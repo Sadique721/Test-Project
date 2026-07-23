@@ -1,0 +1,639 @@
+<!-- Page Header -->
+<div class="row">
+    <div class="col-md-12">
+        <mat-card class="cardWithShadow">
+            <mat-card-header>
+                <img src="assets/img/DashboardIcons/Back Arrow.svg" alt="arrow back" class="m-r-10"
+                    (click)="customerDetailOpen()">
+                <div style="font-size:x-large; align-items: center; font-weight: 500; align-content: center;">
+                    {{ customerLedgerDetailData.title }} {{ customerLedgerDetailData.firstname }} {{
+                    customerLedgerDetailData.lastname }} - Discount Details
+                </div>
+               <span style="flex: 1 1 auto;"></span>
+                <button mat-icon-button (click)="getcustDiscountDetails(customerLedgerDetailData?.id, '', 'changeDiscount')" matTooltip="Refresh">
+                        <img src="assets/img/DashboardIcons/Refresh.svg" />
+                    </button>
+            </mat-card-header>
+            <mat-card-content class="mat-card-content-border">
+
+                <!-- Discount List Table -->
+                <div class="table-container" style="overflow-x:scroll !important">
+                    <table mat-table [dataSource]="custCustDiscountList" class="mat-elevation-z8 w-100">
+
+                        <!-- Connection No Column -->
+                        <ng-container matColumnDef="connectionNo">
+                            <th mat-header-cell *matHeaderCellDef class="table-header-title">Connection No.
+                            </th>
+                            <td mat-cell *matCellDef="let data" class="f-s-14">
+                                <mat-form-field appearance="outline" class="w-100 hide-hint">
+                                    <input matInput [(ngModel)]="data.connectionNo" placeholder="Enter Connection No."
+                                        disabled>
+                                </mat-form-field>
+                            </td>
+                        </ng-container>
+
+                        <!-- Service Column -->
+                        <ng-container matColumnDef="service">
+                            <th mat-header-cell *matHeaderCellDef class="table-header-title">Service</th>
+                            <td mat-cell *matCellDef="let data" class="f-s-14">
+                                <mat-form-field appearance="outline" class="w-100 hide-hint">
+                                    <input matInput [(ngModel)]="data.serviceName" placeholder="Enter Service Name"
+                                        disabled>
+                                </mat-form-field>
+                            </td>
+                        </ng-container>
+
+                        <!-- Current Discount Type Column -->
+                        <ng-container matColumnDef="currentDiscountType">
+                            <th mat-header-cell *matHeaderCellDef class="table-header-title">Current
+                                Discount Type</th>
+                            <td mat-cell *matCellDef="let data" class="f-s-14">
+                                <mat-form-field appearance="outline" class="w-100 hide-hint">
+                                    <mat-select [(ngModel)]="data.discountType" placeholder="Select a Discount Type"
+                                        disabled>
+                                        <mat-option *ngFor="let type of chargeType" [value]="type.label">
+                                            {{ type.label }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </td>
+                        </ng-container>
+
+                        <!-- Current Discount Column -->
+                        <ng-container matColumnDef="currentDiscount">
+                            <th mat-header-cell *matHeaderCellDef class="table-header-title">Current
+                                Discount (%)</th>
+                            <td mat-cell *matCellDef="let data" class="f-s-14">
+                                <mat-form-field appearance="outline" class="w-100 hide-hint">
+                                    <input matInput [(ngModel)]="data.discount" type="number"
+                                        placeholder="Enter Discount" disabled>
+                                </mat-form-field>
+                            </td>
+                        </ng-container>
+
+                        <!-- Current Expiry Date Column -->
+                        <ng-container matColumnDef="currentExpiryDate">
+                            <th mat-header-cell *matHeaderCellDef class="table-header-title">Current
+                                Discount Expiry Date</th>
+                            <td mat-cell *matCellDef="let data" class="f-s-14">
+                                @if (data.discountType === 'Recurring') {
+                                <mat-form-field appearance="outline" class="w-100 hide-hint">
+                                    <input matInput [matDatepicker]="currentPicker"
+                                        [(ngModel)]="data.discountExpiryDate" [min]="dateTime"
+                                        [disabled]="!(data.nextTeamHierarchyMappingId === null && data.nextStaff === null)"
+                                        placeholder="Enter Discount Expiry Date">
+                                    <mat-datepicker-toggle matSuffix [for]="currentPicker"></mat-datepicker-toggle>
+                                    <mat-datepicker #currentPicker></mat-datepicker>
+                                </mat-form-field>
+                                @if (!data.discountExpiryDate) {
+                                <div class="error text-danger">Current Discount Expiry Date is required.
+                                </div>
+                                }
+                                }
+                                @if (data.discountType !== 'Recurring') {
+                                <span>-</span>
+                                }
+                            </td>
+                        </ng-container>
+
+                        <!-- New Discount Type Column -->
+                        <ng-container matColumnDef="newDiscountType">
+                            <th mat-header-cell *matHeaderCellDef class="table-header-title">New Discount
+                                Type</th>
+                            <td mat-cell *matCellDef="let data; let i = index" class="f-s-14">
+                                <mat-form-field appearance="outline" class="w-100 hide-hint">
+                                    <mat-select [(ngModel)]="data.newDiscountType"
+                                        [disabled]="!(data.nextTeamHierarchyMappingId === null && data.nextStaff === null)"
+                                        placeholder="Select New Discount Type">
+                                        <mat-option *ngFor="let type of chargeType" [value]="type.label">
+                                            {{ type.label }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </td>
+                        </ng-container>
+
+                        <!-- New Discount Column -->
+                        <ng-container matColumnDef="newDiscount">
+                            <th mat-header-cell *matHeaderCellDef class="table-header-title">New Discount
+                                (%)</th>
+                            <td mat-cell *matCellDef="let data; let i = index" class="f-s-14">
+                                <mat-form-field appearance="outline" class="w-100 hide-hint">
+                                    <input matInput type="number" [(ngModel)]="data.newDiscount" #numberOne="ngModel"
+                                        [disabled]="!(data.nextTeamHierarchyMappingId === null && data.nextStaff === null)"
+                                        [customMax]="maxDiscountValue" (change)="changeValue(data.newDiscount)"
+                                        placeholder="Enter New Discount*" min="0" required>
+                                    <mat-error *ngIf="numberOne.errors?.customMax">
+                                        Maximum 99 Percentage allowed.
+                                    </mat-error>
+                                </mat-form-field>
+                            </td>
+                        </ng-container>
+
+                        <!-- New Expiry Date Column -->
+                        <ng-container matColumnDef="newExpiryDate">
+                            <th mat-header-cell *matHeaderCellDef class="table-header-title">New Discount
+                                Expiry Date</th>
+                            <td mat-cell *matCellDef="let data; let i = index" class="f-s-14">
+                                @if (data.newDiscountType === 'Recurring') {
+                                <mat-form-field appearance="outline" class="w-100 hide-hint">
+                                    <input matInput [matDatepicker]="newPicker" [(ngModel)]="data.newDiscountExpiryDate"
+                                        [min]="dateTime"
+                                        [disabled]="!(data.nextTeamHierarchyMappingId === null && data.nextStaff === null)"
+                                        placeholder="Enter New Discount Expiry Date">
+                                    <mat-datepicker-toggle matSuffix [for]="newPicker"></mat-datepicker-toggle>
+                                    <mat-datepicker #newPicker></mat-datepicker>
+                                </mat-form-field>
+                                @if (!data.newDiscountExpiryDate) {
+                                <div class="error text-danger">New Discount Expiry Date is required.</div>
+                                }
+                                }
+                                @if (data.newDiscountType !== 'Recurring') {
+                                <span>-</span>
+                                }
+                            </td>
+                        </ng-container>
+
+                        <!-- Remarks Column -->
+                        <ng-container matColumnDef="remarks">
+                            <th mat-header-cell *matHeaderCellDef class="table-header-title">Remarks</th>
+                            <td mat-cell *matCellDef="let data; let i = index" class="f-s-14">
+                                <mat-form-field appearance="outline" class="w-100 hide-hint">
+                                    <input matInput [(ngModel)]="data.remarks" #remark="ngModel"
+                                        [readonly]="!(data.nextTeamHierarchyMappingId === null && data.nextStaff === null)"
+                                        placeholder="Enter Remarks" maxlength="250" required>
+                                    <mat-error *ngIf="remark.errors?.maxlength">
+                                        Maximum 250 characters are allowed
+                                    </mat-error>
+                                </mat-form-field>
+                            </td>
+                        </ng-container>
+
+                        <!-- Action Column -->
+                        <ng-container matColumnDef="action">
+                            <th mat-header-cell *matHeaderCellDef class="table-header-title">Action</th>
+                            <td mat-cell *matCellDef="let data" class="f-s-14">
+                                <div
+                                    style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; max-width: 150px;">
+
+                                    <!-- Pick Button -->
+                                    <button mat-icon-button color="accent"
+                                        [disabled]="data.nextTeamHierarchyMappingId === null || 
+                                                         data.nextStaff != null || 
+                                                         (data.status == 'Active' && data.discountFlowInProcess != 'yes') ||
+                                                         (data.status == 'active' && data.discountFlowInProcess != 'yes')" (click)="pickModalOpen(data)"
+                                        matTooltip="Pick">
+                                        <img src="assets/img/DashboardIcons/Pick-ticket-to-resolve.svg">
+                                    </button>
+
+                                    <!-- Audit Button -->
+                                    @if (auditAccess) {
+                                    <button mat-icon-button color="primary"
+                                        (click)="custDiscountWorkflowAuditopen(data.id, data.id, data.planId)"
+                                        matTooltip="Audit & Change Discount Status Details">
+                                        <img style="height: 20px; width: 20px"
+                                            src="assets/img/DashboardIcons/WorkFlow status Details.svg" />
+                                    </button>
+                                    }
+
+                                    <!-- Approve Button -->
+                                    <button mat-icon-button style="color: green;"
+                                        [disabled]="data.nextStaff === null || 
+                                                         data.nextStaff !== userId ||
+                                                         (data.status.toLowerCase() == 'active' && data.discountFlowInProcess.toLowerCase() != 'yes')"
+                                        (click)="discountApporeved(data)" matTooltip="Approve">
+                                        <img src="assets/img/DashboardIcons/Assign.svg" />
+                                    </button>
+
+                                    <!-- Reject Button -->
+                                    <button mat-icon-button color="warn"
+                                        [disabled]="data.nextStaff === null || 
+                                                         data.nextStaff !== userId || 
+                                                         (data.status.toLowerCase() == 'active' && data.discountFlowInProcess.toLowerCase() != 'yes')"
+                                        (click)="discountRejected(data)" matTooltip="Reject">
+                                        <img src="assets/img/DashboardIcons/Reject.svg" />
+                                    </button>
+
+                                    <!-- Reassign Button -->
+                                    <button mat-icon-button style="color: #ff9800;"
+                                        [disabled]="data.nextStaff !== userId || 
+                                                         data.nextTeamHierarchyMappingId === null ||
+                                                         (data.status.toLowerCase() == 'active' && data.discountFlowInProcess.toLowerCase() != 'yes')"
+                                        (click)="discountReasignListShiftLocation(data)"
+                                        matTooltip="Reassign shiftLocation">
+                                        <img src="assets/img/DashboardIcons/send-svgrepo-com 1.svg" />
+                                    </button>
+                                </div>
+                            </td>
+                        </ng-container>
+
+                        <!-- Table Rows -->
+                        <tr mat-header-row *matHeaderRowDef="displayedColumns" class="table-header-bg"></tr>
+                        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="table-content-row"></tr>
+                    </table>
+
+                    <!-- No Data Message -->
+                    @if (!custCustDiscountList || custCustDiscountList.length === 0) {
+                    <div style="text-align: center; padding: 20px;">
+                        <p>No discount details available</p>
+                    </div>
+                    }
+                </div>
+
+                <!-- Update Button -->
+                <div class="addUpdateBtn" style="margin-top: 20px; padding: 0 20px 20px;">
+                    @if (updateAccess) {
+                    <div class="d-flex">
+                        <button mat-flat-button color="primary" (click)="updateDiscount()"
+                            class="button-normal m-l-auto">
+                            Update Discount
+                        </button>
+                    </div>
+
+                    }
+                </div>
+                <!-- No Data Message -->
+                @if (!custCustDiscountList || custCustDiscountList.length === 0) {
+                <div style="text-align: center; padding: 20px;">
+                    <p>No discount details available</p>
+                </div>
+                }
+            </mat-card-content>
+        </mat-card>
+    </div>
+
+    <!-- Main Content Card -->
+
+</div>
+
+<!-- Workflow Audit Modal (Integrated) -->
+<ng-template #workflowAuditDialog>
+    <div class="dialog-container" style="min-width: 80%;">
+        <div class="dialog-header">
+            Workflow Audit Details
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="closeWorkflowAuditModal()">
+                    <img src="assets/img/DashboardIcons/Reject.svg" alt="close" />
+                </a>
+            </span>
+        </div>
+
+        <div mat-dialog-content>
+            <div class="col-md-12">
+                <mat-card-content>
+                    <!-- Status Progress (if available) -->
+                    @if (planStatusDetail && planStatusDetail.length > 0 && !ifAuditStatusDetialShow &&
+                    !ifDiscountStatusDetialShow) {
+                    <div class="row" style="margin-bottom: 20px;">
+                        <div class="col-12">
+                            <h5 style="font-weight: 600; margin-bottom: 15px;">Approval Progress</h5>
+                            <div class="status-timeline">
+                                <div *ngFor="let status of planStatusDetail; let i = index" class="status-item">
+                                    <div class="status-circle" [ngClass]="{
+                           'status-completed': status.status === 'Completed',
+                           'status-pending': status.status === 'Pending',
+                           'status-current': status.status === 'In Progress'
+                         }">
+                                        {{ i + 1 }}
+                                    </div>
+                                    <div class="status-details">
+                                        <strong>{{ status.teamName }}</strong>
+                                        <div style="font-size: 12px; color: #666;">
+                                            {{ status.statusDescription || status.status }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div style="margin-top: 20px;">
+                                @if (check_Hierachy === 'CUSTOMER_DISCOUNT') {
+                                <button mat-stroked-button (click)="show_DiscountData()" class="button-normal m-r-10">
+                                    <mat-icon>history</mat-icon>
+                                    Show Discount History
+                                </button>
+                                }
+                                <button mat-stroked-button (click)="show_AuditData()" class="button-normal">
+                                    <mat-icon>visibility</mat-icon>
+                                    Show Audit Details
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    }
+
+                    <!-- Audit Details Table -->
+                    @if (ifAuditStatusDetialShow) {
+                    <div class="row">
+                        <div class="col-12">
+                            <button mat-stroked-button (click)="BackshowAuditData()" class="button-normal m-b-10">
+                                <mat-icon>arrow_back</mat-icon>
+                                Back
+                            </button>
+
+                            <h5 style="font-weight: 600; margin-bottom: 15px;">Workflow Audit History</h5>
+
+                            <table mat-table [dataSource]="workflowAuditData" class="w-100 mat-elevation-z2">
+
+                                <!-- Entity Name Column -->
+                                <ng-container matColumnDef="entityName">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">
+                                        {{ check_Hierachy == 'PAYMENT' ? 'Reference Number' : nameTitile }}
+                                    </th>
+                                    <td mat-cell *matCellDef="let data" class="f-s-14">
+                                        {{ data.entityName }} {{ data.planName }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Action Column -->
+                                <ng-container matColumnDef="auditAction">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">Action</th>
+                                    <td mat-cell *matCellDef="let data" class="f-s-14">
+                                        <span class="badge" [ngClass]="{
+                              'badge-success': data.action === 'Approved',
+                              'badge-danger': data.action === 'Rejected',
+                              'badge-info': data.action === 'Picked' || data.action === 'Assigned'
+                            }">
+                                            {{ data.action }}
+                                        </span>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Staff Name Column -->
+                                <ng-container matColumnDef="staffName">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">Staff name</th>
+                                    <td mat-cell *matCellDef="let data" class="f-s-14">
+                                        {{ data.actionByName }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Remark Column -->
+                                <ng-container matColumnDef="remark">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">Remark</th>
+                                    <td mat-cell *matCellDef="let data" class="f-s-14">
+                                        {{ data.remark || '-' }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Action Date Column -->
+                                <ng-container matColumnDef="actionDate">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">Action Date</th>
+                                    <td mat-cell *matCellDef="let data" class="f-s-14">
+                                        {{ data.actionDateTime | date: 'yyyy-MM-dd hh:mm a' }}
+                                    </td>
+                                </ng-container>
+
+                                <tr mat-header-row *matHeaderRowDef="auditColumns" class="table-header-bg"></tr>
+                                <tr mat-row *matRowDef="let row; columns: auditColumns;" class="table-content-row"></tr>
+                            </table>
+
+                            @if (!workflowAuditData || workflowAuditData.length === 0) {
+                            <div style="text-align: center; padding: 20px;">
+                                <p>No audit records found</p>
+                            </div>
+                            }
+                        </div>
+                    </div>
+                    }
+
+                    <!-- Discount Details Table -->
+                    @if (ifDiscountStatusDetialShow) {
+                    <div class="row">
+                        <div class="col-12">
+                            <button mat-stroked-button (click)="ststusData()" class="button-normal m-b-10">
+                                <mat-icon>arrow_back</mat-icon>
+                                Back
+                            </button>
+
+                            <h5 style="font-weight: 600; margin-bottom: 15px;">Discount Change History</h5>
+
+                            <table mat-table [dataSource]="discountDetailsData" class="w-100 mat-elevation-z2">
+
+                                <!-- Staff Name Column -->
+                                <ng-container matColumnDef="discountStaff">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">Staff name</th>
+                                    <td mat-cell *matCellDef="let data" class="f-s-14">
+                                        {{ data.staffname }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Old Discount Column -->
+                                <ng-container matColumnDef="oldDiscount">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">Old Discount (%)
+                                    </th>
+                                    <td mat-cell *matCellDef="let data" class="f-s-14">
+                                        {{ data.oldDiscount }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- New Discount Column -->
+                                <ng-container matColumnDef="newDiscount">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">New Discount (%)
+                                    </th>
+                                    <td mat-cell *matCellDef="let data" class="f-s-14">
+                                        {{ data.newDiscount }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Action Date Column -->
+                                <ng-container matColumnDef="discountActionDate">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">Action Date</th>
+                                    <td mat-cell *matCellDef="let data" class="f-s-14">
+                                        {{ data.updateddate | date: 'yyyy-MM-dd hh:mm a' }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Remarks Column -->
+                                <ng-container matColumnDef="discountRemarks">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">Remarks</th>
+                                    <td mat-cell *matCellDef="let data" class="f-s-14">
+                                        {{ data.remarks || '-' }}
+                                    </td>
+                                </ng-container>
+
+                                <tr mat-header-row *matHeaderRowDef="discountColumns" class="table-header-bg"></tr>
+                                <tr mat-row *matRowDef="let row; columns: discountColumns;" class="table-content-row">
+                                </tr>
+                            </table>
+
+                            @if (!discountDetailsData || discountDetailsData.length === 0) {
+                            <div style="text-align: center; padding: 20px;">
+                                <p>No discount history found</p>
+                            </div>
+                            }
+                        </div>
+                    </div>
+                    }
+                </mat-card-content>
+            </div>
+        </div>
+
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+            <button mat-stroked-button type="button" class="button-normal" (click)="closeWorkflowAuditModal()">
+                Close
+            </button>
+        </div>
+    </div>
+</ng-template>
+
+<!-- Approve/Reject Modal -->
+<ng-template #approveRejectDialog>
+    <div class="dialog-container">
+        <div class="dialog-header">
+            {{ AppRjecHeader }} Discount
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="closeRejectApproveDiscountModal()">
+                    <img src="assets/img/DashboardIcons/Reject.svg" alt="close" />
+                </a>
+            </span>
+        </div>
+
+        <div mat-dialog-content>
+            <div class="col-md-12">
+                <mat-card-content>
+                    <form [formGroup]="assignAppRejectDiscountForm">
+                        <div class="row">
+                            <div class="col-12">
+                                <label class="inputLabel">Remarks *</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <textarea matInput formControlName="remark" placeholder="Enter Remarks"
+                                        rows="4"></textarea>
+                                    <mat-error
+                                        *ngIf="assignDiscounsubmitted && assignAppRejectDiscountForm.controls.remark.errors">
+                                        Remark is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                    </form>
+                </mat-card-content>
+            </div>
+        </div>
+
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+            <button mat-stroked-button type="button" class="button-normal m-r-10"
+                (click)="closeRejectApproveDiscountModal()">
+                Close
+            </button>
+            <button mat-flat-button color="primary" type="button" class="button-normal"
+                (click)="assignDiscountApprove()">
+                <mat-icon>check_circle</mat-icon>
+                Submit
+            </button>
+        </div>
+    </div>
+</ng-template>
+
+<!-- Assign Staff Modal -->
+<ng-template #assignStaffDialog>
+    <div class="dialog-container" style="min-width: 70%;">
+        <div class="dialog-header">
+            {{ approved ? 'Approve' : 'Reject' }} Discount - Assign Staff
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="closeAssignDiscountModal()">
+                    <img src="assets/img/DashboardIcons/Reject.svg" alt="close" />
+                </a>
+            </span>
+        </div>
+
+        <div mat-dialog-content>
+            <div class="col-md-12">
+                <mat-card-content>
+                    <!-- Search Staff -->
+                    <div class="row" style="margin-bottom: 20px;">
+                        <div class="col-md-4">
+                            <mat-form-field appearance="outline" class="w-100 hide-hint">
+                                <input matInput [(ngModel)]="searchStaffDeatil" placeholder="Search by name or username"
+                                    (keydown.enter)="searchStaffByName()">
+                                <mat-icon matSuffix>search</mat-icon>
+                            </mat-form-field>
+                        </div>
+                        <div class="col-md-8">
+                            <button mat-flat-button color="primary" class="button-normal m-r-10"
+                                (click)="searchStaffByName()" [disabled]="!searchStaffDeatil">
+                                <mat-icon>search</mat-icon>
+                                Search
+                            </button>
+                            <button mat-stroked-button class="button-normal" (click)="clearSearchForm()">
+                                <mat-icon>refresh</mat-icon>
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Staff List -->
+                    <div class="row">
+                        <div class="col-12">
+                            <h5 style="font-weight: 600; margin-bottom: 15px;">Select Staff Member</h5>
+
+                            <div *ngIf="approveInventoryData && approveInventoryData.length > 0"
+                                style="max-height: 400px; overflow-y: auto;">
+                                <!-- <mat-radio-group [(ngModel)]="approved ? selectStaff : selectStaffReject" class="w-100">
+                                    <div *ngFor="let staff of approveInventoryData"
+                                        style="padding: 10px; border-bottom: 1px solid #e0e0e0;">
+                                        <mat-radio-button [value]="staff.id" color="primary">
+                                            <div style="margin-left: 10px;">
+                                                <strong>{{ staff.fullName }}</strong>
+                                                <div style="font-size: 12px; color: #666;">
+                                                    Username: {{ staff.username }} | Partner: {{ staff.partnerName }}
+                                                </div>
+                                            </div>
+                                        </mat-radio-button>
+                                    </div>
+                                </mat-radio-group> -->
+                            </div>
+
+                            <div *ngIf="!approveInventoryData || approveInventoryData.length === 0"
+                                style="text-align: center; padding: 20px;">
+                                <p>No staff members available</p>
+                            </div>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </div>
+        </div>
+
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+            <button mat-stroked-button type="button" class="button-normal m-r-10" (click)="closeAssignDiscountModal()">
+                Close
+            </button>
+            <button mat-flat-button color="primary" type="button" class="button-normal"
+                (click)="assignToStaff(approved)" [disabled]="!(approved ? selectStaff : selectStaffReject)">
+                <mat-icon>person_add</mat-icon>
+                Assign Staff
+            </button>
+        </div>
+    </div>
+</ng-template>
+
+<!-- Pick Modal -->
+<ng-template #pickDialog>
+    <div class="dialog-container">
+        <div class="dialog-header">
+            Pick Discount Request
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="closePickModal()">
+                    <img src="assets/img/DashboardIcons/Reject.svg" alt="close" />
+                </a>
+            </span>
+        </div>
+
+        <div mat-dialog-content>
+            <div class="col-md-12">
+                <mat-card-content>
+                    <p>Are you sure you want to pick this discount request?</p>
+                </mat-card-content>
+            </div>
+        </div>
+
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+            <button mat-stroked-button type="button" class="button-normal m-r-10" (click)="closePickModal()">
+                Cancel
+            </button>
+            <button mat-flat-button color="primary" type="button" class="button-normal" (click)="confirmPick()">
+                <mat-icon>pan_tool</mat-icon>
+                Confirm Pick
+            </button>
+        </div>
+    </div>
+</ng-template>

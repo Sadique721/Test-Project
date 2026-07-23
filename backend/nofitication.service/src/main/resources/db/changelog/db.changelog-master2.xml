@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd
+http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.8.xsd">
+
+    <changeSet id="DB00000000045" author="Darshan Bharambe">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmevent WHERE eventname="Inventory Request" and mvnoid=1;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="TBLMEVENT">
+            <column name="eventid" valueNumeric="(select COALESCE(eventid + 1)  from TBLMEVENT t order by eventid desc limit 1)" />
+            <column name="eventname"
+                    value="Inventory Request" />
+            <column name="eventtype" value="Schedule" />
+            <column name="description"
+                    value="Inventory Request" />
+            <column name="status" value="Active" />
+            <column name="mvnoid" value="1"></column>
+            <column name="servicetype" value="BSS"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="DB00000000046" author="Darshan Bharambe" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM tblmtemplate WHERE templatename = "Inventory Request" and mvnoid=2;</sqlCheck>
+        </preConditions>
+        <insert tableName="tblmtemplate">
+            <column name="eventid" valueNumeric="(SELECT eventid FROM TBLMEVENT WHERE eventname ='Inventory Request' AND mvnoid='1')"/>
+            <column name="templatename" value="Inventory Request"/>
+            <column name="smstemplatedata" value="" />
+            <column name="smseventconfigured" valueBoolean="false"/>
+            <column name="emailtemplatedata"
+                    value="Hi {requestTo},&lt;br /&gt; &lt;br /&gt;You have an inventory request from {onBehalfOf} : {requester}. Please look into the same &lt;br /&gt;Please review the information provided, and if you have any questions or concerns regarding the assigned asset, feel free to reach out to our IT support team.&lt;br /&gt; &lt;br /&gt;Thank you for your cooperation.&lt;br /&gt; &lt;br /&gt;Best regards,"></column>
+            <column name="emaileventconfigured" valueBoolean="true"/>
+            <column name="status" value="Active"/>
+            <column name="mvnoid" value="2"/>
+            <column name="servicetype" value="BSS"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="DB00000000047" author="Darshan Bharambe">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmevent WHERE eventname="Inventory Fulfilment" and mvnoid=1;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="TBLMEVENT">
+            <column name="eventid" valueNumeric="(select COALESCE(eventid + 1)  from TBLMEVENT t order by eventid desc limit 1)" />
+            <column name="eventname"
+                    value="Inventory Fulfilment" />
+            <column name="eventtype" value="Schedule" />
+            <column name="description"
+                    value="Inventory Fulfilment" />
+            <column name="status" value="Active" />
+            <column name="mvnoid" value="1"></column>
+            <column name="servicetype" value="BSS"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="DB00000000048" author="Darshan Bharambe" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM tblmtemplate WHERE templatename = "Inventory Fulfilment" and mvnoid=2;</sqlCheck>
+        </preConditions>
+        <insert tableName="tblmtemplate">
+            <column name="eventid" valueNumeric="(SELECT eventid FROM TBLMEVENT WHERE eventname ='Inventory Fulfilment' AND mvnoid='1')"/>
+            <column name="templatename" value="Inventory Fulfilment"/>
+            <column name="smstemplatedata" value="" />
+            <column name="smseventconfigured" valueBoolean="false"/>
+            <column name="emailtemplatedata"
+                    value="Hi {requestDestinationName},&lt;br /&gt; &lt;br /&gt;{requestSourcename} has assigned you {productName} product with {quantity} quantity. The Inward ID is {inwardNumber}. Please acknowledge the same. &lt;br /&gt;Please review the information provided, and if you have any questions or concerns regarding the assigned asset, feel free to reach out to our IT support team.&lt;br /&gt; &lt;br /&gt;Thank you for your cooperation.&lt;br /&gt; &lt;br /&gt;Best regards,"></column>
+            <column name="emaileventconfigured" valueBoolean="true"/>
+            <column name="status" value="Active"/>
+            <column name="mvnoid" value="2"/>
+            <column name="servicetype" value="BSS"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="YG0000000001" author="Yash Godhani">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="TBLMEMAIL" columnName="cprid"></columnExists>
+            </not>
+        </preConditions>
+        <addColumn tableName="TBLMEMAIL">
+            <column name="cprid" type="bigint"></column>
+        </addColumn>
+    </changeSet>
+    <changeSet id="YG0000000002" author="Yash Godhani">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="TBLMSMS" columnName="cprid"></columnExists>
+            </not>
+        </preConditions>
+        <addColumn tableName="TBLMSMS">
+            <column name="cprid" type="bigint"></column>
+        </addColumn>
+    </changeSet>
+    <changeSet id="AP00000000001" author="Ashwini Patil">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmevent WHERE eventname = 'Inventory Threshold' AND mvnoid = 1;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="TBLMEVENT">
+            <column name="eventid" valueNumeric="(select COALESCE(eventid + 1)  from TBLMEVENT t order by eventid desc limit 1)" />
+            <column name="eventname"
+                    value="Inventory Threshold" />
+            <column name="eventtype" value="Schedule" />
+            <column name="description"
+                    value="Inventory Threshold event to notify when currentQty is less threshold qty" />
+            <column name="status" value="Active" />
+            <column name="mvnoid" value="1" />
+            <column name="servicetype" value="BSS" />
+        </insert>
+    </changeSet>
+    <changeSet id="AP00000000002" author="Ashwini Patil">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">SELECT COUNT(*) FROM tblmtemplate WHERE templatename = 'Inventory Threshold' AND mvnoid = 2;</sqlCheck>
+        </preConditions>
+        <insert tableName="tblmtemplate">
+            <column name="eventid" valueNumeric="(SELECT eventid FROM TBLMEVENT WHERE eventname = 'Inventory Threshold' AND mvnoid = '1')"/>
+            <column name="templatename" value="Inventory Threshold"/>
+            <column name="smstemplatedata" value=""/>
+            <column name="smseventconfigured" valueBoolean="false"/>
+            <column name="emailtemplatedata"
+                    value="Dear Staff,&lt;br /&gt;&lt;br /&gt;Please note that &lt;b&gt;{productName}&lt;/b&gt; quantity is low in Warehouse &lt;b&gt;{warehouseName}&lt;/b&gt;.&lt;br /&gt;Current quantity is &lt;b&gt;{currentQty}&lt;/b&gt;.&lt;br /&gt;&lt;br /&gt;Kindly procure more inventory to ensure availability for installation.&lt;br /&gt;&lt;br /&gt;Regards,&lt;br /&gt;Inventory Team"/>
+            <column name="emaileventconfigured" valueBoolean="true"/>
+            <column name="status" value="Active"/>
+            <column name="mvnoid" value="2"/>
+            <column name="servicetype" value="BSS"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="DB00000000049" author="Darshan Bharambe">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmtemplate WHERE templatename = 'Inventory Threshold' AND mvnoid = 1;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmtemplate">
+            <column name="eventid" valueNumeric="(SELECT eventid FROM TBLMEVENT WHERE eventname = 'Inventory Threshold' AND mvnoid = '1')"/>
+            <column name="templatename" value="Inventory Threshold"/>
+            <column name="smstemplatedata" value=""/>
+            <column name="smseventconfigured" valueBoolean="false"/>
+            <column name="emailtemplatedata"
+                    value="Dear Staff,&lt;br /&gt;&lt;br /&gt;Please note that &lt;b&gt;{productName}&lt;/b&gt; quantity is low in Warehouse &lt;b&gt;{warehouseName}&lt;/b&gt;.&lt;br /&gt;Current quantity is &lt;b&gt;{currentQty}&lt;/b&gt;.&lt;br /&gt;&lt;br /&gt;Kindly procure more inventory to ensure availability for installation.&lt;br /&gt;&lt;br /&gt;Regards,&lt;br /&gt;Inventory Team"/>
+            <column name="emaileventconfigured" valueBoolean="true"/>
+            <column name="status" value="Active"/>
+            <column name="mvnoid" value="1"/>
+            <column name="servicetype" value="BSS"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="DB00000000050" author="Darshan Bharambe">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmtemplate WHERE templatename = "Inventory Request" and mvnoid=1;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmtemplate">
+            <column name="eventid" valueNumeric="(SELECT eventid FROM TBLMEVENT WHERE eventname ='Inventory Request' AND mvnoid='1')"/>
+            <column name="templatename" value="Inventory Request"/>
+            <column name="smstemplatedata" value="" />
+            <column name="smseventconfigured" valueBoolean="false"/>
+            <column name="emailtemplatedata"
+                    value="Hi {requestTo},&lt;br /&gt; &lt;br /&gt;You have an inventory request from {onBehalfOf} : {requester}. Please look into the same &lt;br /&gt;Please review the information provided, and if you have any questions or concerns regarding the assigned asset, feel free to reach out to our IT support team.&lt;br /&gt; &lt;br /&gt;Thank you for your cooperation.&lt;br /&gt; &lt;br /&gt;Best regards,"></column>
+            <column name="emaileventconfigured" valueBoolean="true"/>
+            <column name="status" value="Active"/>
+            <column name="mvnoid" value="1"/>
+            <column name="servicetype" value="BSS"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="DB00000000051" author="Darshan Bharambe">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmtemplate WHERE templatename = "Inventory Fulfilment" and mvnoid=1;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmtemplate">
+            <column name="eventid" valueNumeric="(SELECT eventid FROM TBLMEVENT WHERE eventname ='Inventory Fulfilment' AND mvnoid='1')"/>
+            <column name="templatename" value="Inventory Fulfilment"/>
+            <column name="smstemplatedata" value="" />
+            <column name="smseventconfigured" valueBoolean="false"/>
+            <column name="emailtemplatedata"
+                    value="Hi {requestDestinationName},&lt;br /&gt; &lt;br /&gt;{requestSourcename} has assigned you {productName} product with {quantity} quantity. The Inward ID is {inwardNumber}. Please acknowledge the same. &lt;br /&gt;Please review the information provided, and if you have any questions or concerns regarding the assigned asset, feel free to reach out to our IT support team.&lt;br /&gt; &lt;br /&gt;Thank you for your cooperation.&lt;br /&gt; &lt;br /&gt;Best regards,"></column>
+            <column name="emaileventconfigured" valueBoolean="true"/>
+            <column name="status" value="Active"/>
+            <column name="mvnoid" value="1"/>
+            <column name="servicetype" value="BSS"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="DB00000000052" author="Darshan Bharambe" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmtemplate WHERE templatename = "Inventory Assignment For Staff" and mvnoid=1;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmtemplate">
+            <column name="eventid" valueNumeric="(SELECT eventid FROM TBLMEVENT WHERE eventname ='Inventory Assignment For Staff' AND mvnoid='1')"/>
+            <column name="templatename" value="Inventory Assignment For Staff"/>
+            <column name="smstemplatedata" value="" />
+            <column name="smseventconfigured" valueBoolean="false"/>
+            <column name="emailtemplatedata"
+                    value="Dear {employeeName},&lt;br /&gt; &lt;br /&gt;We would like to inform you that an asset has been successfully assigned to you. Below are the details of the assigned asset:&lt;br /&gt; &lt;br /&gt;Asset ID: {assetId} &lt;br /&gt;Serial Number: {serialNumber} &lt;br /&gt;Specifications: {specifications} &lt;br /&gt;Assigned Date: {assignDate} &lt;br /&gt;Please review the information provided, and if you have any questions or concerns regarding the assigned asset, feel free to reach out to our IT support team.&lt;br /&gt; &lt;br /&gt;Thank you for your cooperation.&lt;br /&gt; &lt;br /&gt;Best regards,"></column>
+            <column name="emaileventconfigured" valueBoolean="true"/>
+            <column name="status" value="Active"/>
+            <column name="mvnoid" value="1"/>
+            <column name="servicetype" value="BSS"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="VK0000000028" author="Varun Kumar">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmevent WHERE eventname="Child Customer Registration Success" and mvnoid=2;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="TBLMEVENT">
+            <column name="eventid" valueNumeric="(select COALESCE(eventid + 1)  from TBLMEVENT t order by eventid desc limit 1)" />
+            <column name="eventname"
+                    value="Child Customer Registration Success" />
+            <column name="eventtype" value="Schedule" />
+            <column name="description"
+                    value="Child Customer Registration Success" />
+            <column name="status" value="Active" />
+            <column name="mvnoid" value="2"></column>
+            <column name="servicetype" value="BSS"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="VK0000000029" author="Varun Kumar" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmtemplate WHERE templatename = "Child Customer Registration Success" and mvnoid=2;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmtemplate">
+            <column name="eventid" valueNumeric="(SELECT eventid FROM TBLMEVENT WHERE eventname ='Child Customer Registration Success' AND mvnoid='2')"/>
+            <column name="templatename" value="Child Customer Registration Success"/>
+            <column name="smstemplatedata" value="" />
+            <column name="smseventconfigured" valueBoolean="false"/>
+            <column name="smstemplatedata"
+                    value="Hi {userName}, You are successfully registered. UserName:{userName} &amp; Password:{password} - {sender}" />
+            <column name="smseventconfigured" valueBoolean="true" />
+            <column name="emailtemplatedata"
+                    value="Hi {userName}, &lt;br /&gt; &lt;br /&gt; You are successfully registered and your credentials are as per below.&lt;br /&gt; UserName : {userName} &lt;br /&gt; Password : {password} &lt;br /&gt;&lt;br /&gt; Thanks, &lt;br /&gt; {sender}">
+            </column>
+            <column name="emaileventconfigured" valueBoolean="true"/>
+            <column name="status" value="Active"/>
+            <column name="mvnoid" value="2"/>
+            <column name="servicetype" value="BSS"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="DB00000000053" author="Darshan Bharambe">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sqlCheck expectedResult="0">
+                    SELECT COUNT(*)
+                    FROM tblmtemplate WHERE templatename="Inventory Assignment For Staff";
+                </sqlCheck>
+            </not>
+        </preConditions>
+        <update tableName="tblmtemplate">
+            <column name="smstemplatedata"
+                    value="Dear {employeeName}, We would like to inform you that an asset has been successfully assigned to you. Below are the details of the assigned asset: Asset ID: {assetId}, Serial Number: {serialNumber}, Specifications: {specifications}, Assigned Date: {assignDate}, Please review the information provided, and if you have any questions or concerns regarding the assigned asset, feel free to reach out to our IT support team. Thank you for your cooperation. - Savbill NetTech"></column>
+            <column name="smseventconfigured" valueBoolean="true"/>
+            <where>templatename = "Inventory Assignment For Staff"</where>
+        </update>
+    </changeSet>
+    <changeSet id="DB00000000054" author="Darshan Bharambe">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sqlCheck expectedResult="0">
+                    SELECT COUNT(*)
+                    FROM tblmtemplate WHERE templatename="Inventory Request";
+                </sqlCheck>
+            </not>
+        </preConditions>
+        <update tableName="tblmtemplate">
+            <column name="smstemplatedata"
+                    value="Hi {requestTo}, You have an inventory request from {onBehalfOf} : {requester}. Please look into the same. Please review the information provided, and if you have any questions or concerns regarding the assigned asset, feel free to reach out to our IT support team. Thank you for your cooperation. - Savbill NetTech"></column>
+            <column name="smseventconfigured" valueBoolean="true"/>
+            <where>templatename = "Inventory Request"</where>
+        </update>
+    </changeSet>
+    <changeSet id="DB00000000055" author="Darshan Bharambe">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sqlCheck expectedResult="0">
+                    SELECT COUNT(*)
+                    FROM tblmtemplate WHERE templatename="Inventory Fulfilment";
+                </sqlCheck>
+            </not>
+        </preConditions>
+        <update tableName="tblmtemplate">
+            <column name="smstemplatedata"
+                    value="Hi {requestDestinationName}, {requestSourcename} has assigned you {productName} product with {quantity} quantity. The Inward ID is {inwardNumber}. Please acknowledge the same. Please review the information provided, and if you have any questions or concerns regarding the assigned asset, feel free to reach out to our IT support team. Thank you for your cooperation. - Savbill NetTech"></column>
+            <column name="smseventconfigured" valueBoolean="true"/>
+            <where>templatename = "Inventory Fulfilment"</where>
+        </update>
+    </changeSet>
+    <changeSet id="DB00000000056" author="Darshan Bharambe">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sqlCheck expectedResult="0">
+                    SELECT COUNT(*)
+                    FROM tblmtemplate WHERE templatename="Inventory Threshold";
+                </sqlCheck>
+            </not>
+        </preConditions>
+        <update tableName="tblmtemplate">
+            <column name="smstemplatedata"
+                    value="Dear Staff, Please note that {productName} quantity is low in Warehouse {warehouseName} Current quantity is {currentQty} Kindly procure more inventory to ensure availability for installation Regards, Inventory Team - Savbill NetTech"/>
+            <column name="smseventconfigured" valueBoolean="true"/>
+            <where>templatename = "Inventory Threshold"</where>
+        </update>
+    </changeSet>
+    <changeSet id="DB00000000057" author="Darshan Bharambe">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmtemplate WHERE templatename = "Consumed Port Percentage Event" and mvnoid=1;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmtemplate">
+            <column name="eventid" valueNumeric="(SELECT eventid FROM TBLMEVENT WHERE eventname ='Consumed Port Percentage Event' AND mvnoid='1')"/>
+            <column name="templatename" value="Consumed Port Percentage Event"/>
+            <column name="smstemplatedata" value="" />
+            <column name="smseventconfigured" valueBoolean="false"/>
+            <column name="emailtemplatedata"
+                    value="Hi {PartnerName},&lt;br /&gt;This is to inform you that the {DeviceName} installed in  {OwnerName}  has used  {ConsumedPercentage} of its input ports. So request you to initiate installation of new devices for uninterrupted service provisioning of new customers.&lt;br /&gt;&lt;br /&gt;Thank you &lt;br /&gt;&lt;br /&gt;Savbill NetTech Pvt. Ltd."></column>
+            <column name="emaileventconfigured" valueBoolean="true"/>
+            <column name="status" value="Active"/>
+            <column name="mvnoid" value="1"/>
+            <column name="servicetype" value="BSS"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="DB00000000058" author="Darshan Bharambe">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sqlCheck expectedResult="0">
+                    SELECT COUNT(*)
+                    FROM tblmtemplate WHERE templatename="Consumed Port Percentage Event";
+                </sqlCheck>
+            </not>
+        </preConditions>
+        <update tableName="tblmtemplate">
+            <column name="smstemplatedata"
+                    value="Hi {PartnerName}, This is to inform you that the {DeviceName} installed in  {OwnerName}  has used  {ConsumedPercentage} of its input ports. So request you to initiate installation of new devices for uninterrupted service provisioning of new customers. - Savbill NetTech"></column>
+            <column name="smseventconfigured" valueBoolean="true"/>
+            <where>templatename = "Consumed Port Percentage Event"</where>
+        </update>
+    </changeSet>
+
+    <changeSet id="RDS0025112501" author="IG_D003" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="idx_customer_username" tableName="tblmcustomer"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="idx_customer_username" tableName="tblmcustomer">
+            <column name="username"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

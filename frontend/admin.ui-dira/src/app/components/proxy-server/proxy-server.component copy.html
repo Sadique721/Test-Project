@@ -1,0 +1,605 @@
+<div class="childComponent">
+    <div class="row">
+        <div class="col-md-12">
+            <!-- User Data -->
+            <div class="panel top">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Proxy Configuration Management</h3>
+                    <div class="right">
+                        <button type="button" class="btn-toggle-collapse" data-toggle="collapse"
+                            data-target="#proxyServerSearchPanel" aria-expanded="false"
+                            aria-controls="proxyServerSearchPanel">
+                            <i class="fa fa-minus-circle"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="proxyServerSearchPanel" class="panel-collapse collapse in">
+                    <div class="panel-body">
+                        <div class="searchForm">
+                            <div class="col-md-2" style="padding-right: 0%; text-align: right">
+                                <label style="padding: 5px">Proxy Name:</label>
+                            </div>
+                            <div class="col-md-6" style="padding-left: 0%">
+                                <input type="text" name="name" class="form-control"
+                                    placeholder="Enter Proxy Configuration Name" [(ngModel)]="searchName"
+                                    (keydown.enter)="search()" [ngClass]="{
+                    'is-invalid': searchSubmitted && searchForm.controls.name.errors
+                  }" />
+                            </div>
+                            <div class="col-md-4" style="padding-left: 0%">
+                                <button type="submit" class="btn btn-primary" data-title="Search Proxy Server"
+                                    data-toggle="tooltip" (click)="search()">
+                                    <i class="fa fa-search"></i>
+                                    Search
+                                </button>
+                                &nbsp;
+                                <button type="reset" class="btn btn-default" data-title="Clear" data-toggle="tooltip"
+                                    (click)="clearSearchForm()">
+                                     <img src="assets/img/DashboardIcons/Refresh.svg" />
+                                    Clear
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-body no-padding panel-udata">
+                        @if (createAccess) {
+                        <div class="col-md-6 pcol">
+                            <div class="dbox">
+                                <a href="javascript:void(0)" (click)="createnewProxy()">
+                                    <img src="../../../assets/img/i01.png" style="width: 32px" />
+                                    <h5>Create Proxy Configuration</h5>
+                                </a>
+                            </div>
+                        </div>
+                        }
+                        <div class="col-md-6 pcol">
+                            <div class="dbox">
+                                <a href="javascript:void(0)" (click)="clearSearchForm()">
+                                    <img src="../../../assets/img/i01.png" style="width: 32px" />
+                                    <h5>Search Proxy Configuration</h5>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- END User Data -->
+        </div>
+    </div>
+
+    <div class="row">
+        @if (proxyGridFlag) {
+        <div class="col-md-12">
+            <!-- Data Table -->
+            <div class="panel">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Proxy Configuration</h3>
+                    <div class="right">
+                        <button type="button" class="btn-toggle-collapse" data-toggle="collapse"
+                            data-target="#proxyServerTablePanel" aria-expanded="false"
+                            aria-controls="proxyServerTablePanel">
+                            <i class="fa fa-minus-circle"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="proxyServerTablePanel" class="panel-collapse collapse in">
+                    <div class="panel-body table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>IP</th>
+                                    <th>Acc Port</th>
+                                    <th>Auth Port</th>
+                                    <th>Status</th>
+                                    <th style="white-space: nowrap">Created On</th>
+                                    @if (editAccess || deleteAccess) {
+                                    <th>Action</th>
+                                    }
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (
+                                config of proxyServers
+                                | paginate
+                                : {
+                                id: 'listing_serverdata',
+                                itemsPerPage: itemsPerPage,
+                                currentPage: currentPage,
+                                totalItems: totalRecords
+                                }; track
+                                config; let i = $index) {
+                                <tr>
+                                    <td>
+                                        <a (click)="showConfigDetail(config.id, config.mvnoId)"
+                                            data-title="Click here to see Proxy detail" class="detailOnAnchorClick"
+                                            style="color: #f7941e">
+                                            {{ config.name }}
+                                        </a>
+                                    </td>
+                                    <td>{{ config.ip }}</td>
+                                    <td>{{ config.acctport }}</td>
+                                    <td>{{ config.authport }}</td>
+                                    @if (config.status == 'Active') {
+                                    <td>
+                                        <label class="switch">
+                                            @if (!modalToggle) {
+                                            <input type="checkbox" checked [disabled]="!editAccess" />
+                                            }
+                                            @if (modalToggle) {
+                                            <input type="checkbox" checked [disabled]="!editAccess"
+                                                (click)="changeStatus(config.id, config.status, config.mvnoId, $event)" />
+                                            }
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </td>
+                                    }
+                                    @if (config.status == 'Inactive') {
+                                    <td>
+                                        <label class="switch">
+                                            @if (!modalToggle) {
+                                            <input type="checkbox" [disabled]="!editAccess" />
+                                            }
+                                            @if (modalToggle) {
+                                            <input type="checkbox" [disabled]="!editAccess"
+                                                (click)="changeStatus(config.id, config.status, config.mvnoId, $event)" />
+                                            }
+                                            <span class="slider round"></span>
+                                        </label>
+                                    </td>
+                                    }
+                                    <td>
+                                        {{ config.createDate | date: "dd-MM-yyy HH:mm" }}
+                                    </td>
+                                    @if (editAccess || deleteAccess) {
+                                    <td class="btnAction">
+                                        @if (editAccess) {
+                                        <a type="button" data-title="Edit" data-toggle="tooltip"
+                                            (click)="edit(config.id, i)">
+                                          <img src="assets/img/DashboardIcons/Edit.svg" >
+                                        </a>
+                                        }
+                                        @if (deleteAccess) {
+                                        <a type="button" data-title="Delete" data-toggle="tooltip"
+                                            (click)="deleteConfirm(config.id, config.mvnoId, i)">
+                                             <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                                        </a>
+                                        }
+                                    </td>
+                                    }
+                                </tr>
+                                }
+                            </tbody>
+                        </table>
+                        <br />
+                        <div class="row">
+                            <div class="col-md-12" style="display: flex">
+                                <pagination-controls id="listing_serverdata" [maxSize]="10" [directionLinks]="true"
+                                    previousLabel="" nextLabel=""
+                                    (pageChange)="pageChanged($event)"></pagination-controls>
+                                <div id="itemPerPageDropdown">
+                                    <p-dropdown [options]="pageLimitOptions" optionLabel="value" optionValue="value"
+                                        (onChange)="TotalItemPerPage($event)"></p-dropdown>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- END Data Table -->
+        </div>
+        }
+
+        @if (createProxyFlag) {
+        <div class="col-md-12">
+            <!-- Form Design -->
+            <div class="panel">
+                <div class="panel-heading">
+                    <h3 class="panel-title">{{ editId ? "Update" : "Create" }} Proxy Configuration</h3>
+                    <div class="right">
+                        <button type="button" class="btn-toggle-collapse" data-toggle="collapse"
+                            data-target="#proxyServerFormPanel" aria-expanded="false"
+                            aria-controls="proxyServerFormPanel">
+                            <i class="fa fa-minus-circle"></i>
+                        </button>
+                    </div>
+                </div>
+                @if (editAccess || createAccess) {
+                <div id="proxyServerFormPanel" class="panel-collapse collapse in">
+                    <form [formGroup]="detailGroupForm" (ngSubmit)="addOrUpdate()">
+                        <div class="panel-body">
+                            <!-- <fieldset
+                    style="margin-top: 0rem; margin-bottom: 2rem"
+                    *ngIf="userId == superAdminId"
+                    >
+                    <legend>Mvno Basic Parameters</legend>
+                    <div class="boxWhite">
+                      <div class="row">
+                        <div class="col-lg-4 co-md-4 col-sm-7 col-xs-12">
+                          <div *ngIf="userId == superAdminId">
+                            <label>Mvno Name *</label>
+                            <div>
+                              <p-dropdown
+                                #dd
+                                [options]="mvnoData"
+                                placeholder="Select mvno"
+                                optionLabel="name"
+                                optionValue="mvnoId"
+                                formControlName="mvnoName"
+                                [readonly]="editId"
+                            [ngClass]="{
+                              'is-invalid': submitted && detailGroupForm.controls.mvnoName.errors
+                            }"
+                              ></p-dropdown>
+                              <div
+                                class="errorWrap text-danger"
+                                *ngIf="submitted && detailGroupForm.controls.mvnoName.errors"
+                                >
+                                <div
+                                  class="error text-danger"
+                                  *ngIf="submitted && detailGroupForm.controls.mvnoName.errors.required"
+                                  >
+                                  Please Select MVNO Name.
+                                </div>
+                              </div>
+                            </div>
+                            <br />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </fieldset> -->
+                            <fieldset style="margin-top: 0rem; margin-bottom: 2rem">
+                                <legend>Proxy Configuration Basic Parameters</legend>
+                                <div class="boxWhite">
+                                    <div class="row">
+                                        <div class="col-lg-4 co-md-4 col-sm-7 col-xs-12">
+                                            <label>Name *</label>
+                                            <input type="text" name="name" [readonly]="editId" formControlName="name"
+                                                class="form-control" [ngClass]="{
+                          'is-invalid': submitted && detailGroupForm.controls.name.errors
+                        }" placeholder="Enter Name" />
+                                            @if (submitted && f.name.errors) {
+                                            <div class="invalid-feedback">
+                                                @if (detailGroupForm.controls.name.errors.required) {
+                                                <div>
+                                                    Please Enter Name.
+                                                </div>
+                                                }
+                                            </div>
+                                            }
+                                            <br />
+                                        </div>
+                                        <div class="col-lg-4 co-md-4 col-sm-7 col-xs-12">
+                                            <label>IP *</label>
+                                            <input type="text" name="ip" formControlName="ip" class="form-control"
+                                                [ngClass]="{
+                          'is-invalid': submitted && detailGroupForm.controls.ip.errors
+                        }" placeholder="Enter IP" />
+                                            @if (submitted && detailGroupForm.controls.ip.errors) {
+                                            <div class="invalid-feedback">
+                                                @if (detailGroupForm.controls.ip.errors.required) {
+                                                <div>
+                                                    Please Enter IP.
+                                                </div>
+                                                }
+                                            </div>
+                                            }
+                                            @if (
+                                            submitted &&
+                                            this.detailGroupForm.controls.ip.invalid &&
+                                            !detailGroupForm.controls.ip.errors.required
+                                            ) {
+                                            <div class="invalid-feedback">
+                                                <div>Please Enter Valid IP Address.</div>
+                                            </div>
+                                            }
+                                            <br />
+                                        </div>
+                                        <div class="col-lg-4 co-md-4 col-sm-7 col-xs-12">
+                                            <label>Secret Key *</label>
+                                            <div class="form-control displayflex">
+                                                <div style="width: 95%">
+                                                    <input id="password" [type]="_passwordNewType" class="inputPassword"
+                                                        placeholder="Enter new secretkey" name="secretkey"
+                                                        formControlName="secretkey" [ngClass]="{
+                              'is-invalid': submitted && detailGroupForm.controls.secretkey.errors
+                            }" />
+                                                    @if (submitted && detailGroupForm.controls.secretkey.errors) {
+                                                    <div class="invalid-feedback">
+                                                        @if (detailGroupForm.controls.secretkey.errors.required) {
+                                                        <div>
+                                                            Please Enter Secret.
+                                                        </div>
+                                                        }
+                                                    </div>
+                                                    }
+                                                </div>
+                                                <div style="width: 5%">
+                                                    @if (showNewPassword) {
+                                                    <mat-icon matSuffix (click)="
+                                                            showPassword = !showPassword;
+                                                            _passwordType = showPassword ? 'text' : 'password'
+                                                          " style="cursor: pointer">
+                                                        {{ showPassword ? "visibility_off" : "visibility" }}
+                                                    </mat-icon>
+                                                    }
+                                                    @if (!showNewPassword) {
+                                                    <mat-icon matSuffix (click)="
+                                                            showPassword = !showPassword;
+                                                            _passwordType = showPassword ? 'text' : 'password'
+                                                          " style="cursor: pointer">
+                                                        {{ showPassword ? "visibility_off" : "visibility" }}
+                                                    </mat-icon>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-4 co-md-4 col-sm-7 col-xs-12">
+                                            <div>
+                                                <label>Status *</label>
+                                                <p-dropdown [options]="status" placeholder="Select status"
+                                                    optionLabel="label" optionValue="label" formControlName="status"
+                                                    [ngClass]="{
+                            'is-invalid': submitted && detailGroupForm.controls.status.errors
+                          }"></p-dropdown>
+                                                @if (submitted && detailGroupForm.controls.status.errors) {
+                                                <div class="errorWrap text-danger">
+                                                    @if (submitted && detailGroupForm.controls.status.errors.required) {
+                                                    <div class="error text-danger">
+                                                        Please Select Status.
+                                                    </div>
+                                                    }
+                                                </div>
+                                                }
+                                            </div>
+                                            <br />
+                                        </div>
+                                        <div class="col-lg-4 co-md-4 col-sm-7 col-xs-12 form-group form-check">
+                                            <label>Override NAS IP</label>
+                                            <br />
+                                            <p-dropdown [options]="override" placeholder="Override NAS IP"
+                                                optionLabel="label" optionValue="value" formControlName="overrideNAS"
+                                                (onChange)="overrideNASEvent($event.value)"></p-dropdown>
+                                        </div>
+                                        <div class="col-lg-4 co-md-4 col-sm-7 col-xs-12">
+                                            <label>NAS IP *</label>
+                                            <input type="text" name="ip" formControlName="nasip" class="form-control"
+                                                [ngClass]="{
+                          'is-invalid': submitted && detailGroupForm.controls.nasip.errors
+                        }" placeholder="Enter NAS IP" />
+                                            @if (submitted && detailGroupForm.controls.nasip.errors) {
+                                            <div class="invalid-feedback">
+                                                @if (detailGroupForm.controls.nasip.errors.required) {
+                                                <div>
+                                                    Please Enter NAS IP.
+                                                </div>
+                                                }
+                                            </div>
+                                            }
+                                            @if (
+                                            submitted &&
+                                            this.detailGroupForm.controls.nasip.invalid &&
+                                            !detailGroupForm.controls.nasip.errors.required
+                                            ) {
+                                            <div class="invalid-feedback">
+                                                <div>Please Enter Valid NAS IP Address.</div>
+                                            </div>
+                                            }
+                                            <br />
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                            <label>Timeout (In ms) *</label>
+                                            <div style="display: flex">
+                                                <div style="width: 60%">
+                                                    <input id="timeout" type="number" min="1" class="form-control"
+                                                        placeholder="Enter Timeout" formControlName="timeout" [ngClass]="{
+                              'is-invalid': submitted && detailGroupForm.controls.timeout.errors
+                            }" />
+                                                    @if (submitted && detailGroupForm.controls.timeout.errors) {
+                                                    <div class="errorWrap text-danger">
+                                                        @if (submitted &&
+                                                        detailGroupForm.controls.timeout.errors.required) {
+                                                        <div class="error text-danger">
+                                                            Timeout is required.
+                                                        </div>
+                                                        }
+                                                    </div>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                            <fieldset style="margin-top: 0rem; margin-bottom: 2rem">
+                                <legend>Port Parameters</legend>
+                                <div class="boxWhite">
+                                    <div class="row">
+                                        <div class="col-lg-4 co-md-4 col-sm-7 col-xs-12">
+                                            <label>Acc Port *</label>
+                                            <input type="text" name="acctport" formControlName="acctport"
+                                                class="form-control" [ngClass]="{
+                          'is-invalid': submitted && detailGroupForm.controls.acctport.errors
+                        }" placeholder="Enter Acc Port" />
+                                            @if (submitted && detailGroupForm.controls.acctport.errors) {
+                                            <div class="invalid-feedback">
+                                                @if (detailGroupForm.controls.acctport.errors.required) {
+                                                <div>
+                                                    Please Enter Acc Port Number.
+                                                </div>
+                                                }
+                                                @if (detailGroupForm.controls.acctport.errors.pattern) {
+                                                <div>
+                                                    Acct Port should be in numeric
+                                                </div>
+                                                }
+                                            </div>
+                                            }
+                                            <br />
+                                        </div>
+                                        <div class="col-lg-4 co-md-4 col-sm-7 col-xs-12">
+                                            <label>Auth Port *</label>
+                                            <input type="text" name="authport" formControlName="authport"
+                                                class="form-control" [ngClass]="{
+                          'is-invalid': submitted && detailGroupForm.controls.authport.errors
+                        }" placeholder="Enter Auth port" />
+                                            @if (submitted && detailGroupForm.controls.authport.errors) {
+                                            <div class="invalid-feedback">
+                                                @if (detailGroupForm.controls.authport.errors.required) {
+                                                <div>
+                                                    Please Enter Authentication Port Number.
+                                                </div>
+                                                }
+                                                @if (detailGroupForm.controls.authport.errors.pattern) {
+                                                <div>
+                                                    Auth Port should be in numeric
+                                                </div>
+                                                }
+                                            </div>
+                                            }
+                                            <br />
+                                        </div>
+                                        <div class="col-lg-4 co-md-4 col-sm-7 col-xs-12">
+                                            <label>Dynamic Auth Port *</label>
+                                            <input type="text" name="dynaAuthPort" formControlName="dynaAuthPort"
+                                                class="form-control" [ngClass]="{
+                          'is-invalid': submitted && detailGroupForm.controls.dynaAuthPort.errors
+                        }" placeholder="Enter Auth port" />
+                                            @if (submitted && detailGroupForm.controls.dynaAuthPort.errors) {
+                                            <div class="invalid-feedback">
+                                                @if (detailGroupForm.controls.dynaAuthPort.errors.required) {
+                                                <div>
+                                                    Please Enter Dynamic Authentication Port Number.
+                                                </div>
+                                                }
+                                                @if (detailGroupForm.controls.dynaAuthPort.errors.pattern) {
+                                                <div>
+                                                    Dynamic Auth Port should be in numeric
+                                                </div>
+                                                }
+                                            </div>
+                                            }
+                                            <br />
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                            <div class="addUpdateBtn">
+                                <button type="submit" class="btn btn-primary" data-title="Submit Proxy Server Details"
+                                    data-toggle="tooltip">
+                                    <i class="fa fa-check-circle"></i>
+                                    {{ editId ? "Update" : "Add" }} Proxy Configuration
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                }
+            </div>
+            <!-- END Form Design -->
+        </div>
+        }
+    </div>
+</div>
+<p-dialog header="{{ config.name }} Detail" [(visible)]="myModal" [style]="{ width: '35%' }" [modal]="true"
+    [responsive]="true" [draggable]="false" [closable]="true">
+    <!-- <div class="modal fade" id="myModal" role="dialog">
+                  <div class="modal-dialog" style="width: 35%"> -->
+    <!-- Modal content-->
+    <!-- <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal">&times;</button> -->
+    <!-- <h4 class="modal-title">{{plan.planName}} Detail</h4> -->
+    <!-- <h3 class="panel-title">{{ config.name }} Detail</h3>
+                    </div> -->
+    <div class="modal-body">
+        <div class="container-fluid">
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="name">Name :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="nameValue">{{ config.name }}</label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="type">IP :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="typeValue">{{ config.ip }}</label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="quota">Auth Port :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="quotaValue">{{ config.authport }}</label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="uom">Acct Port :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="uomValue">{{ config.acctport }}</label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="uom">Dynamic Authentication Port :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="uomValue">{{ config.dynaAuthPort }}</label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="uom">Override NAS IP:</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="uomValue">{{ config.overrideNAS }}</label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="uom">NAS IP:</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="uomValue">{{ config.nasip }}</label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="uom">Timeout (In ms) :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="uomValue">{{ config.timeout }}</label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="uom">Status :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="uomValue">{{ config.status }}</label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+    </div>
+    <!-- </div>
+                </div>
+              </div> -->
+</p-dialog>
+<!-- <div class="row" *ngIf="modalToggle">
+
+          </div> -->

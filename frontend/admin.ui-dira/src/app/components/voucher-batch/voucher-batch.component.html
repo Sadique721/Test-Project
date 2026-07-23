@@ -1,0 +1,809 @@
+<div class="p-16 f-s-14 rounded m-t-12 p-10">
+    <mat-card-content class="mat-card-content-border">
+
+        <div class="voucher-table-list">
+            <div class="table-responsive">
+
+                <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8 w-100">
+
+                    <!-- Batch Name -->
+                    <ng-container matColumnDef="batchName">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header sticky class="table-header-title">
+                            Batch Name
+                        </th>
+                        <td mat-cell *matCellDef="let batch">
+
+                            {{ batch.batchName }}
+
+                        </td>
+                    </ng-container>
+
+                    <!-- Voucher Name -->
+                    <ng-container matColumnDef="voucherName">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header sticky class="table-header-title">
+                            Voucher Name
+                        </th>
+                        <td mat-cell *matCellDef="let batch">
+                            {{ batch.voucherConfiguration?.name }}
+                        </td>
+                    </ng-container>
+
+                    <!-- Plan -->
+                    <ng-container matColumnDef="plan">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header sticky class="table-header-title">
+                            Plan
+                        </th>
+                        <td mat-cell *matCellDef="let batch">
+                            {{ batch.plan?.name || '-' }}
+                        </td>
+                    </ng-container>
+
+                    <!-- Quantity -->
+                    <ng-container matColumnDef="quantity">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header sticky class="table-header-title">
+                            Voucher Qty
+                        </th>
+                        <td mat-cell *matCellDef="let batch">
+                            {{ batch.voucherQuantity }}
+                        </td>
+                    </ng-container>
+
+                    <!-- Price -->
+                    <ng-container matColumnDef="price">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header sticky class="table-header-title">
+                            Price
+                        </th>
+                        <td mat-cell *matCellDef="let batch">
+                            {{ batch.price * batch.voucherQuantity }}
+                        </td>
+                    </ng-container>
+
+                    <!-- Created On -->
+                    <ng-container matColumnDef="createdOn">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header sticky class="table-header-title">
+                            Created On
+                        </th>
+                        <td mat-cell *matCellDef="let batch">
+                            {{ batch.createDate | date:'dd-MM-yyyy HH:mm' }}
+                        </td>
+                    </ng-container>
+
+                    <!-- Expiry -->
+                    <ng-container matColumnDef="expiry">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header sticky class="table-header-title">
+                            Expiry Date
+                        </th>
+                        <td mat-cell *matCellDef="let batch">
+                            {{ batch.expirydate | date:'dd-MM-yyyy HH:mm' }}
+                        </td>
+                    </ng-container>
+
+                    <!-- Action -->
+                    <ng-container matColumnDef="action">
+                        <th mat-header-cell *matHeaderCellDef stickyEnd class="table-header-title"
+                            style="text-align:center;">
+                            Action
+                        </th>
+                        <td mat-cell *matCellDef="let batch" style="text-align:center;">
+                            <a mat-icon-button matTooltip="view" color="primary"
+                                (click)="getVoucherBatchDetails(batch.voucherBatchId)">
+                                <img src="assets/img/DashboardIcons/eye-svgrepo-com (1) 1.svg">
+                            </a>
+                            <!-- View -->
+                            <a mat-icon-button matTooltip="View Voucher"
+                                (click)="viewVoucher(batch.voucherBatchId, batch.batchName)">
+                                <img src="assets/img/DashboardIcons/send-svgrepo-com 1.svg">
+                            </a>
+
+                            <!-- Extend Expiry -->
+                            <a *ngIf="expiryAccess" mat-icon-button matTooltip="Extend Expiry Date"
+                                (click)="currentExpiryUpdate(batch.voucherBatchId, batch.expirydate, batch.createDate)"
+                                data-toggle="modal" data-target="#extendExpiry">
+                                <img src="assets/img/D_Extend-Expiry-Date_Y.png">
+                            </a>
+
+                        </td>
+                    </ng-container>
+
+                    <!-- HEADER + ROWS -->
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+                    <tr mat-row class="table-content-row" *matRowDef="let row; columns: displayedColumns;">
+                    </tr>
+
+                </table>
+
+                <!-- No Record -->
+                <div *ngIf="batchData?.length === 0" class="no-record">
+                    No Record Found.
+                </div>
+
+                <!-- Pagination -->
+                <mat-paginator [length]="totalRecords" [pageSize]="itemsPerPage" [pageSizeOptions]="[5, 10, 20, 50,100]"
+                    showFirstLastButtons (page)="pageChanged($event)">
+                </mat-paginator>
+
+            </div>
+        </div>
+
+    </mat-card-content>
+</div>
+<ng-template #ExtendExpiryDialog>
+    <div class="dialog-container">
+
+        <!-- HEADER -->
+        <div class="dialog-header">
+            Extend Expiry Date
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="UpdatedExpiry = null; onCancle()">
+                    <img src="assets/img/DashboardIcons/Reject.svg" />
+                </a>
+            </span>
+        </div>
+
+        <!-- CONTENT -->
+        <div mat-dialog-content style="overflow-y: auto; max-height: 75vh">
+            <mat-card-content class="matcardContent">
+
+                <form class="row g-3">
+
+                    <div class="modal-body">
+
+                        <mat-label class="f-s-14 f-w-600 m-b-8 d-block">
+                            Current Expiry Date: {{ currentExpiry | date : "dd-MM-yyy HH:mm" }}
+                        </mat-label>
+
+                        <mat-label class="f-s-14 f-w-600 m-b-8 d-block" style="margin-top: 20px;">
+                            Extend Expiry Date *
+                        </mat-label>
+
+                        <div class="d-flex align-items-center" style="gap: 8px;">
+
+                            <!-- Date Picker -->
+                            <mat-form-field appearance="outline" class="w-100" color="primary">
+                                <input matInput [matDatepicker]="expiryDatePicker" placeholder="Select Date"
+                                    class="input p-5" [min]="currentExpiry" [(ngModel)]="UpdatedExpiryDate"
+                                    name="UpdatedExpiryDate" [ngModelOptions]="{standalone: true}" />
+
+                                <mat-datepicker-toggle matSuffix [for]="expiryDatePicker"></mat-datepicker-toggle>
+                                <mat-datepicker #expiryDatePicker touchUi="true"></mat-datepicker>
+                            </mat-form-field>
+
+                            <!-- Time Picker -->
+                            <mat-form-field appearance="outline" class="w-100" color="primary">
+                                <input matInput [matTimepicker]="expiryTimePicker" placeholder="Select Time"
+                                    class="input p-5" [(ngModel)]="UpdatedExpiryTime" name="UpdatedExpiryTime"
+                                    [ngModelOptions]="{standalone: true}" />
+
+                                <mat-timepicker-toggle matSuffix [for]="expiryTimePicker"></mat-timepicker-toggle>
+                                <mat-timepicker #expiryTimePicker touchUi="true"></mat-timepicker>
+                            </mat-form-field>
+
+                        </div>
+
+                        <!-- Error Message -->
+                        <div class="error text-danger" *ngIf="submitted && (!UpdatedExpiryDate || !UpdatedExpiryTime)">
+                            Expiry Date & Time is required.
+                        </div>
+
+                    </div>
+
+                </form>
+            </mat-card-content>
+
+            <!-- BUTTONS -->
+            <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+
+                <!-- Save -->
+                <button mat-flat-button color="primary" class="button-normal"
+                    [disabled]="!UpdatedExpiryDate || !UpdatedExpiryTime" (click)="updateExpiry()">
+                    Save
+                </button>
+
+                <!-- Clear -->
+                <button mat-stroked-button color="primary" class="button-normal"
+                    (click)="UpdatedExpiry = null; UpdatedExpiryDate=null; UpdatedExpiryTime=null;">
+                    Clear
+                </button>
+
+                <!-- Cancel -->
+                <button mat-stroked-button color="warn" class="button-normal"
+                    (click)="UpdatedExpiry = null; onCancle()">
+                    Close
+                </button>
+
+            </div>
+        </div>
+    </div>
+</ng-template>
+<!-- view details -->
+
+<ng-template #voucherDetailTemplate>
+    <div class="dialog-container">
+
+        <!-- Header -->
+        <div class="dialog-header">
+            Voucher Batch Detail
+            <span>
+                <a mat-icon-button mat-dialog-close>
+                    <img src="assets/img/DashboardIcons/Reject.svg" />
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <mat-card-content>
+            <div style="margin-top: 25px;">
+
+                <!-- Batch Name -->
+                <div class="m-b-5 dataGroup field">
+                    <span class="label-text">Name</span>
+                    <span class="colon">:</span>
+                    <span class="m-l-10">{{ voucherShowBatch?.batchName || "-" }}</span>
+                </div>
+
+                <!-- Voucher Qty -->
+                <div class="m-b-5 dataGroup field">
+                    <span class="label-text">Voucher Qty</span>
+                    <span class="colon">:</span>
+                    <span class="m-l-10">{{ voucherShowBatch?.voucherQuantity || "-" }}</span>
+                </div>
+
+                <!-- Price -->
+                <div class="m-b-5 dataGroup field">
+                    <span class="label-text">Price</span>
+                    <span class="colon">:</span>
+                    <span class="m-l-10">
+                        {{ (voucherShowBatch?.price * voucherShowBatch?.voucherQuantity) || "-" }}
+                    </span>
+                </div>
+
+            </div>
+        </mat-card-content>
+
+        <!-- Footer -->
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+            <button mat-stroked-button color="primary" class="button-normal" mat-dialog-close>
+                Close
+            </button>
+        </div>
+
+    </div>
+</ng-template>
+
+
+
+
+<!-- <p-confirmDialog [style]="{ width: '40vw' }" [baseZIndex]="10000"></p-confirmDialog>
+<div class="childComponent">
+ 
+<div class="row">
+  <div class="col-md-12">
+    <!- User Data ->
+    <div class="panel top">
+      <div class="panel-heading">
+        <h3 class="panel-title">Voucher Batch Management</h3>
+        <div class="right">
+          <button
+            type="button"
+            class="btn-toggle-collapse"
+            data-toggle="collapse"
+            data-target="#liveUserSearchPanel"
+            aria-expanded="false"
+            aria-controls="liveUserSearchPanel"
+            >
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+      <div id="liveUserSearchPanel" class="panel-collapse collapse in">
+        <div class="panel-body">
+          <div class="searchForm">
+            <form class="form-auth-small" [formGroup]="searchForm">
+              <div class="col-md-4" style="padding-right: 0%; text-align: right">
+                <label style="padding: 5px">Batch Name:</label>
+              </div>
+              <div class="col-md-4" style="padding-left: 0%">
+                <input
+                  type="text"
+                  name="name"
+                  class="form-control"
+                  placeholder="Enter Batchname"
+                  formControlName="batchName"
+                    [ngClass]="{
+                      'is-invalid': searchSubmitted && searchForm.controls.batchName.errors
+                    }"
+                  />
+                </div>
+                <div class="col-md-4" style="padding-left: 0%">
+                  <button
+                    type="submit"
+                    class="btn btn-primary"
+                    data-title="Search Batch"
+                    data-toggle="tooltip"
+                    (click)="search()"
+                    >
+                    <i class="fa fa-search"></i>
+                    Search
+                  </button>
+                  &nbsp;
+                  <button
+                    type="reset"
+                    class="btn btn-default"
+                    data-title="Clear"
+                    data-toggle="tooltip"
+                    (click)="clearSearchForm()"
+                    >
+                     <img src="assets/img/DashboardIcons/Refresh.svg" />
+                    Clear
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+          <div class="panel-body no-padding panel-udata">
+            <div class="col-md-4 pcol">
+              <div class="dbox">
+                <a href="javascript:void(0)" [routerLink]="['/home/voucherManagement']">
+                  <img src="../../../assets/img/i01.png" style="width: 32px" />
+                  <h5>Show Voucher Profile</h5>
+                </a>
+              </div>
+            </div>
+            @if (voucherBatchAccess) {
+              <div
+                class="col-md-4 pcol"
+              [ngClass]="{
+                'is-active': this.showBatch
+              }"
+                >
+                <div class="dbox">
+                  <a href="javascript:void(0)" [routerLink]="['/home/voucherBatch']">
+                    <img src="../../../assets/img/i01.png" style="width: 32px" />
+                    <h5>Show Voucher Batch</h5>
+                  </a>
+                </div>
+              </div>
+            }
+            @if (voucherManageAccess) {
+              <div class="col-md-4 pcol">
+                <div class="dbox">
+                  <a href="javascript:void(0)" [routerLink]="['/home/voucher']">
+                    <img src="../../../assets/img/i01.png" style="width: 32px" />
+                    <h5>Show Manage Vouchers</h5>
+                  </a>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+      <!- END User Data ->
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-12">
+      <!- Data Table ->
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">Voucher Batches</h3>
+          <div class="right">
+            <button
+              type="button"
+              class="btn-toggle-collapse"
+              data-toggle="collapse"
+              data-target="#liveUserTabelPanel"
+              aria-expanded="false"
+              aria-controls="liveUserTabelPanel"
+              >
+              <i class="fa fa-minus-circle"></i>
+            </button>
+          </div>
+        </div>
+        <div id="liveUserTabelPanel" class="panel-collapse collapse in">
+        
+        <div class="panel-body table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Batch Name</th>
+                <th>Voucher Name</th>
+                <th>Plan</th>
+                <th>Voucher Quantity</th>
+                <th>Price</th>
+                <th>Create On</th>
+                <th>Expiry Date</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (
+                batch of batchData
+                | paginate
+                : {
+                id: 'listing_batchdata',
+                itemsPerPage: itemsPerPage,
+                currentPage: currentPage,
+                totalItems: totalRecords
+                }; track
+                batch; let i = $index) {
+                <tr
+                  >
+                  <td>
+                    <a
+                      class="detailOnAnchorClick"
+                      (click)="getVoucherBatchDetails(batch.voucherBatchId)"
+                      style="color: #f7941e"
+                      href="javascript:void(0)"
+                      data-title="Click here to see Voucher Batch detail"
+                      data-toggle="modal"
+                      data-target="#voucherBatchModal"
+                      >
+                      {{ batch.batchName }}
+                    </a>
+                  </td>
+                  <td>{{ batch.voucherConfiguration.name }}</td>
+                  <td>{{ batch.plan ? batch.plan.name : '-' }}</td>
+                  <td>{{ batch.voucherQuantity }}</td>
+                  <td>{{ batch.price * batch.voucherQuantity }}</td>
+                  <td>{{ batch.createDate | date : "dd-MM-yyy HH:mm" }}</td>
+                  <td>{{ batch.expirydate | date : "dd-MM-yyy HH:mm" }}</td>
+                  <td>
+                    <a
+                      (click)="viewVoucher(batch.voucherBatchId, batch.batchName)"
+                      type="button"
+                      data-title="View Vouchers"
+                      data-toggle="tooltip"
+                      title="view vouchers"
+                      >
+                      <img class="icon" src="assets/img/DashboardIcons/send-svgrepo-com 1.svg" /> </a
+                      >&nbsp;
+                      @if (expiryAccess) {
+                        <a
+                      (click)="
+                        currentExpiryUpdate(
+                          batch.voucherBatchId,
+                          batch.expirydate,
+                          batch.createDate
+                          batch.createDate
+                        )
+                      "
+                          data-target="#extendExpiry"
+                          data-toggle="modal"
+                          data-keyboard="false"
+                          data-backdrop="static"
+                          data-title="Extend Expiry Date"
+                          data-toggle="tooltip"
+                          title="Extend expiry date"
+                          >
+                          <img class="icon" src="assets/img/D_Extend-Expiry-Date_Y.png" />
+                        </a>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+            <br />
+            <div class="row">
+              <div class="col-md-12" style="display: flex">
+                <pagination-controls
+                  id="listing_batchdata"
+                  [maxSize]="10"
+                  [directionLinks]="true"
+                  previousLabel=""
+                  nextLabel=""
+                  (pageChange)="pageChanged($event)"
+                ></pagination-controls>
+                <div id="itemPerPageDropdown">
+                  <p-dropdown
+                    [options]="pageLimitOptions"
+                    optionLabel="value"
+                    optionValue="value"
+                    (onChange)="TotalItemPerPage($event)"
+                  ></p-dropdown>
+                </div>
+              </div>
+              <!- END Data Table ->
+            </div>
+          </div>
+        </div>
+
+
+        <div class="modal fade" id="assignDataModal" role="dialog">
+          <div class="modal-dialog" style="width: 35%">
+            <!- Modal content->
+            <div class="modal-content">
+              <div class="modal-header">
+                <h3 class="panel-title">Assing Reseller to Batch</h3>
+              </div>
+              <div class="modal-body">
+                <form class="form-auth-small" [formGroup]="assignForm">
+                  <div>
+                    <label style="display: block">Batch *</label>
+                  
+                </div>
+                <br />
+                <div>
+                  <label style="display: block">Reseller *</label>
+                  <div>
+                    <p-dropdown
+                      [options]="resellerDropDown"
+                      placeholder="Select Reseller"
+                      optionLabel="resellerName"
+                      optionValue="resellerId"
+                      formControlName="resellerId"
+                        [ngClass]="{
+                          'is-invalid': assignSubmitted && assignForm.controls.resellerId.errors
+                        }"
+                    ></p-dropdown>
+                    @if (assignSubmitted && assignForm.controls.resellerId.errors) {
+                      <div
+                        class="errorWrap text-danger"
+                        >
+                        @if (assignSubmitted && assignForm.controls.resellerId.errors.required) {
+                          <div
+                            class="error text-danger"
+                            >
+                            Please select Reseller.
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+                </div>
+                <br />
+                <div>
+                  <label style="margin-bottom: 0">Override validity *</label>&nbsp;
+                  <p-checkbox
+                    formControlName="overwiteExpiry"
+                    name="overRight"
+                    [binary]="true"
+                  ></p-checkbox>
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <div class="addUpdateBtn">
+                <button
+                  type="submit"
+                  class="btn btn-primary btn-sm"
+                  data-dismiss="modal"
+                  (click)="assignReseller()"
+                  [disabled]="!assignForm.valid"
+                  >
+                  <i class="fa fa-check-circle"></i>
+                  Save
+                </button>
+                <button
+                  id="btn"
+                  type="button"
+                  class="btn btn-default btn-sm"
+                  (click)="assignForm.reset()"
+                  >
+                   <img src="assets/img/DashboardIcons/Refresh.svg" />
+                  Clear
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-danger btn-sm"
+                  data-dismiss="modal"
+                  (click)="assignForm.reset()"
+                  >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="modal fade" id="extendExpiry" role="dialog">
+        <div class="modal-dialog" style="width: 35%">
+          <!- Modal content->
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3 class="panel-title">Extend Expiry Date</h3>
+            </div>
+            <div class="modal-body">
+              <label for="currentExpiry"
+                >Current Expiry Date: {{ currentExpiry | date : "dd-MM-yyy HH:mm" }}</label
+                >
+                <br />
+                <label style="margin-top: 20px">Extend Expiry Date:</label>
+                <p-calendar
+                  dateFormat="dd/mm/yy"
+                  [minDate]="currentExpiry"
+                  [showIcon]="true"
+                  [showButtonBar]="true"
+                  [hideOnDateTimeSelect]="true"
+                  [showTime]="true"
+                  placeholder="Enter New Expiry Date"
+                  [(ngModel)]="UpdatedExpiry"
+                  [style]="{ width: '100%' }"
+                ></p-calendar>
+              </div>
+              <div class="modal-footer">
+                <div class="addUpdateBtn">
+                  <button
+                    type="submit"
+                    class="btn btn-primary btn-sm"
+                    data-dismiss="modal"
+                    (click)="updateExpiry()"
+                    [disabled]="!UpdatedExpiry"
+                    >
+                    <i class="fa fa-check-circle"></i>
+                    Save
+                  </button>
+                  <button
+                    id="btn"
+                    type="button"
+                    class="btn btn-default btn-sm"
+                    (click)="UpdatedExpiry = null"
+                    >
+                     <img src="assets/img/DashboardIcons/Refresh.svg" />
+                    Clear
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-danger btn-sm"
+                    data-dismiss="modal"
+                    (click)="UpdatedExpiry = null"
+                    >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal fade" id="voucherBatchModal" role="dialog">
+          <div class="modal-dialog" style="width: 35%">
+            <!- Modal content->
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h3 class="panel-title">Voucher Batch Detail</h3>
+              </div>
+              <div class="modal-body">
+                <div class="container-fluid">
+                  <div class="row" id="viewDetail">
+                    <div class="col-md-4">
+                      <label for="status">Name :</label>
+                    </div>
+                    <div class="col-md-8">
+                      <label for="statusValue">
+                        {{ voucherShowBatch?.batchName }}
+                      </label>
+                    </div>
+                  </div>
+                  <div class="row" id="viewDetail">
+                    <div class="col-md-4">
+                      <label for="noOfVoucher">Voucher Qty :</label>
+                    </div>
+                    <div class="col-md-8">
+                      <label for="noOfVoucherValue">
+                        {{ voucherShowBatch?.voucherQuantity }}
+                      </label>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-4">
+                      <label for="price">Price :</label>
+                    </div>
+                    <div class="col-md-8">
+                      <label for="priceValue">
+                        {{ voucherShowBatch?.price * voucherShowBatch?.voucherQuantity }}
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+@if (modalToggle) {
+  <div class="modal fade" id="voucherModal" role="dialog">
+    <div class="modal-dialog" style="width: 35%">
+      <!- Modal content->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h3 class="panel-title">{{ voucherConfig.name }} Detail</h3>
+        </div>
+        <div class="modal-body">
+          <div class="container-fluid">
+            <div class="row" id="viewDetail">
+              <div class="col-md-5">
+                <label for="name">Name :</label>
+              </div>
+              <div class="col-md-7">
+                <label for="nameValue">{{ voucherConfig.name }}</label>
+              </div>
+            </div>
+            <div class="row" id="viewDetail">
+              <div class="col-md-5">
+                <label for="type">Voucher Code Format :</label>
+              </div>
+              <div class="col-md-7">
+                <label for="typeValue">
+                  {{ voucherConfig.voucherCodeFormat }}
+                </label>
+              </div>
+            </div>
+            <div class="row" id="viewDetail">
+              <div class="col-md-5">
+                <label for="noOfVoucher">No. of Vouchers :</label>
+              </div>
+              <div class="col-md-7">
+                <label for="noOfVoucherValue">
+                  {{ voucherConfig.noOfVoucher }}
+                </label>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-5">
+                <label for="planName">Plan :</label>
+              </div>
+              <div class="col-md-7">
+                <label for="planNameValue">{{ planDetail.name }}</label>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-5">
+                <label for="planName">Validity :</label>
+              </div>
+              <div class="col-md-7">
+                <label for="planNameValue">{{ planDetail.validity }}</label>
+              </div>
+            </div>
+            <div class="row" id="viewDetail">
+              <div class="col-md-5">
+                <label for="length">Voucher Code Length :</label>
+              </div>
+              <div class="col-md-7">
+                <label for="lengthValue">
+                  {{ voucherConfig.voucherCodeLength }}
+                </label>
+              </div>
+            </div>
+            <div class="row" id="viewDetail">
+              <div class="col-md-5">
+                <label for="preValue">Prefix :</label>
+              </div>
+              <div class="col-md-7">
+                <label for="preValuevalue">{{ voucherConfig.prefix }}</label>
+              </div>
+            </div>
+            <div class="row" id="viewDetail">
+              <div class="col-md-5">
+                <label for="postValue">Suffix :</label>
+              </div>
+              <div class="col-md-7">
+                <label for="postValueValue">{{ voucherConfig.suffix }}</label>
+              </div>
+            </div>
+            <div class="row" id="viewDetail">
+              <div class="col-md-5">
+                <label for="status">Status :</label>
+              </div>
+              <div class="col-md-7">
+                <label for="statusValue">{{ voucherConfig.status }}</label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+} -->

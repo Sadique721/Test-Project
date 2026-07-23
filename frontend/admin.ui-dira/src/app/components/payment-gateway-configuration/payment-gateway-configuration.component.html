@@ -1,0 +1,703 @@
+<!-- 
+<div class="row">
+  <div class="col-md-6 left">
+    <div class="panel">
+      <div class="panel-heading">
+        <h3 class="panel-title">Payment Gateway Configurations</h3>
+      </div>
+
+      <div id="searchEmail" class="panel-collapse collapse in">
+        <div class="panel-body table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Status</th>
+                @if (editAccess || deleteAccess) {
+                  <th>Action</th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (
+                paymentConfig of paymentGatewayConfigurationList
+                | paginate
+                : {
+                id: 'listing_groupdata',
+                itemsPerPage: paymentConfigItemsPerPage,
+                currentPage: paymentConfigCurrentPage,
+                totalItems: paymentConfigTotalRecords
+                }; track
+                paymentConfig; let i = $index) {
+                <tr
+                  >
+                  <td>{{ paymentConfig.paymentConfigName }}</td>
+                  <td>
+                    <div>
+                      <p-inputSwitch
+                        [(ngModel)]="paymentConfig.isActive"
+                        (onChange)="changeConfigStatus(paymentConfig)"
+                      ></p-inputSwitch>
+                    </div>
+                  </td>
+                  <td class="btnAction">
+                    @if (editAccess) {
+                      <a
+                        (click)="editConfigById(paymentConfig.paymentConfigId, i)"
+                        class="curson_pointer"
+                        >
+                      <img src="assets/img/DashboardIcons/Edit.svg" >
+                      </a>
+                    }
+                    @if (deleteAccess) {
+                      <a
+                        id="delete-button"
+                        href="javascript:void(0)"
+                        (click)="deletePaymentConfigConfirmation(paymentConfig.paymentConfigId)"
+                        >
+                         <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                      </a>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          <br />
+          <div class="pagination_Dropdown">
+            <pagination-controls
+              id="listing_groupdata"
+              maxSize="10"
+              directionLinks="true"
+              previousLabel=""
+              nextLabel=""
+              (pageChange)="pageChanged($event)"
+            ></pagination-controls>
+            <div id="itemPerPageDropdown">
+              <p-dropdown
+                [options]="pageLimitOptions"
+                optionLabel="value"
+                optionValue="value"
+                (onChange)="TotalItemPerPage($event)"
+              ></p-dropdown>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6 right">
+    <div class="panel">
+      <div class="panel-heading">
+        <h3 class="panel-title">
+          {{ editMode ? "Update" : "Create" }} Payment Gateway Configuration
+        </h3>
+        <div class="right">
+          <button
+            type="button"
+            class="btn-toggle-collapse"
+            data-toggle="collapse"
+            data-target="#editEmail"
+            aria-expanded="false"
+            aria-controls="editEmail"
+            >
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+
+      <div id="editEmail" class="panel-collapse collapse in">
+        <div class="panel-body">
+          @if (!createAccess && !editMode) {
+            <div class="panel-body table-responsive">
+              Sorry you have not privilege to create operation!
+            </div>
+          }
+          @if (createAccess || (editMode && editAccess)) {
+            <div>
+              <form class="form-auth-small" [formGroup]="paymentgatewayConfigFormGroup">
+                <div>
+                  <label>Payment Gateway</label>
+                  <br />
+                  <p-dropdown
+                    [options]="paymentgatewayList"
+                    placeholder="Select payment gateway"
+                    optionLabel="displayName"
+                    optionValue="displayName"
+                    formControlName="paymentConfigName"
+                    filter="true"
+                    filterBy="displayName"
+                    (onChange)="onPaymentGatewayChange($event)"
+                    [disabled]="editMode"
+                  [ngClass]="{
+                    'is-invalid':
+                      submitted && paymentgatewayConfigFormGroup.controls.paymentConfigName.errors
+                  }"
+                  ></p-dropdown>
+                  @if (
+                    submitted && paymentgatewayConfigFormGroup.controls.paymentConfigName.errors
+                    ) {
+                    <div
+                      class="errorWrap text-danger"
+                      >
+                      @if (
+                        submitted &&
+                        paymentgatewayConfigFormGroup.controls.paymentConfigName.errors.required
+                        ) {
+                        <div
+                          class="error text-danger"
+                          >
+                          Payment Gateway name is required
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+                <br />
+                <div>
+                  <label>Payment Gateway Info</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Enter Payment Gateway Info"
+                    formControlName="paymentGatewayInfo"
+                  [ngClass]="{
+                    'is-invalid':
+                      submitted && paymentgatewayConfigFormGroup.controls.paymentGatewayInfo.errors
+                  }"
+                    maxlength="100"
+                    />
+                  </div>
+                  @if (isDropdownClick || editMode == true) {
+                    <div>
+                      <fieldset style="margin-top: 0.5rem">
+                        <legend>Gateway Configuration</legend>
+                        <div class="boxWhite">
+                          @for (controlName of paymentgatewayConfigFormGroup?.controls | keyvalue; track controlName) {
+                            <div
+                              >
+                              @if (
+                                controlName.key !== 'paymentConfigName' &&
+                                controlName.key !== 'paymentConfigId' &&
+                                controlName.key !== 'paymentGatewayInfo' &&
+                                parameterForMap[controlName.key] == 'GATEWAY'
+                                ) {
+                                <div
+                                  >
+                                  <label>{{ labelMap[controlName.key] }} *</label>
+                                  <br />
+                                  <input
+                                    type="text"
+                                    class="form-control"
+                                    placeholder="{{ labelMap[controlName.key] }}"
+                                    [formControlName]="controlName.key"
+                          [ngClass]="{
+                            'is-invalid':
+                              submitted &&
+                              paymentgatewayConfigFormGroup.controls[controlName.key]?.errors
+                          }"
+                                    />
+                                    @if (
+                                      submitted &&
+                                      paymentgatewayConfigFormGroup.controls[controlName.key]?.errors
+                                      ) {
+                                      <div
+                                        class="errorWrap text-danger"
+                                        >
+                                        @if (
+                                          submitted &&
+                                          paymentgatewayConfigFormGroup.controls[controlName.key]?.errors
+                                          .required
+                                          ) {
+                                          <div
+                                            class="error text-danger"
+                                            >
+                                            {{ labelMap[controlName.key] }} is required
+                                          </div>
+                                        }
+                                      </div>
+                                    }
+                                    <br />
+                                  </div>
+                                }
+                              </div>
+                            }
+                          </div>
+                        </fieldset>
+                        <fieldset style="margin-top: 0.5rem">
+                          <legend>System Configuration</legend>
+                          <div class="boxWhite">
+                            @for (controlName of paymentgatewayConfigFormGroup?.controls | keyvalue; track controlName) {
+                              <div
+                                >
+                                @if (
+                                  controlName.key !== 'paymentConfigName' &&
+                                  controlName.key !== 'paymentConfigId' &&
+                                  controlName.key !== 'paymentGatewayInfo' &&
+                                  controlName.key !== 'STAFFUSER_PASSWORD' &&
+                                  parameterForMap[controlName.key] == 'SYSTEM'
+                                  ) {
+                                  <div
+                                    >
+                                    <label>{{ labelMap[controlName.key] }} *</label>
+                                    <br />
+                                    <input
+                                      type="text"
+                                      class="form-control"
+                                      placeholder="{{ labelMap[controlName.key] }}"
+                                      [formControlName]="controlName.key"
+                          [ngClass]="{
+                            'is-invalid':
+                              submitted &&
+                              paymentgatewayConfigFormGroup.controls[controlName.key]?.errors
+                          }"
+                                      />
+                                      @if (
+                                        submitted &&
+                                        paymentgatewayConfigFormGroup.controls[controlName.key]?.errors
+                                        ) {
+                                        <div
+                                          class="errorWrap text-danger"
+                                          >
+                                          @if (
+                                            submitted &&
+                                            paymentgatewayConfigFormGroup.controls[controlName.key]?.errors
+                                            .required
+                                            ) {
+                                            <div
+                                              class="error text-danger"
+                                              >
+                                              {{ labelMap[controlName.key] }} is required
+                                            </div>
+                                          }
+                                        </div>
+                                      }
+                                      <br />
+                                    </div>
+                                  }
+                                  @if (controlName.key === 'STAFFUSER_USERNAME') {
+                                    <div>
+                                      <label>{{ labelMap["STAFFUSER_PASSWORD"] }} *</label>
+                                      <br />
+                                      <input
+                                        type="text"
+                                        class="form-control"
+                                        [formControlName]="'STAFFUSER_PASSWORD'"
+                                        placeholder="{{ labelMap['STAFFUSER_PASSWORD'] }}"
+                          [ngClass]="{
+                            'is-invalid':
+                              submitted &&
+                              paymentgatewayConfigFormGroup.controls['STAFFUSER_PASSWORD']?.errors
+                          }"
+                                        />
+                                        @if (
+                                          submitted &&
+                                          paymentgatewayConfigFormGroup.controls['STAFFUSER_PASSWORD']?.errors
+                                          ) {
+                                          <div
+                                            class="errorWrap text-danger"
+                                            >
+                                            @if (
+                                              submitted &&
+                                              paymentgatewayConfigFormGroup.controls['STAFFUSER_PASSWORD']?.errors
+                                              .required
+                                              ) {
+                                              <div
+                                                class="error text-danger"
+                                                >
+                                                {{ labelMap["STAFFUSER_PASSWORD"] }} is required
+                                              </div>
+                                            }
+                                          </div>
+                                        }
+                                        <br />
+                                      </div>
+                                    }
+                                  </div>
+                                }
+                              </div>
+                            </fieldset>
+                          </div>
+                        }
+                      <br />
+                      @if (editMode == false) {
+                        <div class="addUpdateBtn">
+                          <button
+                            type="submit"
+                            class="btn btn-primary"
+                            (click)="addUpdatePaymentGatewayConfig()"
+                            >
+                            <i class="fa fa-check-circle"></i>
+                            Add Payment Gateway Config
+                          </button>
+                          <button type="button" class="btn btn-danger" (click)="resetFormConfirm()">
+                            Clear
+                          </button>
+                          <br />
+                        </div>
+                      }
+                      @if (editMode == true) {
+                        <div class="addUpdateBtn">
+                          <button
+                            type="submit"
+                            class="btn btn-primary"
+                            (click)="addUpdatePaymentGatewayConfig()"
+                            [disabled]="isEmailConfigEdit"
+                            >
+                            <i class="fa fa-check-circle"></i>
+                            Update Payment Gateway Config
+                          </button>
+                          <button type="button" class="btn btn-danger" (click)="resetForm()">Cancel</button>
+                          <br />
+                        </div>
+                      }
+                    </form>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      </div> -->
+
+<div class="row header-row">
+    <mat-card class="cardWithShadow w-100">
+        <mat-card-content class="mat-card-content-border">
+            <div class="row">
+                <div class="col-sm-9 d-flex">
+                    <mat-form-field appearance="outline" style="margin-left: 16px" class="w-100 hide-hint mr-10">
+                        <input class="input-p-5" [(ngModel)]="searchVendorName" matInput
+                            placeholder="Search {{ title }}" (keydown.enter)="searchVendor()" />
+                        <mat-icon matSuffix class="search-header-search-icon">
+                            <i class="pi pi-search icon-size"></i>
+                        </mat-icon>
+                    </mat-form-field>
+
+                    <button mat-button mat-flat-button color="primary" class="button-normal m-r-10"
+                        (click)="searchVendor()">
+                        Search
+                    </button>
+                    <button mat-stroked-button matButton="outlined" class="button-normal" (click)="clearSearchVendor()">
+                        Clear
+                    </button>
+                </div>
+
+                <div class="col-sm-3 search-div">
+                    <button mat-button mat-flat-button color="primary" (click)="openpaymentGatewayConfigDetailsDialog()"
+                        class="button-normal mr-10">
+                        Add Payment gateway
+                    </button>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+
+<div class="container-fluid contain-flud">
+    <div class="row">
+        <!-- Payment Gateway Configurations table start -->
+        <div class="col-md-12">
+            <mat-card class="cardWithShadow">
+                <mat-card-content class="mat-card-content-border">
+                    <div class="payment-config-table-list">
+                        <div class="table-container">
+                            <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8 w-100">
+
+                                <ng-container matColumnDef="id">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        ID
+                                    </th>
+                                    <td mat-cell *matCellDef="let paymentConfig" class="f-s-14">
+                                        {{ paymentConfig.paymentConfigId }}
+                                    </td>
+                                </ng-container>
+                                <!-- Name Column -->
+                                <ng-container matColumnDef="name">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Name
+                                    </th>
+                                    <td mat-cell *matCellDef="let paymentConfig" class="f-s-14">
+                                        {{ paymentConfig.paymentConfigName }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Status Column -->
+                                <ng-container matColumnDef="status">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Status
+                                    </th>
+                                    <td mat-cell *matCellDef="let paymentConfig" class="f-s-14">
+                                        <mat-slide-toggle [checked]="paymentConfig.isActive"
+                                            (change)="changeConfigStatus(paymentConfig)" color="primary">
+                                        </mat-slide-toggle>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Action Column -->
+                                @if (editAccess || deleteAccess) {
+                                <ng-container matColumnDef="action">
+                                    <th mat-header-cell *matHeaderCellDef stickyEnd class="table-header-title">
+                                        Action
+                                    </th>
+                                    <td mat-cell *matCellDef="let paymentConfig" class="btnAction">
+                                        @if (editAccess) {
+                                        <a mat-icon-button matTooltip="edit" href="javascript:void(0)" title="Edit"
+                                            (click)="editConfigById(paymentConfig.paymentConfigId, i)"
+                                            class="curson_pointer">
+                                            <img src="assets/img/DashboardIcons/Edit.svg">
+                                        </a>
+                                        }
+                                        @if (deleteAccess) {
+                                        <a mat-icon-button matTooltip="delete" href="javascript:void(0)" title="Delete"
+                                            (click)="deletePaymentConfigConfirmation(paymentConfig)">
+                                            <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                        </a>
+                                        }
+                                    </td>
+                                </ng-container>
+                                }
+
+                                <tr mat-header-row class="table-header-bg"
+                                    *matHeaderRowDef="getDisplayedPlanDetailsColumns(); sticky: true"></tr>
+                                <tr mat-row class="table-content-row"
+                                    *matRowDef="let row; columns: getDisplayedPlanDetailsColumns()">
+                                </tr>
+                            </table>
+
+                            <mat-paginator [length]="paymentConfigTotalRecords" [pageSize]="paymentConfigItemsPerPage"
+                                [pageIndex]="paymentConfigCurrentPage - 1" [pageSizeOptions]="pageSizeOptions"
+                                showFirstLastButtons (page)="onPageChange($event)">
+                            </mat-paginator>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+        <!-- Payment Gateway Configurations table end -->
+    </div>
+</div>
+
+<ng-template #paymentGatewayConfigDetails let-dialogRef="dialogRef">
+    <div class="dialog-container dialog-box">
+        <!-- Header -->
+        <div class="dialog-header">
+            {{ editMode ? "Update" : "Create" }} Payment Gateway Configuration
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <form class="card-form mb-3" [formGroup]="paymentgatewayConfigFormGroup">
+            <!-- Content -->
+            <div mat-dialog-content class="dialog-box-content">
+                <div class="modal-body">
+                    @if (!createAccess && !editMode) {
+                    <mat-card-content class="matcard-content">
+                        <div class="panel-body table-responsive">
+                            Sorry you have not privilege to create operation!
+                        </div>
+                    </mat-card-content>
+                    }
+                    @if (createAccess || (editMode && editAccess)) {
+                    <mat-card-content class="matcardContent">
+
+                        <!-- Basic Configuration Section -->
+                        <mat-card class="cardWithShadow">
+                            <mat-card-header>
+                                <mat-card-title class="font-900">
+                                    Basic Configuration
+                                </mat-card-title>
+                            </mat-card-header>
+                            <mat-card-content>
+                                <div class="row p-10">
+                                    <!-- Payment Gateway -->
+                                    <div class="col-md-6">
+                                        <label for="paymentConfigName" class="inputLabel">Payment Gateway*</label>
+                                        <mat-form-field appearance="outline" class="w-100">
+                                            <mat-select id="paymentConfigName" class="input-p-5"
+                                                placeholder="Select payment gateway" formControlName="paymentConfigName"
+                                                (selectionChange)="onPaymentGatewayChange($event)" [disabled]="editMode"
+                                                [ngClass]="{
+                                                        'is-invalid': submitted && paymentgatewayConfigFormGroup.controls.paymentConfigName.errors
+                                                    }">
+                                                <mat-option *ngFor="let gateway of paymentgatewayList"
+                                                    [value]="gateway.displayName">
+                                                    {{ gateway.displayName }}
+                                                </mat-option>
+                                            </mat-select>
+                                            <mat-error
+                                                *ngIf="submitted && paymentgatewayConfigFormGroup.controls.paymentConfigName.errors">
+                                                <span
+                                                    *ngIf="submitted && paymentgatewayConfigFormGroup.controls.paymentConfigName.errors.required">
+                                                    Payment Gateway name is required
+                                                </span>
+                                            </mat-error>
+                                        </mat-form-field>
+                                    </div>
+
+                                    <!-- Payment Gateway Info -->
+                                    <div class="col-md-6">
+                                        <label for="paymentGatewayInfo" class="inputLabel">Payment Gateway Info</label>
+                                        <mat-form-field appearance="outline" class="w-100">
+                                            <input id="paymentGatewayInfo" matInput type="text"
+                                                placeholder="Enter Payment Gateway Info"
+                                                formControlName="paymentGatewayInfo" class="input-p-5" maxlength="100"
+                                                [ngClass]="{
+                                                        'is-invalid': submitted && paymentgatewayConfigFormGroup.controls.paymentGatewayInfo.errors
+                                                    }" />
+                                        </mat-form-field>
+                                    </div>
+                                </div>
+                            </mat-card-content>
+                        </mat-card>
+
+                        <br>
+
+                        <!-- Gateway Configuration Section -->
+                        @if (isDropdownClick || editMode == true) {
+                        <mat-card class="cardWithShadow">
+                            <mat-card-header>
+                                <mat-card-title class="font-900">
+                                    Gateway Configuration
+                                </mat-card-title>
+                            </mat-card-header>
+                            <mat-card-content>
+                                <div class="row p-10">
+                                    @for (controlName of paymentgatewayConfigFormGroup?.controls | keyvalue; track
+                                    controlName) {
+                                    @if (
+                                    controlName.key !== 'paymentConfigName' &&
+                                    controlName.key !== 'paymentConfigId' &&
+                                    controlName.key !== 'paymentGatewayInfo' &&
+                                    parameterForMap[controlName.key] == 'GATEWAY'
+                                    ) {
+                                    <div class="col-md-6">
+                                        <label [for]="controlName.key" class="inputLabel">
+                                            {{ labelMap[controlName.key] }}*
+                                        </label>
+                                        <mat-form-field appearance="outline" class="w-100">
+                                            <input [id]="controlName.key" matInput type="text"
+                                                [placeholder]="labelMap[controlName.key]"
+                                                [formControlName]="controlName.key" class="input-p-5" [ngClass]="{
+                                                                    'is-invalid': submitted && paymentgatewayConfigFormGroup.controls[controlName.key]?.errors
+                                                                }" />
+                                            <mat-error
+                                                *ngIf="submitted && paymentgatewayConfigFormGroup.controls[controlName.key]?.errors">
+                                                <span
+                                                    *ngIf="submitted && paymentgatewayConfigFormGroup.controls[controlName.key]?.errors?.required">
+                                                    {{ labelMap[controlName.key] }} is required
+                                                </span>
+                                            </mat-error>
+                                        </mat-form-field>
+                                    </div>
+                                    }
+                                    }
+                                </div>
+                            </mat-card-content>
+                        </mat-card>
+
+                        <br>
+
+                        <!-- System Configuration Section -->
+                        <mat-card class="cardWithShadow">
+                            <mat-card-header>
+                                <mat-card-title class="font-900">
+                                    System Configuration
+                                </mat-card-title>
+                            </mat-card-header>
+                            <mat-card-content>
+                                <div class="row p-10">
+                                    @for (controlName of paymentgatewayConfigFormGroup?.controls | keyvalue; track
+                                    controlName) {
+                                    @if (
+                                    controlName.key !== 'paymentConfigName' &&
+                                    controlName.key !== 'paymentConfigId' &&
+                                    controlName.key !== 'paymentGatewayInfo' &&
+                                    controlName.key !== 'STAFFUSER_PASSWORD' &&
+                                    parameterForMap[controlName.key] == 'SYSTEM'
+                                    ) {
+                                    <div class="col-md-6">
+                                        <label [for]="controlName.key" class="inputLabel">
+                                            {{ labelMap[controlName.key] }}*
+                                        </label>
+                                        <mat-form-field appearance="outline" class="w-100">
+                                            <input [id]="controlName.key" matInput type="text"
+                                                [placeholder]="labelMap[controlName.key]"
+                                                [formControlName]="controlName.key" class="input-p-5" [ngClass]="{
+                                                                    'is-invalid': submitted && paymentgatewayConfigFormGroup.controls[controlName.key]?.errors
+                                                                }" />
+                                            <mat-error
+                                                *ngIf="submitted && paymentgatewayConfigFormGroup.controls[controlName.key]?.errors">
+                                                <span
+                                                    *ngIf="submitted && paymentgatewayConfigFormGroup.controls[controlName.key]?.errors?.required">
+                                                    {{ labelMap[controlName.key] }} is required
+                                                </span>
+                                            </mat-error>
+                                        </mat-form-field>
+                                    </div>
+                                    }
+                                    @if (controlName.key === 'STAFFUSER_USERNAME') {
+                                    <div class="col-md-6">
+                                        <label for="STAFFUSER_PASSWORD" class="inputLabel">
+                                            {{ labelMap["STAFFUSER_PASSWORD"] }}*
+                                        </label>
+                                        <mat-form-field appearance="outline" class="w-100">
+                                            <input id="STAFFUSER_PASSWORD" matInput type="text"
+                                                [placeholder]="labelMap['STAFFUSER_PASSWORD']"
+                                                formControlName="STAFFUSER_PASSWORD" class="input-p-5" [ngClass]="{
+                                                                    'is-invalid': submitted && paymentgatewayConfigFormGroup.controls['STAFFUSER_PASSWORD']?.errors
+                                                                }" />
+                                            <mat-error
+                                                *ngIf="submitted && paymentgatewayConfigFormGroup.controls['STAFFUSER_PASSWORD']?.errors">
+                                                <span
+                                                    *ngIf="submitted && paymentgatewayConfigFormGroup.controls['STAFFUSER_PASSWORD']?.errors?.required">
+                                                    {{ labelMap["STAFFUSER_PASSWORD"] }} is required
+                                                </span>
+                                            </mat-error>
+                                        </mat-form-field>
+                                    </div>
+                                    }
+                                    }
+                                </div>
+                            </mat-card-content>
+                        </mat-card>
+                        }
+                    </mat-card-content>
+                    }
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <!-- @if (createAccess || !createAccess && editMode) { -->
+            <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+                @if (editMode == false) {
+                <button mat-flat-button color="primary" class="button-normal" type="submit"
+                    (click)="addUpdatePaymentGatewayConfig()">
+                    Create Payment Gateway Config
+                </button>
+                <button mat-stroked-button type="button" color="primary" class="button-normal"
+                    (click)="resetFormConfirm()">
+                    Clear
+                </button>
+                }
+                @if (editMode == true) {
+                <button mat-flat-button color="primary" class="button-normal" type="submit"
+                    (click)="addUpdatePaymentGatewayConfig()" [disabled]="isEmailConfigEdit">
+                    Update Payment Gateway Config
+                </button>
+                <button mat-stroked-button type="button" color="primary" class="button-normal"
+                    (click)="dialogRef.close()">
+                    Cancel
+                </button>
+                }
+            </div>
+            <!-- } -->
+        </form>
+    </div>
+</ng-template>

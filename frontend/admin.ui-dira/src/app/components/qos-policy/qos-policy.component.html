@@ -1,0 +1,925 @@
+<!-- Qos-policy card header search part start -->
+<div class="row header-row">
+    <mat-card class="cardWithShadow w-100">
+        <mat-card-content class="mat-card-content-border">
+            <div class="row">
+                <div class="col-sm-9 d-flex">
+                    <mat-form-field appearance="outline" style="margin-left: 16px;"
+                        class="w-100 hide-hint mr-10 header-input">
+                        <input class="input-p-5" [(ngModel)]="searchName" matInput placeholder='Search {{title}}'
+                            (keydown.enter)="search()" />
+                        <mat-icon matSuffix class="search-header-search-icon">
+                            <i class="pi pi-search icon-size"></i>
+                        </mat-icon>
+                    </mat-form-field>
+                    <button mat-button mat-flat-button color="primary" class="button-normal m-r-10"
+                        (click)="search()">Search
+                    </button>
+                    <button mat-stroked-button matButton="outlined" class="button-normal" (click)="clearSearch()">Clear
+                    </button>
+
+                </div>
+                <div class="col-sm-3 search-div">
+                    <button mat-button mat-flat-button color="primary" (click)="addEDitQosPolicyDialog()"
+                        class="button-normal m-r-10" style="width: auto;">
+                        Add {{title}}
+                    </button>
+                    <button mat-stroked-button matButton="outlined" (click)="clearSearch()">
+                        <i class="pi pi-sync icon-size"></i>
+                    </button>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+<!-- Qos-policy card header search part end -->
+
+
+<!-- body part start -->
+<div class="container-fluid contain-flud">
+    <div class="row">
+        <!-- list table start -->
+        <div class="col-md-12">
+            <mat-card class="cardWithShadow">
+                <mat-card-content class="mat-card-content-border">
+                    <div class="country-table-list">
+                        <div class="table-container">
+                            <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8 w-100">
+                                <!-- Id Column -->
+                                <ng-container matColumnDef="id">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">
+                                        ID
+                                    </th>
+
+                                    <td mat-cell *matCellDef="let item">
+                                        {{ item.id
+                                        }}
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="Qos Policy Name">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Qos Policy Name
+                                    </th>
+                                    <td mat-cell *matCellDef="let item" class="f-s-14">
+                                        {{ item.name}}
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="Policy Name">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Policy Name
+                                    </th>
+                                    <td mat-cell *matCellDef="let item" class="f-s-14">
+                                        {{ item.thpolicyname }}
+                                    </td>
+                                </ng-container>
+                                <ng-container matColumnDef="Qos Speed">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Qos Speed
+                                    </th>
+                                    <td mat-cell *matCellDef="let item" class="f-s-14">
+                                        {{ item.qosspeed }}
+                                    </td>
+                                </ng-container>
+                                <ng-container matColumnDef="ISP Name">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        ISP Name
+                                    </th>
+                                    <td mat-cell *matCellDef="let item" class="f-s-14">
+                                        {{ item.mvnoName}}
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="Action">
+                                    @if (editAccess || deleteAccess) {
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">
+                                        Action
+                                    </th>
+                                    }
+
+                                    <td mat-cell *matCellDef="let item">
+
+                                        <a mat-icon-button matTooltip="view" (click)="qosPolicyDetail(item.id)">
+                                            <img src="assets/img/DashboardIcons/eye-svgrepo-com (1) 1.svg">
+
+                                        </a>
+
+                                        @if (editAccess) {
+                                        <a mat-icon-button matTooltip="edit" href="javascript:void(0)"
+                                            (click)="editQosPolicy(item.id)">
+                                            <img src="assets/img/DashboardIcons/Edit.svg">
+
+                                        </a>
+                                        }
+
+                                        @if (deleteAccess) {
+                                        <a mat-icon-button matTooltip="delete" href="javascript:void(0)"
+                                            (click)="deleteConfirmonQosPolicy(item)">
+                                            <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+
+                                        </a>
+                                        }
+                                    </td>
+                                </ng-container>
+
+                                <tr mat-header-row class="table-header-bg"
+                                    *matHeaderRowDef="getDisplayedPlanDetailsColumns();sticky: true"></tr>
+                                <tr mat-row class="table-content-row"
+                                    *matRowDef="let row; columns: getDisplayedPlanDetailsColumns()">
+                                </tr>
+                            </table>
+
+                            <mat-paginator class="custome-paginator" stickyEnd [length]="qosPolicyListdatatotalRecords"
+                                [pageSize]="qosPolicyListdataitemsPerPage" [pageSizeOptions]="[5,10,20,50,100]"
+                                showFirstLastButtons (page)="pageChangedQosPolicyList($event)">
+                            </mat-paginator>
+
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+        <!-- list table end -->
+    </div>
+</div>
+<!-- body part end -->
+<ng-template #addEditQosPolicyDialog>
+    <div class="dialog-container">
+        <div class="dialog-header">
+            {{ isQosPolicyEdit ? "Update" : "Create" }} {{ title}}
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="closeDialog()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <ng-container *ngIf="!createAccess && !isQosPolicyEdit">
+            <mat-card-content class="matcard-content">
+                <div class="panel-body table-responsive">
+                    Sorry you have not privilege to create operation!
+                </div>
+            </mat-card-content>
+        </ng-container>
+        @if (createAccess || (isQosPolicyEdit && editAccess)) {
+        <div mat-dialog-content>
+            <div class="col-md-12">
+                <mat-card-content class="matcardContent">
+                    <form class="card-form mb-3" [formGroup]="qosPolicyGroupForm">
+                        <!-- create basic detail card start -->
+                        <mat-card class="mb-4 basic-details">
+                            <mat-card-header>
+                                <mat-card-title class="font-900">Basic Detail</mat-card-title>
+                            </mat-card-header>
+                            <mat-card-content>
+                                <div class="row g-3">
+                                    <!-- Input with label -->
+                                    <div class="col-md-6 mb-4">
+                                        <label for="countryname" class="inputLabel">Qos Policy Name*</label>
+                                        <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                            <input id="countryname" type="text" class="input-p-5" matInput
+                                                placeholder="Enter Qos Policy Name" formControlName="name" [ngClass]="{
+                          'is-invalid': submitted && qosPolicyGroupForm.controls.name.errors
+                        }" maxLength="250">
+                                        </mat-form-field>
+                                        @if (submitted && qosPolicyGroupForm.controls.name.errors) {
+                                        <div class="errorWrap text-danger" style="margin-top: -11px;margin-left: 10px;">
+                                            @if (submitted && qosPolicyGroupForm.controls.name.errors.required) {
+                                            <div class="error text-danger">
+                                                Qos Policy Name is required.
+                                            </div>
+                                            }
+                                            @if (
+                                            submitted && qosPolicyGroupForm.controls.name.errors?.cannotContainSpace
+                                            ) {
+                                            <div class="position">
+                                                <p class="error">White space are not allowed.</p>
+                                            </div>
+                                            }
+                                        </div>
+                                        }
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <label for="countryname" class="inputLabel">Policy Name*</label>
+                                        <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                            <input id="countryname" type="text" class="input-p-5" matInput
+                                                placeholder="Enter Policy Name" formControlName="thpolicyname"
+                                                [ngClass]="{ 'is-invalid': submitted && qosPolicyGroupForm.controls.thpolicyname.errors }"
+                                                maxLength="250">
+                                        </mat-form-field>
+                                        @if (submitted && qosPolicyGroupForm.controls.thpolicyname.errors) {
+                                        <div class="errorWrap text-danger" style="margin-top: -11px;margin-left: 10px;">
+                                            @if (
+                                            submitted && qosPolicyGroupForm.controls.thpolicyname.errors.required
+                                            ) {
+                                            <div class="error text-danger">
+                                                Policy Name is required.
+                                            </div>
+                                            }
+                                        </div>
+                                        }
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <label for="countryname" class="inputLabel">Base Policy Name*</label>
+                                        <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                            <input type="text" id="countryname" class="input-p-5" matInput
+                                                placeholder="Enter Base Policy Name" formControlName="basepolicyname"
+                                                [ngClass]="{ 'is-invalid': submitted && qosPolicyGroupForm.controls.basepolicyname.errors }"
+                                                maxLength="250">
+                                        </mat-form-field>
+                                        @if (submitted && qosPolicyGroupForm.controls.basepolicyname.errors) {
+                                        <div class="errorWrap text-danger" style="margin-top: -11px;margin-left: 10px;">
+                                            @if (
+                                            submitted && qosPolicyGroupForm.controls.basepolicyname.errors.required
+                                            ) {
+                                            <div class="error text-danger">
+                                                Base Policy Name is required.
+                                            </div>
+                                            }
+                                        </div>
+                                        }
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <label for="countryname" class="inputLabel">QoS Speed*</label>
+                                        <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                            <input type="number" (keypress)="onKeymobilelength($event)" id="countryname"
+                                                class="input-p-5" matInput placeholder="Enter QoS Speed"
+                                                formControlName="qosspeed"
+                                                [ngClass]="{ 'is-invalid': submitted && qosPolicyGroupForm.controls.qosspeed.errors }"
+                                                maxLength="250">
+                                            <span matTextSuffix>Mbps</span>
+                                        </mat-form-field>
+                                        @if (submitted && qosPolicyGroupForm.controls.qosspeed.errors) {
+                                        <div class="errorWrap text-danger" style="margin-top: -11px;margin-left: 10px;">
+                                            @if (
+                                            submitted &&
+                                            qosPolicyGroupForm.controls.qosspeed.errors.required
+                                            ) {
+                                            <div class="error text-danger">
+                                                Qos Speed is required.
+                                            </div>
+                                            }
+                                        </div>
+                                        }
+                                    </div>
+                                    <div class="col-md-12 mb-4">
+                                        <label for="countryname" class="inputLabel">Description*</label>
+                                        <mat-form-field class="mat-form-field" appearance="outline"
+                                            class="w-100 input-p-5">
+                                            <textarea matInput id="countryname" class="input-p-5"
+                                                placeholder="Enter Description" formControlName="description"
+                                                [ngClass]="{ 'is-invalid': submitted && qosPolicyGroupForm.controls.description.errors }"
+                                                maxLength="250">
+                                            </textarea>
+                                        </mat-form-field>
+                                        @if (submitted && qosPolicyGroupForm.controls.description.errors) {
+                                        <div class="errorWrap text-danger" style="margin-top: -11px;margin-left: 10px;">
+                                            @if (
+                                            submitted && qosPolicyGroupForm.controls.description.errors.required
+                                            ) {
+                                            <div class="error text-danger">
+                                                Description is required.
+                                            </div>
+                                            }
+                                            @if (
+                                            submitted && qosPolicyGroupForm.controls.description.errors.pattern
+                                            ) {
+                                            <div class="error text-danger">
+                                                Maximum 100 charecter required.
+                                            </div>
+                                            }
+                                        </div>
+                                        }
+                                    </div>
+                                </div>
+                            </mat-card-content>
+                        </mat-card>
+                        <!-- create basic detail card end -->
+
+                        <!-- gate way detail card start -->
+                        @if (!isUpStreamDetailView) {
+                        <mat-card class="mb-4 basic-details">
+                            <div class="dialog-header" style="border-top-left-radius: 7px !important;
+                            border-top-right-radius: 7px !important;">Gateway Details
+                                <button mat-stroked-button matButton="outlined" type="button" color="primary"
+                                    class="button-normal" (click)="onAddOfGatwayMapping()">
+                                    Add
+                                </button>
+                            </div>
+                            <mat-card-content>
+                                <table [dataSource]="dataSourcess" mat-table class="mat-elevation-z8 full-width-table">
+                                    <ng-container matColumnDef="name" class="m-t-5">
+                                        <th mat-header-cell *matHeaderCellDef class="m-t-5 f-s-12">
+                                            Gateway Name</th>
+
+                                        <td mat-cell *matCellDef="let row; let i = index" class="m-t-5">
+                                            <mat-form-field appearance="outline" class="w-100 m-t-10">
+                                                <input matInput type="text" placeholder="Enter Gateway Name"
+                                                    class="input-p-5" [formControl]="row.get('gatewayName')" [ngClass]="{
+                                                    'is-invalid': submitted && row.get('gatewayName').invalid
+                                                    }" />
+                                            </mat-form-field>
+                                            <mat-error *ngIf="submitted && row.get('gatewayName').hasError('required')">
+                                                Gateway Name is required.
+                                            </mat-error>
+                                        </td>
+                                    </ng-container>
+                                    <ng-container matColumnDef="d-speed" class="m-t-5">
+                                        <th mat-header-cell *matHeaderCellDef class="m-t-5 f-s-12">
+                                            Download Speed</th>
+
+                                        <td mat-cell *matCellDef="let row; let i = index" class="m-t-5">
+                                            <mat-form-field appearance="outline" class="w-100 m-t-10">
+                                                <input matInput type="text" placeholder="Enter Download Speed"
+                                                    class="input-p-5" [formControl]="row.get('downloadSpeed')"
+                                                    [ngClass]="{
+                                                    'is-invalid': submitted && row.get('downloadSpeed').invalid
+                                                    }" />
+                                            </mat-form-field>
+                                            <mat-error
+                                                *ngIf="submitted && row.get('downloadSpeed').hasError('required')">
+                                                Download Speed required.
+                                            </mat-error>
+                                        </td>
+                                    </ng-container>
+                                    <ng-container matColumnDef="u-speed" class="m-t-5">
+                                        <th mat-header-cell *matHeaderCellDef class="m-t-5 f-s-12">
+                                            Upload Speed</th>
+                                        <td mat-cell *matCellDef="let row; let i = index" class="m-t-5">
+                                            <mat-form-field appearance="outline" class="w-100 m-t-10">
+                                                <input matInput type="text" placeholder="Enter Upload Speed"
+                                                    class="input-p-5" [formControl]="row.get('uploadSpeed')" [ngClass]="{
+                                                    'is-invalid': submitted && row.get('uploadSpeed').invalid
+                                                    }" />
+                                            </mat-form-field>
+                                            <mat-error *ngIf="submitted && row.get('uploadSpeed').hasError('required')">
+                                                Upload Speed required.
+                                            </mat-error>
+                                        </td>
+                                    </ng-container>
+                                    <ng-container matColumnDef="b-d-speed" class="m-t-5">
+                                        <th mat-header-cell *matHeaderCellDef class="m-t-5 f-s-12">
+                                            Base Download Speed</th>
+                                        <td mat-cell *matCellDef="let row; let i = index" class="m-t-5">
+                                            <mat-form-field appearance="outline" class="w-100 m-t-10">
+                                                <input matInput type="text" placeholder="Enter Base Download Speed"
+                                                    class="input-p-5" [formControl]="row.get('baseDownloadSpeed')"
+                                                    [ngClass]="{
+                                                    'is-invalid': submitted && row.get('baseDownloadSpeed').invalid
+                                                    }" />
+                                            </mat-form-field>
+                                            <mat-error
+                                                *ngIf="submitted && row.get('baseDownloadSpeed').hasError('required')">
+                                                Base D-Speed required.
+                                            </mat-error>
+                                        </td>
+                                    </ng-container>
+                                    <ng-container matColumnDef="b-u-speed" class="m-t-5">
+                                        <th mat-header-cell *matHeaderCellDef class="m-t-5 f-s-12">
+                                            Base Upload Speed</th>
+                                        <td mat-cell *matCellDef="let row; let i = index" class="m-t-5">
+                                            <mat-form-field appearance="outline" class="w-100 m-t-10">
+                                                <input matInput type="text" placeholder="Enter Base Download Speed"
+                                                    class="input-p-5" [formControl]="row.get('baseUploadSpeed')"
+                                                    [ngClass]="{
+                                                    'is-invalid': submitted && row.get('baseUploadSpeed').invalid
+                                                    }" />
+                                            </mat-form-field>
+                                            <mat-error
+                                                *ngIf="submitted && row.get('baseUploadSpeed').hasError('required')">
+                                                Base U-Speed required.
+                                            </mat-error>
+                                        </td>
+                                    </ng-container>
+                                    <ng-container matColumnDef="t-d-speed" class="m-t-5">
+                                        <th mat-header-cell *matHeaderCellDef class="m-t-5 f-s-12">
+                                            Throttle Download Speed</th>
+                                        <td mat-cell *matCellDef="let row; let i = index" class="m-t-5">
+                                            <mat-form-field appearance="outline" class="w-100 m-t-10">
+                                                <input matInput type="text" placeholder="Enter Throttle Download Speed"
+                                                    class="input-p-5" [formControl]="row.get('throttleDownloadSpeed')"
+                                                    [ngClass]="{
+                                                    'is-invalid':
+                                                    submitted && row.get('throttleDownloadSpeed').invalid
+                                                    }" />
+                                            </mat-form-field>
+                                            <mat-error
+                                                *ngIf="submitted && row.get('throttleDownloadSpeed').hasError('required')">
+                                                Throttle D-Speed required.
+                                            </mat-error>
+                                        </td>
+                                    </ng-container>
+                                    <ng-container matColumnDef="t-u-speed" class="m-t-5">
+                                        <th mat-header-cell *matHeaderCellDef class="m-t-5 f-s-12">
+                                            Throttle Upload Speed</th>
+                                        <td mat-cell *matCellDef="let row; let i = index" class="m-t-5">
+                                            <mat-form-field appearance="outline" class="w-100 m-t-10">
+                                                <input matInput type="text" placeholder="Enter Throttle Upload Speed"
+                                                    class="input-p-5" [formControl]="row.get('throttleUploadSpeed')"
+                                                    [ngClass]="{
+                                                    'is-invalid':
+                                                    submitted && row.get('throttleUploadSpeed').invalid
+                                                    }" />
+                                            </mat-form-field>
+                                            <mat-error
+                                                *ngIf="submitted && row.get('throttleUploadSpeed').hasError('required')">
+                                                Throttle U-Speed required.
+                                            </mat-error>
+                                        </td>
+                                    </ng-container>
+                                    <ng-container matColumnDef="delete" class="m-t-5">
+                                        <th mat-header-cell *matHeaderCellDef class="m-t-5 f-s-12">
+                                            Delete</th>
+                                        <td mat-cell *matCellDef="let row; let i = index"
+                                            class="text-start justify-content-start d-flex m-t-10"
+                                            style="border-bottom: none;">
+                                            <a mat-icon-button href="javascript:void(0)"
+                                                (click)="deleteConfirmInActiveAttribute(i)">
+                                                <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                            </a>
+                                        </td>
+                                    </ng-container>
+                                    <tr mat-header-row
+                                        *matHeaderRowDef="['name', 'd-speed', 'u-speed', 'b-d-speed', 'b-u-speed', 't-d-speed', 't-u-speed', 'delete']">
+                                    </tr>
+                                    <tr mat-row
+                                        *matRowDef="let row; columns: ['name', 'd-speed', 'u-speed', 'b-d-speed', 'b-u-speed', 't-d-speed', 't-u-speed', 'delete']">
+                                    </tr>
+                                </table>
+                            </mat-card-content>
+                        </mat-card>
+                        }
+                        <!-- gate way detail card end -->
+
+                        <!-- isUpStreamDetailView detail card start -->
+                        @if (isUpStreamDetailView) {
+                        <mat-card class="mb-4 basic-details">
+                            <mat-card-header>
+                                <mat-card-title class="font-900">UpStream - DownStream Details</mat-card-title>
+                            </mat-card-header>
+                            <mat-card-content>
+                                <div class="row">
+                                    <div class="col-md-6 mb-4">
+                                        <label for="countryname" class="inputLabel">UpStream Profile Name</label>
+                                        <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                            <input id="countryname" class="input-p-5" matInput
+                                                placeholder="Enter UpStream Profile Name" class="input-p-5"
+                                                formControlName="upstreamprofileName" (blur)="upProfileLeave()">
+                                        </mat-form-field>
+                                    </div>
+
+                                    <div class="col-md-6 mb-4">
+                                        <label for="countryname" class="inputLabel">UpStream Profile</label>
+                                        <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                            <mat-select class="input-p-5" placeholder="Unit"
+                                                formControlName="upstreamprofileuid"
+                                                placeholder="Select a UpStream Profile"
+                                                (selectionChange)="onDropdownChange($event, upStreamProfileData)">
+                                                <mat-option *ngFor="let unit of upStreamProfileData"
+                                                    [value]="unit.uuid">
+                                                    {{ unit.uuid }}
+                                                </mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+                                    </div>
+
+                                    @if (assuredbandwidth) {
+                                    <div class="col-md-6 mb-4">
+                                        <label for="countryname" class="inputLabel"> </label>
+                                        <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                            <a class="form-control"
+                                                style="color: #f7941e; border: none; border-color: #ffff; cursor: pointer"
+                                                (click)="getUpStreamProfileData(upStreamProfileData, upStreamprofilename)"
+                                                title="Click To See Upstream bandwidth data">{{ assuredbandwidth +
+                                                bandwidthUnit }}
+                                            </a>
+                                        </mat-form-field>
+                                    </div>
+                                    }
+
+                                    <div class="col-md-6 mb-4">
+                                        <label for="countryname" class="inputLabel">DownStream Profile Name</label>
+                                        <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                            <input id="countryname" class="input-p-5" matInput
+                                                placeholder="Enter DownStream Profile Name" class="input-p-5"
+                                                formControlName="downstreamprofileName" (blur)="downProfileLeave()">
+                                        </mat-form-field>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <label for="countryname" class="inputLabel">DownStream Profile</label>
+                                        <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                            <mat-select class="input-p-5" placeholder="Unit"
+                                                formControlName="downstreamprofileuid"
+                                                placeholder="Select a DownStream Profile"
+                                                (selectionChange)="ondownstramDropdownChange($event, downStreamProfileData)">
+                                                <mat-option *ngFor="let unit of downStreamProfileData"
+                                                    [value]="unit.uuid">
+                                                    {{ unit.uuid }}
+                                                </mat-option>
+                                            </mat-select>
+                                            @if (!qosPolicyGroupForm.value.downstreamprofileName) {
+                                            <div class="errorWrap text-danger">
+                                                <div class="error text-danger">
+                                                    Please enter downstream profile first!
+                                                </div>
+                                            </div>
+                                            }
+                                            @if (
+                                            submitted && qosPolicyGroupForm.controls.downstreamprofileuid.errors
+                                            ) {
+                                            <div class="errorWrap text-danger">
+                                                @if (
+                                                submitted &&
+                                                qosPolicyGroupForm.controls.downstreamprofileuid.errors.required
+                                                ) {
+                                                <div class="error text-danger">
+                                                    DownStream Profile is required.
+                                                </div>
+                                                }
+                                            </div>
+                                            }
+                                        </mat-form-field>
+                                    </div>
+
+                                    @if (bandwidthValue) {
+                                    <div class="col-md-6 mb-4">
+                                        <label for="countryname" class="inputLabel"> </label>
+                                        <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                            <a class="form-control"
+                                                style="color: #f7941e; border: none; border-color: #ffff; cursor: pointer"
+                                                (click)="getDownStreamProfileData(downStreamProfilename, downStreamProfileData)"
+                                                data-toggle="modal" title="Click To See CDRs Detail">{{
+                                                bandwidthValue }}
+                                            </a>
+                                        </mat-form-field>
+                                    </div>
+                                    }
+                                </div>
+                            </mat-card-content>
+                        </mat-card>
+                        }
+                        <!-- isUpStreamDetailView detail card end -->
+
+                        <!-- Param Details detail card start -->
+                        <mat-card class="mb-4 basic-details">
+                            <mat-card-header>
+                                <mat-card-title class="font-900">Basic Details</mat-card-title>
+                            </mat-card-header>
+                            <mat-card-content>
+                                <div class="row g-3">
+                                    <!-- Input with label -->
+                                    <div class="col-md-6 mb-4">
+                                        <label for="countryname" class="inputLabel">Param 1*</label>
+                                        <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                            <input type="text" id="countryname" class="input-p-5" matInput
+                                                placeholder="Enter Param 1" formControlName="thparam1" [ngClass]="{
+                          'is-invalid': submitted && qosPolicyGroupForm.controls.thparam1.errors
+                        }">
+                                        </mat-form-field>
+                                        @if (submitted && qosPolicyGroupForm.controls.thparam1.errors) {
+                                        <div class="errorWrap text-danger">
+                                            @if (submitted && qosPolicyGroupForm.controls.thparam1.errors.required)
+                                            {
+                                            <div class="error text-danger">
+                                                Param 1 is required.
+                                            </div>
+                                            }
+                                        </div>
+                                        }
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <label for="countryname" class="inputLabel">Param 2*</label>
+                                        <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                            <input type="text" id="countryname" class="input-p-5" matInput
+                                                placeholder="Enter Param 2" formControlName="thparam2" [ngClass]="{
+                          'is-invalid': submitted && qosPolicyGroupForm.controls.thparam2.errors
+                        }">
+                                        </mat-form-field>
+                                        @if (submitted && qosPolicyGroupForm.controls.thparam2.errors) {
+                                        <div class="errorWrap text-danger">
+                                            @if (submitted && qosPolicyGroupForm.controls.thparam2.errors.required)
+                                            {
+                                            <div class="error text-danger">
+                                                Param 2 is required.
+                                            </div>
+                                            }
+                                        </div>
+                                        }
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <label for="countryname" class="inputLabel">Param 3*</label>
+                                        <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                            <input type="text" id="countryname" class="input-p-5" matInput
+                                                placeholder="Enter Param 3" formControlName="thparam3" [ngClass]="{
+                          'is-invalid': submitted && qosPolicyGroupForm.controls.thparam3.errors
+                        }">
+                                        </mat-form-field>
+                                        @if (submitted && qosPolicyGroupForm.controls.thparam3.errors) {
+                                        <div class="errorWrap text-danger">
+                                            @if (submitted && qosPolicyGroupForm.controls.thparam3.errors.required)
+                                            {
+                                            <div class="error text-danger">
+                                                Param 3 is required.
+                                            </div>
+                                            }
+                                        </div>
+                                        }
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <label for="countryname" class="inputLabel">Base Param 1*</label>
+                                        <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                            <input type="text" id="countryname" class="input-p-5" matInput
+                                                placeholder="Enter Base Param 1" formControlName="baseparam1" [ngClass]="{
+                          'is-invalid': submitted && qosPolicyGroupForm.controls.baseparam1.errors
+                        }">
+                                        </mat-form-field>
+                                        @if (submitted && qosPolicyGroupForm.controls.baseparam1.errors) {
+                                        <div class="errorWrap text-danger">
+                                            @if (
+                                            submitted && qosPolicyGroupForm.controls.baseparam1.errors.required
+                                            ) {
+                                            <div class="error text-danger">
+                                                Base Param 1 is required.
+                                            </div>
+                                            }
+                                        </div>
+                                        }
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <label for="countryname" class="inputLabel">Base Param 2*</label>
+                                        <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                            <input type="text" id="countryname" class="input-p-5" matInput
+                                                placeholder="Enter Base Param 2" formControlName="baseparam2" [ngClass]="{
+                          'is-invalid': submitted && qosPolicyGroupForm.controls.baseparam2.errors
+                        }">
+                                        </mat-form-field>
+                                        @if (submitted && qosPolicyGroupForm.controls.baseparam2.errors) {
+                                        <div class="errorWrap text-danger">
+                                            @if (
+                                            submitted && qosPolicyGroupForm.controls.baseparam2.errors.required
+                                            ) {
+                                            <div class="error text-danger">
+                                                Base Param 2 is required.
+                                            </div>
+                                            }
+                                        </div>
+                                        }
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <label for="countryname" class="inputLabel">Base Param 3*</label>
+                                        <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                            <input type="text" id="countryname" class="input-p-5" matInput
+                                                placeholder="Enter Base Param 3" formControlName="baseparam3" [ngClass]="{
+                          'is-invalid': submitted && qosPolicyGroupForm.controls.baseparam3.errors
+                        }">
+                                        </mat-form-field>
+                                        @if (submitted && qosPolicyGroupForm.controls.baseparam3.errors) {
+                                        <div class="errorWrap text-danger">
+                                            @if (
+                                            submitted && qosPolicyGroupForm.controls.baseparam3.errors.required
+                                            ) {
+                                            <div class="error text-danger">
+                                                Base Param 3 is required.
+                                            </div>
+                                            }
+                                        </div>
+                                        }
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <label for="countryname" class="inputLabel">Multi service type</label>
+                                        <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                            <input type="text" id="countryname" class="input-p-5" matInput
+                                                placeholder="Enter type" formControlName="type" [ngClass]="{
+                          'is-invalid': submitted && qosPolicyGroupForm.controls.type.errors
+                        }">
+                                        </mat-form-field>
+                                        @if (submitted && qosPolicyGroupForm.controls.type.errors) {
+                                        <div class="errorWrap text-danger">
+                                            @if (submitted && qosPolicyGroupForm.controls.type.errors.required) {
+                                            <div class="error text-danger">
+                                                Multi service type required.
+                                            </div>
+                                            }
+                                        </div>
+                                        }
+                                    </div>
+                                </div>
+                            </mat-card-content>
+                        </mat-card>
+                        <!-- Param Details detail card end -->
+                    </form>
+                </mat-card-content>
+
+            </div>
+        </div>}
+        @if (createAccess || (isQosPolicyEdit && editAccess)) {
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+            <div class="button-normal m-r-10">
+                @if (!isQosPolicyEdit) {
+                <button mat-button mat-flat-button color="primary" (click)="addEditQosPolicy('')" class="button-normal"
+                    type="submit">
+                    Add {{title}}
+                </button>
+                }
+                @if (isQosPolicyEdit) {
+                <button mat-button mat-flat-button color="primary" (click)="addEditQosPolicy(viewQosPolicyListData.id)"
+                    class="button-normal" type="submit">
+                    Update {{title}}
+                </button>
+                }
+            </div>
+            <div class="button-normal">
+                <button mat-stroked-button matButton="outlined" type="button" color="primary"
+                    class="button-normal w-100" (click)="closeDialog()">
+                    Cancel
+                </button>
+            </div>
+        </div>}
+    </div>
+</ng-template>
+
+<!-- view detail template start -->
+<ng-template #viewTatForTaskDialog>
+    <div class="container-fluid p-0">
+        <div class="dialog-header dialog-title">
+            {{ viewQosPolicyListData.name }} {{ title }}
+            <span>
+                <a mat-icon-button (click)="closeDialog()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <mat-dialog-content>
+            <!-- basic detail card start -->
+            <mat-card class="">
+                <mat-card-header>
+                    <mat-card-title class="font-900">Basic Details</mat-card-title>
+                </mat-card-header>
+                <div class="row p-15 m-t-10">
+                    <!-- Name -->
+                    <div class="col-md-4 field-row detail-row">
+                        <span class="field-label f-s-15 f-w-700 label">Name</span>
+                        <span class="field-label f-s-15 f-w-700 colon">:</span>
+                        <span class="field-value value m-l-10">{{ viewQosPolicyListData.name }}</span>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="col-md-4 field-row detail-row">
+                        <span class="field-label f-s-15 f-w-700 label">Policy Name</span>
+                        <span class="field-label f-s-15 f-w-700 colon">:</span>
+                        <span class="field-value value m-l-10">{{viewQosPolicyListData.thpolicyname }}</span>
+                    </div>
+
+                    <!-- Response Time -->
+                    <div class="col-md-4 field-row detail-row">
+                        <span class="field-label f-s-15 f-w-700 label">Base Policy Name</span>
+                        <span class="field-label f-s-15 f-w-700 colon">:</span>
+                        <span class="field-value value m-l-10">{{viewQosPolicyListData.basepolicyname }}</span>
+                    </div>
+
+                    <div class="col-md-4 field-row detail-row">
+                        <span class="field-label f-s-15 f-w-700 label">QoS Speed</span>
+                        <span class="field-label f-s-15 f-w-700 colon">:</span>
+                        <span class="field-value value m-l-10">{{viewQosPolicyListData.qosspeed }}</span>
+                    </div>
+
+                    <div class="col-md-4 field-row detail-row">
+                        <span class="field-label f-s-15 f-w-700 label">Description</span>
+                        <span class="field-label f-s-15 f-w-700 colon">:</span>
+                        <span class="field-value value m-l-10">{{viewQosPolicyListData.description }}</span>
+                    </div>
+
+                </div>
+            </mat-card>
+            <!-- basic detail card start -->
+
+            <!-- gateway detail -->
+            <mat-card class="">
+                <mat-card-header>
+                    <mat-card-title class="font-900">MikroTik Details</mat-card-title>
+                </mat-card-header>
+
+                <div class="row p-15 m-t-10"
+                    *ngFor="let gateway of viewQosPolicyListData.qosPolicyGatewayMappingList; let i = index">
+
+                    <div class="col-md-12 field-row detail-row" style="margin-bottom: 10px; ">
+                        <span class="f-s-14 f-w-700 dialog-header">Gateway {{ i + 1 }}</span>
+                    </div>
+                    <div class="col-md-4 ">
+                        <div class="field">
+                            <span class="label-text">Gateway Name</span>
+                            <span class="colon">:</span>
+                            <span class=" m-l-10">{{ gateway.gatewayName }}</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4 ">
+                        <div class="field">
+                            <span class="label-text">Download Speed</span>
+                            <span class="colon">:</span>
+                            <span class=" m-l-10">{{ gateway.downloadSpeed }}</span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 ">
+                        <div class="field">
+                            <span class="label-text">Upload Speed</span>
+                            <span class="colon">:</span>
+                            <span class=" m-l-10">{{ gateway.uploadSpeed }}</span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 ">
+                        <div class="field">
+                            <span class="label-text">Base Download Speed</span>
+                            <span class="colon">:</span>
+                            <span class=" m-l-10">{{ gateway.baseDownloadSpeed }}</span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 ">
+                        <div class="field">
+                            <span class="label-text">Base Upload Speed</span>
+                            <span class="colon">:</span>
+                            <span class=" m-l-10">{{ gateway.baseUploadSpeed }}</span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 ">
+                        <div class="field">
+                            <span class="label-text">Throttle Download Speed</span>
+                            <span class="colon">:</span>
+                            <span class=" m-l-10">{{ gateway.throttleDownloadSpeed }}</span>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 ">
+                        <div class="field">
+                            <span class="label-text">Throttle Upload Speed</span>
+                            <span class="colon">:</span>
+                            <span class=" m-l-10">{{ gateway.throttleUploadSpeed }}</span>
+                        </div>
+                    </div>
+                </div>
+            </mat-card>
+            <!-- gateway detail -->
+
+            <!-- param detail start -->
+            <mat-card class="">
+                <mat-card-header>
+                    <mat-card-title class="font-900">Param Details</mat-card-title>
+                </mat-card-header>
+
+                <div class="row p-15 m-t-10">
+
+                    <div class="col-md-4 field-row detail-row">
+                        <span class="field-label f-s-15 f-w-700 label">Param 1</span>
+                        <span class="field-label f-s-15 f-w-700 colon">:</span>
+                        <span class="field-value value m-l-10">{{ viewQosPolicyListData.thparam1 }}</span>
+                    </div>
+
+                    <div class="col-md-4 field-row detail-row">
+                        <span class="field-label f-s-15 f-w-700 label">Param 2</span>
+                        <span class="field-label f-s-15 f-w-700 colon">:</span>
+                        <span class="field-value value m-l-10">{{ viewQosPolicyListData.thparam2 }}</span>
+                    </div>
+
+                    <div class="col-md-4 field-row detail-row">
+                        <span class="field-label f-s-15 f-w-700 label">Param 3</span>
+                        <span class="field-label f-s-15 f-w-700 colon">:</span>
+                        <span class="field-value value m-l-10">{{ viewQosPolicyListData.thparam3 }}</span>
+                    </div>
+
+                    <div class="col-md-4 field-row detail-row">
+                        <span class="field-label f-s-15 f-w-700 label">Base Param 1</span>
+                        <span class="field-label f-s-15 f-w-700 colon">:</span>
+                        <span class="field-value value m-l-10">{{ viewQosPolicyListData.baseparam1 }}</span>
+                    </div>
+
+                    <div class="col-md-4 field-row detail-row">
+                        <span class="field-label f-s-15 f-w-700 label">Base Param 2</span>
+                        <span class="field-label f-s-15 f-w-700 colon">:</span>
+                        <span class="field-value value m-l-10">{{ viewQosPolicyListData.baseparam2 }}</span>
+                    </div>
+
+                    <div class="col-md-4 field-row detail-row">
+                        <span class="field-label f-s-15 f-w-700 label">Base Param 3</span>
+                        <span class="field-label f-s-15 f-w-700 colon">:</span>
+                        <span class="field-value value m-l-10">{{ viewQosPolicyListData.baseparam3 }}</span>
+                    </div>
+                </div>
+            </mat-card>
+            <!-- param detail end -->
+
+        </mat-dialog-content>
+
+        <mat-dialog-actions align="end">
+            <button mat-stroked-button color="warn" (click)="closeDialog()">Close</button>
+        </mat-dialog-actions>
+    </div>
+</ng-template>
+<!-- view detail template end  -->

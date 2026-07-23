@@ -1,0 +1,784 @@
+<div class="row">
+  <div class="col-md-12">
+    <div class="panel top">
+      <div class="panel-heading">
+        <h3 class="panel-title">IP Management</h3>
+        <div class="right">
+          <button
+            type="button"
+            class="btn-toggle-collapse"
+            data-toggle="collapse"
+            data-target="#searchIp"
+            aria-expanded="false"
+            aria-controls="searchIp"
+            >
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+
+      <div id="searchIp" class="panel-collapse collapse in">
+        <div class="panel-body no-padding panel-udata">
+          @if (createAccess) {
+            <div class="col-md-6 pcol">
+              <div class="dbox">
+                <a (click)="createIpView()" class="curson_pointer">
+                  <img src="../../../assets/img/i01.png" style="width: 32px" />
+                  <h5>Create IP</h5>
+                </a>
+              </div>
+            </div>
+          }
+          <div class="col-md-6 pcol">
+            <div class="dbox">
+              <a (click)="listIpView()" class="curson_pointer">
+                <img src="../../../assets/img/i01.png" style="width: 32px" />
+                <h5>Search IP</h5>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  @if (listView) {
+    <div class="col-md-12">
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">IP</h3>
+          <div class="right">
+            <button class="btn refreshbtn" type="reset" (click)="getIpDataList('')">
+               <img src="assets/img/DashboardIcons/Refresh.svg" />
+            </button>
+            <button
+              type="button"
+              class="btn-toggle-collapse"
+              data-toggle="collapse"
+              data-target="#listIp"
+              aria-expanded="false"
+              aria-controls="listIp"
+              >
+              <i class="fa fa-minus-circle"></i>
+            </button>
+          </div>
+        </div>
+        <div id="listIp" class="panel-collapse collapse in">
+          <div class="panel-body table-responsive">
+            <div>
+              <div class="row">
+                <div class="col-md-12">
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>Network IP</th>
+                        <th>Broadcast IP</th>
+                        <th>Pool Type</th>
+                        <th>Net Mask</th>
+                        <th>IP Range</th>
+                        <th>Status</th>
+                        @if (editAccess || deleteAccess) {
+                          <th>Action</th>
+                        }
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (
+                        ip of ipListData
+                        | paginate
+                        : {
+                        id: 'ipListData',
+                        itemsPerPage: ipListdataitemsPerPage,
+                        currentPage: currentPageIpListdata,
+                        totalItems: ipListdatatotalRecords
+                        }; track
+                        ip; let i = $index) {
+                        <tr
+                          >
+                          <td
+                            class="curson_pointer"
+                            (click)="IpAllDetails(ip.poolId)"
+                            style="color: #f7941e"
+                            >
+                            {{ ip.networkIp }}
+                          </td>
+                          <td>{{ ip.broadcastIp }}</td>
+                          <td>{{ ip.poolType }}</td>
+                          <td>{{ ip.netMask }}</td>
+                          <td>{{ ip.ipRange }}</td>
+                          @if (ip.status == 'Active') {
+                            <td>
+                              <span class="badge badge-success">Active</span>
+                            </td>
+                          }
+                          @if (ip.status == 'Inactive') {
+                            <td>
+                              <span class="badge badge-danger">Inactive</span>
+                            </td>
+                          }
+                          @if (editAccess || deleteAccess) {
+                            <td class="btnAction">
+                              @if (editAccess) {
+                                <a
+                                  id="edit-button"
+                                  type="button"
+                                  href="javascript:void(0)"
+                                  (click)="editIp(ip.poolId)"
+                                  >
+                                <img src="assets/img/DashboardIcons/Edit.svg" >
+                                </a>
+                              }
+                              @if (deleteAccess) {
+                                <a
+                                  id="delete-button"
+                                  href="javascript:void(0)"
+                                  (click)="deleteConfirmonIp(ip.poolId)"
+                                  >
+                                   <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                                </a>
+                              }
+                            </td>
+                          }
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                  <div class="pagination_Dropdown">
+                    <pagination-controls
+                      id="ipListData"
+                      maxSize="10"
+                      directionLinks="true"
+                      previousLabel=""
+                      nextLabel=""
+                      (pageChange)="pageChangedIpList((currentPageIpListdata = $event))"
+                    ></pagination-controls>
+                    <div id="itemPerPageDropdown">
+                      <p-dropdown
+                        [options]="pageLimitOptions"
+                        optionLabel="value"
+                        optionValue="value"
+                        (onChange)="TotalItemPerPage($event)"
+                      ></p-dropdown>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+  @if (createView) {
+    <div class="col-md-12">
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">{{ isIpEdit ? "Update" : "Create" }} IP</h3>
+          <div class="right">
+            <button
+              type="button"
+              class="btn-toggle-collapse"
+              data-toggle="collapse"
+              data-target="#createIP"
+              aria-expanded="false"
+              aria-controls="createIP"
+              >
+              <i class="fa fa-minus-circle"></i>
+            </button>
+          </div>
+        </div>
+        <div id="createIP" class="panel-collapse collapse in">
+          <div class="panel-body">
+            <form class="form-auth-small" [formGroup]="ipForm">
+              <fieldset style="margin-top: 0px">
+                <legend>IP Information</legend>
+                <div class="boxWhite">
+                  <div class="row">
+                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                      <label>Network IP*</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        placeholder="Enter Network IP"
+                        formControlName="networkIp"
+                      [ngClass]="{
+                        'is-invalid': submitted && ipForm.controls.networkIp.errors
+                      }"
+                        />
+                        @if (submitted && ipForm.controls.networkIp.errors) {
+                          <div
+                            class="errorWrap text-danger"
+                            >
+                            @if (submitted && ipForm.controls.networkIp.errors.required) {
+                              <div
+                                class="error text-danger"
+                                >
+                                Network IP is required.
+                              </div>
+                            }
+                          </div>
+                        }
+                        <br />
+                      </div>
+                      <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                        <label>Display Name*</label>
+                        <input
+                          type="text"
+                          class="form-control"
+                          placeholder="Enter Display Name"
+                          formControlName="displayName"
+                      [ngClass]="{
+                        'is-invalid': submitted && ipForm.controls.displayName.errors
+                      }"
+                          />
+                          @if (submitted && ipForm.controls.displayName.errors) {
+                            <div
+                              class="errorWrap text-danger"
+                              >
+                              @if (submitted && ipForm.controls.displayName.errors.required) {
+                                <div
+                                  class="error text-danger"
+                                  >
+                                  Display Name is required.
+                                </div>
+                              }
+                            </div>
+                          }
+                          <br />
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                          <label>IP Range*</label>
+                          <input
+                            type="text"
+                            class="form-control"
+                            placeholder="Enter IP Range"
+                            formControlName="ipRange"
+                      [ngClass]="{
+                        'is-invalid': submitted && ipForm.controls.ipRange.errors
+                      }"
+                            />
+                            @if (submitted && ipForm.controls.ipRange.errors) {
+                              <div
+                                class="errorWrap text-danger"
+                                >
+                                @if (submitted && ipForm.controls.ipRange.errors.required) {
+                                  <div
+                                    class="error text-danger"
+                                    >
+                                    IP Range is required.
+                                  </div>
+                                }
+                              </div>
+                            }
+                            <br />
+                          </div>
+                        </div>
+                        <div class="row">
+                          <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                            <label>Pool Name*</label>
+                            <input
+                              type="text"
+                              class="form-control"
+                              placeholder="Enter Pool Name"
+                              formControlName="poolName"
+                      [ngClass]="{
+                        'is-invalid': submitted && ipForm.controls.poolName.errors
+                      }"
+                              />
+                              @if (submitted && ipForm.controls.poolName.errors) {
+                                <div
+                                  class="errorWrap text-danger"
+                                  >
+                                  @if (submitted && ipForm.controls.poolName.errors.required) {
+                                    <div
+                                      class="error text-danger"
+                                      >
+                                      Pool Name is required.
+                                    </div>
+                                  }
+                                </div>
+                              }
+                              <br />
+                            </div>
+                            <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                              <label>Pool Category*</label>
+                              <input
+                                type="text"
+                                class="form-control"
+                                placeholder="Enter Pool Category"
+                                formControlName="poolCategory"
+                      [ngClass]="{
+                        'is-invalid': submitted && ipForm.controls.poolCategory.errors
+                      }"
+                                />
+                                @if (submitted && ipForm.controls.poolCategory.errors) {
+                                  <div
+                                    class="errorWrap text-danger"
+                                    >
+                                    @if (submitted && ipForm.controls.poolCategory.errors.required) {
+                                      <div
+                                        class="error text-danger"
+                                        >
+                                        Pool Category is required.
+                                      </div>
+                                    }
+                                  </div>
+                                }
+                                <br />
+                              </div>
+                              <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                <label>Pool Type*</label>
+                                <p-dropdown
+                                  [options]="PoolType"
+                                  optionValue="label"
+                                  optionLabel="label"
+                                  filter="true"
+                                  filterBy="label"
+                                  placeholder="Select a Pool Type"
+                                  formControlName="poolType"
+                      [ngClass]="{
+                        'is-invalid': submitted && ipForm.controls.poolType.errors
+                      }"
+                                ></p-dropdown>
+                                @if (submitted && ipForm.controls.poolType.errors) {
+                                  <div
+                                    class="errorWrap text-danger"
+                                    >
+                                    @if (submitted && ipForm.controls.poolType.errors.required) {
+                                      <div
+                                        class="error text-danger"
+                                        >
+                                        Pool Type is required.
+                                      </div>
+                                    }
+                                  </div>
+                                }
+                                <br />
+                              </div>
+                            </div>
+                            <div class="row">
+                              <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                <label>Default Pool Flag*</label>
+                                <p-dropdown
+                                  [options]="defaultPoolFlagValue"
+                                  optionValue="value"
+                                  optionLabel="label"
+                                  filter="true"
+                                  filterBy="label"
+                                  placeholder="Select a Default Pool Flag"
+                                  formControlName="defaultPoolFlag"
+                      [ngClass]="{
+                        'is-invalid': submitted && ipForm.controls.defaultPoolFlag.errors
+                      }"
+                                ></p-dropdown>
+                                @if (submitted && ipForm.controls.defaultPoolFlag.errors) {
+                                  <div
+                                    class="errorWrap text-danger"
+                                    >
+                                    @if (submitted && ipForm.controls.defaultPoolFlag.errors.required) {
+                                      <div
+                                        class="error text-danger"
+                                        >
+                                        Default Pool Flag is required.
+                                      </div>
+                                    }
+                                  </div>
+                                }
+                                <br />
+                              </div>
+                              <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                <label>Static IP Pool*</label>
+                                <p-dropdown
+                                  [options]="IpPool"
+                                  optionValue="value"
+                                  optionLabel="label"
+                                  filter="true"
+                                  filterBy="label"
+                                  placeholder="Select a Static IP Pool"
+                                  formControlName="isStaticIpPool"
+                      [ngClass]="{
+                        'is-invalid': submitted && ipForm.controls.isStaticIpPool.errors
+                      }"
+                                ></p-dropdown>
+                                @if (submitted && ipForm.controls.isStaticIpPool.errors) {
+                                  <div
+                                    class="errorWrap text-danger"
+                                    >
+                                    @if (submitted && ipForm.controls.isStaticIpPool.errors.required) {
+                                      <div
+                                        class="error text-danger"
+                                        >
+                                        Static IP Pool is required.
+                                      </div>
+                                    }
+                                  </div>
+                                }
+                                <br />
+                              </div>
+                              <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                <label>Broadcast IP*</label>
+                                <input
+                                  type="text"
+                                  class="form-control"
+                                  placeholder="Enter Broadcast IP"
+                                  formControlName="broadcastIp"
+                      [ngClass]="{
+                        'is-invalid': submitted && ipForm.controls.broadcastIp.errors
+                      }"
+                                  />
+                                  @if (submitted && ipForm.controls.broadcastIp.errors) {
+                                    <div
+                                      class="errorWrap text-danger"
+                                      >
+                                      @if (submitted && ipForm.controls.broadcastIp.errors.required) {
+                                        <div
+                                          class="error text-danger"
+                                          >
+                                          Broadcast IP is required.
+                                        </div>
+                                      }
+                                    </div>
+                                  }
+                                  <br />
+                                </div>
+                              </div>
+                              <div class="row">
+                                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                  <label>First Host*</label>
+                                  <input
+                                    type="text"
+                                    class="form-control"
+                                    placeholder="Enter First Host"
+                                    formControlName="firstHost"
+                      [ngClass]="{
+                        'is-invalid': submitted && ipForm.controls.firstHost.errors
+                      }"
+                                    />
+                                    @if (submitted && ipForm.controls.firstHost.errors) {
+                                      <div
+                                        class="errorWrap text-danger"
+                                        >
+                                        @if (submitted && ipForm.controls.firstHost.errors.required) {
+                                          <div
+                                            class="error text-danger"
+                                            >
+                                            First Host is required.
+                                          </div>
+                                        }
+                                      </div>
+                                    }
+                                    <br />
+                                  </div>
+                                  <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                    <label>Last Host*</label>
+                                    <input
+                                      type="text"
+                                      class="form-control"
+                                      placeholder="Enter  Last Host"
+                                      formControlName="lastHost"
+                      [ngClass]="{
+                        'is-invalid': submitted && ipForm.controls.lastHost.errors
+                      }"
+                                      />
+                                      @if (submitted && ipForm.controls.lastHost.errors) {
+                                        <div
+                                          class="errorWrap text-danger"
+                                          >
+                                          @if (submitted && ipForm.controls.lastHost.errors.required) {
+                                            <div
+                                              class="error text-danger"
+                                              >
+                                              Last Host is required.
+                                            </div>
+                                          }
+                                        </div>
+                                      }
+                                      <br />
+                                    </div>
+                                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                      <label>Total Host*</label>
+                                      <input
+                                        type="text"
+                                        class="form-control"
+                                        placeholder="Enter Total Host"
+                                        formControlName="totalHost"
+                      [ngClass]="{
+                        'is-invalid': submitted && ipForm.controls.totalHost.errors
+                      }"
+                                        />
+                                        @if (submitted && ipForm.controls.totalHost.errors) {
+                                          <div
+                                            class="errorWrap text-danger"
+                                            >
+                                            @if (submitted && ipForm.controls.totalHost.errors.required) {
+                                              <div
+                                                class="error text-danger"
+                                                >
+                                                Total Host is required.
+                                              </div>
+                                            }
+                                          </div>
+                                        }
+                                        <br />
+                                      </div>
+                                    </div>
+                                    <div class="row">
+                                      <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                        <label>Net Mask*</label>
+                                        <input
+                                          type="text"
+                                          class="form-control"
+                                          placeholder="Enter  Net Mask"
+                                          formControlName="netMask"
+                      [ngClass]="{
+                        'is-invalid': submitted && ipForm.controls.netMask.errors
+                      }"
+                                          />
+                                          @if (submitted && ipForm.controls.netMask.errors) {
+                                            <div
+                                              class="errorWrap text-danger"
+                                              >
+                                              @if (submitted && ipForm.controls.netMask.errors.required) {
+                                                <div
+                                                  class="error text-danger"
+                                                  >
+                                                  Net Mask is required.
+                                                </div>
+                                              }
+                                            </div>
+                                          }
+                                          <br />
+                                        </div>
+                                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                          <label>Status*</label>
+                                          <p-dropdown
+                                            [options]="statusOptions"
+                                            optionValue="label"
+                                            optionLabel="label"
+                                            filter="true"
+                                            filterBy="label"
+                                            placeholder="Select a Status"
+                                            formControlName="status"
+                      [ngClass]="{
+                        'is-invalid': submitted && ipForm.controls.status.errors
+                      }"
+                                          ></p-dropdown>
+                                          <!-- <select
+                                          class="form-control"
+                                          formControlName="status"
+                                          style="width: 100%;"
+                    [ngClass]="{
+                      'is-invalid': submitted && ipForm.controls.status.errors
+                    }"
+                                          >
+                                          <option value="">
+                                            Select Status
+                                          </option>
+                                          <option value="Active">
+                                            Active
+                                          </option>
+                                          <option value="InActive">
+                                            InActive
+                                          </option>
+                                        </select> -->
+                                        @if (submitted && ipForm.controls.status.errors) {
+                                          <div
+                                            class="errorWrap text-danger"
+                                            >
+                                            @if (submitted && ipForm.controls.status.errors.required) {
+                                              <div
+                                                class="error text-danger"
+                                                >
+                                                Status is required.
+                                              </div>
+                                            }
+                                          </div>
+                                        }
+                                        <br />
+                                      </div>
+                                      <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                        <label>Remark*</label>
+                                        <textarea
+                                          class="form-control"
+                                          placeholder="Enter Remark"
+                                          formControlName="remark"
+                      [ngClass]="{
+                        'is-invalid': submitted && ipForm.controls.remark.errors
+                      }"
+                                        ></textarea>
+                                        @if (submitted && ipForm.controls.remark.errors) {
+                                          <div
+                                            class="errorWrap text-danger"
+                                            >
+                                            @if (submitted && ipForm.controls.remark.errors.required) {
+                                              <div
+                                                class="error text-danger"
+                                                >
+                                                Remark is required.
+                                              </div>
+                                            }
+                                          </div>
+                                        }
+                                        <br />
+                                      </div>
+                                    </div>
+                                  </div>
+                                </fieldset>
+                                <div class="addUpdateBtn" style="margin: 3.5rem 0 2rem">
+                                  @if (!isIpEdit) {
+                                    <button
+                                      type="submit"
+                                      class="btn btn-primary"
+                                      (click)="addEditIp('')"
+                                      id="submit"
+                                      >
+                                      <i class="fa fa-check-circle"></i>
+                                      Add IP
+                                    </button>
+                                  }
+                                  @if (isIpEdit) {
+                                    <button
+                                      type="submit"
+                                      class="btn btn-primary"
+                                      (click)="addEditIp(viewIpData.poolId)"
+                                      id="submit"
+                                      >
+                                      <i class="fa fa-check-circle"></i>
+                                      Update IP
+                                    </button>
+                                  }
+                                  <br />
+                                </div>
+                              </form>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+
+                  @if (detailView) {
+                    <div class="row">
+                      <div class="col-md-12 col-sm-12">
+                        <div class="panel">
+                          <div class="panel-heading">
+                            <div class="displayflex">
+                              <button
+                                type="button"
+                                class="btn btn-secondary backbtn"
+                                data-toggle="tooltip"
+                                data-placement="bottom"
+                                title="Go to Ip Details"
+                                (click)="listIpView()"
+                                >
+                                <i
+                                  class="fa fa-arrow-circle-left"
+                                  style="color: #f7941e !important; font-size: 28px"
+                                ></i>
+                              </button>
+                              <h3 class="panel-title">IP</h3>
+                            </div>
+                            <div class="right">
+                              <button
+                                type="button"
+                                class="btn-toggle-collapse"
+                                data-toggle="collapse"
+                                data-target="#deatilsIP"
+                                aria-expanded="false"
+                                aria-controls="deatilsIP"
+                                >
+                                <i class="fa fa-minus-circle"></i>
+                              </button>
+                            </div>
+                          </div>
+                          <div id="deatilsIP" class="panel-collapse collapse in">
+                            <div class="panel-body table-responsive">
+                              <fieldset style="margin-top: 0rem; margin-bottom: 2rem">
+                                <legend>Basic Details</legend>
+                                <div class="boxWhite">
+                                  <div class="row">
+                                    <div class="col-lg-4 col-md-4 dataGroup">
+                                      <label class="datalbl">IP :</label>
+                                      <span>{{ viewIpData.networkIp }}</span>
+                                    </div>
+                                    <div class="col-lg-4 col-md-4 dataGroup">
+                                      <label class="datalbl">Display Name :</label>
+                                      <span>{{ viewIpData.displayName }}</span>
+                                    </div>
+                                    <div class="col-lg-4 col-md-4 dataGroup">
+                                      <label class="datalbl">IP Range :</label>
+                                      <span>{{ viewIpData.ipRange }}</span>
+                                    </div>
+                                  </div>
+                                  <div class="row">
+                                    <div class="col-lg-4 col-md-4 dataGroup">
+                                      <label class="datalbl">Pool Name :</label>
+                                      <span>{{ viewIpData.poolName }}</span>
+                                    </div>
+                                    <div class="col-lg-4 col-md-4 dataGroup">
+                                      <label class="datalbl">Pool Category :</label>
+                                      <span>{{ viewIpData.poolCategory }}</span>
+                                    </div>
+                                    <div class="col-lg-4 col-md-4 dataGroup">
+                                      <label class="datalbl">Pool Type :</label>
+                                      <span>{{ viewIpData.poolType }}</span>
+                                    </div>
+                                  </div>
+                                  <div class="row">
+                                    <div class="col-lg-4 col-md-4 dataGroup">
+                                      <label class="datalbl">Default Pool Flag :</label>
+                                      <span>{{ viewIpData.defaultPoolFlag }}</span>
+                                    </div>
+                                    <div class="col-lg-4 col-md-4 dataGroup">
+                                      <label class="datalbl">Static IP Pool :</label>
+                                      <span>{{ viewIpData.isStaticIpPool }}</span>
+                                    </div>
+                                    <div class="col-lg-4 col-md-4 dataGroup">
+                                      <label class="datalbl">Broadcast IP :</label>
+                                      <span>{{ viewIpData.broadcastIp }}</span>
+                                    </div>
+                                  </div>
+                                  <div class="row">
+                                    <div class="col-lg-4 col-md-4 dataGroup">
+                                      <label class="datalbl">First Host :</label>
+                                      <span>{{ viewIpData.firstHost }}</span>
+                                    </div>
+                                    <div class="col-lg-4 col-md-4 dataGroup">
+                                      <label class="datalbl">Last Host :</label>
+                                      <span>{{ viewIpData.lastHost }}</span>
+                                    </div>
+                                    <div class="col-lg-4 col-md-4 dataGroup">
+                                      <label class="datalbl">Total Host :</label>
+                                      <span>{{ viewIpData.totalHost }}</span>
+                                    </div>
+                                  </div>
+                                  <div class="row">
+                                    <div class="col-lg-4 col-md-4 dataGroup">
+                                      <label class="datalbl">Net Mask :</label>
+                                      <span>{{ viewIpData.netMask }}</span>
+                                    </div>
+                                    <div class="col-lg-4 col-md-4 dataGroup">
+                                      <label class="datalbl">Status :</label>
+                                      @if (viewIpData.status == 'Active') {
+                                        <span class="badge badge-success">
+                                          Active
+                                        </span>
+                                      }
+                                      @if (viewIpData.status == 'Inactive') {
+                                        <span class="badge badge-danger">
+                                          Inactive
+                                        </span>
+                                      }
+                                    </div>
+                                    <div class="col-lg-4 col-md-4 dataGroup">
+                                      <label class="datalbl">Remark :</label>
+                                      <span>{{ viewIpData.remark }}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </fieldset>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  }

@@ -1,0 +1,124 @@
+package com.savbill.notification.jwt;
+
+
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+
+import com.savbill.notification.helper.JwtUserDetail;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+
+@Component
+public class JwtUtil
+{
+	private static final String CAPTIVEPORTAL = "captiveportal";
+//	private static final long JWT_TOKEN_VALIDITY = 1000 * 60 * 60 * 10;
+//	private String SECRET_KEY = "radiussecret";
+	@Value("${jwt.token.validity}")
+	private long jwtTokenValidity;
+//	@Value("${jwt.captive.portal.token.validity}")
+//	private long jwtTokenValidityForCaptivePortal;
+	@Value("${jwt.secret}")
+	private String secretKey;
+
+	public String extractUsername(String token) {
+		return extractClaim(token, Claims::getSubject);
+	}
+
+    public Date extractExpiration(String token) {
+        return extractClaim(token, Claims::getExpiration);
+    }
+
+    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+        final Claims claims = extractAllClaims(token);
+        return claimsResolver.apply(claims);
+    }
+    private Claims extractAllClaims(String token) {
+        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
+    }
+
+
+
+    public String generateToken(UserDetails userDetails,Long mvnoId)
+    {
+        Map<String, Object> claims = new HashMap<>();
+		JwtUserDetail jwtUserDto=new JwtUserDetail();
+		jwtUserDto.setUserName(userDetails.getUsername());
+		jwtUserDto.setId(mvnoId);
+		String userDetail= null;
+		try {
+			userDetail = new ObjectMapper().writeValueAsString(jwtUserDto);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+
+        return Jwts.builder().setClaims(claims).setSubject(userDetail)
+        		.setIssuedAt(new Date(System.currentTimeMillis()))
+        		.setExpiration(new Date(System.currentTimeMillis() +jwtTokenValidity ))
+        		.signWith(SignatureAlgorithm.HS256, secretKey).compact();   		
+    }
+    
+/**
+    private String createToken(Map<String, Object> claims, String subject) 
+    {
+    	if(subject.equalsIgnoreCase(CAPTIVEPORTAL))
+    	{
+    		return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
+                    .setExpiration(new Date(System.currentTimeMillis() + jwtTokenValidityForCaptivePortal))
+                    .signWith(SignatureAlgorithm.HS256, secretKey).compact();
+    	}
+    	else
+    	{
+    		//System.out.println(new Date(System.currentTimeMillis() + jwtTokenValidity));
+    		return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
+    				.setExpiration(new Date(System.currentTimeMillis() + jwtTokenValidity))
+    				.signWith(SignatureAlgorithm.HS256, secretKey).compact();
+
+    	}
+    }
+    **/
+
+	public String doGenerateRefreshToken(Map<String, Object> claims, String subject) {
+
+		return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
+				.setExpiration(new Date(System.currentTimeMillis() + jwtTokenValidity))
+				.signWith(SignatureAlgorithm.HS512, secretKey).compact();
+
+	}
+
+ 
+    
+    public List<SimpleGrantedAuthority> getRolesFromToken(String token) {
+		Claims claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
+
+		List<SimpleGrantedAuthority> roles = null;
+
+		Boolean isAdmin = claims.get("isAdmin", Boolean.class);
+		Boolean isUser = claims.get("isUser", Boolean.class);
+
+		if (isAdmin != null && isAdmin) {
+			roles = Arrays.asList(new SimpleGrantedAuthority("ROLE_ADMIN"));
+		}
+
+		if (isUser != null && isAdmin) {
+			roles = Arrays.asList(new SimpleGrantedAuthority("ROLE_USER"));
+		}
+		return roles;
+
+	}
+    
+
+    
+}

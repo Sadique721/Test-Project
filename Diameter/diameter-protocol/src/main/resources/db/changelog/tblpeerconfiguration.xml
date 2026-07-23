@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="create-tblpeerconfiguration" author="auto-generated">
+        <preConditions onFail="MARK_RAN" onError="MARK_RAN">
+            <not>
+                <tableExists tableName="tblpeerconfiguration"/>
+            </not>
+        </preConditions>
+        <createTable tableName="tblpeerconfiguration">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="node_name" type="varchar(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="realm" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="fqdn" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sctp_listen_port" type="int" defaultValue="3868">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tcp_listen_port" type="int" defaultValue="3868">
+                <constraints nullable="false"/>
+            </column>
+            <column name="dtls_sctp_listen_port" type="int" defaultValue="5658">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tls_tcp_listen_port" type="int" defaultValue="5658">
+                <constraints nullable="false"/>
+            </column>
+            <column name="radius_udp_server_ports" type="varchar(255)"/>
+            <column name="enable_radius_udp_client_ports" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="radius_client_udp_port_range_start" type="int" defaultValue="2000">
+                <constraints nullable="false"/>
+            </column>
+            <column name="radius_client_udp_port_range_end" type="int" defaultValue="2499">
+                <constraints nullable="false"/>
+            </column>
+            <column name="verification_mode" type="varchar(50)" defaultValue="Verify None">
+                <constraints nullable="false"/>
+            </column>
+            <column name="certificate_type" type="varchar(255)"/>
+            <column name="certificate_name" type="varchar(255)"/>
+            <column name="ip_addresses" type="varchar(4000)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+</changeSet>
+        
+         <!-- Add constraints -->
+    <changeSet id="add-peerconfiguration-constraints" author="auto-generated">
+    
+     <sql dbms="mysql">
+            <![CDATA[ALTER TABLE tblpeerconfiguration 
+            ADD CONSTRAINT chk_node_name_format 
+            CHECK (node_name REGEXP '^[a-zA-Z_][a-zA-Z0-9_]*$');
+
+            ALTER TABLE tblpeerconfiguration 
+            ADD CONSTRAINT chk_realm_format 
+            CHECK (realm REGEXP '^[a-zA-Z_][a-zA-Z0-9-]*[a-zA-Z0-9](\.[a-zA-Z][a-zA-Z0-9-]*[a-zA-Z0-9])*$'
+                AND length(realm) <= 255);
+
+            ALTER TABLE tblpeerconfiguration 
+            ADD CONSTRAINT chk_fqdn_format 
+            CHECK (fqdn REGEXP '^[a-zA-Z_][a-zA-Z0-9-]*[a-zA-Z0-9](\.[a-zA-Z][a-zA-Z0-9-]*[a-zA-Z0-9])*$'
+                AND length(fqdn) <= 255);
+
+            ALTER TABLE tblpeerconfiguration 
+            ADD CONSTRAINT chk_sctp_listen_port_range 
+            CHECK (sctp_listen_port BETWEEN 1024 AND 49151);
+
+            ALTER TABLE tblpeerconfiguration 
+            ADD CONSTRAINT chk_tcp_listen_port_range 
+            CHECK (tcp_listen_port BETWEEN 1024 AND 49151);
+
+            ALTER TABLE tblpeerconfiguration 
+            ADD CONSTRAINT chk_dtls_sctp_listen_port_range 
+            CHECK (dtls_sctp_listen_port BETWEEN 1024 AND 49151);
+
+            ALTER TABLE tblpeerconfiguration 
+            ADD CONSTRAINT chk_tls_tcp_listen_port_range 
+            CHECK (tls_tcp_listen_port BETWEEN 1024 AND 49151);
+
+            ALTER TABLE tblpeerconfiguration 
+            ADD CONSTRAINT chk_radius_port_range 
+            CHECK (radius_client_udp_port_range_start BETWEEN 1024 AND 49151 
+                AND radius_client_udp_port_range_end BETWEEN 1024 AND 49151 
+                AND radius_client_udp_port_range_start <= radius_client_udp_port_range_end);
+
+            ALTER TABLE tblpeerconfiguration 
+            ADD CONSTRAINT chk_verification_mode 
+            CHECK (verification_mode IN ('Verify None', 'Verify Peer', 'Fail if No Peer Certificate', 'Verify Client Once'));
+
+            ALTER TABLE tblpeerconfiguration 
+            ADD CONSTRAINT chk_radius_client_ports_when_enabled 
+            CHECK ((enable_radius_udp_client_ports = false AND radius_client_udp_port_range_start IS NULL AND radius_client_udp_port_range_end IS NULL) 
+                OR (enable_radius_udp_client_ports = true AND radius_client_udp_port_range_start IS NOT NULL AND radius_client_udp_port_range_end IS NOT NULL));
+        ]]></sql>
+        
+    </changeSet>
+    
+    <changeSet id="add-columns" author="auto-generated">
+        <addColumn tableName="tblpeerconfiguration">
+        	<column name="watchdog_interval" type="int" defaultValue="1000">
+                <constraints nullable="false"/>
+            </column>
+            <column name="remote_port" type="int" defaultValue="3868">
+                <constraints nullable="false"/>
+            </column>
+            <column name="remote_ip_address" type="varchar(4000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="varchar(50)" defaultValue="Active">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+
+        <sql dbms="mysql">
+            <![CDATA[
+            ALTER TABLE tblpeerconfiguration 
+            ADD CONSTRAINT chk_remote_port_range 
+            CHECK (remote_port BETWEEN 1024 AND 49151);
+
+            ALTER TABLE tblpeerconfiguration 
+            ADD CONSTRAINT chk_status 
+            CHECK (status IN ('Active', 'Inactive', 'Deleted'));
+            
+            ALTER TABLE tblpeerconfiguration
+            ADD CONSTRAINT chk_watchdog_interval
+            CHECK (watchdog_interval > 0);
+            ]]>
+        </sql>
+    </changeSet>
+    
+    <changeSet id="remove-node-name-and-fqdn-constraint" author="auto-generated">
+    <sql dbms="mysql">
+        ALTER TABLE tblpeerconfiguration 
+        DROP CHECK chk_node_name_format;
+    </sql>
+</changeSet>
+
+	<changeSet id="remove-chk-radius-client-ports-when-enabled-constraint" author="auto-generated">
+	    <sql dbms="mysql">
+	        ALTER TABLE tblpeerconfiguration 
+	        DROP CHECK chk_radius_client_ports_when_enabled;
+	    </sql>
+	</changeSet>
+	
+	<changeSet id="add-description-column" author="auto-generated">
+	    <addColumn tableName="tblpeerconfiguration">
+	        <column name="description" type="varchar(500)">
+	            <constraints nullable="true"/>
+	        </column>
+	    </addColumn>
+	
+	    <sql dbms="mysql">
+	        <![CDATA[
+	        ALTER TABLE tblpeerconfiguration 
+	        ADD CONSTRAINT chk_description_length 
+	        CHECK (description IS NULL OR length(description) <= 500);
+	        ]]>
+	    </sql>
+	</changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,64 @@
+package com.savbill.partnermanagement.modules.partner.entity;
+
+import com.savbill.partnermanagement.core.data.IBaseData;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import javax.persistence.*;
+import java.time.LocalDate;
+
+@Getter
+@Setter
+@Entity
+@Table(name = "tblmpartnerledger")
+public class PartnerLedger implements IBaseData<Long> {
+
+    @Id
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "partnerledger_id")
+    private Long id;
+    private Double totaldue = 0.0;
+    private Double totalpaid = 0.0;
+
+
+    @JsonBackReference
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "partner_id")
+    @ToString.Exclude
+    private Partner partner;
+
+    @CreationTimestamp
+    @Column(name = "CREATEDATE", nullable = false)
+    private LocalDate createdate;
+
+    @UpdateTimestamp
+    @Column(name = "LASTMODIFIEDDATE")
+    private LocalDate updatedate;
+
+    @Column(name = "is_deleted", columnDefinition = "Boolean default false")
+    private Boolean isDeleted = false;
+
+    @Override
+    public Long getPrimaryKey() {
+        return id;
+    }
+
+    @Override
+    public void setDeleteFlag(boolean deleteFlag) {
+        this.isDeleted = deleteFlag;
+    }
+
+    @Override
+    public boolean getDeleteFlag() {
+        return isDeleted;
+    }
+
+    @Override
+    public String toString() {
+        return "PartnerLedger []";
+    }
+}

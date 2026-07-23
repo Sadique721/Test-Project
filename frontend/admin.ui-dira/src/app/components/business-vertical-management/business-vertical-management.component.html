@@ -1,0 +1,539 @@
+<!-- 
+<div class="row">
+  <div class="col-md-12">
+    <div class="panel top">
+      <div class="panel-heading">
+        <h3 class="panel-title">Business vertical Management</h3>
+        <div class="right">
+          <button
+            type="button"
+            class="btn-toggle-collapse"
+            data-toggle="collapse"
+            data-target="#searchDataCountry"
+            >
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+      <div id="searchDataCountry" class="panel-collapse collapse in">
+        <div id="" class="panel-body">
+          <div class="row">
+            <div class="col-lg-3 col-md-3">
+              <input
+                id="taxName"
+                type="text"
+                [(ngModel)]="searchBusinessVName"
+                class="form-control"
+                placeholder="Global Search Filter"
+                (keydown.enter)="searchBusinessV()"
+                />
+              </div>
+              <div class="col-lg-3 col-md-4 marginTopSearchBtn">
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  id="searchbtn"
+                  (click)="searchBusinessV()"
+                  >
+                  <i class="fa fa-search"></i>
+                  Search
+                </button>
+                <button
+                  type="reset"
+                  class="btn btn-default"
+                  id="searchbtn"
+                  (click)="clearSearchCountry()"
+                  >
+                   <img src="assets/img/DashboardIcons/Refresh.svg" />
+                  Clear
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div> -->
+
+<!-- 
+  <div class="row">
+    <div class="col-md-6 left">
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">Business vertical</h3>
+          <div class="right">
+            <button
+              type="button"
+              class="btn-toggle-collapse"
+              data-toggle="collapse"
+              data-target="#allDataCountry"
+              aria-expanded="false"
+              aria-controls="allDataCountry"
+              >
+              <i class="fa fa-minus-circle"></i>
+            </button>
+          </div>
+        </div>
+        <div id="allDataCountry" class="panel-collapse collapse in">
+          <div class="panel-body table-responsive">
+            <div class="row">
+              <div class="col-lg-12 col-md-12">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Business Vertical Name</th>
+                      <th>Status</th>
+                      @if (deleteAccess || editAccess) {
+                        <th>Action</th>
+                      }
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (
+                      business of businessVisData
+                      | paginate
+                      : {
+                      id: 'countryListData',
+                      itemsPerPage: businessVitemsPerPage,
+                      currentPage: currentPageBusinessVSlab,
+                      totalItems: businessVtotalRecords
+                      }; track
+                      business; let i = $index) {
+                      <tr
+                        >
+                        <td>{{ business.vname }}</td>
+                        @if (business.status == 'ACTIVE' || business.status == 'Active') {
+                          <td>
+                            <span class="badge badge-success">Active</span>
+                          </td>
+                        }
+                        @if (business.status == 'INACTIVE' || business.status == 'Inactive') {
+                          <td>
+                            <span class="badge badge-danger">Inactive</span>
+                          </td>
+                        }
+                        @if (deleteAccess || editAccess) {
+                          <td class="btnAction">
+                            @if (editAccess) {
+                              <a
+                                id="edit-button"
+                                href="javascript:void(0)"
+                                type="button"
+                                (click)="editRegion(business.id)"
+                                >
+                              <img src="assets/img/DashboardIcons/Edit.svg" >
+                              </a>
+                            }
+                            @if (deleteAccess) {
+                              <a
+                                id="delete-button"
+                                href="javascript:void(0)"
+                                (click)="deleteConfirmBusinessV(business.id)"
+                                >
+                                 <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                              </a>
+                            }
+                          </td>
+                        }
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+
+                <div class="row">
+                  <div class="col-md-12" style="display: flex">
+                    <pagination-controls
+                      id="countryListData"
+                      maxSize="10"
+                      directionLinks="true"
+                      previousLabel=""
+                      nextLabel=""
+                      (pageChange)="pageChangedCountryList($event)"
+                    ></pagination-controls>
+                    <div id="itemPerPageDropdown">
+                      <p-dropdown
+                        [options]="pageLimitOptions"
+                        optionLabel="value"
+                        optionValue="value"
+                        (onChange)="TotalItemPerPage($event)"
+                      ></p-dropdown>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 right">
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">{{ isBusinessVEdit ? "Update" : "Create" }} {{ title }}</h3>
+        </div>
+        <div id="createDataCountry" class="panel-collapse collapse in">
+          <div class="panel-body">
+            @if (!createAccess && !isBusinessVEdit) {
+              <div class="panel-body table-responsive">
+                Sorry you have not privilege to create operation!
+              </div>
+            }
+            @if (createAccess || (isBusinessVEdit && editAccess)) {
+              <div class="panel-body">
+                <form [formGroup]="businessVerticalFormGroup">
+                  <label>Business vertical Name*</label>
+                  <input
+                    id="name"
+                    type="text"
+                    class="form-control"
+                    placeholder="Enter Business vertical Name"
+                    formControlName="vname"
+                [ngClass]="{
+                  'is-invalid': submitted && businessVerticalFormGroup.controls.vname.errors
+                }"
+                    />
+                    @if (submitted && businessVerticalFormGroup.controls.vname.errors) {
+                      <div
+                        class="errorWrap text-danger"
+                        >
+                        @if (submitted && businessVerticalFormGroup.controls.vname.errors.required) {
+                          <div
+                            class="error text-danger"
+                            >
+                            {{ title }} Name is required.
+                          </div>
+                        }
+                        @if (
+                          submitted && businessVerticalFormGroup.controls.vname.errors?.cannotContainSpace
+                          ) {
+                          <div
+                            class="error text-danger"
+                            >
+                            <p class="error">White space are not allowed.</p>
+                          </div>
+                        }
+                      </div>
+                    }
+                    <br />
+                    <div>
+                      <label>Region</label>
+                      <div>
+                        <p-multiSelect
+                          (onChange)="getSelectCustomerSector($event)"
+                          id="id"
+                          [options]="regionSector"
+                          formControlName="region_id"
+                          defaultLabel="Select Region Name"
+                          optionValue="id"
+                          optionLabel="rname"
+                          filter="true"
+                          filterBy="rname"
+                    [ngClass]="{
+                      'is-invalid': submitted && businessVerticalFormGroup.controls.region_id.errors
+                    }"
+                        ></p-multiSelect>
+                      </div>
+                      <br />
+                    </div>
+                    <label>Status*</label>
+                    <div>
+                      <p-dropdown
+                        [options]="statusOptions"
+                        optionValue="label"
+                        optionLabel="label"
+                        filter="true"
+                        filterBy="label"
+                        placeholder="Select a Status"
+                        formControlName="status"
+                  [ngClass]="{
+                    'is-invalid': submitted && businessVerticalFormGroup.controls.status.errors
+                  }"
+                      ></p-dropdown>
+                    </div>
+                    @if (submitted && businessVerticalFormGroup.controls.status.errors) {
+                      <div
+                        class="errorWrap text-danger"
+                        >
+                        @if (submitted && businessVerticalFormGroup.controls.status.errors.required) {
+                          <div
+                            class="error text-danger"
+                            >
+                            {{ title }} Status is required.
+                          </div>
+                        }
+                      </div>
+                    }
+                    <br />
+                    <div class="addUpdateBtn">
+                      @if (!isBusinessVEdit) {
+                        <button
+                          type="submit"
+                          (click)="addEdit('')"
+                          class="btn btn-primary"
+                          id="submit"
+                          >
+                          <i class="fa fa-check-circle"></i>
+                          Add {{ title }}
+                        </button>
+                      }
+                      @if (isBusinessVEdit) {
+                        <button
+                          type="submit"
+                          class="btn btn-primary"
+                          id="submit"
+                          (click)="addEdit(viewBusinessVListData.id)"
+                          >
+                          <i class="fa fa-check-circle"></i>
+                          Update {{ title }}
+                        </button>
+                      }
+                      <br />
+                    </div>
+                  </form>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </div> -->
+
+<div class="row header-row">
+    <mat-card class="cardWithShadow w-100">
+        <mat-card-content class="mat-card-content-border">
+            <div class="row">
+                <div class="col-sm-9 d-flex">
+                    <mat-form-field appearance="outline" style="margin-left: 16px" class="w-100 hide-hint mr-10">
+                        <input class="input-p-5" id="taxName" [(ngModel)]="searchBusinessVName" matInput
+                            placeholder="Global Search Filter" (keydown.enter)="searchBusinessV()" />
+                        <mat-icon matSuffix class="search-header-search-icon">
+                            <i class="pi pi-search icon-size"></i>
+                        </mat-icon>
+                    </mat-form-field>
+
+                    <button mat-button mat-flat-button color="primary" class="button-normal m-r-10"
+                        (click)="searchBusinessV()">
+                        Search
+                    </button>
+                    <button mat-stroked-button matButton="outlined" class="button-normal"
+                        (click)="clearSearchCountry()">
+                        Clear
+                    </button>
+                </div>
+
+                <div class="col-sm-3 search-div">
+                    <button mat-button mat-flat-button color="primary" class="button-normal mr-10"
+                        (click)="openbusinessDialog()">
+                        Add Business Vertical
+                    </button>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+
+<div class="container-fluid contain-flud">
+    <div class="row">
+        <!-- Business Vertical list table start -->
+        <div class="col-md-12">
+            <mat-card class="cardWithShadow">
+                <mat-card-content class="mat-card-content-border">
+                    <div class="business-vertical-table-list">
+                        <div class="table-container">
+                            <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8 w-100">
+
+                                <ng-container matColumnDef="id">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        ID
+                                    </th>
+                                    <td mat-cell *matCellDef="let business" class="f-s-14">{{ business.id }}</td>
+                                </ng-container>
+                                <!-- Business Vertical Name Column -->
+                                <ng-container matColumnDef="Name">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Business Vertical Name
+                                    </th>
+                                    <td mat-cell *matCellDef="let business" class="f-s-14">{{ business.vname }}</td>
+                                </ng-container>
+
+                                <!-- Status Column -->
+                                <ng-container matColumnDef="Status">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Status
+                                    </th>
+                                    <td mat-cell *matCellDef="let business" class="f-s-14">
+                                        @if (business.status == 'ACTIVE' || business.status == 'Active') {
+                                        <span class="status-badge status-success">Active</span>
+                                        }
+                                        @if (business.status == 'INACTIVE' || business.status == 'Inactive') {
+                                        <span class="status-badge status-danger">Inactive</span>
+                                        }
+                                    </td>
+                                </ng-container>
+
+                                <!-- Action Column -->
+                                @if (deleteAccess || editAccess) {
+                                <ng-container matColumnDef="Action">
+                                    <th mat-header-cell *matHeaderCellDef stickyEnd class="table-header-title">
+                                        Action
+                                    </th>
+                                    <td mat-cell *matCellDef="let business">
+                                        @if (editAccess) {
+                                        <a mat-icon-button href="javascript:void(0)" title="Edit"
+                                            (click)="editRegion(business.id)">
+                                            <img src="assets/img/DashboardIcons/Edit.svg" >
+                                        </a>
+                                        }
+                                        @if (deleteAccess) {
+                                        <a mat-icon-button href="javascript:void(0)"
+                                            (click)="deleteConfirmBusinessV(business.id)">
+                                            <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                                        </a>
+                                        }
+                                    </td>
+                                </ng-container>
+                                }
+
+                                <tr mat-header-row class="table-header-bg"
+                                    *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+                                <tr mat-row class="table-content-row" *matRowDef="let row; columns: displayedColumns">
+                                </tr>
+                            </table>
+
+                            <mat-paginator [length]="businessVtotalRecords" [pageSize]="businessVitemsPerPage"
+                                [pageSizeOptions]="pageSizeOptions" showFirstLastButtons
+                                (page)="pageChangedCountryList($event)">
+                            </mat-paginator>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+        <!-- Business Vertical list table end -->
+    </div>
+</div>
+
+<ng-template #businessVerticalDialog let-dialogRef="dialogRef">
+
+    <div class="dialog-container">
+        <!-- Header -->
+        <div class="dialog-header dialog-header-titleFont">
+            <span class="dialog-header-titleFont">{{ isBusinessVEdit ? "Update" : "Create" }} {{ title }}</span>
+            <a mat-icon-button href="javascript:void(0)" (click)="dialogRef.close()">
+                 <img src="assets/img/DashboardIcons/Reject.svg">
+            </a>
+        </div>
+
+        <form [formGroup]="businessVerticalFormGroup" class="card-form mb-3">
+            <!-- Content -->
+            <div class="dialog-content">
+                <div class="col-md-12">
+                    @if (!createAccess && !isBusinessVEdit) {
+                    <mat-card-content class="matcard-content">
+                        <div class="panel-body table-responsive">
+                            Sorry you have not privilege to create operation!
+                        </div>
+                    </mat-card-content>
+                    }
+                    @if (createAccess || (isBusinessVEdit && editAccess)) {
+                    <mat-card-content class="matcardContent">
+                        <div class="row g-2">
+                            <!-- Business Vertical Name -->
+                            <div class="col-sm-6">
+                                <label for="name" class="inputLabel">{{ title }} Name*</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <input id="name" matInput type="text" placeholder="Enter Business vertical Name"
+                                        formControlName="vname" class="input-p-5" maxlength="250" [ngClass]="{
+                      'is-invalid': submitted && businessVerticalFormGroup.controls.vname.errors
+                    }" />
+                                    <mat-error *ngIf="
+                      (submitted || businessVerticalFormGroup.controls['vname'].touched) &&
+                      businessVerticalFormGroup.controls['vname'].errors as errors
+                    ">
+                                        <span *ngIf="errors['required']">
+                                            {{ title }} Name is required.
+                                        </span>
+                                        <span *ngIf="errors['cannotContainSpace']">
+                                            White space are not allowed.
+                                        </span>
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Region -->
+                            <div class="col-sm-6">
+                                <label for="regionSelect" class="inputLabel">Region</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select id="regionSelect" class="input-p-5" placeholder="Select Region Name"
+                                        formControlName="region_id" multiple [ngClass]="{
+                      'is-invalid': submitted && businessVerticalFormGroup.controls.region_id.errors
+                    }">
+                                        <mat-option *ngFor="let option of regionSector" [value]="option.id">
+                                            {{ option.rname }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error *ngIf="
+                      (submitted || businessVerticalFormGroup.controls['region_id'].touched) &&
+                      businessVerticalFormGroup.controls['region_id'].errors as errors
+                    ">
+                                        <span *ngIf="errors['required']">
+                                            Region is required.
+                                        </span>
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Status -->
+                            <div class="col-sm-6">
+                                <label for="statusSelect" class="inputLabel">Status*</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select id="statusSelect" class="input-p-5" placeholder="Select Status"
+                                        formControlName="status" [ngClass]="{
+                      'is-invalid': submitted && businessVerticalFormGroup.controls.status.errors
+                    }">
+                                        <mat-option *ngFor="let option of statusOptions" [value]="option.label">
+                                            {{ option.label }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error *ngIf="
+                      (submitted || businessVerticalFormGroup.controls['status'].touched) &&
+                      businessVerticalFormGroup.controls['status'].errors as errors
+                    ">
+                                        <span *ngIf="errors['required']">
+                                            {{ title }} Status is required.
+                                        </span>
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                    </mat-card-content>
+                    }
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+                @if (!isBusinessVEdit) {
+                <button mat-button mat-flat-button color="primary" type="submit" id="submit" (click)="addEdit('')"
+                    class="button-normal">
+                    Add {{ title }}
+                </button>
+                }
+                @if (isBusinessVEdit) {
+                <button mat-button mat-flat-button color="primary" type="submit" id="submit"
+                    (click)="addEdit(viewBusinessVListData.id)" class="button-normal">
+                    Update {{ title }}
+                </button>
+                }
+                <button mat-stroked-button matButton="outlined" type="button" color="primary" class="button-normal"
+                    (click)="dialogRef.close()">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+
+</ng-template>

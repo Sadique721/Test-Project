@@ -1,0 +1,617 @@
+<div class="row header-row">
+    <mat-card class="cardWithShadow w-100">
+        <mat-card-content class="mat-card-content-border">
+            <form class="form-auth-small" [formGroup]="searchForm">
+                <div class="row">
+                    <div class="col-sm-9 d-flex">
+                        <mat-form-field appearance="outline" class="w-100 hide-hint mr-10 header-input">
+                            <input matInput class="input-p-5 " formControlName="mobileNo"
+                                placeholder="Enter Mobile Number"
+                                [attr.maxLength]="commondropdownService.maxMobileLength"
+                                (keydown.enter)="searchBySourceName()" />
+                            <mat-icon matSuffix class="search-header-search-icon">
+                                <i class="pi pi-search icon-size"></i>
+                            </mat-icon>
+
+                            <mat-error *ngIf="searchSubmitted && searchForm.controls.mobileNo.errors">
+                                <mat-error *ngIf="searchForm.controls.mobileNo.errors.required">
+                                    <span>Mobile Number is required.</span>
+                                </mat-error>
+                                <mat-error
+                                    *ngIf="searchForm.controls.mobileNo.errors.minlength || searchForm.controls.mobileNo.errors.maxlength">
+                                    <mat-error
+                                        *ngIf="commondropdownService.minMobileLength === commondropdownService.maxMobileLength; else rangeLength">
+                                        <span> Mobile Number must be exactly {{ commondropdownService.minMobileLength }}
+                                            digits.</span>
+                                    </mat-error>
+                                    <mat-error #rangeLength>
+                                        <span> Mobile Number must be between {{ commondropdownService.minMobileLength }}
+                                            and {{ commondropdownService.maxMobileLength }} digits.</span>
+                                    </mat-error>
+                                </mat-error>
+                            </mat-error>
+                        </mat-form-field>
+
+                        <button mat-button mat-flat-button color="primary" class="button-normal m-r-10"
+                            (click)="searchBySourceName()">
+                            Search
+                        </button>
+                        <button mat-stroked-button matButton="outlined" class="button-normal"
+                            (click)="clearSearchForm()">
+                            Clear
+                        </button>
+                    </div>
+
+                    <div class="col-sm-3 search-div">
+                        <button mat-button mat-flat-button color="primary" (click)="opensmsDialog()"
+                            class="button-normal mr-10">
+                            Add SMS
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </mat-card-content>
+    </mat-card>
+</div>
+
+<div class="container-fluid contain-flud">
+    <div class="row">
+        <div class="col-md-12">
+            <mat-card class="cardWithShadow">
+                <mat-card-content class="mat-card-content-border">
+                    <div class="sms-table-list">
+                        <div class="table-container">
+                            <table mat-table [dataSource]="searchkey ? dataSource : groupData" matSort
+                                class="mat-elevation-z8 w-100">
+                                <ng-container matColumnDef="id">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">ID</th>
+                                    <td mat-cell *matCellDef="let sms">
+                                        {{ sms.smsId }}
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="eventType">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">Event Type</th>
+                                    <td mat-cell *matCellDef="let sms" class="f-s-14">
+                                        {{ sms.eventName ? sms.eventName : '-' }}
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="mobileNo">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">Mobile No</th>
+                                    <td mat-cell *matCellDef="let sms" class="f-s-14">{{ sms.mobileNo }}</td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="eventTime">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">Event Time</th>
+                                    <td mat-cell *matCellDef="let sms" class="f-s-14">{{ sms.date }}</td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="status">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">Status</th>
+                                    <td mat-cell *matCellDef="let sms" class="f-s-14">
+                                        <span class="status-badge" [ngClass]="{
+                        'status-success': sms.status === 'Sent',
+                        'status-danger': sms.status !== 'Sent'
+                      }">
+                                            {{ sms.status }}
+                                        </span>
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="action">
+                                    <th mat-header-cell *matHeaderCellDef stickyEnd class="table-header-title">
+                                        Action
+                                    </th>
+                                    <td mat-cell *matCellDef="let sms; let i = index">
+                                        <a *ngIf="editAccess" matTooltip="Edit" mat-icon-button
+                                            href="javascript:void(0)" (click)="editSmsById(sms.smsId, i)">
+                                            <img src="assets/img/DashboardIcons/Edit.svg">
+                                        </a>
+                                        <a *ngIf="deleteAccess" matTooltip="Delete" mat-icon-button
+                                            href="javascript:void(0)" (click)="deleteConfirm(sms)">
+                                            <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                        </a>
+                                        <span *ngIf="sms.status != 'Sent' && sendAccess">
+                                            <a matTooltip="Send" mat-icon-button href="javascript:void(0)"
+                                                (click)="sendSmsById(sms.smsId)">
+                                                <img src="assets/img/DashboardIcons/send-svgrepo-com 1.svg"
+                                                    class="icon-size" />
+                                            </a>
+                                        </span>
+                                    </td>
+                                </ng-container>
+
+                                <tr mat-header-row class="table-header-bg"
+                                    *matHeaderRowDef=" getDisplayedPlanDetailsColumns(); sticky: true"></tr>
+                                <tr mat-row class="table-content-row"
+                                    *matRowDef="let row; columns:  getDisplayedPlanDetailsColumns()">
+                                </tr>
+                            </table>
+
+                            <!-- Updated paginator -->
+                            <mat-paginator #paginator [length]="totalRecords" [pageSize]="itemsPerPage"
+                                [pageIndex]="currentPage" [pageSizeOptions]="[5,10,20,50,100]" showFirstLastButtons
+                                (page)="onPageChange($event)">
+                            </mat-paginator>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </div>
+</div>
+
+
+<ng-template #smsDialog let-dialogRef="dialogRef">
+    <div class="dialog-container">
+        <!-- Header -->
+        <div class="dialog-header">
+            <span>{{ editMode ? "Update" : "Create" }} SMS Details</span>
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <form class="card-form mb-3" [formGroup]="smsDetailsForm">
+            <!-- Content -->
+            <div mat-dialog-content class="overflow">
+                <div class="col-md-12">
+                    <!-- No access case -->
+                    <ng-container *ngIf="!createAccess && !editMode">
+                        <mat-card-content class="matcard-content">
+                            <div class="panel-body table-responsive">
+                                Sorry you have not privilege to create operation!
+                            </div>
+                        </mat-card-content>
+                    </ng-container>
+
+                    <!-- Form case -->
+                    <ng-container *ngIf="createAccess || (editMode && editAccess)">
+                        <mat-card-content class="matcardContent">
+                            <div class="row g-3">
+
+                                <!-- Event Type -->
+                                <div class="col-md-6 mb-4">
+                                    <label for="eventId" class="inputLabel">Event Type*</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select id="eventId" class="input-p-5" placeholder="Select Event Type"
+                                            formControlName="eventId" [ngClass]="{
+                      'is-invalid': submitted && smsDetailsForm.controls.eventId.errors
+                    }">
+                                            <mat-option *ngFor="let event of eventTypeValue.eventList"
+                                                [value]="event.eventId">
+                                                {{ event.eventName }}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error
+                                            *ngIf="submitted && smsDetailsForm.controls.eventId.errors?.required">
+                                            Event Type is required
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Source Name -->
+                                <div class="col-md-6 mb-4">
+                                    <label for="sourceName" class="inputLabel">Source Name*</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select id="sourceName" class="input-p-5" placeholder="Select Group Status"
+                                            formControlName="sourceName" [ngClass]="{
+                      'is-invalid': submitted && smsDetailsForm.controls.sourceName.errors
+                    }">
+                                            <mat-option *ngFor="let source of sourceNameValue" [value]="source.label">
+                                                {{ source.label }}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error
+                                            *ngIf="submitted && smsDetailsForm.controls.sourceName.errors?.required">
+                                            Source Name is required
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Country Code -->
+                                <div class="col-md-6 mb-4">
+                                    <label for="countryCode" class="inputLabel">Country Code</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select id="countryCode" class="input-p-5" placeholder="+91"
+                                            formControlName="countryCode">
+                                            <mat-option *ngFor="let country of countries" [value]="country.dial_code">
+                                                {{ country.dial_code }}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Mobile Number -->
+                                <div class="col-md-6 mb-4">
+                                    <label for="mobileNo" class="inputLabel">Mobile No*</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <input id="mobileNo" matInput type="number" placeholder="Enter Mobile No"
+                                            formControlName="mobileNo"
+                                            [attr.maxLength]="commondropdownService.maxMobileLength" [ngClass]="{
+                      'is-invalid':
+                        submitted &&
+                        smsDetailsForm.controls.mobileNo.errors &&
+                        smsDetailsForm.controls.mobileNo.touched
+                    }" class="input-p-5" />
+                                        <mat-error *ngIf="
+                      submitted &&
+                      smsDetailsForm.controls.mobileNo.errors &&
+                      smsDetailsForm.controls.mobileNo.touched
+                    ">
+                                            <span *ngIf="smsDetailsForm.controls.mobileNo.errors.required">
+                                                Mobile No is required.
+                                            </span>
+                                            <span *ngIf="
+                        smsDetailsForm.controls.mobileNo.errors.minlength ||
+                        smsDetailsForm.controls.mobileNo.errors.maxlength
+                      ">
+                                                <ng-container *ngIf="
+                          commondropdownService.minMobileLength ===
+                            commondropdownService.maxMobileLength;
+                          else rangeLength
+                        ">
+                                                    Mobile Number must be exactly
+                                                    {{ commondropdownService.minMobileLength }} digits.
+                                                </ng-container>
+                                                <ng-template #rangeLength>
+                                                    Mobile Number must be between
+                                                    {{ commondropdownService.minMobileLength }} and
+                                                    {{ commondropdownService.maxMobileLength }} digits.
+                                                </ng-template>
+                                            </span>
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Message -->
+                                <div class="col-md-12 mb-4">
+                                    <label for="message" class="inputLabel">Message*</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <textarea id="message" matInput placeholder="Enter message"
+                                            formControlName="message" [ngClass]="{
+                      'is-invalid': submitted && smsDetailsForm.controls.message.errors
+                    }" class="input-p-5" rows="4"></textarea>
+                                        <mat-error
+                                            *ngIf="submitted && smsDetailsForm.controls.message.errors?.required">
+                                            Message is required
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                            </div>
+                        </mat-card-content>
+                    </ng-container>
+                </div>
+            </div>
+            @if (createAccess || (editMode && editAccess)) {
+            <!-- Action Buttons -->
+            <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+                <button mat-button mat-flat-button color="{{ editMode ? 'accent' : 'primary' }}" class="button-normal"
+                    type="submit" (click)="addSmsDetails()">
+                    {{ editMode ? "Update" : "Create" }} SMS
+                </button>
+                <button mat-stroked-button matButton="outlined" type="button" color="primary" class="button-normal"
+                    (click)="dialogRef.close()">
+                    Cancel
+                </button>
+            </div>}
+        </form>
+    </div>
+
+
+</ng-template>
+
+
+<!-- <div class="">
+  <div class="row">
+    <div class="col-md-6 left">
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">SMS Details</h3>
+          <div class="right">
+            <button
+              type="button"
+              class="btn-toggle-collapse"
+              data-toggle="collapse"
+              data-target="#ListSMS"
+              aria-expanded="false"
+              aria-controls="ListSMS"
+            >
+              <i class="fa fa-minus-circle"></i>
+            </button>
+          </div>
+        </div>
+
+        <div id="ListSMS" class="panel-collapse collapse in">
+          <div class="panel-body table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Event Type</th>
+                  <th>Mobile No</th>
+                  <th>Event Time</th>
+                  <th>Status</th>
+                  <th *ngIf="editAccess || deleteAccess || sendAccess">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  *ngFor="
+                    let group of groupData
+                      | paginate
+                        : {
+                            id: 'listing_groupdata',
+                            itemsPerPage: itemsPerPage,
+                            currentPage: currentPage,
+                            totalItems: totalRecords
+                          };
+                    index as i
+                  "
+                >
+                  <td *ngIf="group.eventName">{{ group.eventName }}</td>
+                  <td *ngIf="!group.eventName">-</td>
+                  <td>{{ group.mobileNo }}</td>
+                  <td>{{ group.date | date:'dd-MM-yyyy HH:mm:ss' }}</td>
+                  <td>{{ group.status }}</td>
+                  <td class="btnAction" *ngIf="editAccess || deleteAccess || sendAccess">
+                    <a
+                      *ngIf="editAccess"
+                      (click)="editSmsById(group.smsId, i)"
+                      class="curson_pointer"
+                    >
+                    <img src="assets/img/DashboardIcons/Edit.svg" >
+                    </a>
+                    <a
+                      *ngIf="deleteAccess"
+                      (click)="deleteConfirm(group.smsId)"
+                      class="curson_pointer"
+                    >
+                       <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                    </a>
+                    <span *ngIf="group.status != 'Sent' && sendAccess">
+                      <a type="button" (click)="sendSmsById(group.smsId)" class="curson_pointer">
+                        <img
+                          class="icon"
+                          src="assets/img/icons-02.png"
+                          style="display: inline-flex"
+                        />
+                      </a>
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <br />
+            <div class="pagination_Dropdown">
+              <pagination-controls
+                id="listing_groupdata"
+                maxSize="10"
+                directionLinks="true"
+                previousLabel=""
+                nextLabel=""
+                (pageChange)="pageChanged($event)"
+              ></pagination-controls>
+              <div id="itemPerPageDropdown">
+                <p-dropdown
+                  [options]="pageLimitOptions"
+                  optionLabel="value"
+                  optionValue="value"
+                  (onChange)="TotalItemPerPage($event)"
+                ></p-dropdown>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 right">
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">{{ editMode ? "Update" : "Create" }} SMS Details</h3>
+          <div class="right">
+            <button
+              type="button"
+              class="btn-toggle-collapse"
+              data-toggle="collapse"
+              data-target="#CreateSMS"
+              aria-expanded="false"
+              aria-controls="CreateSMS"
+            >
+              <i class="fa fa-minus-circle"></i>
+            </button>
+          </div>
+        </div>
+        <div class="panel-body table-responsive" *ngIf="!createAccess && !editMode">
+          Sorry you have not privilege to create operation!
+        </div>
+        <div *ngIf="createAccess || (editMode && editAccess)">
+          <div id="CreateSMS" class="panel-collapse collapse in">
+            <div class="panel-body">
+              <div>
+                <form class="form-auth-small" [formGroup]="smsDetailsForm">
+                  <div>
+                    <label>Event Type *</label>
+                    <p-dropdown
+                      [options]="eventTypeValue.eventList"
+                      placeholder="Select Event Type"
+                      optionLabel="eventName"
+                      optionValue="eventId"
+                      formControlName="eventId"
+                      filter="true"
+                      filterBy="eventName"
+                      [ngClass]="{
+                        'is-invalid': submitted && smsDetailsForm.controls.eventId.errors
+                      }"
+                    ></p-dropdown>
+                    <div
+                      class="errorWrap text-danger"
+                      *ngIf="submitted && smsDetailsForm.controls.eventId.errors"
+                    >
+                      <div
+                        class="error text-danger"
+                        *ngIf="submitted && smsDetailsForm.controls.eventId.errors.required"
+                      >
+                        Event Type is required
+                      </div>
+                    </div>
+                  </div>
+                  <br />
+                  <div>
+                    <label>Source Name *</label>
+                    <p-dropdown
+                      [options]="sourceNameValue"
+                      placeholder="Select Group Status"
+                      optionLabel="label"
+                      optionValue="label"
+                      formControlName="sourceName"
+                      filter="true"
+                      filterBy="label"
+                      [ngClass]="{
+                        'is-invalid': submitted && smsDetailsForm.controls.sourceName.errors
+                      }"
+                    ></p-dropdown>
+                    <div
+                      class="errorWrap text-danger"
+                      *ngIf="submitted && smsDetailsForm.controls.sourceName.errors"
+                    >
+                      <div
+                        class="error text-danger"
+                        *ngIf="submitted && smsDetailsForm.controls.sourceName.errors.required"
+                      >
+                        Source Name is required
+                      </div>
+                    </div>
+                    
+                  </div>
+                  <br />
+                  <label>Mobile No *</label>
+                  <div style="width: 100%; display: flex">
+                    <div style="width: 15%">
+                      <p-dropdown
+                        id="countryCode"
+                        [filter]="true"
+                        [options]="countries"
+                        placeholder="+91"
+                        optionLabel="dial_code"
+                        optionValue="dial_code"
+                        formControlName="countryCode"
+                        filter="true"
+                        filterBy="dial_code"
+                      ></p-dropdown>
+                     
+                    </div>
+                    <div style="width: 80%">
+                      <input
+                        type="number"
+                        name="mobileNo"
+                        class="form-control"
+                        placeholder="Enter Mobile No"
+                        formControlName="mobileNo"
+                        [attr.maxLength]="commondropdownService.maxMobileLength"
+                        [ngClass]="{
+                          'is-invalid':
+                            submitted &&
+                            smsDetailsForm.controls.mobileNo.errors &&
+                            smsDetailsForm.controls.mobileNo.touched
+                        }"
+                      />
+
+                      <div
+                        class="errorWrap text-danger"
+                        *ngIf="
+                          submitted &&
+                          smsDetailsForm.controls.mobileNo.errors &&
+                          smsDetailsForm.controls.mobileNo.touched
+                        "
+                      >
+                        <div *ngIf="smsDetailsForm.controls.mobileNo.errors.required">
+                          Mobile No is required.
+                        </div>
+
+                        <div
+                          *ngIf="
+                            smsDetailsForm.controls.mobileNo.errors.minlength ||
+                            smsDetailsForm.controls.mobileNo.errors.maxlength
+                          "
+                        >
+                          <ng-container
+                            *ngIf="
+                              commondropdownService.minMobileLength ===
+                                commondropdownService.maxMobileLength;
+                              else rangeLength
+                            "
+                          >
+                            Mobile Number must be exactly
+                            {{ commondropdownService.minMobileLength }} digits.
+                          </ng-container>
+                          <ng-template #rangeLength>
+                            Mobile Number must be between
+                            {{ commondropdownService.minMobileLength }} and
+                            {{ commondropdownService.maxMobileLength }} digits.
+                          </ng-template>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <br />
+                  <label>Message *</label>
+                  <textarea
+                    name="message"
+                    id="message"
+                    class="form-control"
+                    placeholder="Enter message"
+                    formControlName="message"
+                    [ngClass]="{
+                      'is-invalid': submitted && smsDetailsForm.controls.message.errors
+                    }"
+                  ></textarea>
+                  <div
+                    class="errorWrap text-danger"
+                    *ngIf="submitted && smsDetailsForm.controls.message.errors"
+                  >
+                    <div
+                      class="error text-danger"
+                      *ngIf="submitted && smsDetailsForm.controls.message.errors.required"
+                    >
+                      Message is required
+                    </div>
+                  </div>
+                  <br />
+                  <div class="addUpdateBtn">
+                    <button type="submit" class="btn btn-primary" (click)="addSmsDetails()">
+                      <i class="fa fa-check-circle"></i>
+                      {{ editMode ? "Update" : "Add" }} SMS
+                    </button>
+                    <br />
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+</div> -->
+<!-- <div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Modal Header</h4>
+        </div>
+        <div class="modal-body">
+          <p>Some text in the modal.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div> -->

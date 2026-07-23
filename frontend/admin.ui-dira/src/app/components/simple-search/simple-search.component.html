@@ -1,0 +1,314 @@
+<div id="tableComp">
+    <div style="padding: 10px 15px">
+        @if (instanceData === null) {
+        <div>Select the filter criteria</div>
+        }
+        @if (instanceData?.length === 0) {
+        <div>No Data Found</div>
+        }
+        @if (instanceData?.length > 0) {
+        <div>
+
+            <div *ngIf="!hideTable" class="table-container">
+
+                <!-- Column Selector & Toolbar -->
+                <div class="row">
+                    <div class="col-md-11">
+                        <label>Choose Columns</label>
+                        <br>
+                        <mat-form-field appearance="outline" class="w-80">
+                            <mat-select [(ngModel)]="selectedCols" multiple (selectionChange)="onColumnsChange()"
+                                [compareWith]="compareColumns">
+                                <mat-option *ngFor="let col of cols" [value]="col">
+                                    {{ col.header }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-md-1 d-flex align-items-center justify-content-center">
+                        <button mat-icon-button color="primary" (click)="resetHandleData()" matTooltip="Reset">
+                            <mat-icon>refresh</mat-icon>
+                        </button>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center">
+                    <div class="d-flex">
+                        @if (exportCSVAccess) {
+                        <a mat-icon-button (click)="exportToCSV()" matTooltip="CSV">
+                            <img src="assets/img/DashboardIcons/Document Download.svg"></a>
+                        }
+                        @if (exportXLSAccess) {
+                        <a mat-icon-button (click)="exportExcel()" matTooltip="XLS" fitContent>
+                            <img src="assets/img/DashboardIcons/xls-file-svgrepo-com 1.svg"></a>
+                        }
+                        @if (exportPDFAccess) {
+                        <a mat-icon-button (click)="exportPdf()" matTooltip="PDF">
+                            <img src="assets/img/DashboardIcons/pdf-file-symbol-svgrepo-com 1.svg"></a>
+                        }
+                    </div>
+                    @if (showbtn) {
+                    <div>
+                        <a mat-icon-button matTooltip="Delete" (click)="deleteSelectedUsers()">
+                            <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                        </a>
+                        <a mat-icon-button matTooltip="Disconnect" (click)="disconnectSelectedUsers()">
+                            <img src="assets/img/DashboardIcons/Reject.svg"></a>
+                    </div>
+                    }
+                </div>
+
+                <!-- Table -->
+                @if(displayedColumns.length>0){
+                <div class="example-container mat-elevation-z8" tabindex="0">
+                    <table mat-table #dt [dataSource]="instanceData" matSort class="mat-elevation-z8">
+
+                        @for (col of selectedCols; track col) {
+                        <ng-container [matColumnDef]="col.field">
+
+                            <!-- ================= Header Cells ================= -->
+                            <th mat-header-cell *matHeaderCellDef>
+                                <!-- Checkbox Header -->
+                                <ng-container *ngIf="showCheckbox && col.field === 'select'; else normalHeader">
+                                    <mat-checkbox (change)="$event ? masterToggle() : null" [checked]="isAllSelected()"
+                                        [indeterminate]="selection.hasValue() && !isAllSelected()">
+                                    </mat-checkbox>
+                                </ng-container>
+
+                                <!-- Normal Header -->
+                                <ng-template #normalHeader>
+                                    {{ col.header }}
+                                </ng-template>
+                            </th>
+
+                            <!-- ================= Data Cells ================= -->
+                            <td mat-cell *matCellDef="let instance">
+                                <!-- Checkbox Column -->
+                                <ng-container *ngIf="showCheckbox && col.field === 'select'; else normalCell">
+                                    <mat-checkbox (click)="$event.stopPropagation()"
+                                        (change)="$event ? selection.toggle(instance) : null"
+                                        [checked]="selection.isSelected(instance)">
+                                    </mat-checkbox>
+                                </ng-container>
+
+                                <!-- Normal Columns -->
+                                <ng-template #normalCell>
+                                    <!-- Non-Actions Columns -->
+                                    <ng-container *ngIf="col.field !== 'Actions'; else actionsCell">
+
+                                        <!-- Regular fields -->
+                                        <ng-container *ngIf="col.field !== 'createDate' 
+                                                    && col.field !== 'lastModificationDate' 
+                                                    && col.field !== 'userName'">
+                                            <span>{{ instance[col.field] || '-' }}</span>
+                                        </ng-container>
+
+                                        <!-- UserName with clickable link -->
+                                        <ng-container *ngIf="col.field === 'userName'">
+                                            <a href="javascript:void(0)" (click)="openDataModal($event, instance)"
+                                                class="text-primary">
+                                                {{ instance[col.field] || '-'}}
+                                            </a>
+                                        </ng-container>
+
+                                        <!-- Date fields -->
+                                        <ng-container
+                                            *ngIf="col.field === 'createDate' || col.field === 'lastModificationDate'">
+                                            <span>{{ instance[col.field] || '-'}}</span>
+                                        </ng-container>
+                                    </ng-container>
+                                </ng-template>
+
+                                <!-- Actions Column -->
+                                <ng-template #actionsCell>
+                                    <ng-container *ngIf="col.field === 'Actions'">
+                                        <div class="d-flex">
+                                            <a mat-icon-button matTooltip="view" href="javascript:void(0)"
+                                                (click)="viewDataModal($event, instance)" *ngIf="instance.isView">
+                                                <img src="assets/img/DashboardIcons/eye-svgrepo-com (1) 1.svg">
+                                            </a>
+
+                                            <a mat-icon-button matTooltip="delete" href="javascript:void(0)"
+                                                *ngIf="deleteLiveUserAccess" (click)="removeData($event, instance)">
+                                                <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                            </a>
+
+                                            <a *ngIf="instance.isView" (click)="addDataModal($event, instance)"
+                                                matTooltip=" Add Concurrency">
+                                                <img src="assets/img/DashboardIcons/Add.svg"
+                                                    style="padding:10px 2px"></a>
+
+
+                                            <a *ngIf="disconnectLiveUserAccess" mat-icon-button matTooltip="Disconnect"
+                                                (click)="disconnectEvent($event, instance)">
+                                                <img src="assets/img/DashboardIcons/Reject.svg"></a>
+
+
+
+                                        </div>
+                                    </ng-container>
+                                </ng-template>
+                            </td>
+
+                        </ng-container>
+                        }
+
+
+                        <!-- Header and Row -->
+                        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                    </table>
+                </div>
+                }
+            </div>
+
+            <!-- <p-table #dt [columns]="selectedCols" [value]="instanceData" [scrollable]="true" [rows]="10"
+                responsiveLayout="scroll" [rowHover]="true" [customSort]="true" (sortFunction)="customSort($event)"
+                [showCurrentPageReport]="true" [filterDelay]="0" [selectionMode]="'multiple'"
+                [(selection)]="selectedInstances">
+                <ng-template pTemplate="caption" style="margin-bottom: 10px">
+                    <ng-container>
+                        <div class="col-12">
+                            <div class="row">
+                                <div class="col-md-11">
+                                    <p-multiSelect [options]="cols" [(ngModel)]="selectedCols" optionLabel="header"
+                                        display="chip" placeholder="Choose Columns">
+                                    </p-multiSelect>
+                                </div>
+                                <div class="col-md-1">
+                                    <button pButton pRipple (click)="resetHandleData()" type="button"
+                                        icon="pi pi-refresh" class="p-button-rounded"></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex" style="display: flex; justify-content: space-between; align-items: center">
+                            <div>
+                                @if (exportCSVAccess) {
+                                <button type="button" pButton pRipple icon="pi pi-file" (click)="dt.exportCSV()"
+                                    class="button" pTooltip="CSV" fitContent appendTo="body"
+                                    tooltipPosition="right"></button>
+                                }
+                                @if (exportXLSAccess) {
+                                <button type="button" pButton (click)="exportExcel()" pRipple icon="pi pi-file-excel"
+                                    class="button p-button-success btn-success mr-2" pTooltip="XLS" fitContent
+                                    appendTo="body" tooltipPosition="right"></button>
+                                }
+                                @if (exportPDFAccess) {
+                                <button type="button" pButton pRipple (click)="exportPdf()" icon="pi pi-file-pdf"
+                                    class="button p-button-warning mr-2 button-css" pTooltip="PDF"
+                                    tooltipPosition="right"></button>
+                                }
+                            </div>
+                            @if (showbtn) {
+                            <div>
+                                <button pButton type="button" label="Delete" class="p-button-danger"
+                                    style="margin-right: 10px" (click)="deleteSelectedUsers()"></button>
+                                <button pButton type="button" label="Disconnect" class="p-button-warning"
+                                    (click)="disconnectSelectedUsers()"></button>
+                            </div>
+                            }
+                        </div>
+                    </ng-container>
+                </ng-template>
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th style="width: 3rem">
+                            @if (showCheckbox) {
+                            <p-tableHeaderCheckbox> </p-tableHeaderCheckbox>
+                            }
+                        </th>
+                        @for (col of selectedCols; track col) {
+                        <th [ngStyle]="{ width: '200px' }" [pSortableColumn]="col.header" style="text-align: center">
+                            {{ col.header }}
+                            <p-sortIcon [field]="col.header"></p-sortIcon>
+                        </th>
+                        }
+                    </tr>
+                    <tr>
+                        <th>
+                            @if (showCheckbox) {
+                            <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+                            }
+                        </th>
+                        @for (col of selectedCols; track col; let i = $index) {
+                        <th [ngStyle]="{ width: '200px' }" style="text-align: right">
+                            @if (col.field !== 'Actions') {
+                            <input style="margin: 10; padding: 10px; width: 150px" pInputText type="text"
+                                (input)="dt.filter($event.target.value, col.field, 'startsWith')"
+                                [placeholder]="col.field" class="p-column-filter" />
+                            }
+                        </th>
+                        }
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-instance>
+                    <tr>
+                        <td>
+                            @if (showCheckbox) {
+                            <p-tableCheckbox [value]="instance"> </p-tableCheckbox>
+                            }
+                        </td>
+                        @for (col of selectedCols; track col; let i = $index) {
+                        <td [ngStyle]="{ width: '200px' }" style="text-align: center">
+                            @if (col.field !== 'Actions') {
+                            @if (
+                            col.field !== 'createDate' &&
+                            col.field !== 'lastModificationDate' &&
+                            col.field !== 'userName'
+                            ) {
+                            <span>
+                                {{ instance[col.field] }}
+                            </span>
+                            }
+                            @if (col.field == 'userName') {
+                            <span>
+                                <a href="javascript:void(0)" (click)="openDataModal($event, instance)"
+                                    style="color: #f7941e">
+                                    {{ instance[col.field] }}
+                                </a>
+                            </span>
+                            }
+                            @if (col.field == 'createDate' || col.field == 'lastModificationDate') {
+                            <span>
+                                {{ instance[col.field] }}
+                            </span>
+                            }
+                            } @else {
+                            @if (deleteLiveUserAccess) {
+                            <button type="submit" id="delete-button" class="btn btn-primary" title="Delete"
+                                data-toggle="tooltip" (click)="removeData($event, instance)">
+                                <i class="fa fa-trash" aria-hidden="true"></i>
+                            </button>
+                            }
+                            &nbsp;
+                            @if (instance.isView) {
+                            <button type="submit" class="btn btn-primary" title="View" data-toggle="tooltip"
+                                (click)="viewDataModal($event, instance)">
+                                <i class="fa fa-eye" aria-hidden="true"></i>
+                            </button>
+                            }
+                            &nbsp;
+                            @if (instance.isView) {
+                            <button style="margin-top: 7px; margin-left: -6px" type="submit" class="btn btn-primary"
+                                title="Add Concurrency" data-toggle="tooltip" (click)="addDataModal($event, instance)">
+                                <i class="fa fa-plus-square"></i>
+                            </button>
+                            }
+                            &nbsp;
+                            @if (disconnectLiveUserAccess) {
+                            <button style="margin-top: 7px" type="submit" class="btn btn-primary" title="Disconnect"
+                                data-toggle="tooltip" (click)="disconnectEvent($event, instance)">
+                                <i class="fa fa-user-slash"></i>
+                            </button>
+                            }
+                            }
+                        </td>
+                        }
+                    </tr>
+                </ng-template>
+            </p-table> -->
+        </div>
+        }
+    </div>
+</div>

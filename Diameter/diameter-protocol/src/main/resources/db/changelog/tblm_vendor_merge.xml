@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="drop-vendor-old-fk" author="auto-generated">
+        <preConditions onFail="CONTINUE">
+	        <foreignKeyConstraintExists 
+	            foreignKeyName="fk_attribute_mapping_vendor" 
+	            foreignKeyTableName="tblm_attribute_mapping"/>
+	    </preConditions>
+	
+	    <dropForeignKeyConstraint
+	        baseTableName="tblm_attribute_mapping"
+	        constraintName="fk_attribute_mapping_vendor"/>
+    </changeSet>
+
+    <changeSet id="drop-vendor-tables" author="auto-generated">
+        <dropTable tableName="tblm_vendor_information"/>
+        <dropTable tableName="tblm_vendor"/>
+    </changeSet>
+
+    <changeSet id="create-new-tblm_vendor" author="auto-generated">
+        <createTable tableName="tblm_vendor">
+            <column name="id" type="varchar(36)">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="status" type="varchar(20)" defaultValue="ACTIVE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="add-constraints-tblm_vendor" author="auto-generated">
+        <addUniqueConstraint 
+            tableName="tblm_vendor"
+            columnNames="name"
+            constraintName="uq_vendor_name"/>
+    </changeSet>
+    
+    <!--<changeSet id="create-new-vendor-fk" author="auto-generated">
+        <addForeignKeyConstraint
+            baseTableName="tblm_attribute_mapping"
+            baseColumnNames="vendor_id"
+            referencedTableName="tblm_vendor"
+            referencedColumnNames="id"
+            constraintName="fk_attribute_mapping_vendor"
+            onDelete="CASCADE"/>
+    </changeSet>-->
+    
+    <changeSet id="add-vendor-id-column" author="auto-generated">
+	    <!-- Add vendor_id column -->
+	    <addColumn tableName="tblm_vendor">
+	        <column name="vendor_id" type="int">
+	            <constraints nullable="true"/>
+	        </column>
+	    </addColumn>
+	    
+	     <sql>
+		    SET @i = 0;
+		    UPDATE tblm_vendor SET vendor_id = (@i := @i + 1) ORDER BY name;
+		  </sql>
+		  
+		  <addUniqueConstraint tableName="tblm_vendor" columnNames="vendor_id" constraintName="uniqueConstraint_tblm_vendor_vendor_id"/>
+		  
+		  <sql>ALTER TABLE tblm_vendor MODIFY COLUMN vendor_id INT NOT NULL AUTO_INCREMENT;</sql>
+
+	</changeSet>
+    
+</databaseChangeLog>

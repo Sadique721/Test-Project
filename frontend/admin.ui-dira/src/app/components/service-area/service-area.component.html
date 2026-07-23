@@ -1,0 +1,795 @@
+<!-- Service Area card header search part start -->
+<div class="row header-row" *ngIf="!customerrMyInventoryView">
+    <mat-card class="cardWithShadow w-100">
+        <mat-card-content class="mat-card-content-border">
+            <div class="row">
+                <div class="col-sm-9 d-flex">
+                    <mat-form-field appearance="outline" style="margin-left: 16px; margin-right: 10px"
+                        class="w-100 hide-hint">
+                        <input class="input-p-5" [(ngModel)]="searchName" matInput
+                            placeholder="Search {{ serviceAreaTitle }} " (keydown.enter)="searchserviceArea()" />
+                        <mat-icon matSuffix class="search-header-search-icon">
+                            <i class="pi pi-search icon-size"></i>
+                        </mat-icon>
+                    </mat-form-field>
+                    <button mat-button mat-flat-button color="primary" class="button-normal m-r-10"
+                        (click)="searchserviceArea()">
+                        Search
+                    </button>
+                    <button mat-stroked-button matButton="outlined" class="button-normal m-r-10"
+                        (click)="clearSearchserviceArea()">
+                        Clear
+                    </button>
+                    @if (loggedInUserMvnoId === 1) {
+                    <button mat-stroked-button matButton="outlined" class="button-normal" (click)="showAllPolygons()">
+                        Covered Area
+                    </button>
+                    }
+                </div>
+                <div class="col-sm-3 search-div">
+                    <button mat-button mat-flat-button color="primary" (click)="addEditServiceAreaDialog()"
+                        class="button-normal m-r-10">
+                        Add {{ serviceAreaTitle }}
+                    </button>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+
+<!-- Service Area card header search part end -->
+
+<!-- body part start -->
+<div class="container-fluid contain-flud">
+    <div class="row">
+        <!-- service-area list table start -->
+        @if (listView) {
+        <div class="col-md-12">
+            <mat-card class="cardWithShadow">
+                <mat-card-content class="mat-card-content-border">
+                    <div class="country-table-list">
+                        <div class="table-container">
+                            <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8 w-100">
+                                <!-- Id Column -->
+                                <ng-container matColumnDef="id">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">ID</th>
+
+                                    <td mat-cell *matCellDef="let ele" class="f-s-14">
+                                        {{ ele.id }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Name -->
+                                <ng-container matColumnDef="Name">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title">
+                                        Name
+                                    </th>
+                                    <td mat-cell *matCellDef="let element" class="f-s-14">{{ element.name }}</td>
+                                </ng-container>
+
+                                <!-- LAT/LONG -->
+                                <ng-container matColumnDef="Lat/Long">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title">
+                                        Lat/Long
+                                    </th>
+                                    <td class="f-s-14" mat-cell *matCellDef="let element">
+                                        {{ element.latitude }} /
+                                        {{ element.longitude }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Status -->
+                                <ng-container matColumnDef="Status">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title">
+                                        Status
+                                    </th>
+                                    <td mat-cell *matCellDef="let ele" class="f-s-14">
+                                        <span class="status-badge" [ngClass]="{
+                          'status-success': ele.status === 'Active',
+                          'status-danger': ele.status === 'Inactive',
+                          'status-info': ele.status === 'UnderDevelopment'
+                        }">
+                                            {{ ele.status }}
+                                        </span>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Action -->
+                                <ng-container matColumnDef="Action">
+                                    @if (editAccess || deleteAccess) {
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title">
+                                        Action
+                                    </th>
+                                    }
+                                    <div class="icon-actions">
+                                        @if (deleteAccess || editAccess || inventoryAccess || viewAccess) {
+                                        <td mat-cell *matCellDef="let item">
+                                            @if (viewAccess) {
+                                            <a mat-icon-button href="javascript:void(0)"
+                                                (click)="viewEditServiceArea(item.id, true)"
+                                                matTooltip="View Service Area">
+                                                <img src="assets/img/DashboardIcons/eye-svgrepo-com (1) 1.svg">
+                                            </a>
+                                            }
+
+                                            @if (editAccess) {
+                                            <a mat-icon-button href="javascript:void(0)"
+                                                (click)="editserviceArea(item.id)" matTooltip="Update Service Area">
+                                                <img src="assets/img/DashboardIcons/Edit.svg">
+                                            </a>
+                                            }
+                                            @if (deleteAccess) {
+                                            <a mat-icon-button href="javascript:void(0)"
+                                                (click)="deleteConfirmonserviceAreaDialog(item)"
+                                                matTooltip="Delete Service Area">
+                                                <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                            </a>
+                                            }
+                                            @if (inventoryAccess) {
+                                            <a mat-icon-button href="javascript:void(0)" (click)="openMyInventory(item)"
+                                                matTooltip="Go to Inventory List">
+                                                <img src="assets/img/DashboardIcons/Ticket-change-priority.svg"></a>
+                                            }
+                                            <a mat-icon-button href="javascript:void(0)"
+                                                (click)="bulkAssignViewData(item)" matTooltip="Go to Bulk Assign">
+                                                <img src="assets/img/DashboardIcons\Bulk Assign.svg">
+                                            </a>
+                                        </td>
+                                        }
+                                    </div>
+                                </ng-container>
+
+                                <!-- Header & Rows -->
+                                <tr mat-header-row class="table-header-bg"
+                                    *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+                                <tr mat-row class="table-content-row" *matRowDef="let row; columns: displayedColumns">
+                                </tr>
+                            </table>
+
+                            <!-- Sticky Paginator -->
+                            <mat-paginator class="custome-paginator" [length]="serviceAreatotalRecords"
+                                [pageSize]="serviceAreaitemPerpage" [pageSizeOptions]="[5, 10, 20,50,100]"
+                                showFirstLastButtons (page)="pageChangedserviceAreaList($event)">
+                            </mat-paginator>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+        }
+        <!-- service-area list table end -->
+    </div>
+</div>
+
+<!-- body part end -->
+
+<!-- inventory card start  -->
+@if (customerrMyInventoryView) {
+<div class="container-fluid contain-flud">
+    <div class="row">
+        <div class="col-md-12 col-sm-12">
+            <mat-card class="cardWithShadow2">
+                <!-- Header Section - -->
+                <div class="dialog-header d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center">
+                        <a mat-icon-button href="javascript:void(0)" (click)="getSAData()" class="back-btn"
+                            matTooltip="Go to Customer Details">
+                            <i class="pi pi-arrow-left icon-size"></i>
+                        </a>
+                        <h3 class="heading-title mb-0 ms-2">
+                            {{ inventoryServiceAreaData?.name }} Inventory List
+                        </h3>
+                    </div>
+
+                    <!-- <button mat-flat-button (click)="opnAssignInventory()" type="button" color="primary"
+                        class="assign-btn" matTooltip="Assign Inventory">
+                        Assign Inventory
+                    </button> -->
+                </div>
+
+                <!-- Table Section -->
+                <div class="table-container">
+                    <div class="">
+                        <app-common-inventory-management [data]="inventoryServiceAreaData" [type]="assignInventory"
+                            [openFrom]="'service_area'" [assignIntevortServiceArea]="true">
+                        </app-common-inventory-management>
+                    </div>
+                </div>
+            </mat-card>
+        </div>
+    </div>
+</div>
+}
+<!-- inventory card end -->
+
+<!-- Bulk Assign Dialog start -->
+<ng-template #bulkAssignDialog>
+    <div class="container-fluid p-0">
+        <div class="dialog-header dialog-title">
+            Bulk Assign
+            <span>
+                <a mat-icon-button (click)="closeDialog()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+            <mat-dialog-content>
+                <form [formGroup]="bulkAssignForm" class="row">
+                    <!-- Staff MultiSelect -->
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                        <label for="name" class="inputLabel">Select Staff</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <mat-select class="input-p-5" placeholder="Select Staff" formControlName="staffId" multiple>
+                                <mat-option *ngFor="let staff of bulkSAStaffList" [value]="staff.id">
+                                    {{ staff.firstname }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Plan MultiSelect -->
+                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                        <label for="name" class="inputLabel">Select a Plan</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <mat-select class="input-p-5" placeholder="Select Plan" formControlName="planId" multiple>
+                                <mat-option *ngFor="let plan of planAllData" [value]="plan.displayId">
+                                    {{ plan.displayName }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                </form>
+            </mat-dialog-content>
+        </div>
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+            <button mat-flat-button color="primary" class="button-normal" (click)="bulkAssignData()"
+                [disabled]="!bulkAssignForm.value.planId && !bulkAssignForm.value.staffId">
+                Bulk Upload
+            </button>
+            <button mat-stroked-button color="warn" class="button-normal" (click)="closeDialog()">
+                Close
+            </button>
+        </div>
+    </div>
+</ng-template>
+<!-- Bulk Assign Dialog end  -->
+
+<!-- Add this dialog after the existing dialog for map start -->
+<ng-template #PolygonNameDialog>
+    <div class="container-fluid p-0">
+        <div class="dialog-header dialog-title">
+            Enter Polygon Name
+            <span>
+                <a mat-icon-button (click)="closeDialog()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <mat-dialog-content>
+            <form [formGroup]="polygonNameForm" class="row">
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                    <label for="name" class="inputLabel">Polygon Name*</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <input matInput type="text" formControlName="name" class="input-p-5"
+                            placeholder="Enter polygon name" class="w-100" />
+                        <div *ngIf="submitted && polygonNameForm.controls.name.errors">
+                            <div class="text-danger" *ngIf="polygonNameForm.controls.name.errors.required">
+                                Polygon name is required.
+                            </div>
+                        </div>
+                    </mat-form-field>
+                </div>
+            </form>
+        </mat-dialog-content>
+
+        <mat-dialog-actions align="end" style="gap: 8px">
+            <button mat-flat-button color="primary" (click)="savePolygonName()" [disabled]="!polygonNameForm.valid">
+                Save
+            </button>
+            <button mat-stroked-button (click)="closeDialog()">Cancel</button>
+        </mat-dialog-actions>
+    </div>
+</ng-template>
+<!-- Add this dialog after the existing dialog for map end -->
+
+<!-- Bulk polygon add Add Pop-up start -->
+<ng-template #uploadPolygonDialog>
+    <div class="container-fluid p-0">
+        <div class="dialog-header dialog-title">
+            Upload Polygon File
+            <span>
+                <a mat-icon-button (click)="closeDialog()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <mat-dialog-content>
+            <form [formGroup]="uploadDocForm" class="row">
+                <div class="col-12">
+                    <label class="inputLabel">Select files to upload (accept only .csv and .kml files) *</label>
+                    <input type="file" matInput class="form-control" class="input-p-5" formControlName="file"
+                        id="txtSelectDocument" (change)="onFileChangeUpload($event)" multiple
+                        accept=".csv,text/csv,.kml" style="padding: 2px; width: 100%" />
+
+                    <!-- File preview list -->
+                    <div *ngFor="let file of selectedFileUploadPreview; let i = index"
+                        style="padding: 4px 10px; font-size: 12px">
+                        {{ file?.name }}
+                        <button mat-icon-button color="warn" (click)="deletUploadedFile(file?.name)">
+                            <mat-icon>close</mat-icon>
+                        </button>
+                    </div>
+
+                    <!-- Validation error -->
+                    <div *ngIf="submitted && uploadDocForm.controls.file.errors" class="text-danger">
+                        <div *ngIf="uploadDocForm.controls.file.errors.required">File is required.</div>
+                    </div>
+                </div>
+            </form>
+        </mat-dialog-content>
+
+        <mat-dialog-actions align="end" style="gap: 8px">
+            <button mat-flat-button color="primary" (click)="uploadPolygonFile()"
+                [disabled]="drawnPolygonLatLongList.length <= 0">
+                <img src="assets/img/DashboardIcons/Assign.svg">
+                Upload
+            </button>
+            <button mat-stroked-button color="warn" (click)="closeUploadDocumentId()">Close</button>
+        </mat-dialog-actions>
+    </div>
+</ng-template>
+<!-- Bulk Add Pop-up end  -->
+
+<!-- search locatioin dialog model start -->
+<ng-template #searchLocationDialog>
+    <div class="container-fluid p-0">
+        <div class="dialog-header dialog-title">
+            Search Location
+            <span>
+                <a mat-icon-button (click)="closeDialog()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <mat-dialog-content>
+            <form [formGroup]="searchLocationForm" (ngSubmit)="searchLocation()">
+                <div class="row">
+                    <div class="col-md-6 mb-4 my-4">
+                        <label for="name" class="inputLabel">Search Location Name</label>
+                        <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                            <input id="name" class="input-p-5" matInput placeholder="Enter Location Name "
+                                formControlName="searchLocationname" [readOnly]="isserviceAreaEdit"
+                                (blur)="onSiteNameChange($event)" />
+
+                            <mat-error *ngIf="
+                  (submitted || searchLocationForm.get('searchLocationname')?.errors) &&
+                  searchLocationForm.get('searchLocationname')?.errors as errors
+                ">
+                                <span *ngIf="errors['required']"> Search Name is required. </span>
+                                <span *ngIf="errors['cannotContainSpace']"> White space are not allowed. </span>
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+                    <div class="col-md-6 searclocation-btn">
+                        <button mat-flat-button color="primary" class="location-btn" type="submit"
+                            [disabled]="!searchLocationForm.valid">
+                            Search
+                        </button>
+                        <button mat-stroked-button class="location-btn" type="button" (click)="clearLocationForm()">
+                            Clear
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Location Table -->
+            <div class="" style="margin-top: 1rem">
+                <table mat-table [dataSource]="searchLocationData" class="mat-elevation-z1 w-100">
+                    <!-- Name Column -->
+                    <ng-container matColumnDef="name">
+                        <th mat-header-cell *matHeaderCellDef style="width: 35%">Name</th>
+                        <td mat-cell *matCellDef="let element" class="HoverEffect"
+                            (click)="filedLocation(element.placeId)" matTooltip="Set value Latitude & Longitude">
+                            {{ element.name }}
+                        </td>
+                    </ng-container>
+
+                    <!-- Address Column -->
+                    <ng-container matColumnDef="address">
+                        <th mat-header-cell *matHeaderCellDef style="width: 65%">Address</th>
+                        <td mat-cell *matCellDef="let element">{{ element.address }}</td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="['name', 'address']"></tr>
+                    <tr mat-row *matRowDef="let row; columns: ['name', 'address']"></tr>
+                </table>
+
+                <!-- Pagination -->
+                <mat-paginator [length]="searchLocationtotalRecords" [pageSize]="searchLocationItemPerPage"
+                    [pageSizeOptions]="[5, 10,  20, 50, 100]" (page)="pageChangedSearchLocationList($event)">
+                </mat-paginator>
+            </div>
+        </mat-dialog-content>
+
+        <mat-dialog-actions align="center">
+            <button mat-stroked-button matButton="outlined" class="button-normal" (click)="closeDialog()">
+                Close
+            </button>
+        </mat-dialog-actions>
+    </div>
+</ng-template>
+<!-- search locatioin dialog model end -->
+
+<!-- Inventory status Progress dialog model start -->
+<ng-template #inventoryStatusDialog>
+    <div class="container-fluid p-0">
+        <div class="dialog-header dialog-title">
+            Inventory Progress
+            <span>
+                <a mat-icon-button (click)="closeDialog()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <mat-card-content>
+            <div class="row">
+                <!-- Progress Bar -->
+                <div class="col-lg-12 col-md-12">
+                    <div class="progressbarWrap">
+                        <div class="circleWrap" *ngFor="let data of inventoryStatusDetails; let isLast = last"
+                            [ngClass]="{
+                'status-success': data.status === 'Approved',
+                'status-info': data.status === 'inprogress'
+              }">
+                            <div class="circledv completedWorkFlowClass">
+                                <ng-container *ngIf="data.status === 'Approved'">
+                                    <a mat-icon-button class="d-flex align-items-center justify-content-center">
+                                        <img src="assets/img/DashboardIcons/Assign.svg">
+                                    </a>
+                                </ng-container>
+                            </div>
+                            <p>{{ data.teamName }}</p>
+                            <ng-container *ngIf="!isLast">
+                                <div class="lines">
+                                    <div class="line"></div>
+                                </div>
+                            </ng-container>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Workflow Audit Table -->
+                <div class="col-lg-12 col-md-12 mt-4">
+                    <h3 class="heading-title m-15">Workflow Audit</h3>
+                    <div class="mat-elevation-z2">
+                        <table mat-table [dataSource]="workflowAuditDataI" matSort class="full-width-table">
+                            <!-- Customer Name Column -->
+                            <ng-container matColumnDef="customer">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header>Customer Name</th>
+                                <td mat-cell *matCellDef="let data">
+                                    <div *ngIf="data.entityName">{{ data.entityName }}</div>
+                                    <div *ngIf="data.planName">{{ data.planName }}</div>
+                                </td>
+                            </ng-container>
+
+                            <!-- Action Column -->
+                            <ng-container matColumnDef="action">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header>Action</th>
+                                <td mat-cell *matCellDef="let data">{{ data.action }}</td>
+                            </ng-container>
+
+                            <!-- Staff Name Column -->
+                            <ng-container matColumnDef="staff">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header>Staff Name</th>
+                                <td mat-cell *matCellDef="let data">{{ data.actionByName }}</td>
+                            </ng-container>
+
+                            <!-- Remark Column -->
+                            <ng-container matColumnDef="remark">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header>Remark</th>
+                                <td mat-cell *matCellDef="let data">{{ data.remark }}</td>
+                            </ng-container>
+
+                            <!-- Action Date Column -->
+                            <ng-container matColumnDef="date">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header>Action Date</th>
+                                <td mat-cell *matCellDef="let data">
+                                    {{ data.actionDateTime | date: "dd-MM-yyyy hh:mm a" }}
+                                </td>
+                            </ng-container>
+
+                            <!-- Table Header & Rows -->
+                            <tr mat-header-row *matHeaderRowDef="['customer', 'action', 'staff', 'remark', 'date']">
+                            </tr>
+                            <tr mat-row
+                                *matRowDef="let row; columns: ['customer', 'action', 'staff', 'remark', 'date']"></tr>
+                        </table>
+
+                        <mat-paginator [pageSize]="MasteritemsPerPageI" [pageIndex]="currentPageMasterSlabI - 1"
+                            [length]="MastertotalRecordsI" [pageSizeOptions]="[5, 10, 20, 50, 100]"
+                            (page)="pageChangedMasterListI($event)">
+                        </mat-paginator>
+                    </div>
+                </div>
+            </div>
+        </mat-card-content>
+
+        <mat-card-actions align="end">
+            <button mat-stroked-button matButton="outlined" class="button-normal" mat-dialog-close>
+                Close
+            </button>
+        </mat-card-actions>
+    </div>
+</ng-template>
+<!-- Inventory status Progress dialog model end --->
+
+<!-- replace Inventory Progress start -->
+<ng-template #inventoryReplaceDialog>
+    <div class="container-fluid p-0">
+        <div class="dialog-header dialog-title">
+            Replace Inventory Progress
+            <span>
+                <a mat-icon-button (click)="closeDialog()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <!-- Content -->
+        <mat-card-content>
+            <div class="row">
+                <!-- Progress Bar Section -->
+                <div class="col-12">
+                    <div class="progressbarWrap">
+                        <div class="circleWrap" *ngFor="let data of inventoryStatusDetailsForReplace; let isLast = last"
+                            [ngClass]="{
+                'status-success': data.status === 'Approved',
+                'status-info': data.status === 'inprogress'
+              }">
+                            <div class="circledv completedWorkFlowClass">
+                                <ng-container *ngIf="data.status === 'Approved'">
+                                    <a mat-icon-button class="d-flex align-items-center justify-content-center">
+                                        <img src="assets/img/DashboardIcons/Assign.svg">
+                                    </a>
+                                </ng-container>
+                            </div>
+                            <p>{{ data.teamName }}</p>
+                            <ng-container *ngIf="!isLast">
+                                <div class="lines">
+                                    <div class="line"></div>
+                                </div>
+                            </ng-container>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </mat-card-content>
+
+        <!-- Footer -->
+        <mat-card-actions align="end">
+            <button mat-stroked-button matButton="outlined" class="button-normal" mat-dialog-close>
+                Close
+            </button>
+        </mat-card-actions>
+    </div>
+</ng-template>
+<!-- replace Inventory Progress end -->
+
+<!-- assign staff dialog model start -->
+<ng-template #assignCustomerInventoryDialog>
+    <div class="container-fluid p-0">
+        <div class="dialog-header dialog-title">
+            Assign Staff
+            <span>
+                <a mat-icon-button (click)="closeDialog()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <mat-card-content>
+            @if (approved) {
+            <div>
+                <h5 class="inputLabel">Select Staff</h5>
+
+                <table mat-table [dataSource]="approveInventoryData" class="mat-elevation-z2">
+                    <!-- Radio Button Column -->
+                    <ng-container matColumnDef="select">
+                        <th mat-header-cell *matHeaderCellDef style="width: 3rem"></th>
+                        <td mat-cell *matCellDef="let row">
+                            <mat-radio-button [value]="row.id" name="selectedStaff" [(ngModel)]="selectStaff">
+                            </mat-radio-button>
+                        </td>
+                    </ng-container>
+
+                    <!-- Name Column -->
+                    <ng-container matColumnDef="name">
+                        <th mat-header-cell *matHeaderCellDef>Name</th>
+                        <td mat-cell *matCellDef="let row">{{ row.fullName }}</td>
+                    </ng-container>
+
+                    <!-- Username Column -->
+                    <ng-container matColumnDef="username">
+                        <th mat-header-cell *matHeaderCellDef>Username</th>
+                        <td mat-cell *matCellDef="let row">{{ row.username }}</td>
+                    </ng-container>
+
+                    <!-- Header and Row Definitions -->
+                    <tr mat-header-row *matHeaderRowDef="['select', 'name', 'username']"></tr>
+                    <tr mat-row *matRowDef="let row; columns: ['select', 'name', 'username']"></tr>
+                </table>
+            </div>
+            }
+        </mat-card-content>
+
+        <!-- Footer -->
+        <mat-card-actions align="end" style="margin-top: 10px">
+            @if (reject && !selectStaffReject) {
+            <button mat-button mat-flat-button color="primary" disabled class="button-normal"
+                (click)="assignToStaff(false)">
+                Assign
+            </button>
+            }
+            @if (reject && selectStaffReject) {
+            <button mat-button mat-flat-button color="primary" disabled class="button-normal"
+                (click)="assignToStaff(false)">
+                Assign
+            </button>
+            }
+            <button mat-stroked-button matButton="outlined" class="button-normal" mat-dialog-close>
+                Close
+            </button>
+        </mat-card-actions>
+    </div>
+</ng-template>
+<!-- assign staff dialog model end -->
+
+<!-- assign staff reject customer inventory dialog start -->
+<ng-template #rejectCustomerInventoryDialog>
+    <div class="container-fluid p-0">
+        <div class="dialog-header dialog-title">
+            Assign Staff
+            <span>
+                <a mat-icon-button (click)="closeDialog()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <!-- Content -->
+        <mat-card-content>
+            <div *ngIf="reject">
+                <h5 class="inputLabel">Select Staff</h5>
+
+                <table mat-table [dataSource]="rejectInventoryData" class="mat-elevation-z2">
+                    <!-- Radio Button Column -->
+                    <ng-container matColumnDef="select">
+                        <th mat-header-cell *matHeaderCellDef style="width: 3rem"></th>
+                        <td mat-cell *matCellDef="let row">
+                            <mat-radio-button [value]="row.id" name="selectedStaffReject"
+                                [(ngModel)]="selectStaffReject">
+                            </mat-radio-button>
+                        </td>
+                    </ng-container>
+
+                    <!-- Name Column -->
+                    <ng-container matColumnDef="name">
+                        <th mat-header-cell *matHeaderCellDef>Name</th>
+                        <td mat-cell *matCellDef="let row">{{ row.fullName }}</td>
+                    </ng-container>
+
+                    <!-- Username Column -->
+                    <ng-container matColumnDef="username">
+                        <th mat-header-cell *matHeaderCellDef>Username</th>
+                        <td mat-cell *matCellDef="let row">{{ row.username }}</td>
+                    </ng-container>
+
+                    <!-- Header and Row Definitions -->
+                    <tr mat-header-row *matHeaderRowDef="['select', 'name', 'username']"></tr>
+                    <tr mat-row *matRowDef="let row; columns: ['select', 'name', 'username']"></tr>
+                </table>
+            </div>
+        </mat-card-content>
+
+        <!-- Footer -->
+        <mat-card-actions align="end" style="margin-top: 10px">
+            @if (reject && !selectStaffReject) {
+            <button mat-button mat-flat-button color="primary" disabled class="button-normal"
+                (click)="assignToStaff(false)">
+                Assign
+            </button>
+            }
+            @if (reject && selectStaffReject) {
+            <button mat-button mat-flat-button color="primary" disabled class="button-normal"
+                (click)="assignToStaff(false)">
+                Assign
+            </button>
+            }
+            <button mat-stroked-button matButton="outlined" class="button-normal" mat-dialog-close>
+                Close
+            </button>
+        </mat-card-actions>
+    </div>
+</ng-template>
+
+<!--  assign staff reject customer inventory dialog end-->
+
+
+<!-- view detail template start -->
+<ng-template #viewserviceAreaDialog>
+    <div class="container-fluid p-0">
+        <div class="dialog-header dialog-title">
+            View Service Area
+            <span>
+                <a mat-icon-button (click)="closeviewDialog()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <mat-dialog-content>
+            <div class="row p-15 m-t-10">
+                <!-- Name -->
+                <div class="col-md-4 field-row detail-row">
+                    <span class="field-label f-s-15 f-w-700 label">Name</span>
+                    <span class="field-label f-s-15 f-w-700 colon" style="margin-left: 24px;">:</span>
+                    <span class="field-value value m-l-10">{{ viewDataService.name }}</span>
+                </div>
+
+                <!-- Status -->
+                <div class="col-md-4 field-row detail-row">
+                    <span class="field-label f-s-15 f-w-700 label">Site Name</span>
+                    <span class="field-label f-s-15 f-w-700 colon">:</span>
+                    <span class="field-value value m-l-10">{{viewDataService.siteName[0] || '-' }}</span>
+                </div>
+
+                <!-- Response Time -->
+                <div class="col-md-4 field-row detail-row">
+                    <span class="field-label f-s-15 f-w-700 label">City</span>
+                    <span class="field-label f-s-15 f-w-700 colon">:</span>
+                    <span class="field-value value m-l-10">{{cityName }}</span>
+                </div>
+
+                <div class="col-md-4 field-row detail-row">
+                    <span class="field-label f-s-15 f-w-700 label">Service Area Type</span>
+                    <span class="field-label f-s-15 f-w-700 colon">:</span>
+                    <span class="field-value value m-l-10">{{viewDataService.serviceAreaType }}</span>
+                </div>
+
+                <div class="col-md-4 field-row detail-row">
+                    <span class="field-label f-s-15 f-w-700 label">Latitude</span>
+                    <span class="field-label f-s-15 f-w-700 colon">:</span>
+                    <span class="field-value value m-l-10">{{viewDataService.latitude }}</span>
+                </div>
+                <div class="col-md-4 field-row detail-row">
+                    <span class="field-label f-s-15 f-w-700 label">Longitude</span>
+                    <span class="field-label f-s-15 f-w-700 colon">:</span>
+                    <span class="field-value value m-l-10">{{viewDataService.longitude }}</span>
+                </div>
+                <div class="col-md-4 field-row detail-row">
+                    <span class="field-label f-s-15 f-w-700 label">Radius(KM)</span>
+                    <span class="field-label f-s-15 f-w-700 colon" style="margin-left: 24px;">:</span>
+                    <span class="field-value value m-l-10">{{viewDataService.radius }}</span>
+                </div>
+                <!-- <div class="col-md-4 field-row detail-row">
+                    <span class="field-label f-s-15 f-w-700 label">Location</span>
+                    <span class="field-label f-s-15 f-w-700 colon">:</span>
+                    <span class="field-value value m-l-10">{{viewDataService.locationIds[0] }}</span>
+                </div> -->
+                <div class="col-md-4 field-row detail-row">
+                    <span class="field-label f-s-15 f-w-700 label">Status</span>
+                    <span class="field-label f-s-15 f-w-700 colon">:</span>
+                    <span class="field-value value m-l-10">{{viewDataService.status }}</span>
+                </div>
+
+            </div>
+        </mat-dialog-content>
+
+        <mat-dialog-actions align="end">
+            <button mat-stroked-button color="warn" (click)="closeviewDialog()">Close</button>
+        </mat-dialog-actions>
+    </div>
+</ng-template>
+<!-- view detail template end  -->

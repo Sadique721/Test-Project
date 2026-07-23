@@ -1,0 +1,332 @@
+
+version: '3'
+services:
+
+    kafka:
+      image: dirainfotech/kafka:latest
+      restart: always
+      container_name: kafka
+      depends_on:
+        - zookeeper
+      environment:
+        - KAFKA_BROKER_ID=1
+        - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
+        - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:30084,PLAINTEXT_HOST://localhost:29092
+        - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:30084,PLAINTEXT_HOST://localhost:29092
+        - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+        - KAFKA_LISTENER_NAME=PLAINTEXT
+        - KAFKA_LISTENER_PORT=29092
+        - KAFKA_LISTENER_HOSTNAME=0.0.0.0
+        - KAFKA_LISTENER_INTER_BROKER_SECURITY_PROTOCOL=PLAINTEXT
+        - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+        - KAFKA_ZOOKEEPER_SYNC_TIME=3000
+        - KAFKA_REPLICA_FETCH_MAX_BYTES=2000000000  # Increase to 1 GB
+        - KAFKA_MAX_REQUEST_SIZE=2000000000        # Increase to 1 GB
+        - KAFKA_LOG_MESSAGE_MAX_BYTES=2000000000   # 1 GB (log segment size)
+        - KAFKA_MESSAGE_MAX_BYTES=2000000000       # 1 GB (maximum message size allowed)
+        - KAFKA_SOCKET_RECEIVE_BUFFER_BYTES=1048576000  # 1 GB (increase socket receive buffer)
+        - KAFKA_SOCKET_SEND_BUFFER_BYTES=1048576000    # 1 GB (increase socket send buffer)
+        - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+        - KAFKA_SOCKET_REQUEST_MAX_BYTES=1200000000
+        - KAFKA_HEAP_OPTS=-Xms4G -Xmx16G
+      user: "0:0"
+      ports:
+        - 29092:29092
+        - 30084:30084
+        - 9092:9092
+      volumes:
+        - ./docker/kafka/logs2:/var/lib/kafka/data
+      networks:
+        - diameterdocker-network
+
+    kafka_gui:
+      image: dirainfotech/kafkagui
+      container_name: kafka_gui
+      restart: always
+      ports:
+        - 8089:8080
+      environment:
+        AKHQ_CONFIGURATION: |
+          akhq:
+            connections:
+              kafka-cluster:
+                properties:
+                  bootstrap.servers: kafka:30084
+                # AKHQ will connect to the listed brokers
+                # These can be external IPs or container IPs if running in a single network
+      depends_on:
+        - kafka
+      networks:
+        - diameterdocker-network
+
+    zookeeper:
+      image: dirainfotech/zookeeper
+      restart: always
+      container_name: zookeeper
+      environment:
+        ZOOKEEPER_CLIENT_PORT: 2181
+        ZOOKEEPER_TICK_TIME: 2000
+        ZOOKEEPER_SERVER_ID: 2
+        ZOOKEEPER_PEER_PORT: 2888
+        ZOOKEEPER_LEADER_PORT: 3888
+        ZOOKEEPER_INIT_LIMIT: 5
+        ZOOKEEPER_SYNC_LIMIT: 2
+        ZOOKEEPER_SERVERS: localhost:2888:3888 #;zookeeper3:2888:3888
+      ports:
+        - 12181:2181
+        - 2888:2888
+        - 3888:3888
+      volumes:
+        - ./docker/zookeeper/log:/var/lib/zookeeper/log
+        - ./docker/zookeeper/secrets:/etc/zookeeper/secrets
+        - ./docker/zookeeper/data:/var/lib/zookeeper/data
+      user: "0:0"
+      networks:
+        - diameterdocker-network
+ 
+    eureka:
+        container_name: eureka
+        image: dirainfotech/eureka:V-1.1
+        restart: always
+        ports:
+            - 8761:8761
+        volumes:
+            - "/root/ssl/:/root"
+        environment:
+           - TZ=Asia/Kolkata
+           - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://localhost:8761/eureka
+           - server.ssl.enabled=false
+           - server.ssl.key-store=/root/Cert1.pfx
+           - server.ssl.key-store-type=pkcs12
+           - server.ssl.key-store-password=secret
+           - server.ssl.key-password=secret
+           - eureka.client.fetch-registry=true
+           - eureka.server.peerReplication=true
+        networks:
+           - diameterdocker-network
+
+    mysql:
+      container_name: mysql
+      image: 'mysql/mysql-server:8.0'
+      restart: always
+      ports:
+        - 3308:3306
+      command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --lower_case_table_names=1 --max_connections=5000 --log_bin_trust_function_creators=1 --server_id=2 --binlog_checksum=NONE --gtid_mode=ON --enforce_gtid_consistency=ON --log_bin --log_slave_updates=ON --master_info_repository=TABLE --relay_log_info_repository=TABLE --transaction_write_set_extraction=XXHASH64 --user=mysql --skip-host-cache --skip-name-resolve --default_authentication_plugin=mysql_native_password --bind-address=0.0.0.0 --port=3306
+      security_opt:
+        - seccomp:unconfined
+      volumes:
+        - ./docker/provision/mysql/init:/docker-entrypoint-initdb.d
+        - dbdata:/var/lib/mysql
+      environment:
+        - MYSQL_ROOT_PASSWORD=diameterserver@2024@db
+        - TZ=Asia/Kolkata
+      networks:
+        - diameterdocker-network
+        
+    mysql_performance_testing:
+      container_name: mysql_performance_testing
+      image: 'mysql/mysql-server:8.0'
+      restart: always
+      ports:
+        - 3307:3306
+      command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --lower_case_table_names=1 --max_connections=5000 --log_bin_trust_function_creators=1 --server_id=2 --binlog_checksum=NONE --gtid_mode=ON --enforce_gtid_consistency=ON --log_bin --log_slave_updates=ON --master_info_repository=TABLE --relay_log_info_repository=TABLE --transaction_write_set_extraction=XXHASH64 --user=mysql --skip-host-cache --skip-name-resolve --default_authentication_plugin=mysql_native_password --bind-address=0.0.0.0 --port=3306
+      security_opt:
+        - seccomp:unconfined
+      volumes:
+        - ./docker/provision/mysql/init:/docker-entrypoint-initdb.d
+        - dbdata_performance_testing:/var/lib/mysql
+      environment:
+        - MYSQL_ROOT_PASSWORD=diameterserver@2024@db
+        - TZ=Asia/Kolkata
+      networks:
+        - diameterdocker-network
+    
+    # commongateway:
+    #   container_name: commongateway
+    #   image: dirainfotech/commongateway:latest
+    #   restart: always
+    #   ports:
+    #     - 30080:30080
+    #     - 9137:9137
+    #     - 9138:9138
+    #   environment:
+    #     - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka
+    #     - spring.datasource.url=jdbc:mysql://mysql:3306/commongateway?allowPublicKeyRetrieval=true&useSSL=false&autoreconnect=true&createDatabaseIfNotExist=true
+    #     - spring.datasource.username=commongateway
+    #     - spring.datasource.password=commongateway
+    #     - javers.sqlSchema=commongateway
+    #     - spring.servlet.multipart.max-file-size=20MB
+    #     - spring.servlet.multipart.max-request-size=20MB
+    #     - sandbox.secret=secret_live_uUm2xgne8ypNSKj8NcQ9FeUht66ovE51
+    #     - sandbox.key=key_live_ldZF4r8GfEZwdB1vllGbbIc6W46pfqDv
+    #     - topicPartition=1
+    #     - replicationFactor=1
+    #     - server.ssl.enabled=false
+    #     - server.ssl.key-store=/root/cert.pfx
+    #     - server.ssl.key-store-type=pkcs12
+    #     - server.ssl.key-store-password=secret
+    #     - server.ssl.key-password=secret
+    #     - TZ=Asia/Yangon
+    #     - logging.level.com.savbill=DEBUG
+    #     - logging.level.root=INFO
+    #     - kafka-url=localhost:30084
+    #     - server.connection-timeout=800000
+    #     - zuul.host.socket-timeout-millis=800000
+    #     - zuul.host.connect-timeout-millis=10000
+    #     - ribbon.ReadTimeout=800000
+    #     - ribbon.ConnectTimeout=10000
+    #     - hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds=800000
+    #     - JAVA_OPTS=-Xms4g -Xmx8g -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -XX:ParallelGCThreads=4 -XX:ConcGCThreads=2 -XX:G1HeapRegionSize=32m -XX:InitiatingHeapOccupancyPercent=45 -XX:G1ReservePercent=10
+    #     - JAVA_TOOL_OPTIONS=-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.port=9137 -Dcom.sun.management.jmxremote.rmi.port=9138 -Djava.rmi.server.hostname=172.28.230.1 -Xms4g -Xmx8g -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -XX:ParallelGCThreads=4 -XX:ConcGCThreads=2 -XX:G1HeapRegionSize=32m -XX:InitiatingHeapOccupancyPercent=45 -XX:G1ReservePercent=10
+    #   networks:
+    #     - diameterdocker-network
+    #   volumes:
+    #     - diameterdoc:/var/document/
+    #     - /var/lib/docker/containers/savbill:/log
+    #     - "/etc/localtime:/etc/localtime:ro"
+    #     - "/root/ssl/:/root"
+    #   logging:
+    #      driver: "json-file"
+    #      options:
+    #        max-size: "10m"
+    #        max-file: "3"   
+    
+    # cpm:
+    #   container_name: cpm
+    #   image: dirainfotech/cpm:latest
+    #   restart: always
+    #   ports:
+    #     - 30086:30086
+    #     - 9135:9135
+    #     - 9136:9136
+    #   environment:
+    #     - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka
+    #     - eureka.instance.ip-address=172.28.230.1
+    #     - spring.datasource.url=jdbc:mysql://mysql:3306/Savbillcpm?allowPublicKeyRetrieval=true&useSSL=false&autoreconnect=true&createDatabaseIfNotExist=true
+    #     - kafka-url=localhost:30084
+    #     - voucher-encryption-key=12345678901234567890123456789012
+    #     - sandbox.secret=secret_live_uUm2xgne8ypNSKj8NcQ9FeUht66ovE51
+    #     - sandbox.key=key_live_ldZF4r8GfEZwdB1vllGbbIc6W46pfqDv
+    #     - server.ssl.enabled=false
+    #     - spring.datasource.username=Savbillcpm
+    #     - spring.datasource.password=Savbillcpm
+    #     - javers.sqlSchema=Savbillcpm
+    #     - server.ssl.key-store=/root/cert.pfx
+    #     - server.ssl.key-store-type=pkcs12
+    #     - server.ssl.key-store-password=secret
+    #     - server.ssl.key-password=secret
+    #     - TZ=Asia/Yangon
+    #     - server.port=30086
+    #     - cronJobTimeForAutomatePayment=0 0 0 31 12 ?
+    #     - cronJobTimeForTatMatrix=0 0 0-23/2 * * ?
+    #     - quotaexpiryjob=0 0 0 * * ?
+    #     - cronjobtimeforrefundrelease=0 0 0 */3 * *
+    #     - cronjobtimeforupdatecustomeranditsservice=0 0 0 31 12 ?
+    #     - cronJobTimeForPlanExpiryNotification=0 0 0 31 12 ?    
+    #     - cronJobTimeForDunning=0 2 0 * * ? #0 0/3 * * * ?
+    #     - cronJobTimeForPartnerCount=0 59 11 * * *
+    #       - cronJobTimeForServiceHold=0 0 0 * * ?
+    #     - cronjobforServiceResume=0 2 0 * * ?
+    #     - cronjobtimeforquotaresetdaymidnight=0 0 0 31 12 ?
+    #     - javers.sqlSchemaManagementEnabled=true
+    #     - logging.level.com.savbill=DEBUG
+    #     - logging.level.root=WARN
+    #     - spring.enable.quotareset.scheduling=false
+    #       - spring.redis.host=172.28.230.2
+    #     - spring.redis.password=root
+    #     - redis.sentinel.master=mymaster
+    #     - redis.sentinel.nodes=172.28.230.1:26379,172.28.230.2:26379,172.28.230.3:26379
+    #     - min-spare=300
+    #     - threads.max=1000
+    #     - accept-count=2000
+    #     - spring.datasource.hikari.maximum-pool-size=350
+    #     - spring.datasource.hikari.minimum-idle=50
+    #       - JAVA_OPTS=-Xms16g -Xmx32g -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -XX:ParallelGCThreads=4 -XX:ConcGCThreads=2 -XX:G1HeapRegionSize=32m -XX:InitiatingHeapOccupancyPercent=45 -XX:G1ReservePercent=10
+    #       - JAVA_TOOL_OPTIONS=-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.port=9135 -Dcom.sun.management.jmxremote.rmi.port=9136 -Djava.rmi.server.hostname=172.28.230.1 -Xms16g -Xmx32g -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -XX:ParallelGCThreads=4 -XX:ConcGCThreads=2 -XX:G1HeapRegionSize=32m -XX:InitiatingHeapOccupancyPercent=45 -XX:G1ReservePercent=10 
+    #   networks:
+    #      - diameterdocker-network
+    #   logging:
+    #      driver: "json-file"
+    #      options:
+    #        max-size: "100m"
+    #        max-file: "3"
+    #          deploy:
+    #          resources:
+    #          limits:
+    #          cpus: "8"
+    #          memory: "16G"
+    #   command:
+    #      - mkdir -p /var/document/custdoc
+    #      - mkdir -p /var/document/leaddoc
+    #      - mkdir -p /var/document/partnerdoc
+    #   volumes:
+    #    - diameterdoc:/var/document/
+    #    - /var/lib/docker/containers/savbill:/log
+    #    - "/etc/localtime:/etc/localtime:ro"
+    #    - "/root/docker/ssl/:/root"
+
+    # radius:
+    #   container_name: radius
+    #   image: dirainfotech/radius:latest
+    #   restart: always
+    #   ports:
+    #     - 9091:9091
+    #     - 3799:3799/udp
+    #     - 1812:1812/udp
+    #     - 1813:1813/udp
+    #     - 161:1615/udp
+    #     - 9127:9127
+    #     - 9128:9128
+    #   environment:
+    #     - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka
+    #     - eureka.instance.ip-address=172.28.230.1
+    #     - spring.datasource.url=jdbc:mysql://mysql:3306/savbillradius?allowPublicKeyRetrieval=true&useSSL=false&autoreconnect=true&createDatabaseIfNotExist=true
+    #     - kafka-url=localhost:30084
+    #     - server.ssl.enabled=false
+    #     - spring.datasource.username=savbillradius
+    #     - spring.datasource.password=savbillradius
+    #     - javers.sqlSchema=Savbillradius
+    #     - session.prune.cron.schedule=0 */10 * ? * *
+    #     - server.port=9091
+    #     - ip.pool.cron.schedule=0 */15 * ? * *
+    #     - session.mac.retention.schedule=0 5 0 * * ? #0 */5 * ? * *
+    #     - server.ssl.key-store=/root/Cert1.pfx
+    #     - server.ssl.key-store-password=secret
+    #     - server.ssl.key-password=secret
+    #     - spring.enable.planexpiry.scheduling=false
+    #     - radius.postpaid.plan.expiry.schedule=0 0 0 31 12 ?
+    #     - TZ=Asia/Yangon
+    #     - radius.authentication.type=dependent
+    #     - logging.level.root=WARN
+    #     - logging.level.com.adopt=WARN
+    #     - spring.redis.host=172.28.230.2
+    #     - spring.redis.password=root
+    #     - redis.sentinel.master=mymaster
+    #     - redis.sentinel.nodes=172.28.230.1:26379,172.28.230.2:26379,172.28.230.3:26379
+    #     - spring.zipkin.enabled=false
+    #     - authMinPort=500
+    #     - authMaxPort=500
+    #     - acctMinPort=500
+    #     - acctMaxPort=500
+    #     - dbMinPool=1000
+    #     - dbMaxPool=1000
+    #     - dbIdleTime=2000
+    #   networks:
+    #     - diameterdocker-network
+    #   volumes:
+    #     - /var/lib/docker/containers/savbill:/log
+    #     - "/etc/localtime:/etc/localtime:ro"
+    #     - /root/docker/vlan:/var/document/bulkvlanpath/
+    #   logging:
+    #      driver: "json-file"
+    #      options:
+    #        max-size: "10m"
+    #        max-file: "3"
+
+volumes:
+   dbdata:
+   diameterdoc:
+   dbdata_performance_testing:
+
+networks:
+  diameterdocker-network:

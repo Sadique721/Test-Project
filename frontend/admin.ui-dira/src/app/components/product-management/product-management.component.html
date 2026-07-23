@@ -1,0 +1,852 @@
+<div class="container-fluid">
+    <!-- List View -->
+    <!-- List View -->
+    @if (listview) {
+    <div class="row header-row">
+        <mat-card class="cardWithShadow w-100">
+            <mat-card-content class="mat-card-content-border">
+                <div class="row">
+                    <!-- Left side - Search Controls -->
+                    <div class="col-sm-10">
+                        <div class="row">
+                            <!-- Search Option Dropdown -->
+                            <div class="col-lg-3 col-md-3 p-0 m-0">
+                                <mat-form-field appearance="outline" class="w-100 hide-hint mr-10 header-input"
+                                    style="padding-left: 16px">
+                                    <mat-select class="input-p-5" [(ngModel)]="searchOption"
+                                        placeholder="Search Option">
+                                        <mat-option value="">All</mat-option>
+                                        <mat-option value="name">Name</mat-option>
+                                        <mat-option value="status">Status</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Search Input -->
+                            <div class="col-lg-3 col-md-3 p-0 m-0">
+                                <mat-form-field appearance="outline" class="w-100 hide-hint mr-10 header-input"
+                                    style="padding-left: 8px">
+                                    <input matInput class="input-p-5" [(ngModel)]="searchProductName"
+                                        placeholder="Search" title (keydown.enter)="searchProduct()" />
+                                    <mat-icon matSuffix class="search-header-search-icon">
+                                        <i class="pi pi-search icon-size"></i>
+                                    </mat-icon>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Buttons -->
+                            <div class="col-lg-3 col-md-3 d-flex p-0 m-0 search-div">
+                                <button mat-button mat-flat-button color="primary" class="button-normal m-r-10"
+                                    (click)="searchProduct()" style="margin-left: 8px">
+                                    Search
+                                </button>
+                                <button mat-stroked-button matButtonOutlined class="button-normal"
+                                    (click)="clearSearchProduct()">
+                                    Clear
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right side - Add Product Button -->
+                    <div class="col-sm-2 search-div p-0 m-0">
+
+                        <button mat-button mat-flat-button color="primary" (click)="createProduct()"
+                            class="button-normal m-r-10" style="width: auto" title>
+                            Add Product
+                        </button>
+
+                    </div>
+                </div>
+
+                <!-- Material Table -->
+                <div class="country-table-list">
+                    <div class="example-container mat-elevation-z8" tabindex="0">
+                        <table mat-table [dataSource]="dataSource">
+                            <!-- Name Column -->
+                            <ng-container matColumnDef="name" sticky>
+                                <th mat-header-cell *matHeaderCellDef class="f-w-600 table-header-title">Name</th>
+                                <td mat-cell *matCellDef="let product">{{ product.name }}</td>
+                            </ng-container>
+
+                            <!-- Warranty Time Column -->
+                            <ng-container matColumnDef="warrantyTime">
+                                <th mat-header-cell *matHeaderCellDef class="f-w-600 table-header-title">
+                                    Warranty Time
+                                </th>
+                                <td mat-cell *matCellDef="let product">{{ product.expiryTime }}</td>
+                            </ng-container>
+
+                            <!-- Warranty Time Unit Column -->
+                            <ng-container matColumnDef="warrantyTimeUnit">
+                                <th mat-header-cell *matHeaderCellDef class="f-w-600 table-header-title">
+                                    Warranty Time Unit
+                                </th>
+                                <td mat-cell *matCellDef="let product">{{ product.expiryTimeUnit }}</td>
+                            </ng-container>
+
+                            <!-- Type Column -->
+                            <ng-container matColumnDef="type">
+                                <th mat-header-cell *matHeaderCellDef class="f-w-600 table-header-title">Type</th>
+                                <td mat-cell *matCellDef="let product">{{ product.productCategory.type }}</td>
+                            </ng-container>
+
+                            <!-- Status Column -->
+                            <ng-container matColumnDef="status">
+                                <th mat-header-cell *matHeaderCellDef class="f-w-600 table-header-title">
+                                    Status
+                                </th>
+                                <td mat-cell *matCellDef="let product">
+                                    <span class="status-badge" [ngClass]="{
+                        'status-success': product.status?.toLowerCase() === 'active',
+                        'status-danger': product.status?.toLowerCase() === 'inactive'
+                      }">
+                                        <span *ngIf="product.status?.toLowerCase() === 'active'">Active</span>
+                                        <span *ngIf="product.status?.toLowerCase() === 'inactive'">Inactive</span>
+                                    </span>
+                                </td>
+                            </ng-container>
+
+                            <!-- Action Column -->
+                            <ng-container matColumnDef="action" stickyEnd>
+                                <th mat-header-cell *matHeaderCellDef class="f-w-600 table-header-title"
+                                    aria-label="row actions">
+                                    Action
+                                </th>
+                                <td mat-cell *matCellDef="let product">
+                                    <div class="d-flex">
+                                        <a mat-icon-button href="javascript:void(0)"
+                                            (click)="getProductManagementDetails(product.id)"
+                                            matTooltip="View Product Details">
+                                            <img src="assets/img/DashboardIcons/eye-svgrepo-com (1) 1.svg">
+                                        </a>
+                                        @if (editAccess) {
+                                        <a mat-icon-button href="javascript:void(0)" (click)="editProduct(product.id)">
+                                            <img src="assets/img/DashboardIcons/Edit.svg">
+                                        </a>
+                                        }
+                                        @if (deleteAccess) {
+                                        <a mat-icon-button href="javascript:void(0)"
+                                            (click)="deleteConfirmProduct(product.id)">
+                                            <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                        </a>
+                                        }
+                                    </div>
+                                </td>
+                            </ng-container>
+
+                            <tr mat-header-row *matHeaderRowDef="getDisplayedPlanDetailsColumns()"></tr>
+                            <tr mat-row *matRowDef="let row; columns: getDisplayedPlanDetailsColumns()"></tr>
+
+                            <!-- No Data Row -->
+                            <tr class="mat-row" *matNoDataRow>
+                                <td class="mat-cell text-center" [attr.colspan]="displayedColumns.length">
+                                    No products found
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <mat-paginator [length]="productListdatatotalRecords" [pageSize]="productListdataitemsPerPage"
+                        [pageSizeOptions]="[5,10,20,50,100]" (page)="onPageChange($event)" showFirstLastButtons>
+                    </mat-paginator>
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+    }
+
+    <!-- Create/Edit View with Stepper -->
+    @if (createView) {
+    <div class="row header-row">
+        <mat-card class="cardWithShadow w-100">
+            <mat-card-header>
+                <mat-card-title-group>
+                    <mat-card-title>
+                        <div>{{ editMode ? "Update" : "Create" }} Product</div>
+                    </mat-card-title>
+                    <div>
+                        <span>
+                            <a mat-icon-button href="javascript:void(0)" (click)="productListView()">
+                                <img src="assets/img/DashboardIcons/Reject.svg">
+
+
+                            </a>
+                        </span>
+                    </div>
+                </mat-card-title-group>
+            </mat-card-header>
+
+            <mat-card-content class="mat-card-content-border">
+                <form [formGroup]="productFormGroup">
+                    @if (!createAccess && !editAccess) {
+                    <mat-card-content class="matcard-content">
+                        <div class="panel-body table-responsive">
+                            Sorry you have not privilege to create operation!
+                        </div>
+                    </mat-card-content>
+                    }
+                    @if (createAccess || editAccess) {
+                    <mat-stepper linear #stepper>
+                        <!-- Step 1: Basic Details -->
+                        <mat-step [stepControl]="step1Group">
+                            <ng-template matStepLabel>Basic Details</ng-template>
+
+                            <div class="row">
+                                <!-- Product Name -->
+                                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="inputLabel">Product Name *</label>
+                                    <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                        <input matInput class="input-p-5" formControlName="name"
+                                            placeholder="Enter Product Name" type="text" />
+                                        <mat-error *ngIf="productFormGroup.controls.name.errors?.required">
+                                            Product Name is required.
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Product ID -->
+                                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="inputLabel">Product ID</label>
+                                    <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                        <input matInput class="input-p-5" formControlName="productId"
+                                            placeholder="Enter Product ID" type="text" />
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Ledger ID -->
+                                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="inputLabel">Ledger ID</label>
+                                    <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                        <input matInput class="input-p-5" formControlName="navLedgerId"
+                                            placeholder="Enter Ledger ID" type="text" />
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Product Category -->
+                                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="inputLabel">Product Category *</label>
+                                    <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                        <mat-select class="input-p-5" formControlName="productCategory"
+                                            placeholder="Select Product Category"
+                                            (selectionChange)="optionProductCategoryParameter()">
+                                            <mat-option *ngFor="let category of productCatagorys" [value]="category.id">
+                                                {{ category.name }}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error *ngIf="productFormGroup.controls.productCategory.errors?.required">
+                                            Product Category is required.
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Status -->
+                                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="inputLabel">Status *</label>
+                                    <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                        <mat-select class="input-p-5" formControlName="status"
+                                            placeholder="Select Status">
+                                            <mat-option *ngFor="let stat of status" [value]="stat.value">
+                                                {{ stat.label }}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error *ngIf="productFormGroup.controls.status.errors?.required">
+                                            Status is required.
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Vendor/Manufacturer -->
+                                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="inputLabel">Manufacturer *</label>
+                                    <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                        <mat-select class="input-p-5" formControlName="vendorId"
+                                            placeholder="Select Manufacturer">
+                                            <mat-option *ngFor="let vendor of allVendor" [value]="vendor.id">
+                                                {{ vendor.name }}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error *ngIf="productFormGroup.controls.vendorId.errors?.required">
+                                            Manufacturer is required.
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Warranty Time -->
+                                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="inputLabel">Warranty Time *</label>
+                                    <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                        <input matInput class="input-p-5" type="number" formControlName="expiryTime"
+                                            placeholder="Enter Warranty Time" />
+                                        <mat-error *ngIf="productFormGroup.controls.expiryTime.errors?.required">
+                                            Warranty Time is required.
+                                        </mat-error>
+                                        <mat-error *ngIf="warrentyError">
+                                            Warranty time must be greater than 0.
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Warranty Time Unit -->
+                                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="inputLabel">Warranty Time Unit *</label>
+                                    <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                        <mat-select class="input-p-5" formControlName="expiryTimeUnit"
+                                            placeholder="Select Time Unit">
+                                            <mat-option *ngFor="let unit of timeUnitData" [value]="unit.text">
+                                                {{ unit.text }}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error *ngIf="productFormGroup.controls.expiryTimeUnit.errors?.required">
+                                            Warranty Time Unit is required.
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Port Configuration (if applicable) -->
+                                @if (specificationParametersDTOList.length > 0) {
+                                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="inputLabel">In Ports *</label>
+                                    <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                        <input matInput class="input-p-5" type="number" formControlName="totalInPorts"
+                                            placeholder="Enter Total In Ports" (keyup)="onKeyTotalInPort($event)" />
+                                    </mat-form-field>
+                                </div>
+                                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="inputLabel">Available In Ports *</label>
+                                    <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                        <input matInput class="input-p-5" type="number"
+                                            formControlName="availableInPorts" placeholder="Enter Available In Ports"
+                                            readonly />
+                                    </mat-form-field>
+                                </div>
+                                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="inputLabel">Out Ports *</label>
+                                    <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                        <input matInput class="input-p-5" type="number" formControlName="totalOutPorts"
+                                            placeholder="Enter Total Out Ports" (keyup)="onKeyTotalOutPort($event)" />
+                                    </mat-form-field>
+                                </div>
+                                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="inputLabel">Available Out Ports *</label>
+                                    <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                        <input matInput class="input-p-5" type="number"
+                                            formControlName="availableOutPorts" placeholder="Enter Available Out Ports"
+                                            readonly />
+                                    </mat-form-field>
+                                </div>
+                                }
+
+                                <!-- CAS Package (if applicable) -->
+                                @if (ifSpliterCASDropdownShow) {
+                                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="inputLabel">CAS Package</label>
+                                    <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                        <mat-select class="input-p-5" formControlName="caseId">
+                                            <mat-option *ngFor="let pkg of casePacakeges" [value]="pkg.id">
+                                                {{ pkg.name }}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+                                }
+
+                                <!-- OEM and Asset Checkboxes -->
+                                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="inputLabel">Is OEM Consider</label>
+                                    <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                        <mat-select class="input-p-5" placeholder="Select a VLAN"
+                                            formControlName="hasOEMConsider">
+                                            <mat-option [value]="true">Yes</mat-option>
+                                            <mat-option [value]="false">No</mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="inputLabel"> Is Asset Consider</label>
+                                    <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                        <mat-select class="input-p-5" placeholder="Select a VLAN"
+                                            formControlName="hasAssetConsider">
+                                            <mat-option [value]="true">Yes</mat-option>
+                                            <mat-option [value]="false">No</mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- File Upload -->
+                                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="inputLabel">Select Attachment</label>
+                                    <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                        <input matInput class="input-p-5" formControlName="filename" readonly
+                                            placeholder="Choose file" />
+                                        <button *ngIf="!removeFileFlag" mat-icon-button matSuffix type="button"
+                                            (click)="fileInput.click()">
+                                            <mat-icon>attach_file</mat-icon>
+                                        </button>
+                                        <button *ngIf="removeFileFlag" mat-icon-button matSuffix type="button"
+                                            (click)="removeFile()">
+                                            <mat-icon>remove_circle_outline</mat-icon>
+                                        </button>
+                                    </mat-form-field>
+                                    <input #fileInput type="file" style="display: none" (change)="onFileChange($event)"
+                                        accept=".pdf,.doc,.docx" />
+                                </div>
+
+                                <!-- License Date -->
+                                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="inputLabel">License Expiry Date</label>
+                                    <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                        <input matInput [matDatepicker]="picker" formControlName="licenseDate"
+                                            placeholder="Choose license date" class="input-p-5" />
+                                        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                                        <mat-datepicker #picker></mat-datepicker>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Description -->
+                                <div class="col-lg-12 col-md-12">
+                                    <label class="inputLabel">Description *</label>
+                                    <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                        <textarea matInput class="input-p-5" formControlName="description" rows="3"
+                                            placeholder="Enter product description"></textarea>
+                                        <mat-error *ngIf="productFormGroup.controls.description.errors?.required">
+                                            Description is required.
+                                        </mat-error>
+                                        <mat-error *ngIf="productFormGroup.controls.description.errors?.pattern">
+                                            Maximum 255 characters allowed.
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+
+                            <!-- Specification Parameters -->
+                            @if (showSpecification && specificationParametersDTOList.length > 0) {
+                            <div formArrayName="specificationParametersDTOList">
+                                <h6 class="mt-3 mb-3">Specification Parameters</h6>
+                                <div *ngFor="let spec of specificationParametersDTOList.controls; let i = index"
+                                    [formGroupName]="i" class="row">
+                                    <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                                        <label class="inputLabel">{{ spec.get("paramName")?.value }}</label>
+                                        <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                            @if (spec.get("isMultiValueParam")?.value) {
+                                            <mat-select class="input-p-5" formControlName="defaultValue">
+                                                <mat-option *ngFor="let option of spec.get('paramValues')?.value"
+                                                    [value]="option.value">
+                                                    {{ option.label }}
+                                                </mat-option>
+                                            </mat-select>
+                                            } @else {
+                                            <input matInput class="input-p-5" formControlName="defaultValue" />
+                                            }
+                                            <mat-error *ngIf="
+                              spec.get('isMandatory')?.value &&
+                              submitted &&
+                              spec.get('defaultValue')?.errors
+                            ">
+                                                This field is required
+                                            </mat-error>
+                                        </mat-form-field>
+                                    </div>
+                                </div>
+                            </div>
+                            }
+
+                            <!-- Step Navigation -->
+                            <div class="d-flex justify-content-end align-items-center">
+                                <button matStepperNext color="primary" mat-button mat-flat-button class="addarea-btn"
+                                    (click)="onFirstNext()">
+                                    Next
+                                </button>
+                            </div>
+                        </mat-step>
+
+                        <!-- Step 2: New Product Details -->
+                        <mat-step [stepControl]="step2Group">
+                            <ng-template matStepLabel>New Product Details</ng-template>
+
+                            <div class="row">
+                                <!-- Actual Price -->
+                                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="inputLabel">Actual Price</label>
+                                    <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                        <input matInput class="input-p-5" type="number"
+                                            formControlName="actualpricenewProduct" placeholder="Enter Actual Price" />
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- New Product Price -->
+                                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="inputLabel">New Product Price</label>
+                                    <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                        <input matInput class="input-p-5" type="number" formControlName="newPrice"
+                                            placeholder="Enter new product price" />
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- TAX -->
+                                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="inputLabel">TAX</label>
+                                    <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                        <mat-select class="input-p-5" formControlName="newProductTax"
+                                            placeholder="Select Tax">
+                                            <mat-option *ngFor="let tax of taxs" [value]="tax.id">
+                                                {{ tax.name }}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- New Product Charge -->
+                                <!-- <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                    <label class="inputLabel">Charge</label>
+                    <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                      <mat-select
+                        class="input-p-5"
+                        formControlName="newProductCharge"
+                        placeholder="Select Charge"
+                      >
+                        <mat-option *ngFor="let charge of charges" [value]="charge.id">
+                          {{ charge.name }}
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </div> -->
+
+                                <!-- Refund Amount In Warranty -->
+                                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="inputLabel">Refund Amount (In Warranty) *</label>
+                                    <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                        <input matInput class="input-p-5" type="number"
+                                            formControlName="newProductRefAmountInWarranty"
+                                            placeholder="Enter refund amount in warranty" />
+                                        <mat-error *ngIf="
+                          productFormGroup.controls.newProductRefAmountInWarranty.errors?.[
+                            'required'
+                          ]
+                        ">
+                                            Refund amount in warranty is required
+                                        </mat-error>
+                                        <mat-error *ngIf="newProductRefAmountInWarrantyError">
+                                            Amount must be greater than 0
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Refund Amount Post Warranty -->
+                                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="inputLabel">Refund Amount (Post Warranty) *</label>
+                                    <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                        <input matInput class="input-p-5" type="number"
+                                            formControlName="newProductRefAmountPostWarranty"
+                                            placeholder="Enter refund amount post warranty" />
+                                        <mat-error *ngIf="
+                          productFormGroup.controls.newProductRefAmountPostWarranty.errors?.[
+                            'required'
+                          ]
+                        ">
+                                            Refund amount post warranty is required
+                                        </mat-error>
+                                        <mat-error *ngIf="newProductRefAmountPostWarrantyError">
+                                            Amount must be greater than 0
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+
+                            <!-- Step Navigation -->
+                            <div class="d-flex justify-content-between align-items-center" style="margin-top: 20px;">
+                                <button mat-stroked-button matStepperPrevious type="button">Back</button>
+                                <button matStepperNext color="primary" mat-button mat-flat-button class="addarea-btn">
+                                    Next
+                                </button>
+                            </div>
+                        </mat-step>
+
+                        <!-- Step 3: Refurbished Product Details -->
+                        <mat-step>
+                            <ng-template matStepLabel>Refurbished Product Details</ng-template>
+
+                            <div class="row">
+                                <!-- Actual Price Refurbished -->
+                                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="inputLabel">Actual Price</label>
+                                    <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                        <input matInput class="input-p-5" type="number"
+                                            formControlName="actualpricerefurbishedProduct"
+                                            placeholder="Enter Actual Price" />
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Refurbished Product Price -->
+                                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="inputLabel">Refurbished Product Price</label>
+                                    <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                        <input matInput class="input-p-5" type="number"
+                                            formControlName="refurburshiedPrice"
+                                            placeholder="Enter refurbished product price" />
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- TAX -->
+                                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="inputLabel">TAX</label>
+                                    <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                        <mat-select class="input-p-5" formControlName="refurburshiedProductTax"
+                                            placeholder="Select Tax">
+                                            <mat-option *ngFor="let tax of taxs" [value]="tax.id">
+                                                {{ tax.name }}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Refurbished Product Charge -->
+                                <!-- <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                    <label class="inputLabel">Charge</label>
+                    <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                      <mat-select
+                        class="input-p-5"
+                        formControlName="refurburshiedProductCharge"
+                        placeholder="Select Charge"
+                      >
+                        <mat-option *ngFor="let charge of charges" [value]="charge.id">
+                          {{ charge.name }}
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </div> -->
+
+                                <!-- Refund Amount In Warranty -->
+                                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="inputLabel">Refund Amount (In Warranty) *</label>
+                                    <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                        <input matInput class="input-p-5" type="number"
+                                            formControlName="refurburshiedProductRefAmountInWarranty"
+                                            placeholder="Enter refund amount in warranty" />
+                                        <mat-error *ngIf="
+                          productFormGroup.controls.refurburshiedProductRefAmountInWarranty.errors
+                            ?.required
+                        ">
+                                            Refund amount in warranty is required
+                                        </mat-error>
+                                        <mat-error *ngIf="refurburshiedProductRefAmountInWarrantyError">
+                                            Amount must be greater than 0
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Refund Amount Post Warranty -->
+                                <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12">
+                                    <label class="inputLabel">Refund Amount (Post Warranty) *</label>
+                                    <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                        <input matInput class="input-p-5" type="number"
+                                            formControlName="refurburshiedProductRefAmountPostWarranty"
+                                            placeholder="Enter refund amount post warranty" />
+                                        <mat-error *ngIf="
+                          productFormGroup.controls.refurburshiedProductRefAmountPostWarranty.errors
+                            ?.required
+                        "> Refund amount post warranty is required </mat-error>
+                                        <mat-error *ngIf="refurburshiedProductRefAmountPostWarrantyError">
+                                            Amount must be greater than 0
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+
+                            <!-- Step Navigation and Submit -->
+                            <div class="d-flex justify-content-between align-items-center" style="margin-top: 20px;">
+                                <button mat-stroked-button matStepperPrevious type="button">Back</button>
+
+                                @if (!editMode) {
+                                <button mat-button mat-flat-button color="primary" class="addarea-btn" type="submit"
+                                    (click)="submit()">
+                                    Add Product
+                                </button>
+                                }
+
+                                @if (editMode) {
+                                <button mat-button mat-flat-button color="primary" class="addarea-btn" type="submit"
+                                    (click)="submit()">
+                                    Update Product
+                                </button>
+                                }
+                            </div>
+                        </mat-step>
+                    </mat-stepper>
+                    }
+                </form>
+            </mat-card-content>
+        </mat-card>
+    </div>
+    }
+
+    <!-- Detail View -->
+    @if (detailView) {
+    <mat-card class="cardWithShadow">
+        <mat-card-header class="d-flex align-items-center justify-content-between p-24 border-bottom">
+            <mat-card-title>Product Details</mat-card-title>
+            <button mat-icon-button (click)="productListView()">
+                <img src="assets/img/DashboardIcons/Reject.svg">
+            </button>
+        </mat-card-header>
+
+        <mat-card-content class="p-24">
+            @if (viewProductManagementDetails) {
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <strong>Name:</strong>
+                    <p>{{ viewProductManagementDetails.name }}</p>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <strong>Product ID:</strong>
+                    <p>{{ viewProductManagementDetails.productId || "-" }}</p>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <strong>Category:</strong>
+                    <p>{{ viewProductManagementDetails.productCategory?.name }}</p>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <strong>Status:</strong>
+                    <p>
+                        @if (viewProductManagementDetails.status == "ACTIVE") {
+                        <span class="badge bg-success">Active</span>
+                        }
+                        @if (viewProductManagementDetails.status == "INACTIVE") {
+                        <span class="badge bg-danger">Inactive</span>
+                        }
+                    </p>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <strong>Warranty Time:</strong>
+                    <p>
+                        {{ viewProductManagementDetails.expiryTime }}
+                        {{ viewProductManagementDetails.expiryTimeUnit }}
+                    </p>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <strong>Type:</strong>
+                    <p>{{ viewProductManagementDetails.productCategory?.type }}</p>
+                </div>
+                <div class="col-md-12 mb-3">
+                    <strong>Description:</strong>
+                    <p>{{ viewProductManagementDetails.description }}</p>
+                </div>
+
+                @if (viewProductManagementDetails.totalInPorts >= 0) {
+                <div class="col-md-6 mb-3">
+                    <strong>Total In Ports:</strong>
+                    <p>{{ viewProductManagementDetails.totalInPorts }}</p>
+                </div>
+                }
+                @if (viewProductManagementDetails.totalOutPorts >= 0) {
+                <div class="col-md-6 mb-3">
+                    <strong>Total Out Ports:</strong>
+                    <p>{{ viewProductManagementDetails.totalOutPorts }}</p>
+                </div>
+                }
+                @if (viewProductManagementDetails.availableInPorts >= 0) {
+                <div class="col-md-6 mb-3">
+                    <strong>Available In Ports:</strong>
+                    <p>{{ viewProductManagementDetails.availableInPorts }}</p>
+                </div>
+                }
+                @if (viewProductManagementDetails.availableOutPorts >= 0) {
+                <div class="col-md-6 mb-3">
+                    <strong>Available Out Ports:</strong>
+                    <p>{{ viewProductManagementDetails.availableOutPorts }}</p>
+                </div>
+                }
+
+                <div class="col-md-12 mt-3">
+                    <h6>Pricing Details</h6>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <strong>New Product Price:</strong>
+                    <p>{{ viewProductManagementDetails.newPrice || "-" }}</p>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <strong>Refurbished Product Price:</strong>
+                    <p>{{ viewProductManagementDetails.refurburshiedPrice || "-" }}</p>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <strong>New Product Refund (In Warranty):</strong>
+                    <p>{{ viewProductManagementDetails.newProductRefAmountInWarranty || "-" }}</p>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <strong>New Product Refund (Post Warranty):</strong>
+                    <p>{{ viewProductManagementDetails.newProductRefAmountPostWarranty || "-" }}</p>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <strong>Refurbished Product Refund (In Warranty):</strong>
+                    <p>
+                        {{ viewProductManagementDetails.refurburshiedProductRefAmountInWarranty || "-" }}
+                    </p>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <strong>Refurbished Product Refund (Post Warranty):</strong>
+                    <p>
+                        {{ viewProductManagementDetails.refurburshiedProductRefAmountPostWarranty || "-" }}
+                    </p>
+                </div>
+
+                @if (
+                viewProductManagementDetails.specificationParametersDTOList &&
+                viewProductManagementDetails.specificationParametersDTOList.length > 0
+                ) {
+                <!-- <div class="col-md-12 mt-3">
+                    <h6>Specification Parameters</h6>
+                </div>
+                <div class="col-md-12">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Parameter Name</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="
+                        let param of viewProductManagementDetails.specificationParametersDTOList
+                      ">
+                                <td>{{ param.paramName }}</td>
+                                <td>{{ param.paramValue || param.defaultValue }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div> -->
+
+                <mat-card class="cardWithShadow w-100 mt-3">
+                    <mat-card-header>
+                        <mat-card-title class="font-900">Specification Parameters</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content class="mat-card-content-border">
+                        <table mat-table [dataSource]="this.viewProductManagementDetails.specificationParametersDTOList"
+                            class="mat-elevation-z8 w-100">
+                            <ng-container matColumnDef="paramName">
+                                <th mat-header-cell *matHeaderCellDef>Parameter Name</th>
+                                <td mat-cell *matCellDef="let row">{{ row.paramName }}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="paramValue">
+                                <th mat-header-cell *matHeaderCellDef>Value</th>
+                                <td mat-cell *matCellDef="let row">{{ row.paramValue || row.defaultValue}}</td>
+                            </ng-container>
+                            <tr mat-header-row *matHeaderRowDef="displayedColumnsParam"></tr>
+                            <tr mat-row *matRowDef="let row; columns: displayedColumnsParam"></tr>
+                        </table>
+                    </mat-card-content>
+                </mat-card>
+                }
+            </div>
+
+            <div class="d-flex justify-content-end mt-4">
+                <button mat-raised-button color="primary" (click)="productListView()">
+                    Back to List
+                </button>
+            </div>
+            }
+        </mat-card-content>
+    </mat-card>
+    }
+</div>

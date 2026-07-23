@@ -1,0 +1,580 @@
+<div class="row m-0">
+  <mat-card class="cardWithShadow w-100">
+    <mat-card-content class="mat-card-content-border">
+      <div class="d-flex justify-content-between gap-20">
+        <div class="row">
+          <div class="col-sm-7 d-flex">
+            <mat-form-field
+              appearance="outline"
+              style="margin-left: 16px"
+              class="w-100 hide-hint mr-10"
+            >
+              <input
+                class="input-p-5"
+                [(ngModel)]="searchMvnoName"
+                matInput
+                placeholder="Enter MVNO Name"
+                (keydown.enter)="searchMvno()"
+              />
+              <mat-icon matSuffix class="m-b-10">
+                <i class="pi pi-search f-s-15"></i>
+              </mat-icon>
+            </mat-form-field>
+
+            <button
+              mat-button
+              mat-flat-button
+              color="primary"
+              class="button-normal m-r-10"
+              (click)="searchMvno()"
+            >
+              Search
+            </button>
+            <button
+              mat-stroked-button
+              matButton="outlined"
+              class="button-normal"
+              (click)="clearMvno()"
+            >
+              Clear
+            </button>
+          </div>
+          <div class="col-sm-5 d-flex" [formGroup]="generateIspInvoiceForm">
+            <mat-form-field appearance="outline" class="d-flex align-items-center w-100 hide-hint">
+              <input
+                matInput
+                [matDatepicker]="formPicker"
+                placeholder="Enter Bill Date"
+                name="StartDate"
+                class="input-p-5"
+                formControlName="startDate"
+                [max]="maxDisbleDate"
+              />
+              <mat-datepicker-toggle
+                class="add-event-date"
+                matSuffix
+                [for]="formPicker"
+              ></mat-datepicker-toggle>
+              <mat-datepicker #formPicker></mat-datepicker>
+            </mat-form-field>
+            <button
+              mat-button
+              mat-flat-button
+              class="button-normal m-l-10"
+              (click)="generateInvoice()"
+              [disabled]="!generateIspInvoiceForm.valid"
+            >
+              Generate
+            </button>
+          </div>
+        </div>
+        <div class="d-flex justify-content-end">
+          <button
+            mat-button
+            mat-flat-button
+            color="primary"
+            (click)="createMvno()"
+            class="button-normal m-r-10"
+          >
+            Add MVNO
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+<div class="container-fluid contain-flud">
+  <div class="row">
+    <div class="col-md-12">
+      <mat-card class="cardWithShadow">
+        <mat-card-content>
+          <div class="table-responsive p-16">
+            <table mat-table [dataSource]="mvnoListData || []" class="w-100">
+              <!-- Name Column -->
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 table-header-title">Name</th>
+                <td mat-cell *matCellDef="let mvno">
+                  <a
+                    [routerLink]="['/home/mvnoManagement/details/', mvno.id]"
+                    class="text-primary"
+                    href="javascript:void(0)"
+                  >
+                    {{ mvno.name }}
+                  </a>
+                </td>
+              </ng-container>
+
+              <!-- Email Column -->
+              <ng-container matColumnDef="email">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 table-header-title">Email</th>
+                <td mat-cell *matCellDef="let mvno">
+                  {{ mvno.email }}
+                </td>
+              </ng-container>
+
+              <!-- Username Column -->
+              <ng-container matColumnDef="username">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 table-header-title">
+                  Username
+                </th>
+                <td mat-cell *matCellDef="let mvno">
+                  {{ mvno.username }}
+                </td>
+              </ng-container>
+
+              <!-- Status Column -->
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 table-header-title">Status</th>
+                <td mat-cell *matCellDef="let mvno">
+                  @if (mvno.status == "Active") {
+                    <span class="status-badge status-success">Active</span>
+                  }
+                  @if (mvno.status == "Inactive") {
+                    <span class="status-badge status-danger">Inactive</span>
+                  }
+                </td>
+              </ng-container>
+
+              <!-- Action Column -->
+              <ng-container matColumnDef="action">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 table-header-title">Action</th>
+                <td mat-cell *matCellDef="let mvno" class="action-column">
+                  <!-- Edit Button -->
+                  <a
+                    mat-icon-button matTooltip="edit"
+                    href="javascript:void(0)"
+                    (click)="editMvno(mvno.id)"
+                    title="Edit"
+                  >
+                      <img src="assets/img/DashboardIcons/Edit.svg" />
+                  </a>
+
+                  <!-- Delete Button -->
+                  <a
+                    mat-icon-button matTooltip="delete"
+                    href="javascript:void(0)"
+                    (click)="deleteConfirmonMvno(mvno.id)"
+                    title="Delete"
+                    disabled
+                  >
+                     <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" />
+                  </a>
+
+                  <!-- Upload Documents Button -->
+                  <a
+                    mat-icon-button matTooltip="upload"
+                    [routerLink]="['/home/mvno-documents/', mvno.id]"
+                    title="Upload Documents"
+                  >
+                   <img src="assets/img/DashboardIcons/Upload.svg" />
+                  </a>
+
+                  <!-- Send MVNO ID Button -->
+                  <a
+                    mat-icon-button matTooltip="send"
+                    href="javascript:void(0)"
+                    (click)="sendMvnoId(mvno)"
+                    title="Send MVNO"
+                  >
+                     <img src="assets/img/DashboardIcons/send-svgrepo-com 1.svg" class="icon-size" />
+                  </a>
+                </td>
+              </ng-container>
+
+              <!-- Header and Row Definitions -->
+              <tr
+                mat-header-row
+                *matHeaderRowDef="['name', 'email', 'username', 'status', 'action']"
+              ></tr>
+              <tr
+                mat-row
+                *matRowDef="let row; columns: ['name', 'email', 'username', 'status', 'action']"
+              ></tr>
+
+              <!-- No Data Row -->
+              <tr class="mat-row" *matNoDataRow>
+                <td class="mat-cell text-center" colspan="5">No Record Found.</td>
+              </tr>
+            </table>
+
+            @if (mvnoListData && mvnoListData?.length > 0) {
+              <mat-paginator
+                [length]="mvnototalRecords"
+                [pageSize]="mvnoitemsPerPage"
+                [pageSizeOptions]="pageLimitOptionsValue"
+                showFirstLastButtons
+                (page)="pageChangedMvnoList($event)"
+              ></mat-paginator>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+  <!-- <div class="row">
+  <div class="col-md-12">
+    <div class="panel mb-15">
+      <div class="panel-heading">
+        <h3 class="panel-title">{{ mvnoTitle }} Management</h3>
+        <div class="right">
+          <button
+            aria-controls="searchPreCust"
+            aria-expanded="false"
+            class="btn-toggle-collapse"
+            data-target="#searchPreCust"
+            data-toggle="collapse"
+            type="button"
+          >
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+
+      <div id="searchMvno" class="panel-collapse collapse in">
+        <div class="panel-body">
+          <div class="row">
+            <div class="col-lg-3 col-md-3">
+              <input
+                id="taxName"
+                type="text"
+                [(ngModel)]="searchMvnoName"
+                class="form-control"
+                placeholder="Enter MVNO Name"
+                (keydown.enter)="searchMvno()"
+              />
+            </div>
+            <div class="col-lg-3 col-md-4 marginTopSearchBtn">
+              <button type="button" class="btn btn-primary" id="searchbtn" (click)="searchMvno()">
+                <i class="fa fa-search"></i>
+                Search
+              </button>
+              <button type="reset" class="btn btn-default" id="searchbtn" (click)="clearMvno()">
+                 <img src="assets/img/DashboardIcons/Refresh.svg" />
+                Clear
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> -->
+  <!-- <div class="row">
+  <div class="col-md-12">
+    <div class="panel mb-15">
+      <div class="panel-heading">
+        <h3 class="panel-title">{{ mvnoTitle }} Invoice Generate</h3>
+        <div class="right">
+          <button
+            aria-controls="searchPreCust"
+            aria-expanded="false"
+            class="btn-toggle-collapse"
+            data-target="#searchPreCust"
+            data-toggle="collapse"
+            type="button"
+          >
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+
+      <div id="searchMvno" class="panel-collapse collapse in">
+        <div class="panel-body">
+          <div class="row" style="margin-left: 15px">
+            <form class="form-auth-small" [formGroup]="generateIspInvoiceForm">
+              <div class="row">
+                <p-calendar
+                  [showIcon]="true"
+                  [showButtonBar]="true"
+                  [showTime]="false"
+                  [hideOnDateTimeSelect]="true"
+                  placeholder="Enter Bill Date"
+                  [maxDate]="maxDisbleDate"
+                  formControlName="startDate"
+                  [style]="{ width: '80%' }"
+                ></p-calendar>
+               
+              </div>
+            </form>
+            <div class="col-lg-3 col-md-4 marginTopSearchBtn">
+              <button
+                type="submit"
+                class="btn btn-primary"
+                id="submit"
+                (click)="generateInvoice()"
+                [disabled]="!generateIspInvoiceForm.valid"
+              >
+                Generate
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> -->
+  <!-- <div class="row">
+  <div class="col-md-12 col-sm-12">
+    <div class="panel">
+      <div class="panel-heading">
+        <h3 class="panel-title">{{ mvnoTitle }} List</h3>
+        <div class="right">
+          <button
+            type="button"
+            class="btn-toggle-collapse"
+            data-toggle="collapse"
+            data-target="#listmvno"
+            aria-expanded="false"
+            aria-controls="listmvno"
+          >
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+
+      <div id="listmvno" class="panel-collapse collapse in">
+        <div class="panel-body table-responsive">
+          <div class="row">
+            <div class="col-lg-12 col-md-12">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Username</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (
+                    mvno of mvnoListData
+                      | paginate
+                        : {
+                            id: "mvnoListData",
+                            itemsPerPage: mvnoitemsPerPage,
+                            currentPage: currentPageMvno,
+                            totalItems: mvnototalRecords
+                          };
+                    track mvno;
+                    let i = $index
+                  ) {
+                    <tr>
+                      <td>
+                        <a
+                          [routerLink]="['/home/mvnoManagement/details/', mvno.id]"
+                          style="color: #f7941e"
+                          href="javascript:void(0)"
+                        >
+                          {{ mvno.name }}
+                        </a>
+                      </td>
+                      <td>{{ mvno.email }}</td>
+                      <td>{{ mvno.username }}</td>
+                      <td>
+                        @if (mvno.status == "Active") {
+                          <span class="badge badge-success"> Active </span>
+                        }
+                        @if (mvno.status == "Inactive") {
+                          <span class="badge badge-danger"> Inactive </span>
+                        }
+                      </td>
+                      <td class="btnAction">
+                        <a
+                          id="edit-button"
+                          href="javascript:void(0)"
+                          type="button"
+                          [routerLink]="['/home/mvnoManagement/edit/', mvno.id]"
+                        >
+                        <img src="assets/img/DashboardIcons/Edit.svg" >
+                        </a>
+                        <a
+                          id="delete-button"
+                          href="javascript:void(0)"
+                          (click)="deleteConfirmonMvno(mvno.id)"
+                          disabled
+                        >
+                           <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                        </a>
+                        <a
+                          [routerLink]="['/home/mvno-documents/', mvno.id]"
+                          data-placement="mb-15"
+                          data-toggle="tooltip"
+                          id="editbutton"
+                          title="Upload Documents"
+                          type="button"
+                        >
+                          <img height="32" src="assets/img/up.jpg" width="32" />
+                        </a>
+                        <a
+                          id="button"
+                          title="mvno"
+                          type="button"
+                          (click)="sendMvnoId(mvno)"
+                          data-placement="mb-15"
+                          data-toggle="tooltip"
+                        >
+                          <img height="32" src="assets/img/icons-02.png" width="32" />
+                        </a>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+              <div class="pagination_Dropdown">
+                <pagination-controls
+                  id="mvnoListData"
+                  maxSize="10"
+                  directionLinks="true"
+                  previousLabel=""
+                  nextLabel=""
+                  (pageChange)="pageChangedMvnoList($event)"
+                ></pagination-controls>
+                <div id="itemPerPageDropdown">
+                  <p-dropdown
+                    [options]="pageLimitOptions"
+                    optionLabel="value"
+                    optionValue="value"
+                    (onChange)="TotalItemPerPage($event)"
+                  ></p-dropdown>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> -->
+
+  <!-- <p-dialog
+  header="{{ mvnoTitle }} Details"
+  [style]="{ width: '50%' }"
+  [(visible)]="migrationDialog"
+  [responsive]="false"
+  [draggable]="false"
+  [modal]="true"
+  [closable]="true"
+  (onHide)="closeDialog()"
+>
+  <div class="modal-body">
+    <div class="row">
+      <div class="col-lg-6 col-md-6">
+        <label for="oldMVNO">Old {{ mvnoTitle }}</label>
+        <input id="oldMVNO" type="text" class="form-control" [(ngModel)]="oldMvnoName" readonly />
+      </div>
+      <div class="col-lg-6 col-md-6">
+        <label for="newMVNO">New {{ mvnoTitle }}</label>
+        <p-dropdown
+          [options]="mvnoOptions"
+          [(ngModel)]="newMvnoId"
+          optionLabel="name"
+          optionValue="id"
+          filter="true"
+          filterBy="name"
+          placeholder="Select an {{ mvnoTitle }}"
+          appendTo="body"
+        >
+        </p-dropdown>
+      </div>
+    </div>
+  </div>
+  <ng-template pTemplate="footer">
+    <div>
+      <button (click)="transferISP()" class="btn btn-primary">Send</button>
+      <button (click)="closeDialog()" class="btn btn-danger" type="button">Close</button>
+      @if (isDownloadView) {
+        <button (click)="downloadFile()" class="btn btn-danger" type="button">Download</button>
+      }
+    </div>
+  </ng-template>
+</p-dialog> -->
+</div>
+
+<!-- <ng-template #createDialog>
+<div> -->
+@if (isShowCreateView) {
+  <app-mvno-create
+    [editMvnoId]="mvnoId"
+    (closeCreateDialog)="closeCreateDialog($event)"
+  ></app-mvno-create>
+}
+<!-- </div>
+</ng-template> -->
+
+<ng-template #migrationDialog>
+  <div class="dialog-container">
+    <div class="dialog-header">
+      {{ mvnoTitle }} Details
+      <span>
+        <a mat-icon-button href="javascript:void(0)" (click)="closeDialog()">
+           <img src="assets/img/DashboardIcons/Reject.svg">
+        </a>
+      </span>
+    </div>
+    <div mat-dialog-content>
+      <mat-card>
+        <mat-card-content>
+          <div class="row g-3">
+            <!-- Old MVNO -->
+            <div class="col-md-6 mb-4">
+              <label for="oldMVNO" class="inputLabel">Old {{ mvnoTitle }}</label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input id="oldMVNO" class="input-p-5" matInput [(ngModel)]="oldMvnoName" readonly />
+              </mat-form-field>
+            </div>
+
+            <!-- New MVNO -->
+            <div class="col-md-6 mb-4">
+              <label for="newMVNO" class="inputLabel">New {{ mvnoTitle }}</label>
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-select
+                  id="newMVNO"
+                  class="input-p-5"
+                  [(ngModel)]="newMvnoId"
+                  placeholder="Select an {{ mvnoTitle }}"
+                >
+                  <mat-option *ngFor="let mvno of mvnoOptions" [value]="mvno.id">
+                    {{ mvno.name }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+    <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+      <button
+        mat-button
+        mat-flat-button
+        color="primary"
+        class="button-normal"
+        (click)="transferISP()"
+      >
+        Send
+      </button>
+      @if (isDownloadView) {
+        <button
+          mat-button
+          mat-flat-button
+          color="accent"
+          class="button-normal"
+          (click)="downloadFile()"
+        >
+          Download
+        </button>
+      }
+      <button
+        mat-stroked-button
+        matButton="outlined"
+        type="button"
+        color="primary"
+        class="button-normal"
+        (click)="closeDialog()"
+      >
+        Close
+      </button>
+    </div>
+  </div>
+</ng-template>

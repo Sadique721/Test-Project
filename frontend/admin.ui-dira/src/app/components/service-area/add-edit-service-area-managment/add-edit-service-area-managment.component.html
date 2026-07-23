@@ -1,0 +1,514 @@
+@if (data.createView || data.isServiceAreaEdit) {
+<div class="dialog-container">
+    <div class="dialog-header">
+        {{ data.title }}
+
+        <span>
+            <a mat-icon-button href="javascript:void(0)" (click)="onCancel()">
+                <img src="assets/img/DashboardIcons/Reject.svg">
+            </a>
+        </span>
+    </div>
+    <div mat-dialog-content>
+        <!-- create new country card start -->
+        <div class="col-md-12">
+            @if (!data.createAcS && data.isServiceAreaEdit && !data.isViewService) {
+            <mat-card-content class="matcard-content">
+                <div class="panel-body">
+                    Sorry you have not privilege to create operation!
+                </div>
+            </mat-card-content>
+            }
+            @if (
+            data.createAcS ||
+            (data.isServiceAreaEdit && data.editAcs && data.viewAcs && data.isViewService)
+            ) {
+            <mat-card-content class="matcardContent">
+                <form class="card-form mb-3" [formGroup]="serviceAreaGroupForm">
+                    <div class="row g-3">
+                        <!-- Name -->
+                        <div class="col-md-4 mb-3">
+                            <label for="name" class="inputLabel">Name*</label>
+                            <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                <input id="name" class="input-p-5" matInput placeholder="Enter Name"
+                                    formControlName="name" (blur)="onKeyName($event)" [ngClass]="{
+                        'is-invalid': submitted && serviceAreaGroupForm.controls.name.errors
+                      }" maxLength="250" />
+                                <mat-error *ngIf="
+                        (submitted || serviceAreaGroupForm.get('name')?.errors) &&
+                        serviceAreaGroupForm.get('name')?.errors as errors
+                      ">
+                                    <span *ngIf="errors['required']"> Name is required. </span>
+                                    <span *ngIf="errors['cannotContainSpace']">
+                                        White space are not allowed.
+                                    </span>
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Site Name -->
+                        <div class="col-md-4 mb-3">
+                            <label for="countryname" class="inputLabel">Site Name
+                                @if (data.loggedinUsermvnoid === 1) {
+                                <span>*</span>
+                                }
+                            </label>
+                            <!-- SiteName input  filed start -->
+                            @if (data.loggedinUsermvnoid === 1) {
+                            <div class="col-md-4 mb-3">
+                                <label for="name" class="inputLabel">Road*</label>
+                                <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                    <input id="name" class="input-p-5" matInput placeholder="Enter Site Name"
+                                        formControlName="siteName" (blur)="onSiteNameChange($event)"
+                                        [readOnly]="data.isServiceAreaEdit" />
+                                </mat-form-field>
+                            </div>
+                            }
+                            <!-- SiteName select  filed end -->
+                            @if (data.loggedinUsermvnoid !== 1) {
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-select id="statusSelect" class="input-p-5" placeholder="Select Site Name"
+                                    formControlName="siteName">
+                                    <mat-option *ngIf="!siteNameListData?.length" disabled>No Data</mat-option>
+                                    <mat-option *ngFor="let site of siteNameListData" [value]="site.id">
+                                        {{ site.name }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            }
+                            <!-- SiteName select  filed end -->
+                        </div>
+
+                        <!-- Select OLT start -->
+                        <div class="col-md-4 my-3">
+                            <label for="statusSelect" class="inputLabel">OLT*</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-select id="statusSelect" class="input-p-5" placeholder="Select OLT"
+                                    formControlName="cityid" (selectionChange)="getSelCity($event)">
+                                    <mat-option *ngFor="let city of data.cityListDatas" [value]="city.id">
+                                        {{ city.name }}
+                                    </mat-option>
+                                </mat-select>
+
+                                <mat-error *ngIf="
+                        (submitted || serviceAreaGroupForm.get('cityid')?.errors) &&
+                        serviceAreaGroupForm.get('cityid')?.errors as errors
+                      ">
+                                    OLT is required.
+                                </mat-error>
+                                <div *ngIf="!pincodeListData?.length && submitted" class="text-danger mt-2">
+                                    No Road Data Available!
+                                </div>
+                            </mat-form-field>
+                        </div>
+                        <!-- Select OLT end -->
+                        <div class="col-md-4 my-3">
+                            <label for="statusSelect" class="inputLabel">Road*</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-select class="input-p-5"
+                                    [placeholder]="pincodeListData?.length ? 'Select Roads' : 'No Road Available'"
+                                    formControlName="pincodes" [disabled]="!pincodeListData?.length" multiple
+                                    (selectionChange)="onSelectionChange($event)">
+
+                                    <mat-checkbox (click)="toggleSelectAll()" [checked]="isAllSelected()"
+                                        [indeterminate]="isIndeterminate()" (click)="$event.stopPropagation()">
+                                        Select All
+                                    </mat-checkbox>
+
+
+                                    <mat-option *ngFor="let pincode of pincodeOptions" [value]="pincode.id">
+                                        {{ pincode.pincode }}
+                                    </mat-option>
+                                </mat-select>
+                                <mat-error *ngIf="
+                                    (submitted || serviceAreaGroupForm.get('pincodes')?.errors) &&
+                                    serviceAreaGroupForm.get('pincodes')?.errors as errors
+                                ">
+                                    Road is required.
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Select Road[pincode] start -->
+                        <!-- <div class="col-md-4 my-3">
+                            <label for="statusSelect" class="inputLabel">Road*</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-select class="input-p-5"
+                                    [placeholder]="pincodeListData?.length ? 'Select Roads' : 'No Road Available'"
+                                    formControlName="pincodes" [disabled]="!pincodeListData?.length" multiple>
+                                    <mat-option *ngFor="let pincode of pincodeOptions" [value]="pincode.id">
+                                        {{ pincode.pincode }}
+                                    </mat-option>
+                                </mat-select>
+                                <mat-error *ngIf="
+                        (submitted || serviceAreaGroupForm.get('pincodes')?.errors) &&
+                        serviceAreaGroupForm.get('pincodes')?.errors as errors
+                      ">
+                                    Road is required.
+                                </mat-error>
+                            </mat-form-field>
+
+                        </div> -->
+
+
+                        <!-- Select Road[pincode] end -->
+
+                        <!-- Select Service Area Type start -->
+                        <div class="col-md-4 my-3">
+                            <label for="statusSelect" class="inputLabel">Service Area Type*</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-select id="statusSelect" class="input-p-5" placeholder="Select Roads"
+                                    formControlName="serviceAreaType" (selectionChange)="serviceAreaTypeChange($event)">
+                                    <mat-option *ngFor="let area of serviceAreaType" [value]="area.value">
+                                        {{ area.label }}
+                                    </mat-option>
+                                </mat-select>
+
+                                <mat-error *ngIf="
+                        (submitted || serviceAreaGroupForm.get('serviceAreaType')?.errors) &&
+                        serviceAreaGroupForm.get('serviceAreaType')?.errors as errors
+                      ">
+                                    service Area Type is required.
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                        <!-- Select Service Area Type end -->
+
+                        <!-- Latitude filed start -->
+                        <div class="col-md-4 mb-3">
+                            <label for="name" class="inputLabel">Latitude</label>
+                            <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                <input id="latitude" class="input-p-5" type="number" matInput
+                                    placeholder="Enter Latitude" formControlName="latitude" [ngClass]="{
+                        'is-invalid': submitted && serviceAreaGroupForm.controls.latitude.errors
+                      }" maxLength="250" />
+                                <mat-error *ngIf="
+                        (submitted || serviceAreaGroupForm.get('latitude')?.errors) &&
+                        serviceAreaGroupForm.get('latitude')?.errors as errors
+                      ">
+                                    <span *ngIf="errors['required']"> latitude is required. </span>
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                        <!-- Latitude filed start -->
+
+                        <!-- Longitude filed start -->
+                        <div class="col-md-4 mb-3">
+                            <label for="name" class="inputLabel">Longitude</label>
+                            <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                <input id="longitude" class="input-p-5" type="number" matInput
+                                    placeholder="Enter Longitude" formControlName="longitude" [ngClass]="{
+                        'is-invalid': submitted && serviceAreaGroupForm.controls.longitude.errors
+                      }" maxLength="250" />
+                                <mat-error *ngIf="
+                        (submitted || serviceAreaGroupForm.get('longitude')?.errors) &&
+                        serviceAreaGroupForm.get('longitude')?.errors as errors
+                      ">
+                                    <span *ngIf="errors['required']"> Longtitude is required. </span>
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                        <!-- Longitude filed start -->
+
+                        <!-- Radius(KM) filed start -->
+                        <div class="col-md-4 mb-3">
+                            <label for="name" class="inputLabel">Radius(KM)</label>
+                            <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                <input id="name" type="number" class="input-p-5" matInput placeholder="Enter Radius"
+                                    formControlName="radius" [ngClass]="{
+                        'is-invalid': submitted && serviceAreaGroupForm.controls.radius.errors
+                      }" maxLength="250" />
+                                <mat-error *ngIf="
+                        (submitted || serviceAreaGroupForm.get('radius')?.errors) &&
+                        serviceAreaGroupForm.get('radius')?.errors as errors
+                      ">
+                                    <span *ngIf="errors['required']"> Radius is required. </span>
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                        <!-- Radius(KM) filed start -->
+
+                        <!-- Select Location start -->
+                        <div class="col-md-4 my-3">
+                            <label for="statusSelect" class="inputLabel">Location</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-select id="statusSelect" class="input-p-5" placeholder="Select Location"
+                                    formControlName="locationIds" multiple>
+                                    <mat-option *ngFor="let location of locationDataByPlan"
+                                        [value]="location.locationMasterId">
+                                        {{ location.name }}
+                                    </mat-option>
+                                </mat-select>
+
+                                <mat-error *ngIf="
+                        (submitted || serviceAreaGroupForm.get('locationIds')?.errors) &&
+                        serviceAreaGroupForm.get('locationIds')?.errors as errors
+                      ">
+                                    Location is required.
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                        <!-- Select Location end -->
+
+                        <!-- location search model and Draw Polygon On Map start -->
+                        <!-- <div class="col-md-4 location-model d-flex">
+                            <a mat-icon-button style="margin-top: 45px" href="javascript:void(0)" (click)="mylocation()"
+                                class="d-flex align-items-center justify-content-center"
+                                matTooltip="Get Current Location">
+                                <i class="pi pi-map-marker icon-size"></i>
+                            </a>
+
+                            <a mat-icon-button style="margin-top: 45px" href="javascript:void(0)"
+                                (click)="openSearchModel()" class="d-flex align-items-center justify-content-center"
+                                matTooltip="Search Location">
+                                <i class="pi pi-search icon-size"></i>
+                            </a> -->
+                        <!-- @if (data.polygonViewAcs) {
+                            <a mat-icon-button style="margin-top: 45px" href="javascript:void(0)"
+                                (click)="DrawPolygon()" class="d-flex align-items-center justify-content-center"
+                                matTooltip="Draw Polygon On Map">
+                                <i class="pi pi-map-marker icon-size"></i>
+                            </a>
+                            } -->
+                        <!-- </div> -->
+                        <!-- location search model and Draw Polygon On Map end -->
+
+                        <!-- Select status start -->
+                        <div class="col-md-4 my-3">
+                            <label for="statusSelect" class="inputLabel">Status*</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-select id="statusSelect" class="input-p-5" placeholder="Select Status"
+                                    formControlName="status">
+                                    <mat-option *ngFor="let option of statusOptions" [value]="option.label">
+                                        {{ option.label }}
+                                    </mat-option>
+                                </mat-select>
+
+                                <mat-error *ngIf="
+                        (submitted || serviceAreaGroupForm.get('status')?.errors) &&
+                        serviceAreaGroupForm.get('status')?.errors as errors
+                      ">
+                                    Status is required.
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                        <!-- Select status end -->
+
+                        <!-- block no & ips start -->
+                        <!-- block filed start -->
+                        @if (serviceAreaGroupForm.value.serviceAreaType == "private") {
+                        <div class="col-md-4 mb-3">
+                            <label for="name" class="inputLabel">Unit No.*</label>
+                            <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                <input id="name" type="number" class="input-p-5" matInput placeholder="Enter Block No."
+                                    formControlName="blockNo" (keydown)="handleKeyDown($event)" [ngClass]="{
+                          'is-invalid': submitted && serviceAreaGroupForm.controls.blockNo.errors
+                        }" maxLength="250" />
+                                <mat-error *ngIf="
+                          (submitted || serviceAreaGroupForm.get('blockNo')?.errors) &&
+                          serviceAreaGroupForm.get('blockNo')?.errors as errors
+                        ">
+                                    <span *ngIf="errors['required']"> Block No. is required. </span>
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                        }
+                        <!-- block filed start -->
+
+                        <!-- ips filed start -->
+                        @if (data.loggedinUsermvnoid === 1) {
+                        <div class="col-md-4 my-3">
+                            <label for="statusSelect" class="inputLabel">ISPs</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-select id="statusSelect" class="input-p-5" placeholder="Select ISPs"
+                                    formControlName="mvnoIds"
+                                    [disabled]="data.isServiceAreaEdit && viewserviceAreaListData.mvnoId != 1" multiple>
+                                    <mat-option *ngFor="let isp of ispListData" [value]="isp.id">
+                                        {{ isp.name }}
+                                    </mat-option>
+                                </mat-select>
+
+                                <mat-error *ngIf="
+                          (submitted || serviceAreaGroupForm.get('mvnoIds')?.errors) &&
+                          serviceAreaGroupForm.get('mvnoIds')?.errors as errors
+                        ">
+                                    ISPs is required.
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                        }
+                        <!-- ips filed start -->
+
+                        <!-- block no & ips end   -->
+                    </div>
+
+                </form>
+            </mat-card-content>
+            }
+        </div>
+        <!-- create new country card end -->
+    </div>
+    <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+
+
+        <!-- Create Mode: Show Submit Button -->
+        @if (!isServiceAreaEdit && !isViewService) {
+        <button mat-button mat-flat-button color="primary" class="button-normal" type="submit"
+            [disabled]="data.loggedinUsermvnoid === 1 && !data.isSiteName" (click)="onSubmit()">
+            {{ data.title }}
+        </button>
+        }
+
+        <!-- Edit Mode: Show Submit Button -->
+        @if (isServiceAreaEdit) {
+        <button mat-button mat-flat-button color="primary" class="button-normal" type="submit" (click)="onSubmit()">
+            {{ data.title }}
+        </button>
+        }
+        <!-- Always show Cancel button -->
+
+        <button mat-stroked-button matButton="outlined" type="button" color="primary" class="button-normal"
+            (click)="onCancel()">
+            {{ data.noLabel || "Cancel" }}
+        </button>
+    </div>
+</div>
+}
+
+<!-- search locatioin dialog model start -->
+<ng-template #searchLocationDialog>
+    <div class="container-fluid p-0">
+        <div class="dialog-header dialog-title">
+            Search Location
+            <span>
+                <a mat-icon-button (click)="onCancelSEarch()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <mat-dialog-content>
+            <form [formGroup]="searchLocationForm" (ngSubmit)="searchLocation()">
+                <div class="row">
+                    <div class="col-md-6 mb-4 my-4">
+                        <label for="name" class="inputLabel">Search Location Name</label>
+                        <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                            <input id="name" class="input-p-5" matInput placeholder="Enter Location Name "
+                                formControlName="searchLocationname" [readOnly]="data.isServiceAreaEdit"
+                                (blur)="onSiteNameChange($event)" />
+
+                            <mat-error *ngIf="
+                  (submitted || searchLocationForm.get('searchLocationname')?.errors) &&
+                  searchLocationForm.get('searchLocationname')?.errors as errors
+                ">
+                                <span *ngIf="errors['required']"> Search Name is required. </span>
+                                <span *ngIf="errors['cannotContainSpace']"> White space are not allowed. </span>
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+                    <div class="col-md-6 searclocation-btn">
+                        <button mat-flat-button color="primary" class="location-btn" type="submit"
+                            [disabled]="!searchLocationForm.valid">
+                            Search
+                        </button>
+                        <button mat-stroked-button class="location-btn" type="button" (click)="clearLocationForm()">
+                            Clear
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Location Table -->
+            <div style="margin-top: 1rem">
+                <table mat-table [dataSource]="searchLocationData" class="mat-elevation-z1 w-100">
+                    <!-- Name Column -->
+                    <ng-container matColumnDef="name">
+                        <th mat-header-cell *matHeaderCellDef style="width: 35%">Name</th>
+                        <td mat-cell *matCellDef="let element" class="HoverEffect"
+                            (click)="filedLocation(element.placeId)" matTooltip="Set value Latitude & Longitude">
+                            {{ element.name }}
+                        </td>
+                    </ng-container>
+
+                    <!-- Address Column -->
+                    <ng-container matColumnDef="address">
+                        <th mat-header-cell *matHeaderCellDef style="width: 65%">Address</th>
+                        <td mat-cell *matCellDef="let element">{{ element.address }}</td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="['name', 'address']"></tr>
+                    <tr mat-row *matRowDef="let row; columns: ['name', 'address']"></tr>
+                </table>
+
+                <!-- Pagination -->
+                <mat-paginator [length]="searchLocationtotalRecords" [pageSize]="searchLocationItemPerPage"
+                    [pageSizeOptions]="[5, 10,  20, 50, 100]" (page)="pageChangedSearchLocationList($event)">
+                </mat-paginator>
+            </div>
+        </mat-dialog-content>
+
+        <mat-dialog-actions align="center">
+            <button mat-stroked-button matButton="outlined" class="button-normal" (click)="onCancelSEarch()">
+                Close
+            </button>
+        </mat-dialog-actions>
+    </div>
+</ng-template>
+<!-- search locatioin dialog model end -->
+
+<!-- Map Dialog Model start -->
+<!-- <ng-template #mapDialog>
+    <div class="container-fluid p-0">
+        <div class="dialog-header dialog-title">
+            Map
+            <span>
+                <a mat-icon-button (click)="onCancelMap()">
+                     <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <mat-dialog-content> -->
+<!-- Search Input -->
+
+<!-- <div class="col-md-12 my-4">
+                <mat-form-field appearance="outline" class="map-input-field w-100">
+                    <input id="name" class="input-p-5" matInput placeholder="Enter Location Name" [(ngModel)]="location"
+                        ngx-google-places-autocomplete (onAddressChange)="handleAddressChange($event)" />
+                </mat-form-field>
+            </div> -->
+
+<!-- Google Map -->
+<!-- <div class="row">
+                <div class="col-md-12">
+                    <google-map height="400px" width="100%" [center]="center" [zoom]="zoom" [mapTypeId]="mapTypeId"
+                        (mapReady)="onMapReady($event)">
+                        @for (m of markers; track m) {
+                        <map-marker [position]="{ lat: m.lat, lng: m.lng }" [label]="m.label"
+                            [options]="{ draggable: m.draggable }">
+                        </map-marker>
+                        }
+                    </google-map>
+                </div>
+            </div>
+        </mat-dialog-content> -->
+
+<!-- <mat-dialog-actions align="end" style="gap: 8px">
+            <button mat-flat-button color="primary" (click)="savePolygon()">Save</button>
+            <button mat-stroked-button (click)="hideMapModel()">Close</button>
+            <button mat-stroked-button *ngIf="data.isClearShow && data.polygonDeleteAccess" (click)="clearDrawnData()">
+                Clear
+            </button>
+            <button mat-flat-button color="primary" *ngIf="isUploadView" (click)="uploadPolygonDocument()">
+                Upload
+            </button>
+            <ng-container *ngIf="!isUploadView && data.isServiceAreaEdit">
+                <button mat-flat-button color="primary" [matMenuTriggerFor]="downloadMenu">Download</button>
+            </ng-container>
+        </mat-dialog-actions>
+        <mat-menu #downloadMenu="matMenu">
+            <button mat-menu-item *ngFor="let item of items" (click)="item.command()">
+                {{ item.label }}
+            </button>
+        </mat-menu>
+    </div>
+</ng-template> -->
+<!-- Map Dialog Model end -->

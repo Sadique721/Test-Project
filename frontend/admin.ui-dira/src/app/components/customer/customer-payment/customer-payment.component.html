@@ -1,0 +1,1901 @@
+<div style="margin-top: 1rem !important;">
+    <div class="row p-0 m-0">
+        <div class="col-md-12">
+            <mat-card class="cardWithShadow">
+                <mat-card-header>
+                    <img src="assets/img/DashboardIcons/Back Arrow.svg" alt="arrow back" class="m-r-10"
+                        (click)="customerDetailOpen()">
+                    <div style="font-size:x-large; font-weight: 500;width:60%;margin-top: 7px;">
+                        {{ customerLedgerDetailData?.title }}
+                        {{ customerLedgerDetailData?.firstname }}
+                        {{ customerLedgerDetailData?.lastname }} Payment Details
+                    </div>
+                    <div class="div2" style="display: flex;">
+                        @if (recordPaymentAccess) {
+                        <div class="div1">
+                            <button mat-flat-button color="primary" class="button-normal"
+                                [disabled]="customerLedgerDetailData?.status === 'Terminate' || isDisable"
+                                (click)="getCustomer()" style="width: auto;margin-right: 7px !important;">
+                                Record Payment
+                            </button>
+                        </div>
+                        <div class="div2">
+                            <button mat-flat-button color="primary" class="button-normal"
+                                [disabled]="customerLedgerDetailData?.status === 'Terminate' || isDisable"
+                                (click)="getFailedPayments()" style="width: auto">
+                                Online Payment Audits
+                            </button>
+                        </div>
+                        }
+                    </div>
+
+                </mat-card-header>
+
+            </mat-card>
+        </div>
+    </div>
+</div>
+<div class="container-fluid contain-flud">
+    <div class="row p-0 m-0">
+        <div class="col-md-12">
+            <mat-card class="cardWithShadow">
+                <mat-card-content class="mat-card-content-border">
+                    <div class="country-table-list">
+                        <div class="example-container mat-elevation-z8" tabindex="0"
+                            *ngIf="viewcustomerPaymentData && viewcustomerPaymentData.length > 0">
+                            <table mat-table [dataSource]="viewcustomerPaymentData">
+
+                                <!-- Payment By -->
+                                <ng-container matColumnDef="custName">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef>Name </th>
+                                    <td mat-cell *matCellDef="let data"> {{ data.custName ?? '-'}} </td>
+                                </ng-container>
+                                <ng-container matColumnDef="paytype">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef> Pay Type </th>
+                                    <td mat-cell *matCellDef="let data">
+                                        {{ data.paytype ?? '-' }}
+                                    </td>
+                                </ng-container>
+                                <ng-container matColumnDef="paymode">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef> Pay Mode </th>
+                                    <td mat-cell *matCellDef="let data">
+                                        {{ data.paymode ?? '-' }}
+                                    </td>
+                                </ng-container>
+                                <!-- Reference No -->
+                                <ng-container matColumnDef="paymentreferenceno">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef> Transaction
+                                        Number </th>
+                                    <td mat-cell *matCellDef="let data"> {{ data.paymentreferenceno }} </td>
+                                </ng-container>
+                                <ng-container matColumnDef="status">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef> Status </th>
+                                    <td mat-cell *matCellDef="let data"> {{ data.status }} </td>
+                                </ng-container>
+                                <!-- Invoice Number -->
+
+
+                                <!-- Paymode -->
+
+
+                                <!-- Amount -->
+                                <ng-container matColumnDef="amount">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef> Amount </th>
+                                    <td mat-cell *matCellDef="let data">
+                                        <span class="cursor-pointer text-warning"
+                                            (click)="openPaymentInvoiceModal('PaymentDetailModal', data.id)">
+                                            {{ data.amount | currency: currency : 'symbol' : '1.2-2' }}
+                                        </span>
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="adjustedAmount">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef> Adjusted Amount
+                                    </th>
+                                    <td mat-cell *matCellDef="let data"> {{ data.adjustedAmount }} </td>
+                                </ng-container>
+                                <ng-container matColumnDef="createdate">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef> CreateDate </th>
+                                    <td mat-cell *matCellDef="let data">
+                                        {{ data.createdate ? data.createdate : '-' }}
+                                    </td>
+                                </ng-container>
+                                <ng-container matColumnDef="createdByName">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef> Payment By </th>
+                                    <td mat-cell *matCellDef="let data">
+                                        {{ data.createdByName ? data.createdByName : '-' }}
+                                    </td>
+                                </ng-container>
+
+
+                                <!-- Table Header / Body -->
+                                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                            </table>
+
+
+
+                        </div><!-- Pagination -->
+                        <div *ngIf="viewcustomerPaymentData && viewcustomerPaymentData.length > 0">
+                            <mat-paginator [length]="customerPaymentDataTotalRecords"
+                                [pageSize]="customerPaymentdataitemsPerPage"
+                                [pageIndex]="currentPagecustomerPaymentdata" [pageSizeOptions]="[5,10,20,50,100]"
+                                (page)="pageChangedCustomerPaymentData($event)" showFirstLastButtons>
+                            </mat-paginator>
+
+                        </div>
+                        <!-- No Records Found -->
+                        <div *ngIf="!viewcustomerPaymentData || viewcustomerPaymentData.length === 0" class="no-data">
+                            <p>No Payment available.</p>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </div>
+</div>
+
+<ng-template #recordPaymentDailog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <!-- Header -->
+        <div class="dialog-header dialog-title">
+            Record Payment
+            <span>
+                <a mat-icon-button (click)="closeRecordPaymentDialog(dialogRef)">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <div mat-dialog-content>
+            <form [formGroup]="paymentFormGroup">
+                <div class="row" style="margin-bottom: 20px">
+                    <!-- Customer -->
+                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12"><label class="inputLabel">Customer*</label>
+
+
+                        <mat-form-field appearance="outline" class="w-100">
+                            <input matInput class="input-p-5" [value]="
+                customerLedgerDetailData?.title +
+                ' ' +
+                customerLedgerDetailData?.firstname +
+                ' ' +
+                customerLedgerDetailData?.lastname
+              " disabled />
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Invoice -->
+                    <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 ">
+                        <label class="inputLabel">Invoice*</label>
+                        <div class="d-flex"><mat-form-field appearance="outline" class="flex-grow-1">
+                                <mat-select class="input-p-5" formControlName="invoiceId" multiple disabled
+                                    placeholder="Select Invoice">
+                                    <mat-option *ngFor="let inv of invoiceList" [value]="inv.id">
+                                        {{ inv.docnumber }}
+                                    </mat-option>
+                                </mat-select>
+                                <mat-error *ngIf="submitted && paymentFormGroup.controls.invoiceId.errors?.required">
+                                    Invoice is required.
+                                </mat-error>
+                            </mat-form-field>
+
+                            <button mat-icon-button color="primary" type="button"
+                                (click)="modalOpenInvoice(customerId)">
+                                <img src="assets/img/DashboardIcons/Add.svg">
+                            </button>
+                        </div>
+
+                    </div>
+
+                    <!-- Payment Mode -->
+                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12"><label class="inputLabel">Payment Mode*</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <mat-select placeholder="Select a Payment Mode" class="input-p-5" formControlName="paymode"
+                                (selectionChange)="selPayModeRecord($event)">
+                                <mat-option *ngFor="let mode of paymentMode" [value]="mode.value">
+                                    {{ mode.text }}
+                                </mat-option>
+                            </mat-select>
+                            <mat-error *ngIf="submitted && paymentFormGroup.controls.paymode.errors?.required">
+                                Pay Mode is required.
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Source -->
+                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                        <label class="inputLabel">Source {{ onlineSourceData?.length > 0 ? '*' : '' }}</label>
+                        <mat-form-field appearance="outline" class="w-100">
+
+                            <mat-select placeholder="Select Source" class="input-p-5" formControlName="onlinesource"
+                                [disabled]="!(onlineSourceData?.length > 0)"
+                                (selectionChange)="selPaySourceRecord($event)">
+                                <mat-option *ngFor="let src of onlineSourceData" [value]="src.value">
+                                    {{ src.text }}
+                                </mat-option>
+                            </mat-select>
+                            <mat-error *ngIf="submitted && paymentFormGroup.controls.onlinesource.errors?.required">
+                                Source is required.
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Amount -->
+                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12"><label class="inputLabel">Amount*</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <input matInput class="input-p-5" type="number" min="1" step=".01" formControlName="amount"
+                                placeholder="Enter Amount" [readonly]="isShowInvoiceList"
+                                (keypress)="keypressId($event)" />
+                            <mat-error *ngIf="submitted && paymentFormGroup.controls.amount.errors?.required">
+                                Amount is required.
+                            </mat-error>
+                            <mat-error *ngIf="submitted && paymentFormGroup.controls.amount.errors?.min">
+                                Amount must be greater than 0.
+                            </mat-error>
+                            <mat-error *ngIf="submitted && paymentFormGroup.controls.amount.errors?.pattern">
+                                Only numeric characters allowed.
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- File -->
+                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12"><label class="inputLabel">Select File</label>
+                        <!-- <mat-form-field appearance="outline" class="w-100"> -->
+                        <input type="file" (change)="onFileChange($event)" formControlName="file" />
+                        <!-- <mat-error *ngIf="submitted && paymentFormGroup.controls.file.errors?.required">
+                                File is required.
+                            </mat-error> -->
+                        <!-- </mat-form-field> -->
+                    </div>
+
+                    <!-- Cheque No -->
+                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12"><label class="inputLabel">Cheque No.*</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <input matInput class="input-p-5" formControlName="chequeno" placeholder="Enter Cheque No."
+                                type="text" />
+                            <mat-error *ngIf="submitted && paymentFormGroup.controls.chequeno.errors?.required">
+                                Cheque No. is required.
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Cheque Date -->
+                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12"><label class="inputLabel">{{ chequeDateName
+                            }}*</label>
+                        <mat-form-field appearance="outline" class="w-100">
+
+                            <input matInput class="input-p-5" [matDatepicker]="picker" [placeholder]="datePlaceholder"
+                                formControlName="chequedate" />
+                            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                            <mat-datepicker #picker></mat-datepicker>
+
+                            <mat-error *ngIf="submitted && paymentFormGroup.controls.chequedate.errors?.['required']">
+                                Cheque Date is required.
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Source Bank -->
+                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12"><label class="inputLabel">Source Bank*</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <mat-select placeholder="Select a Source Bank" class="input-p-5"
+                                formControlName="bankManagement">
+                                <mat-option value="">Select Source Bank</mat-option>
+                                <mat-option *ngFor="let bank of bankDataList" [value]="bank.id">
+                                    {{ bank.bankname }} - {{ bank.accountnum }}
+                                </mat-option>
+                            </mat-select>
+                            <mat-error *ngIf="submitted && paymentFormGroup.controls.bankManagement.errors?.required">
+                                Bank is required.
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Destination Bank -->
+                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12" *ngIf="destinationbank">
+                        <label class="inputLabel">Destination
+                            Bank*</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <mat-select placeholder="Select Destination Bank" class="input-p-5"
+                                formControlName="destinationBank">
+                                <mat-option value="">Select Destination Bank</mat-option>
+                                <mat-option *ngFor="let bankDest of bankDestination" [value]="bankDest.id">
+                                    {{ bankDest.bankname }} - {{ bankDest.accountnum }}
+                                </mat-option>
+                            </mat-select>
+                            <mat-error *ngIf="submitted && paymentFormGroup.controls.destinationBank.errors?.required">
+                                Bank Destination is required.
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Branch -->
+                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12"><label class="inputLabel">Branch</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <input matInput class="input-p-5" formControlName="branch" placeholder="Enter Branch" />
+                            <mat-error *ngIf="submitted && paymentFormGroup.controls.branch.errors?.required">
+                                Branch is required.
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Reference No -->
+                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12"><label class="inputLabel">Reference No.{{
+                            paymentFormGroup.value.paymode ? '*' : '' }}</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <input matInput class="input-p-5" formControlName="referenceno"
+                                placeholder="Enter Reference No." />
+                            <mat-error *ngIf="submitted && paymentFormGroup.controls.referenceno.errors?.required">
+                                Reference No. is required.
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Receipt No -->
+                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12"><label class="inputLabel">Receipt No</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <input matInput class="input-p-5" formControlName="reciptNo"
+                                placeholder="Enter Receipt No." />
+                            <mat-error *ngIf="submitted && paymentFormGroup.controls.reciptNo.errors?.required">
+                                Receipt No. is required.
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- TDS -->
+                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12"><label class="inputLabel">TDS</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <input matInput class="input-p-5" formControlName="tdsAmount" type="number"
+                                placeholder="Enter TDS Amount" step=".01" [readonly]="isShowInvoiceList" />
+                        </mat-form-field>
+                    </div>
+
+                    <!-- ABBS -->
+                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12"><label class="inputLabel">ABBS</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <input matInput class="input-p-5" formControlName="abbsAmount" type="number"
+                                placeholder="Enter ABBS Amount" step=".01" [readonly]="isShowInvoiceList" />
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Remark -->
+                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12"><label class="inputLabel">Remark*</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <textarea matInput class="input-p-5" formControlName="remark" rows="3"
+                                placeholder="Enter Remark"></textarea>
+                            <mat-error *ngIf="submitted && paymentFormGroup.controls.remark.errors?.required">
+                                Remark is required.
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+                </div>
+            </form>
+            @if (isShowInvoiceList) {
+            <mat-card>
+                <mat-card-content>
+                    <div class="table-responsive tableViewScrollHeight example-container">
+                        <table mat-table [dataSource]="selectedInvoice" class="mat-table w-100">
+
+                            <!-- Doc Number -->
+                            <ng-container matColumnDef="docnumber">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Doc Number</th>
+                                <td mat-cell *matCellDef="let data">{{ data.docnumber }}</td>
+                            </ng-container>
+
+                            <!-- Created By -->
+                            <ng-container matColumnDef="createdByName">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Created By</th>
+                                <td mat-cell *matCellDef="let data">{{ data.createdByName }}</td>
+                            </ng-container>
+
+                            <!-- Tax Amount -->
+                            <ng-container matColumnDef="tax">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Tax Amount</th>
+                                <td mat-cell *matCellDef="let data">{{ data.tax }}</td>
+                            </ng-container>
+
+                            <!-- Total Invoice -->
+                            <ng-container matColumnDef="totalamount">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Total Invoice</th>
+                                <td mat-cell *matCellDef="let data">
+                                    {{ data.totalamount | currency: currency : 'symbol' : '1.2-2' }}
+                                </td>
+                            </ng-container>
+
+                            <!-- Pending Amount -->
+                            <ng-container matColumnDef="pendingAmount">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Pending Amount</th>
+                                <td mat-cell *matCellDef="let data">
+                                    {{
+                                    data.adjustedAmount == null
+                                    ? (data.totalamount | currency: currency : 'symbol' : '1.2-2')
+                                    : (getPendingAmount(data) | currency: currency : 'symbol' : '1.2-2')
+                                    }}
+                                </td>
+                            </ng-container>
+
+                            <!-- Refundable Amount -->
+                            <ng-container matColumnDef="refundAbleAmount">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Refundable Amount</th>
+                                <td mat-cell *matCellDef="let data">
+                                    {{ data.refundAbleAmount | currency: currency : 'symbol' : '1.2-2' }}
+                                </td>
+                            </ng-container>
+
+                            <!-- Collected Amount (conditionally displayed) -->
+                            <ng-container *ngIf="isDisplayConvertedAmount" matColumnDef="convertedAmount">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Collected Amount</th>
+                                <td mat-cell *matCellDef="let data">
+                                    {{ data.convertedAmount | currency: collectedCurrency : 'symbol' : '1.2-2' }}
+                                </td>
+                            </ng-container>
+
+                            <!-- Amount -->
+                            <ng-container matColumnDef="testamount">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Amount</th>
+                                <td mat-cell *matCellDef="let data">
+                                    {{ data.testamount | currency: currency : 'symbol' : '1.2-2' }}
+                                </td>
+                            </ng-container>
+
+                            <!-- TDS -->
+                            <ng-container matColumnDef="tdsCheck">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>TDS</th>
+                                <td mat-cell *matCellDef="let data">{{ data.tdsCheck }}</td>
+                            </ng-container>
+
+                            <!-- ABBS -->
+                            <ng-container matColumnDef="abbsCheck">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>ABBS</th>
+                                <td mat-cell *matCellDef="let data">{{ data.abbsCheck }}</td>
+                            </ng-container>
+
+                            <!-- Header and Row Definitions -->
+                            <tr mat-header-row *matHeaderRowDef="displayedColumnsInvoice"></tr>
+                            <tr mat-row *matRowDef="let row; columns: displayedColumnsInvoice"></tr>
+                        </table>
+
+                    </div>
+
+                </mat-card-content>
+            </mat-card>
+            }
+        </div>
+
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+            <button mat-flat-button color="primary" class="button-normal m-l-auto" (click)="addPayment('',dialogRef)"
+                label="Add Payment">
+                Add Payment
+            </button>
+            <button mat-stroked-button (click)="closeRecordPaymentDialog(dialogRef)">Close</button>
+
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #selectInvoiceDailog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <!-- Header -->
+        <div class="dialog-header dialog-title">Select Invoices<span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <mat-dialog-content>
+
+            <!-- Currency Row -->
+            <div class="row">
+                <div class="col-lg-4 ">
+                    <label class="inputLabel">Collected Amount Currency</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-select placeholder="Select a Currency" class="input-p-5" [(ngModel)]="collectedCurrency"
+                            (selectionChange)="onCurrencyChange($event, data)">
+                            <mat-option *ngFor="let c of commondropdownService.currency" [value]="c.value">
+                                {{ c.displayName }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                <div class="col-lg-4 ">
+                    <label class="inputLabel">Converted Rate</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <input matInput class="input-p-5" type="number" placeholder="Enter Converted Rate"
+                            [(ngModel)]="convertedExchangeRate" (blur)="onConvertedRateChange()" />
+                    </mat-form-field>
+                </div>
+
+
+
+            </div>
+
+            <!-- Invoice Table -->
+            <div class="table-responsive tableViewScrollHeight example-container">
+                <table mat-table [dataSource]="invoiceList">
+
+                    <!-- Checkbox Column -->
+                    <ng-container matColumnDef="select">
+                        <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>
+                            <mat-checkbox [(ngModel)]="masterSelected"
+                                (change)="checkUncheckAllInvoice()"></mat-checkbox>
+                        </th>
+                        <td mat-cell *matCellDef="let data">
+                            <mat-checkbox [(ngModel)]="data.isSelected"
+                                (change)="isAllSelectedInvoice()"></mat-checkbox>
+                        </td>
+                    </ng-container>
+
+                    <!-- Doc Number -->
+                    <ng-container matColumnDef="docnumber">
+                        <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef> Doc Number </th>
+                        <td mat-cell *matCellDef="let data"> {{ data.docnumber }} </td>
+                    </ng-container>
+
+                    <!-- Created By -->
+                    <ng-container matColumnDef="createdByName">
+                        <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef> Created By </th>
+                        <td mat-cell *matCellDef="let data"> {{ data.createdByName }} </td>
+                    </ng-container>
+
+                    <!-- Tax Amount -->
+                    <ng-container matColumnDef="tax">
+                        <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef> Tax Amount </th>
+                        <td mat-cell *matCellDef="let data">
+                            {{ data.tax }}
+                        </td>
+                    </ng-container>
+
+                    <!-- Total Invoice -->
+                    <ng-container matColumnDef="totalamount">
+                        <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef> Total Invoice </th>
+                        <td mat-cell *matCellDef="let data">
+                            {{ data.totalamount | number:'1.2-2' }}
+                        </td>
+                    </ng-container>
+
+                    <!-- Pending Amount -->
+                    <ng-container matColumnDef="pendingAmount">
+                        <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef> Pending Amount </th>
+                        <td mat-cell *matCellDef="let data">
+                            <ng-container *ngIf="data.adjustedAmount == null">
+                                {{ data.totalamount | number:'1.2-2' }}
+                            </ng-container>
+                            <ng-container *ngIf="data.adjustedAmount != null">
+                                {{ data.totalamount - data.adjustedAmount | number:'1.2-2' }}
+                            </ng-container>
+                        </td>
+                    </ng-container>
+
+                    <!-- Refundable Amount -->
+                    <ng-container matColumnDef="refundAbleAmount">
+                        <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef> Refundable Amount </th>
+                        <td mat-cell *matCellDef="let data">
+                            {{ data.refundAbleAmount | number:'1.2-2' }}
+                        </td>
+                    </ng-container>
+
+                    <!-- Collected Amount (conditional) -->
+                    <!-- <ng-container *ngIf="isDisplayConvertedAmount" matColumnDef="convertedAmount">
+                        <th mat-header-cell class="f-w-600 f-s-15"  *matHeaderCellDef> Collected Amount </th>
+                        <td mat-cell *matCellDef="let data">
+                            <mat-form-field appearance="outline" class="w-32">
+                                <input matInput class="input-p-5" type="number" [(ngModel)]="data.convertedAmount"
+                                    (ngModelChange)="onConvertedAmountChange($event, data)" />
+                            </mat-form-field>
+                        </td>
+                    </ng-container> -->
+
+                    <!-- Amount -->
+                    <ng-container matColumnDef="testamount">
+                        <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef> Amount </th>
+                        <td mat-cell *matCellDef="let data">
+                            <mat-form-field appearance="outline" style="width: auto;">
+                                <input matInput class="input-p-5" type="number" [(ngModel)]="data.testamount"
+                                    (keypress)="keypressId($event)" (ngModelChange)="onSelectedInvoice($event, data)" />
+                            </mat-form-field>
+                        </td>
+                    </ng-container>
+
+                    <!-- TDS -->
+                    <ng-container matColumnDef="tds">
+                        <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef> TDS </th>
+                        <td mat-cell *matCellDef="let data">
+                            <mat-checkbox [(ngModel)]="data.includeTds" [disabled]="!data.testamount"
+                                (ngModelChange)="onChangeOFTDSTest($event, data)">
+                            </mat-checkbox>
+                            <mat-form-field appearance="outline" class="w-28 ml-2">
+                                <input matInput class="input-p-5" type="text" [(ngModel)]="data.tdsCheck"
+                                    [readonly]="!data.testamount" />
+                            </mat-form-field>
+                        </td>
+                    </ng-container>
+
+                    <!-- ABBS -->
+                    <ng-container matColumnDef="abbs">
+                        <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef> ABBS </th>
+                        <td mat-cell *matCellDef="let data">
+                            <mat-checkbox [(ngModel)]="data.includeAbbs" [disabled]="!data.testamount"
+                                (ngModelChange)="onChangeOFABBSTest($event, data)">
+                            </mat-checkbox>
+                            <mat-form-field appearance="outline" class="w-28 ml-2">
+                                <input matInput class="input-p-5" type="text" [(ngModel)]="data.abbsCheck"
+                                    [disabled]="!data.testamount" />
+                            </mat-form-field>
+                        </td>
+                    </ng-container>
+
+                    <!-- Header / Row -->
+                    <tr mat-header-row *matHeaderRowDef="displayedInvoiceColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedInvoiceColumns"></tr>
+
+                </table>
+            </div>
+
+        </mat-dialog-content>
+        <div class="dialog-action-adjust d-flex justify-content-end" style="gap:8px">
+            <button mat-button mat-flat-button color="'primary'" class="addarea-btn" (click)="bindInvoice(dialogRef)">
+                Save
+            </button>
+
+            <button mat-stroked-button mat-dialog-closeclose (click)="dialogRef.close()">Close</button>
+        </div>
+    </div>
+</ng-template>
+<ng-template #onlinePaymentDialog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <!-- Header -->
+        <div class="dialog-header dialog-title">
+            Online Payment Audits
+            <span>
+                <a mat-icon-button (click)="getFailedPaymentsClose()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <!-- Body -->
+        <div class="modal-body" style="padding:45px">
+            <div class="tableViewScrollHeight example-container">
+                <table mat-table [dataSource]="viewcustomerFailedPaymentData" class="mat-table w-100">
+
+                    <!-- Reference No -->
+                    <ng-container matColumnDef="orderId">
+                        <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef> Reference No </th>
+                        <td mat-cell *matCellDef="let payment">{{ payment.orderId }}</td>
+                    </ng-container>
+
+                    <!-- Transaction No -->
+                    <ng-container matColumnDef="pgTransactionId">
+                        <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef> Transaction No </th>
+                        <td mat-cell *matCellDef="let payment">
+                            {{ payment?.pgTransactionId && payment.pgTransactionId !== 'null' ? payment.pgTransactionId
+                            : '-' }}
+                        </td>
+                    </ng-container>
+
+                    <!-- Account Number -->
+                    <ng-container matColumnDef="accountNumber">
+                        <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef> Account Number </th>
+                        <td mat-cell *matCellDef="let payment">
+                            {{ payment?.accountNumber && payment.accountNumber !== 'null' ? payment.accountNumber : '-'
+                            }}
+                        </td>
+                    </ng-container>
+
+                    <!-- Customer Username -->
+                    <ng-container matColumnDef="customerUsername">
+                        <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef> Customer Username </th>
+                        <td mat-cell *matCellDef="let payment">{{ payment.customerUsername }}</td>
+                    </ng-container>
+
+                    <!-- Payment Amount -->
+                    <ng-container matColumnDef="payment">
+                        <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef> Payment Amount </th>
+                        <td mat-cell *matCellDef="let payment">{{ payment.payment }}</td>
+                    </ng-container>
+
+                    <!-- Status -->
+                    <ng-container matColumnDef="status">
+                        <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef> Status </th>
+                        <td mat-cell *matCellDef="let payment">
+                            <span [ngClass]="{
+                'badge-success': payment.status?.toUpperCase() === 'SUCCESS' || payment.status?.toUpperCase() === 'SUCCESSFUL',
+                'badge-info': payment.status?.toUpperCase() === 'PENDING' || payment.status?.toUpperCase() === 'INITIATE',
+                'badge-danger': payment.status?.toUpperCase() === 'FAILED'
+              }" class="badge">
+                                {{
+                                payment.status == null ||
+                                payment.status?.toLowerCase()?.trim() === '' ||
+                                payment.status?.toLowerCase()?.trim() === 'null'
+                                ? '-'
+                                : (payment.status | titlecase)
+                                }}
+                            </span>
+                        </td>
+                    </ng-container>
+
+                    <!-- Gateway Status -->
+                    <ng-container matColumnDef="gatewayStatus">
+                        <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef> Gateway Status </th>
+                        <td mat-cell *matCellDef="let payment">
+                            <span [ngClass]="{
+                'badge-success': ['success', 'successful'].includes(payment.gatewayStatus?.toLowerCase()),
+                'badge-info': ['initiate', 'pending'].includes(payment.gatewayStatus?.toLowerCase()),
+                'badge-danger': payment.gatewayStatus?.toLowerCase() === 'failed'
+              }" class="badge">
+                                {{
+                                payment.gatewayStatus == null ||
+                                payment.gatewayStatus?.toLowerCase()?.trim() === '' ||
+                                payment.gatewayStatus?.toLowerCase()?.trim() === 'null'
+                                ? '-'
+                                : (payment.gatewayStatus | titlecase)
+                                }}
+                            </span>
+                        </td>
+                    </ng-container>
+
+                    <!-- Failure Reason -->
+                    <ng-container matColumnDef="failureDescription">
+                        <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef> Failure Reason </th>
+                        <td mat-cell *matCellDef="let payment">
+                            <ng-container *ngIf="payment.failureDescription; else noFailure">
+                                <button mat-stroked-button color="warn"
+                                    (click)="openFailureReason(payment.failureDescription)">
+                                    View
+                                </button>
+                            </ng-container>
+                            <ng-template #noFailure>-</ng-template>
+                        </td>
+                    </ng-container>
+
+                    <!-- Payment Date -->
+                    <ng-container matColumnDef="paymentDate">
+                        <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef> Payment Date </th>
+                        <td mat-cell *matCellDef="let payment">{{ payment.paymentDate | date:'dd-MM-yyyy HH:mm:ss' }}
+                        </td>
+                    </ng-container>
+
+                    <!-- Merchant Name -->
+                    <ng-container matColumnDef="merchantName">
+                        <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef> Merchant Name </th>
+                        <td mat-cell *matCellDef="let payment">{{ payment.merchantName }}</td>
+                    </ng-container>
+
+                    <!-- Transaction Date -->
+                    <ng-container matColumnDef="transactionDate">
+                        <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef> Transaction Date </th>
+                        <td mat-cell *matCellDef="let payment">{{ payment.transactionDate | date:'dd-MM-yyyy HH:mm:ss'
+                            }}</td>
+                    </ng-container>
+
+                    <!-- Payer Mobile -->
+                    <ng-container matColumnDef="payerMobileNumber">
+                        <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef> Payer Mobile Number </th>
+                        <td mat-cell *matCellDef="let payment">{{ payment.payerMobileNumber }}</td>
+                    </ng-container>
+
+                    <!-- Auto Payment Initiator -->
+                    <ng-container matColumnDef="autoPaymentInitiator">
+                        <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef> Auto Payment Initiator </th>
+                        <td mat-cell *matCellDef="let payment">{{ payment.autoPaymentInitiator }}</td>
+                    </ng-container>
+
+                    <!-- Action -->
+                    <ng-container matColumnDef="action">
+                        <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef> Action </th>
+                        <td mat-cell *matCellDef="let payment">
+                            <button mat-icon-button color="primary" matTooltip="Retry" [disabled]="
+                  payment.gatewayStatus?.toLowerCase() === 'success' ||
+                  payment.gatewayStatus?.toLowerCase() === 'successful'
+                " (click)="retryPayment(payment.orderId)">
+                                <mat-icon>refresh</mat-icon>
+                            </button>
+
+                            <button mat-icon-button color="accent" matTooltip="Manully Settlement"
+                                [disabled]="!(payment?.pgTransactionId == null || payment?.pgTransactionId == 'NA')"
+                                (click)="addToWallet(payment.orderId)">
+                                <mat-icon>account_balance_wallet</mat-icon>
+                            </button>
+                        </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumnsOnlinePayment"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumnsOnlinePayment;"></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</ng-template>
+
+
+<ng-template #failureReasonsDialog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <div class="dialog-header dialog-title">
+            Failure Reason
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <div class="modal-body">
+            <div *ngIf="failureReason">
+                <div class="failure-item">
+                    <strong>{{ failureReason }}</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</ng-template>
+
+
+<ng-template #addTransactionDialog>
+    <div class="container-fluid p-0">
+        <div class="dialog-header dialog-title">
+            Add Transaction No
+            <span>
+                <a mat-icon-button (click)="addToWalletClose()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <div class="modal-body" style="padding: 30px;">
+            <label class="inputLabel">Transaction No</label>
+            <mat-form-field appearance="outline" class="w-100">
+                <input matInput class="input-p-5" [(ngModel)]="transactionNo" placeholder="Enter Transaction No" />
+            </mat-form-field>
+        </div>
+
+        <div class="dialog-action-adjust d-flex justify-content-end" style="gap:8px">
+            <button mat-button mat-flat-button color="'primary'" class="addarea-btn"
+                (click)="ConfirmonTransactionNumber()" [disabled]="!transactionNo">
+                Add To Wallet
+            </button>
+
+            <button mat-stroked-button (click)="addToWalletClose()">Close</button>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #chequeDetailsDialog>
+    <div class="container-fluid p-0">
+        <!-- Header -->
+        <div class="dialog-header dialog-title"
+            style="background: #f7941e; color: white; padding: 10px; font-weight: 500;">
+            Cheque Details
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()" style="color: white;"><img
+                        src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <!-- Body -->
+        <div class="modal-body p-3">
+            <div class="table-responsive tableViewScrollHeight example-container">
+                <table mat-table [dataSource]="chequeDetail" class="mat-elevation-z2 w-100">
+
+                    <!-- Amount Column -->
+                    <ng-container matColumnDef="amount">
+                        <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef> Amount </th>
+                        <td mat-cell *matCellDef="let cheque">{{ cheque.amount }}</td>
+                    </ng-container>
+
+                    <!-- Cheque Date Column -->
+                    <ng-container matColumnDef="chequedate">
+                        <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef> Cheque Date </th>
+                        <td mat-cell *matCellDef="let cheque">{{ cheque.chequedate }}</td>
+                    </ng-container>
+
+                    <!-- Cheque No Column -->
+                    <ng-container matColumnDef="chequeNo">
+                        <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef> Cheque No </th>
+                        <td mat-cell *matCellDef="let cheque">{{ cheque.chequeNo }}</td>
+                    </ng-container>
+
+                    <!-- Table Rows -->
+                    <tr mat-header-row *matHeaderRowDef="displayedChequeColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedChequeColumns;"></tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="modal-footer text-end p-3">
+            <button mat-stroked-button>Close</button>
+        </div>
+    </div>
+</ng-template>
+
+<!-- confirmation dialog start -->
+<ng-template #confirmationDialog>
+    <div class="dialog-container">
+        <div class="dialog-header dialog-header-titleFont">
+            Transaction No Confirmation
+            <span class="w-h-18">
+                <a mat-icon-button href="javascript:void(0)" (click)="cancelConfirm()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+            <p class="dialog-description">Do you want to confirm this transaction no?</p>
+            <div mat-dialog-actions class="p-0">
+                <button mat-flat-button type="button" class="primary" (click)="addToWalletAPI()">
+                    Yes
+                </button>
+                <button mat-stroked-button matButton="outlined" color="primary" (click)="cancelConfirm()">
+                    No
+                </button>
+            </div>
+        </div>
+    </div>
+</ng-template>
+
+<!-- confirmation dialog end -->
+
+
+
+
+
+
+
+
+
+
+
+<!-- <div class="row">
+    <div class="col-md-12 col-sm-12">
+        <div class="panel">
+            <div class="panel-heading">
+                <div class="displayflex">
+                    <button (click)="customerDetailOpen()" class="btn btn-secondary backbtn" data-placement="bottom"
+                        data-toggle="tooltip" title="Go to Customer Details" type="button">
+                        <i class="fa fa-arrow-circle-left" style="color: #f7941e !important; font-size: 28px"></i>
+                    </button>
+                    <h3 class="panel-title">
+                        {{ customerLedgerDetailData?.title }}
+                        {{ customerLedgerDetailData?.firstname }}
+                        {{ customerLedgerDetailData?.lastname }} Payment Details
+                    </h3>
+                </div>
+                <div class="right">
+                    <button class="btn refreshbtn" type="reset" (click)="openCustomersPaymentData(customerId, '')">
+                        <img src="assets/img/DashboardIcons/Refresh.svg" />
+                    </button>
+                    <button aria-controls="paymentPreCust" aria-expanded="false" class="btn-toggle-collapse"
+                        data-target="#paymentPreCust" data-toggle="collapse" type="button">
+                        <i class="fa fa-minus-circle"></i>
+                    </button>
+                </div>
+                @if (recordPaymentAccess) {
+                <button [disabled]="customerLedgerDetailData?.status === 'Terminate' || isDisable"
+                    (click)="getCustomer()" class="btn btn-primary statusbtn" data-backdrop="static"
+                    data-keyboard="false" data-target="#recordPayment" data-title="Record Payment" data-toggle="modal"
+                    style="
+            background-color: #f7941e !important;
+            font-size: 16px;
+            padding: 3px 12px;
+            margin-top: 10px;
+          " type="submit">
+                    Record Payment
+                </button>
+                }
+                @if (recordPaymentAccess) {
+                <button [disabled]="customerLedgerDetailData?.status === 'Terminate' || isDisable"
+                    (click)="getFailedPayments()" class="btn btn-primary statusbtn" data-backdrop="static"
+                    data-keyboard="false" data-target="#recordPayment" data-title="Record Payment" data-toggle="modal"
+                    style="
+            background-color: #f7941e !important;
+            font-size: 16px;
+            padding: 3px 12px;
+            margin-top: 10px;
+          " type="submit">
+                    Online Payment Audits
+                </button>
+                }
+            </div>
+            <div class="panel-collapse collapse in" id="paymentPreCust">
+                @if (viewcustomerPaymentData?.length !== 0) {
+                <div class="panel-body table-responsive">
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Payment By</th>
+                                        <th>Receipt No</th>
+                                        <th>Invoice Number</th>
+                                        <th>Paymode</th>
+                                        <th>Pay Amount</th>
+                                        <th>TDS</th>
+                                        <th>ABBS</th>
+                                        <th>Source</th>
+                                        <th>Unsettled Amount</th>
+                                        <th>Bank Name</th>
+                                        <th>Cheque No.</th>
+                                        <th>Payment Date</th>
+                                        <th>File</th>
+                                        <th>Status</th>
+                                        <th>Remark</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (
+                                    data of viewcustomerPaymentData
+                                    | paginate
+                                    : {
+                                    id: 'customerPayListpageData',
+                                    itemsPerPage: customerPaymentdataitemsPerPage,
+                                    currentPage: currentPagecustomerPaymentdata,
+                                    totalItems: customerPaymentdatatotalRecords
+                                    }; track
+                                    data; let i = $index) {
+                                    <tr>
+                                        <td>{{ data.paymentBy }}</td>
+                                        <td>{{ data.creditdocumentno }}</td>
+                                        <td>{{ data.invoiceNumber }}</td>
+                                        <td>
+                                            @if (data.paymode == 'Cheque') {
+                                            <a style="color: #f7941e" class="HoverEffect" title="Payment Details"
+                                                (click)="openPaymentModal(data.id)">
+                                                {{ data.paymode }}
+                                            </a>
+                                            }
+                                            @if (data.paymode !== 'Cheque') {
+                                            <span>
+                                                {{ data.paymode }}
+                                            </span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <span (click)="openPaymentInvoiceModal('PaymentDetailModal', data.id)"
+                                                class="curson_pointer" style="color: #f7941e">
+                                             
+                                                {{ data.amount | currency: currency : "symbol" : "1.2-2" }}
+                                            </span>
+                                        </td>
+                                        <td>{{ data.tdsamount | number: "1.2-2" }}</td>
+                                        <td>{{ data.abbsAmount | number: "1.2-2" }}</td>
+                                        <td>{{ data.onlinesource }}</td>
+                                       
+                                        <td>{{ data.unsettledAmount | currency: currency : "symbol" : "1.2-2" }}</td>
+                                        <td>{{ data.bankName }}</td>
+                                        <td>{{ data.paydetails2 }}</td>
+                                        <td>
+                                            @if (data.paymentdate) {
+                                            <span>
+                                                {{ data.paymentdate }}
+                                            </span>
+                                            }
+                                            @if (!data.paymentdate) {
+                                            <span>-</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (data.filename != null) {
+                                            <a (click)="downloadInvoice(data.id, data.custId, data.filename)"
+                                                href="javascript:void(0)" style="color: #28a745; font-size: 20px"
+                                                title="Download Invoice">
+                                                <img src="assets/img/pdf.png" style="width: 25px; height: 25px" />
+                                            </a>
+                                            }
+                                            @if (data.filename == null) {
+                                            <span> - </span>
+                                            }
+                                        </td>
+                                        @if (data.status === 'Fully Adjusted') {
+                                        <td>
+                                            <span class="badge badge-success">
+                                                {{ "verified" | titlecase }}
+                                            </span>
+                                        </td>
+                                        }
+                                        @if (data.status === 'advance') {
+                                        <td>
+                                            <span class="badge badge-success">
+                                                {{ "verified" | titlecase }}
+                                            </span>
+                                        </td>
+                                        }
+                                        @if (data.status === 'approved') {
+                                        <td>
+                                            <span class="badge badge-success">
+                                                {{ "verified" | titlecase }}
+                                            </span>
+                                        </td>
+                                        }
+                                        @if (data.status === 'Online Payment Pending') {
+                                        <td style="text-align: center">
+                                            <span class="badge badge-success">
+                                                {{ "Payment Pending" | titlecase }}
+                                            </span>
+                                        </td>
+                                        }
+                                        @if (data.status === 'pending' && data.nextTeamHierarchyMappingId == null) {
+                                        <td>
+                                            <span class="badge badge-info">
+                                                {{ "Collected" | titlecase }}
+                                            </span>
+                                        </td>
+                                        }
+                                        @if (data.status === 'pending' && data.nextTeamHierarchyMappingId != null) {
+                                        <td>
+                                            <span class="badge badge-info">
+                                                {{ "Submitted" | titlecase }}
+                                            </span>
+                                        </td>
+                                        }
+                                        @if (data.status === 'Partialy Adjusted') {
+                                        <td>
+                                            <span class="badge badge-success">
+                                                {{ "verified" | titlecase }}
+                                            </span>
+                                        </td>
+                                        }
+                                        @if (data.status === 'rejected') {
+                                        <td>
+                                            <span class="badge badge-danger">
+                                                {{ data.status | titlecase }}
+                                            </span>
+                                        </td>
+                                        }
+                                        <td>{{ data.remarks }}</td>
+                                    </tr>
+                                    }
+                                </tbody>
+                            </table>
+                            <br />
+                            <div class="pagination_Dropdown">
+                                <pagination-controls (pageChange)="pageChangedcustomerPaymentList($event)"
+                                    directionLinks="true" id="customerPayListpageData" maxSize="10" nextLabel=""
+                                    previousLabel=""></pagination-controls>
+                                <div id="itemPerPageDropdown">
+                                    <p-dropdown (onChange)="TotalPaymentItemPerPage($event)"
+                                        [options]="pageLimitOptions" optionLabel="value"
+                                        optionValue="value"></p-dropdown>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                }
+                @if (viewcustomerPaymentData?.length === 0) {
+                <div class="panel-body table-responsive">
+                    Details are not available.
+                </div>
+                }
+            </div>
+        </div>
+    </div>
+</div> -->
+
+<!-- Payment Modal Start -->
+<!-- <div class="modal fade" id="paymentModal">
+<div class="modal-dialog">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h4 class="modal-title">Cheque Details:</h4>
+    </div>
+
+    <div class="modal-body">
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th>amount</th>
+            <th>chequedate</th>
+            <th>chequeNo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let cheque of chequeDetail">
+            <td>{{ cheque.amount }}</td>
+            <td>{{ cheque.chequedate }}</td>
+            <td>{{ cheque.chequeNo }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-default" data-dismiss="modal" type="button">Close</button>
+    </div>
+  </div>
+</div>
+</div> -->
+<!-- <p-dialog header="Cheque Details:" [(visible)]="showChequeDetails" [modal]="true" [style]="{ width: '50%' }"
+    [responsive]="true" [draggable]="false" [closable]="false" style="background: #f7941e !important">
+    <div class="modal-body">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Amount</th>
+                    <th>Cheque Date</th>
+                    <th>Cheque No</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (cheque of chequeDetail; track cheque) {
+                <tr>
+                    <td>{{ cheque.amount }}</td>
+                    <td>{{ cheque.chequedate }}</td>
+                    <td>{{ cheque.chequeNo }}</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="modal-footer">
+        <button class="btn btn-default" (click)="showChequeDetails = false" type="button">Close</button>
+    </div>
+</p-dialog>  -->
+
+<!-- <p-dialog header="Record Payment" [(visible)]="displayRecordPaymentDialog" [modal]="true" [style]="{ width: '90%' }"
+    [responsive]="true" [draggable]="false" [closable]="true" (onHide)="closePaymentForm()"
+    style="background: #f7941e !important">
+    <div class="modal-body">
+        <form [formGroup]="paymentFormGroup">
+            <div class="row" style="margin-bottom: 20px">
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <label>Customer*</label>
+                    <select class="form-control" disabled name="customerid" style="width: 100%">
+                        <option value="">
+                            {{ customerLedgerDetailData?.title }}
+                            {{ customerLedgerDetailData?.firstname }}
+                            {{ customerLedgerDetailData?.lastname }}
+                        </option>
+                    </select>
+                </div>
+                <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+                    <label>Invoice*</label>
+                    <br />
+                    <div style="display: inline-block">
+                        <p-multiSelect placeholder="Select a Invoice" id="roles" [options]="invoiceList"
+                            formControlName="invoiceId" styleClass="disableDropdown" [disabled]="true"
+                            defaultLabel="Invoice" optionLabel="docnumber" optionValue="id" resetFilterOnHide="true"
+                            [ngClass]="{
+                'is-invalid': submitted && paymentFormGroup.controls.invoiceId.errors
+              }"></p-multiSelect>
+                    </div>
+                    <button (click)="modalOpenInvoice(customerId)" class="btn btn-primary"
+                        style="border-radius: 5px; padding: 5px 10px; line-height: 1.5; margin-left: 10px">
+                        <i class="fa fa-plus-square"></i>
+                    </button>
+
+                    @if (submitted && paymentFormGroup.controls.invoiceId.errors) {
+                    <div class="errorWrap text-danger">
+                        @if (submitted && paymentFormGroup.controls.invoiceId.errors.required) {
+                        <div class="error text-danger">
+                            Invoice is required.
+                        </div>
+                        }
+                    </div>
+                    }
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <label>Payment Mode*</label>
+                    <p-dropdown (onChange)="selPayModeRecord($event)" [ngClass]="{
+              'is-invalid': submitted && paymentFormGroup.controls.paymode.errors
+            }" [options]="paymentMode" [filter]="true" filterBy="text" formControlName="paymode" optionLabel="text"
+                        optionValue="value" placeholder="Select a Payment Mode"></p-dropdown>
+                    @if (submitted && paymentFormGroup.controls.paymode.errors) {
+                    <div class="errorWrap text-danger">
+                        @if (submitted && paymentFormGroup.controls.paymode.errors.required) {
+                        <div class="error text-danger">
+                            Pay Mode is required.
+                        </div>
+                        }
+                    </div>
+                    }
+                    <br />
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <label>Source {{ onlineSourceData?.length > 0 ? "*" : "" }}</label>
+                    <p-dropdown [disabled]="!(onlineSourceData?.length > 0)" [options]="onlineSourceData"
+                        [filter]="true" filterBy="text" optionLabel="text" optionValue="value"
+                        placeholder="Select a Payment Mode" formControlName="onlinesource"
+                        (onChange)="selPaySourceRecord($event)"></p-dropdown>
+                    @if (submitted && paymentFormGroup.controls.onlinesource.errors) {
+                    <div class="errorWrap text-danger">
+                        @if (submitted && paymentFormGroup.controls.onlinesource.errors.required) {
+                        <div class="error text-danger">
+                            Source is required.
+                        </div>
+                        }
+                    </div>
+                    }
+                    <br />
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <label>Amount*</label>
+                    <input [ngClass]="{
+              'is-invalid': submitted && paymentFormGroup.controls.amount.errors
+            }" class="form-control" formControlName="amount" min="1" placeholder="Enter Amount" step=".01"
+                        type="number" customDecimal (keypress)="keypressId($event)" [readonly]="isShowInvoiceList" />
+                    @if (submitted && paymentFormGroup.controls.amount.errors) {
+                    <div class="errorWrap text-danger">
+                        @if (submitted && paymentFormGroup.controls.amount.errors.required) {
+                        <div class="error text-danger">
+                            Amount is required.
+                        </div>
+                        }
+                        @if (submitted && paymentFormGroup.controls.amount.errors.pattern) {
+                        <div class="error text-danger">
+                            Only numeric characters allowed.
+                        </div>
+                        }
+                        @if (submitted && paymentFormGroup.controls.amount.errors.min) {
+                        <div class="error text-danger">
+                            Amount must be greater then 0.
+                        </div>
+                        }
+                    </div>
+                    }
+                    <br />
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <label>Select File</label>
+                    <input (change)="onFileChange($event)" [ngClass]="{
+              'is-invalid': submitted && paymentFormGroup.controls.file.errors
+            }" class="form-control" formControlName="file" type="file" />
+                    @if (submitted && paymentFormGroup.controls.file.errors) {
+                    <div class="errorWrap text-danger">
+                        @if (submitted && paymentFormGroup.controls.file.errors.required) {
+                        <div class="error text-danger">
+                            file is required.
+                        </div>
+                        }
+                    </div>
+                    }
+                    <br />
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <label>Cheque No.*</label>
+                    <input [ngClass]="{
+              'is-invalid': submitted && paymentFormGroup.controls.chequeno.errors
+            }" class="form-control" formControlName="chequeno" min="1" placeholder="Enter Cheque No." type="text" />
+                    @if (submitted && paymentFormGroup.controls.chequeno.errors) {
+                    <div class="errorWrap text-danger">
+                        @if (submitted && paymentFormGroup.controls.chequeno.errors.required) {
+                        <div class="error text-danger">
+                            Cheque No. is required.
+                        </div>
+                        }
+                        @if (submitted && paymentFormGroup.controls.chequeno.errors.pattern) {
+                        <div class="error text-danger">
+                            Only numeric characters allowed.
+                        </div>
+                        }
+                    </div>
+                    }
+                    <br />
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <label>{{ chequeDateName }}*</label>
+                    <input [ngClass]="{
+              'is-invalid': submitted && paymentFormGroup.controls.chequedate.errors
+            }" class="form-control" formControlName="chequedate" [placeholder]="'Enter' + chequeDateName"
+                        type="date" />
+                    @if (submitted && paymentFormGroup.controls.chequedate.errors) {
+                    <div class="errorWrap text-danger">
+                        @if (submitted && paymentFormGroup.controls.chequedate.errors.required) {
+                        <div class="error text-danger">
+                            Cheque Date is required.
+                        </div>
+                        }
+                    </div>
+                    }
+                    <br />
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <label>Source Bank*</label>
+                    <select [ngClass]="{
+              'is-invalid': submitted && paymentFormGroup.controls.bankManagement.errors
+            }" class="form-control" formControlName="bankManagement" style="width: 100%">
+                        <option value="">Select Source Bank</option>
+                        @for (bank of bankDataList; track bank) {
+                        <option value="{{ bank.id }}">
+                            {{ bank.bankname }} - {{ bank.accountnum }}
+                        </option>
+                        }
+                    </select>
+
+                    @if (submitted && paymentFormGroup.controls.bankManagement.errors) {
+                    <div class="errorWrap text-danger">
+                        @if (submitted && paymentFormGroup.controls.bankManagement.errors.required) {
+                        <div class="error text-danger">
+                            Bank is required.
+                        </div>
+                        }
+                    </div>
+                    }
+                    <br />
+                </div>
+                @if (destinationbank) {
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <label>Destination Bank*</label>
+                    <select [ngClass]="{
+              'is-invalid': submitted && paymentFormGroup.controls.destinationBank.errors
+            }" class="form-control" formControlName="destinationBank" style="width: 100%">
+                        <option value="">Select Destination Bank</option>
+                        @for (bankDest of bankDestination; track bankDest) {
+                        <option value="{{ bankDest.id }}">
+                            {{ bankDest.bankname }} - {{ bankDest.accountnum }}
+                        </option>
+                        }
+                    </select>
+                    @if (submitted && paymentFormGroup.controls.destinationBank.errors) {
+                    <div class="errorWrap text-danger">
+                        @if (submitted && paymentFormGroup.controls.destinationBank.errors.required) {
+                        <div class="error text-danger">
+                            Bank Destination is required.
+                        </div>
+                        }
+                    </div>
+                    }
+                    <br />
+                </div>
+                }
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <label>Branch</label>
+                    <input [ngClass]="{
+              'is-invalid': submitted && paymentFormGroup.controls.branch.errors
+            }" class="form-control" formControlName="branch" placeholder="Enter Branch" type="text" />
+                    @if (submitted && paymentFormGroup.controls.branch.errors) {
+                    <div class="errorWrap text-danger">
+                        @if (submitted && paymentFormGroup.controls.branch.errors.required) {
+                        <div class="error text-danger">
+                            Branch is required.
+                        </div>
+                        }
+                    </div>
+                    }
+                    <br />
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <label>Reference No.{{ paymentFormGroup.value.paymode !== null ? "*" : "" }}</label>
+                    <input [ngClass]="{
+              'is-invalid': submitted && paymentFormGroup.controls.referenceno.errors
+            }" class="form-control" formControlName="referenceno" placeholder="Enter Reference No." type="text" />
+                    @if (submitted && paymentFormGroup.controls.referenceno.errors) {
+                    <div class="errorWrap text-danger">
+                        @if (submitted && paymentFormGroup.controls.referenceno.errors.required) {
+                        <div class="error text-danger">
+                            Reference No. is required.
+                        </div>
+                        }
+                    </div>
+                    }
+                    <br />
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <label>Receipt No</label>
+                    <input [ngClass]="{
+              'is-invalid': submitted && paymentFormGroup.controls.reciptNo.errors
+            }" class="form-control" formControlName="reciptNo" placeholder="Enter Recipt No." type="text" />
+                    @if (submitted && paymentFormGroup.controls.reciptNo.errors) {
+                    <div class="errorWrap text-danger">
+                        @if (submitted && paymentFormGroup.controls.reciptNo.errors.required) {
+                        <div class="error text-danger">
+                            Recipt No. is required.
+                        </div>
+                        }
+                    </div>
+                    }
+                    <br />
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <span>TDS</span>
+                    <input class="form-control" formControlName="tdsAmount" placeholder="Please enter TDS amount"
+                        step=".01" type="number" [readonly]="isShowInvoiceList" />
+                </div>
+
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <span>ABBS</span>
+                    <input class="form-control" formControlName="abbsAmount" placeholder="Please enter ABBS amount"
+                        step=".01" type="number" [readonly]="isShowInvoiceList" />
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <label>Remark*</label>
+                    <textarea [ngClass]="{
+              'is-invalid': submitted && paymentFormGroup.controls.remark.errors
+            }" class="form-control" formControlName="remark" placeholder="Enter Remark" rows="3"></textarea>
+                    @if (submitted && paymentFormGroup.controls.remark.errors) {
+                    <div class="errorWrap text-danger">
+                        @if (submitted && paymentFormGroup.controls.remark.errors.required) {
+                        <div class="error text-danger">
+                            Remark is required.
+                        </div>
+                        }
+                    </div>
+                    }
+                    <br />
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="row">
+        <div class="modal-body">
+            @if (isShowInvoiceList) {
+            <p-table [value]="selectedInvoice" [rows]="10" [paginator]="true">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>Doc Number</th>
+                        <th>Created BY</th>
+                        <th>Tax Amount</th>
+                        <th>Total Invoice</th>
+                        <th>Pending Amount</th>
+                        <th>Refundable Amount</th>
+                        @if (isDisplayConvertedAmount) {
+                        <th>Collected Amount</th>
+                        }
+                        <th>Amount</th>
+                        <th>TDS</th>
+                        <th>ABBS</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-data>
+                    <tr>
+                        <td>{{ data.docnumber }}</td>
+                        <td>{{ data.createdByName }}</td>
+                        <td>{{ data.tax }}</td>
+                        <td>{{ data.totalamount | currency: currency : "symbol" : "1.2-2" }}</td>
+                        @if (data.adjustedAmount == null) {
+                        <td>
+                            {{ data.totalamount | currency: currency : "symbol" : "1.2-2" }}
+                        </td>
+                        } @else {
+                        <td>
+                            {{ getPendingAmount(data) | currency: currency : "symbol" : "1.2-2" }}
+                        </td>
+                        }
+                        <td>{{ data.refundAbleAmount | currency: currency : "symbol" : "1.2-2" }}</td>
+                        @if (isDisplayConvertedAmount) {
+                        <td>
+                            {{ data.convertedAmount | currency: collectedCurrency : "symbol" : "1.2-2" }}
+                        </td>
+                        }
+                        <td>{{ data.testamount | currency: currency : "symbol" : "1.2-2" }}</td>
+                        <td>{{ data.tdsCheck }}</td>
+                        <td>{{ data.abbsCheck }}</td>
+                    </tr>
+                </ng-template>
+            </p-table>
+            }
+        </div>
+    </div>
+    <div class="modal-footer">
+        <div class="addUpdateBtn">
+            <button type="submit" (click)="addPayment('')" [disabled]="!paymentFormGroup.valid" label="Add Payment"
+                icon="pi pi-check-circle" class="btn btn-primary">
+                Add Payment
+            </button>
+            <button type="reset" (click)="closePaymentForm()" label="Close" icon="pi pi-times-circle"
+                class="btn btn-danger">
+                Close
+            </button>
+        </div>
+    </div>
+</p-dialog> -->
+
+<!-- <p-dialog header="Select Invoice" [(visible)]="displaySelectInvoiceDialog" [style]="{ width: '75%' }" [modal]="true"
+    [responsive]="true" [draggable]="false" [closable]="false">
+    <div class="modal-body">
+        <div class="p-d-flex p-ac-center p-ai-center">
+            <label>Collected Amount Currency : </label>
+            &nbsp;
+            <p-dropdown class="ms-1" [options]="this.commondropdownService.currency" optionValue="value"
+                optionLabel="displayName" filter="true" filterBy="displayName" placeholder="Select a Currency"
+                [(ngModel)]="collectedCurrency" (onChange)="onCurrencyChange($event, invoice)"></p-dropdown>
+            <div class="ms-1" style="margin-left: 10px">
+                <label>Converted Rate : </label>
+                &nbsp;
+                <input type="number" placeholder="Enter Converted Rate" [(ngModel)]="convertedExchangeRate"
+                    (blur)="onConvertedRateChange()" />
+            </div>
+        </div>
+        <p-table #dt [value]="invoiceList" responsiveLayout="scroll" [(selection)]="selectedInvoice">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>
+                        <input (change)="checkUncheckAllInvoice()" [(ngModel)]="masterSelected" name="master-checkbox"
+                            type="checkbox" />
+                    </th>
+                    <th>Doc Number</th>
+                    <th>Created By</th>
+                    <th>Tax Amount</th>
+                    <th>Total Invoice</th>
+                    <th>Pending Amount</th>
+                    <th>Refundable Amount</th>
+                    @if (isDisplayConvertedAmount) {
+                    <th>Collected Amount</th>
+                    }
+                    <th>Amount</th>
+                    <th>TDS</th>
+                    <th>ABBS</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-invoice let-rowIndex="rowIndex">
+                <tr>
+                    <td>
+                        <input [value]="invoice" (change)="isAllSelectedInvoice()" [(ngModel)]="invoice.isSelected"
+                            type="checkbox" />
+                    </td>
+                    <td>{{ invoice.docnumber }}</td>
+                    <td>{{ invoice.createdByName }}</td>
+                    <td>
+                        {{ invoice.tax }}
+                    </td>
+                    <td>{{ invoice.totalamount | currency: currency : "symbol" : "1.2-2" }}</td>
+                    <td>{{ getPendingAmount(invoice) | currency: currency : "symbol" : "1.2-2" }}</td>
+                    <td>{{ invoice.refundAbleAmount | currency: currency : "symbol" : "1.2-2" }}</td>
+                    
+                    @if (isDisplayConvertedAmount) {
+                    <td>
+                        <input pInputText [(ngModel)]="invoice.convertedAmount" type="number" class="small-input"
+                            (ngModelChange)="onConvertedAmountChange($event, invoice)" />
+                    </td>
+                    }
+
+                    <td>
+                        <input pInputText [(ngModel)]="invoice.testamount" type="number" class="small-input"
+                            (ngModelChange)="
+                onSelectedInvoice($event, invoice, invoice.includeTds, invoice.includeAbbs)
+              " />
+                    </td>
+
+                    <td>
+                        <div class="p-d-flex p-ai-center">
+                            <p-checkbox (onChange)="onChangeOFTDSTest($event, invoice)"
+                                [disabled]="!invoice.testamount"></p-checkbox>
+                            &nbsp;
+                            <input pInputText [(ngModel)]="invoice.tdsCheck" [readonly]="!invoice.testamount"
+                                class="small-input" />
+                        </div>
+                    </td>
+                    <td>
+                        <div class="p-d-flex p-ai-center">
+                            <p-checkbox (onChange)="onChangeOFABBSTest($event, invoice)"
+                                [disabled]="!invoice.testamount"></p-checkbox>
+                            &nbsp;
+                            <input pInputText class="small-input" [(ngModel)]="invoice.abbsCheck"
+                                [readonly]="!invoice.testamount" />
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+    <div class="modal-footer">
+        <div class="addUpdateBtn">
+            <button style="object-fit: cover; padding: 5px 8px" class="btn btn-primary" (click)="bindInvoice()">
+                <i class="fa fa-check-circle"></i>
+                Save
+            </button>
+            <button type="button" class="btn btn-danger" (click)="modalCloseInvoiceList()">Close</button>
+        </div>
+    </div>
+</p-dialog> -->
+
+<!-- <p-dialog header="Online Payment Audits" [(visible)]="displayFailedPaymentDialog" [style]="{ width: '85%' }"
+    [modal]="true" [responsive]="true" [draggable]="false" [closable]="true" (onHide)="closeFailedPaymentForm()">
+    <div class="modal-body">
+        <p-table #dt [value]="viewcustomerFailedPaymentData" responsiveLayout="scroll">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>Reference No</th>
+
+                    <th>Transaction No</th>
+                    <th>Account Number</th>
+                    <th>Customer Username</th>
+                    <th>Payment Amount</th>
+                    <th>Status</th>
+                    <th>Gateway Status</th>
+                    <th>Failure reason</th>
+                    <th>Payment Date</th>
+                    <th>Merchant Name</th>
+                    <th>Transaction Date</th>
+                    <th>Payer Mobile Number</th>
+                    <th>Auto Payment Initiator</th>
+                    <th>Action</th>
+                </tr>
+            </ng-template>
+
+            <ng-template pTemplate="body" let-payment let-rowIndex="rowIndex">
+                <tr>
+                    <td>
+                        {{ payment.orderId }}
+                    </td>
+
+                    <td>
+                        {{
+                        payment?.pgTransactionId && payment.pgTransactionId !== "null"
+                        ? payment.pgTransactionId
+                        : "-"
+                        }}
+                    </td>
+                    <td>
+                        {{
+                        payment?.accountNumber && payment.accountNumber !== "null"
+                        ? payment.accountNumber
+                        : "-"
+                        }}
+                    </td>
+                    <td>{{ payment.customerUsername }}</td>
+                    <td>{{ payment.payment }}</td>
+
+                    <td>
+                        <span>
+                            @switch (payment.status?.toUpperCase()) {
+                            @case ('PENDING') {
+                            <span class="badge badge-info">{{
+                                payment.status | titlecase
+                                }}</span>
+                            }
+                            @case ('INITIATE') {
+                            <span class="badge badge-info">{{
+                                payment.status | titlecase
+                                }}</span>
+                            }
+                            @case ('SUCCESS') {
+                            <span class="badge badge-success">{{
+                                payment.status | titlecase
+                                }}</span>
+                            }
+                            @case ('SUCCESSFUL') {
+                            <span class="badge badge-success">{{
+                                payment.status | titlecase
+                                }}</span>
+                            }
+                            @case ('FAILED') {
+                            <span class="badge badge-danger">{{
+                                payment.status | titlecase
+                                }}</span>
+                            }
+                            @default {
+                            <span class="badge badge-info">
+                                {{
+                                payment.status == null ||
+                                payment.status?.toLowerCase()?.trim() === "" ||
+                                payment.status?.toLowerCase()?.trim() === "null"
+                                ? "-"
+                                : payment.status
+                                }}
+                            </span>
+                            }
+                            }
+                        </span>
+                    </td>
+
+                    <td>
+                        <span>
+                            @switch (payment.gatewayStatus?.toLowerCase()) {
+                            @case ('success') {
+                            <span class="badge badge-success">{{
+                                payment.gatewayStatus | titlecase
+                                }}</span>
+                            }
+                            @case ('successful') {
+                            <span class="badge badge-success">{{
+                                payment.gatewayStatus | titlecase
+                                }}</span>
+                            }
+                            @case ('initiate') {
+                            <span class="badge badge-info">{{
+                                payment.gatewayStatus | titlecase
+                                }}</span>
+                            }
+                            @case ('pending') {
+                            <span class="badge badge-info">{{
+                                payment.gatewayStatus | titlecase
+                                }}</span>
+                            }
+                            @case ('failed') {
+                            <span class="badge badge-danger">{{
+                                payment.gatewayStatus | titlecase
+                                }}</span>
+                            }
+                            @default {
+                            <span class="badge badge-info">
+                                {{
+                                payment.gatewayStatus == null ||
+                                payment.gatewayStatus?.toLowerCase()?.trim() === "" ||
+                                payment.gatewayStatus?.toLowerCase()?.trim() === "null"
+                                ? "-"
+                                : payment.gatewayStatus
+                                }}
+                            </span>
+                            }
+                            }
+                        </span>
+                    </td>
+
+                    <td>
+                        @if (payment.failureDescription) {
+                        <span>
+                            <span class="badge badge-warning" style="cursor: pointer"
+                                (click)="openFailureReason(payment.failureDescription)">
+                                View
+                            </span>
+                        </span>
+                        } @else {
+                        <span style="margin-right: 5px">-</span>
+                        }
+                    </td>
+                    <td>{{ payment.paymentDate | date: "dd-MM-YYYY HH:mm:ss" }}</td>
+                    <td>{{ payment.merchantName }}</td>
+                    <td>{{ payment.transactionDate | date: "dd-MM-YYYY HH:mm:ss" }}</td>
+                    <td>
+                        {{ payment.payerMobileNumber }}
+                    </td>
+                    <td>
+                        {{ payment.autoPaymentInitiator }}
+                    </td>
+                    <td>
+                        @if (retryPaymentAccess) {
+                        <button class="approve-btn" id="retry"
+                            style="border: none; background: transparent; padding: 0; margin-right: 5px" [disabled]="
+                payment.gatewayStatus?.toLowerCase() === 'success' ||
+                payment.gatewayStatus?.toLowerCase() === 'successful'
+              " type="button" title="Retry" (click)="retryPayment(payment.orderId)">
+                            <img class="icon" style="width: 25px; height: 25px; margin-right: 3px"
+                                src="assets/img/refresh.png" />
+                        </button>
+                        }
+                        @if (manuallySettlement) {
+                        <button class="approve-btn" id="retry" type="button" title="Manually Settlement"
+                            style="border: none; background: transparent; padding: 0"
+                            [disabled]="!(payment?.pgTransactionId == null || payment?.pgTransactionId == 'NA')"
+                            (click)="addToWallet(payment.orderId)">
+                            <img class="icon" style="width: 25px; height: 25px; margin-right: 3px"
+                                src="assets/img/19_Promise-to-Pay_Y.png" />
+                        </button>
+                        }
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+</p-dialog> -->
+
+<!-- <p-dialog header="Failure Reason" [(visible)]="failureReasonDialog" [style]="{ width: '60%' }" [modal]="true"
+    [responsive]="true" [draggable]="false" [closable]="true" (onHide)="closeFailureReason()">
+    <div class="modal-body">
+        @if (failureReason) {
+        <div>
+            <div class="failure-item">
+                <strong>{{ failureReason }}</strong>
+            </div>
+        </div>
+        }
+    </div>
+</p-dialog> -->
+
+@if (displayInvoiceDetails) {
+<app-payment-amount-model [paymentId]="paymentId" (closeParentCustt)="displayInvoiceDetails = false"
+    dialogId="PaymentDetailModal"></app-payment-amount-model>
+}
+
+<!-- <p-dialog header="Add Transaction No" [(visible)]="transModal" [modal]="true" [style]="{ width: '30%' }"
+    [draggable]="false" (onHide)="transactionModal()" [resizable]="false">
+    <div class="form-group">
+        <label style="margin-top: 10px">Transaction No: </label>
+        <input type="text" name="transactionNo" id="transactionNo" [(ngModel)]="transactionNo"
+            placeholder="Enter Transaction No" class="form-control" />
+    </div>
+    <ng-template pTemplate="footer">
+        <div class="btnGroup text-center">
+            <button class="btn btn-primary btnStyle" (click)="ConfirmonTransactionNumber()" style="margin-right: 10px"
+                [disabled]="!transactionNo">
+                Add To Wallet
+            </button>
+            <button class="btn btn-danger btnStyle" (click)="transactionModal()">Cancel</button>
+        </div>
+    </ng-template>
+</p-dialog>  -->

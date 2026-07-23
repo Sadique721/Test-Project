@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="create-tblmdiscount-001" author="initial-change">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="tblmdiscount"/>
+            </not>
+        </preConditions>
+
+
+        <createTable tableName="tblmdiscount">
+
+            <column name="DISCOUNTID" type="BIGINT">
+                <constraints primaryKey="true" nullable="false" unique="true"/>
+            </column>
+            <column name="NAME" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="DESCRIPTION" type="VARCHAR(255)"/>
+            <column name="STATUS" type="CHAR(1)" defaultValue="Y">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CREATEDATE" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CREATEDBYSTAFFID" type="DECIMAL(20,0)"/>
+            <column name="LASTMODIFIEDBYSTAFFID" type="DECIMAL(20,0)"/>
+            <column name="LASTMODIFIEDDATE" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="MVNOID" type="BIGINT"/>
+            <column name="is_delete" type="TINYINT(1)" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="createbyname" type="VARCHAR(100)"/>
+            <column name="updatebyname" type="VARCHAR(100)"/>
+            <column name="BUID" type="BIGINT"/>
+            <column name="mvno_name" type="VARCHAR(150)"/>
+        </createTable>
+
+        <!-- Indexes -->
+        <createIndex tableName="tblmdiscount" indexName="tblmdiscount_ibfk_1">
+            <column name="MVNOID"/>
+        </createIndex>
+
+        <createIndex tableName="tblmdiscount" indexName="discount_charge_fk">
+            <column name="BUID"/>
+        </createIndex>
+
+        <!-- Foreign Key Constraints -->
+        <addForeignKeyConstraint constraintName="discount_charge_fk"
+                                 baseTableName="tblmdiscount"
+                                 baseColumnNames="BUID"
+                                 referencedTableName="tblmbusinessunit"
+                                 referencedColumnNames="businessunitid"
+                                 onDelete="RESTRICT"
+                                 onUpdate="CASCADE"/>
+
+        <addForeignKeyConstraint constraintName="tblmdiscount_ibfk_1"
+                                 baseTableName="tblmdiscount"
+                                 baseColumnNames="MVNOID"
+                                 referencedTableName="tblmmvno"
+                                 referencedColumnNames="MVNOID"
+                                 onDelete="RESTRICT"
+                                 onUpdate="CASCADE"/>
+    </changeSet>
+
+</databaseChangeLog>

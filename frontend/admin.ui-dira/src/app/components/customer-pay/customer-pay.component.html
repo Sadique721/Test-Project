@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en" class="fullscreen-bg">
+
+<head>
+    <title>Login | Savbill Dashboard</title>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+    <!-- VENDOR CSS -->
+    <!-- <link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.min.css">
+      <link rel="stylesheet" href="assets/vendor/font-awesome/css/font-awesome.min.css">
+      <link rel="stylesheet" href="assets/vendor/linearicons/style.css"> -->
+    <!-- MAIN CSS -->
+    <!-- <link rel="stylesheet" href="assets/css/main.css"> -->
+
+    <!-- GOOGLE FONTS -->
+    <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700" rel="stylesheet" />
+    <!-- ICONS -->
+    <link rel="apple-touch-icon" sizes="76x76" href="assets/img/apple-icon.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="assets/img/favicon.png" />
+</head>
+
+<body class="loginbg">
+    <!-- <p-toast [style]="{ height: 'auto', width: '20vw', fontSize: '16px' }"></p-toast> -->
+    <!-- <ngx-spinner type="ball-clip-rotate-multiple" size="medium">
+        <p class="loading">Loading...</p>
+      </ngx-spinner> -->
+    <ngx-spinner
+        template='<img class="rotate" width="150" height="150" src="assets/img/loader-new.svg" >'></ngx-spinner>
+    <!-- WRAPPER -->
+    <div id="wrapper" pFocusTrap class="responsive-wrapper">
+        <mat-card class="payment-card cardWithShadow">
+            <mat-card-content class="mat-card-content-border">
+                <div class="content">
+                    <div class="header text-center">
+                        <div class="logo">
+                            <img src="../../assets/img/loginlogo.jpg" alt="Savbill Logo" class="savbilllogo" />
+                        </div>
+                    </div>
+
+                    @if (errorMessage == "" && customerDetailData) {
+                    <span>
+                        <p class="welcome-text">Welcome {{ customerDetailData?.custName || "-" }}</p>
+                        <p class="info-text">
+                            Your {{ customerDetailData?.customerUsername || "-" }} Package Subscription <br />
+                            was due for Renewal on
+                            {{ customerDetailData?.planDueDate ? (customerDetailData.planDueDate | date: 'dd-MM-yyyy') :
+                            '-'
+                            }}
+                        </p>
+
+                        <!-- @if (customerDetailData?.amount === null || customerDetailData?.amount === 0) {
+                        <p class="lead">
+                            Please Enter Amount <br /><b>UGX{{ customerDetailData?.amount }}</b>
+                        </p>
+                        } -->
+                        @if (customerDetailData?.amount !== null && customerDetailData?.amount !== 0) {
+                        <p class="lead f-s-20">
+                            Amount to pay <br /><b class="f-s-20">{{ currency }}{{ customerDetailData?.amount }}</b>
+                        </p>
+                        }
+
+                        <form class="form-auth-small" [formGroup]="mpinForm">
+                            <div class="form-field">
+                                <label class="inputLabel text-left">Amount :</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <input id="countryname" type="number" name="amount" class="input-p-5" matInput
+                                        formControlName="amount" [ngClass]="{
+                                            'is-invalid': submitted && mpinForm.controls.amount.errors
+                                          }" placeholder="Amount" />
+                                    <mat-error *ngIf="submitted && mpinForm.controls.amount.errors?.required">
+                                        Amount is required.
+                                    </mat-error>
+                                    <mat-error *ngIf="submitted && mpinForm.controls.amount.errors?.min">
+                                        Amount must be greater than 0.
+                                    </mat-error>
+                                    <mat-error *ngIf="submitted && mpinForm.controls.amount.errors?.max">
+                                        Maximum amount allowed is UGX 50,00,000.
+                                    </mat-error>
+                                    <mat-error *ngIf="submitted && mpinForm.controls.amount.errors?.pattern">
+                                        Only numeric characters & decimal values allowed.
+                                    </mat-error>
+                                </mat-form-field>
+
+                            </div>
+
+                            <div class="form-field">
+                                <div class="phone-group">
+                                    <mat-form-field appearance="outline" class="country-code">
+                                        <mat-select id="statusSelect" formControlName="countryCode">
+                                            <mat-option *ngFor="let option of countries" [value]="option.dial_code">
+                                                {{ option.dial_code }}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="mobile-number">
+                                        <input #mobileNo matInput type="text" id="mobileNo" name="mobileNo"
+                                            placeholder="Enter mobile number" formControlName="mobileNumber" [ngClass]="{
+                      'is-invalid': submitted && mpinForm.controls['mobileNumber'].errors
+                    }" (blur)="onMobileNumberFocusOut()" (change)="onMobileNumberFocusOut()"
+                                            (keydown.enter)="checkPaymentDetails($event)"
+                                            (keydown.enter)="$event.preventDefault()" />
+                                        <mat-error *ngIf="submitted && mpinForm.controls['mobileNumber'].errors">
+                                            <ng-container *ngIf="mpinForm.controls['mobileNumber'].errors['required']">
+                                                Mobile number is required
+                                            </ng-container>
+                                            <ng-container *ngIf="mpinForm.controls['mobileNumber'].errors['pattern']">
+                                                Enter a valid mobile number
+                                            </ng-container>
+                                        </mat-error>
+                                    </mat-form-field>
+
+                                </div>
+                            </div>
+                            <div class="form-field" *ngIf="selectedPaymentGateway">
+                                <label class="inputLabel text-left">Payment Gateway :</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select id="paymentGatewaySelect " [(ngModel)]="selectedPaymentGateway"
+                                        [ngModelOptions]="{standalone: true}"
+                                        (selectionChange)="onPaymentGatewayChange()">
+                                        <mat-option *ngFor="let gateway of paymentGateWays" [value]="gateway">
+                                            {{ gateway }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+
+                            <div class="btn-wrapper">
+                                <button mat-flat-button color="primary" class="button-normal" (click)="payNow()">
+                                    Pay
+                                </button>
+                            </div>
+                        </form>
+                    </span>
+                    }
+
+                    @if (errorMessage !== "") {
+                    <span>
+                        <p class="error-message">{{ errorMessage }}</p>
+                    </span>
+                    }
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+
+    <!-- END WRAPPER -->
+</body>
+
+</html>
+
+
+<!-- payment confirmation dialog start -->
+<ng-template #paymentConfirmationModal>
+    <div class="dialog-header dialog-title">
+        Payment Confirmation
+        <span>
+            <a mat-icon-button mat-dialog-close>
+                <img src="assets/img/DashboardIcons/Reject.svg">
+            </a>
+        </span>
+    </div>
+
+    <mat-dialog-content>
+        <div class="row">
+            <h5 class="modalHeadTxt m-l-20">
+                Prompt sent to customer. Pending Approval
+            </h5>
+        </div>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+        <!-- <button mat-stroked-button matButton="outlined" style="height: 51px" class="button-normal"
+            (click)="hidepaymentConfirmDialog()">Close
+             @if (exitBuy) {
+            <span> ({{ paymentstatusCount }}) </span>
+            } -->
+        <!-- </button> -->
+
+        <button mat-flat-button color="primary" class="button-normal m-r-10" (click)="hidepaymentConfirmDialog()">Close
+        </button>
+
+    </mat-dialog-actions>
+</ng-template>
+<!-- payment confirmation dialog end -->
+
+
+<!-- payment Success dialog start -->
+<ng-template #paymentSucessModel>
+    <div class="dialog-header dialog-title">
+        Payment Confirmation
+        <span>
+            <a mat-icon-button mat-dialog-close>
+                <img src="assets/img/DashboardIcons/Reject.svg">
+            </a>
+        </span>
+    </div>
+
+    <mat-dialog-content>
+        <div class="row">
+            <h5 class="modalHeadTxt m-l-20">
+                Plan purchased successfully
+            </h5>
+        </div>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+        <button mat-stroked-button [disabled]="exitBuy" matButton="outlined" style="height: 51px" class="button-normal"
+            (click)="hidepaymentConfirmDialog()">Ok
+        </button>
+
+    </mat-dialog-actions>
+</ng-template>
+<!-- payment Success dialog end -->

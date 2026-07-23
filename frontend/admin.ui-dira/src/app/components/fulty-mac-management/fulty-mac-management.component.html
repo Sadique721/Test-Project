@@ -1,0 +1,477 @@
+<!-- 
+<div class="row">
+  <div class="col-md-12">
+    <div class="panel top">
+      <div class="panel-heading">
+        <h3 class="panel-title">Faulty Mac Management</h3>
+        <div class="right">
+          <button
+            type="button"
+            class="btn-toggle-collapse"
+            data-toggle="collapse"
+            data-target="#searchDataFultyMac"
+            >
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+     
+    </div>
+  </div>
+</div> -->
+
+
+<!-- 
+<div class="row">
+
+  <div class="col-md-6 left">
+    <div class="panel">
+      <div class="panel-heading">
+        <h3 class="panel-title">Faulty Mac</h3>
+        <div class="right">
+          <button
+            type="button"
+            class="btn-toggle-collapse"
+            data-toggle="collapse"
+            data-target="#allDataFultyMac"
+            aria-expanded="false"
+            aria-controls="allDataFultyMac"
+            >
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+      <div id="allDataFultyMac" class="panel-collapse collapse in">
+        <div class="panel-body table-responsive">
+          <div class="row">
+            <div class="col-lg-12 col-md-12">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Mac Ip Address</th>
+                    <th>Last Connected</th>
+                    @if (editAccess || deleteAccess) {
+                      <th>Action</th>
+                    }
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (
+                    fultyMac of fultyMacListData
+                    | paginate
+                    : {
+                    id: 'fultyMacListData',
+                    itemsPerPage: fultyMacitemsPerPage,
+                    currentPage: currentPageFultyMacSlab,
+                    totalItems: fultyMactotalRecords
+                    }; track
+                    fultyMac; let i = $index) {
+                    <tr
+                      >
+                      <td>{{ fultyMac.mackId }}</td>
+                      <td>{{ fultyMac.lastConnected | date: "dd-MM-yyyy hh:mm a" }}</td>
+                      <td class="btnAction" >
+                        @if (editAccess) {
+                          <a
+                            id="edit-button"
+                            href="javascript:void(0)"
+                            type="button"
+                            (click)="editFullyMac(fultyMac.id)"
+                            >
+                          <img src="assets/img/DashboardIcons/Edit.svg" >
+                          </a>
+                        }
+                        @if (deleteAccess) {
+                          <a
+                            id="delete-button"
+                            href="javascript:void(0)"
+                            (click)="deleteConfirmonFultyMac(fultyMac.id)"
+                            >
+                             <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                          </a>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+
+              <div class="row">
+                <div class="col-md-12" style="display: flex">
+                  <pagination-controls
+                    id="fultyMacListData"
+                    maxSize="10"
+                    directionLinks="true"
+                    previousLabel=""
+                    nextLabel=""
+                    (pageChange)="pageChangedFultyMacList($event)"
+                  ></pagination-controls>
+                  <div id="itemPerPageDropdown">
+                    <p-dropdown
+                      [options]="pageLimitOptions"
+                      optionLabel="value"
+                      optionValue="value"
+                      (onChange)="TotalItemPerPage($event)"
+                    ></p-dropdown>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div> 
+
+  <div class="col-md-6 right">
+    <div class="panel">
+      <div class="panel-heading">
+        <h3 class="panel-title">{{ isFullyMacEdit ? "Update" : "Create" }} Faulty Mac</h3>
+        <div class="right">
+          <button
+            type="button"
+            class="btn-toggle-collapse"
+            data-toggle="collapse"
+            data-target="#createDataFultyMac"
+            aria-expanded="false"
+            aria-controls="createDataFultyMac"
+            >
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+      <div id="createDataFultyMac" class="panel-collapse collapse in">
+        <div class="panel-body">
+          <form [formGroup]="fultyMacFormGroup">
+            <div class="form-group">
+              <label>Select Action</label>
+              <p-dropdown
+                [disabled]="isFullyMacEdit"
+                [options]="selectOptionData"
+                optionValue="value"
+                optionLabel="label"
+                placeholder="Select Action"
+                [(ngModel)]="selectAction"
+                [ngModelOptions]="{ standalone: true }"
+                (onChange)="selectActionData($event)"
+              ></p-dropdown>
+            </div>
+            @if (selectAction === 'single') {
+              <div class="form-group">
+                <label>Mac Ip*</label>
+                <input
+                  id="macIp"
+                  type="text"
+                  class="form-control"
+                  placeholder="Enter Mac Ip"
+                  formControlName="mackId"
+                  maxLength="250"
+                  [ngClass]="{ 'is-invalid': submitted && fultyMacFormGroup.controls.mackId.errors }"
+                  />
+                </div>
+              }
+              
+              @if (submitted && fultyMacFormGroup.controls.mackId.errors) {
+                <div
+                  class="errorWrap text-danger"
+                  >
+                  @if (submitted && fultyMacFormGroup.controls.mackId.errors.required) {
+                    <div
+                      class="error text-danger"
+                      >
+                      Faulty Mac is required.
+                    </div>
+                  }
+                </div>
+              }
+              @if (selectAction === 'bulk') {
+                <div class="form-group">
+                  <label>Select File</label>
+                  <input
+                    (change)="onFileChangeUpload($event)"
+                    class="form-control"
+                    formControlName="file"
+                    id="txtSelectDocument"
+                    multiple="multiple"
+                    placeholder="Select Attachment"
+                    type="file"
+                    accept=".XLSX,XLS"
+                    [ngClass]="{ 'is-invalid': submitted && fultyMacFormGroup.controls.file.errors }"
+                    />
+                  </div>
+                }
+                @if (submitted && fultyMacFormGroup.controls.file.errors) {
+                  <div
+                    class="errorWrap text-danger"
+                    >
+                    @if (submitted && fultyMacFormGroup.controls.file.errors.required) {
+                      <div
+                        class="error text-danger"
+                        >
+                        File is required.
+                      </div>
+                    }
+                  </div>
+                }
+                <br />
+                <div class="addUpdateBtn">
+                  @if (!isFullyMacEdit) {
+                    <button
+                      type="submit"
+                      class="btn btn-primary"
+                      id="submit"
+                      [disabled]="!createAccess"
+                      (click)="selectAction === 'single' ? addEditFultyMac('') : uploadDocument()"
+                      >
+                      <i class="fa fa-check-circle"></i>
+                      Add Faulty Mac
+                    </button>
+                  }
+                  @if (isFullyMacEdit) {
+                    <button
+                      type="submit"
+                      class="btn btn-primary"
+                      id="submit"
+                      [disabled]="!editAccess"
+                      (click)="addEditFultyMac(viewFultyMacListData.id)"
+                      >
+                      <i class="fa fa-check-circle"></i>
+                      Update Faulty Mac
+                    </button>
+                  }
+                  <br />
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+</div>
+
+-->
+
+
+<div class="row header-row">
+    <mat-card class="cardWithShadow w-100">
+        <mat-card-content class="mat-card-content-border">
+            <div class="row">
+                <div class="col-sm-9 d-flex">
+                    <mat-form-field appearance="outline" style="margin-left: 16px" class="w-100 hide-hint mr-10">
+                        <input class="input-p-5" [(ngModel)]="searchVendorName" matInput
+                            placeholder="Search {{ title }}" (keydown.enter)="searchVendor()" />
+                        <mat-icon matSuffix class="search-header-search-icon">
+                            <i class="pi pi-search icon-size"></i>
+                        </mat-icon>
+                    </mat-form-field>
+
+                    <button mat-button mat-flat-button color="primary" class="button-normal m-r-10"
+                        (click)="searchFultyMac()">
+                        Search
+                    </button>
+                    <button mat-stroked-button matButton="outlined" class="button-normal"
+                        (click)="clearSearchFultyMac()">
+                        Clear
+                    </button>
+                </div>
+
+                <div class="col-sm-3 search-div">
+                    <button mat-button mat-flat-button color="primary" (click)="openFultyMacDialog()"
+                        class="button-normal mr-10">
+                        Add Faulty-mac
+                    </button>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+
+<div class="container-fluid contain-flud">
+    <div class="row">
+        <!-- faulty mac list table start -->
+        <div class="col-md-12">
+            <mat-card class="cardWithShadow">
+                <mat-card-content class="mat-card-content-border">
+                    <div class="country-table-list">
+                        <div class="table-container">
+                            <table mat-table [dataSource]="fultyMacDataSource" matSort class="mat-elevation-z8 w-100">
+                                <ng-container matColumnDef="id">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        ID
+                                    </th>
+                                    <td mat-cell *matCellDef="let fultyMac" class="f-s-14">{{ fultyMac.id }}</td>
+                                </ng-container>
+
+                                <!-- Mac Ip Address Column -->
+                                <ng-container matColumnDef="mackId">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Mac Ip Address
+                                    </th>
+                                    <td mat-cell *matCellDef="let fultyMac" class="f-s-14">{{ fultyMac.mackId }}</td>
+                                </ng-container>
+
+                                <!-- Last Connected Column -->
+                                <ng-container matColumnDef="lastConnected">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Last Connected
+                                    </th>
+                                    <td mat-cell *matCellDef="let fultyMac" class="f-s-14">
+                                        {{ fultyMac.lastConnected | date: "dd-MM-yyyy hh:mm a" }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Action Column -->
+                                @if (editAccess || deleteAccess) {
+                                <ng-container matColumnDef="Action">
+                                    <th mat-header-cell *matHeaderCellDef stickyEnd class="table-header-title">
+                                        Action
+                                    </th>
+                                    <td mat-cell *matCellDef="let fultyMac" class="btnAction">
+                                        @if (editAccess) {
+                                        <a mat-icon-button matTooltip="edit" href="javascript:void(0)" title="Edit"
+                                            (click)="editFullyMac(fultyMac.id)">
+                                            <img src="assets/img/DashboardIcons/Edit.svg" >
+                                        </a>
+                                        }
+                                        @if (deleteAccess) {
+                                        <a mat-icon-button matTooltip="delete" href="javascript:void(0)"
+                                            (click)="deleteConfirmonFultyMac(fultyMac)">
+                                            <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                                        </a>
+                                        }
+                                    </td>
+                                </ng-container>
+                                }
+
+                                <tr mat-header-row class="table-header-bg"
+                                    *matHeaderRowDef="getDisplayedPlanDetailsColumns(); sticky: true"></tr>
+                                <tr mat-row class="table-content-row"
+                                    *matRowDef="let row; columns: getDisplayedPlanDetailsColumns()"></tr>
+                            </table>
+
+                            <mat-paginator [length]="fultyMactotalRecords" [pageSize]="fultyMacitemsPerPage"
+                                [pageIndex]="currentPageFultyMacSlab" [pageSizeOptions]="pageSizeOptions"
+                                showFirstLastButtons (page)="onFultyMacPageChange($event)">
+                            </mat-paginator>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+        <!-- faulty mac list table end -->
+    </div>
+</div>
+
+<ng-template #fultyMacDialog let-dialogRef="dialogRef">
+    <div class="dialog-container">
+        <!-- Header -->
+        <div class="dialog-header dialog-header-titleFont">
+            <span class="dialog-header-titleFont">{{ isFullyMacEdit ? "Update" : "Create" }} Faulty Mac</span>
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="dialogRef.close()">
+                     <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <form [formGroup]="fultyMacFormGroup" class="card-form mb-3">
+            <!-- Content -->
+            <div mat-dialog-content>
+                <div class="col-md-12">
+                    @if ((!isFullyMacEdit && !createAccess) || (isFullyMacEdit && !editAccess)) {
+                    <mat-card-content class="matcard-content">
+                        <div class="panel-body table-responsive">
+                            Sorry you have not privilege to {{ isFullyMacEdit ? 'edit' : 'create' }} operation!
+                        </div>
+                    </mat-card-content>
+                    }
+                    @if ((!isFullyMacEdit && createAccess) || (isFullyMacEdit && editAccess)) {
+                    <mat-card-content class="matcardContent">
+                        <div class="row g-2">
+                            <!-- Select Action -->
+                            <div class="col-sm-12">
+                                <label for="selectAction" class="inputLabel">Select Action</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select id="selectAction" class="input-p-5" placeholder="Select Action"
+                                        [(ngModel)]="selectAction" [ngModelOptions]="{ standalone: true }"
+                                        (selectionChange)="selectActionData($event)" [disabled]="isFullyMacEdit">
+                                        <mat-option *ngFor="let option of selectOptionData" [value]="option.value">
+                                            {{ option.label }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Single Mac Input -->
+                            @if (selectAction === 'single') {
+                            <div class="col-sm-12">
+                                <label for="macIp" class="inputLabel">Mac Ip*</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <input id="macIp" matInput type="text" placeholder="Enter Mac Ip"
+                                        formControlName="mackId" class="input-p-5" maxlength="250" [ngClass]="{
+                        'is-invalid': submitted && fultyMacFormGroup.controls.mackId.errors
+                      }" />
+                                    <mat-error *ngIf="
+                        (submitted || fultyMacFormGroup.controls['mackId'].touched) &&
+                        fultyMacFormGroup.controls['mackId'].errors as errors
+                      ">
+                                        <span *ngIf="errors['required']">
+                                            Faulty Mac is required.
+                                        </span>
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                            }
+
+                            <!-- Bulk File Upload -->
+                            @if (selectAction === 'bulk') {
+                            <div class="col-sm-12">
+                                <label for="txtSelectDocument" class="inputLabel">Select File</label>
+                                <div class="file-input-container">
+                                    <input (change)="onFileChangeUpload($event)" class="form-control file-input"
+                                        formControlName="file" id="txtSelectDocument" multiple="multiple"
+                                        placeholder="Select Attachment" type="file" accept=".XLSX,.XLS"
+                                        [ngClass]="{ 'is-invalid': submitted && fultyMacFormGroup.controls.file.errors }" />
+                                    @if (submitted && fultyMacFormGroup.controls.file.errors) {
+                                    <div class="errorWrap text-danger">
+                                        @if (submitted && fultyMacFormGroup.controls.file.errors.required) {
+                                        <div class="error text-danger">
+                                            File is required.
+                                        </div>
+                                        }
+                                    </div>
+                                    }
+                                </div>
+                            </div>
+                            }
+                        </div>
+                    </mat-card-content>
+                    }
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+                @if (!isFullyMacEdit && createAccess) {
+                <button mat-button mat-flat-button color="primary" type="submit" id="submit"
+                    (click)="selectAction === 'single' ? addEditFultyMac('') : uploadDocument()" class="button-normal">
+                    Add Faulty Mac
+                </button>
+                }
+                @if (isFullyMacEdit && editAccess) {
+                <button mat-button mat-flat-button color="primary" type="submit" id="submit"
+                    (click)="addEditFultyMac(viewFultyMacListData.id)" class="button-normal">
+                    Update Faulty Mac
+                </button>
+                }
+                <button mat-stroked-button matButton="outlined" type="button" color="primary" class="button-normal"
+                    (click)="dialogRef.close()">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+</ng-template>

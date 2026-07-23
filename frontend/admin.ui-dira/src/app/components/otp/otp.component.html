@@ -1,0 +1,895 @@
+<div class="row header-row">
+    <mat-card class="cardWithShadow w-100">
+        <mat-card-content class="mat-card-content-border">
+            <form [formGroup]="searchForm">
+                <div class="row">
+                    <div class="col-sm-9 d-flex">
+                        <mat-form-field appearance="outline" style="margin-left: 16px;" class="w-100 hide-hint mr-10">
+                            <input matInput placeholder="Enter OTP Profile" formControlName="name" class="input-p-5"
+                                (keydown.enter)="search()" [ngClass]="{
+                'is-invalid': searchSubmitted && searchForm.controls.name.errors
+              }" />
+                            <mat-icon matSuffix class="search-header-search-icon">
+                                <i class="pi pi-search icon-size"></i>
+                            </mat-icon>
+                        </mat-form-field>
+
+                        <button mat-button mat-flat-button color="primary" class="button-normal mr-10"
+                            (click)="search()">
+                            Search
+                        </button>
+                        <button mat-stroked-button matButton="outlined" class="button-normal"
+                            (click)="clearSearchForm()">Clear
+                        </button>
+                    </div>
+
+                    <div class="col-sm-3 search-div">
+                        <button mat-button mat-flat-button color="primary" (click)="openprofileDialog(false)"
+                            class="button-normal mr-10" style="width: auto;">
+
+                            Add Profile</button>
+                    </div>
+                </div>
+            </form>
+        </mat-card-content>
+    </mat-card>
+</div>
+
+
+
+
+<div class="container-fluid contain-flud">
+    <div class="row">
+        <div class="col-md-12">
+            <mat-card class="cardWithShadow">
+                <mat-card-content class="mat-card-content-border">
+                    <div class="team-table-list">
+                        <div class="table-responsive" style="overflow-x: hidden;">
+
+                            <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8 w-100">
+                                <ng-container matColumnDef="id">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title">
+                                        ID
+                                    </th>
+                                    <td mat-cell *matCellDef="let profile">
+
+
+
+                                        {{ profile.profileId }}
+
+                                    </td>
+                                </ng-container>
+                                <!-- Profile Name -->
+                                <ng-container matColumnDef="profileName">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title">
+                                        Profile Name
+                                    </th>
+                                    <td mat-cell *matCellDef="let profile">
+
+
+
+                                        {{ profile.profileName }}
+
+                                    </td>
+                                </ng-container>
+
+                                <!-- OTP Length -->
+                                <ng-container matColumnDef="otpLength">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title">
+                                        Length
+                                    </th>
+                                    <td mat-cell *matCellDef="let profile">
+                                        {{ profile.otpLength }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Validity -->
+                                <ng-container matColumnDef="otpValidityInMin">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title">
+                                        Validity
+                                    </th>
+                                    <td mat-cell *matCellDef="let profile">
+                                        {{ profile.otpValidityInMin }} Mins
+                                    </td>
+                                </ng-container>
+
+                                <!-- Generation -->
+                                <ng-container matColumnDef="generationType">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title">
+                                        Generation
+                                    </th>
+                                    <td mat-cell *matCellDef="let profile">
+                                        {{ getGenerationType(profile.generationType) | titlecase }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- ISP / MVNO Name -->
+                                <ng-container matColumnDef="mvnoName">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title">
+                                        ISP Name
+                                    </th>
+                                    <td mat-cell *matCellDef="let profile">
+                                        {{ profile.mvnoName }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Actions -->
+                                <ng-container *ngIf="editAccess || deleteAccess" matColumnDef="action">
+                                    <th mat-header-cell *matHeaderCellDef stickyEnd class="table-header-title"
+                                        style="text-align:center;">
+                                        Action
+                                    </th>
+                                    <td mat-cell *matCellDef="let profile; let i = index" class="btnAction"
+                                        style="text-align:center;">
+                                        <a mat-icon-button color="primary" matTooltip="view"
+                                            (click)="getOTPDetail(profile.profileId, profile.mvnoId)">
+                                            <img src="assets/img/DashboardIcons/eye-svgrepo-com (1) 1.svg">
+                                        </a>
+                                        <!-- Edit -->
+                                        <a *ngIf="editAccess" mat-icon-button (click)="edit(profile.profileId)"
+                                            matTooltip="Edit">
+                                            <img src="assets/img/DashboardIcons/Edit.svg">
+                                        </a>
+
+                                        <!-- Delete -->
+                                        <a *ngIf="deleteAccess" mat-icon-button (click)="deleteConfirm(profile)"
+                                            matTooltip="Delete">
+                                            <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                        </a>
+
+                                    </td>
+                                </ng-container>
+
+                                <!-- Table Rows -->
+                                <tr mat-header-row class="table-header-bg"
+                                    *matHeaderRowDef="getDisplayedPlanDetailsColumns()"></tr>
+                                <tr mat-row class="table-content-row"
+                                    *matRowDef="let row; columns: getDisplayedPlanDetailsColumns()"></tr>
+                            </table>
+
+                            <!-- No Record Found -->
+                            <div *ngIf="otpProfiles?.length === 0" class="no-record">
+                                No Record Found.
+                            </div>
+
+                            <!-- Paginator -->
+                            <mat-paginator [length]="totalRecords" [pageSize]="itemsPerPage"
+                                [pageSizeOptions]="[5,10,20,50,100]" showFirstLastButtons (page)="pageChanged($event)">
+                            </mat-paginator>
+
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </div>
+</div>
+
+
+
+<ng-template #profileDialogTemplate>
+    <div class="dialog-container">
+        <div class="dialog-header">
+            {{ editId ? 'Update OTP Profile' : 'Create OTP Profile' }}
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="onCancel()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <mat-card-content class="matcard-content">
+            <div class="panel-body table-responsive">
+                Sorry you have not privilege to create operation!
+            </div>
+        </mat-card-content>
+
+        @if (createAccess || (editId && editAccess)) {
+        <div mat-dialog-content style="overflow-y: auto; max-height: 70vh;">
+            <mat-card-content class="matcardContent">
+                @if (!createAccess && !editId) {
+                <mat-card-content class="matcard-content">
+                    <div class="panel-body table-responsive">
+                        Sorry you have not privilege to create operation!
+                    </div>
+                </mat-card-content>
+                }
+                <form [formGroup]="detailGroupForm" (ngSubmit)="addOrUpdate()">
+                    <div class="row g-3">
+                        <!-- Profile Name -->
+                        <div class="col-md-12 mb-4">
+                            <label for="name" class="inputLabel">Profile Name *</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input matInput id="name" placeholder="Enter Profile Name" formControlName="name"
+                                    class="input-p-5" [readonly]="editId"
+                                    [ngClass]="{ 'is-invalid': submitted && detailGroupForm.controls.name.errors }">
+                                <mat-error *ngIf="submitted && detailGroupForm.controls.name.errors?.['required']">
+                                    Please enter Profile Name.
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- OTP Length -->
+                        <div class="col-md-6 mb-4">
+                            <label for="length" class="inputLabel">OTP Length *</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input matInput id="length" placeholder="Enter OTP Length" formControlName="length"
+                                    class="input-p-5"
+                                    [ngClass]="{ 'is-invalid': submitted && detailGroupForm.controls.length.errors }">
+                                <mat-error *ngIf="submitted && detailGroupForm.controls.length.errors?.['required']">
+                                    Please enter OTP Length.
+                                </mat-error>
+                                <mat-error *ngIf="submitted && detailGroupForm.controls.length.errors?.['pattern']">
+                                    OTP Length should be numeric.
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- OTP Validity -->
+                        <div class="col-md-6 mb-4">
+                            <label for="validity" class="inputLabel">OTP Validity (mins) *</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input matInput id="validity" placeholder="Enter Validity in mins"
+                                    formControlName="validity" class="input-p-5"
+                                    [ngClass]="{ 'is-invalid': submitted && detailGroupForm.controls.validity.errors }">
+                                <mat-error *ngIf="submitted && detailGroupForm.controls.validity.errors?.['required']">
+                                    Please enter OTP Validity.
+                                </mat-error>
+                                <mat-error *ngIf="submitted && detailGroupForm.controls.validity.errors?.['pattern']">
+                                    OTP Validity should be numeric.
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Generation Type -->
+                        <div class="col-md-6 mb-4">
+                            <label for="generationType" class="inputLabel">Generation Type *</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-select id="generationType" formControlName="selectedGenerationType"
+                                    class="input-p-5" placeholder="Select Generation Type"
+                                    (selectionChange)="generationTypeChange($event)">
+                                    <mat-option *ngFor="let type of generationTypes" [value]="type.value">
+                                        {{ type.label }}
+                                    </mat-option>
+                                </mat-select>
+                                <mat-error
+                                    *ngIf="submitted && detailGroupForm.controls.selectedGenerationType.errors?.['required']">
+                                    Please select Generation Type.
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Static OTP -->
+                        <div class="col-md-6 mb-4" *ngIf="detailGroupForm.value.selectedGenerationType === 'STATIC'">
+                            <label for="staticOtp" class="inputLabel">Static OTP *</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input matInput id="staticOtp" placeholder="Enter Static OTP"
+                                    formControlName="staticOtp" class="input-p-5"
+                                    [ngClass]="{ 'is-invalid': submitted && detailGroupForm.controls.staticOtp.errors }">
+                                <mat-error *ngIf="submitted && detailGroupForm.controls.staticOtp.errors?.['required']">
+                                    Please enter Static OTP.
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Allowed Values -->
+                        <div class="col-md-6 mb-4">
+                            <label for="allowedValues" class="inputLabel">Values Allowed *</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-select id="allowedValues" formControlName="selectedAllowedValues" class="input-p-5"
+                                    multiple placeholder="Select Allowed Values">
+                                    <mat-option *ngFor="let value of allowedValues" [value]="value.value">
+                                        {{ value.label }}
+                                    </mat-option>
+                                </mat-select>
+                                <mat-error
+                                    *ngIf="submitted && detailGroupForm.controls.selectedAllowedValues.errors?.['required']">
+                                    Please select Allowed Values.
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                </form>
+            </mat-card-content>
+        </div>
+        }
+        @if (createAccess || (editId && editAccess)) {
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+
+            <button mat-button mat-flat-button color="primary" class="button-normal " (click)="addOrUpdate()">
+                {{ editId ? 'Update' : 'Create' }} OTP Profile
+            </button>
+
+
+            <button mat-stroked-button matButton="outlined" type="button" color="primary" class="button-normal "
+                (click)="onCancel()">
+                Cancel
+            </button>
+        </div>}
+
+
+    </div>
+</ng-template>
+
+
+<ng-template #otpDetailDialog let-dialogRef="dialogRef">
+    <div class="dialog-container">
+
+        <div class="dialog-header">
+            OTP Details
+            <span>
+                <a mat-icon-button mat-dialog-close>
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <mat-card-content>
+            <div class="row" style="margin-top: 20px;">
+
+                <!-- Profile Name -->
+                <div class="col-12 m-b-5 dataGroup field">
+                    <span class="label-text">Profile Name</span>
+                    <span class="colon">:</span>
+                    <span class="m-l-10">{{ otpProfileData?.profileName || '-' }}</span>
+                </div>
+
+                <!-- OTP Length -->
+                <div class="col-12 m-b-5 dataGroup field">
+                    <span class="label-text">OTP Length</span>
+                    <span class="colon">:</span>
+                    <span class="m-l-10">{{ otpProfileData?.otpLength || '-' }}</span>
+                </div>
+
+                <!-- OTP Validity -->
+                <div class="col-12 m-b-5 dataGroup field">
+                    <span class="label-text">OTP Validity (min)</span>
+                    <span class="colon">:</span>
+                    <span class="m-l-10">{{ otpProfileData?.otpValidityInMin || '-' }}</span>
+                </div>
+
+                <!-- Generation Type -->
+                <div class="col-12 m-b-5 dataGroup field">
+                    <span class="label-text">Generation Type</span>
+                    <span class="colon">:</span>
+                    <span class="m-l-10">{{ otpProfileData?.generationType || '-' }}</span>
+                </div>
+
+                <!-- Allowed Values -->
+                <div class="col-12 m-b-5 dataGroup field">
+                    <span class="label-text">Allowed Values</span>
+                    <span class="colon">:</span>
+                    <span class="m-l-10">
+                        <ng-container *ngIf="otpProfileData?.type?.length; else noValues">
+                            <span *ngFor="let val of otpProfileData.type; let last = last">
+                                {{ val }}<span *ngIf="!last">, </span>
+                            </span>
+                        </ng-container>
+                        <ng-template #noValues>-</ng-template>
+                    </span>
+                </div>
+
+            </div>
+        </mat-card-content>
+
+
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+            <button mat-stroked-button matButton="outlined" type="button" color="primary" mat-dialog-close>
+                Close
+            </button>
+        </div>
+
+    </div>
+</ng-template>
+
+
+
+
+
+<!-- <div class="childComponent">
+  <div class="row">
+    <div class="col-md-12">
+      <!- User Data ->
+      <div class="panel top">
+        <div class="panel-heading">
+          <h3 class="panel-title">OTP Profile Management</h3>
+          <div class="right">
+            <button
+              type="button"
+              class="btn-toggle-collapse"
+              data-toggle="collapse"
+              data-target="#OTPsearchPanel"
+              aria-expanded="false"
+              aria-controls="OTPsearchPanel"
+              >
+              <i class="fa fa-minus-circle"></i>
+            </button>
+          </div>
+        </div>
+        <div id="OTPsearchPanel" class="panel-collapse collapse in">
+          <div class="panel-body">
+            <div class="searchForm">
+              <form class="form-auth-small" [formGroup]="searchForm">
+                <div class="col-md-2" style="padding-right: 0%; text-align: right">
+                  <label style="padding: 5px">OTP Profile Name:</label>
+                </div>
+                <div class="col-md-6" style="padding-left: 0%">
+                  <input
+                    id="searchName"
+                    type="text"
+                    name="name"
+                    class="form-control"
+                    placeholder="Enter OTP Profile"
+                    formControlName="name"
+                    [ngClass]="{
+                      'is-invalid': searchSubmitted && searchForm.controls.name.errors
+                    }"
+                    />
+                  </div>
+                  <div class="col-md-4" style="padding-left: 0%">
+                    <button
+                      type="submit"
+                      class="btn btn-primary"
+                      data-title="Search OTP Profile"
+                      data-toggle="tooltip"
+                      (click)="search()"
+                      >
+                      <i class="fa fa-search"></i>
+                      Search
+                    </button>
+                    &nbsp;
+                    <button
+                      type="reset"
+                      class="btn btn-default"
+                      data-title="Clear"
+                      data-toggle="tooltip"
+                      (click)="clearSearchForm()"
+                      >
+                       <img src="assets/img/DashboardIcons/Refresh.svg" />
+                      Clear
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+            <div class="panel-body no-padding panel-udata">
+              <div class="col-md-6 pcol">
+                <div class="dbox">
+                  <a href="javascript:void(0)" (click)="createNewOtp()">
+                    <img src="../../../assets/img/i01.png" style="width: 32px" />
+                    <h5>Create Profile</h5>
+                  </a>
+                </div>
+              </div>
+              <div class="col-md-6 pcol">
+                <div class="dbox">
+                  <a href="javascript:void(0)" (click)="clearSearchForm()">
+                    <img src="../../../assets/img/i01.png" style="width: 32px" />
+                    <h5>Search Profile</h5>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!- END User Data ->
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6 left">
+        <!- Data Table ->
+        <div class="panel">
+          <div class="panel-heading">
+            <h3 class="panel-title">Profile</h3>
+            <div class="right">
+              <button
+                type="button"
+                class="btn-toggle-collapse"
+                data-toggle="collapse"
+                data-target="#OTPtabelPanel"
+                aria-expanded="false"
+                aria-controls="OTPtabelPanel"
+                >
+                <i class="fa fa-minus-circle"></i>
+              </button>
+            </div>
+          </div>
+          <div id="OTPtabelPanel" class="panel-collapse collapse in">
+            <div class="panel-body table-responsive">
+              <div>
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Length</th>
+                      <th>Validity</th>
+                      <th>Generation</th>
+                      <th>ISP Name</th>
+                      @if (editAccess || deleteAccess) {
+                        <th>Action</th>
+                      }
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (
+                      profile of otpProfileList
+                      | paginate
+                      : {
+                      id: 'listing_profiledata',
+                      itemsPerPage: itemsPerPage,
+                      currentPage: currentPage,
+                      totalItems: totalRecords
+                      }; track
+                      profile; let i = $index) {
+                      <tr
+                        >
+                        <td>
+                          <a
+                            class="detailOnAnchorClick"
+                            style="color: #f7941e"
+                            (click)="getOTPDetail(profile.profileId, profile.mvnoId)"
+                            data-title="Click here to see OTP details"
+                            data-toggle="modal"
+                            data-target="#otpDetailModal"
+                            >
+                            {{ profile.profileName }}
+                          </a>
+                        </td>
+                        <td>{{ profile.otpLength }}</td>
+                        <td>{{ profile.otpValidityInMin }} Mins</td>
+                        <td>
+                          {{ getGenerationType(profile.generationType) | titlecase }}
+                        </td>
+                        <td>{{profile.mvnoName}}</td>
+                        @if (editAccess || deleteAccess) {
+                          <td class="btnAction">
+                            @if (editAccess) {
+                              <a
+                                class="detailOnAnchorClick"
+                                type="button"
+                                data-title="Edit"
+                                data-toggle="tooltip"
+                                (click)="edit(profile.profileId)"
+                                >
+                              <img src="assets/img/DashboardIcons/Edit.svg" >
+                              </a>
+                            }
+                            @if (deleteAccess) {
+                              <a
+                                class="detailOnAnchorClick"
+                                type="button"
+                                data-title="Delete"
+                                data-toggle="tooltip"
+                                (click)="deleteConfirm(profile.profileId, i)"
+                                >
+                                 <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                              </a>
+                            }
+                          </td>
+                        }
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+
+                <br />
+                <div class="row">
+                  <div class="col-md-12" style="display: flex">
+                    <pagination-controls
+                      id="listing_profiledata"
+                      [maxSize]="10"
+                      [directionLinks]="true"
+                      previousLabel=""
+                      nextLabel=""
+                      (pageChange)="pageChanged($event)"
+                    ></pagination-controls>
+                    <div id="itemPerPageDropdown">
+                      <p-dropdown
+                        [options]="pageLimitOptions"
+                        optionLabel="value"
+                        optionValue="value"
+                        (onChange)="TotalItemPerPage($event)"
+                      ></p-dropdown>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!- END Data Table ->
+      </div>
+
+      <div class="col-md-6 right">
+        <!- Form Design ->
+        <div class="panel">
+          <div class="panel-heading">
+            <h3 class="panel-title">{{ editId ? "Update" : "Create" }} OTP Profile</h3>
+            <div class="right">
+              <button
+                type="button"
+                class="btn-toggle-collapse"
+                data-toggle="collapse"
+                data-target="#createOtp"
+                aria-expanded="false"
+                aria-controls="createOtp"
+                >
+                <i class="fa fa-minus-circle"></i>
+              </button>
+            </div>
+          </div>
+          <div id="createOtp" class="panel-collapse collapse in">
+            <div class="panel-body">
+              @if (!createAccess && !editId) {
+                <div class="panel-body table-responsive">
+                  Sorry you have not privilege to create operation!
+                </div>
+              }
+              @if (createAccess || (editId && editAccess)) {
+                <div>
+                  <form [formGroup]="detailGroupForm" (ngSubmit)="addOrUpdate()">
+                    <div class="panel-body">
+                      <label>Profile Name *</label>
+                      <input
+                        #focusOnOTP
+                        type="text"
+                        name="name"
+                        [readonly]="editId"
+                        formControlName="name"
+                        class="form-control"
+                    [ngClass]="{
+                      'is-invalid': submitted && detailGroupForm.controls.name.errors
+                    }"
+                        placeholder="Enter Profile Name"
+                        ngModel
+                        />
+                        @if (submitted && detailGroupForm.controls.name.errors) {
+                          <div
+                            class="invalid-feedback"
+                            >
+                            @if (detailGroupForm.controls.name.errors.required) {
+                              <div>
+                                Please Enter Profile Name.
+                              </div>
+                            }
+                          </div>
+                        }
+                        <br />
+                        <label>OTP Length *</label>
+                        <input
+                          type="text"
+                          name="length"
+                          formControlName="length"
+                          class="form-control"
+                    [ngClass]="{
+                      'is-invalid': submitted && detailGroupForm.controls.length.errors
+                    }"
+                          placeholder="Enter Length"
+                          ngModel
+                          />
+                          @if (submitted && detailGroupForm.controls.length.errors) {
+                            <div
+                              class="invalid-feedback"
+                              >
+                              @if (detailGroupForm.controls.length.errors.required) {
+                                <div>
+                                  Please Enter OTP Length.
+                                </div>
+                              }
+                              @if (detailGroupForm.controls.length.errors.pattern) {
+                                <div>
+                                  Length should be in numeric
+                                </div>
+                              }
+                            </div>
+                          }
+                          <br />
+                          <label>OTP Validity(min) *</label>
+                          <input
+                            type="text"
+                            name="validity"
+                            formControlName="validity"
+                            class="form-control"
+                    [ngClass]="{
+                      'is-invalid': submitted && detailGroupForm.controls.validity.errors
+                    }"
+                            placeholder="Enter Validity in min"
+                            ngModel
+                            />
+                            @if (submitted && detailGroupForm.controls.validity.errors) {
+                              <div
+                                class="invalid-feedback"
+                                >
+                                @if (detailGroupForm.controls.validity.errors.required) {
+                                  <div>
+                                    Please Enter Validity.
+                                  </div>
+                                }
+                                @if (detailGroupForm.controls.validity.errors.pattern) {
+                                  <div>
+                                    Validity should be in numeric
+                                  </div>
+                                }
+                              </div>
+                            }
+                            <br />
+                            <label>Generation Type *</label>
+                            <p-dropdown
+                              [options]="generationTypes"
+                              optionValue="value"
+                              optionLabel="label"
+                              filter="true"
+                              filterBy="label"
+                              placeholder="Select Generation Types"
+                              formControlName="selectedGenerationType"
+                              (onChange)="generationTypeChange($event)"
+                    [ngClass]="{
+                      is_invalidNGSelecet:
+                        submitted && detailGroupForm.controls.selectedGenerationType?.errors
+                    }"
+                            ></p-dropdown>
+                            <div></div>
+                            @if (submitted && detailGroupForm.controls.selectedGenerationType?.errors) {
+                              <div
+                                class="invalid-feedback"
+                                >
+                                @if (detailGroupForm.controls.selectedGenerationType.errors.required) {
+                                  <div>
+                                    Please Select Generation Type.
+                                  </div>
+                                }
+                              </div>
+                            }
+                            <br />
+                            <!- Static Value ->
+                            @if (detailGroupForm.value.selectedGenerationType === 'STATIC') {
+                              <div>
+                                <label>Static Value *</label>
+                                <input
+                                  type="text"
+                                  name="staticOtp"
+                                  formControlName="staticOtp"
+                                  class="form-control"
+                      [ngClass]="{
+                        'is-invalid': submitted && detailGroupForm.controls.staticOtp.errors
+                      }"
+                                  placeholder="Enter Static OTP"
+                                  />
+                                  @if (submitted && detailGroupForm.controls.staticOtp.errors) {
+                                    <div
+                                      class="invalid-feedback"
+                                      >
+                                      Please Enter Static OTP.
+                                    </div>
+                                  }
+                                  <br />
+                                </div>
+                              }
+                              <!- Value Allowed ->
+                              <label>Values allowed *</label>
+                              <p-multiSelect
+                                id="id"
+                                [options]="allowedValues"
+                                formControlName="selectedAllowedValues"
+                                optionLabel="label"
+                                optionValue="value"
+                                filter="true"
+                                filterBy="label"
+                                placeholder="Select Allowed values"
+                    [ngClass]="{
+                      is_invalidNGSelecet:
+                        submitted && detailGroupForm.controls.selectedAllowedValues?.errors
+                    }"
+                              ></p-multiSelect>
+                              <div></div>
+                              @if (submitted && detailGroupForm.controls.selectedAllowedValues?.errors) {
+                                <div
+                                  class="invalid-feedback"
+                                  >
+                                  @if (detailGroupForm.controls.selectedAllowedValues.errors.required) {
+                                    <div>
+                                      Please Select Allowed Value.
+                                    </div>
+                                  }
+                                </div>
+                              }
+                              <br />
+                              <div class="addUpdateBtn">
+                                <button
+                                  type="submit"
+                                  class="btn btn-primary"
+                                  data-title="Submit OTP Profile Details"
+                                  >
+                                  <i class="fa fa-check-circle"></i>
+                                  {{ editId ? "Update" : "Add" }} OTP Profile
+                                </button>
+                                <br />
+                              </div>
+                            </div>
+                          </form>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                </div>
+                <!- END Form Design ->
+              </div>
+            </div>
+          </div>
+          @if (showDetailsDialogue) {
+            <div class="row">
+              <div class="modal fade" id="otpDetailModal" role="dialog">
+                <div class="modal-dialog" style="width: 35%">
+                  <!- Modal content->
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal">&times;</button>
+                      <h3 class="panel-title">OTP Details</h3>
+                    </div>
+                    <div class="modal-body">
+                      <div class="container-fluid">
+                        <div class="row" id="viewDetail">
+                          <div class="col-md-5">
+                            <label for="name">Name :</label>
+                          </div>
+                          <div class="col-md-7">
+                            <label for="nameValue">
+                              {{ this.otpProfileData.profileName }}
+                            </label>
+                          </div>
+                        </div>
+                        <div class="row" id="viewDetail">
+                          <div class="col-md-5">
+                            <label for="type">Otp Length :</label>
+                          </div>
+                          <div class="col-md-7">
+                            <label for="typeValue">
+                              {{ this.otpProfileData.otpLength }}
+                            </label>
+                          </div>
+                        </div>
+                        <div class="row" id="viewDetail">
+                          <div class="col-md-5">
+                            <label for="type">Otp Validity In Min :</label>
+                          </div>
+                          <div class="col-md-7">
+                            <label for="typeValue">
+                              {{ this.otpProfileData.otpValidityInMin }}
+                            </label>
+                          </div>
+                        </div>
+                        <div class="row" id="viewDetail">
+                          <div class="col-md-5">
+                            <label for="type">Generation Type :</label>
+                          </div>
+                          <div class="col-md-7">
+                            <label for="typeValue">
+                              {{ this.otpProfileData.generationType }}
+                            </label>
+                          </div>
+                        </div>
+                        <div class="row" id="viewDetail">
+                          <div class="col-md-5">
+                            <label for="type">Values allowed :</label>
+                          </div>
+                          @if (otpProfileData.type) {
+                            <div class="col-md-7">
+                              @for (data of otpProfileData.type; track data) {
+                                <label for="typeValue">
+                                  <span>{{ data }},&nbsp;</span>
+                                </label>
+                              }
+                            </div>
+                          }
+                        </div>
+                      </div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          } -->

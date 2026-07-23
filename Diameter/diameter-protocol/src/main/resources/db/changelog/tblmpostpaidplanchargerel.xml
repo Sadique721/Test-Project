@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="create-tblmpostpaidplanchargerel-001" author="initial-change">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="tblmpostpaidplanchargerel"/>
+            </not>
+        </preConditions>
+
+        <!-- Create Table -->
+        <createTable tableName="tblmpostpaidplanchargerel">
+
+            <column name="POSTPAIDPLANCHARGERELID" type="BIGINT" >
+                <constraints primaryKey="true"
+                             primaryKeyName="mpostpaidplanchargerel_id_unq"
+                             nullable="false"/>
+            </column>
+
+            <column name="CHARGEID" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="BILLINGCYCLE" type="DECIMAL(2,0)"/>
+
+            <column name="CREATEDATE" type="TIMESTAMP"
+                    defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="POSTPAIDPLANID" type="BIGINT"/>
+
+            <column name="chargeprice" type="DECIMAL(20,8)"/>
+
+            <column name="chargeName" type="VARCHAR(100)"/>
+
+        </createTable>
+
+
+        <!-- Composite Index (POSTPAIDPLANID, CHARGEID) -->
+        <createIndex
+                tableName="tblmpostpaidplanchargerel"
+                indexName="index_TBLMPOSTPAIDPLANCHARGEREL_planId_chargeId">
+            <column name="POSTPAIDPLANID"/>
+            <column name="CHARGEID"/>
+        </createIndex>
+
+
+        <!-- Index for CHARGEID -->
+        <createIndex
+                tableName="tblmpostpaidplanchargerel"
+                indexName="tblmpostpaidplanchargerel_ibfk_2">
+            <column name="CHARGEID"/>
+        </createIndex>
+
+
+        <!-- Foreign Key: POSTPAIDPLANID -->
+        <addForeignKeyConstraint
+                baseTableName="tblmpostpaidplanchargerel"
+                baseColumnNames="POSTPAIDPLANID"
+                constraintName="tblmpostpaidplanchargerel_ibfk_1"
+                referencedTableName="tblmpostpaidplan"
+                referencedColumnNames="POSTPAIDPLANID"/>
+
+
+        <!-- Foreign Key: CHARGEID -->
+        <addForeignKeyConstraint
+                baseTableName="tblmpostpaidplanchargerel"
+                baseColumnNames="CHARGEID"
+                constraintName="tblmpostpaidplanchargerel_ibfk_2"
+                referencedTableName="tblcharges"
+                referencedColumnNames="CHARGEID"/>
+
+    </changeSet>
+
+</databaseChangeLog>

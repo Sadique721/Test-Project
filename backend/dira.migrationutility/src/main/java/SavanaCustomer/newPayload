@@ -1,0 +1,326 @@
+try {
+
+
+        CommonGetAPI commonGetAPI = new CommonGetAPI();
+
+        String fullName = customerDetails.get("Name");
+                    String firstName="";
+                    String lastName="";
+                    // Check if fullName is null or empty
+                    if (fullName == null || fullName.trim().isEmpty()) {
+                        // Handle the case where the full name is missing or empty
+                        firstName = "Unknown"; // Or some default value
+                        lastName = "Unknown";  // Or some default value
+                    } else {
+                        // Split the full name into parts based on space
+                        String[] nameParts = fullName.split("\\s+");
+
+                        // Extract the first name (first part)
+                         firstName = nameParts[0];
+
+                        // Join the rest of the parts as the last name (everything after the first part)
+                         lastName = (nameParts.length > 1)
+                            ? String.join(" ", Arrays.copyOfRange(nameParts, 1, nameParts.length))
+                            : firstName; // If no last name exists, use first name as last name
+
+                        // If lastName is still empty or null, fallback to firstName
+                        if (lastName == null || lastName.isEmpty()) {
+                            lastName = firstName;
+                        }
+                    }
+
+        JSONObject customerJsonObject = new JSONObject();
+        customerJsonObject.put("firstname", firstName);
+        customerJsonObject.put("lastname", lastName);
+        String email = customerDetails.get("Email");
+        customerJsonObject.put("email", (email != null && !email.isEmpty()) ? email : "savanna@123gmail.com");
+        customerJsonObject.put("title", customerDetails.get("Title") );
+        customerJsonObject.put("pan", "");
+        customerJsonObject.put("gst", "");
+        customerJsonObject.put("aadhar", "");
+        customerJsonObject.put("passportNo", "");
+        customerJsonObject.put("tinNo", "");
+        customerJsonObject.put("contactperson", firstName);
+        customerJsonObject.put("failcount", 0);
+        customerJsonObject.put("custtype", "Prepaid");
+        customerJsonObject.put("custlabel", "customer");
+
+        // mobile number------------------------------------------------->
+                    customerJsonObject.put("countryCode", "+256");//Static
+                     // Handle mobile number
+                    String mobNo = customerDetails.get("PrimaryMobile");
+                    String updatedNumber = "";
+
+                    if (mobNo != null && !mobNo.trim().isEmpty()) {
+                        if (mobNo.contains("E")) {
+                            String regularNumber = String.format("%.0f", Double.parseDouble(mobNo));
+                            updatedNumber = regularNumber.substring(3);
+                        } else {
+                            updatedNumber = mobNo.replaceAll("[^0-9]", "").substring(3);
+                        }
+                    } else {
+                        updatedNumber = "99999999";
+                    }
+
+                    // Convert to number (Long) if valid, else use default
+                    try {
+                        Long mobileNumber = Long.parseLong(updatedNumber);
+                        customerJsonObject.put("mobile", mobileNumber); // stored as number in JSON
+                    } catch (NumberFormatException e) {
+                        customerJsonObject.put("mobile", 99999999); // fallback
+                    }
+
+        customerJsonObject.put("altmobile", "");
+        customerJsonObject.put("birthDate", JSONObject.NULL); // -->here we need to change date format.
+        customerJsonObject.put("customerType", "Customer");
+        customerJsonObject.put("voicesrvtype", "");
+        customerJsonObject.put("didno", "");
+        customerJsonObject.put("calendarType", "English");
+        customerJsonObject.put("partnerid", 1);
+        customerJsonObject.put("servicetype", "");
+
+        // *********** Service Area Details *****************
+                    String ServiceArea=customerDetails.get("Servicearea").toLowerCase();
+
+                   // System.out.println(ServiceArea+"--------------------------------");
+                    //int serviceAreaId = commonGetAPI.getServiceAreaIdList(ServiceArea).get(0);
+                    Integer serviceareaId=serviceAreaDetails.get(ServiceArea);
+                //	System.out.println(serviceAreaDetails);
+                    //System.out.println(serviceAreaDetails.get("Serv01"));
+                    customerJsonObject.put("serviceareaid", serviceareaId);
+
+        // Handle status
+                    String status = customerDetails.get("status");
+                    switch (status != null ? status : "") {
+                        case "Active":
+                            customerJsonObject.put("status", "Active");
+                            break;
+                        case "In Active":
+                            customerJsonObject.put("status", "In Active");
+                            break;
+                        case "Suspend":
+                            customerJsonObject.put("status", "Suspend");
+                            break;
+                        default:
+                            customerJsonObject.put("status", "Terminate");
+                            break;
+                    }
+
+        customerJsonObject.put("parentCustomerId", "");
+        customerJsonObject.put("locations", JSONObject.NULL);
+        customerJsonObject.put("latitude", "");
+        customerJsonObject.put("longitude", "");
+        customerJsonObject.put("billTo", "CUSTOMER");
+        customerJsonObject.put("billableCustomerId", "");
+        customerJsonObject.put("isInvoiceToOrg", false);
+        customerJsonObject.put("istrialplan", false);
+        customerJsonObject.put("popid", "");
+        customerJsonObject.put("discount", "");
+        customerJsonObject.put("flatAmount", "");
+        customerJsonObject.put("plangroupid", "");
+        customerJsonObject.put("discountType", "");
+        customerJsonObject.put("discountExpiryDate", "");
+
+            //Plan Json ---------------------
+            JSONObject planDetailJsonObject = new JSONObject();
+            String plan = customerDetails.get("Plan");
+            String service = customerDetails.get("Service");
+            int planId = commonGetAPI.getPlanId(plan);
+            String planDetails[] = commonGetAPI.getPlanDetails(planId).split(":");
+            int serviceId = commonGetAPI.getServiceId(service);
+            String serviceName = planDetails[0];
+            float offerPrice = Float.valueOf(planDetails[1]);
+            int validity = Integer.parseInt(planDetails[2]);
+            float flatAmount = offerPrice;
+            float discountPercentage = 0;
+            boolean invoiceToOrg = false;
+            boolean skipQuotaUpdate = false;
+
+            List<JSONObject> planJsonObjectList = new ArrayList<JSONObject>();
+            planDetailJsonObject.put("planId", planId);
+            planDetailJsonObject.put("service", serviceName);
+            planDetailJsonObject.put("validity", validity);
+            planDetailJsonObject.put("discount", discountPercentage);
+            planDetailJsonObject.put("billTo", "CUSTOMER");
+            planDetailJsonObject.put("billableCustomerId", "");
+            planDetailJsonObject.put("newAmount", "");
+            planDetailJsonObject.put("invoiceType", "");
+            planDetailJsonObject.put("offerPrice", offerPrice);
+            planDetailJsonObject.put("isInvoiceToOrg", invoiceToOrg);
+            planDetailJsonObject.put("istrialplan", JSONObject.NULL);
+            planDetailJsonObject.put("discountType", "One-time");
+            planDetailJsonObject.put("serialNumber", "");
+            planDetailJsonObject.put("discountExpiryDate", JSONObject.NULL);
+            planDetailJsonObject.put("skipQuotaUpdate", skipQuotaUpdate);
+            planDetailJsonObject.put("currency", "UGX");
+
+            planJsonObjectList.add(planDetailJsonObject);
+
+        customerJsonObject.put("planMappingList", planJsonObjectList);
+
+            //Addressing Json -----------------------------------------
+
+            List<JSONObject> addressJsonObjectList = new ArrayList<JSONObject>();
+            JSONObject presentAddressDetail = ("Present", customerDetails);
+                        if (presentAddressDetail != null) {
+                            addressJsonObjectList.add(presentAddressDetail);
+                        }
+            JSONObject addressDetailJsonObject = new JSONObject();
+
+                        if (!"Present".equalsIgnoreCase(addressType)) {
+                            return addressDetailJsonObject; // return empty object if not 'Present'
+                        }
+
+                String address = customerDetails.get("Address");
+                String landmark = customerDetails.get("Landmark");
+                String ward = customerDetails.get("Ward");
+                String municipality = customerDetails.get("Municipality");
+                String subArea = customerDetails.get("subArea");
+                String buildingName = customerDetails.get("buildingName");
+                String buildingNumber = customerDetails.get("buildingNumber");
+
+                // Validate required fields
+                    if (isNullOrEmpty(address) || isNullOrEmpty(landmark) || isNullOrEmpty(ward) || isNullOrEmpty(municipality)) {
+                        return null;
+                    }
+
+            // Fetch hierarchical details
+                String wardHierarchyDetail = commonGetAPI.getMasterDetailsByAreaName(ward);
+
+
+                String[] hierarchyDetails = wardHierarchyDetail.split(":");
+
+                if (hierarchyDetails.length < 4) {
+                        return null; // or throw exception if hierarchy format is wrong
+                    }
+
+                Integer buildingMgmtId = null;
+
+                    if (!isNullOrEmpty(buildingName)) {
+                        buildingMgmtId = getBuildingMgmtId(buildingName);
+                    }
+
+               int pincodeId = commonGetAPI.getPincodeId(municipality);  // pincode id
+                   int subAreaId = isNullOrEmpty(subArea) ? 0 : commonGetAPI.getSubAreaId(subArea);
+
+                // Build JSON object
+                    addressDetailJsonObject.put("addressType", addressType);
+                    addressDetailJsonObject.put("landmark", address); // Assuming this is actual landmark
+                    addressDetailJsonObject.put("landmark1", JSONObject.NULL);
+                    addressDetailJsonObject.put("areaId", Integer.parseInt(hierarchyDetails[0]));
+                    addressDetailJsonObject.put("subareaId", subAreaId != 0 ? subAreaId : JSONObject.NULL);
+                    addressDetailJsonObject.put("pincodeId", pincodeId);
+                    addressDetailJsonObject.put("countryId", Integer.parseInt(hierarchyDetails[2]));
+                    addressDetailJsonObject.put("stateId", Integer.parseInt(hierarchyDetails[3]));
+                    addressDetailJsonObject.put("cityId", Integer.parseInt(hierarchyDetails[1]));
+
+                    addressDetailJsonObject.put("building_mgmt_id",buildingMgmtId != null ? buildingMgmtId : JSONObject.NULL);
+
+
+
+                    addressDetailJsonObject.put("buildingNumber",
+                        (buildingNumber != null && !buildingNumber.trim().isEmpty()) ? buildingNumber : JSONObject.NULL);
+
+                    addressDetailJsonObject.put("version", "NEW");
+
+
+        customerJsonObject.put("addressList", addressJsonObjectList);
+
+        List<JSONObject> chargeJsonObjectList = new ArrayList<JSONObject>();
+        customerJsonObject.put("overChargeList", chargeJsonObjectList);
+
+        List<JSONObject> macJsonObjectList = new ArrayList<JSONObject>();
+        customerJsonObject.put("custMacMapppingList", macJsonObjectList);
+
+        List<JSONObject> mappingJsonObjectList = new ArrayList<JSONObject>();
+        customerJsonObject.put("custIpMappingList", mappingJsonObjectList);
+
+        customerJsonObject.put("branch", JSONObject.NULL);
+        String branchName = customerDetails.get("Branch");
+                    if (!"".equals(branchName)) {
+                        int branchId = commonGetAPI.getBranchIdList(branchName).get(0);
+                        customerJsonObject.put("branch", branchId);
+                    }
+
+        customerJsonObject.put("oltid", "");
+        customerJsonObject.put("masterdbid", "");
+        customerJsonObject.put("splitterid", "");
+        customerJsonObject.put("customerArea", "");
+
+        JSONObject paymentJson = new JSONObject();
+        paymentJson.put("amount", 0);
+                    paymentJson.put("paymode", "");
+                    paymentJson.put("referenceno", "");
+                    paymentJson.put("paymentdate", "");
+        customerJsonObject.put("paymentDetails", paymentJson);
+        customerJsonObject.put("isCustCaf", "no");
+        customerJsonObject.put("dunningCategory", "Gold");
+        customerJsonObject.put("billday", "");
+        customerJsonObject.put("departmentId", "");
+        customerJsonObject.put("parentQuotaType", "");
+        customerJsonObject.put("isParentLocation", "");
+        customerJsonObject.put("earlybillday", "");
+        customerJsonObject.put("mac_provision", true);
+        customerJsonObject.put("mac_auth_enable", true);
+        customerJsonObject.put("addparam1", "");
+        customerJsonObject.put("addparam2", "");
+        customerJsonObject.put("addparam3", "");
+        customerJsonObject.put("addparam4", "");
+        customerJsonObject.put("earlybilldate", "");
+        customerJsonObject.put("macRetentionPeriod", "");
+        customerJsonObject.put("macRetentionUnit", "");
+        customerJsonObject.put("skipQuotaUpdate", false);
+        customerJsonObject.put("blockNo", "");
+        customerJsonObject.put("customerVrn", "");
+        customerJsonObject.put("customerNid", "");
+        customerJsonObject.put("isEmailAndMobileRequired", "");
+        customerJsonObject.put("renewPlanLimit", "");
+        customerJsonObject.put("isCredentialMatchWithAccountNo", ture);
+        customerJsonObject.put("loginUsername", customerDetails.get("Username");
+        customerJsonObject.put("loginPassword", customerDetails.get("Password");
+        customerJsonObject.put("currency", "UGX");
+
+        List<JSONObject> customerLocationsJsonObject = new ArrayList<JSONObject>();
+        customerJsonObject.put("customerLocations", customerLocationsJsonObject);
+
+        customerJsonObject.put("invoiceType", JSONObject.NULL);
+        customerJsonObject.put("planPurchaseType", "individual");
+
+    } // take care of this brace
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+//        System.out.println(jsonString);
+
+		return jsonString;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

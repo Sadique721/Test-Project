@@ -1,0 +1,11 @@
+package com.savbill.inventorymanagement.core.dto;
+
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+
+@Data
+public class LocationVo {
+
+    private String latitude;
+    private String longitude;
+}

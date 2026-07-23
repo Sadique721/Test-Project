@@ -1,0 +1,1765 @@
+<div class="row header-row">
+    <mat-card class="cardWithShadow w-100">
+        <mat-card-header>
+            <mat-card-title-group>
+                <mat-card-title>
+                    <div>{{ iscustomerEdit ? "Update" : "Create" }} Customer</div>
+                </mat-card-title>
+                <span>
+                    <a mat-icon-button href="javascript:void(0)" (click)="listView()">
+                        <img src="assets/img/DashboardIcons/Reject.svg">
+                    </a>
+                </span>
+            </mat-card-title-group>
+        </mat-card-header>
+
+        <mat-card-content class="mat-card-content-border">
+            <form [formGroup]="customerGroupForm">
+                <mat-stepper [linear]="!iscustomerEdit" #stepper>
+                    <!-- =============================================== -->
+                    <!-- STEP 1: BASIC INFORMATION -->
+                    <!-- =============================================== -->
+                    <mat-step [stepControl]="step1Group" label="Basic Details">
+                        <div class="row">
+                            <!-- First Name -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">First Name <span class="text-danger">*</span></label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <input matInput class="input-p-5" formControlName="firstname"
+                                        placeholder="Enter First Name" />
+                                    <mat-error *ngIf="customerGroupForm.get('firstname')?.hasError('required')">
+                                        First Name is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Last Name -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Last Name <span class="text-danger">*</span></label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <input matInput class="input-p-5" formControlName="lastname"
+                                        placeholder="Enter Last Name" />
+                                    <mat-error *ngIf="customerGroupForm.get('lastname')?.hasError('required')">
+                                        Last Name is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Is Credential Match With AccountNo -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12 d-flex align-items-center pb-3">
+                                <mat-checkbox formControlName="isCredentialMatchWithAccountNo"
+                                    (change)="isCredentialMatchWithAccountNumber($event.checked)">
+                                    Is Credential Match With AccountNo
+                                </mat-checkbox>
+                            </div>
+
+                            <!-- AAA Username -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">AAA Username</label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <input matInput class="input-p-5" formControlName="username"
+                                        placeholder="Enter Username" (blur)="onUsernameBlur()" />
+                                </mat-form-field>
+                            </div>
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">AAA Password</label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <input matInput class="input-p-5" [type]="hidePassword ? 'password' : 'text'"
+                                        formControlName="password" placeholder="Enter Password" />
+                                    <button mat-icon-button matSuffix type="button"
+                                        (click)="hidePassword = !hidePassword" [attr.aria-label]="'Hide password'">
+                                        <mat-icon>{{ hidePassword ? "visibility_off" : "visibility" }}</mat-icon>
+                                    </button>
+                                </mat-form-field>
+                            </div>
+                            <!-- Username -->
+                            <div *ngIf="!iscustomerEdit" class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Username <span class="text-danger">*</span></label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <input matInput class="input-p-5" formControlName="loginUsername"
+                                        placeholder="Enter Login Username" />
+                                    <mat-error *ngIf="customerGroupForm.get('loginUsername')?.hasError('required')">
+                                        Username is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Password -->
+                            <div *ngIf="!iscustomerEdit" class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Password <span class="text-danger">*</span></label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <input matInput class="input-p-5" [type]="hideLoginPassword ? 'password' : 'text'"
+                                        formControlName="loginPassword" placeholder="Enter Login Password" />
+                                    <button mat-icon-button matSuffix type="button"
+                                        (click)="hideLoginPassword = !hideLoginPassword"
+                                        [attr.aria-label]="'Hide password'">
+                                        <mat-icon>{{ hideLoginPassword ? "visibility_off" : "visibility" }}</mat-icon>
+                                    </button>
+                                    <mat-error *ngIf="customerGroupForm.get('loginPassword')?.hasError('required')">
+                                        Password is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Primary Mobile Number -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Primary Mobile Number <span
+                                        class="text-danger">*</span></label>
+                                <div class="d-flex gap-2">
+                                    <!-- Country Code Select -->
+                                    <mat-form-field appearance="outline" class="country-code-field">
+                                        <mat-select formControlName="countryCode" class="input-p-5">
+                                            <mat-option *ngFor="let code of countries" [value]="code.dial_code">
+                                                {{ code.dial_code }}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+
+                                    <!-- Mobile Input -->
+                                    <mat-form-field appearance="outline" class="flex-grow-1 mat-form-field">
+                                        <input matInput class="input-p-5" formControlName="mobile"
+                                            placeholder="Enter Mobile" type="tel" [maxlength]="mobileMaxLength" />
+                                        <mat-error *ngIf="customerGroupForm.get('mobile')?.hasError('required')">
+                                            Mobile Number is required
+                                        </mat-error>
+                                        <mat-error *ngIf="customerGroupForm.get('mobile')?.hasError('pattern')">
+                                            Invalid mobile number
+                                        </mat-error>
+                                        <!-- <mat-error *ngIf="customerGroupForm.get('mobile')?.hasError('minlength') ||
+                                                            customerGroupForm.get('mobile')?.hasError('maxlength')">
+                                            Invalid mobile number
+                                        </mat-error> -->
+                                    </mat-form-field>
+                                </div>
+                            </div>
+
+                            <!-- Secondary Mobile Number -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Secondary Mobile Number</label>
+                                <div class="d-flex gap-2">
+                                    <!-- Country Code Select -->
+                                    <mat-form-field appearance="outline" class="country-code-field">
+                                        <mat-select formControlName="altCountryCode" class="input-p-5">
+                                            <mat-option *ngFor="let code of countries" [value]="code.dial_code">
+                                                {{ code.dial_code }}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+
+                                    <!-- Mobile Input -->
+                                    <mat-form-field appearance="outline" class="flex-grow-1 mat-form-field">
+                                        <input matInput class="input-p-5" formControlName="altmobile"
+                                            placeholder="Enter Secondary Mobile Number" type="tel"
+                                            [maxlength]="mobileMaxLength" />
+                                    </mat-form-field>
+                                </div>
+                            </div>
+
+                            <!-- Email -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Email</label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <input matInput class="input-p-5" type="email" formControlName="email"
+                                        placeholder="Enter Email" />
+                                    <mat-error *ngIf="customerGroupForm.get('email')?.hasError('email')">
+                                        Invalid email format
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- KRA PIN -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">{{ KraTitle }}</label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <input matInput class="input-p-5" formControlName="pan"
+                                        placeholder="Enter {{ KraTitle }}" />
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Contact Person -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Contact Person <span class="text-danger">*</span></label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <input matInput class="input-p-5" formControlName="contactperson"
+                                        placeholder="Enter Contact Person" />
+                                    <mat-error *ngIf="customerGroupForm.get('contactperson')?.hasError('required')">
+                                        Contact Person is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            @if (!iscustomerEdit) {
+                            <!-- Calendar Type -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Calendar Type <span class="text-danger">*</span></label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <mat-select formControlName="calendarType" class="input-p-5"
+                                        placeholder="Select Calendar Type">
+                                        <mat-option *ngFor="let cal of celendarTypeData" [value]="cal.label">
+                                            {{ cal.label }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error *ngIf="customerGroupForm.get('calendarType')?.hasError('required')">
+                                        Calendar Type is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                            }
+
+
+                            <!-- Customer Category -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Customer Category <span class="text-danger">*</span></label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <mat-select placeholder="Select Customer Category" formControlName="dunningCategory"
+                                        class="input-p-5">
+                                        <mat-option *ngFor="let category of commondropdownService.dunningRules"
+                                            [value]="category.value">
+                                            {{ category.value }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error *ngIf="customerGroupForm.get('dunningCategory')?.hasError('required')">
+                                        Customer Category is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- DOB -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">DOB</label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <input matInput class="input-p-5" [matDatepicker]="birthDatePicker"
+                                        formControlName="birthDate" placeholder="dd-mm-yyyy" />
+                                    <mat-datepicker-toggle matSuffix [for]="birthDatePicker"></mat-datepicker-toggle>
+                                    <mat-datepicker #birthDatePicker></mat-datepicker>
+                                </mat-form-field>
+                            </div>
+
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12" *ngIf="custType === 'Postpaid'">
+
+                                <label class="inputLabel">
+                                    Bill Day <span class="text-danger">*</span>
+                                </label>
+
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <mat-select formControlName="billday" placeholder="Select a Day" class="input-p-5"
+                                        [disabled]="iscustomerEdit">
+
+                                        <mat-option *ngFor="let day of days" [value]="day.label">
+                                            {{ day.label }}
+                                        </mat-option>
+
+                                    </mat-select>
+
+                                    <mat-error *ngIf="
+                                            customerGroupForm.get('billday')?.hasError('required')
+                                        ">
+                                        Bill Day is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Status -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Status <span class="text-danger">*</span></label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <mat-select formControlName="status" placeholder="Select Status" class="input-p-5">
+                                        <mat-option *ngFor="let status of commondropdownService.CustomerNewStatusValue"
+                                            [value]="status.value">
+                                            {{ status.text }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error *ngIf="customerGroupForm.get('status')?.hasError('required')">
+                                        Status is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Parent Customer -->
+                            <!-- <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Parent Customer1</label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <mat-select formControlName="parentCustomerId" class="input-p-5"
+                                        placeholder="Select Parent Customer">
+                                        <mat-option *ngFor="let parent of parentCustList" [value]="parent.id">
+                                            {{ parent.name }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <button mat-icon-button matSuffix type="button"
+                                        (click)="modalOpenParentCustomer('parent')">
+                                        <mat-icon class="text-primary">add_circle</mat-icon>
+                                    </button>
+                                    <button mat-icon-button matSuffix type="button"
+                                        *ngIf="customerGroupForm.get('parentCustomerId')?.value"
+                                        (click)="removeSelParentCust('parent')">
+                                        <mat-icon class="text-danger">cancel</mat-icon>
+                                    </button>
+                                </mat-form-field>
+                            </div> -->
+
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Parent Customer</label>
+                                <div class="d-flex gap-2 align-items-start">
+                                    <mat-form-field appearance="outline" class="flex-grow-1 mat-form-field">
+                                        <mat-select formControlName="parentCustomerId" class="input-p-5"
+                                            placeholder="Select a Parent Customer" disabled>
+                                            <mat-option *ngFor="let parent of parentCustList" [value]="parent.id">
+                                                {{ parent.name }}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+
+                                    <button mat-icon-button color="primary" type="button"
+                                        (click)="modalOpenParentCustomer('parent')" matTooltip="Add Parent Customer"
+                                        class="action-btn">
+                                        <img src="assets/img/DashboardIcons/Add.svg">
+                                    </button>
+
+                                    <button mat-icon-button color="primary" type="button"
+                                        (click)="removeSelParentCust('parent')" matTooltip="Remove Parent Customer"
+                                        class="action-btn">
+                                        <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+
+                                    </button>
+                                </div>
+                            </div>
+                            <div *ngIf="this.customerGroupForm.controls.parentExperience.enabled"
+                                class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Parent Experience</label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <mat-select formControlName="parentExperience" class="input-p-5"
+                                        placeholder="Select Parent Experience"
+                                        (onSelect)="parentExperienceSelect($event)" [disabled]="iscustomerEdit">
+                                        <mat-option *ngFor="let parent of parentExperience" [value]="parent.value">
+                                            {{ parent.label }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+                            <!-- Department -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Department</label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <mat-select formControlName="departmentId" class="input-p-5"
+                                        placeholder="Select Department">
+                                        <mat-option *ngFor="let dept of departmentListData" [value]="dept.id">
+                                            {{ dept.displayName }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <!-- <button
+                    mat-icon-button
+                    matSuffix
+                    type="button"
+                    (click)="openDepartmentModal()"
+                    matTooltip="Add Department"
+                  >
+                    <mat-icon class="text-primary">add_circle</mat-icon>
+                  </button> -->
+                                    <!-- <button mat-icon-button matSuffix type="button"
+                                        *ngIf="customerGroupForm.get('departmentId')?.value" (click)="clearDepartment()"
+                                        matTooltip="Clear Department">
+                                        <mat-icon class="text-danger">cancel</mat-icon>
+                                    </button> -->
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Location -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Location</label>
+                                <div class="d-flex gap-2 align-items-start">
+
+                                    <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                        <mat-select formControlName="locationId" class="input-p-5"
+                                            placeholder="Select Location">
+                                            <mat-option *ngFor="let loc of locationDataByPlan"
+                                                [value]="loc.locationMasterId">
+                                                {{ loc.name }}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                    <button mat-icon-button matSuffix type="button" matTooltip="Add Location"
+                                        (click)="locationMacModelOpen()">
+                                        <img src="assets/img/DashboardIcons/Add.svg">
+                                    </button>
+                                    <button mat-icon-button matSuffix type="button" matTooltip="Remove location"
+                                        *ngIf="customerGroupForm.get('locationId')?.value"
+                                        (click)="clearLocationForm()">
+                                        <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                    </button>
+                                    <!-- </mat-form-field> -->
+                                </div>
+                            </div>
+
+                            <!-- Is Parent Location Checkbox -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12 d-flex align-items-center pb-3">
+                                <mat-checkbox formControlName="isParentLocation"
+                                    (onChange)="parentLocationCheck($event)">
+                                    Is Parent Location
+                                </mat-checkbox>
+                            </div>
+
+                            <!-- Parent Quota Type -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Parent Quota Type</label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <mat-select formControlName="parentQuotaType" class="input-p-5"
+                                        placeholder="Select Parent Quota Type">
+                                        <mat-option value="individual">Individual</mat-option>
+                                        <mat-option value="shared">Shared</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Customer Type -->
+                            <div *ngIf="!iscustomerEdit" class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Customer Type <span class="text-danger">*</span></label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <mat-select formControlName="customerType" class="input-p-5"
+                                        placeholder="Select Customer Type">
+                                        <mat-option value="Customer">Customer</mat-option>
+                                        <mat-option value="organization">Organization</mat-option>
+
+                                    </mat-select>
+                                    <mat-error *ngIf="customerGroupForm.get('customerType')?.hasError('required')">
+                                        Customer Type is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Passport Number -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Passport Number</label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <input matInput class="input-p-5" formControlName="passportNumber"
+                                        placeholder="Enter Passport Number" />
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Customer VAT Registration Number -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Customer VAT Registration Number</label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <input matInput class="input-p-5" formControlName="vatRegistrationNumber"
+                                        placeholder="Enter Customer VAT Registration Number" />
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Customer National Identification -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Customer National Identification</label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <input matInput class="input-p-5" formControlName="nationalId"
+                                        placeholder="Enter Customer National Identification" />
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Mac Retention Period -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Mac Retention Period</label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <input matInput class="input-p-5" type="number" formControlName="macRetentionPeriod"
+                                        placeholder="Enter Mac Retention Period" />
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Mac Retention Unit -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Mac Retention Unit</label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <mat-select formControlName="macRetentionUnit" class="input-p-5">
+                                        <mat-option value="Hours">Hours</mat-option>
+                                        <mat-option value="Days">Days</mat-option>
+                                        <mat-option value="Months">Months</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Is Mac Provision Checkbox -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12 d-flex align-items-center pb-3">
+                                <mat-checkbox formControlName="isMacProvision">
+                                    Is Mac Provision
+                                </mat-checkbox>
+                            </div>
+
+                            <!-- Is Mac Auth Enable Checkbox -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12 d-flex align-items-center pb-3">
+                                <mat-checkbox formControlName="isMacAuthEnable"> Is Mac Auth Enable </mat-checkbox>
+                            </div>
+
+                            <!-- Renew Plan Limit -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Renew Plan Limit</label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <input matInput class="input-p-5" type="number" formControlName="renewPlanLimit"
+                                        placeholder="Enter Renew Plan Limit" />
+                                </mat-form-field>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="mt-3 d-flex justify-content-end">
+                            <!-- <button mat-stroked-button type="button" (click)="listView()" class="me-2">
+                Cancel
+              </button> -->
+                            <button mat-flat-button color="primary" matStepperNext>Next</button>
+                        </div>
+                    </mat-step>
+
+                    <!-- =============================================== -->
+                    <!-- STEP 2: PLAN DETAILS -->
+                    <!-- =============================================== -->
+                    <mat-step [stepControl]="step2Group" label="Service Area Details" *ngIf="!iscustomerEdit">
+                        <div class="row">
+                            <!-- Service Area -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Service Area <span class="text-danger">*</span></label>
+
+
+                                <div class="d-flex">
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <input matInput readonly formControlName="serviceAreaName" class="input-p-5"
+                                            placeholder="Select a Servicearea">
+                                    </mat-form-field>
+
+                                    <button mat-icon-button color="primary" type="button" [disabled]="iscustomerEdit"
+                                        (click)="openSelectorDialogComponent()">
+                                        <img src="assets/img/DashboardIcons/Add.svg">
+
+                                    </button>
+                                </div>
+                                <mat-error *ngIf="customerGroupForm.get('serviceareaid')?.hasError('required')">
+                                    Service Area is required
+                                </mat-error>
+
+                                <!-- <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <mat-select formControlName="serviceareaid" class="input-p-5"
+                                        placeholder="Select a Servicearea"
+                                        (selectionChange)="selServiceArea($event, true)">
+                                        <mat-option *ngFor="let service of commondropdownService.serviceAreaList"
+                                            [value]="service.id">
+                                            {{ service.name }}
+                                        </mat-option>
+                                    </mat-select>
+                                    
+                                </mat-form-field> -->
+                            </div>
+
+                            <!-- Branch/Partner - CASE 1: isBranchAvailable = true -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12" *ngIf="isBranchAvailable">
+                                <label class="inputLabel">Branch/Partner <span class="text-danger">*</span></label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <mat-select formControlName="branch" class="input-p-5"
+                                        placeholder="Select a Branch">
+                                        <mat-option *ngFor="let branch of branchData" [value]="branch.id">
+                                            {{ branch.name }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error *ngIf="!customerGroupForm.value.serviceareaid">
+                                        Please select Service Area first!
+                                    </mat-error>
+                                    <mat-error *ngIf="customerGroupForm.get('branch')?.hasError('required')">
+                                        Branch is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Branch/Partner - CASE 2: isBranchAvailable = false -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12" *ngIf="!isBranchAvailable">
+                                <label class="inputLabel">Branch/Partner <span class="text-danger">*</span></label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <mat-select formControlName="partnerid" class="input-p-5"
+                                        placeholder="Select a Partner"
+                                        [disabled]="partnerId !== 1 || !customerGroupForm.value.serviceareaid"
+                                        (selectionChange)="onPartnerCategoryChange($event)">
+                                        <mat-option *ngFor="let partner of partnerListByServiceArea"
+                                            [value]="partner.id">
+                                            {{ partner.name }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error *ngIf="customerGroupForm.get('partnerid')?.hasError('required')">
+                                        Partner is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Unit No. (Conditional - Only for private service area) -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12"
+                                *ngIf="serviceAreaData?.serviceAreaType == 'private' && !iscustomerEdit">
+                                <label class="inputLabel">Unit No. <span class="text-danger">*</span></label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <mat-select formControlName="blockNo" class="input-p-5"
+                                        placeholder="Select a blockNo">
+                                        <mat-option *ngFor="let block of blockNoOptions" [value]="block">
+                                            {{ block }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error *ngIf="customerGroupForm.get('blockNo')?.hasError('required')">
+                                        Unit No. is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                        </div>
+
+                        <!-- presentGroupForm Section -->
+                        <div class="row" [formGroup]="presentGroupForm">
+                            <!-- Address (landmark) -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">{{ addressTitle }} <span class="text-danger">*</span></label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <input matInput class="input-p-5" formControlName="landmark"
+                                        placeholder="Enter {{ addressTitle }}" type="text" />
+                                    <mat-error *ngIf="presentGroupForm.get('landmark')?.hasError('required')">
+                                        {{ addressTitle }} is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Pincode -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">{{ pincodeTitle }} <span class="text-danger">*</span></label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <mat-select formControlName="pincodeId" class="input-p-5"
+                                        placeholder="Select a {{ pincodeTitle }}"
+                                        (selectionChange)="onChnagePincode($event, 'present')"
+                                        [disabled]="iscustomerEdit">
+                                        <mat-option *ngFor="let pincode of pincodeDD" [value]="pincode.pincodeid">
+                                            {{ pincode.pincode }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error *ngIf="presentGroupForm.get('pincodeId')?.hasError('required')">
+                                        {{ pincodeTitle }} is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Area -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">{{ areaTitle }} <span class="text-danger">*</span></label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <mat-select formControlName="areaId" class="input-p-5"
+                                        placeholder="Select a {{ areaTitle }}"
+                                        (selectionChange)="onChangeArea($event, 'present')" [disabled]="iscustomerEdit">
+                                        <mat-option *ngFor="let area of areaListDD" [value]="area.id">
+                                            {{ area.name }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error *ngIf="presentGroupForm.get('areaId')?.hasError('required')">
+                                        {{ areaTitle }} is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Sub Area -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">{{ subareaTitle }}</label>
+                                <div class="d-flex">
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <input matInput readonly formControlName="subareaName" class="input-p-5"
+                                            [placeholder]="'Select a ' + subareaTitle">
+                                    </mat-form-field>
+                                    <button mat-icon-button [disabled]="iscustomerEdit" color="primary" type="button"
+                                        (click)="openSelectBuildingDialogComponent()">
+                                        <mat-icon>add</mat-icon>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Building -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">{{ buildingTitle }}</label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <mat-select formControlName="building_mgmt_id" class="input-p-5"
+                                        placeholder="Select a {{ buildingTitle }}"
+                                        (selectionChange)="onChangeBuildingArea($event, 'present')"
+                                        [disabled]="iscustomerEdit">
+                                        <mat-option *ngFor="let building of buildingListDD"
+                                            [value]="building.buildingMgmtId">
+                                            {{ building.buildingName }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Building Number -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Building Number</label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <mat-select formControlName="buildingNumber" class="input-p-5"
+                                        placeholder="Select a Building Number" [disabled]="iscustomerEdit">
+                                        <mat-option *ngFor="let num of buildingNoDD" [value]="num.buildingNumber">
+                                            {{ num.buildingNumber }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- City -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">{{ cityTitle }} <span class="text-danger">*</span></label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <mat-select formControlName="cityId" class="input-p-5"
+                                        placeholder="Select {{ cityTitle }}"
+                                        [disabled]="this.presentGroupForm.value.areaId?true:false">
+                                        <mat-option *ngFor="let city of commondropdownService.cityListData"
+                                            [value]="city.id">
+                                            {{ city.name }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- State -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">{{ stateTitle }} <span class="text-danger">*</span></label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <mat-select formControlName="stateId" class="input-p-5"
+                                        placeholder="Select {{ stateTitle }}"
+                                        [disabled]="this.presentGroupForm.value.areaId?true:false">
+                                        <mat-option *ngFor="let state of commondropdownService.stateListData"
+                                            [value]="state.id">
+                                            {{ state.name }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Country -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">{{ countryTitle }} <span class="text-danger">*</span></label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <mat-select formControlName="countryId" class="input-p-5"
+                                        placeholder="Select {{ countryTitle }}"
+                                        [disabled]="this.presentGroupForm.value.areaId?true:false">
+                                        <mat-option *ngFor="let country of commondropdownService.countryListData"
+                                            [value]="country.id">
+                                            {{ country.name }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Landmark (landmark1) -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Landmark</label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <input matInput class="input-p-5" formControlName="landmark1"
+                                        placeholder="Enter Landmark" type="text" />
+                                </mat-form-field>
+                            </div>
+                        </div>
+
+                        <!-- Valley Type Section (outside presentGroupForm) -->
+                        <div class="row">
+                            <!-- Outside Valley -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12"
+                                *ngIf="customerGroupForm.value.valleyType == 'Outside Valley'">
+                                <label class="inputLabel">Outside Valley</label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <mat-select formControlName="customerArea" class="input-p-5"
+                                        placeholder="Select a Outside Valley">
+                                        <mat-option *ngFor="let valley of commondropdownService.outsideValley"
+                                            [value]="valley.value">
+                                            {{ valley.text }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Inside Valley -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12"
+                                *ngIf="customerGroupForm.value.valleyType == 'Inside Valley'">
+                                <label class="inputLabel">Inside Valley</label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <mat-select formControlName="customerArea" class="input-p-5"
+                                        placeholder="Select a Inside Valley">
+                                        <mat-option *ngFor="let valley of commondropdownService.insideValley"
+                                            [value]="valley.value">
+                                            {{ valley.text }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Latitude -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12" [formGroup]="presentGroupForm">
+                                <label class="inputLabel">Latitude</label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <input matInput class="input-p-5" formControlName="latitude"
+                                        placeholder="Enter latitude" type="text" [readonly]="iflocationFill" />
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Longitude -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12" [formGroup]="presentGroupForm">
+                                <label class="inputLabel">Longitude</label>
+                                <div class="d-flex gap-2 align-items-start">
+                                    <mat-form-field appearance="outline" class="flex-grow-1 mat-form-field">
+                                        <input matInput class="input-p-5" formControlName="longitude"
+                                            placeholder="Enter longitude" type="text" [readonly]="iflocationFill" />
+                                    </mat-form-field>
+
+                                    <!-- Location Buttons -->
+                                    <button mat-mini-fab color="warn" type="button" (click)="mylocation()"
+                                        matTooltip="Get Current Location" class="location-btn">
+                                        <mat-icon>my_location</mat-icon>
+                                    </button>
+
+                                    <button mat-mini-fab color="accent" type="button" (click)="openSearchModel()"
+                                        matTooltip="Search Location" class="location-btn">
+                                        <mat-icon>search</mat-icon>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="mt-3 d-flex justify-content-between">
+                            <button mat-stroked-button matStepperPrevious class="me-2">Back</button>
+                            <button mat-flat-button color="primary" matStepperNext>Next</button>
+                        </div>
+                    </mat-step>
+
+                    <!-- =============================================== -->
+                    <!-- STEP 3: Plan DETAILS -->
+                    <!-- =============================================== -->
+                    <mat-step [stepControl]="step3Group" label="Plan Details" *ngIf="!iscustomerEdit">
+                        <div class="row">
+                            <!-- Plan Offer Price -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12" [formGroup]="planDataForm">
+                                <label class="inputLabel">Plan Offer Price</label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <input matInput class="input-p-5" formControlName="offerPrice"
+                                        placeholder="Enter Plan Offer Price" readonly type="number" />
+                                </mat-form-field>
+                            </div>
+
+                            <!-- New Price (with Discount) -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12"
+                                *ngIf="customerGroupForm.value.billTo !== 'ORGANIZATION'" [formGroup]="planDataForm">
+                                <label class="inputLabel">New Price (with Discount)</label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <input matInput class="input-p-5" formControlName="discountPrice"
+                                        placeholder="Enter New Price" type="number"
+                                        [readonly]="!ifcustomerDiscountField" (keydown)="preventNegativeInput($event)"
+                                        (keyup)="discountvaluesetPercentage($event)" />
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Plan Category -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12" [formGroup]="planCategoryForm">
+                                <label class="inputLabel">Plan Category</label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <mat-select formControlName="planCategory" class="input-p-5"
+                                        placeholder="Select a Plan Group"
+                                        [disabled]="iscustomerEdit || serviceareaCheck"
+                                        (selectionChange)="planSelectType($event)">
+                                        <mat-option *ngFor="let plan of planDetailsCategory" [value]="plan.value">
+                                            {{ plan.label }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error *ngIf="serviceareaCheck && !iscustomerEdit">
+                                        Please select Service Area first!
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Bill To -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Bill To</label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <mat-select formControlName="billTo" class="input-p-5" placeholder="Select Bill To"
+                                        [disabled]="
+                      iscustomerEdit || payMappingListFromArray.length > 0 || ifplanisSubisuSelect
+                    " (selectionChange)="billtoSelectValue($event)">
+                                        <mat-option *ngFor="let bill of billToData" [value]="bill.value">
+                                            {{ bill.text }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error *ngIf="customerGroupForm.get('billTo')?.hasError('max')">
+                                        Bill To required!
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Billable To -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Billable To</label>
+                                <div class="d-flex gap-2 align-items-start">
+                                    <mat-form-field appearance="outline" class="flex-grow-1 mat-form-field">
+                                        <mat-select formControlName="billableCustomerId" class="input-p-5"
+                                            placeholder="Select a Billable" [disabled]="true">
+                                            <mat-option *ngFor="let cust of prepaidParentCustomerList"
+                                                [value]="cust.id">
+                                                {{ cust.firstname }}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+
+                                    <button mat-icon-button color="primary" type="button" [disabled]="iscustomerEdit"
+                                        (click)="modalOpenParentCustomer('billable')" matTooltip="Add Billable"
+                                        class="action-btn">
+                                        <img src="assets/img/DashboardIcons/Add.svg">
+                                    </button>
+
+                                    <button mat-icon-button color="primary" type="button" [disabled]="iscustomerEdit"
+                                        (click)="removeSelParentCust('billable')" matTooltip="Remove Billable"
+                                        class="action-btn">
+                                        <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Invoice Type (Conditional) -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12" *ngIf="
+                  planCategoryForm.value.planCategory === 'groupPlan'
+                ">
+                                <label class="inputLabel">Invoice Type <span class="text-danger">*</span></label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <mat-select formControlName="invoiceType" class="input-p-5"
+                                        placeholder="Select a Invoice Type"
+                                        [disabled]="customerGroupForm.value.parentExperience == 'Single'">
+                                        <mat-option *ngFor="let type of invoiceType" [value]="type.value">
+                                            {{ type.label }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error
+                                        *ngIf="submitted && customerGroupForm.get('invoiceType')?.hasError('required')">
+                                        Invoice Type is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Invoice To Org (Conditional) -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12"
+                                *ngIf="customerGroupForm.value.billTo == 'ORGANIZATION'">
+                                <label class="inputLabel">Invoice To Org</label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <mat-select formControlName="isInvoiceToOrg" class="input-p-5"
+                                        placeholder="Select Invoice to org or not" [disabled]="ifplanisSubisuSelect"
+                                        (selectionChange)="onChangeInvoiceToOrg($event)">
+                                        <mat-option *ngFor="let inv of invoiceData" [value]="inv.value">
+                                            {{ inv.label }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+                        </div>
+
+                        <!-- Plan Group Section -->
+                        <div *ngIf="ifPlanGroup" class="row mt-3" [formGroup]="planGroupForm">
+                            <!-- Plan Group Dropdown (Not Edit + Not Partner) -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12"
+                                *ngIf="!iscustomerEdit && !isPartnerSelected">
+                                <label class="inputLabel">Plan Group</label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <mat-select formControlName="plangroupid" class="input-p-5"
+                                        placeholder="Select a Plan Group"
+                                        (selectionChange)="planGroupSelectSubisu($event)">
+                                        <mat-option *ngFor="let plan of filterNormalPlanGroup"
+                                            [value]="plan.planGroupId">
+                                            {{ plan.planGroupName }}
+                                            <span *ngIf="plan.category == 'Business Promotion'">( Business Promotion
+                                                )</span>
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Plan Group Dropdown (Not Edit + Partner Selected) -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12"
+                                *ngIf="!iscustomerEdit && isPartnerSelected">
+                                <label class="inputLabel">Plan Group</label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <mat-select formControlName="plangroupid" class="input-p-5"
+                                        placeholder="Select a Plan Group"
+                                        (selectionChange)="planGroupSelectSubisu($event)">
+                                        <mat-option *ngFor="let plan of filterPartnerPlanGroup"
+                                            [value]="plan.planGroupId">
+                                            {{ plan.planGroupName }}
+                                            <span *ngIf="plan.category == 'Business Promotion'">( Business Promotion
+                                                )</span>
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Discount Type -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12"
+                                *ngIf="customerGroupForm.value.billTo !== 'ORGANIZATION'">
+                                <label class="inputLabel">Discount Type</label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <mat-select formControlName="discountType" class="input-p-5"
+                                        placeholder="Select a Discount Type" [(ngModel)]="discountType"
+                                        [disabled]="checkIfDiscountPlanGroup(customerGroupForm.value.plangroupid)">
+                                        <mat-option *ngFor="let type of chargeType" [value]="type.label">
+                                            {{ type.label }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Discount % -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12"
+                                *ngIf="customerGroupForm.value.billTo !== 'ORGANIZATION'">
+                                <label class="inputLabel">Discount %</label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <input matInput class="input-p-5" formControlName="discount"
+                                        placeholder="Enter a Discount" type="number"
+                                        [readonly]="!customerGroupForm.value.plangroupid || !ifcustomerDiscountField"
+                                        (keydown)="discountKeyDown($event)" />
+                                    <mat-error *ngIf="customerGroupForm.get('discount')?.hasError('max')">
+                                        Maximum 99 Percentage allowed
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Discount Expiry Date -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12" *ngIf="
+                  customerGroupForm.value.billTo !== 'ORGANIZATION' &&
+                  customerGroupForm.value.discountType === 'Recurring'
+                ">
+                                <label class="inputLabel">Discount Expiry Date</label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <input matInput [matDatepicker]="discountExpiryPicker"
+                                        formControlName="discountExpiryDate" placeholder="Enter Discount Expiry Date"
+                                        [min]="dateTime" />
+                                    <mat-datepicker-toggle matSuffix
+                                        [for]="discountExpiryPicker"></mat-datepicker-toggle>
+                                    <mat-datepicker #discountExpiryPicker></mat-datepicker>
+                                    <mat-error *ngIf="
+                      plansubmitted && planGroupForm.get('discountExpiryDate')?.hasError('required')
+                    ">
+                                        Discount Expiry Date is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Trial Plan Checkbox -->
+                            <!-- <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12 d-flex align-items-end pb-3"
+                                *ngIf="customerGroupForm.value.billTo !== 'ORGANIZATION'">
+                                <mat-checkbox formControlName="istrialplan"> Trial Plan </mat-checkbox>
+                            </div> -->
+
+                            <!-- Skip Quota Checkbox -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12 d-flex align-items-end pb-3">
+                                <mat-checkbox formControlName="skipQuotaUpdate"> Skip Quota </mat-checkbox>
+                            </div>
+                        </div>
+
+                        <!-- Plan Mapping List Table (For Plan Group) -->
+                        <div *ngIf="customerGroupForm.value.plangroupid" style="margin-top: 10px;">
+                            <mat-card class="cardWithShadow w-100">
+                                <mat-card-header class="mat-card-header">
+                                    <mat-card-title>
+                                        <h5 class="heading-title">Plan Mapping List</h5>
+                                    </mat-card-title>
+                                </mat-card-header>
+
+                                <mat-card-content class="mat-card-content-border">
+                                    <div class="table-responsive mat-elevation-z2">
+                                        <table class="table table-bordered plan-details" style="text-align: center;">
+                                            <thead>
+                                                <tr>
+                                                    <th>Service</th>
+                                                    <th>Plan Name</th>
+                                                    <th>Validity</th>
+                                                    <th>Price</th>
+                                                    <th>New Price</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr *ngFor="let data of planGroupMapingList">
+                                                    <td>{{ data.service }}</td>
+                                                    <td>{{ data.plan?.name }}</td>
+                                                    <td>
+                                                        <span *ngIf="custType == 'Prepaid'">{{ data.plan?.validity
+                                                            }}
+                                                            {{ data.plan?.unitsOfValidity }}</span>
+                                                        <span *ngIf="custType != 'Prepaid'">N/A</span>
+                                                    </td>
+                                                    <td>{{ data.plan?.offerprice }}</td>
+                                                    <td>{{ data.newofferprice }}</td>
+                                                </tr>
+                                                <tr *ngIf="!planGroupMapingList || planGroupMapingList.length === 0">
+                                                    <td colspan="5" class="text-center text-muted">
+                                                        No plans mapped yet
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </mat-card-content></mat-card>
+                        </div>
+
+                        <!-- Individual Plan Section -->
+                        <div *ngIf="ifIndividualPlan" [formGroup]="planGroupForm">
+                            <table mat-table [dataSource]="[1]" class="mat-elevation-z8 plan-mapping-table"
+                                style="table-layout: fixed; width: 100%; border-collapse: collapse;">
+
+                                <!-- Service -->
+                                <ng-container matColumnDef="service">
+                                    <th mat-header-cell *matHeaderCellDef class="w-27">Service <span
+                                            class="text-danger">*</span></th>
+                                    <td mat-cell *matCellDef="let row; let i = index" class="w-27 p-15">
+                                        <mat-form-field appearance="outline" class="w-100 header-input mat-form-field">
+                                            <mat-select formControlName="serviceId" class="input-p-5"
+                                                placeholder="Select a Service"
+                                                (selectionChange)="serviceBasePlanDATA($event)">
+                                                <mat-option *ngFor="let service of serviceData" [value]="service.id">
+                                                    {{ service.name }}
+                                                </mat-option>
+                                            </mat-select>
+                                            <mat-error
+                                                *ngIf="plansubmitted && planGroupForm.get('serviceId')?.hasError('required')">
+                                                Service is required
+                                            </mat-error>
+                                        </mat-form-field>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Plan -->
+                                <ng-container matColumnDef="plan">
+                                    <th mat-header-cell *matHeaderCellDef class="w-37">Plan <span
+                                            class="text-danger">*</span></th>
+                                    <td mat-cell *matCellDef="let row; let i = index" class="w-37 p-15">
+                                        <mat-form-field appearance="outline" class="w-100 mat-form-field header-input">
+                                            <mat-select formControlName="planId" class="input-p-5"
+                                                placeholder="Select a Plan" (selectionChange)="getPlanValidity($event)">
+                                                <mat-option *ngFor="let plan of plantypaSelectData" [value]="plan.id">
+                                                    {{ plan.name }}
+                                                    <span *ngIf="plan.category == 'Business Promotion'">( Business
+                                                        Promotion
+                                                        )</span>
+                                                </mat-option>
+                                            </mat-select>
+                                            <mat-error
+                                                *ngIf="plansubmitted && planGroupForm.get('planId')?.hasError('required')">
+                                                Plan is required
+                                            </mat-error>
+                                        </mat-form-field>
+                                    </td>
+                                </ng-container>
+                                <ng-container matColumnDef="invoiceType">
+                                    <th mat-header-cell *matHeaderCellDef class="w-30">
+                                        Invoice Type <span class="text-danger">*</span>
+                                    </th>
+
+                                    <td mat-cell *matCellDef="let row; let i = index" class="w-30 p-15">
+
+                                        @if (
+
+                                        planCategoryForm.get("planCategory").value === 'individual' &&
+                                        customerGroupForm.get("parentCustomerId").value
+                                        ) {
+                                        <mat-form-field appearance="outline" class="w-100 mat-form-field header-input">
+                                            <mat-select formControlName="invoiceType" class="input-p-5"
+                                                placeholder="Select a Invoice Type"
+                                                [disabled]="customerGroupForm.value.parentExperience === 'Single'">
+
+                                                <mat-option *ngFor="let type of invoiceType" [value]="type.value">
+                                                    {{ type.label }}
+                                                </mat-option>
+
+                                            </mat-select>
+
+                                            <mat-error *ngIf="
+                                                        submitted &&
+                                                        customerGroupForm.get('invoiceType')?.hasError('required')
+                                                    ">
+                                                Invoice Type is required.
+                                            </mat-error>
+                                        </mat-form-field>
+                                        }
+
+                                    </td>
+                                </ng-container>
+
+
+                                <!-- Validity -->
+                                <!-- <ng-container *ngIf="custType?.toLowerCase() === 'prepaid'">
+                                    <ng-container matColumnDef="validity">
+                                        <th mat-header-cell *matHeaderCellDef class="w-40">Validity</th>
+                                        <td mat-cell *matCellDef="let row" class="w-40 p-15">
+                                            <div class="d-flex gap-2 header-input">
+                                                <mat-form-field appearance="outline" class=" mat-form-field">
+                                                    <input matInput class="input-p-5" formControlName="validity"
+                                                        type="number" readonly min="1" />
+                                                </mat-form-field>
+
+                                                <mat-form-field appearance="outline" class="flex-grow-1 mat-form-field"
+                                                    [formGroup]="validityUnitFormGroup">
+                                                    <mat-select formControlName="validityUnit" class="input-p-5"
+                                                        disabled>
+                                                        <mat-option
+                                                            *ngFor="let unit of commondropdownService.validityUnitData"
+                                                            [value]="unit.label">
+                                                            {{ unit.label }}
+                                                        </mat-option>
+                                                    </mat-select>
+                                                </mat-form-field>
+                                            </div>
+                                        </td>
+                                    </ng-container>
+                                </ng-container> -->
+
+                                <ng-container matColumnDef="validity">
+                                    <th mat-header-cell *matHeaderCellDef class="w-40">Validity</th>
+                                    <td mat-cell *matCellDef="let row" class="w-40 p-15">
+
+                                        @if (custType?.toLowerCase() === 'prepaid') {
+                                        <div class="d-flex gap-2 header-input">
+                                            <mat-form-field appearance="outline">
+                                                <input matInput formControlName="validity" readonly type="number" />
+                                            </mat-form-field>
+
+                                            <mat-form-field appearance="outline" [formGroup]="validityUnitFormGroup">
+                                                <mat-select formControlName="validityUnit" disabled>
+                                                    <mat-option
+                                                        *ngFor="let unit of commondropdownService.validityUnitData"
+                                                        [value]="unit.label">
+                                                        {{ unit.label }}
+                                                    </mat-option>
+                                                </mat-select>
+                                            </mat-form-field>
+                                        </div>
+                                        }
+
+                                    </td>
+                                </ng-container>
+
+                                <!-- Trial Plan -->
+                                <!-- <ng-container *ngIf="customerGroupForm.value.billTo !== 'ORGANIZATION'"
+                                    matColumnDef="t-plan">
+                                    <th mat-header-cell *matHeaderCellDef class="w-15">Trial Plan</th>
+                                    <td mat-cell *matCellDef="let row" class="w-15 m-b-10">
+                                        <mat-checkbox formControlName="istrialplan" [disabled]="isTrialCheckDisable">
+                                        </mat-checkbox>
+                                    </td>
+                                </ng-container> -->
+
+                                <!-- Skip Quota -->
+                                <!-- <ng-container matColumnDef="skipQuota">
+                                    <th mat-header-cell *matHeaderCellDef class="w-15">Skip Quota</th>
+                                    <td mat-cell *matCellDef="let row" class="w-5 m-b-10">
+                                            <mat-checkbox formControlName="skipQuotaUpdate"></mat-checkbox>
+                                    </td>
+                                </ng-container> -->
+
+                                <!-- Discount Type -->
+                                <ng-container *ngIf="customerGroupForm.value.billTo !== 'ORGANIZATION'"
+                                    matColumnDef="d-type">
+                                    <th mat-header-cell *matHeaderCellDef class="w-35">Discount Type</th>
+                                    <td mat-cell *matCellDef="let row" class="w-35 p-15">
+                                        <mat-form-field appearance="outline" class="w-100 mat-form-field header-input">
+                                            <mat-select formControlName="discountType" class="input-p-5"
+                                                placeholder="Select a Discount Type" [(ngModel)]="discountType"
+                                                [disabled]="ifdiscounAllow">
+                                                <mat-option *ngFor="let type of chargeType" [value]="type.label">
+                                                    {{ type.label }}
+                                                </mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Discount -->
+                                <ng-container *ngIf="customerGroupForm.value.billTo !== 'ORGANIZATION'"
+                                    matColumnDef="discount">
+                                    <th mat-header-cell *matHeaderCellDef class="w-25">Discount %</th>
+                                    <td mat-cell *matCellDef="let row" class="w-25 p-15">
+                                        <mat-form-field appearance="outline" class="w-100 mat-form-field header-input">
+                                            <input matInput class="input-p-5" formControlName="discount"
+                                                placeholder="Discount %" type="number"
+                                                [readonly]="!planGroupForm.value.planId || !ifcustomerDiscountField"
+                                                (keydown)="discountKeyDown($event)" />
+                                            <mat-error *ngIf="planGroupForm.get('discount')?.hasError('max')">
+                                                Maximum 99 Percentage allowed
+                                            </mat-error>
+                                            <mat-error *ngIf="planGroupForm.get('discount')?.hasError('min')">
+                                                Minimum -99 Percentage allowed
+                                            </mat-error>
+                                            <mat-error
+                                                *ngIf="plansubmitted && planGroupForm.get('discount')?.hasError('required')">
+                                                Discount is required
+                                            </mat-error>
+                                        </mat-form-field>
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="discountExpiryDate">
+                                    <th mat-header-cell *matHeaderCellDef class="w-30">Discount Expiry
+                                        Date</th>
+                                    <td mat-cell *matCellDef="let row" class="w-30 p-15">
+                                        <div
+                                            *ngIf="customerGroupForm.value.billTo !== 'ORGANIZATION' && planGroupForm.value.discountType === 'Recurring'">
+                                            <mat-form-field appearance="outline"
+                                                class="w-100 mat-form-field header-input">
+                                                <input matInput [matDatepicker]="individualDiscountPicker"
+                                                    formControlName="discountExpiryDate"
+                                                    placeholder="Enter Discount Expiry Date" [min]="dateTime" />
+                                                <mat-datepicker-toggle matSuffix
+                                                    [for]="individualDiscountPicker"></mat-datepicker-toggle>
+                                                <mat-datepicker #individualDiscountPicker></mat-datepicker>
+                                                <mat-error
+                                                    *ngIf="plansubmitted && planGroupForm.get('discountExpiryDate')?.hasError('required')">
+                                                    Discount Expiry Date is required
+                                                </mat-error>
+                                            </mat-form-field>
+                                        </div>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Action -->
+                                <ng-container matColumnDef="action">
+                                    <th mat-header-cell *matHeaderCellDef class="w-25">Action</th>
+                                    <td mat-cell *matCellDef="let row" class="w-25">
+                                        <button mat-stroked-button matButton="outlined" type="button" color="primary"
+                                            class="button-normal m-b-5" (click)="onAddplanMappingList()">
+                                            Add
+                                        </button>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Header & Rows -->
+                                <tr mat-header-row *matHeaderRowDef="getDisplayedPlanDetailsColumns()">
+                                </tr>
+                                <tr mat-row *matRowDef="let row; columns: getDisplayedPlanDetailsColumns()">
+                                </tr>
+                            </table>
+                        </div>
+
+                        <!-- Individual Plan Mapping Table -->
+                        <div *ngIf="ifIndividualPlan && payMappingListFromArray.length > 0" class="mt-4">
+                            <!-- <h3 class="table-title">Plan Mapping List</h3> -->
+                            <mat-card>
+                                <mat-card-header>
+                                    <mat-card-title>Plan Mapping List</mat-card-title>
+                                </mat-card-header>
+                                <mat-card-content>
+                                    <div class="table-responsive tableAddEditScrollHeight example-container">
+                                        <table mat-table [dataSource]="planMappingDataSource"
+                                            style="table-layout: fixed; width: 100%;">
+                                            <!-- Serial Number Column -->
+                                            <ng-container matColumnDef="serialNumber" *ngIf="isSerialNumberShow">
+                                                <th mat-header-cell *matHeaderCellDef>Serial Number</th>
+                                                <td mat-cell *matCellDef="let row">
+                                                    <mat-form-field appearance="outline" class="table-field">
+                                                        <input matInput [formControl]="row.get('serialNumber')"
+                                                            readonly />
+                                                    </mat-form-field>
+                                                </td>
+                                            </ng-container>
+
+                                            <!-- Service Column -->
+                                            <ng-container matColumnDef="service">
+                                                <th mat-header-cell *matHeaderCellDef>
+                                                    Service <span class="text-danger">*</span>
+                                                </th>
+                                                <td mat-cell *matCellDef="let row">
+                                                    <mat-form-field appearance="outline"
+                                                        class="table-field disabled-class">
+                                                        <mat-select [formControl]="row.get('service')" [disabled]="true"
+                                                            [readOnly]="true">
+                                                            <mat-option value="">Select Service</mat-option>
+                                                            <mat-option
+                                                                *ngFor="let item of commondropdownService.planserviceData"
+                                                                [value]="item.name">
+                                                                {{ item.name }}
+                                                            </mat-option>
+                                                        </mat-select>
+                                                    </mat-form-field>
+                                                </td>
+                                            </ng-container>
+
+                                            <!-- Plan Column -->
+                                            <ng-container matColumnDef="plan">
+                                                <th mat-header-cell *matHeaderCellDef>
+                                                    Plan <span class="text-danger">*</span>
+                                                </th>
+                                                <td mat-cell *matCellDef="let row">
+                                                    <mat-form-field appearance="outline"
+                                                        class="table-field disabled-class">
+                                                        <input matInput [value]="row.get('name')?.value" readonly />
+                                                    </mat-form-field>
+                                                </td>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="validity">
+                                                <th mat-header-cell *matHeaderCellDef>
+                                                    Validity <span class="text-danger">*</span>
+                                                </th>
+                                                <td mat-cell *matCellDef="let row; let index = index">
+                                                    <div *ngIf="custType == 'Prepaid'"
+                                                        class="d-flex gap-1 disabled-class">
+
+                                                        <mat-form-field appearance="outline" class="table-field w-100">
+                                                            <input matInput
+                                                                [value]="row.get('validity')?.value + ' ' + validityUnitFormArray.at(index).get('validityUnit')?.value"
+                                                                readonly />
+                                                        </mat-form-field>
+
+                                                    </div>
+                                                    <span *ngIf="custType != 'Prepaid'">N/A</span>
+                                                </td>
+                                            </ng-container>
+
+                                            <ng-container matColumnDef="currency">
+                                                <th mat-header-cell *matHeaderCellDef>Currency</th>
+                                                <td mat-cell *matCellDef="let row">
+                                                    <mat-form-field appearance="outline" class="table-field">
+                                                        <input matInput [formControl]="row.get('currency')" readonly />
+                                                    </mat-form-field>
+                                                </td>
+                                            </ng-container>
+
+                                            <!-- Offer Price Column (for Organization) -->
+                                            <ng-container matColumnDef="offerPrice">
+                                                <th mat-header-cell *matHeaderCellDef>
+                                                    Offer Price <span class="text-danger">*</span>
+                                                </th>
+                                                <td mat-cell *matCellDef="let row">
+                                                    <mat-form-field appearance="outline" class="table-field">
+                                                        <input matInput [formControl]="row.get('offerPrice')" readonly
+                                                            type="number" />
+                                                    </mat-form-field>
+                                                </td>
+                                            </ng-container>
+
+                                            <!-- New Offer Price Column (for Organization) -->
+                                            <ng-container matColumnDef="newAmount">
+                                                <th mat-header-cell *matHeaderCellDef>New Offer Price</th>
+                                                <td mat-cell *matCellDef="let row">
+                                                    <mat-form-field appearance="outline" class="table-field">
+                                                        <input matInput [formControl]="row.get('newAmount')" readonly
+                                                            type="number" />
+                                                    </mat-form-field>
+                                                </td>
+                                            </ng-container>
+
+                                            <!-- Discount Type Column -->
+                                            <ng-container matColumnDef="discountType">
+                                                <th mat-header-cell *matHeaderCellDef>Discount Type</th>
+                                                <td mat-cell *matCellDef="let row">
+                                                    <mat-form-field appearance="outline"
+                                                        class="table-field disabled-class">
+                                                        <mat-select [formControl]="row.get('discountType')"
+                                                            [disabled]="ifdiscounAllow">
+                                                            <mat-option *ngFor="let type of chargeType"
+                                                                [value]="type.label">
+                                                                {{ type.label }}
+                                                            </mat-option>
+                                                        </mat-select>
+                                                    </mat-form-field>
+                                                </td>
+                                            </ng-container>
+
+                                            <!-- Discount % Column -->
+                                            <ng-container matColumnDef="discount">
+                                                <th mat-header-cell *matHeaderCellDef>
+                                                    Discount (%) <span class="text-danger">*</span>
+                                                </th>
+                                                <td mat-cell *matCellDef="let row; let index = index">
+                                                    <mat-form-field appearance="outline" class="table-field">
+                                                        <input matInput [formControl]="row.get('discount')"
+                                                            type="number"
+                                                            [readonly]="iscustomerEdit || !ifcustomerDiscountField"
+                                                            (keyup)="discountChange($event, index)" />
+                                                    </mat-form-field>
+                                                </td>
+                                            </ng-container>
+
+                                            <!-- Discount Expiry Date Column -->
+                                            <ng-container matColumnDef="discountExpiryDate">
+                                                <th mat-header-cell *matHeaderCellDef>Discount Expiry Date</th>
+                                                <td mat-cell *matCellDef="let row">
+                                                    <span *ngIf="row.value.discountType === 'Recurring'">
+                                                        {{ row.value.discountExpiryDate | date: "dd/MM/yyyy" }}
+                                                    </span>
+                                                    <span *ngIf="row.value.discountType !== 'Recurring'">-</span>
+                                                </td>
+                                            </ng-container>
+
+                                            <!-- Invoice Type Column -->
+                                            <ng-container matColumnDef="invoiceType">
+                                                <th mat-header-cell *matHeaderCellDef>Invoice Type</th>
+                                                <td mat-cell *matCellDef="let row">
+                                                    <mat-form-field appearance="outline" class="table-field">
+                                                        <mat-select [formControl]="row.get('invoiceType')"
+                                                            [disabled]="true" [readOnly]="true">
+                                                            <mat-option value="">Select Service</mat-option>
+                                                            <mat-option *ngFor="let item of invoiceType"
+                                                                [value]="item.value">
+                                                                {{ item.label }}
+                                                            </mat-option>
+                                                        </mat-select>
+                                                    </mat-form-field>
+                                                </td>
+                                            </ng-container>
+
+                                            <!-- Trial Plan Column -->
+                                            <!-- <ng-container matColumnDef="trialPlan">
+                                                <th mat-header-cell *matHeaderCellDef>Trial Plan</th>
+                                                <td mat-cell *matCellDef="let row">
+                                                    <mat-checkbox class="disabled-class"
+                                                        [formControl]="row.get('istrialplan')" [disabled]="true"
+                                                        [readOnly]="true"></mat-checkbox>
+                                                </td>
+                                            </ng-container> -->
+
+                                            <!-- Skip Quota Column -->
+                                            <ng-container matColumnDef="skipQuota">
+                                                <th mat-header-cell *matHeaderCellDef>Skip Quota</th>
+                                                <td mat-cell *matCellDef="let row">
+                                                    <mat-checkbox class="disabled-class"
+                                                        [formControl]="row.get('skipQuotaUpdate')" [disabled]="true"
+                                                        [readOnly]="true"></mat-checkbox>
+                                                </td>
+                                            </ng-container>
+
+                                            <!-- Delete Column -->
+                                            <ng-container matColumnDef="delete" *ngIf="!iscustomerEdit">
+                                                <th mat-header-cell *matHeaderCellDef class="text-center">Delete</th>
+                                                <td mat-cell *matCellDef="let row; let index = index"
+                                                    class="text-center">
+                                                    <button mat-icon-button color="warn"
+                                                        (click)="deleteConfirmonChargeField(index, 'Plan')"
+                                                        matTooltip="Delete Plan">
+                                                        <img
+                                                            src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                                    </button>
+                                                </td>
+                                            </ng-container>
+
+                                            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                                            <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+                                        </table>
+                                    </div>
+                                </mat-card-content>
+                            </mat-card>
+                            <!-- Pagination -->
+                            <!-- <div class="mt-3">
+                                <pagination-controls (pageChange)="pageChangedpayMapping($event)"
+                                    id="payMappingListFromArrayData" maxSize="5"></pagination-controls>
+                            </div> -->
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="mt-3 d-flex justify-content-between">
+                            <button mat-stroked-button matStepperPrevious class="me-2">Back</button>
+                            <button mat-flat-button color="primary" (click)="onNext(stepper)">Next</button>
+                        </div>
+                    </mat-step>
+                    <!-- Step 4: Param Details -->
+                    <mat-step label="Param Details">
+                        <div class="row">
+                            <!-- Param 1 -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Param 1</label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <input matInput class="input-p-5" formControlName="addparam1"
+                                        placeholder="Enter Param 1" type="text" />
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Param 2 -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Param 2</label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <input matInput class="input-p-5" formControlName="addparam2"
+                                        placeholder="Enter Param 2" type="text" />
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Param 3 -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Param 3</label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <input matInput class="input-p-5" formControlName="addparam3"
+                                        placeholder="Enter Param 3" type="text" />
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Param 4 -->
+                            <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Param 4</label>
+                                <mat-form-field appearance="outline" class="w-100 mat-form-field">
+                                    <input matInput class="input-p-5" formControlName="addparam4"
+                                        placeholder="Enter Param 4" type="text" />
+                                </mat-form-field>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="mt-4 d-flex justify-content-between gap-2">
+                            <button mat-stroked-button matStepperPrevious class="me-2">
+                                Back
+                            </button>
+
+                            <!-- Add Customer Button (Create Mode) -->
+                            <button mat-flat-button color="primary" type="button" *ngIf="!iscustomerEdit"
+                                (click)="checkUsernme('')">
+                                Add Customer
+                            </button>
+
+                            <!-- Update Customer Button (Edit Mode) -->
+                            <button mat-flat-button color="primary" type="button" *ngIf="iscustomerEdit"
+                                (click)="addEditcustomer(editCustId)">
+                                Update Customer
+                            </button>
+                        </div>
+                    </mat-step>
+                </mat-stepper>
+            </form>
+        </mat-card-content>
+    </mat-card>
+</div>
+
+<!-- Parent Customer Search Modal -->
+<!-- <p-dialog [(visible)]="showParentCustomerModel" [modal]="true" [style]="{ width: '80vw' }" [draggable]="false"
+    [resizable]="false">
+    <ng-template pTemplate="header">
+        <h5>Select {{ customerSelectType }} Customer</h5>
+    </ng-template>
+    <app-get-customer-modal [custType]="custType" (selectedCust)="selectedCustChange($event)"></app-get-customer-modal>
+</p-dialog> -->
+<!-- <ng-template #parentCustomerDialog>
+    <h2 mat-dialog-title>Select {{ customerSelectType }} Customer</h2>
+    <mat-dialog-content class="dialog-large-content">
+       
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Search Customer</mat-label>
+                    <input matInput [(ngModel)]="searchParentCustValue" (ngModelChange)="onSearchParentCustomer()"
+                        placeholder="Search by name, mobile, or account number" />
+                    <mat-icon matSuffix>search</mat-icon>
+                </mat-form-field>
+            </div>
+        </div>
+        <table mat-table [dataSource]="prepaidParentCustomerListDataSource" class="mat-elevation-z2">
+           
+            <ng-container matColumnDef="select">
+                <th mat-header-cell *matHeaderCellDef>Select</th>
+                <td mat-cell *matCellDef="let customer">
+                    <mat-radio-button [value]="customer" [checked]="selectedParentCust?.id === customer.id"
+                        (change)="onCustomerSelect(customer)"></mat-radio-button>
+                </td>
+            </ng-container>
+
+          
+            <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef>Name</th>
+                <td mat-cell *matCellDef="let customer">
+                    {{ customer.title }} {{ customer.firstname }} {{ customer.lastname }}
+                </td>
+            </ng-container>
+
+           
+            <ng-container matColumnDef="mobile">
+                <th mat-header-cell *matHeaderCellDef>Mobile</th>
+                <td mat-cell *matCellDef="let customer">{{ customer.mobile }}</td>
+            </ng-container>
+            <ng-container matColumnDef="acctno">
+                <th mat-header-cell *matHeaderCellDef>Account No</th>
+                <td mat-cell *matCellDef="let customer">{{ customer.acctno }}</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="customerColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: customerColumns"></tr>
+        </table>
+
+        <mat-paginator [length]="parentCustomerListdatatotalRecords" [pageSize]="parentCustomerListdataitemsPerPage"
+            [pageSizeOptions]="[5, 10,  20, 50, 100]" (page)="onCustomerPageChange($event)"
+            showFirstLastButtons></mat-paginator>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+        <button mat-button (click)="closeParentCustomerModal()">Cancel</button>
+        <button mat-raised-button color="primary" (click)="confirmCustomerSelection()" [disabled]="!selectedParentCust">
+            Select
+        </button>
+    </mat-dialog-actions>
+</ng-template> -->
+
+<ng-template #parentCustomerDialog>
+    <div class="dialog-container" style="min-width: 80%;">
+        <div class="dialog-header">
+            Select {{ customerSelectType }} Customer
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="closeParentCustomerModal()">
+                    <mat-icon>close</mat-icon>
+                </a>
+            </span>
+        </div>
+
+        <div mat-dialog-content class="dialog-large-content">
+            <div class="col-md-12">
+                <h5 style="font-weight: 600; margin-bottom: 15px;">Search Customer</h5>
+                <div class="row mb-3">
+                    <div class="col-md-12">
+                        <mat-form-field appearance="outline" class="w-100 hide-hint">
+                            <input matInput [(ngModel)]="searchParentCustValue"
+                                placeholder="Search by name, mobile, or account number"
+                                (keydown.enter)="onSearchParentCustomer()" />
+                            <mat-icon matSuffix>search</mat-icon>
+                        </mat-form-field>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table mat-table [dataSource]="prepaidParentCustomerListDataSource" class="w-100 mat-elevation-z2">
+                        <ng-container matColumnDef="select">
+                            <th mat-header-cell *matHeaderCellDef class="table-header-title" style="width: 50px;">Select
+                            </th>
+                            <td mat-cell *matCellDef="let customer" class="f-s-14">
+                                <mat-radio-button [value]="customer" [checked]="selectedParentCust?.id === customer.id"
+                                    (change)="onCustomerSelect(customer)" color="primary"></mat-radio-button>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="name">
+                            <th mat-header-cell *matHeaderCellDef class="table-header-title">Name</th>
+                            <td mat-cell *matCellDef="let customer" class="f-s-14">
+                                {{ customer.title }} {{ customer.firstname }} {{ customer.lastname }}
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="mobile">
+                            <th mat-header-cell *matHeaderCellDef class="table-header-title">Mobile</th>
+                            <td mat-cell *matCellDef="let customer" class="f-s-14">{{ customer.mobile }}</td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="acctno">
+                            <th mat-header-cell *matHeaderCellDef class="table-header-title">Account No</th>
+                            <td mat-cell *matCellDef="let customer" class="f-s-14">{{ customer.acctno }}</td>
+                        </ng-container>
+
+                        <tr mat-header-row *matHeaderRowDef="customerColumns" class="table-header-bg"></tr>
+                        <tr mat-row *matRowDef="let row; columns: customerColumns" class="table-content-row"></tr>
+                    </table>
+                </div>
+
+                <mat-paginator [length]="parentCustomerListdatatotalRecords"
+                    [pageSize]="parentCustomerListdataitemsPerPage" [pageSizeOptions]="[5, 10, 20, 50, 100]"
+                    (page)="onCustomerPageChange($event)" showFirstLastButtons>
+                </mat-paginator>
+            </div>
+        </div>
+
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+            <button mat-flat-button color="primary" type="button" class="button-normal"
+                (click)="confirmCustomerSelection()" [disabled]="!selectedParentCust">
+                Select
+            </button>
+            <button mat-stroked-button type="button" class="button-normal m-r-10" (click)="closeParentCustomerModal()">
+                Close
+            </button>
+        </div>
+    </div>
+</ng-template>
+
+<p-dialog [(visible)]="ifsearchLocationModal" [modal]="true" [style]="{ width: '80vw' }" [draggable]="false"
+    [resizable]="false">
+    <ng-template pTemplate="header">
+        <h5>Search Location</h5>
+    </ng-template>
+</p-dialog>

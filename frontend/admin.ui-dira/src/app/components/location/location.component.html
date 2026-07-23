@@ -1,0 +1,1228 @@
+<!-- <p-confirmDialog [style]="{ width: '40vw' }" [baseZIndex]="10000"></p-confirmDialog> -->
+
+<!-- <div class="childComponent" pFocusTrap>
+
+  <div class="row">
+    <div class="col-md-12">
+      <div class="panel top">
+        <div class="panel-heading">
+          <h3 class="panel-title">Location Master Management</h3>
+        </div>
+        <div id="locationSearch" class="panel-collapse collapse in">
+          <div class="panel-body">
+            <div class="searchForm">
+              <form class="form-auth-small" [formGroup]="searchByNameForm">
+                <div class="row">
+                 
+                <div class="col-lg-3 col-md-3">
+                  <input
+                    type=" text "
+                    name=" name "
+                    class="form-control"
+                    placeholder=" Enter Location Master Name "
+                    formControlName="name"
+                      [ngClass]="{
+                        'is-invalid': searchSubmitted && searchByNameForm.controls.name.errors
+                      }"
+                    (keydown.enter)="searchByName()"
+                    />
+                  </div>
+                  <div class="col-md-4" style="padding-left: 0%">
+                    <button
+                      type="submit"
+                      class="btn btn-primary"
+                      title="Search Location"
+                      data-toggle="tooltip"
+                      (click)="searchByName()"
+                      >
+                      <i class="fa fa-search"></i> Search
+                    </button>
+                    &nbsp;
+                    <button
+                      type="reset"
+                      class="btn btn-default"
+                      title="Clear"
+                      data-toggle="tooltip"
+                      (click)="clearSearchForm()"
+                      >
+                       <img src="assets/img/DashboardIcons/Refresh.svg" /> Clear
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+    </div>
+    </div>
+  </div>
+</div> -->
+
+
+<!-- 
+<div class="row">
+  <div class="col-md-6 left">
+    <div class="panel">
+      <div class="panel-heading">
+        <h3 class="panel-title">Location Master</h3>
+      </div>
+      <div id="locationTablePanel" class="panel-collapse collapse in">
+        <div class="panel-body table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th style="width: 15%">Location ID</th>
+                <th style="width: 30%">Name</th>
+                <th>Identify Value</th>
+                @if (this.accessData.locationMaster.createUpdateAccess) {
+                  <th style="width: 10%">
+                    Status
+                  </th>
+                }
+                @if (
+                  this.accessData.locationMaster.createUpdateAccess ||
+                  this.accessData.locationMaster.deleteAccess ||
+                  editAccess
+                  ) {
+                  <th
+                    style="width: 15%"
+                    >
+                    Action
+                  </th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (
+                location of locationData
+                | paginate
+                : {
+                id: 'listing_locationdata',
+                itemsPerPage: itemsPerPage,
+                currentPage: currentPage,
+                totalItems: totalRecords
+                }; track
+                location; let i = $index) {
+                <tr
+                  >
+                  <td style="width: 15%">{{ location.locationMasterId }}</td>
+                  <td style="width: 30%" class="detailOnAnchorClick">
+                    <a
+                      (click)="getLocationDetail(location.locationMasterId)"
+                      data-title="Click here to see Location  detail"
+                      data-toggle="modal"
+                      data-target="#myModal"
+                      >{{ location.name }}</a
+                      >
+                    </td>
+                    <td>{{ location.locationIdentifyValue }}</td>
+                    @if (this.accessData.locationMaster.createUpdateAccess) {
+                      <td style="width: 10%">
+                        <label class="switch">
+                          <input
+                            [checked]="location.status == 'Active' ? true : false"
+                            type="checkbox"
+                            (change)="changeStatus(location.name, location.status, location.mvnoId)"
+                            />
+                            <span class="slider round"></span>
+                          </label>
+                        </td>
+                      }
+                      @if (
+                        this.accessData.locationMaster.createUpdateAccess ||
+                        this.accessData.locationMaster.deleteAccess ||
+                        editAccess
+                        ) {
+                        <td
+                          style="width: 15%"
+                          class="btnAction"
+                          >
+                          @if (this.accessData.locationMaster.createUpdateAccess && editAccess) {
+                            <a
+                              data-title="Edit"
+                              data-toggle="tooltip"
+                              (click)="editById(location.locationMasterId, i, location.mvnoId)"
+                              ><img <img src="assets/img/DashboardIcons/Edit.svg" >
+                            /></a>
+                          }
+                      </td>
+                    }
+                  </tr>
+                }
+              </tbody>
+            </table>
+            <br />
+            <div class="row">
+              <div class="col-md-12" style="display: flex">
+                <pagination-controls
+                  id="listing_locationdata"
+                  [maxSize]="10"
+                  [directionLinks]="true"
+                  previousLabel=""
+                  nextLabel=""
+                  (pageChange)="pageChanged($event)"
+                  >
+                </pagination-controls>
+
+                <div id="itemPerPageDropdown">
+                  <p-dropdown
+                    [options]="pageLimitOptions"
+                    optionLabel="value"
+                    optionValue="value"
+                    (onChange)="TotalItemPerPage($event)"
+                  ></p-dropdown>
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  @if (this.accessData.locationMaster.createUpdateAccess) {
+    <div class="col-md-6 right">
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">{{ editMode ? "Update" : "Create" }} Location Master</h3>
+        </div>
+        <div id="locationFormPanel" class="panel-collapse collapse in">
+            @if (!createAccess && !editMode) {
+            <div class="panel-body table-responsive">
+                Sorry you have not privilege to create operation!
+            </div>
+            }
+            @if (createAccess || (editMode && editAccess)) {
+            <div class="panel-body">
+                <form class="form-auth-small" [formGroup]="createForm">
+                    @if (userId == superAdminId) {
+                    <div>
+                        <label>Mvno Name *</label>
+                        <div>
+                            <p-dropdown #dd [options]="mvnoData" placeholder="Select mvno" optionLabel="name"
+                                optionValue="id" formControlName="mvnoName" [readonly]="editMode" [ngClass]="{
+                      'is-invalid': submitted && createForm.controls.mvnoName.errors
+                    }"></p-dropdown>
+                            @if (submitted && createForm.controls.mvnoName.errors) {
+                            <div class="errorWrap text-danger">
+                                @if (submitted && createForm.controls.mvnoName.errors.required) {
+                                <div class="error text-danger">
+                                    Please select MVNO name.
+                                </div>
+                                }
+                            </div>
+                            }
+                        </div>
+                        <br />
+                    </div>
+                    }
+                    <label>Location Master Name *</label>
+                    <input type="text" name="name" [readonly]="editMode" class="form-control"
+                        placeholder="Enter Location Master Name" formControlName="name" [ngClass]="{
+                  'is-invalid': submitted && createForm.controls.name.errors
+                }" />
+                    @if (submitted && createForm.controls.name.errors) {
+                    <div class="errorWrap text-danger">
+                        @if (submitted && createForm.controls.name.errors.required) {
+                        <div class="error text-danger">
+                            Please enter Location Master name.
+                        </div>
+                        }
+                        @if (submitted && createForm.controls.name.errors?.cannotContainSpace) {
+                        <div class="error text-danger">
+                            <p class="error">White space are not allowed.</p>
+                        </div>
+                        }
+                    </div>
+                  }
+                  <br /><label>Check Item</label>
+                  <input
+                    type=" text "
+                    name=" checkItem "
+                    class="form-control"
+                    placeholder=" Enter Check Item "
+                    formControlName="checkItem"
+                    />
+                  <br />
+                  <label>Location Identify Attribute</label>
+                  <input
+                    type="text"
+                    name="locationIdentifyAttribute"
+                    class="form-control"
+                    placeholder="Enter Location Identify Attribute"
+                    formControlName="locationIdentifyAttribute"
+                    />
+                    <br />
+                    <label>Location Identify Value</label>
+                    <input type="text" name="locationIdentifyValue" class="form-control"
+                        placeholder="Enter Location Identify Value" formControlName="locationIdentifyValue" />
+                    <br />
+                    <div>
+                        <label style="display: block">Status *</label>
+                        <p-dropdown [options]="status" placeholder="Select Location Master Status" optionLabel="label"
+                            optionValue="label" formControlName="status" [ngClass]="{
+                    'is-invalid': submitted && createForm.controls.status.errors
+                  }"></p-dropdown>
+                        @if (submitted && createForm.controls.status.errors) {
+                        <div class="errorWrap text-danger">
+                            @if (submitted && createForm.controls.status.errors.required) {
+                            <div class="error text-danger">
+                                Please select status.
+                            </div>
+                            }
+                        </div>
+                        }
+                    </div>
+                    <br />
+                    <div>
+                        <label style="display: block">Location Mac</label>
+                        <p-dropdown id="parentcust" [disabled]="true" [showClear]="true" filter="true" filterBy="name"
+                            optionLabel="name" optionValue="id" placeholder="Location Mac"
+                            styleClass="disableDropdown"></p-dropdown>
+                        <button id="opencust" type="button" (click)="locationMacModelOpen()" class="btn btn-primary"
+                            style="border-radius: 5px; padding: 5px 10px; line-height: 1.5; margin-left: 5px">
+                            <i class="fa fa-plus-square"></i>
+                        </button>
+                        <button type="button" (click)="locationMacDetailsModelOpen()" class="btn btn-primary"
+                            style="border-radius: 5px; padding: 5px 10px; line-height: 1.5; margin-left: 5px">
+                            <i _ngcontent-nrc-c2="" class="fa fa-eye"></i>
+                        </button>
+                    </div>
+                    <br />
+                    <div class="addUpdateBtn">
+                        <button type="submit" class="btn btn-primary" title="Submit Location Details"
+                            (click)="addConcurrent()">
+                            <i class="fa fa-check-circle"></i>
+                            {{ editMode ? "Update Location Master " : "Add Location Master " }}
+                        </button>
+                        <br />
+                      </div>
+                    </form>
+                  </div>
+                }
+              </div>
+            </div>
+            <p-confirmDialog [style]="{ width: '50vw' }" key="positionDialog" [baseZIndex]="10000">
+            </p-confirmDialog>
+          </div>
+        }
+      </div>
+    </div> -->
+
+
+<!-- 
+@if (showDialogue) {
+<div class="row">
+    <div class="modal fade" id="myModal" role="dialog">
+        <div class="modal-dialog" style="width: 35%">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h3 class="panel-title">Location Details</h3>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <div class="row" id="viewDetail">
+                            <div class="col-md-5">
+                                <label for="name">Name : </label>
+                            </div>
+                            <div class="col-md-7">
+                                <label for="nameValue">{{ this.showLocationDetails.name }}</label>
+                            </div>
+                        </div>
+                        <div class="row" id="viewDetail">
+                            <div class="col-md-5">
+                                <label for="type">Status : </label>
+                            </div>
+                            <div class="col-md-7">
+                                <label for="typeValue">{{ this.showLocationDetails.status }}</label>
+                            </div>
+                        </div>
+                        <div class="row" id="viewDetail">
+                            <div class="col-md-5">
+                                <label for="quota">Check Item : </label>
+                            </div>
+                            <div class="col-md-7">
+                                <label for="quotaValue">{{ this.showLocationDetails.checkItem }}</label>
+                            </div>
+                        </div>
+                        <div class="row" id="viewDetail">
+                            <div class="col-md-5">
+                                <label for="quotaReserInterval">Location Identify Attribute: </label>
+                            </div>
+                            <div class="col-md-7">
+                                <label for="quotaReserIntervalValue">{{
+                                    this.showLocationDetails.locationIdentifyAttribute
+                                    }}</label>
+                            </div>
+                        </div>
+                        <div class="row" id="viewDetail">
+                            <div class="col-md-5">
+                                <label for="quotaReserInterval">Location Identify Value: </label>
+                            </div>
+                            <div class="col-md-7">
+                                <label for="quotaReserIntervalValue">{{
+                                    this.showLocationDetails.locationIdentifyValue
+                                    }}</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+}  -->
+
+<!-- 
+    <p-dialog
+      header="Location Mac"
+      [(visible)]="showLocationMac"
+      [style]="{ width: '75vw' }"
+      [modal]="true"
+      [responsive]="true"
+      [draggable]="false"
+      [closable]="true"
+      (onHide)="locationMacModelClose()"
+      >
+      <div class="modal-body">
+        <fieldset style="margin-top: 0.5rem">
+          <legend>Location Mac</legend>
+          <div class="boxWhite">
+            <table [formGroup]="locationMacForm" style="width: 100%">
+              <td style="text-align: center; padding: 0 10px 0 0">
+                <input
+                  class="form-control"
+                  formControlName="identity"
+                  id="identity        "
+                  name="identity"
+                  placeholder="Enter Identity"
+                  type="text"
+                  />
+                </td>
+                <td style="text-align: center; padding: 0 10px 0 0">
+                  <input
+              [ngClass]="{
+                'is-invalid': locationMacsubmitted && locationMacForm.controls.mac.errors
+              }"
+                    class="form-control"
+                    formControlName="mac"
+                    id="mac        "
+                    name="mac"
+                    (keyup)="keypdown($event)"
+                    placeholder="Enter Mac"
+                    type="text"
+                    />
+                  </td>
+                  <td style="text-align: center; width: 9%">
+                    <button
+                      (click)="addLocationMacListField()"
+                      class="btn btn-primary form-control"
+                      style="object-fit: cover; float: right"
+                      >
+                      <i aria-hidden="true" class="fa fa-plus-square"></i>
+                      Add
+                    </button>
+                  </td>
+
+                  <tr>
+                    <td>
+                  </td>
+                  <td>
+                    @if (locationMacsubmitted && locationMacForm.controls.mac.errors) {
+                      <div
+                        class="errorWrap text-danger"
+                        >
+                        <div class="error text-danger">Mac is required.</div>
+                      </div>
+                    }
+                    @if (locationMacsubmitted && isMacExist && !locationMacForm.controls.mac.errors) {
+                      <div
+                        class="errorWrap text-danger"
+                        >
+                        <div class="error text-danger">Mac already exist.</div>
+                      </div>
+                    }
+                  </td>
+                  <td style="text-align: center; width: 9%"></td>
+                </tr>
+              </table>
+
+              <table class="table coa-table" style="margin-top: 3rem">
+                <thead>
+                  <tr>
+                    <th style="text-align: center">Identity</th>
+                    <th style="text-align: center">Mac</th>
+                    <th style="text-align: center">Delete</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (
+                    row of overLocationMacArray.controls
+                    | paginate
+                    : {
+                    id: 'overChargeListFromArrayData',
+                    itemsPerPage: overChargeListItemPerPage,
+                    currentPage: currentPageoverChargeList,
+                    totalItems: overChargeListtotalRecords
+                    }; track
+                    row; let index = $index) {
+                    <tr
+                      >
+                      <td>
+                        <input
+                          [formControl]="row.get('identity')"
+                          class="form-control"
+                          id="identity"
+                          name="identity"
+                          placeholder="Enter identity"
+                          readonly
+                          type="text"
+                          />
+                        </td>
+                        <td>
+                          <input
+                            disabled
+                            class="form-control"
+                            [formControl]="row.get('mac')"
+                            id="mac"
+                            name="mac"
+                            placeholder="Enter Mac"
+                            type="text"
+                            />
+                          </td>
+                          <td style="text-align: center">
+                            <span>
+                              <button
+                                class="approve-btn"
+                                id="deleteAtt"
+                                style="border: none; background: transparent; padding: 0; margin-right: 3px"
+                                type="button"
+                                (click)="deleteLocationMapField(index)"
+                                >
+                                 <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                              </button>
+                            </span>
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+
+                  <br />
+                </div>
+              </fieldset>
+            </div>
+            <div class="modal-footer" style="display: flex; justify-content: flex-end">
+              <div class="addUpdateBtn mr-2">
+                <button
+                  type="button"
+                  class="btn btn-primary btn-sm"
+                  (click)="saveLocationMacData()"
+                  [disabled]="overLocationMacArray.controls.length == 0"
+                  >
+                  Save
+                </button>
+              </div>
+              <div class="addUpdateBtn" style="padding-left: 8px">
+                <button
+                  data-dismiss="modal"
+                  class="btn btn-danger btn-sm"
+                  type="button"
+                  (click)="locationMacModelClose()"
+                  >
+                  Close
+                </button>
+              </div>
+            </div>
+          </p-dialog>  -->
+
+<!--           
+          <p-dialog
+            header="Location Mac Details"
+            [(visible)]="showChargeDetails"
+            [style]="{ width: '75vw' }"
+            [modal]="true"
+            [responsive]="true"
+            [draggable]="false"
+            [closable]="true"
+            (onHide)="locationMacDetailsModelClose()"
+            >
+            <div class="modal-body">
+              <fieldset style="margin-top: 0.5rem">
+                <legend>Add Location Mac</legend>
+                <div class="boxWhite">
+                  <table class="table coa-table" style="margin-top: 3rem">
+                    <thead>
+                      <tr>
+                        <th style="text-align: center">Identity</th>
+                        <th style="text-align: center">Mac</th>
+                        <th style="text-align: center">Delete</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (
+                        row of locationMacData
+                        | paginate
+                        : {
+                        id: 'overChargeListFromArrayData',
+                        itemsPerPage: overChargeListItemPerPage,
+                        currentPage: currentPageoverChargeList,
+                        totalItems: overChargeListtotalRecords
+                        }; track
+                        row; let index = $index) {
+                        <tr
+                          >
+                          <td style="text-align: center">{{ row.identity }}</td>
+                          <td style="text-align: center">
+                            {{ row.mac }}
+                          </td>
+                          <td style="text-align: center">
+                            <span>
+                              <button
+                                (click)="deleteLocationMapField(index)"
+                                class="approve-btn"
+                                id="deleteAtt"
+                                style="border: none; background: transparent; padding: 0; margin-right: 3px"
+                                type="button"
+                                >
+                                 <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                              </button>
+                            </span>
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+
+                  
+                <br />
+              </div>
+            </fieldset>
+          </div>
+          <div class="modal-footer" style="display: flex; justify-content: flex-end">
+            <div class="addUpdateBtn">
+              <button
+                data-dismiss="modal"
+                class="btn btn-danger btn-sm"
+                type="button"
+                (click)="locationMacDetailsModelClose()"
+                >
+                Close
+              </button>
+            </div>
+          </div>
+        </p-dialog>  -->
+
+
+<div class="row header-row">
+    <mat-card class="cardWithShadow w-100">
+        <mat-card-content class="mat-card-content-border">
+            <form class="form-auth-small" [formGroup]="searchByNameForm">
+                <div class="row">
+                    <div class="col-sm-9 d-flex">
+                        <mat-form-field appearance="outline" style="margin-left: 16px" class="w-100 hide-hint mr-10">
+                            <input class="input-p-5" [(ngModel)]="searchLocationName" matInput
+                                placeholder="Enter Location Master Name" formControlName="name" [ngClass]="{
+                        'is-invalid': searchSubmitted && searchByNameForm.controls.name.errors
+                      }" (keydown.enter)="searchByName()" />
+                            <mat-icon matSuffix class="search-header-search-icon">
+                                <i class="pi pi-search icon-size"></i>
+                            </mat-icon>
+                        </mat-form-field>
+
+                        <button mat-button mat-flat-button color="primary" class="button-normal m-r-10"
+                            (click)="searchByName()">
+                            Search
+                        </button>
+                        <button mat-stroked-button matButton="outlined" class="button-normal"
+                            (click)="clearSearchForm()">
+                            Clear
+                        </button>
+                    </div>
+
+                    <div class="col-sm-3 search-div">
+                        <button mat-button mat-flat-button color="primary" (click)="openlocationDialog()"
+                            class="button-normal mr-10">
+                            Add Location
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </mat-card-content>
+    </mat-card>
+</div>
+
+<div class="container-fluid contain-flud">
+    <div class="row">
+        <!-- Location Master table start -->
+        <div class="col-md-12">
+            <mat-card class="cardWithShadow">
+                <mat-card-content class="mat-card-content-border">
+                    <div class="location-table-list">
+                        <div class="table-container">
+                            <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8 w-100">
+
+
+                                <!-- Location ID Column -->
+                                <ng-container matColumnDef="locationId">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title">
+                                        Location ID
+                                    </th>
+                                    <td mat-cell *matCellDef="let location" class="f-s-14">
+                                        {{ location.locationMasterId }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Name Column -->
+                                <ng-container matColumnDef="name">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title">
+                                        Name
+                                    </th>
+                                    <td mat-cell *matCellDef="let location" class="f-s-14 detailOnAnchorClick">
+                                        {{ location.name }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Identify Value Column -->
+                                <ng-container matColumnDef="identifyValue">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title">
+                                        Identify Value
+                                    </th>
+                                    <td mat-cell *matCellDef="let location" class="f-s-14">
+                                        {{ location.locationIdentifyValue }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Status Column -->
+                                @if (this.accessData.locationMaster.createUpdateAccess) {
+                                <ng-container matColumnDef="status">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">
+                                        Status
+                                    </th>
+                                    <td mat-cell *matCellDef="let location" class="f-s-14">
+                                        <mat-slide-toggle [checked]="location.status == 'Active' ? true : false"
+                                            (change)="changeStatus(location.name, location.status, location.mvnoId)"
+                                            color="primary">
+                                        </mat-slide-toggle>
+                                    </td>
+                                </ng-container>
+                                }
+
+                                <!-- Action Column -->
+                                @if (this.accessData.locationMaster.createUpdateAccess ||
+                                this.accessData.locationMaster.deleteAccess || editAccess) {
+                                <ng-container matColumnDef="action">
+                                    <th mat-header-cell *matHeaderCellDef stickyEnd class="table-header-title">
+                                        Action
+                                    </th>
+                                    <td mat-cell *matCellDef="let location" class="btnAction">
+                                        <a mat-icon-button matTooltip="edit" href="javascript:void(0)" matTooltip="View"
+                                            (click)="getLocationDetail(location.locationMasterId)">
+                                            <i class="pi pi-eye icon-size"></i>
+                                        </a>
+                                        @if (this.accessData.locationMaster.createUpdateAccess && editAccess) {
+                                        <a mat-icon-button href="javascript:void(0)" matTooltip="edit"
+                                            (click)="editById(location.locationMasterId, i, location.mvnoId)">
+                                            <i class="pi pi-pencil icon-size"></i>
+                                        </a>
+                                        }
+                                    </td>
+                                </ng-container>
+                                }
+
+                                <tr mat-header-row class="table-header-bg"
+                                    *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+                                <tr mat-row class="table-content-row" *matRowDef="let row; columns: displayedColumns">
+                                </tr>
+                            </table>
+
+                            <mat-paginator [length]="totalRecords" [pageSize]="itemsPerPage"
+                                [pageSizeOptions]="pageSizeOptions" showFirstLastButtons (page)="onPageChange($event)">
+                            </mat-paginator>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+        <!-- Location Master table end -->
+    </div>
+</div>
+
+<ng-template #locationDialog let-dialogRef="dialogRef">
+
+    <div class="dialog-container">
+        <!-- Header -->
+        <div class="dialog-header dialog-header-titleFont">
+            <span class="dialog-header-titleFont">{{ editMode ? "Update" : "Create" }} Location Master</span>
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="dialogRef.close()">
+                    <i class="pi pi-times f-s-15"></i>
+                </a>
+            </span>
+        </div>
+
+        <form [formGroup]="createForm" class="card-form mb-3">
+            <!-- Content -->
+            <div mat-dialog-content>
+                <div class="col-md-12">
+                    @if (!createAccess && !editMode) {
+                    <mat-card-content class="matcard-content">
+                        <div class="panel-body table-responsive">
+                            Sorry you have not privilege to create operation!
+                        </div>
+                    </mat-card-content>
+                    }
+                    @if (createAccess || (editMode && editAccess)) {
+                    <mat-card-content class="matcardContent">
+                        <div class="row g-2">
+                            <!-- MVNO Name (Conditional) -->
+                            @if (userId == superAdminId) {
+                            <div class="col-sm-6">
+                                <label for="mvnoName" class="inputLabel">Mvno Name*</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select id="mvnoName" class="input-p-5" placeholder="Select mvno"
+                                        formControlName="mvnoName" [disabled]="editMode" [ngClass]="{
+                                    'is-invalid': submitted && createForm.controls.mvnoName.errors
+                                }">
+                                        <mat-option *ngFor="let mvno of mvnoData" [value]="mvno.id">
+                                            {{ mvno.name }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error *ngIf="
+                                    (submitted || createForm.controls['mvnoName'].touched) &&
+                                    createForm.controls['mvnoName'].errors as errors
+                                ">
+                                        <span *ngIf="errors['required']">
+                                            Please select MVNO name.
+                                        </span>
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                            }
+
+                            <!-- Location Master Name -->
+                            <div class="col-sm-6">
+                                <label for="locationName" class="inputLabel">Location Master Name*</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <input id="locationName" matInput type="text"
+                                        placeholder="Enter Location Master Name" formControlName="name"
+                                        class="input-p-5" maxlength="250" [readonly]="editMode" [ngClass]="{
+                                    'is-invalid': submitted && createForm.controls.name.errors
+                                }" />
+                                    <mat-error *ngIf="
+                                    (submitted || createForm.controls['name'].touched) &&
+                                    createForm.controls['name'].errors as errors
+                                ">
+                                        <span *ngIf="errors['required']">
+                                            Please enter Location Master name.
+                                        </span>
+                                        <span *ngIf="errors['cannotContainSpace']">
+                                            White space are not allowed.
+                                        </span>
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Check Item -->
+                            <div class="col-sm-6">
+                                <label for="checkItem" class="inputLabel">Check Item</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <input id="checkItem" matInput type="text" placeholder="Enter Check Item"
+                                        formControlName="checkItem" class="input-p-5" maxlength="250" />
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Location Identify Attribute -->
+                            <div class="col-sm-6">
+                                <label for="locationIdentifyAttribute" class="inputLabel">Location Identify
+                                    Attribute</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <input id="locationIdentifyAttribute" matInput type="text"
+                                        placeholder="Enter Location Identify Attribute"
+                                        formControlName="locationIdentifyAttribute" class="input-p-5" maxlength="250" />
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Location Identify Value -->
+                            <div class="col-sm-6">
+                                <label for="locationIdentifyValue" class="inputLabel">Location Identify Value</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <input id="locationIdentifyValue" matInput type="text"
+                                        placeholder="Enter Location Identify Value"
+                                        formControlName="locationIdentifyValue" class="input-p-5" maxlength="250" />
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Status -->
+                            <div class="col-sm-12">
+                                <label for="statusSelect" class="inputLabel">Status*</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select id="statusSelect" class="input-p-5"
+                                        placeholder="Select Location Master Status" formControlName="status" [ngClass]="{
+                                    'is-invalid': submitted && createForm.controls.status.errors
+                                }">
+                                        <mat-option *ngFor="let option of status" [value]="option.label">
+                                            {{ option.label }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error *ngIf="
+                                    (submitted || createForm.controls['status'].touched) &&
+                                    createForm.controls['status'].errors as errors
+                                ">
+                                        <span *ngIf="errors['required']">
+                                            Please select status.
+                                        </span>
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Location Mac -->
+                            <div class="col-sm-12">
+                                <label for="locationMac" class="inputLabel">Location Mac</label>
+                                <div class="row align-items-center">
+                                    <div class="col-sm-8">
+                                        <mat-form-field appearance="outline" class="w-100">
+                                            <mat-select id="locationMac" class="input-p-5" placeholder="Location Mac"
+                                                [disabled]="true">
+                                                <!-- Options will be populated dynamically -->
+                                            </mat-select>
+                                        </mat-form-field>
+                                    </div>
+                                    <div
+                                        class="col-sm-4 d-flex align-items-center justify-content-start gap-2 adjusting">
+                                        <button mat-flat-button color="primary" type="button"
+                                            (click)="openlocationMacDialog()" class="button-normal">
+                                            ADD
+                                        </button>
+                                        <a mat-icon-button href="javascript:void(0)" color="primary"
+                                            class="addmarginleft" (click)="locationMacDetailsModelOpen()">
+                                            <i class="pi pi-eye icon-size"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </mat-card-content>
+                    }
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+                <button mat-button mat-flat-button color="primary" type="submit" id="submit" (click)="addConcurrent()"
+                    class="button-normal">
+                    {{ editMode ? "Update Location Master" : "Add Location Master" }}
+                </button>
+                <button mat-stroked-button matButton="outlined" type="button" color="primary" class="button-normal"
+                    (click)="dialogRef.close()">
+                    Cancel
+                </button>
+            </div>
+        </form>
+
+    </div>
+
+
+
+</ng-template>
+
+<ng-template #locationMacDialog let-dialogRef="dialogRef">
+    <div class="dialog-container">
+        <!-- Header -->
+        <div class="dialog-header dialog-header-titleFont">
+            <span class="dialog-header-titleFont">Location Mac Management</span>
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="dialogRef2.close()">
+                    <i class="pi pi-times f-s-15"></i>
+                </a>
+            </span>
+        </div>
+
+        <div mat-dialog-content class="location-mac-content">
+            <!-- Single Card Container -->
+            <mat-card class="cardWithShadow">
+                <mat-card-header>
+                    <mat-card-title class="font-900">Location Mac</mat-card-title>
+                </mat-card-header>
+
+                <mat-card-content>
+                    <!-- Form Section -->
+                    <div class="row p-5 addjustify-content" [formGroup]="locationMacForm">
+                        <!-- Identity Field -->
+                        <div class="col-md-4">
+                            <label class="inputLabel">Identity</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input id="identity" matInput type="text" placeholder="Enter Identity"
+                                    formControlName="identity" class="input-p-5" />
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Mac Field -->
+                        <div class="col-md-4">
+                            <label class="inputLabel">Mac*</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input id="mac" matInput type="text" placeholder="Enter Mac" formControlName="mac"
+                                    class="input-p-5" (keyup)="keypdown($event)" [ngClass]="{
+                                    'is-invalid': locationMacsubmitted && locationMacForm.controls.mac.errors
+                                }" />
+                                <mat-error *ngIf="locationMacsubmitted && locationMacForm.controls.mac.errors">
+                                    Mac is required.
+                                </mat-error>
+                                <mat-error
+                                    *ngIf="locationMacsubmitted && isMacExist && !locationMacForm.controls.mac.errors">
+                                    Mac already exist.
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+
+
+                        <!-- Add Button -->
+                        <div class="col-md-2">
+                            <button mat-flat-button color="primary" class="w-100 button-normal" type="button"
+                                style="margin-top:38px;" (click)="addLocationMacListField()">
+                                Add
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Data Table Section -->
+                    <mat-card-content>
+                        <div class="table-container">
+                            <table mat-table [dataSource]="locationMacDataSource" matSort
+                                class="mat-elevation-z8 w-100">
+
+                                <!-- Identity Column -->
+                                <ng-container matColumnDef="identity">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">
+                                        Identity
+                                    </th>
+                                    <td mat-cell *matCellDef="let element; let i = index">
+                                        <mat-form-field appearance="outline" class="w-100 m-t-10">
+                                            <input class="input-p-5" matInput placeholder="Identity" name="identity"
+                                                [value]="element.get('identity')?.value" disabled />
+                                        </mat-form-field>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Mac Column -->
+                                <ng-container matColumnDef="mac">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">
+                                        Mac
+                                    </th>
+                                    <td mat-cell *matCellDef="let element; let i = index">
+                                        <mat-form-field appearance="outline" class="w-100 m-t-10">
+                                            <input class="input-p-5" matInput placeholder="Mac" name="mac"
+                                                [value]="element.get('mac')?.value" disabled />
+                                        </mat-form-field>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Delete Column -->
+                                <ng-container matColumnDef="delete">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">
+                                        Delete
+                                    </th>
+                                    <td mat-cell *matCellDef="let element; let i = index" class="text-center">
+                                        <a mat-icon-button matTooltip="delete" href="javascript:void(0)"
+                                            class="addmargin" (click)="deleteLocationMapField(index)">
+                                            <i class="pi pi-trash icon-size"></i>
+                                        </a>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Header & Rows -->
+                                <tr mat-header-row *matHeaderRowDef="locationMacDisplayedColumns"></tr>
+                                <tr mat-row *matRowDef="let row; columns: locationMacDisplayedColumns"></tr>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        <mat-paginator #locationMacPaginator [length]="overChargeListtotalRecords"
+                            [pageSize]="overChargeListItemPerPage" [pageSizeOptions]="[5,10,20,50,100]" showFirstLastButtons
+                            (page)="onLocationMacPageChange($event)">
+                        </mat-paginator>
+                    </mat-card-content>
+
+                </mat-card-content>
+            </mat-card>
+        </div>
+
+        <!-- Actions -->
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+            <button mat-button mat-flat-button color="primary" type="button" (click)="saveLocationMacData()"
+                [disabled]="overLocationMacArray.controls.length == 0" class="button-normal">
+                Save
+            </button>
+            <button mat-stroked-button matButton="outlined" type="button" color="primary" class="button-normal"
+                (click)="dialogRef2.close()">
+                Close
+            </button>
+        </div>
+    </div>
+
+</ng-template>
+
+
+<ng-template #locationMacDetailsDialog let-dialogRef="dialogRef">
+
+    <div class="dialog-container">
+        <!-- Header -->
+        <div class="dialog-header dialog-header-titleFont">
+            <span class="dialog-header-titleFont">Location Mac Details</span>
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="dialogRef3.close()">
+                    <i class="pi pi-times f-s-15"></i>
+                </a>
+            </span>
+        </div>
+
+        <div mat-dialog-content class="location-mac-content">
+            <!-- Single Card Container -->
+            <mat-card class="cardWithShadow">
+                <mat-card-header>
+                    <mat-card-title class="font-900">Add Location Mac</mat-card-title>
+                </mat-card-header>
+
+                <mat-card-content>
+                    <!-- Table Section -->
+                    <div class="table-container">
+                        <table mat-table [dataSource]="locationMacDetailsDataSource" matSort
+                            class="mat-elevation-z8 w-100">
+
+                            <!-- Identity Column -->
+                            <ng-container matColumnDef="identity">
+                                <th mat-header-cell *matHeaderCellDef class="table-header-title" sticky>
+                                    Identity
+                                </th>
+                                <td mat-cell *matCellDef="let row" class="f-s-14">
+                                    {{ row.identity }}
+                                </td>
+                            </ng-container>
+
+                            <!-- Mac Column -->
+                            <ng-container matColumnDef="mac">
+                                <th mat-header-cell *matHeaderCellDef class="table-header-title" sticky>
+                                    Mac
+                                </th>
+                                <td mat-cell *matCellDef="let row" class="f-s-14">
+                                    {{ row.mac }}
+                                </td>
+                            </ng-container>
+
+                            <!-- Delete Column -->
+                            <ng-container matColumnDef="delete">
+                                <th mat-header-cell *matHeaderCellDef class="table-header-title" stickyEnd>
+                                    Delete
+                                </th>
+                                <td mat-cell *matCellDef="let row; let i = index">
+                                    <a mat-icon-button matTooltip="delete" href="javascript:void(0)"
+                                        (click)="deleteLocationMacDetail(i)">
+                                        <i class="pi pi-trash icon-size"></i>
+                                    </a>
+                                </td>
+                            </ng-container>
+
+                            <!-- Header & Rows -->
+                            <tr mat-header-row class="table-header-bg"
+                                *matHeaderRowDef="locationMacDetailsDisplayedColumns; sticky: true"></tr>
+                            <tr mat-row class="table-content-row"
+                                *matRowDef="let row; columns: locationMacDetailsDisplayedColumns"></tr>
+                        </table>
+
+                        <!-- Pagination -->
+                        <mat-paginator #locationMacDetailsPaginator [length]="locationMacDetailsTotalRecords"
+                            [pageSize]="locationMacDetailsItemPerPage" [pageSizeOptions]="pageSizeOptions"
+                            showFirstLastButtons (page)="onLocationMacDetailsPageChange($event)">
+                        </mat-paginator>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+
+        <!-- Actions -->
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+            <button mat-stroked-button matButton="outlined" type="button" color="primary" class="button-normal"
+                (click)="dialogRef3.close()">
+                Close
+            </button>
+        </div>
+    </div>
+
+</ng-template>
+
+<ng-template #locationDialogContent let-dialogRef="dialogRef">
+
+    <div class="dialog-container">
+        <!-- Header -->
+        <div class="dialog-header">
+            Location Details
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="dialogRef.close()">
+                    <i class="pi pi-times f-s-15"></i>
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <div mat-dialog-content>
+            <div class="col-md-12">
+                <!-- Location Details Card -->
+                <mat-card class="cardWithShadow">
+                    <div class="dialog-header">Location Information</div>
+                    <mat-card-content>
+                        <div class="row">
+                            <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                                <div class="field">
+                                    <span class="label-text">Name</span>
+                                    <span class="colon">:</span>
+                                    <span class="m-l-10">{{ this.showLocationDetails.name }}</span>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                                <div class="field">
+                                    <span class="label-text">Status</span>
+                                    <span class="colon">:</span>
+                                    <span class="m-l-10">{{ this.showLocationDetails.status }}</span>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                                <div class="field">
+                                    <span class="label-text">Check Item</span>
+                                    <span class="colon">:</span>
+                                    <span class="m-l-10">{{ this.showLocationDetails.checkItem }}</span>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                                <div class="field">
+                                    <span class="label-text">Location Identify Attribute</span>
+                                    <span class="colon">:</span>
+                                    <span class="m-l-10">{{ this.showLocationDetails.locationIdentifyAttribute }}</span>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                                <div class="field">
+                                    <span class="label-text">Location Identify Value</span>
+                                    <span class="colon">:</span>
+                                    <span class="m-l-10">{{ this.showLocationDetails.locationIdentifyValue }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+            <button mat-stroked-button type="button" color="primary" class="button-normal"
+                (click)="dialogRef.close()">Close</button>
+        </div>
+    </div>
+
+</ng-template>

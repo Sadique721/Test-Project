@@ -1,0 +1,1686 @@
+<!-- country card header search part start -->
+<div class="row header-row">
+    <mat-card class="cardWithShadow w-100">
+        <mat-card-content class="mat-card-content-border">
+            <div class="row">
+                <div class="col-sm-8 d-flex">
+                    <mat-form-field appearance="outline" style="margin-left: 16px" class="w-100 hide-hint mr-10">
+                        <input class="input-p-5" [(ngModel)]="searchName" matInput placeholder="Search {{ team }}"
+                            (keydown.enter)="search()" />
+                        <mat-icon matSuffix class="search-header-search-icon">
+                            <i class="pi pi-search icon-size"></i>
+                        </mat-icon>
+                    </mat-form-field>
+
+                    <button mat-button mat-flat-button color="primary" class="button-normal m-r-10" (click)="search()">
+                        Search
+                    </button>
+                    <button mat-stroked-button matButton="outlined" class="button-normal" (click)="clearSearch()">
+                        Clear
+                    </button>
+                </div>
+
+                <div class="col-sm-4 search-div">
+                    <button mat-button mat-flat-button color="primary" (click)="createMapping(workflowDialog)"
+                        class="button-normal mr-10">
+                        Add Workflow Management
+                    </button>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+<!-- country card header search part end ->
+
+<CERATE  Dialog Template -->
+<!-- new code -->
+<ng-template #workflowDialog let-dialogRef="dialogRef">
+    <div class="dialog-container">
+        <!-- Dialog Header -->
+        <div class="dialog-header">
+            {{ isEdit ? "Update" : "Create" }} Workflow Management
+            <span>
+                <button mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+
+                </button>
+            </span>
+        </div>
+
+        <!-- Dialog Content -->
+        <ng-container *ngIf="!createAccess && !isEdit">
+            <mat-card-content class="matcard-content">
+                <div class="panel-body table-responsive">
+                    Sorry you have not privilege to create operation!
+                </div>
+            </mat-card-content>
+        </ng-container>
+        @if (createAccess || (isEdit && editAccess)) {
+        <div mat-dialog-content>
+
+            <form class="card-form mb-3" [formGroup]="teamHierarchyForm">
+                <!-- Workflow Information -->
+                <mat-card class="mb-4">
+                    <mat-card-header>
+                        <mat-card-title>Workflow Management Information</mat-card-title>
+                    </mat-card-header>
+
+                    <mat-card-content class="matcardContent">
+                        <div class="row g-3">
+                            <!-- Workflow Name -->
+                            <div class="col-md-6">
+                                <label for="hierarchyName" class="inputLabel">Workflow Management Name*</label>
+                                <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                    <input id="hierarchyName" class="input-p-5" matInput
+                                        placeholder="Enter Workflow Management name" formControlName="hierarchyName"
+                                        [ngClass]="{ 'is-invalid': submitted && stateFormGroup.controls.name.errors }"
+                                        maxLength="250" />
+                                    <mat-error
+                                        *ngIf="submittedTH && teamHierarchyForm.controls.hierarchyName.errors?.required">
+                                        Workflow Management Name is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Event -->
+                            <div class="col-md-6 mb-4">
+                                <label for="eventName" class="inputLabel">Event*</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select id="eventName" class="input-p-5" placeholder="Event"
+                                        formControlName="eventName" (selectionChange)="getTeamevent($event)"
+                                        [ngClass]="{ 'is-invalid': submitted && stateFormGroup.controls.status.errors }"
+                                        maxLength="250">
+                                        <mat-option *ngFor="let event of eventData" [value]="event.value">
+                                            {{ event.text }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error
+                                        *ngIf="submittedTH && teamHierarchyForm.controls.eventName.errors?.required">
+                                        Event is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+            </form>
+            <mat-card>
+                <mat-card-header>
+                    <mat-card-title>Teams</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="row">
+                        <!-- Team Dropdown -->
+                        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12"><label class="inputLabel">Teams *</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-select [(ngModel)]="teamValue" placeholder="Select a Team"
+                                    [ngClass]="{ 'is-invalid': teamSubmitted && !teamValue }">
+                                    <mat-option *ngFor="let team of teamListData" [value]="team.id">
+                                        {{ team.name }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+
+                            <div *ngIf="teamSubmitted && !teamValue" class="errorWrap text-danger">
+                                <div class="error text-danger">Team is required.</div>
+                            </div>
+                        </div>
+
+                        <!-- Action Dropdown -->
+                        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12"><label class="inputLabel">Action</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-select [(ngModel)]="teamHerAction" [disabled]="!isWorkFlowAction"
+                                    placeholder="Select a Action" (selectionChange)="removeWorkFlowActionData($event)">
+                                    <mat-option *ngFor="let action of eventActionData" [value]="action.value">
+                                        {{ action.text }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- TAT Matrics Dropdown -->
+                        <div *ngIf="ifTATMetricsShow" class="col-lg-2 col-md-2 col-sm-2 col-xs-12"><label
+                                class="inputLabel">TAT
+                                Matrics</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-select [(ngModel)]="tatMatricesID" placeholder="Select a TAT Matrics">
+                                    <mat-option *ngFor="let tat of commondropdownService.activeTatMatricsData"
+                                        [value]="tat.id">
+                                        {{ tat.name }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12">
+                            <label class="inputLabel">Add a Condition</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input matInput [value]="teamcondition" placeholder="Add a condition" readonly
+                                    (click)="openConditionModel()" [disabled]="!isWorkFlowAction"
+                                    style="cursor: pointer" />
+                                <button mat-icon-button matSuffix (click)="openConditionModel()"
+                                    [disabled]="!isWorkFlowAction" matTooltip="Add a Condition">
+                                  <img src="assets/img/DashboardIcons/Add.svg">
+                                </button>
+                            </mat-form-field>
+                        </div>
+
+
+                        <!-- Add Condition Input Button -->
+                        <!-- <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12">
+                            <label class="inputLabel">Add a
+                                condition</label>
+                            <button mat-stroked-button color="primary" class="w-100" (click)="openConditionModel()">
+                                <mat-icon>add_circle</mat-icon>
+                                <span *ngIf="!teamcondition">Add a condition</span>
+                                <span *ngIf="teamcondition">{{ teamcondition }}</span>
+                            </button> -->
+
+                        <!-- <button mat-button [disabled]="!isWorkFlowAction" (click)="openConditionModel()"
+                                title="Add a Condition" data-target="#teamConditionModal" data-toggle="modal"
+                                data-backdrop="static" data-keyboard="false" style="width: 100%">
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <input matInput [(ngModel)]="teamcondition" readonly />
+                                </mat-form-field>
+                            </button> -->
+                        <!-- </div> -->
+
+                        <!-- Auto Assign Dropdown -->
+                        <div *ngIf="isAutoAssignShow && teamHerAction" class="col-lg-2 col-md-2 col-sm-1 col-xs-12">
+                            <label class="inputLabel">Auto Assign</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-select [(ngModel)]="isAutoAssign">
+                                    <mat-option [value]="true">Yes</mat-option>
+                                    <mat-option [value]="false">No</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Auto Approve Dropdown -->
+                        <div *ngIf="isAutoAssignShow && teamHerAction" class="col-lg-2 col-md-2 col-sm-2 col-xs-12">
+                            <label class="inputLabel">Auto Approve</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-select [(ngModel)]="isAutoApprove">
+                                    <mat-option [value]="true">Yes</mat-option>
+                                    <mat-option [value]="false">No</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+
+                        <!-- Add Button -->
+                        <div class="col-lg-1 col-md-1 col-sm-1 col-xs-12" style="margin-top: 37px;">
+                            <button mat-button mat-flat-button color="primary" (click)="onAddAttribute()">
+                                  Add </button>
+                        </div>
+                    </div>
+
+                    <!-- Table Section -->
+                    <div class="table-responsive tableAddEditScrollHeight example-container">
+                        <table mat-table #teamsTable [dataSource]="teams.controls" class="w-100 table-layout-fixed">
+                            <ng-container matColumnDef="approval">
+                                <th mat-header-cell *matHeaderCellDef>Approval</th>
+                                <td mat-cell *matCellDef="let row; let i = index">Approval {{ i + 1 }}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="team">
+                                <th mat-header-cell *matHeaderCellDef>Teams *</th>
+                                <td mat-cell *matCellDef="let row">
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select [formControl]="row.get('teamId')">
+                                            <mat-option *ngFor="let team of teamListData" [value]="team.id">{{ team.name
+                                                }}</mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="action">
+                                <th mat-header-cell *matHeaderCellDef>Action</th>
+                                <td mat-cell *matCellDef="let row">
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select [formControl]="row.get('teamAction')" placeholder="Select a Action"
+                                            [disabled]="!isWorkFlowAction">
+                                            <mat-option *ngFor="let action of eventActionData" [value]="action.value">
+                                                {{ action.text }}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </td>
+                            </ng-container>
+
+                            <ng-container *ngIf="ifTATMetricsShow" matColumnDef="tat">
+                                <th mat-header-cell *matHeaderCellDef>TAT Matrics</th>
+                                <td mat-cell *matCellDef="let row">
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select [formControl]="row.get('tat_id')"
+                                            placeholder="Select a TAT Matrics">
+                                            <mat-option *ngFor="let tat of commondropdownService.activeTatMatricsData"
+                                                [value]="tat.id">
+                                                {{ tat.name }}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="condition">
+                                <th mat-header-cell *matHeaderCellDef>Condition</th>
+                                <td mat-cell *matCellDef="let row; let i = index">
+                                    <button mat-stroked-button [disabled]="!isWorkFlowAction" color="accent"
+                                        class="w-100" (click)="defultAddTeamCondition(i, row.value.id)" style="
+                                                                display: flex;
+                                                                justify-content: start;
+                                                                align-items: center;
+                                                                white-space: nowrap;
+                                                                overflow: hidden;
+                                                                text-overflow: ellipsis;
+                                                                max-width: 100%;
+                                                              ">
+                                        <mat-icon>rule</mat-icon>
+                                        <span *ngIf="!row.get('teamcondition')?.value">Add a condition</span>
+                                        <span *ngIf="row.get('teamcondition')?.value">
+                                            {{ row.get("teamcondition")?.value }}
+                                        </span>
+                                    </button>
+
+                                </td>
+                            </ng-container>
+
+                            <ng-container *ngIf="isAutoAssignShow" matColumnDef="autoAssign">
+                                <th mat-header-cell *matHeaderCellDef>Workflow Auto Assign</th>
+                                <td mat-cell *matCellDef="let row">
+                                    <mat-checkbox [formControl]="row.get('isAutoAssign')"
+                                        [disabled]="!row.get('teamAction')?.value"
+                                        (change)="row.get('isAutoAssign')?.setValue($event.checked)"></mat-checkbox>
+                                </td>
+                            </ng-container>
+
+                            <ng-container *ngIf="isAutoAssignShow" matColumnDef="autoApprove">
+                                <th mat-header-cell *matHeaderCellDef>Workflow Auto Approve</th>
+                                <td mat-cell *matCellDef="let row">
+                                    <mat-checkbox [formControl]="row.get('isAutoApprove')"
+                                        [disabled]="!row.get('teamAction')?.value"
+                                        (change)="row.get('isAutoApprove')?.setValue($event.checked)"></mat-checkbox>
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="delete">
+                                <th mat-header-cell *matHeaderCellDef>Delete</th>
+                                <td mat-cell *matCellDef="let row; let i = index">
+                                    <button mat-icon-button color="warn" *ngIf="teams.controls.length > 1"
+                                        (click)="deleteConfirmAttribute(i, row.value)">
+                                        <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                    </button>
+                                </td>
+                            </ng-container>
+
+                            <tr mat-header-row *matHeaderRowDef="isplayedColumns"></tr>
+                            <tr mat-row *matRowDef="let row; columns: isplayedColumns"></tr>
+                        </table>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+
+
+
+        </div>
+        }
+        @if (createAccess || (isEdit && editAccess)) {
+        <!-- Dialog Actions -->
+        <div mat-dialog-actions class="dialog-action-adjust">
+            <button mat-flat-button color="primary" class="button-normal m-r-10" (click)="addEditTeamHierarchy(dialogRef)">
+                {{ isEdit ? "Update" : "Save" }}
+            </button>
+             <button mat-stroked-button (click)="dialogRef.close()">Cancel</button>
+        </div>
+        }
+    </div>
+</ng-template>
+
+
+<!-- New List View starts -->
+<div class="container-fluid contain-flud">
+    <div class="row">
+        <div class="col-md-12">
+            <mat-card class="cardWithShadow">
+                <mat-card-content class="mat-card-content-border">
+                    <div class="country-table-list">
+                        <div class="table-container">
+                            <table mat-table [dataSource]="teamhierarchyData.slice(
+                                  currentPage * itemsPerPage,
+                                  currentPage * itemsPerPage +
+                                    itemsPerPage
+                                )
+                              " matSort class="mat-elevation-z8 w-100">
+                                <ng-container matColumnDef="id">
+                                    <!-- Header cell -->
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">ID</th>
+
+                                    <!-- Data cell -->
+                                    <td mat-cell *matCellDef="let team">
+                                        {{ team.id }}
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="workflow_name">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Workflow Name
+                                    </th>
+
+                                    <td mat-cell *matCellDef="let team" class="f-s-14">
+                                        {{ team.hierarchyName }}
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="Action">
+                                    <th mat-header-cell *matHeaderCellDef stickyEnd class="table-header-title">
+                                        Action
+                                    </th>
+                                    <!-- action page -->
+                                    <td mat-cell *matCellDef="let team">
+
+
+                                        <a mat-icon-button matTooltip="view" href="javascript:void(0)"
+                                            (click)="detailMapping(team.id, team.eventName)">
+                                            <img src="assets/img/DashboardIcons/eye-svgrepo-com (1) 1.svg">
+                                        </a>
+                                        <a mat-icon-button href="javascript:void(0)" [matTooltip]="'Edit'"
+                                            (click)="editById(team.id, workflowDialog)">
+                                            <img src="assets/img/DashboardIcons/Edit.svg">
+                                        </a>
+                                        <a mat-icon-button href="javascript:void(0)" (click)="deleteConfirmon(team)"
+                                            [matTooltip]="'Delete'">
+                                            <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                        </a>
+                                        <a mat-icon-button href="javascript:void(0)"
+                                            (click)="teamHierarchyModalOpen(team.teamsSet)" title="Workflow Management"
+                                            [matTooltip]="'Map'">
+                                            <img src="assets/img/DashboardIcons/Diagram.svg">
+                                        </a>
+                                    </td>
+                                </ng-container>
+                                <tr mat-header-row class="table-header-bg"
+                                    *matHeaderRowDef="getDisplayedPlanDetailsColumns(); sticky: true"></tr>
+                                <tr mat-row class="table-content-row"
+                                    *matRowDef="let row; columns: getDisplayedPlanDetailsColumns()">
+                                </tr>
+                            </table>
+                            <mat-paginator [length]="teamhierarchyData.length" [pageSize]="itemsPerPage"
+                                [pageIndex]="currentPage" [pageSizeOptions]="[5,10,20,50,100]" showFirstLastButtons (page)="
+                                                              currentPage = $event.pageIndex;
+                                                              itemsPerPage = $event.pageSize
+                                                            ">
+                            </mat-paginator>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </div>
+</div>
+
+<ng-template #workflowManagement>
+    <div class="dialog-container" style="width: 900px; max-width: 90vw; max-height: 90vh; overflow-y: auto">
+        <div class="dialog-header">
+            Workflow Management
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="closeTeamHierarchy()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+            <div *ngFor="let data of teamHierarchyData | keyvalue; let last = last">
+                <div style="text-align: center">
+                    <mat-card class="mat-elevation-z4" style="display: inline-block; min-width: 200px; padding: 10px;">
+                        <mat-card-content>
+                            {{ data.value }}
+                        </mat-card-content>
+                    </mat-card>
+
+                    <br />
+
+                    <ng-container *ngIf="!last">
+                        <mat-icon style="font-size: 30px; color: #666;">arrow_downward</mat-icon>
+                    </ng-container>
+
+                    <br />
+                </div>
+            </div>
+
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #teamConditionDialog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <!-- Header -->
+        <div class="dialog-header dialog-title">
+            Team Condition
+            <span>
+                <a mat-icon-button (click)="onCancel(dialogRef)">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <div mat-dialog-content>
+            <div class="table-responsive tableAddEditScrollHeight example-container">
+                <table mat-table #teamConditiontable [dataSource]="teamConditionArray.controls" class="w-100">
+                    <!-- Field Column -->
+                    <ng-container matColumnDef="field">
+                        <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Field</th>
+                        <td mat-cell *matCellDef="let row; let i = index">
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-select class="input-p-5" placeholder="Enter a Field"
+                                    [formControl]="row.get('field')">
+                                    <mat-option *ngFor="let field of evenCatagorytData" [value]="field.value">
+                                        {{ field.text }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </td>
+                    </ng-container>
+
+                    <!-- Operator Column -->
+                    <ng-container matColumnDef="operator">
+                        <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Operator</th>
+                        <td mat-cell *matCellDef="let row">
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-select class="input-p-5" placeholder="Select Operator"
+                                    [formControl]="row.get('operator')">
+                                    <mat-option *ngFor="let op of operatorList" [value]="op.value">
+                                        {{ op.label }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </td>
+                    </ng-container>
+
+                    <!-- Value Column -->
+                    <ng-container matColumnDef="value">
+                        <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Value</th>
+                        <td mat-cell *matCellDef="let row">
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input matInput class="input-p-5" placeholder="Enter a Value"
+                                    [formControl]="row.get('value')" />
+                            </mat-form-field>
+                        </td>
+                    </ng-container>
+
+                    <!-- Condition Column -->
+                    <ng-container matColumnDef="condition">
+                        <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Condition</th>
+                        <td mat-cell *matCellDef="let row; let i = index">
+                            <ng-container *ngIf="conditionDataEnableDisble[i]">
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select class="input-p-5" placeholder="Select a Condition"
+                                        [formControl]="row.get('condition')" (selectionChange)="onkeyCondition($event)">
+                                        <mat-option *ngFor="let cond of AndOrDropdown" [value]="cond.value">
+                                            {{ cond.label }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </ng-container>
+                        </td>
+                    </ng-container>
+
+                    <!-- Delete Column -->
+                    <ng-container matColumnDef="delete">
+                        <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef style="width: 10%">
+                            <button mat-button mat-flat-button color="primary" (click)="onConditionAddAttribute()">
+                                Add
+                            </button>
+                        </th>
+                        <td mat-cell *matCellDef="let row; let i = index">
+                            <a mat-icon-button href="javascript:void(0)" *ngIf="teamConditionArray.length > 1"
+                                (click)="deleteTeamCondition(i, row.value)">
+                                <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                            </a>
+                        </td>
+                    </ng-container>
+
+                    <!-- Header and Row Definitions -->
+                    <tr mat-header-row *matHeaderRowDef="dispayviewTat; sticky: true"></tr>
+                    <tr mat-row *matRowDef="let row; columns: dispayviewTat"></tr>
+                </table>
+            </div>
+            <!-- Error Messages -->
+            <div *ngIf="!teamConditionArray.valid || errormsgCondition" style="margin-top: 5px">
+                <div class="text-danger">
+                    <ng-container *ngIf="!teamConditionArray.valid">Please Enter Details.</ng-container>
+                    <ng-container *ngIf="teamConditionArray.valid && errormsgCondition">{{
+                        errormsgCondition
+                        }}</ng-container>
+                </div>
+            </div>
+
+            <div class="modal-footer" style="display: flex; justify-content: flex-end">
+                <button  mat-flat-button color="primary" class="button-normal m-r-10" (click)="saveConditionData(dialogRef)"
+                    [disabled]="!teamConditionArray.valid">
+                    Save
+                </button>
+
+                <button mat-stroked-button matButton="outlined" color="primary" (click)="onCancel(dialogRef)">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #confirmDialog let-data>
+    <div class="dialog-container">
+        <div class="dialog-header dialog-header-titleFont">
+            {{ data.title || "Delete Confirmation" }}
+            <span class="w-h-18">
+                <a mat-icon-button href="javascript:void(0)" mat-dialog-close="false">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+            <p class="dialog-description">{{ data.description }}</p>
+
+            <div mat-dialog-actions class="p-0">
+                <button mat-flat-button type="button" class="primary" [mat-dialog-close]="true">
+                    {{ data.yesLabel || "Confirm" }}
+                </button>
+                <button mat-stroked-button matButton="outlined" color="primary" mat-dialog-close="false">
+                    {{ data.noLabel || "Cancel" }}
+                </button>
+            </div>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #detailsDialog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <!-- Header -->
+        <div class="dialog-header dialog-title">
+            Team Hierarchy Details
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <div mat-dialog-content>
+
+
+            <!-- Basic Details Card -->
+            <mat-card class="mat-elevation-z4 mb-4">
+                <mat-card-header>
+                    <mat-card-title>Basic Details</mat-card-title>
+                </mat-card-header> 
+
+                <mat-card-content>
+                    <div class="row">
+                        <div class="col-lg-4 col-md-4 dataGroup">
+                             <span class="label-text">Name </span>
+                               <span class="colon">:</span>
+                            <span class="m-l-10">{{ teamHirerarchyDetailData.hierarchyName }}</span>
+                        </div>
+                        <div class="col-lg-4 col-md-4 dataGroup">
+                             <span class="label-text">Event Name </span>
+                              <span class="colon">:</span>
+                            <span class="m-l-10">{{ teamHirerarchyDetailData.eventName }}</span>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+
+            <!-- Teams Details Card -->
+            <mat-card class="mat-elevation-z4">
+                <mat-card-header>
+                    <mat-card-title>Teams Details</mat-card-title>
+                </mat-card-header>
+
+                <mat-card-content class="table-responsive">
+                    <table mat-table [dataSource]="teamHirerarchyDetailData.teamHierarchyMappingList"
+                        class="mat-elevation-z2 w-100">
+
+                        <!-- Approval Column -->
+                        <ng-container matColumnDef="approval">
+                            <th mat-header-cell *matHeaderCellDef>Approval</th>
+                            <td mat-cell *matCellDef="let team; let i = index">Approval {{ i + 1 }}</td>
+                        </ng-container>
+
+                        <!-- Teams Column -->
+                        <ng-container matColumnDef="teamName">
+                            <th mat-header-cell *matHeaderCellDef>Teams</th>
+                            <td mat-cell *matCellDef="let team">{{ team.teamName }}</td>
+                        </ng-container>
+
+                        <!-- Action Column -->
+                        <ng-container matColumnDef="action">
+                            <th mat-header-cell *matHeaderCellDef>Action</th>
+                            <td mat-cell *matCellDef="let team">
+                                <ng-container *ngIf="team.teamAction; else noAction">
+                                    {{ team.teamActionName }}
+                                </ng-container>
+                                <ng-template #noAction>-</ng-template>
+                            </td>
+                        </ng-container>
+
+                        <!-- Condition Column -->
+                        <ng-container matColumnDef="condition">
+                            <th mat-header-cell *matHeaderCellDef>Condition</th>
+                            <td mat-cell *matCellDef="let team; let i = index">
+                                <ng-container *ngIf="showTeamConditionData[i]?.condition; else noCondition">
+                                    {{ showTeamConditionData[i].condition }}
+                                </ng-container>
+                                <ng-template #noCondition>-</ng-template>
+                            </td>
+                        </ng-container>
+
+                        <!-- Header & Rows -->
+                        <tr mat-header-row *matHeaderRowDef="['approval', 'teamName', 'action', 'condition']"></tr>
+                        <tr mat-row *matRowDef="let row; columns: ['approval', 'teamName', 'action', 'condition']"></tr>
+
+                    </table>
+                </mat-card-content>
+            </mat-card>
+
+
+
+        </div>
+
+        <div class="dialog-action-adjust d-flex justify-content-end">
+            <button mat-stroked-button mat-dialog-close>Close</button>
+        </div>
+    </div>
+</ng-template>
+<!-- workflow Management Dialog -->
+<!-- <p-dialog header="Workflow Management" [(visible)]="teamHierarchyModal" [style]="{ width: '40%' }" [modal]="true"
+    [responsive]="true" [draggable]="false" [closable]="true">
+    <div class="modal-body">
+        @for (data of teamHierarchyData | keyvalue; track data; let last = $last) {
+        <div style="text-align: center">
+            <p-card>{{ data.value }}</p-card>
+            <br />
+            @if (!last) {
+            <i style="font-size: 30px !important" class="icon-submenu paddingmenuIcon lnr lnr-arrow-down"></i>
+            }
+            <br />
+        </div>
+        }
+       
+    </div>
+</p-dialog> -->
+<!-- workflow Management Dialog -->
+<!-- New List View ends -->
+<!-- END DIALOG BOX -->
+
+<!-- Icon Button to open dialog -->
+
+<!-- Angular Material Dialog -->
+<!-- Button to open dialog -->
+
+<!-- ng-template for the dialog -->
+<!-- Example: inside a row where "team" is available -->
+
+<!-- ng-template wrapping the PrimeNG dialog -->
+<!-- Button that opens dialog -->
+
+<!-- Dialog -->
+
+<!--OLD CODE ->
+<div class="row">
+  <div class="col-md-12">
+    <div class="panel top">
+      <div class="panel-heading">
+        <h3 class="panel-title">Workflow Management</h3>
+        <div class="right">
+          <button
+            type="button"
+            class="btn-toggle-collapse"
+            data-toggle="collapse"
+            data-target="#searchTeamHirerarchy"
+            aria-expanded="false"
+            aria-controls="searchTeamHirerarchy"
+          >
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+      <div id="searchTeamHirerarchy" class="panel-collapse collapse in">
+        @if (searchView) {
+          <div class="panel-body">
+            <div class="row">
+              <div class="col-lg-3 col-md-3">
+                <input
+                  type="text"
+                  [(ngModel)]="searchName"
+                  class="form-control"
+                  placeholder="Enter Workflow Management Name"
+                  (keydown.enter)="search()"
+                />
+              </div>
+              <div class="col-lg-3 col-md-4 marginTopSearchBtn">
+                <button type="button" class="btn btn-primary" id="searchbtn" (click)="search()">
+                  <i class="fa fa-search"></i>
+                  Search
+                </button>
+                <button type="reset" class="btn btn-default" id="searchbtn" (click)="clearSearch()">
+                   <img src="assets/img/DashboardIcons/Refresh.svg" />
+                  Clear
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+
+        <div class="panel-body no-padding panel-udata">
+          @if (createAccess) {
+            <div class="col-md-6 pcol">
+              <div class="dbox">
+                <a class="curson_pointer" (click)="createMapping()">
+                  <img src="../../../assets/img/i01.png" style="width: 32px" />
+                  <h5>Create Workflow Management</h5>
+                </a>
+              </div>
+            </div>
+          }
+          <div class="col-md-6 pcol">
+            <div class="dbox">
+              <a class="curson_pointer" (click)="listMapping()">
+                <img src="../../../assets/img/i01.png" style="width: 32px" />
+                <h5>Search Workflow Management</h5>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <div class="row">
+    @if (hierarchyListShow) {
+      <div class="col-md-12">
+        <!-- Data Table ->
+        <div class="panel">
+          <div class="panel-heading">
+            <h3 class="panel-title">Workflow</h3>
+            <div class="right">
+              <button
+                type="button"
+                class="btn-toggle-collapse"
+                data-toggle="collapse"
+                data-target="#listteam"
+                aria-expanded="false"
+                aria-controls="listteam"
+                >
+                <i class="fa fa-minus-circle"></i>
+              </button>
+            </div>
+          </div>
+          <div id="listteam" class="panel-collapse collapse in">
+            <div class="panel-body table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Workflow Name</th>
+                    @if (editAccess || deleteAccess) {
+                      <th>Action</th>
+                    }
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (
+                    team of teamhierarchyData //
+                    | paginate
+                    : {
+                    id: 'listing_teamdata',
+                    itemsPerPage: itemsPerPage,
+                    currentPage: currentPage,
+                    totalItems: totalRecords
+                    }; track
+                    team; let i = $index) {
+                    <tr
+                      >
+                      <td style="padding-left: 8px">
+                        <a
+                          href="javacript:void(0)"
+                          style="color: #f7941e"
+                          (click)="detailMapping(team.id, team.eventName)"
+                          >
+                          {{ team.hierarchyName }}
+                        </a>
+                      </td>
+                      @if (editAccess || deleteAccess) {
+                        <td class="btnAction">
+                          @if (editAccess) {
+                            <a
+                              type="button"
+                              (click)="editById(team.id)"
+                              class="curson_pointer"
+                              >
+                            <img src="assets/img/DashboardIcons/Edit.svg" >
+                            </a>
+                          }
+                          @if (deleteAccess) {
+                            <a (click)="deleteConfirmon(team)" class="curson_pointer">
+                               <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                            </a>
+                          }
+                          <a
+                            href="javascript:void(0)"
+                            (click)="teamHierarchyModalOpen(team.teamsSet)"
+                            title="Workflow Management"
+                            >
+                            <img style="width: 30px" src="assets/img/diagram.png" />
+                          </a>
+                        </td>
+                      }
+                    </tr>
+                  }
+                </tbody>
+              </table>
+              <br />
+              <div class="pagination_Dropdown">
+                <pagination-controls
+                  id="listing_teamdata"
+                  [maxSize]="10"
+                  [directionLinks]="true"
+                  previousLabel=""
+                  nextLabel=""
+                  (pageChange)="pageChanged($event)"
+                ></pagination-controls>
+                <div id="itemPerPageDropdown">
+                  <p-dropdown
+                    [options]="pageLimitOptions"
+                    optionLabel="value"
+                    optionValue="value"
+                    (onChange)="TotalItemPerPage($event)"
+                  ></p-dropdown>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- END Data Table ->
+      </div>
+    }
+    @if (createView) {
+      <div class="col-md-12">
+        <div class="panel">
+          <div class="panel-heading">
+            <h3 class="panel-title">{{ isEdit ? "Update" : "Create" }} Workflow Management</h3>
+            <div class="right">
+              <button
+                type="button"
+                class="btn-toggle-collapse"
+                data-toggle="collapse"
+                data-target="#createteamHierarchy"
+                aria-expanded="false"
+                aria-controls="createteamHierarchy"
+                >
+                <i class="fa fa-minus-circle"></i>
+              </button>
+            </div>
+          </div>
+          <div id="createteamHierarchy" class="panel-collapse collapse in">
+            <div class="panel-body">
+              <form [formGroup]="teamHierarchyForm">
+                <!--   TeamHierarchy Information  ->
+                <fieldset style="margin-top: 0px">
+                  <legend>Workflow Management Information</legend>
+                  <div class="boxWhite">
+                    <div class="row">
+                      <div class="col-lg-4 col-md-4 col-sm-4 col-12">
+                        <label>Workflow Management Name *</label>
+                        <input
+                          id="name"
+                          type="text"
+                          class="form-control"
+                          placeholder="Enter Workflow Management Name"
+                          formControlName="hierarchyName"
+                      [ngClass]="{
+                        'is-invalid': submittedTH && teamHierarchyForm.controls.hierarchyName.errors
+                      }"
+                          />
+                          @if (submittedTH && teamHierarchyForm.controls.hierarchyName.errors) {
+                            <div
+                              class="errorWrap text-danger"
+                              >
+                              @if (
+                                submittedTH && teamHierarchyForm.controls.hierarchyName.errors.required
+                                ) {
+                                <div
+                                  class="error text-danger"
+                                  >
+                                  Workflow Management Name is required.
+                                </div>
+                              }
+                            </div>
+                          }
+                          <br />
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-4 col-12">
+                          <label>Event *</label>
+                          <p-dropdown
+                            [options]="eventData"
+                            [filter]="true"
+                            filterBy="text"
+                            optionValue="value"
+                            optionLabel="text"
+                            placeholder="Select a Event"
+                            formControlName="eventName"
+                            (onChange)="getTeamevent($event)"
+                            [disabled]="isEdit"
+                      [ngClass]="{
+                        'is-invalid': submittedTH && teamHierarchyForm.controls.eventName.errors
+                      }"
+                          ></p-dropdown>
+                          @if (submittedTH && teamHierarchyForm.controls.eventName.errors) {
+                            <div
+                              class="errorWrap text-danger"
+                              >
+                              @if (submittedTH && teamHierarchyForm.controls.eventName.errors.required) {
+                                <div
+                                  class="error text-danger"
+                                  >
+                                  Event is required.
+                                </div>
+                              }
+                            </div>
+                          }
+                          <br />
+                        </div>
+                      </div>
+                    </div>
+                  </fieldset>
+                  <!--    Team Mapping ->
+                </form>
+                <fieldset style="margin-top: 0rem; margin-bottom: 2rem">
+                  <legend>Teams</legend>
+                  <div class="boxWhite">
+                    <div>
+                      <div class="row display: flex; justify-content: flex-start; align-items: center " >
+                        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12">
+                          <span class="p-float-label">
+                            <p-dropdown
+                              [options]="teamListData"
+                              optionValue="id"
+                              optionLabel="name"
+                              filter="true"
+                              filterBy="name"
+                              [(ngModel)]="teamValue"
+                        [ngClass]="{
+                          'is-invalid': teamSubmitted && !teamValue
+                        }"
+                              id="team"
+                              [autoDisplayFirst]="false"
+                            ></p-dropdown>
+                            <label for="team">Teams *</label>
+                          </span>
+                          <div></div>
+                          @if (teamSubmitted && !teamValue) {
+                            <div class="errorWrap text-danger">
+                              <div class="error text-danger">Team is required.</div>
+                            </div>
+                          }
+                        </div>
+                        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12">
+                          <span class="p-float-label">
+                            <p-dropdown
+                              [disabled]="!isWorkFlowAction"
+                              [options]="eventActionData"
+                              optionValue="value"
+                              optionLabel="text"
+                              filter="true"
+                              filterBy="text"
+                              [(ngModel)]="teamHerAction"
+                              id="team"
+                              [autoDisplayFirst]="false"
+                              (onChange)="removeWorkFlowActionData($event)"
+                            ></p-dropdown>
+                            <label for="team">Action</label>
+                          </span>
+                          <div></div>
+                    <!-- [ngClass]="{
+                      'is-invalid': teamSubmitted && !teamHerAction
+                    }" -->
+<!-- <div
+                          class="errorWrap text-danger"
+                          *ngIf="teamSubmitted && !teamHerAction"
+                          >
+                          <div class="error text-danger">Action is required.</div>
+                        </div> ->
+                      </div>
+                      @if (ifTATMetricsShow) {
+                        <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12">
+                          <p-dropdown
+                            [options]="commondropdownService.activeTatMatricsData"
+                            optionValue="id"
+                            optionLabel="name"
+                            filter="true"
+                            filterBy="name"
+                            placeholder="Select a TAT Matrics"
+                            [(ngModel)]="tatMatricesID"
+                            [showClear]="true"
+                            id="team"
+                          ></p-dropdown>
+                        </div>
+                      }
+                      <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12">
+                        <button
+                          [disabled]="!isWorkFlowAction"
+                          (click)="openConditionModel()"
+                          title="Add a Condition"
+                          data-target="#teamConditionModal"
+                          data-toggle="modal"
+                          data-backdrop="static"
+                          data-keyboard="false"
+                          style="width: 100%; border: none; background: none"
+                          >
+                          <input
+                            type="text"
+                            [(ngModel)]="teamcondition"
+                            class="form-control"
+                            placeholder="Add a condition"
+                            style="width: 100%; width: 100%; cursor: pointer"
+                            readonly
+                            />
+                          </button>
+                        </div>
+                        @if (isAutoAssignShow && teamHerAction) {
+                          <div class="col-lg-1 col-md-1 col-sm-1 col-xs-12">
+                            <div class="form-group form-check inputcheckboxCenter" style="display: flex; align-items: center; gap: 5px;">
+                              <p-checkbox
+                                class="checkbox-align"
+                                [(ngModel)]="isAutoAssign"
+                                id="team"
+                                [binary]="true"
+                              ></p-checkbox>
+                              <label class="form-check-label" for="team" style="margin-bottom: 0;">Auto Assign</label>
+                            </div>
+                          </div>
+                        }
+                        @if (isAutoAssignShow && teamHerAction) {
+                          <div class="col-lg-2 col-md-2 col-sm-2 col-xs-12">
+                            <div class="form-group form-check inputcheckboxCenter" style="display: flex; align-items: center; gap: 5px;">
+                              <p-checkbox
+                                class="checkbox-align"
+                                [(ngModel)]="isAutoApprove"
+                                id="team"
+                                [binary]="true">
+                              </p-checkbox>
+                              <label class="form-check-label" for="team" style="margin-bottom: 0;">Auto Approve</label>
+                            </div>
+                          </div>
+                        }
+                        <div class="col-lg-1 col-md-1 col-sm-1 col-xs-12" style="text-align: end">
+                          <button
+                            style="object-fit: cover; padding: 5px 8px"
+                            class="btn btn-primary"
+                            (click)="onAddAttribute()"
+                            >
+                            <i class="fa fa-plus-square" aria-hidden="true"></i>
+                            Add
+                          </button>
+                        </div>
+                      </div>
+                      <div class="gridtable">
+                        <table class="table coa-table fixed_header" style="margin-top: 3rem">
+                          <thead class="BI_tablehead">
+                            <tr>
+                              <th style="width: 8%">Approval</th>
+                              <th>Teams*</th>
+                              <th>Action</th>
+                              <!-- <th *ngIf="!ifTATMetricsShow">TAT Matrics</th> ->
+                              <th style="width: 30%">Condition</th>
+                              @if (isAutoAssignShow) {
+                                <th style="width: 15%">Workflow Auto Assign </th>
+                              }
+                              @if (isAutoAssignShow) {
+                                <th style="width: 15%">Workflow Auto Approve </th>
+                              }
+                              <th style="width: 5%">Delete</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            @for (row of teams.controls; track row; let index = $index) {
+                              <tr>
+                                <td style="padding-left: 2px; text-align: center; width: 8%">
+                                  Approval {{ index + 1 }}
+                                </td>
+                                <td>
+                                  <p-dropdown
+                                    appendTo="body"
+                                    [options]="teamListData"
+                                    placeholder="Select Teams"
+                                    optionLabel="name"
+                                    optionValue="id"
+                                    placeholder="Select a Team"
+                                    [formControl]="row.get('teamId')"
+                                  ></p-dropdown>
+                                </td>
+                                <td >
+                                  <p-dropdown
+                                    [disabled]="!isWorkFlowAction"
+                                    appendTo="body"
+                                    [options]="eventActionData"
+                                    optionValue="value"
+                                    optionLabel="text"
+                                    filter="true"
+                                    filterBy="text"
+                                    placeholder="Select a Action"
+                                    [formControl]="row.get('teamAction')"
+                                    [showClear]="true"
+                                  ></p-dropdown>
+                                </td>
+                                @if (ifTATMetricsShow) {
+                                  <td>
+                                    <p-dropdown
+                                      appendTo="body"
+                                      [options]="commondropdownService.activeTatMatricsData"
+                                      optionValue="id"
+                                      optionLabel="name"
+                                      filter="true"
+                                      filterBy="name"
+                                      placeholder="Select a TAT Matrics"
+                                      [formControl]="row.get('tat_id')"
+                                    ></p-dropdown>
+                                  </td>
+                                }
+                                <td style="width: 25%">
+                                  <button
+                                    [disabled]="!isWorkFlowAction"
+                                    (click)="defultAddTeamCondition(index, row.value.id)"
+                                    title="Add a Condition"
+                                    data-target="#teamConditionModal"
+                                    data-toggle="modal"
+                                    data-backdrop="static"
+                                    data-keyboard="false"
+                                    style="width: 100%; border: none; background: none"
+                                    >
+                                    <input
+                                      type="text"
+                                      [formControl]="row.get('teamcondition')"
+                                      class="form-control"
+                                      placeholder="Add a condition"
+                                      style="width: 100%; width: 100%; cursor: pointer"
+                                      readonly
+                                      />
+                                    </button>
+                                  </td>
+                                  <td style="padding-left: 8%;  text-align: center;  width: 15%">
+                                    @if (isAutoAssignShow ) {
+                                      <div class="form-group form-check inputcheckboxCenter" >
+                                        <p-checkbox
+                                          class="p-field-checkbox"
+                                          [binary]="true"
+                                          [formControl]="row.get('isAutoAssign')"
+                                          [ngModel]="row.get('isAutoAssign')?.value === true"
+                                          (onChange)="row.get('isAutoAssign')?.setValue($event.checked)"
+                                          [binary]="true"
+                                          [disabled]="!row.get('teamAction')?.value"
+                                        ></p-checkbox>
+                                      </div>
+                                    }</td>
+                                    @if (isAutoAssignShow) {
+                                      <td style="padding-left: 8%; text-align: center;  width: 15%">
+                                        <div class="form-group form-check inputcheckboxCenter">
+                                          <p-checkbox
+                                            class="p-field-checkbox"
+                                            [binary]="true"
+                                            [formControl]="row.get('isAutoApprove')"
+                                            [ngModel]="row.get('isAutoApprove')?.value === true"
+                                            (onChange)="row.get('isAutoApprove')?.setValue($event.checked)"
+                                            [disabled]="!row.get('teamAction')?.value"
+                                          ></p-checkbox>
+                                        </div></td>
+                                      }
+                                      <td style="text-align: center; width: 5%">
+                                        @if (teams.controls.length > 1) {
+                                          <a
+                                            id="deleteAtt"
+                                            href="javascript:void(0)"
+                                            (click)="deleteConfirmAttribute(index, row.value)"
+                                            >
+                                             <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                                          </a>
+                                        }
+                                      </td>
+                                    </tr>
+                                  }
+                                </tbody>
+                              </table>
+                            </div>
+                            <!-- <div class="row">
+                            <div class="col-md-12">
+                              <pagination-controls
+                                id="ArrayData"
+                                maxSize="5"
+                                directionLinks="true"
+                                previousLabel=""
+                                nextLabel=""
+                                (pageChange)="pageChangedTeams($event)"
+                              ></pagination-controls>
+                            </div>
+                          </div> ->
+                        </div>
+                      </div>
+                    </fieldset>
+                    <div class="addUpdateBtn" style="margin: 3rem 0">
+                      @if (!isEdit) {
+                        <button
+                          type="submit"
+                          class="btn btn-primary"
+                          id="submit"
+                          [disabled]="teams.controls.length == 0"
+                          (click)="addEditTeamHierarchy()"
+                          >
+                          <i class="fa fa-check-circle"></i>
+                          Add Workflow Management
+                        </button>
+                      }
+                      @if (isEdit) {
+                        <button
+                          type="submit"
+                          class="btn btn-primary"
+                          id="submit"
+                          [disabled]="teams.controls.length == 0"
+                          (click)="addEditTeamHierarchy()"
+                          >
+                          <i class="fa fa-check-circle"></i>
+                          Update Workflow Management
+                        </button>
+                      }
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+          @if (hierarchyDeatilsShow) {
+            <div class="col-md-12">
+              <div class="panel">
+                <div class="panel-heading">
+                  <h3 class="panel-title">
+                    <div class="displayflex">
+                      <button
+                        type="button"
+                        class="btn btn-secondary backbtn"
+                        data-toggle="tooltip"
+                        data-placement="bottom"
+                        title="Go to Workflow List"
+                        (click)="listMapping()"
+                        >
+                        <i
+                          class="fa fa-arrow-circle-left"
+                          style="color: #f7941e !important; font-size: 28px"
+                        ></i>
+                      </button>
+                      <h3 class="panel-title">Workflow Detail</h3>
+                    </div>
+                  </h3>
+                  <div class="right">
+                    <button
+                      type="button"
+                      class="btn-toggle-collapse"
+                      data-toggle="collapse"
+                      data-target="#detailteamHierarchy"
+                      aria-expanded="false"
+                      aria-controls="detailteamHierarchy"
+                      >
+                      <i class="fa fa-minus-circle"></i>
+                    </button>
+                  </div>
+                </div>
+                <div id="detailteamHierarchy" class="panel-collapse collapse in">
+                  <div class="panel-body">
+                    <fieldset style="margin-top: 0rem; margin-bottom: 2rem">
+                      <legend>Basic Details</legend>
+                      <div class="boxWhite">
+                        <div class="row">
+                          <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                            <label class="datalbl">Name :</label>
+                            <span>{{ teamHirerarchyDetailData.hierarchyName }}</span>
+                          </div>
+                          <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                            <label class="datalbl">Event Name :</label>
+                            <span>{{ teamHirerarchyDetailData.eventName }}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </fieldset>
+                    <fieldset style="margin-top: 0rem; margin-bottom: 2rem">
+                      <legend>Teams Details</legend>
+                      <div class="boxWhite">
+                        <div class="row table-responsive">
+                          <div class="col-lg-12 col-md-12">
+                            <table class="table">
+                              <thead>
+                                <tr>
+                                  <th>Approval</th>
+                                  <th>Teams</th>
+                                  <th>Action</th>
+                                  <!-- <th *ngIf="!ifTATMetricsShow">TAT Matrics</th> ->
+                                  <th>Condition</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                @for (
+                                  teams of teamHirerarchyDetailData.teamHierarchyMappingList; track
+                                  teams; let i = $index) {
+                                  <tr
+                                    >
+                                    <td>Approval {{ i + 1 }}</td>
+                                    <td>{{ teams.teamName }}</td>
+                                    <td>
+                                      @if (teams.teamAction) {
+                                        <span>
+                                          {{ teams.teamActionName }}
+                                        </span>
+                                      }
+                                      @if (!teams.teamAction || teams.teamAction == 0) {
+                                        <span> - </span>
+                                      }
+                                    </td>
+                                    <!-- <td *ngIf="!ifTATMetricsShow">
+                                    <span *ngIf="teams.tat_id">
+                                      {{ teams.teamTATMatrics }}
+                                    </span>
+                                    <span *ngIf="!teams.tat_id || teams.tat_id == 0"> - </span>
+                                  </td> ->
+                                  <td>
+                                    <!-- {{ teams.teamCondition }} ->
+                                    @for (list of showTeamConditionData; track list; let j = $index) {
+                                      <span>
+                                        @if (i === j) {
+                                          <span>
+                                            @if (list.condition) {
+                                              <span>
+                                                {{ list.condition }}
+                                              </span>
+                                            }
+                                            @if (!list.condition) {
+                                              <span>-</span>
+                                            }
+                                          </span>
+                                        }
+                                      </span>
+                                    }
+                                  </td>
+                                </tr>
+                              }
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  </fieldset>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Assign Parent Team Modal ->
+      <div
+        class="modal fade"
+        id="assignParentTeamModal"
+        tabindex="-1"
+        role="dialog"
+        aria-labelledby="myModalLabel"
+        >
+        <div class="modal-dialog" style="width: 35%">
+          <!-- Modal content->
+          <div class="modal-content">
+            <div class="modal-header">
+              <!-- <button type="button" class="close" data-dismiss="modal">&times;</button> ->
+              <h3 class="panel-title">Assign Parent Team</h3>
+            </div>
+            <div class="modal-body">
+              <form [formGroup]="assignParentTeamForm">
+                <label>Parent Team *</label>
+                <p-dropdown
+                  [options]="parentTeamListData"
+                  optionValue="id"
+                  optionLabel="name"
+                  [filter]="true"
+                  filterBy="name"
+                  placeholder="Select a Parent Team"
+                  formControlName="parentteamid"
+            [ngClass]="{
+              'is-invalid': submitted && assignParentTeamForm.controls.parentteamid.errors
+            }"
+          ></p-dropdown>
+          <div></div>
+          @if (submitted && assignParentTeamForm.controls.parentteamid.errors) {
+            <div class="errorWrap text-danger">
+              @if (submitted && assignParentTeamForm.controls.parentteamid.errors.required) {
+                <div class="error text-danger">Parent Team is required.</div>
+              }
+            </div>
+          }
+        </form>
+      </div>
+      <div class="modal-footer">
+        <div class="addUpdateBtn">
+          <button type="submit" class="btn btn-primary btn-sm" (click)="checkAssignparentTeam()">
+            <i class="fa fa-check-circle"></i>
+            Assign
+          </button>
+          <button
+            type="button"
+            class="btn btn-danger btn-sm"
+            (click)="assignparentTeamModalClose()"
+          >
+            <i class="fa fa-times-circle"></i>
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+      <!-- Assign Parent Team Modal ->
+
+      <p-dialog
+        header="Workflow Management"
+        [(visible)]="teamHierarchyModal"
+        [style]="{ width: '40%' }"
+        [modal]="true"
+        [responsive]="true"
+        [draggable]="false"
+        [closable]="true">
+        <div class="modal-body">
+          @for (data of teamHierarchyData; track data; let last = $last) {
+            <div
+              style="text-align: center"
+              >
+              <p-card>{{ data }}</p-card>
+              <br />
+              @if (!last) {
+                <i
+                  style="font-size: 30px !important"
+                  class="icon-submenu paddingmenuIcon lnr lnr-arrow-down"
+                ></i>
+              }
+              <br />
+            </div>
+          }
+          <!-- <p-organizationChart [value]="teamHierarchyData"></p-organizationChart> ->
+        </div>
+      </p-dialog>
+
+      <p-dialog
+        header="Team Condition"
+        [(visible)]="teamConditionModal"
+        [style]="{ width: '75%' }"
+        [modal]="true"
+        [responsive]="true"
+        [draggable]="false"
+        [closable]="false"
+        >
+        <div class="modal-body" style="height: 30rem; padding-bottom: 20px">
+          <table class="table map-table">
+            <thead>
+              <tr>
+                <th>Field</th>
+                <th>Operator</th>
+                <th>Value</th>
+                <th>Condition</th>
+                <th style="width: 10%">
+                  <button
+                    id="addAtt"
+                    style="object-fit: cover; padding: 5px 8px"
+                    class="btn btn-primary"
+                    (click)="onConditionAddAttribute()"
+                    >
+                    <i class="fa fa-plus-square" aria-hidden="true"></i>
+                    Add
+                  </button>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (
+                row of teamConditionArray.controls
+                | paginate
+                : {
+                id: 'ArrayData',
+                itemsPerPage: ItemPerPageteamCondition,
+                currentPage: currentPageteamCondition,
+                totalItems: totalRecordsteamCondition
+                }; track
+                row; let index = $index) {
+                <tr
+                  >
+                  <td>
+                    <p-dropdown
+                      [options]="evenCatagorytData"
+                      optionValue="value"
+                      optionLabel="text"
+                      filter="true"
+                      filterBy="text"
+                      placeholder="Enter a Field"
+                      [formControl]="row.get('field')"
+                    ></p-dropdown>
+                  </td>
+                  <td>
+                    <p-dropdown
+                      [options]="operatorList"
+                      placeholder="Select Operator"
+                      optionLabel="label"
+                      optionValue="value"
+                      [formControl]="row.get('operator')"
+                      filter="true"
+                      filterBy="label"
+                    ></p-dropdown>
+                  </td>
+                  <td>
+                    <input
+                      type="text"
+                      name="speed"
+                      class="form-control"
+                      placeholder="Enter a Value"
+                      [formControl]="row.get('value')"
+                      />
+                    </td>
+                    <td>
+                      @for (list of conditionDataEnableDisble; track list; let j = $index) {
+                        <span>
+                          @if (index == j) {
+                            <span>
+                              @if (index == j) {
+                                <p-dropdown
+                                  [options]="AndOrDropdown"
+                                  placeholder="Select a Condition"
+                                  optionLabel="label"
+                                  optionValue="value"
+                                  [formControl]="row.get('condition')"
+                                  filter="true"
+                                  filterBy="label"
+                                  (onChange)="onkeyCondition($event)"
+                                ></p-dropdown>
+                              }
+                            </span>
+                          }
+                        </span>
+                      }
+                    </td>
+                    <td style="width: 10%">
+                      <a
+                        id="deleteAtt"
+                        class="curson_pointer"
+                        (click)="deleteTeamCondition(index, row.value)"
+                        >
+                         <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                      </a>
+                    </td>
+                  </tr>
+                }
+                <tr>
+                  @if (!this.teamConditionArray.valid) {
+                    <div
+                      style="margin-left: 5px"
+                      class="errorWrap text-danger"
+                      >
+                      Please Enter Details.
+                    </div>
+                  }
+                  @if (this.teamConditionArray.valid && errormsgCondition) {
+                    <div
+                      style="margin-left: 5px"
+                      class="errorWrap text-danger"
+                      >
+                      {{ this.errormsgCondition }}
+                    </div>
+                  }
+                </tr>
+              </tbody>
+            </table>
+            <div class="row">
+              <div class="col-md-12">
+                <pagination-controls
+                  id="ArrayData"
+                  [maxSize]="5"
+                  [directionLinks]="true"
+                  previousLabel=""
+                  nextLabel=""
+                  (pageChange)="pageChangedTeamMappingList($event)"
+                ></pagination-controls>
+              </div>
+            </div>
+            <br />
+          </div>
+          <div class="modal-footer" style="display: flex; justify-content: flex-end">
+            <div class="addUpdateBtn">
+              <button
+                type="button"
+                class="btn btn-primary"
+                data-title="Apply Condition"
+                (click)="saveConditionData()"
+                #closebutton
+                data-dismiss="modal"
+                [disabled]="!this.teamConditionArray.valid"
+                >
+                Save
+              </button>
+            </div>
+            <div class="addUpdateBtn" style="margin-left: 1.5rem">
+              <button
+                type="button"
+                class="btn btn-danger btn-sm"
+                #closebutton
+                data-dismiss="modal"
+                (click)="closeConditionModel()"
+                >
+                Close
+              </button>
+            </div>
+          </div>
+         </p-dialog> -->

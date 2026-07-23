@@ -1,0 +1,2854 @@
+<div style="margin-top: 1rem !important;">
+    <!-- HEADER SECTION -->
+     <div class="row p-0 m-0">
+    <div class="col-md-12">
+        <mat-card class="cardWithShadow">
+            <mat-card-header>
+                <img src="assets/img/DashboardIcons/Back Arrow.svg" alt="arrow back" class="m-r-10"
+                    (click)="customerDetailOpen()" />
+                <div style="font-size: x-large; align-items: center; font-weight: 500; align-content: center">
+                    {{ customerLedgerDetailData.title }} {{ customerLedgerDetailData.firstname }}
+                    {{ customerLedgerDetailData.lastname }}
+                </div>
+                <button mat-icon-button color="accent" matTooltip="Refresh" (click)="clearSearchinvoiceMaster()"
+                    style="position: absolute; right: 10px; top: 14%; transform: translateY(-50%)">
+                    <img src=" assets/img/DashboardIcons/Refresh.svg" alt="Refresh" />
+                </button>
+            </mat-card-header>
+            <mat-card-content>
+                <form [formGroup]="searchInvoiceMasterFormGroup">
+                    <div class="row">
+                        <!-- Invoice Number -->
+                        <div class="col-md-3 mb-3">
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-label>Invoice Number</mat-label>
+                                <input matInput class="input-p-5" formControlName="docnumber"
+                                    placeholder="Enter invoice number" />
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Bill Run ID -->
+                        <div class="col-md-3 mb-3">
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-label>Customer Name</mat-label>
+                                <input matInput
+                                    [value]="customerLedgerDetailData.title + ' ' + customerLedgerDetailData.custname"
+                                    disabled />
+                            </mat-form-field>
+                        </div>
+                        <!-- class="input-p-5" formControlName="billrunid" -->
+
+                        <!-- From Date -->
+                        <div class="col-md-3 mb-3">
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-label>From Date</mat-label>
+                                <input matInput class="input-p-5" [matDatepicker]="fromDatePicker"
+                                    formControlName="billfromdate" />
+                                <mat-datepicker-toggle matSuffix [for]="fromDatePicker"></mat-datepicker-toggle>
+                                <mat-datepicker #fromDatePicker></mat-datepicker>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- To Date -->
+                        <div class="col-md-3 mb-3">
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-label>To Date</mat-label>
+                                <input matInput class="input-p-5" [matDatepicker]="toDatePicker"
+                                    formControlName="billtodate" />
+                                <mat-datepicker-toggle matSuffix [for]="toDatePicker"></mat-datepicker-toggle>
+                                <mat-datepicker #toDatePicker></mat-datepicker>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Search Buttons -->
+                        <div class="col-12">
+                            <div class="d-flex gap-2">
+                                <button mat-flat-button color="primary" class="button-normal m-r-10" (click)="searchInvoices()">Search</button>
+                                <button mat-stroked-button class="button-normal" (click)="clearSearchinvoiceMaster()">Clear</button>
+                                <!-- <button *ngIf="generateAccess" mat-flat-button color="accent"
+                                    (click)="generatePDFInvoice(customerId)" class="ms-auto">
+                                    <mat-icon>description</mat-icon> Generate Invoice
+                                </button>
+                                <button mat-flat-button color="warn" (click)="getAuditData('')">
+                                    <mat-icon>fact_check</mat-icon> Audit Log
+                                </button> -->
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </mat-card-content>
+        </mat-card>
+    </div>
+    </div>
+</div>
+<div class="container-fluid contain-flud">
+    <div class="row p-0 m-0">
+    <div class="col-md-12">
+        <!-- INVOICES TABLE CARD -->
+        <mat-card class="mb-4 cardWithShadow">
+            <mat-card-header>
+                <div style="font-size: x-large; align-items: center; font-weight: 500; align-content: center">
+                    Invoice List
+                </div>
+                @if (gracePeriodAccess) {
+                <button mat-flat-button color="primary" class="button-normal m-l-auto" (click)="getAuditData('')">
+                    Grace Period
+                </button>
+                }
+            </mat-card-header>
+
+            <mat-card-content>
+                <!-- INVOICE TABLE -->
+                <div class="table-container" style="overflow-x: scroll !important"
+                    *ngIf="invoiceMasterListData?.length > 0">
+                    <table mat-table [dataSource]="invoiceMasterListData" class="w-100 mat-elevation-z2">
+                        <!-- Customer -->
+                        <ng-container matColumnDef="customer">
+                            <th mat-header-cell *matHeaderCellDef>Customer</th>
+                            <td mat-cell *matCellDef="let invoice">{{ invoice.customerName }}</td>
+                        </ng-container>
+
+                        <!-- Invoice Number -->
+                        <ng-container matColumnDef="invoiceNumber">
+                            <th mat-header-cell *matHeaderCellDef>Invoice Number</th>
+                            <td mat-cell *matCellDef="let invoice">
+                                {{ invoice.docnumber }}
+                                <!-- <a href="javascript:void(0)" (click)="openInvoiceModal(invoice.id, invoice)"
+                                    class="link-text">
+                                    {{ invoice.docnumber }}
+                                </a> -->
+                            </td>
+                        </ng-container>
+
+                        <!-- Purchase By -->
+                        <ng-container matColumnDef="purchaseBy">
+                            <th mat-header-cell *matHeaderCellDef>Purchase By</th>
+                            <td mat-cell *matCellDef="let invoice">
+                                {{ invoice.createdByName || "N/A" }}
+                            </td>
+                        </ng-container>
+
+                        <!-- Billable To -->
+                        <ng-container matColumnDef="billableTo">
+                            <th mat-header-cell *matHeaderCellDef>Billable To</th>
+                            <td mat-cell *matCellDef="let invoice">
+                                {{
+                                invoice.billableToName !== null && invoice.billableToName !== ""
+                                ? invoice.billableToName
+                                : "-"
+                                }}
+                            </td>
+                        </ng-container>
+
+                        <!-- Total Amount -->
+                        <ng-container matColumnDef="totalAmount">
+                            <th mat-header-cell *matHeaderCellDef>Total Amount</th>
+                            <td mat-cell *matCellDef="let invoice">
+                                {{ invoice.totalamount | currency: currency : "symbol" : "1.2-2" }}
+                            </td>
+                        </ng-container>
+
+                        <!-- Adjusted Amount -->
+                        <ng-container matColumnDef="adjustedAmount">
+                            <th mat-header-cell *matHeaderCellDef>Adjusted Amount</th>
+                            <td mat-cell *matCellDef="let invoice">
+                                {{ invoice.adjustedAmount || 0 | currency: currency : "symbol" : "1.2-2" }}
+                            </td>
+                        </ng-container>
+
+                        <!-- Unpaid Amount -->
+                        <ng-container matColumnDef="unpaidAmount">
+                            <th mat-header-cell *matHeaderCellDef>Unpaid Amount</th>
+                            <td mat-cell *matCellDef="let invoice">
+                                {{
+                                invoice.totalamount - invoice.adjustedAmount
+                                | currency: currency : "symbol" : "1.2-2"
+                                }}
+                            </td>
+                        </ng-container>
+
+                        <!-- Bill Run Status -->
+                        <ng-container matColumnDef="billRunStatus">
+                            <th mat-header-cell *matHeaderCellDef>Bill Run Status</th>
+                            <td mat-cell *matCellDef="let invoice">
+                                <span class="status-badge" [ngClass]="{
+    'status-danger': invoice.billrunstatus?.trim().toLowerCase() === 'cancelled',
+    'status-success': invoice.billrunstatus?.trim().toLowerCase() !== 'cancelled'
+  }">
+                                    {{ invoice.billrunstatus || "-" }}
+                                </span>
+                            </td>
+                        </ng-container>
+
+                        <!-- Bill Date -->
+                        <ng-container matColumnDef="billDate">
+                            <th mat-header-cell *matHeaderCellDef>Bill Date</th>
+                            <td mat-cell *matCellDef="let invoice">
+                                {{ invoice.billdate | date: "yyyy-MM-dd" }}
+                            </td>
+                        </ng-container>
+
+                        <!-- Payment Status -->
+                        <ng-container matColumnDef="paymentStatus">
+                            <th mat-header-cell *matHeaderCellDef>Payment Status</th>
+                            <td mat-cell *matCellDef="let invoice">
+                                <span class="status-badge d-flex" [ngClass]="{
+                                                    'status-success': invoice.paymentStatus?.toLowerCase() === 'fully paid' || invoice.paymentStatus?.toLowerCase() === 'payable' || invoice.paymentStatus?.toLowerCase() === 'approved',
+                                                    'status-danger': invoice.paymentStatus?.toLowerCase() === 'unpaid' || invoice.paymentStatus?.toLowerCase() === 'cancelled' || invoice.paymentStatus?.toLowerCase() === 'rejected',
+                                                    'status-info': invoice.paymentStatus?.toLowerCase() === 'partialy paid' || invoice.paymentStatus?.toLowerCase() === 'pending sent' || invoice.paymentStatus?.toLowerCase() === 'pending' || invoice.paymentStatus?.toLowerCase() === 'pending accepted' || invoice.paymentStatus?.toLowerCase() === 'partial pending' || invoice.paymentStatus?.toLowerCase() === 'clear' || invoice.paymentStatus?.toLowerCase() === 'void'
+                                                  }">
+                                    {{ invoice.paymentStatus || "–" }}
+                                </span>
+                            </td>
+                        </ng-container>
+
+                        <!-- Payment Owner -->
+                        <ng-container matColumnDef="paymentOwner">
+                            <th mat-header-cell *matHeaderCellDef>Payment Owner</th>
+                            <td mat-cell *matCellDef="let invoice">{{ invoice.paymentowner || "-" }}</td>
+                        </ng-container>
+
+                        <!-- Action -->
+                        <ng-container matColumnDef="action">
+                            <th mat-header-cell *matHeaderCellDef style="width: 350px">Action</th>
+                            <td mat-cell *matCellDef="let invoice">
+                                <div class="action-buttons" style="
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 5px;
+                    max-width: 150px;
+                  ">
+                                    <button *ngIf="viewInvoiceAccess" mat-icon-button color="primary"
+                                        (click)="openInvoiceModal(invoice.id, invoice)" matTooltip="View">
+                                        <!-- <mat-icon>visibility</mat-icon> -->
+                                        <img src="assets/img/DashboardIcons/eye-svgrepo-com (1) 1.svg" alt="image" />
+                                    </button>
+                                    <!-- View Invoice -->
+                                    <button *ngIf="viewInvoiceAccess" mat-icon-button color="primary"
+                                        (click)="viewInvoice(invoice.id, invoice.customerName)"
+                                        matTooltip="View Invoice">
+                                        <img src="assets/img/DashboardIcons/View Invoice.svg" alt="image" />
+                                    </button>
+                                    <button *ngIf="
+                      (invoice.billrunstatus == 'Cancelled' || invoice.billrunstatus === 'VOID') &&
+                      customerLedgerDetailData?.status !== 'Terminate'
+                    " mat-icon-button color="primary" (click)="displayNote('invoice')" matTooltip="Audit">
+                                        <img class="icon" src="assets/img/DashboardIcons\Audit _Compliance.svg" />
+                                    </button>
+                                    <button *ngIf="
+                      customerLedgerDetailData?.status !== 'Terminate' &&
+                      invoice.billrunstatus === 'Generated' &&
+                      generateAccess
+                    " mat-icon-button color="primary" (click)="generatePDFInvoice(invoice.id)"
+                                        [disabled]="!invoice.docnumber" matTooltip="Generate Invoice">
+                                        <img src="assets/img/DashboardIcons/DTV.svg" alt="Generate" width="25"
+                                            height="25" />
+                                    </button>
+
+                                    <!-- Download Invoice -->
+                                    <button mat-icon-button color="primary"
+                                        *ngIf=" invoice.billrunstatus !== 'Generated'"
+                                        (click)="downloadPDFINvoice(invoice.id, invoice.customerName)"
+                                        matTooltip="Download Invoice">
+                                        <img src="assets/img/DashboardIcons/Document Download.svg" alt="" />
+                                    </button>
+
+                                    <!-- Reprint Invoice -->
+                                    <button *ngIf="reprintInvoiceAccess" mat-icon-button color="accent"
+                                        (click)="InvoiceReprint(invoice.id, invoice.customerName)"
+                                        matTooltip="Reprint Invoice">
+                                        <img src="assets/img/DashboardIcons/Reprint-invoice.svg" />
+                                    </button>
+
+                                    <!-- Send Email -->
+                                    <button mat-icon-button color="primary" *ngIf="
+                      invoice.billrunstatus == 'Exported' || invoice.billrunstatus == 'Distributed'
+                    " (click)="sendemailinvoice(invoice.id)" matTooltip="Send Email">
+                                        <img src="assets/img/DashboardIcons/mail-svgrepo-com 1.svg" alt="" />
+                                    </button>
+
+                                    <!-- Invoice Payment List -->
+                                    <button *ngIf="invoicePaymentListAccess" mat-icon-button color="primary"
+                                        (click)="invoicePaymentList(invoice)" matTooltip="Invoice Payment List">
+                                        <img src="assets/img/DashboardIcons/Invoice Payment.svg" alt="" />
+                                    </button>
+
+                                    <!-- Payment Gateway -->
+                                    <button *ngIf="invoice.totalamount - invoice.adjustedAmount >= 1"
+                                        [disabled]="invoice.billrunstatus == 'Cancelled'" mat-icon-button color="accent"
+                                        (click)="openPaymentGatewaysforInvoicePayment(invoice)"
+                                        matTooltip="Invoice Payment">
+                                        <img src="assets/img/DashboardIcons/Invoice Payment 1.svg" />
+                                    </button>
+
+                                    <!-- Payment Link -->
+                                    <button *ngIf="isPaymentGatewayConfigured" mat-icon-button color="primary"
+                                        (click)="openPaymentGateways(invoice)" matTooltip="Generate Payment Link">
+                                        <img src="assets/img/DashboardIcons/PAYMENT LINK.svg" alt="" />
+                                    </button>
+
+                                    <!-- Void Invoice -->
+                                    <button *ngIf="voidInvoiceAcces && invoice.billrunstatus?.toLowerCase() !== 'void'"
+                                        [disabled]="
+                      (invoice.creditDocId.length > 0 ||
+                        invoice.totalamount - invoice.adjustedAmount <= 0) &&
+                      !isTodayBeforeOrEqual(invoice.startdate)
+                    " mat-icon-button color="warn" (click)="invoiceRemarks(invoice, 'void')" matTooltip="Void Invoice">
+                                        <img src="assets/img/DashboardIcons/Void-Invoice.svg" alt="" />
+                                    </button>
+
+                                    <!-- Cancel & Regenerate -->
+                                    <button *ngIf="
+                      cancelAndRegenerateAccess &&
+                      invoice.billrunstatus?.toLowerCase() !== 'void' &&
+                      invoice.billrunstatus?.toLowerCase() !== 'cancelled'
+                    " mat-icon-button color="warn" (click)="invoiceRemarks(invoice, 'cancelRegenerate')"
+                                        matTooltip="Cancel & Regenerate">
+                                        <img src="assets/img/DashboardIcons/Replace.svg" alt="" />
+                                    </button>
+
+                                    <!-- Send TRA Invoice -->
+                                    <button *ngIf="
+                      sendTraInvoiceAccess &&
+                      isTraEnable &&
+                      invoice.billrunstatus?.toLowerCase() !== 'void' &&
+                      invoice.billrunstatus?.toLowerCase() !== 'cancelled'
+                    " mat-icon-button color="primary" (click)="sendInvoiceTraIntigration(invoice)"
+                                        matTooltip="Send TRA Invoice">
+                                        <img src="assets/img/DashboardIcons/send-svgrepo-com 1.svg" alt="" />
+                                    </button>
+
+                                    <!-- Write Off -->
+                                    <button *ngIf="
+                      writeOffAccess &&
+                      invoice.billrunstatus?.toLowerCase() !== 'void' &&
+                      invoice.billrunstatus?.toLowerCase() !== 'cancelled'
+                    " mat-icon-button color="warn" (click)="openWriteOff(invoice)" matTooltip="WriteOff Payment">
+                                        <img src="assets/img/DashboardIcons/dollar-sign-money-svgrepo-com 1.svg"
+                                            alt="" />
+                                    </button>
+
+                                    <!-- Grace Period -->
+                                    <button
+                                        *ngIf="gracePeriodAccess && invoice.billrunstatus?.toLowerCase() !== 'void' && invoice.billrunstatus?.toLowerCase() !== 'cancelled'"
+                                        mat-icon-button color="accent" (click)="openGracePeriod(invoice)"
+                                        matTooltip="Grace Period">
+                                        <img src="assets/img/DashboardIcons/time-solid-svgrepo-com 1.svg" alt="">
+                                    </button>
+
+                                    <!-- <button [disabled]="
+        isButtonDisabled(invoice.duedate, invoice.startdate) ||
+        invoice.billrunstatus?.toLowerCase() === 'cancelled'
+    " matTooltip="Service Stop" mat-icon-button color="warn"
+                                        (click)="openPaushSearviceMedel(invoice.id,invoice.custServiceMappingId, 'Stop')">
+                                        <img src="assets/img/DashboardIcons/Service Extension.svg" alt="" />
+                                    </button> -->
+                                </div>
+
+                            </td>
+                        </ng-container>
+
+                        <tr mat-header-row *matHeaderRowDef="[
+                'customer',
+                'invoiceNumber',
+                'purchaseBy',
+                'billableTo',
+                'totalAmount',
+                'adjustedAmount',
+                'unpaidAmount',
+                'billRunStatus',
+                'billDate',
+                'paymentStatus',
+                'paymentOwner',
+                'action'
+              ]"></tr>
+                        <tr mat-row *matRowDef="
+                let row;
+                columns: [
+                  'customer',
+                  'invoiceNumber',
+                  'purchaseBy',
+                  'billableTo',
+                  'totalAmount',
+                  'adjustedAmount',
+                  'unpaidAmount',
+                  'billRunStatus',
+                  'billDate',
+                  'paymentStatus',
+                  'paymentOwner',
+                  'action'
+                ]
+              "></tr>
+                    </table>
+                    <!-- Empty State -->
+                    <div *ngIf="!invoiceMasterListData || invoiceMasterListData.length === 0" class="empty-state py-5">
+                        <mat-icon class="empty-icon">receipt_long</mat-icon>
+                        <p class="text-muted">No invoices found.</p>
+                    </div>
+                </div>
+                <!-- Pagination -->
+                <mat-paginator *ngIf="invoiceMasterListData && invoiceMasterListData.length > 0"
+                    [length]="invoiceMastertotalRecords" [pageSize]="invoiceMasteritemsPerPage"
+                    [pageSizeOptions]="pageLimitOptions" [pageIndex]="currentPageinvoiceMasterSlab - 1"
+                    showFirstLastButtons (page)="pageChangedinvoiceMasterList($event)">
+                </mat-paginator>
+            </mat-card-content>
+        </mat-card>
+    </div>
+    </div>
+    </div>
+
+<!-- ==================== INVOICE DETAILS MODAL ==================== -->
+<!-- ============================================ -->
+<!-- 7. INVOICE DETAILS MODAL (Full View) -->
+<!-- ============================================ -->
+<ng-template #invoiceDetailsModal>
+    <div class="modal-backdrop" (click)="closeInvoiceDetails()">
+        <div class="modal-dialog-container" (click)="$event.stopPropagation()" style="max-width: 1100px">
+            <!-- Header -->
+            <div class="row" style="margin: 0; padding: 20px 24px">
+                <div class="col-12" style="padding: 0">
+                    <div style="display: flex; align-items: center; justify-content: space-between">
+                        <div style="display: flex; align-items: center; gap: 12px">
+                            <mat-icon
+                                style="color: white; font-size: 28px; width: 28px; height: 28px">receipt_long</mat-icon>
+                            <div>
+                                <h5 style="margin: 0; color: white; font-size: 20px; font-weight: 600">
+                                    Invoice Details
+                                </h5>
+                                <p style="margin: 4px 0 0 0; color: rgba(255, 255, 255, 0.9); font-size: 13px">
+                                    Invoice ID: {{ invoiceID }}
+                                </p>
+                            </div>
+                        </div>
+                        <button mat-icon-button (click)="closeInvoiceDetails()" style="color: white">
+                            <mat-icon>close</mat-icon>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Body -->
+            <div class="row" style="margin: 0; padding: 24px; max-height: 70vh; overflow-y: auto">
+                <div class="col-12">
+                    <!-- Loading State -->
+                    <div *ngIf="loadingInvoiceDetails" style="text-align: center; padding: 60px 20px">
+                        <mat-spinner style="margin: 0 auto 16px"></mat-spinner>
+                        <p style="color: #757575; margin: 0">Loading invoice details...</p>
+                    </div>
+
+                    <!-- Invoice Details Content -->
+                    <div *ngIf="!loadingInvoiceDetails && invoiceDetailsData">
+                        <!-- Invoice Header Information -->
+                        <div class="row" style="margin-bottom: 24px">
+                            <div class="col-12">
+                                <mat-card style="
+                    background: linear-gradient(135deg, #f5f5f5 0%, #fafafa 100%);
+                    border: 1px solid #e0e0e0;
+                  ">
+                                    <mat-card-content style="padding: 20px">
+                                        <div class="row g-3">
+                                            <!-- Left Column -->
+                                            <div class="col-md-6">
+                                                <div style="margin-bottom: 16px">
+                                                    <label style="
+                              font-size: 12px;
+                              color: #757575;
+                              display: block;
+                              margin-bottom: 4px;
+                              font-weight: 500;
+                            ">Customer Name</label>
+                                                    <div style="display: flex; align-items: center; gap: 8px">
+                                                        <mat-icon
+                                                            style="color: #2196f3; font-size: 20px; width: 20px; height: 20px">person</mat-icon>
+                                                        <strong style="font-size: 15px; color: #212121">{{
+                                                            invoiceDetailsData?.customerName || "N/A"
+                                                            }}</strong>
+                                                    </div>
+                                                </div>
+
+                                                <div style="margin-bottom: 16px">
+                                                    <label style="
+                              font-size: 12px;
+                              color: #757575;
+                              display: block;
+                              margin-bottom: 4px;
+                              font-weight: 500;
+                            ">Invoice Number</label>
+                                                    <span class="badge bg-primary"
+                                                        style="font-size: 13px; padding: 6px 12px">{{
+                                                        invoiceDetailsData?.docnumber || "N/A" }}</span>
+                                                </div>
+
+                                                <div style="margin-bottom: 16px">
+                                                    <label style="
+                              font-size: 12px;
+                              color: #757575;
+                              display: block;
+                              margin-bottom: 4px;
+                              font-weight: 500;
+                            ">Invoice Date</label>
+                                                    <div style="display: flex; align-items: center; gap: 8px">
+                                                        <mat-icon
+                                                            style="color: #757575; font-size: 18px; width: 18px; height: 18px">calendar_today</mat-icon>
+                                                        <span style="font-size: 14px; color: #212121">{{
+                                                            invoiceDetailsData?.billdate | date: "yyyy-MM-dd"
+                                                            }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Right Column -->
+                                            <div class="col-md-6">
+                                                <div style="margin-bottom: 16px">
+                                                    <label style="
+                              font-size: 12px;
+                              color: #757575;
+                              display: block;
+                              margin-bottom: 4px;
+                              font-weight: 500;
+                            ">Total Amount</label>
+                                                    <strong style="font-size: 20px; color: #4caf50">{{ currency }}
+                                                        {{ invoiceDetailsData?.totalamount | number: "1.2-2" }}</strong>
+                                                </div>
+
+                                                <div style="margin-bottom: 16px">
+                                                    <label style="
+                              font-size: 12px;
+                              color: #757575;
+                              display: block;
+                              margin-bottom: 4px;
+                              font-weight: 500;
+                            ">Adjusted Amount</label>
+                                                    <span style="font-size: 16px; color: #2196f3">{{ currency }}
+                                                        {{ invoiceDetailsData?.adjustedAmount | number: "1.2-2"
+                                                        }}</span>
+                                                </div>
+
+                                                <div style="margin-bottom: 16px">
+                                                    <label style="
+                              font-size: 12px;
+                              color: #757575;
+                              display: block;
+                              margin-bottom: 4px;
+                              font-weight: 500;
+                            ">Outstanding Amount</label>
+                                                    <strong style="font-size: 18px; color: #f44336">{{ currency }}
+                                                        {{
+                                                        invoiceDetailsData?.totalamount -
+                                                        invoiceDetailsData?.adjustedAmount
+                                                        | number: "1.2-2"
+                                                        }}</strong>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Status and Additional Info -->
+                                        <hr style="margin: 16px 0; border-color: #e0e0e0" />
+
+                                        <div class="row g-3">
+                                            <div class="col-md-4">
+                                                <label style="
+                            font-size: 12px;
+                            color: #757575;
+                            display: block;
+                            margin-bottom: 4px;
+                            font-weight: 500;
+                          ">Bill Run Status</label>
+                                                <span class="badge" [ngClass]="{
+                            'bg-success':
+                              invoiceDetailsData?.billrunstatus === 'Completed' ||
+                              invoiceDetailsData?.billrunstatus === 'PAID',
+                            'bg-warning': invoiceDetailsData?.billrunstatus === 'Pending',
+                            'bg-danger':
+                              invoiceDetailsData?.billrunstatus === 'VOID' ||
+                              invoiceDetailsData?.billrunstatus === 'Cancelled',
+                            'bg-info': invoiceDetailsData?.billrunstatus === 'Partial'
+                          }" style="font-size: 13px; padding: 6px 12px">
+                                                    {{ invoiceDetailsData?.billrunstatus || "-" }}
+                                                </span>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <label style="
+                            font-size: 12px;
+                            color: #757575;
+                            display: block;
+                            margin-bottom: 4px;
+                            font-weight: 500;
+                          ">Created By</label>
+                                                <span style="font-size: 14px; color: #212121">{{
+                                                    invoiceDetailsData?.createdByName || "-"
+                                                    }}</span>
+                                            </div>
+
+                                            <div class="col-md-4">
+                                                <label style="
+                            font-size: 12px;
+                            color: #757575;
+                            display: block;
+                            margin-bottom: 4px;
+                            font-weight: 500;
+                          ">Payment Owner</label>
+                                                <span style="font-size: 14px; color: #212121">{{
+                                                    invoiceDetailsData?.paymentowner || "-"
+                                                    }}</span>
+                                            </div>
+                                        </div>
+                                    </mat-card-content>
+                                </mat-card>
+                            </div>
+                        </div>
+
+                        <!-- Line Items Section -->
+                        <div class="row" style="margin-bottom: 24px">
+                            <div class="col-12">
+                                <h6 style="margin: 0 0 16px 0; font-weight: 600; color: #212121">
+                                    Invoice Line Items
+                                </h6>
+
+                                <div class="table-responsive">
+                                    <table mat-table [dataSource]="invoiceLineItems" class="w-100">
+                                        <!-- Description Column -->
+                                        <ng-container matColumnDef="description">
+                                            <th mat-header-cell *matHeaderCellDef>Description</th>
+                                            <td mat-cell *matCellDef="let item">{{ item.description }}</td>
+                                        </ng-container>
+
+                                        <!-- Quantity Column -->
+                                        <ng-container matColumnDef="quantity">
+                                            <th mat-header-cell *matHeaderCellDef class="text-center">Quantity</th>
+                                            <td mat-cell *matCellDef="let item" class="text-center">
+                                                {{ item.quantity }}
+                                            </td>
+                                        </ng-container>
+
+                                        <!-- Unit Price Column -->
+                                        <ng-container matColumnDef="unitPrice">
+                                            <th mat-header-cell *matHeaderCellDef class="text-end">Unit Price</th>
+                                            <td mat-cell *matCellDef="let item" class="text-end">
+                                                {{ item.unitPrice | number: "1.2-2" }}
+                                            </td>
+                                        </ng-container>
+
+                                        <!-- Tax Column -->
+                                        <ng-container matColumnDef="tax">
+                                            <th mat-header-cell *matHeaderCellDef class="text-end">Tax</th>
+                                            <td mat-cell *matCellDef="let item" class="text-end">
+                                                {{ item.tax | number: "1.2-2" }}
+                                            </td>
+                                        </ng-container>
+
+                                        <!-- Total Column -->
+                                        <ng-container matColumnDef="total">
+                                            <th mat-header-cell *matHeaderCellDef class="text-end">Total</th>
+                                            <td mat-cell *matCellDef="let item" class="text-end">
+                                                <strong>{{ item.total | number: "1.2-2" }}</strong>
+                                            </td>
+                                        </ng-container>
+
+                                        <tr mat-header-row
+                                            *matHeaderRowDef="['description', 'quantity', 'unitPrice', 'tax', 'total']">
+                                        </tr>
+                                        <tr mat-row *matRowDef="
+                        let row;
+                        columns: ['description', 'quantity', 'unitPrice', 'tax', 'total']
+                      "></tr>
+
+                                        <!-- No Data Row -->
+                                        <tr class="mat-row" *matNoDataRow>
+                                            <td class="mat-cell" colspan="5" style="text-align: center; padding: 40px">
+                                                <mat-icon style="font-size: 48px; color: #ccc">receipt</mat-icon>
+                                                <p class="text-muted mt-2">No line items found</p>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment History Section (Optional) -->
+                        <div class="row" *ngIf="invoicePaymentHistory && invoicePaymentHistory.length > 0">
+                            <div class="col-12">
+                                <h6 style="margin: 0 0 16px 0; font-weight: 600; color: #212121">
+                                    Payment History
+                                </h6>
+
+                                <mat-card>
+                                    <mat-card-content style="padding: 0">
+                                        <div *ngFor="let payment of invoicePaymentHistory; let last = last"
+                                            style="padding: 16px; border-bottom: 1px solid #e0e0e0"
+                                            [ngClass]="{ 'border-0': last }">
+                                            <div
+                                                style="display: flex; justify-content: space-between; align-items: center">
+                                                <div>
+                                                    <div
+                                                        style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px">
+                                                        <mat-icon
+                                                            style="color: #4caf50; font-size: 20px; width: 20px; height: 20px">check_circle</mat-icon>
+                                                        <strong style="font-size: 14px; color: #212121">{{
+                                                            payment.reciptNo
+                                                            }}</strong>
+                                                    </div>
+                                                    <small style="color: #757575">{{ payment.paymentdate | date:
+                                                        "yyyy-MM-dd HH:mm" }} •
+                                                        {{ payment.paymode }}</small>
+                                                </div>
+                                                <strong style="font-size: 16px; color: #4caf50">{{ currency }} {{
+                                                    payment.amount | number: "1.2-2" }}</strong>
+                                            </div>
+                                        </div>
+                                    </mat-card-content>
+                                </mat-card>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div aria-labelledby="myModalLabel" class="modal fade" id="StopServiceModal" role="dialog"
+                        tabindex="-1">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button aria-label="Close" class="close" data-dismiss="modal" type="button">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                    <h4 class="modal-title" id="myModalLabel" style="color: #fff !important">
+                                        Stop Service Confirmation
+                                    </h4>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                            <label>Deactivate Reason</label>
+                                            <p-dropdown optionLabel="text" filter="true" filterBy="text"
+                                                placeholder="Select a Reason *"
+                                                [(ngModel)]="selectDeactivateReason"></p-dropdown>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="margin-top: 20px">
+                                            <label>Remark*</label>
+                                            <textarea class="form-control" name="remark"
+                                                [(ngModel)]="serviceStropRemarks"></textarea>
+
+                                            <br />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button class="btn btn-primary" id="submit" type="submit">
+                                        <i class="fa fa-check-circle"></i>
+                                        Save
+                                    </button>
+
+                                    <button class="btn btn-default" data-dismiss="modal" type="button">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div *ngIf="!loadingInvoiceDetails && !invoiceDetailsData"
+                        style="text-align: center; padding: 60px 20px">
+                        <mat-icon style="font-size: 72px; color: #ccc">receipt_long</mat-icon>
+                        <p style="color: #757575; margin: 16px 0 0 0">No invoice details available</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="row" style="margin: 0; padding: 16px 24px; background: #fafafa; border-top: 1px solid #e0e0e0">
+                <div class="col-12" style="display: flex; justify-content: space-between; align-items: center">
+                    <div style="display: flex; gap: 8px">
+                        <button mat-stroked-button (click)="
+                downloadPDFINvoice(invoiceDetailsData?.docnumber, invoiceDetailsData?.customerName)
+              " *ngIf="invoiceDetailsData">
+                            <mat-icon>download</mat-icon> Download PDF
+                        </button>
+                        <button mat-stroked-button (click)="printInvoice()" *ngIf="invoiceDetailsData">
+                            <mat-icon>print</mat-icon> Print
+                        </button>
+                    </div>
+                    <button mat-flat-button (click)="closeInvoiceDetails()"
+                        style="padding: 0 24px; height: 42px; border-radius: 8px; font-weight: 500">
+                        <mat-icon style="margin-right: 8px; font-size: 18px; width: 18px; height: 18px">close</mat-icon>
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</ng-template>
+
+<!-- <p-dialog header="Stop Service Confirmation" [(visible)]="displayStopServiceModal" [style]="{ width: '35%' }"
+    [modal]="true" [responsive]="true" [draggable]="false" [closable]="false">
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <strong>{{stopServiceReason}}</strong>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button (click)="StopService()" class="btn btn-primary" id="submit" type="submit">
+            <i class="fa fa-check-circle"></i>
+            Stop
+        </button>
+        <button class="btn btn-danger" id="searchbtn" type="reset" (click)="ClosePaushSearviceMedel()">
+            <i class="fa fa-refresh"></i>
+            Close
+        </button>
+    </div>
+</p-dialog> -->
+
+<!-- stop service dialog start -->
+<ng-template #stopServiceDialog>
+    <div class="container-fluid p-0">
+        <div class="dialog-header dialog-title">
+            <span> Stop Service Confirmation</span>
+            <span (click)="ClosePaushSearviceMedel()">
+                <a mat-icon-button>
+                    <img src="assets/img/DashboardIcons/Reject.svg" />
+                </a>
+            </span>
+        </div>
+        <mat-dialog-content>
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <strong>{{ stopServiceReason }}</strong>
+                </div>
+            </div>
+        </mat-dialog-content>
+        <mat-dialog-actions align="end" style="display: flex; gap: 8px">
+            <button mat-flat-button color=" warn" class="button-normal" (click)="StopService()">
+                StopService
+            </button>
+            <button mat-stroked-button color=" warn" class="button-normal" (click)="ClosePaushSearviceMedel()">
+                Close
+            </button>
+        </mat-dialog-actions>
+    </div>
+</ng-template>
+<!-- stop service dialog end -->
+
+<!-- ============================================ -->
+<!-- 8. INVOICE PAYMENT MAPPING MODAL (Enhanced) -->
+<!-- ============================================ -->
+<ng-template #paymentMappingModal>
+    <div class="modal-backdrop" (click)="invoicePaymentCloseModal()">
+        <div class="modal-dialog-container" (click)="$event.stopPropagation()" style="max-width: 1000px">
+            <!-- Header -->
+            <div class="row">
+                <div class="col-12" style="padding: 0">
+                    <div style="display: flex; align-items: center; justify-content: space-between">
+                        <div style="display: flex; align-items: center; gap: 12px">
+                            <mat-icon style="color: white; font-size: 28px; width: 28px; height: 28px">link</mat-icon>
+                            <h5 style="margin: 0; color: white; font-size: 20px; font-weight: 600">
+                                Invoice Payment Mapping
+                            </h5>
+                        </div>
+                        <button mat-icon-button (click)="invoicePaymentCloseModal()" style="color: white">
+                            <mat-icon>close</mat-icon>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Body -->
+            <div class="row" style="margin: 0; padding: 24px; max-height: 600px; overflow-y: auto">
+                <div class="col-12">
+                    <!-- Info Alert -->
+                    <div class="row" style="margin-bottom: 20px">
+                        <div class="col-12">
+                            <div style="
+                  display: flex;
+                  align-items: flex-start;
+                  gap: 12px;
+                  padding: 12px 16px;
+                  background: #fff3cd;
+                  border: 1px solid #ffc107;
+                  border-radius: 8px;
+                ">
+                                <mat-icon style="
+                    color: #ff9800;
+                    font-size: 20px;
+                    width: 20px;
+                    height: 20px;
+                    margin-top: 2px;
+                  ">info</mat-icon>
+                                <small style="color: #856404; font-size: 13px; line-height: 1.5">
+                                    Select one or more payment records to map against the invoice. Only payments with
+                                    remaining balance can be adjusted.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Table Section -->
+                    <div class="row" *ngIf="invoicePaymentData && invoicePaymentData.length > 0">
+                        <div class="col-12">
+                            <!-- Selection Summary -->
+                            <div style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-between;
+                  margin-bottom: 16px;
+                  padding: 12px;
+                  background: #f5f5f5;
+                  border-radius: 8px;
+                ">
+                                <div style="display: flex; align-items: center; gap: 8px">
+                                    <mat-icon style="color: #2196f3">check_circle</mat-icon>
+                                    <span style="font-size: 14px; color: #212121">
+                                        <strong>{{ allchakedPaymentData?.length || 0 }}</strong> payment(s) selected
+                                    </span>
+                                </div>
+                                <div *ngIf="allchakedPaymentData && allchakedPaymentData.length > 0">
+                                    <span style="font-size: 13px; color: #757575">Total Amount: </span>
+                                    <strong style="font-size: 16px; color: #4caf50">{{ currency }} {{
+                                        getTotalSelectedAmount() | number: "1.2-2" }}</strong>
+                                </div>
+                            </div>
+
+                            <!-- Payment Table -->
+                            <div class="table-responsive">
+                                <table mat-table [dataSource]="invoicePaymentData" class="w-100">
+                                    <!-- Select Checkbox Column -->
+                                    <ng-container matColumnDef="select">
+                                        <th mat-header-cell *matHeaderCellDef style="width: 50px">
+                                            <mat-checkbox [(ngModel)]="allIsChecked"
+                                                (ngModelChange)="checkInvoicePaymentAll($event)"
+                                                color="primary"></mat-checkbox>
+                                        </th>
+                                        <td mat-cell *matCellDef="let payment">
+                                            <mat-checkbox [(ngModel)]="payment.isSinglepaymentChecked"
+                                                (ngModelChange)="addInvoicePaymentChecked(payment.id, $event)"
+                                                color="primary"
+                                                [disabled]="payment.amount - payment.adjustedAmount <= 0"></mat-checkbox>
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- Receipt Number Column -->
+                                    <ng-container matColumnDef="receiptNo">
+                                        <th mat-header-cell *matHeaderCellDef>Receipt Number</th>
+                                        <td mat-cell *matCellDef="let payment">
+                                            <div style="display: flex; align-items: center; gap: 8px">
+                                                <mat-icon
+                                                    style="font-size: 18px; width: 18px; height: 18px; color: #2196f3">receipt</mat-icon>
+                                                <span class="badge bg-info">{{ payment.reciptNo }}</span>
+                                            </div>
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- Payment Date Column -->
+                                    <ng-container matColumnDef="paymentDate">
+                                        <th mat-header-cell *matHeaderCellDef>Payment Date</th>
+                                        <td mat-cell *matCellDef="let payment">
+                                            {{ payment.paymentdate | date: "yyyy-MM-dd" }}
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- Payment Amount Column -->
+                                    <ng-container matColumnDef="paymentAmount">
+                                        <th mat-header-cell *matHeaderCellDef class="text-end">Payment Amount</th>
+                                        <td mat-cell *matCellDef="let payment" class="text-end">
+                                            <strong>{{ payment.amount | number: "1.2-2" }}</strong>
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- Adjusted Amount Column -->
+                                    <ng-container matColumnDef="adjustedAmt">
+                                        <th mat-header-cell *matHeaderCellDef class="text-end">Adjusted Amount</th>
+                                        <td mat-cell *matCellDef="let payment" class="text-end">
+                                            {{ payment.adjustedAmount | number: "1.2-2" }}
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- Remaining Amount Column -->
+                                    <ng-container matColumnDef="remainingAmount">
+                                        <th mat-header-cell *matHeaderCellDef class="text-end">Remaining Amount</th>
+                                        <td mat-cell *matCellDef="let payment" class="text-end">
+                                            <span class="badge" [ngClass]="{
+                          'bg-success': payment.amount - payment.adjustedAmount <= 0,
+                          'bg-warning': payment.amount - payment.adjustedAmount > 0
+                        }">
+                                                {{ payment.amount - payment.adjustedAmount | number: "1.2-2" }}
+                                            </span>
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- Payment Mode Column -->
+                                    <ng-container matColumnDef="paymode">
+                                        <th mat-header-cell *matHeaderCellDef>Payment Mode</th>
+                                        <td mat-cell *matCellDef="let payment">
+                                            <span class="badge bg-secondary">{{ payment.paymode || "-" }}</span>
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- Type Column -->
+                                    <ng-container matColumnDef="type">
+                                        <th mat-header-cell *matHeaderCellDef>Type</th>
+                                        <td mat-cell *matCellDef="let payment">{{ payment.type || "-" }}</td>
+                                    </ng-container>
+
+                                    <tr mat-header-row *matHeaderRowDef="[
+                      'select',
+                      'receiptNo',
+                      'paymentDate',
+                      'paymentAmount',
+                      'adjustedAmt',
+                      'remainingAmount',
+                      'paymode',
+                      'type'
+                    ]"></tr>
+                                    <tr mat-row *matRowDef="
+                      let row;
+                      columns: [
+                        'select',
+                        'receiptNo',
+                        'paymentDate',
+                        'paymentAmount',
+                        'adjustedAmt',
+                        'remainingAmount',
+                        'paymode',
+                        'type'
+                      ]
+                    "></tr>
+
+                                    <!-- No Data Row -->
+                                    <tr class="mat-row" *matNoDataRow>
+                                        <td class="mat-cell" colspan="8" style="text-align: center; padding: 40px">
+                                            <mat-icon style="font-size: 48px; color: #ccc">payments</mat-icon>
+                                            <p class="text-muted mt-2">No payment records available for mapping</p>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <!-- Pagination -->
+                            <mat-paginator [length]="invoicePaymenttotalRecords" [pageSize]="invoicePaymentItemPerPage"
+                                [pageSizeOptions]="[10, 25, 50, 100]"
+                                (page)="pageChangedInvoicePaymentList($event.pageIndex + 1)" showFirstLastButtons>
+                            </mat-paginator>
+                        </div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div *ngIf="!invoicePaymentData || invoicePaymentData.length === 0" class="row">
+                        <div class="col-12" style="text-align: center; padding: 60px 20px">
+                            <mat-icon style="font-size: 72px; color: #ccc">payments</mat-icon>
+                            <p style="color: #757575; margin: 16px 0 0 0">No payment records found</p>
+                            <small style="color: #9e9e9e">There are no available payments to map against this
+                                invoice.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="row" style="margin: 0; padding: 16px 24px; background: #fafafa; border-top: 1px solid #e0e0e0">
+                <div class="col-12" style="display: flex; justify-content: space-between; align-items: center">
+                    <div>
+                        <small style="color: #757575">
+                            <mat-icon style="
+                  font-size: 16px;
+                  width: 16px;
+                  height: 16px;
+                  vertical-align: middle;
+                  color: #ff9800;
+                ">info</mat-icon>
+                            Selected payments will be adjusted against the invoice
+                        </small>
+                    </div>
+                    <div style="display: flex; gap: 12px">
+                        <button mat-stroked-button (click)="invoicePaymentCloseModal()" style="
+                padding: 0 24px;
+                height: 42px;
+                border-radius: 8px;
+                font-weight: 500;
+                border: 1.5px solid #e0e0e0;
+              ">
+                            <mat-icon
+                                style="margin-right: 8px; font-size: 18px; width: 18px; height: 18px">close</mat-icon>
+                            Cancel
+                        </button>
+                        <button mat-flat-button color="primary" (click)="invoicePaymentAdjsment()"
+                            [disabled]="!allchakedPaymentData || allchakedPaymentData.length === 0"
+                            style="padding: 0 24px; height: 42px; border-radius: 8px; font-weight: 600">
+                            <mat-icon
+                                style="margin-right: 8px; font-size: 18px; width: 18px; height: 18px">check</mat-icon>
+                            Adjust Payment ({{ allchakedPaymentData?.length || 0 }})
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</ng-template>
+
+<!-- ============================================ -->
+<!-- Invoice Cancel/Void Remarks Dialog - Pure Inline Styles -->
+<!-- ============================================ -->
+<ng-template #remark>
+    <div (click)="$event.stopPropagation()">
+        <!-- Header Row -->
+        <div class="row" style="margin: 0; padding: 20px 24px">
+            <div class="col-12" style="padding: 0">
+                <div style="display: flex; align-items: center; justify-content: space-between">
+                    <div style="display: flex; align-items: center; gap: 12px">
+                        <mat-icon style="color: white; font-size: 28px; width: 28px; height: 28px">
+                            {{ invoiceCancelRemarksType === "void" ? "block" : "refresh" }}
+                        </mat-icon>
+                        <h5 style="margin: 0; color: white; font-size: 20px; font-weight: 600">
+                            {{
+                            invoiceCancelRemarksType === "void" ? "Void Invoice" : "Cancel & Regenerate Invoice"
+                            }}
+                        </h5>
+                    </div>
+
+                    <button mat-icon-button (click)="closeInvoiceCancelremark()" style="color: white">
+                        <img src="assets/img/DashboardIcons/Reject.svg">
+
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Body Content -->
+        <div class="row" style="margin: 0; padding: 24px">
+            <div class="col-12">
+                <!-- Info Alert -->
+                <div class="row" style="margin-bottom: 20px">
+                    <div class="col-12">
+                        <div style="
+                display: flex;
+                align-items: flex-start;
+                gap: 12px;
+                padding: 12px 16px;
+                background: #fff3cd;
+                border: 1px solid #ffc107;
+                border-radius: 8px;
+              ">
+                            <mat-icon
+                                style="color: #ff9800; font-size: 20px; width: 20px; height: 20px; margin-top: 2px">
+                                warning
+                            </mat-icon>
+                            <div style="flex: 1">
+                                <strong style="display: block; color: #856404; font-size: 14px; margin-bottom: 4px">
+                                    {{
+                                    invoiceCancelRemarksType === "void" ? invoiceRemarkTitle1 : invoiceRemarkTitle2
+                                    }}
+                                </strong>
+                                <small style="color: #856404; font-size: 13px; line-height: 1.5">
+                                    {{
+                                    invoiceCancelRemarksType === "void"
+                                    ? invoiceRemarkSubTitle1
+                                    : invoiceRemarkSubTitle2
+                                    }}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Remarks Textarea -->
+                <div class="row" style="margin-bottom: 20px">
+                    <div class="col-12">
+                        <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Remarks</mat-label>
+                            <textarea matInput [(ngModel)]="invoiceCancelRemarks" rows="5"
+                                placeholder="Enter detailed remarks for this action..." maxlength="500"
+                                required></textarea>
+                            <mat-icon matSuffix style="opacity: 0.6; font-size: 20px; width: 20px; height: 20px">
+                                comment
+                            </mat-icon>
+                            <mat-hint align="end">{{ invoiceCancelRemarks?.length || 0 }}/500</mat-hint>
+                            <mat-error>Remarks are required</mat-error>
+                        </mat-form-field>
+
+                        <div style="display: flex; align-items: center; gap: 4px; margin-top: -8px">
+                            <mat-icon style="font-size: 14px; width: 14px; height: 14px; color: #757575">info</mat-icon>
+                            <small style="color: #757575; font-size: 12px">
+                                Please provide a detailed reason for this action for audit purposes
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Character Counter Visual (Optional) -->
+                <div class="row" *ngIf="invoiceCancelRemarks && invoiceCancelRemarks.length > 0">
+                    <div class="col-12">
+                        <div style="
+                height: 4px;
+                width: 100%;
+                background: #e0e0e0;
+                border-radius: 2px;
+                overflow: hidden;
+              ">
+                            <div [style.width.%]="(invoiceCancelRemarks.length / 500) * 100" style="
+                  height: 100%;
+                  background: linear-gradient(to right, #4caf50, #ff9800, #f44336);
+                  transition: width 0.3s ease;
+                "></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Row -->
+        <div class="row" style="margin: 0; padding: 16px 24px; background: #fafafa; border-top: 1px solid #e0e0e0">
+            <div class="col-12" style="display: flex; justify-content: flex-end; gap: 12px">
+                <!-- Cancel Button -->
+                <button mat-stroked-button (click)="closeInvoiceCancelremark()" style="
+            padding: 0 24px;
+            height: 42px;
+            border-radius: 8px;
+            font-weight: 500;
+            border: 1.5px solid #e0e0e0;
+          ">
+                    <mat-icon style="margin-right: 8px; font-size: 18px; width: 18px; height: 18px">close</mat-icon>
+                    Cancel
+                </button>
+
+                <!-- Submit Button -->
+                <button mat-flat-button [color]="invoiceCancelRemarksType === 'void' ? 'warn' : 'primary'"
+                    (click)="addInvoiceRemarks()"
+                    [disabled]="!invoiceCancelRemarks || invoiceCancelRemarks.trim().length === 0"
+                    style="padding: 0 24px; height: 42px; border-radius: 8px; font-weight: 600">
+                    <mat-icon style="margin-right: 8px; font-size: 18px; width: 18px; height: 18px">
+                        {{ invoiceCancelRemarksType === "void" ? "block" : "check" }}
+                    </mat-icon>
+                    {{ invoiceCancelRemarksType === "void" ? "Void Invoice" : "Confirm Action" }}
+                </button>
+            </div>
+        </div>
+    </div>
+</ng-template>
+
+<!-- ==================== WRITE OFF MODAL ==================== -->
+<ng-template #writeoffDialog>
+    <div (click)="$event.stopPropagation()" style="
+      max-width: 600px;
+      width: 100%;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+      overflow: hidden;
+    ">
+        <!-- Header Row -->
+        <div class="row" style="margin: 0; padding: 20px 24px">
+            <div class="col-12" style="padding: 0">
+                <div style="display: flex; align-items: center; justify-content: space-between">
+                    <div style="display: flex; align-items: center; gap: 12px">
+                        <mat-icon style="color: white; font-size: 28px; width: 28px; height: 28px">money_off</mat-icon>
+                        <h5 style="margin: 0; color: white; font-size: 20px; font-weight: 600">
+                            Write Off Amount
+                        </h5>
+                    </div>
+                    <button mat-icon-button (click)="closeWriteOff()" style="color: white">
+                        <img src="assets/img/DashboardIcons/Reject.svg">
+
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Body Content -->
+        <div class="row" style="margin: 0; padding: 24px">
+            <div class="col-12">
+                <!-- Outstanding Amount Field -->
+                <div class="row" style="margin-bottom: 20px">
+                    <div class="col-12">
+                        <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Outstanding Amount</mat-label>
+                            <input matInput [value]="writeOffAmountFirst" readonly
+                                style="font-weight: 600; color: #1976d2; font-size: 16px" />
+                            <span matPrefix style="font-weight: 600; color: #424242; margin-right: 4px">{{ currency
+                                }}&nbsp;</span>
+                            <mat-icon matSuffix style="opacity: 0.6; font-size: 20px; width: 20px; height: 20px"
+                                color="primary">
+                                account_balance_wallet
+                            </mat-icon>
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <!-- Write Off Amount Field -->
+                <div class="row" style="margin-bottom: 20px">
+                    <div class="col-12">
+                        <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Write Off Amount</mat-label>
+                            <input matInput type="number" [(ngModel)]="writeOffAmount"
+                                placeholder="Enter write off amount" (keypress)="keypress($event)"
+                                [max]="writeOffAmountFirst" min="0" step="0.01" required />
+                            <span matPrefix style="font-weight: 600; color: #424242; margin-right: 4px">{{ currency
+                                }}&nbsp;</span>
+                            <mat-icon matSuffix style="opacity: 0.6; font-size: 20px; width: 20px; height: 20px"
+                                color="accent">
+                                calculate
+                            </mat-icon>
+                            <mat-error>Write off amount is required</mat-error>
+                        </mat-form-field>
+                        <div style="
+                display: flex;
+                align-items: center;
+                gap: 4px;
+                margin-top: -12px;
+                margin-bottom: 8px;
+              ">
+                            <mat-icon style="font-size: 14px; width: 14px; height: 14px; color: #757575">info</mat-icon>
+                            <small style="color: #757575">Maximum allowed: {{ currency }} {{ writeOffAmountFirst |
+                                number: "1.2-2" }}</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Remarks Field -->
+                <div class="row" style="margin-bottom: 20px">
+                    <div class="col-12">
+                        <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Remarks</mat-label>
+                            <textarea matInput [(ngModel)]="writeOffRemark" rows="4"
+                                placeholder="Enter reason for write off..." maxlength="500"></textarea>
+                            <mat-icon matSuffix
+                                style="opacity: 0.6; font-size: 20px; width: 20px; height: 20px">comment</mat-icon>
+                            <mat-hint align="end">{{ writeOffRemark?.length || 0 }}/500</mat-hint>
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <!-- Summary Card (Conditional) -->
+                <div class="row" *ngIf="writeOffAmount && writeOffAmount > 0">
+                    <div class="col-12">
+                        <div style="
+                background: linear-gradient(135deg, #f5f5f5 0%, #fafafa 100%);
+                border: 1px solid #e0e0e0;
+                border-radius: 8px;
+                padding: 16px;
+              ">
+                            <!-- Outstanding -->
+                            <div class="row" style="margin-bottom: 8px">
+                                <div class="col-7" style="padding-left: 0">
+                                    <span style="font-size: 14px; color: #616161; font-weight: 500">Outstanding
+                                        Amount:</span>
+                                </div>
+                                <div class="col-5 text-end" style="padding-right: 0">
+                                    <span style="font-size: 15px; font-weight: 600; color: #212121">
+                                        {{ currency }} {{ writeOffAmountFirst | number: "1.2-2" }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- Write Off -->
+                            <div class="row" style="margin-bottom: 12px">
+                                <div class="col-7" style="padding-left: 0">
+                                    <span style="font-size: 14px; color: #616161; font-weight: 500">Write Off
+                                        Amount:</span>
+                                </div>
+                                <div class="col-5 text-end" style="padding-right: 0">
+                                    <span style="font-size: 15px; font-weight: 600; color: #f44336">
+                                        - {{ currency }} {{ writeOffAmount | number: "1.2-2" }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <hr style="margin: 12px 0; border-color: #e0e0e0" />
+
+                            <!-- Remaining -->
+                            <div class="row">
+                                <div class="col-7" style="padding-left: 0">
+                                    <span style="font-size: 16px; color: #212121; font-weight: 700">Remaining
+                                        Balance:</span>
+                                </div>
+                                <div class="col-5 text-end" style="padding-right: 0">
+                                    <span style="font-size: 16px; font-weight: 700; color: #4caf50">
+                                        {{ currency }} {{ writeOffAmountFirst - writeOffAmount | number: "1.2-2" }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Row -->
+        <div class="row" style="margin: 0; padding: 16px 24px; background: #fafafa; border-top: 1px solid #e0e0e0">
+            <div class="col-12" style="display: flex; justify-content: flex-end; gap: 12px">
+                <!-- Cancel Button -->
+                <button mat-stroked-button (click)="closeWriteOff()" style="
+            padding: 0 24px;
+            height: 42px;
+            border-radius: 8px;
+            font-weight: 500;
+            border: 1.5px solid #e0e0e0;
+          ">
+                    <mat-icon style="margin-right: 8px; font-size: 18px; width: 18px; height: 18px">close</mat-icon>
+                    Cancel
+                </button>
+
+                <!-- Write Off Button -->
+                <button mat-flat-button color="warn" (click)="checkWriteOff()" [disabled]="
+            !writeOffAmount || writeOffAmount <= 0 || writeOffAmount > writeOffAmountFirst
+          " style="padding: 0 24px; height: 42px; border-radius: 8px; font-weight: 600">
+                    <mat-icon style="margin-right: 8px; font-size: 18px; width: 18px; height: 18px">money_off</mat-icon>
+                    Confirm Write Off
+                </button>
+            </div>
+        </div>
+    </div>
+</ng-template>
+
+<!-- ==================== GRACE PERIOD MODAL ==================== -->
+<ng-template #gracePeriodModal>
+    <div class="modal-backdrop" (click)="closeGracePeriod()">
+        <div class="modal-dialog-container" (click)="$event.stopPropagation()" style="max-width: 600px">
+            <!-- Header -->
+            <div class="row" style="margin: 0; padding: 20px 24px">
+                <div class="col-12" style="padding: 0">
+                    <div style="display: flex; align-items: center; justify-content: space-between">
+                        <div style="display: flex; align-items: center; gap: 12px">
+                            <mat-icon
+                                style="color: white; font-size: 28px; width: 28px; height: 28px">schedule</mat-icon>
+                            <h5 style="margin: 0; color: white; font-size: 20px; font-weight: 600">
+                                Add Grace Period
+                            </h5>
+                        </div>
+                        <button mat-icon-button (click)="closeGracePeriod()" style="color: white">
+                            <mat-icon>close</mat-icon>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Body -->
+            <div class="row" style="margin: 0; padding: 24px">
+                <div class="col-12">
+                    <!-- Info Alert -->
+                    <div class="row" style="margin-bottom: 20px">
+                        <div class="col-12">
+                            <div style="
+                  display: flex;
+                  align-items: flex-start;
+                  gap: 12px;
+                  padding: 12px 16px;
+                  background: #e3f2fd;
+                  border: 1px solid #2196f3;
+                  border-radius: 8px;
+                ">
+                                <mat-icon style="
+                    color: #2196f3;
+                    font-size: 20px;
+                    width: 20px;
+                    height: 20px;
+                    margin-top: 2px;
+                  ">info</mat-icon>
+                                <small style="color: #0d47a1; font-size: 13px; line-height: 1.5">Grace period allows
+                                    customers additional time to pay their invoices without
+                                    service interruption. Enter the number of days to extend the payment
+                                    deadline.</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Current Grace Period (If any) -->
+                    <div class="row" style="margin-bottom: 20px" *ngIf="gracePeriodData?.debitDocGraceDays > 0">
+                        <div class="col-12">
+                            <div style="
+                  padding: 12px;
+                  background: #f5f5f5;
+                  border-radius: 8px;
+                  border: 1px dashed #bdbdbd;
+                ">
+                                <div style="display: flex; justify-content: space-between; align-items: center">
+                                    <span style="font-size: 14px; color: #616161; font-weight: 500">Current Grace
+                                        Days:</span>
+                                    <span style="font-size: 16px; font-weight: 700; color: #4caf50">{{
+                                        gracePeriodData?.debitDocGraceDays }} days</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Grace Period Days Input -->
+                    <div class="row" style="margin-bottom: 20px">
+                        <div class="col-12">
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-label>Grace Period (Days)</mat-label>
+                                <input matInput type="number" [(ngModel)]="gracePeriod"
+                                    placeholder="Enter grace period in days" (keypress)="keypress($event)"
+                                    (input)="validateHoldDays($event)" min="1" max="31" required />
+                                <span matSuffix style="opacity: 0.6; margin-left: 8px; font-weight: 500">days</span>
+                                <mat-icon matSuffix style="
+                    opacity: 0.6;
+                    font-size: 20px;
+                    width: 20px;
+                    height: 20px;
+                    margin-right: 8px;
+                  ">event</mat-icon>
+                                <mat-error *ngIf="!gracePeriod">Grace period is required</mat-error>
+                                <mat-error *ngIf="gracePeriod && (gracePeriod < 1 || gracePeriod > 31)">Grace period
+                                    must be between 1 and 31 days</mat-error>
+                                <mat-hint align="start">Minimum: 1 day | Maximum: 31 days</mat-hint>
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <!-- Preview Card (If valid input) -->
+                    <div class="row" *ngIf="gracePeriod && gracePeriod >= 1 && gracePeriod <= 31">
+                        <div class="col-12">
+                            <div style="
+                  background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
+                  border: 1px solid #4caf50;
+                  border-radius: 8px;
+                  padding: 16px;
+                ">
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px">
+                                    <mat-icon
+                                        style="color: #4caf50; font-size: 20px; width: 20px; height: 20px">check_circle</mat-icon>
+                                    <strong style="color: #2e7d32; font-size: 14px">Grace Period Preview</strong>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-top: 12px">
+                                    <span style="font-size: 13px; color: #558b2f">Extended Payment Days:</span>
+                                    <strong style="font-size: 14px; color: #2e7d32">{{ gracePeriod }} days</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="row" style="margin: 0; padding: 16px 24px; background: #fafafa; border-top: 1px solid #e0e0e0">
+                <div class="col-12" style="display: flex; justify-content: flex-end; gap: 12px">
+                    <button mat-stroked-button (click)="closeGracePeriod()" style="
+              padding: 0 24px;
+              height: 42px;
+              border-radius: 8px;
+              font-weight: 500;
+              border: 1.5px solid #e0e0e0;
+            ">
+                        <mat-icon style="margin-right: 8px; font-size: 18px; width: 18px; height: 18px">close</mat-icon>
+                        Cancel
+                    </button>
+                    <button mat-flat-button color="primary" (click)="saveGracePeriod()"
+                        [disabled]="!gracePeriod || gracePeriod < 1 || gracePeriod > 31"
+                        style="padding: 0 24px; height: 42px; border-radius: 8px; font-weight: 600">
+                        <mat-icon
+                            style="margin-right: 8px; font-size: 18px; width: 18px; height: 18px">schedule</mat-icon>
+                        Add Grace Period
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</ng-template>
+
+<!-- ==================== PAYMENT GATEWAY SELECTION MODAL ==================== -->
+<ng-template #paymentDetailsModal>
+    <div class="modal-backdrop" (click)="invoicePaymentCloseModal()">
+        <div class="modal-dialog-container" (click)="$event.stopPropagation()" style="max-width: 900px">
+            <!-- Header -->
+            <div class="row" style="
+          margin: 0;
+          padding: 20px 24px;
+          background: linear-gradient(135deg, #2196f3 0%, #03a9f4 100%);
+        ">
+                <div class="col-12" style="padding: 0">
+                    <div style="display: flex; align-items: center; justify-content: space-between">
+                        <div style="display: flex; align-items: center; gap: 12px">
+                            <mat-icon
+                                style="color: white; font-size: 28px; width: 28px; height: 28px">payment</mat-icon>
+                            <h5 style="margin: 0; color: white; font-size: 20px; font-weight: 600">
+                                Payment Details
+                            </h5>
+                        </div>
+                        <button mat-icon-button (click)="invoicePaymentCloseModal()" style="color: white">
+                            <mat-icon>close</mat-icon>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Body -->
+            <div class="row" style="margin: 0; padding: 24px; max-height: 600px; overflow-y: auto">
+                <div class="col-12">
+                    <!-- Table -->
+                    <div class="table-responsive">
+                        <table mat-table [dataSource]="invoicePaymentData" class="w-100">
+                            <!-- Checkbox Column -->
+                            <ng-container matColumnDef="select">
+                                <th mat-header-cell *matHeaderCellDef style="width: 50px">
+                                    <mat-checkbox [(ngModel)]="ispaymentChecked"
+                                        (ngModelChange)="checkInvoicePaymentAll($event)"
+                                        [checked]="ispaymentChecked"></mat-checkbox>
+                                </th>
+                                <td mat-cell *matCellDef="let payment">
+                                    <mat-checkbox [(ngModel)]="payment.isSinglepaymentChecked"
+                                        (ngModelChange)="addInvoicePaymentChecked(payment.id, $event)"
+                                        [checked]="payment.isSinglepaymentChecked"></mat-checkbox>
+                                </td>
+                            </ng-container>
+
+                            <!-- Receipt Number Column -->
+                            <ng-container matColumnDef="reciptNo">
+                                <th mat-header-cell *matHeaderCellDef>Receipt Number</th>
+                                <td mat-cell *matCellDef="let payment">
+                                    <span class="badge bg-info">{{ payment.reciptNo }}</span>
+                                </td>
+                            </ng-container>
+
+                            <!-- Payment Date Column -->
+                            <ng-container matColumnDef="paymentdate">
+                                <th mat-header-cell *matHeaderCellDef>Payment Date</th>
+                                <td mat-cell *matCellDef="let payment">
+                                    {{ payment.paymentdate | date: "yyyy-MM-dd" }}
+                                </td>
+                            </ng-container>
+
+                            <!-- Payment Amount Column -->
+                            <ng-container matColumnDef="amount">
+                                <th mat-header-cell *matHeaderCellDef class="text-end">Payment Amount</th>
+                                <td mat-cell *matCellDef="let payment" class="text-end">
+                                    <strong>{{ payment.amount | number: "1.2-2" }}</strong>
+                                </td>
+                            </ng-container>
+
+                            <!-- Adjusted Amount Column -->
+                            <ng-container matColumnDef="adjustedAmount">
+                                <th mat-header-cell *matHeaderCellDef class="text-end">Adjusted Amount</th>
+                                <td mat-cell *matCellDef="let payment" class="text-end">
+                                    {{ payment.adjustedAmount | number: "1.2-2" }}
+                                </td>
+                            </ng-container>
+
+                            <!-- Remaining Amount Column -->
+                            <ng-container matColumnDef="remainingAmount">
+                                <th mat-header-cell *matHeaderCellDef class="text-end">Remaining Amount</th>
+                                <td mat-cell *matCellDef="let payment" class="text-end">
+                                    <span class="badge" [ngClass]="
+                      payment.amount - payment.adjustedAmount > 0 ? 'bg-warning' : 'bg-success'
+                    ">
+                                        {{ payment.amount - payment.adjustedAmount | number: "1.2-2" }}
+                                    </span>
+                                </td>
+                            </ng-container>
+
+                            <!-- Payment Mode Column -->
+                            <ng-container matColumnDef="paymode">
+                                <th mat-header-cell *matHeaderCellDef>Payment Mode</th>
+                                <td mat-cell *matCellDef="let payment">{{ payment.paymode || "-" }}</td>
+                            </ng-container>
+
+                            <!-- Type Column -->
+                            <ng-container matColumnDef="type">
+                                <th mat-header-cell *matHeaderCellDef>Type</th>
+                                <td mat-cell *matCellDef="let payment">
+                                    <span class="badge bg-secondary">{{ payment.type || "-" }}</span>
+                                </td>
+                            </ng-container>
+
+                            <!-- <tr mat-header-row *matHeaderRowDef="paymentDetailsColumns"></tr>
+                            <tr mat-row *matRowDef="let row; columns: paymentDetailsColumns;"></tr> -->
+
+                            <!-- No Data Row -->
+                            <tr class="mat-row" *matNoDataRow>
+                                <td class="mat-cell" style="text-align: center; padding: 40px">
+                                    <mat-icon style="font-size: 48px; color: #ccc">payment</mat-icon>
+                                    <p class="text-muted mt-2">No payment details found</p>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <mat-paginator [length]="invoicePaymenttotalRecords" [pageSize]="invoicePaymentItemPerPage"
+                        [pageSizeOptions]="[10, 25, 50, 100]"
+                        (page)="pageChangedInvoicePaymentList($event.pageIndex + 1)" showFirstLastButtons>
+                    </mat-paginator>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="row" style="margin: 0; padding: 16px 24px; background: #fafafa; border-top: 1px solid #e0e0e0">
+                <div class="col-12" style="display: flex; justify-content: flex-end; gap: 12px">
+                    <button mat-stroked-button (click)="invoicePaymentCloseModal()" style="
+              padding: 0 24px;
+              height: 42px;
+              border-radius: 8px;
+              font-weight: 500;
+              border: 1.5px solid #e0e0e0;
+            ">
+                        <mat-icon style="margin-right: 8px; font-size: 18px; width: 18px; height: 18px">close</mat-icon>
+                        Close
+                    </button>
+                    <button mat-flat-button color="primary" (click)="invoicePaymentAdjsment()"
+                        [disabled]="!allchakedPaymentData || allchakedPaymentData.length === 0"
+                        style="padding: 0 24px; height: 42px; border-radius: 8px; font-weight: 600">
+                        <mat-icon style="margin-right: 8px; font-size: 18px; width: 18px; height: 18px">check</mat-icon>
+                        Manual Adjustment
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</ng-template>
+
+<!-- ==================== MPESA OPTIONS MODAL ==================== -->
+<ng-template #mpesaOptionsModal>
+    <div class="modal-backdrop" (click)="closeMpesaOptions()">
+        <div class="modal-dialog-container" (click)="$event.stopPropagation()" style="max-width: 500px">
+            <!-- Header -->
+            <div class="row" style="
+          margin: 0;
+          padding: 20px 24px;
+          background: linear-gradient(135deg, #00c853 0%, #64dd17 100%);
+        ">
+                <div class="col-12" style="padding: 0">
+                    <div style="display: flex; align-items: center; justify-content: space-between">
+                        <div style="display: flex; align-items: center; gap: 12px">
+                            <mat-icon
+                                style="color: white; font-size: 28px; width: 28px; height: 28px">payment</mat-icon>
+                            <h5 style="margin: 0; color: white; font-size: 20px; font-weight: 600">
+                                MPESA Payment Options
+                            </h5>
+                        </div>
+                        <button mat-icon-button (click)="closeMpesaOptions()" style="color: white">
+                            <mat-icon>close</mat-icon>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Body -->
+            <div class="row" style="margin: 0; padding: 24px">
+                <div class="col-12">
+                    <!-- Info Alert -->
+                    <div class="row" style="margin-bottom: 20px">
+                        <div class="col-12">
+                            <div style="
+                  display: flex;
+                  align-items: flex-start;
+                  gap: 12px;
+                  padding: 12px 16px;
+                  background: #e8f5e9;
+                  border: 1px solid #4caf50;
+                  border-radius: 8px;
+                ">
+                                <mat-icon style="
+                    color: #4caf50;
+                    font-size: 20px;
+                    width: 20px;
+                    height: 20px;
+                    margin-top: 2px;
+                  ">info</mat-icon>
+                                <small style="color: #2e7d32; font-size: 13px; line-height: 1.5">
+                                    Select your preferred MPESA payment method. Both options are secure and instant.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Invoice Details Card -->
+                    <div class="row" style="margin-bottom: 24px">
+                        <div class="col-12">
+                            <div style="
+                  background: #f5f5f5;
+                  border-radius: 8px;
+                  padding: 16px;
+                  border: 1px solid #e0e0e0;
+                ">
+                                <h6 style="margin: 0 0 12px 0; font-weight: 600; color: #212121">
+                                    Invoice Details
+                                </h6>
+
+                                <div class="row" style="margin-bottom: 8px">
+                                    <div class="col-6" style="padding-left: 0">
+                                        <span style="font-size: 13px; color: #757575">Invoice Number:</span>
+                                    </div>
+                                    <div class="col-6 text-end" style="padding-right: 0">
+                                        <strong style="font-size: 14px; color: #212121">{{
+                                            selectedInvoice?.docnumber
+                                            }}</strong>
+                                    </div>
+                                </div>
+
+                                <div class="row" style="margin-bottom: 8px">
+                                    <div class="col-6" style="padding-left: 0">
+                                        <span style="font-size: 13px; color: #757575">Customer Name:</span>
+                                    </div>
+                                    <div class="col-6 text-end" style="padding-right: 0">
+                                        <strong style="font-size: 14px; color: #212121">{{
+                                            selectedInvoice?.customerName
+                                            }}</strong>
+                                    </div>
+                                </div>
+
+                                <hr style="margin: 12px 0; border-color: #e0e0e0" />
+
+                                <div class="row">
+                                    <div class="col-6" style="padding-left: 0">
+                                        <span style="font-size: 14px; color: #757575; font-weight: 600">Amount to
+                                            Pay:</span>
+                                    </div>
+                                    <div class="col-6 text-end" style="padding-right: 0">
+                                        <strong style="font-size: 18px; color: #4caf50">
+                                            {{ currency }}
+                                            {{
+                                            selectedInvoice?.totalamount - selectedInvoice?.adjustedAmount
+                                            | number: "1.2-2"
+                                            }}
+                                        </strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Options (Radio Buttons) -->
+                    <div class="row" style="margin-bottom: 20px">
+                        <div class="col-12">
+                            <h6 style="margin: 0 0 16px 0; font-weight: 600; color: #212121">
+                                Select Payment Method
+                            </h6>
+
+                            <mat-radio-group [(ngModel)]="selectedMpesaOption" (change)="onMpesaOptionChange($event)">
+                                <!-- Option 1: MPESA Express (STK Push) -->
+                                <div style="margin-bottom: 12px">
+                                    <mat-card style="cursor: pointer; transition: all 0.3s"
+                                        [ngClass]="{ 'border-primary': selectedMpesaOption === 'stkpush' }"
+                                        (click)="selectedMpesaOption = 'stkpush'">
+                                        <mat-card-content style="padding: 16px">
+                                            <div style="display: flex; align-items: flex-start; gap: 12px">
+                                                <mat-radio-button value="stkpush"
+                                                    style="margin-top: 4px"></mat-radio-button>
+                                                <div style="flex: 1">
+                                                    <div
+                                                        style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px">
+                                                        <mat-icon
+                                                            style="color: #4caf50; font-size: 24px; width: 24px; height: 24px">phone_android</mat-icon>
+                                                        <strong style="font-size: 15px; color: #212121">MPESA Express
+                                                            (STK Push)</strong>
+                                                    </div>
+                                                    <p
+                                                        style="margin: 0; font-size: 13px; color: #757575; line-height: 1.5">
+                                                        Receive a prompt on your phone to enter your MPESA PIN. Quick
+                                                        and
+                                                        convenient.
+                                                    </p>
+                                                    <div
+                                                        style="margin-top: 8px; display: flex; align-items: center; gap: 4px">
+                                                        <mat-icon
+                                                            style="font-size: 16px; width: 16px; height: 16px; color: #4caf50">check_circle</mat-icon>
+                                                        <small
+                                                            style="color: #4caf50; font-weight: 500">Recommended</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </mat-card-content>
+                                    </mat-card>
+                                </div>
+
+                                <!-- Option 2: MPESA Paybill -->
+                                <div style="margin-bottom: 12px">
+                                    <mat-card style="cursor: pointer; transition: all 0.3s"
+                                        [ngClass]="{ 'border-primary': selectedMpesaOption === 'paybill' }"
+                                        (click)="selectedMpesaOption = 'paybill'">
+                                        <mat-card-content style="padding: 16px">
+                                            <div style="display: flex; align-items: flex-start; gap: 12px">
+                                                <mat-radio-button value="paybill"
+                                                    style="margin-top: 4px"></mat-radio-button>
+                                                <div style="flex: 1">
+                                                    <div
+                                                        style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px">
+                                                        <mat-icon
+                                                            style="color: #2196f3; font-size: 24px; width: 24px; height: 24px">account_balance</mat-icon>
+                                                        <strong style="font-size: 15px; color: #212121">MPESA
+                                                            Paybill</strong>
+                                                    </div>
+                                                    <p
+                                                        style="margin: 0; font-size: 13px; color: #757575; line-height: 1.5">
+                                                        Manually pay using our Paybill number. Use invoice number as
+                                                        account
+                                                        reference.
+                                                    </p>
+                                                    <div
+                                                        style="margin-top: 8px; display: flex; align-items: center; gap: 4px">
+                                                        <mat-icon
+                                                            style="font-size: 16px; width: 16px; height: 16px; color: #2196f3">info</mat-icon>
+                                                        <small style="color: #2196f3; font-weight: 500">Manual
+                                                            Payment</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </mat-card-content>
+                                    </mat-card>
+                                </div>
+                            </mat-radio-group>
+                        </div>
+                    </div>
+
+                    <!-- Phone Number Input (Conditional - Only for STK Push) -->
+                    <div class="row" *ngIf="selectedMpesaOption === 'stkpush'" style="margin-bottom: 20px">
+                        <div class="col-12">
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-label>MPESA Phone Number</mat-label>
+                                <input matInput type="tel" [(ngModel)]="mpesaPhoneNumber"
+                                    placeholder="e.g., 254712345678" (keypress)="keypress($event)" maxlength="12"
+                                    required />
+                                <span matPrefix style="margin-right: 8px">+</span>
+                                <mat-icon matSuffix style="opacity: 0.6">phone</mat-icon>
+                                <mat-hint align="start">Enter phone number in format: 254XXXXXXXXX</mat-hint>
+                                <mat-error *ngIf="!mpesaPhoneNumber">Phone number is required</mat-error>
+                                <mat-error *ngIf="mpesaPhoneNumber && mpesaPhoneNumber.length < 12">Phone number must be
+                                    12 digits</mat-error>
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <!-- Paybill Details (Conditional - Only for Paybill) -->
+                    <div class="row" *ngIf="selectedMpesaOption === 'paybill'">
+                        <div class="col-12">
+                            <div style="
+                  background: linear-gradient(135deg, #e3f2fd 0%, #e1f5fe 100%);
+                  border: 1px solid #2196f3;
+                  border-radius: 8px;
+                  padding: 16px;
+                ">
+                                <h6 style="margin: 0 0 12px 0; font-weight: 600; color: #1976d2">
+                                    Paybill Payment Instructions
+                                </h6>
+
+                                <div style="margin-bottom: 12px">
+                                    <small style="color: #0d47a1; font-weight: 500">1. Go to MPESA Menu</small>
+                                </div>
+                                <div style="margin-bottom: 12px">
+                                    <small style="color: #0d47a1; font-weight: 500">2. Select Lipa na MPESA</small>
+                                </div>
+                                <div style="margin-bottom: 12px">
+                                    <small style="color: #0d47a1; font-weight: 500">3. Select Paybill</small>
+                                </div>
+                                <div style="margin-bottom: 12px">
+                                    <small style="color: #0d47a1; font-weight: 500">4. Enter Business Number:
+                                        <strong>{{ paybillNumber || "123456" }}</strong></small>
+                                </div>
+                                <div style="margin-bottom: 12px">
+                                    <small style="color: #0d47a1; font-weight: 500">5. Enter Account Number:
+                                        <strong>{{ selectedInvoice?.docnumber }}</strong></small>
+                                </div>
+                                <div>
+                                    <small style="color: #0d47a1; font-weight: 500">6. Enter Amount:
+                                        <strong>{{
+                                            selectedInvoice?.totalamount - selectedInvoice?.adjustedAmount
+                                            | number: "1.2-2"
+                                            }}</strong></small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="row" style="margin: 0; padding: 16px 24px; background: #fafafa; border-top: 1px solid #e0e0e0">
+                <div class="col-12" style="display: flex; justify-content: flex-end; gap: 12px">
+                    <button mat-stroked-button (click)="closeMpesaOptions()" style="
+              padding: 0 24px;
+              height: 42px;
+              border-radius: 8px;
+              font-weight: 500;
+              border: 1.5px solid #e0e0e0;
+            ">
+                        <mat-icon style="margin-right: 8px; font-size: 18px; width: 18px; height: 18px">close</mat-icon>
+                        Cancel
+                    </button>
+                    <button mat-flat-button [color]="selectedMpesaOption === 'stkpush' ? 'primary' : 'accent'"
+                        (click)="processMpesaPayment()" [disabled]="
+              !selectedMpesaOption ||
+              (selectedMpesaOption === 'stkpush' &&
+                (!mpesaPhoneNumber || mpesaPhoneNumber.length < 12))
+            " style="padding: 0 24px; height: 42px; border-radius: 8px; font-weight: 600">
+                        <mat-icon style="margin-right: 8px; font-size: 18px; width: 18px; height: 18px">
+                            {{ selectedMpesaOption === "stkpush" ? "send" : "content_copy" }}
+                        </mat-icon>
+                        {{ selectedMpesaOption === "stkpush" ? "Send STK Push" : "Copy Paybill Details" }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</ng-template>
+
+<!-- ==================== MPIN MODAL ==================== -->
+<!-- <div *ngIf="mpinModal" class="modal-backdrop" (click)="hideMpinModal()">
+    <div class="modal-dialog-container" (click)="$event.stopPropagation()" style="max-width: 500px">
+        <div class="modal-header">
+            <h5 class="modal-title">Enter Mobile Number</h5>
+            <button type="button" class="close-button" (click)="hideMpinModal()">
+                <mat-icon>close</mat-icon>
+            </button>
+        </div>
+
+        <div class="modal-body">
+            <form [formGroup]="mpinForm">
+                <div class="row">
+                    <div class="col-4 mb-3">
+                        <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Code</mat-label>
+                            <mat-select formControlName="countryCode">
+                                <mat-option *ngFor="let country of countries" 
+                                [value]="country.dial_code">
+                                    {{ country.dial_code }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-8 mb-3">
+                        <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Mobile Number</mat-label>
+                            <input matInput formControlName="mobileNumber" placeholder="Enter mobile number"
+                                (input)="onInputMobile($event)" 
+                                (keyup)="onKeymobilelength($event)"
+                                (keypress)="keypressId($event)"
+                                 />
+                            <mat-error *ngIf="mpinForm.get('mobileNumber')?.hasError('required')">
+                                Mobile number is required
+                            </mat-error>
+                            <mat-error *ngIf="mobileError">
+                                Mobile number cannot start with 0
+                            </mat-error>
+                            <mat-hint *ngIf="inputMobile" class="text-warning">{{ inputMobile }}</mat-hint>
+                        </mat-form-field>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="modal-footer">
+            <button mat-stroked-button (click)="hideMpinModal()">
+                <mat-icon>close</mat-icon> Cancel
+            </button>
+            <button mat-flat-button color="primary" (click)="invoicePaymentGateway('')"
+                [disabled]="!mpinForm.valid || mobileError">
+                <mat-icon>payment</mat-icon> Proceed to Payment
+            </button>
+        </div>
+    </div>
+</div> -->
+
+<!-- ==================== PAYMENT CONFIRMATION MODAL ==================== -->
+
+<ng-template #paymentDialog>
+    <div class="dialog-container">
+        <div class="dialog-header dialog-header-titleFont">
+            Payment Processing
+            <a mat-icon-button href="javascript:void(0)" mat-dialog-close="false">
+                <img src="assets/img/DashboardIcons/Reject.svg" />
+            </a>
+        </div>
+        <div mat-dialog-content>
+            <mat-spinner diameter="60" class="mx-auto mb-3"></mat-spinner>
+            <h6>Processing your payment...</h6>
+            <p class="text-muted">Please complete the payment on your device</p>
+
+            <div mat-dialog-actions class="p-0">
+                <button mat-stroked-button matButton="outlined" (click)="hidepaymentConfirmDialog()" color="primary"
+                    mat-dialog-close="false">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</ng-template>
+<!-- <div *ngIf="paymentConfirmationModal" class="modal-backdrop">
+    <div class="modal-dialog-container" (click)="$event.stopPropagation()" style="max-width: 500px">
+        <div class="modal-header">
+            <h5 class="modal-title">Payment Processing</h5>
+        </div>
+
+        <div class="modal-body text-center py-5">
+            <mat-spinner diameter="60" class="mx-auto mb-3"></mat-spinner>
+            <h6>Processing your payment...</h6>
+            <p class="text-muted">Please complete the payment on your device</p>
+            <p class="text-muted">Checking status: {{ paymentstatusCount }}s</p>
+        </div>
+
+        <div class="modal-footer">
+            <button mat-stroked-button (click)="hidepaymentConfirmDialog()">
+                <mat-icon>close</mat-icon> Close
+            </button>
+        </div>
+    </div>
+</div> -->
+
+<!-- ==================== PAYMENT SUCCESS MODAL ==================== -->
+<div *ngIf="paymentSucessModel" class="modal-backdrop">
+    <div class="modal-dialog-container" (click)="$event.stopPropagation()" style="max-width: 500px">
+        <div class="modal-header bg-success">
+            <h5 class="modal-title text-white">Payment Successful</h5>
+        </div>
+
+        <div class="modal-body text-center py-5">
+            <mat-icon class="success-icon text-success mb-3">check_circle</mat-icon>
+            <h5>Payment Completed Successfully!</h5>
+            <p class="text-muted">Your payment has been processed.</p>
+        </div>
+
+        <div class="modal-footer">
+            <button mat-flat-button color="primary" (click)="hidepaymentSucessDialog()">
+                <mat-icon>check</mat-icon> Done
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== AUDIT LOG MODAL ==================== -->
+<ng-template #auditListModal>
+    <div class="modal-backdrop" (click)="auditListModal = false">
+        <div class="modal-dialog-container" (click)="$event.stopPropagation()" style="max-width: 1000px">
+            <!-- Header -->
+            <div class="row" style="margin: 0; padding: 20px 24px">
+                <div class="col-12" style="padding: 0">
+                    <div style="display: flex; align-items: center; justify-content: space-between">
+                        <div style="display: flex; align-items: center; gap: 12px">
+                            <mat-icon
+                                style="color: white; font-size: 28px; width: 28px; height: 28px">history</mat-icon>
+                            <h5 style="margin: 0; color: white; font-size: 20px; font-weight: 600">
+                                Audit History
+                            </h5>
+                        </div>
+                        <button mat-icon-button (click)="auditListModal = false" style="color: white">
+                            <mat-icon>close</mat-icon>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Body -->
+            <div class="row" style="margin: 0; padding: 24px; max-height: 70vh; overflow-y: auto">
+                <div class="col-12">
+                    <!-- Search Section -->
+                    <div class="row" style="margin-bottom: 20px">
+                        <div class="col-12">
+                            <mat-card style="background: #f5f5f5">
+                                <mat-card-content>
+                                    <div class="row g-3">
+                                        <!-- Search By Dropdown -->
+                                        <div class="col-md-4">
+                                            <mat-form-field appearance="outline" class="w-100">
+                                                <mat-label>Search By</mat-label>
+                                                <mat-select [(ngModel)]="searchBy"
+                                                    (selectionChange)="onSearchByChange($event)">
+                                                    <mat-option value="all">All</mat-option>
+                                                    <mat-option value="username">Username</mat-option>
+                                                    <mat-option value="action">Action</mat-option>
+                                                    <mat-option value="module">Module</mat-option>
+                                                    <mat-option value="ipaddress">IP Address</mat-option>
+                                                </mat-select>
+                                                <mat-icon matSuffix>filter_alt</mat-icon>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <!-- Search Input -->
+                                        <div class="col-md-5">
+                                            <mat-form-field appearance="outline" class="w-100">
+                                                <mat-label>Search Value</mat-label>
+                                                <input matInput [(ngModel)]="searchValue"
+                                                    placeholder="Enter search term..."
+                                                    [disabled]="searchBy === 'all'" />
+                                                <mat-icon matSuffix>search</mat-icon>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <!-- Search Buttons -->
+                                        <div class="col-md-3">
+                                            <div style="display: flex; gap: 8px; height: 100%; align-items: center">
+                                                <button mat-raised-button color="primary"
+                                                    (click)="getAuditData(searchValue)"
+                                                    [disabled]="searchBy !== 'all' && !searchValue" style="flex: 1">
+                                                    <mat-icon>search</mat-icon> Search
+                                                </button>
+                                                <button mat-stroked-button (click)="clearAuditSearch()" style="flex: 1">
+                                                    <mat-icon>clear</mat-icon> Clear
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </mat-card-content>
+                            </mat-card>
+                        </div>
+                    </div>
+
+                    <!-- Table Section -->
+                    <div class="row">
+                        <div class="col-12">
+                            <!-- Table Header Actions -->
+                            <div style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: between;
+                  margin-bottom: 16px;
+                ">
+                                <h6 style="margin: 0; font-weight: 600">
+                                    Audit Records ({{ auditTotalRecords || 0 }})
+                                </h6>
+                                <mat-form-field appearance="outline" style="width: 120px; margin-left: auto">
+                                    <mat-label>Items Per Page</mat-label>
+                                    <mat-select [(value)]="auditItemsPerPage"
+                                        (selectionChange)="onAuditPageSizeChange($event)">
+                                        <mat-option *ngFor="let option of pageLimitOptions" [value]="option.value">
+                                            {{ option.label }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Audit Table -->
+                            <div class="table-responsive">
+                                <table mat-table [dataSource]="auditListData" class="w-100">
+                                    <!-- Date & Time Column -->
+                                    <ng-container matColumnDef="createddate">
+                                        <th mat-header-cell *matHeaderCellDef>Date & Time</th>
+                                        <td mat-cell *matCellDef="let audit">
+                                            <div style="display: flex; flex-direction: column; gap: 2px">
+                                                <span style="font-weight: 600; font-size: 13px">{{
+                                                    audit.createddate | date: "yyyy-MM-dd"
+                                                    }}</span>
+                                                <span style="font-size: 12px; color: #757575">{{
+                                                    audit.createddate | date: "HH:mm:ss"
+                                                    }}</span>
+                                            </div>
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- Username Column -->
+                                    <ng-container matColumnDef="username">
+                                        <th mat-header-cell *matHeaderCellDef>Username</th>
+                                        <td mat-cell *matCellDef="let audit">
+                                            <div style="display: flex; align-items: center; gap: 8px">
+                                                <mat-icon
+                                                    style="font-size: 20px; width: 20px; height: 20px; color: #2196f3">person</mat-icon>
+                                                <span>{{ audit.username || "N/A" }}</span>
+                                            </div>
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- Action Column -->
+                                    <ng-container matColumnDef="action">
+                                        <th mat-header-cell *matHeaderCellDef>Action</th>
+                                        <td mat-cell *matCellDef="let audit">
+                                            <span class="badge" [ngClass]="{
+                          'bg-success': audit.action === 'CREATE' || audit.action === 'ADD',
+                          'bg-warning': audit.action === 'UPDATE' || audit.action === 'MODIFY',
+                          'bg-danger': audit.action === 'DELETE' || audit.action === 'VOID',
+                          'bg-info': audit.action === 'VIEW' || audit.action === 'DOWNLOAD',
+                          'bg-secondary': audit.action === 'OTHER'
+                        }">
+                                                {{ audit.action || "-" }}
+                                            </span>
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- Module Column -->
+                                    <ng-container matColumnDef="module">
+                                        <th mat-header-cell *matHeaderCellDef>Module</th>
+                                        <td mat-cell *matCellDef="let audit">{{ audit.module || "-" }}</td>
+                                    </ng-container>
+
+                                    <!-- Description Column -->
+                                    <ng-container matColumnDef="description">
+                                        <th mat-header-cell *matHeaderCellDef>Description</th>
+                                        <td mat-cell *matCellDef="let audit">
+                                            <div style="
+                          max-width: 300px;
+                          overflow: hidden;
+                          text-overflow: ellipsis;
+                          white-space: nowrap;
+                        " [matTooltip]="audit.description">
+                                                {{ audit.description || "-" }}
+                                            </div>
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- IP Address Column -->
+                                    <ng-container matColumnDef="ipaddress">
+                                        <th mat-header-cell *matHeaderCellDef>IP Address</th>
+                                        <td mat-cell *matCellDef="let audit">
+                                            <code style="
+                          background: #f5f5f5;
+                          padding: 4px 8px;
+                          border-radius: 4px;
+                          font-size: 12px;
+                        ">
+                        {{ audit.ipaddress || "-" }}
+                      </code>
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- Actions Column -->
+                                    <ng-container matColumnDef="actions">
+                                        <th mat-header-cell *matHeaderCellDef class="text-center">Actions</th>
+                                        <td mat-cell *matCellDef="let audit" class="text-center">
+                                            <button mat-icon-button [matMenuTriggerFor]="auditMenu"
+                                                matTooltip="More Actions">
+                                                <mat-icon>more_vert</mat-icon>
+                                            </button>
+                                            <mat-menu #auditMenu="matMenu">
+                                                <button mat-menu-item (click)="viewAuditDetails(audit)">
+                                                    <mat-icon>visibility</mat-icon> View Details
+                                                </button>
+                                                <button mat-menu-item (click)="exportAuditRecord(audit)">
+                                                    <mat-icon>download</mat-icon> Export Record
+                                                </button>
+                                            </mat-menu>
+                                        </td>
+                                    </ng-container>
+
+                                    <tr mat-header-row *matHeaderRowDef="auditColumns"></tr>
+                                    <tr mat-row *matRowDef="let row; columns: auditColumns"></tr>
+
+                                    <!-- No Data Row -->
+                                    <tr class="mat-row" *matNoDataRow>
+                                        <td class="mat-cell" [attr.colspan]="auditColumns.length"
+                                            style="text-align: center; padding: 40px">
+                                            <mat-icon style="font-size: 48px; color: #ccc">history</mat-icon>
+                                            <p class="text-muted mt-2">No audit records found</p>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <!-- Pagination -->
+                            <mat-paginator [length]="auditTotalRecords" [pageSize]="auditItemsPerPage"
+                                [pageSizeOptions]="[10, 25, 50, 100]" (page)="onAuditPageChange($event.pageIndex + 1)"
+                                showFirstLastButtons>
+                            </mat-paginator>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="row" style="margin: 0; padding: 16px 24px; background: #fafafa; border-top: 1px solid #e0e0e0">
+                <div class="col-12" style="display: flex; justify-content: space-between; align-items: center">
+                    <div style="display: flex; gap: 8px">
+                        <button mat-stroked-button (click)="exportAllAuditRecords()"
+                            [disabled]="!auditListData || auditListData.length === 0">
+                            <mat-icon>download</mat-icon> Export All
+                        </button>
+                        <button mat-stroked-button (click)="refreshAuditList()">
+                            <mat-icon>refresh</mat-icon> Refresh
+                        </button>
+                    </div>
+                    <button mat-flat-button (click)="auditListModal = false"
+                        style="padding: 0 24px; height: 42px; border-radius: 8px; font-weight: 500">
+                        <mat-icon style="margin-right: 8px; font-size: 18px; width: 18px; height: 18px">close</mat-icon>
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</ng-template>
+
+<!-- --------------------------------------------------------- -->
+<ng-template #paymentDetailsDialog>
+    <div class="dialog-container">
+        <!-- Header -->
+        <div class="dialog-header">
+            Payment Details
+            <span>
+                <a mat-icon-button (click)="paymentDialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+
+                </a>
+            </span>
+        </div>
+
+        <!-- Dialog Content -->
+        <div mat-dialog-content>
+            <div class="table-container mat-elevation-z2 mt-2">
+                <table mat-table [dataSource]="invoicePaymentData" class="mat-elevation-z1 w-100">
+                    <!-- Select All Checkbox -->
+                    <ng-container matColumnDef="selectAll">
+                        <th mat-header-cell *matHeaderCellDef>
+                            <mat-checkbox [(ngModel)]="ispaymentChecked"
+                                (change)="checkInvoicePaymentAll($event)"></mat-checkbox>
+                        </th>
+                        <td mat-cell *matCellDef="let data">
+                            <mat-checkbox [(ngModel)]="data.isSinglepaymentChecked"
+                                (change)="addInvoicePaymentChecked(data.id, $event)"></mat-checkbox>
+                        </td>
+                    </ng-container>
+
+                    <!-- Receipt Number -->
+                    <ng-container matColumnDef="reciptNo">
+                        <th mat-header-cell *matHeaderCellDef class="table-header-title">Receipt Number</th>
+                        <td mat-cell *matCellDef="let data">{{ data.reciptNo }}</td>
+                    </ng-container>
+
+                    <!-- Payment Date -->
+                    <ng-container matColumnDef="paymentdate">
+                        <th mat-header-cell *matHeaderCellDef class="table-header-title">Payment Date</th>
+                        <td mat-cell *matCellDef="let data">{{ data.paymentdate }}</td>
+                    </ng-container>
+
+                    <!-- Payment Amount -->
+                    <ng-container matColumnDef="amount">
+                        <th mat-header-cell *matHeaderCellDef class="table-header-title">Payment Amount</th>
+                        <td mat-cell *matCellDef="let data">{{ data.amount | number: "1.2-2" }}</td>
+                    </ng-container>
+
+                    <!-- Adjusted Amount -->
+                    <ng-container matColumnDef="adjustedAmount">
+                        <th mat-header-cell *matHeaderCellDef class="table-header-title">Adjusted Amount</th>
+                        <td mat-cell *matCellDef="let data">{{ data.adjustedAmount | number: "1.2-2" }}</td>
+                    </ng-container>
+
+                    <!-- Remaining Amount -->
+                    <ng-container matColumnDef="remainingAmount">
+                        <th mat-header-cell *matHeaderCellDef class="table-header-title">Remaining Amount</th>
+                        <td mat-cell *matCellDef="let data">
+                            {{ data.amount - data.adjustedAmount | number: "1.2-2" }}
+                        </td>
+                    </ng-container>
+
+                    <!-- Payment Mode -->
+                    <ng-container matColumnDef="paymode">
+                        <th mat-header-cell *matHeaderCellDef class="table-header-title">Payment Mode</th>
+                        <td mat-cell *matCellDef="let data">{{ data.paymode }}</td>
+                    </ng-container>
+
+                    <!-- Type -->
+                    <ng-container matColumnDef="type">
+                        <th mat-header-cell *matHeaderCellDef class="table-header-title">Type</th>
+                        <td mat-cell *matCellDef="let data">{{ data.type }}</td>
+                    </ng-container>
+
+                    <!-- Header & Row Definition -->
+                    <tr mat-header-row *matHeaderRowDef="paymentDisplayedColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: paymentDisplayedColumns"></tr>
+                </table>
+
+                <!-- No Record Found -->
+                <!-- <div class="text-center py-3 f-s-15 text-muted" *ngIf="invoicePaymentData.length === 0">
+                    No record found
+                </div> -->
+
+                <!-- Pagination -->
+                <mat-paginator [length]="invoicePaymenttotalRecords" [pageSize]="invoicePaymentItemPerPage"
+                    (page)="pageChangedInvoicePaymentList($event)" showFirstLastButtons></mat-paginator>
+            </div>
+        </div>
+
+        <!-- Dialog Actions -->
+        <mat-dialog-actions align="end">
+            <button mat-stroked-button color="primary" (click)="invoicePaymentAdjsment()"
+                [disabled]="allchakedPaymentData.length === 0">
+                Manual Adjustment
+            </button>
+
+            <button mat-stroked-button color="warn" (click)="invoicePaymentCloseModal()">Close</button>
+        </mat-dialog-actions>
+    </div>
+</ng-template>
+
+<!-- ----------remarks--------- -->
+<ng-template #remarkDialog>
+    <div class="dialog-container">
+        <!-- Dialog Header -->
+        <div class="dialog-header">
+            Add Remark
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="remarkDialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+
+                </a>
+            </span>
+        </div>
+
+        <!-- Dialog Body -->
+        <div mat-dialog-content>
+            <form class="w-full" #remarkForm="ngForm">
+                <label class="inputLabel">Remark *</label>
+                <mat-form-field appearance="outline" class="w-100">
+                    <textarea matInput [(ngModel)]="invoiceCancelRemarks" name="remark" rows="4" required></textarea>
+                    @if (!invoiceCancelRemarks) {
+                    <mat-error>Please enter a remark.</mat-error>
+                    }
+                </mat-form-field>
+            </form>
+        </div>
+
+        <!-- Dialog Footer -->
+        <mat-dialog-actions>
+            <button mat-flat-button color="primary" (click)="addInvoiceRemarks()" [disabled]="!invoiceCancelRemarks">
+                Remarks
+            </button>
+
+            <button mat-stroked-button color="warn" (click)="closeInvoiceCancelremark(); remarkDialogRef.close()">
+                Close
+            </button>
+        </mat-dialog-actions>
+    </div>
+</ng-template>
+
+<!-- -----write off------- -->
+<!-- Write Off Dialog -->
+<ng-template #writeOffDialog>
+    <div class="dialog-container">
+        <!-- Dialog Header -->
+        <div class="dialog-header">
+            Add Write Off
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="writeOffDialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+
+                </a>
+            </span>
+        </div>
+
+        <!-- Dialog Content -->
+        <div mat-dialog-content class="dialog-body">
+            <label class="inputLabel">Write Off Amount</label>
+            <mat-form-field appearance="outline" class="w-100 mb-3">
+                <input matInput type="number" [(ngModel)]="writeOffAmount" placeholder="Enter Write Off Amount" min="0"
+                    (keypress)="keypress($event)" />
+            </mat-form-field>
+
+            <label class="inputLabel">Remark*</label>
+            <mat-form-field appearance="outline" class="w-100">
+                <textarea matInput [(ngModel)]="writeOffRemark" placeholder="Enter Remark" rows="3"></textarea>
+            </mat-form-field>
+        </div>
+
+        <!-- Dialog Footer -->
+        <mat-dialog-actions align="end">
+            <button mat-raised-button color="primary" (click)="checkWriteOff(); writeOffDialogRef.close()"
+                [disabled]="writeOffAmountFirst < writeOffAmount || !writeOffRemark">
+                Add To Write Off
+            </button>
+
+            <button mat-stroked-button color="warn" (click)="closeWriteOff(); writeOffDialogRef.close()">
+                Cancel
+            </button>
+        </mat-dialog-actions>
+    </div>
+</ng-template>
+
+<!-- Grace Period Dialog -->
+<ng-template #gracePeriodDialog>
+    <div class="dialog-container">
+        <!-- Dialog Header -->
+        <div class="dialog-header">
+            Add Grace Period
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="gracePeriodDialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+
+                </a>
+            </span>
+        </div>
+
+        <!-- Dialog Content -->
+        <div mat-dialog-content>
+            <form>
+                <label class="inputLabel">Grace Period</label>
+                <mat-form-field appearance="outline" class="w-100 mt-3">
+                    <input matInput type="text" name="gracePeriod" id="gracePeriod" placeholder="Enter Grace Period"
+                        [(ngModel)]="gracePeriod" (keypress)="keypress($event)" min="0" />
+                </mat-form-field>
+            </form>
+        </div>
+
+        <!-- Dialog Actions -->
+        <mat-dialog-actions align="dialog-action-adjust d-flex justify-content-end">
+            <button mat-flat-button color="primary" (click)="saveGracePeriod()" style="margin-right: 10px">
+                Add Grace Period
+            </button>
+            <button mat-stroked-button color="warn" (click)="closeGracePeriod()">Cancel</button>
+        </mat-dialog-actions>
+    </div>
+</ng-template>
+
+<!-- Audit Dialog -->
+<ng-template #auditDialog>
+    <div class="dialog-container">
+        <!-- Dialog Header -->
+        <div class="dialog-header">
+            Audit
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="auditDialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+
+                </a>
+            </span>
+        </div>
+
+        <!-- Dialog Content -->
+        <div mat-dialog-content>
+            <div class="w-100">
+                <table mat-table [dataSource]="showdata" class="mat-elevation-z2 w-100"
+                    *ngIf="!planNotes && showdata?.length > 0">
+                    <!-- Event Column -->
+                    <ng-container matColumnDef="event">
+                        <th mat-header-cell *matHeaderCellDef class="table-header-title">Event</th>
+                        <td mat-cell *matCellDef="let data">
+                            <span *ngIf="data.operationType === 'Cancel_Regenerate'">
+                                Cancel and Regenerate Invoice
+                            </span>
+                            <span *ngIf="data.operationType === 'Change_Plan'">Change Plan</span>
+                            <span *ngIf="data.operationType === 'VOID'">Void Invoice</span>
+                            <span *ngIf="!data.operationType">-</span>
+                        </td>
+                    </ng-container>
+
+                    <!-- Date Column -->
+                    <ng-container matColumnDef="date">
+                        <th mat-header-cell *matHeaderCellDef class="table-header-title">Date</th>
+                        <td mat-cell *matCellDef="let data">{{ data.createdate | date:'dd-MM-yyyy HH:mm:ss' }}</td>
+                    </ng-container>
+
+                    <!-- Remark Column -->
+                    <ng-container matColumnDef="remark">
+                        <th mat-header-cell *matHeaderCellDef class="table-header-title">Remark</th>
+                        <td mat-cell *matCellDef="let data">
+                            {{ data.remarks || "-" }}
+                        </td>
+                    </ng-container>
+
+                    <!-- Modified By Column -->
+                    <ng-container matColumnDef="modifiedBy">
+                        <th mat-header-cell *matHeaderCellDef class="table-header-title">Modified By</th>
+                        <td mat-cell *matCellDef="let data">{{ data.lastModifiedByName }}</td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="auditDisplayedColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: auditDisplayedColumns"></tr>
+                </table>
+
+                <!-- No Record Found -->
+                <div *ngIf="!planNotes && (!showdata || showdata.length === 0)" class="text-center py-3">
+                    <strong>No record found</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <mat-dialog-actions align="end">
+            <button mat-stroked-button color="warn" (click)="auditDialogRef.close()">Close</button>
+        </mat-dialog-actions>
+    </div>
+</ng-template>
+
+<ng-template #auditdetailsDialog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <!-- Header -->
+        <div class="dialog-header dialog-title">
+            Audit Details
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg" />
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <div mat-dialog-content>
+            <mat-card>
+                <mat-card-content>
+                    <div class="row">
+                        <!-- Search Option Dropdown -->
+                        <div class="col-lg-3 col-md-3">
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-select [(value)]="searchOption" placeholder="Select Search Option">
+                                    <mat-option *ngFor="let option of searchOptions" [value]="option.value">
+                                        {{ option.label }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Conditional Input -->
+                        <div class="col-lg-3 col-md-3"
+                            *ngIf="searchOption === 'username' || searchOption === 'invoicenumber'">
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input matInput [(ngModel)]="searchInput" placeholder="Enter Search Detail" />
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="col-lg-6 col-md-6 col-sm-12">
+                            <div class="d-flex gap-2">
+                                <button mat-flat-button color="primary" (click)="searchAudit()">Search</button>
+                                <button mat-stroked-button (click)="clearAuditSearch()">Clear</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="example-container mat-elevation-z8" tabindex="0">
+                        <table mat-table [dataSource]="auditListData">
+                            <!-- User Name -->
+                            <ng-container matColumnDef="userName">
+                                <th mat-header-cell *matHeaderCellDef>User Name</th>
+                                <td mat-cell *matCellDef="let audit">{{ audit.userName }}</td>
+                            </ng-container>
+
+                            <!-- Audit Date -->
+                            <ng-container matColumnDef="auditDate">
+                                <th mat-header-cell *matHeaderCellDef>Audit Date</th>
+                                <td mat-cell *matCellDef="let audit">{{ audit.auditDate | date: "yyyy-MM-dd" }}</td>
+                            </ng-container>
+
+                            <!-- Invoice Number -->
+                            <ng-container matColumnDef="invoiceNumber">
+                                <th mat-header-cell *matHeaderCellDef>Invoice Number</th>
+                                <td mat-cell *matCellDef="let audit">{{ audit.invoiceNumber }}</td>
+                            </ng-container>
+
+                            <!-- Grace Days -->
+                            <ng-container matColumnDef="debitDocGraceDays">
+                                <th mat-header-cell *matHeaderCellDef>Grace Days</th>
+                                <td mat-cell *matCellDef="let audit">{{ audit.debitDocGraceDays }}</td>
+                            </ng-container>
+
+                            <!-- Table Header and Rows -->
+                            <tr mat-header-row *matHeaderRowDef="displayedAuditColumns"></tr>
+                            <tr mat-row *matRowDef="let row; columns: displayedAuditColumns"></tr>
+                        </table>
+                    </div>
+                    <!-- Pagination -->
+                    <div *ngIf="auditListData.length > 0">
+                        <mat-paginator [length]="auditTotalRecords" [pageSize]="auditListitemsPerPage"
+                            [pageSizeOptions]="[5,10,20,50,100]" (page)="pageChangedList($event)"
+                            showFirstLastButtons></mat-paginator>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+
+        <div class="dialog-action-adjust d-flex justify-content-end">
+            <button mat-stroked-button mat-dialog-close>Close</button>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #payamentGetwayMethode let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <!-- Header -->
+        <div class="dialog-header dialog-title">
+            Payment Gateway Method
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg" />
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <div mat-dialog-content>
+            <div *ngFor="let config of savedConfig">
+                <mat-card class="payment-card mat-elevation-z4">
+                    <!-- Card Title -->
+                    <mat-card-header>
+                        <mat-card-title class="title-text">
+                            {{ config.paymentConfigName }}
+                        </mat-card-title>
+                    </mat-card-header>
+
+                    <!-- Card Content -->
+                    <mat-card-content>
+                        <div>
+                            {{ config.paymentGatewayInfo?.substring(0, 50) }}
+                        </div>
+                        <div style="white-space: normal">
+                            {{ config.paymentGatewayInfo?.substring(50) }}
+                        </div>
+                        <div class="d-flex justify-content-center" style="margin-top: 1rem">
+                            <button mat-flat-button color="primary"
+                                (click)="invoicePaymentpaymentGateway(config, dialogRef)">
+                                Proceed
+                            </button>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+        </div>
+
+        <div class="dialog-action-adjust d-flex justify-content-end">
+            <button mat-stroked-button mat-dialog-close>Close</button>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #mpinModalDailog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <!-- Header -->
+        <div class="dialog-header dialog-title">
+            Mobile Number
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg" />
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <div mat-dialog-content>
+            <form [formGroup]="mpinForm">
+                <div class="row">
+                    <div class="col-4 mb-3">
+                        <mat-form-field appearance="outline" class="w-100">
+                            <mat-select formControlName="countryCode" placeholder="Country Code">
+                                <mat-option *ngFor="let country of countries" [value]="country.dial_code">
+                                    {{ country.dial_code }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-8 mb-3">
+                        <!-- Mobile Number -->
+                        <mat-form-field appearance="outline" class="w-100">
+                            <input matInput type="text" formControlName="mobileNumber"
+                                [maxlength]="commondropdownService.maxMobileLength" (input)="onInputMobile($event)"
+                                placeholder="Enter mobile number" />
+                            <mat-error *ngIf="isMpinFormSubmitted && mpinForm.controls.mobileNumber.errors">
+                                <ng-container *ngIf="mpinForm.controls.mobileNumber.errors.required">
+                                    Mobile Number is required.
+                                </ng-container>
+
+                                <ng-container *ngIf="
+                    mpinForm.controls.mobileNumber.errors.minlength ||
+                    mpinForm.controls.mobileNumber.errors.maxlength
+                  ">
+                                    <ng-container *ngIf="
+                      commondropdownService.minMobileLength ===
+                        commondropdownService.maxMobileLength;
+                      else mpinRangeError
+                    ">
+                                        Mobile Number must be exactly
+                                        {{ commondropdownService.minMobileLength }} digits.
+                                    </ng-container>
+                                    <ng-template #mpinRangeError>
+                                        Mobile Number must be between
+                                        {{ commondropdownService.minMobileLength }} and
+                                        {{ commondropdownService.maxMobileLength }} digits.
+                                    </ng-template>
+                                </ng-container>
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="dialog-action-adjust d-flex justify-content-end" style="gap: 5px">
+            <button mat-flat-button color="primary" (click)="invoicePaymentGateway(dialogRef)"
+                [disabled]="mpinForm.invalid || mobileError">
+                Buy
+            </button>
+            <button mat-stroked-button mat-dialog-close>Close</button>
+        </div>
+    </div>
+</ng-template>

@@ -1,0 +1,1430 @@
+<!-- <div class="row">
+  <div class="col-md-12">
+    <div class="panel top">
+      <div class="panel-heading">
+        <h3 class="panel-title">Bulk Consumption</h3>
+        <div class="right">
+          <button type="button" class="btn-toggle-collapse" data-toggle="collapse" data-target="#bulkConsumption"
+            aria-expanded="false" aria-controls="bulkConsumption">
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+
+      <div id="bulkConsumption" class="panel-collapse collapse in">
+        <div class="panel-body">
+          @if (hideSearchBar) {
+          <div class="row">
+            <div class="col-lg-3 col-md-3">
+              <input id="taxName" type="text" [(ngModel)]="searchProductCatName" class="form-control"
+                placeholder="Enter Bulk Consumption Name" (keydown.enter)="searchProduct()" />
+            </div>
+            <div class="col-lg-3 col-md-4 marginTopSearchBtn">
+              <button type="button" class="btn btn-primary" id="searchbtn" (click)="searchProduct()">
+                <i class="fa fa-search"></i>
+                Search
+              </button>
+              <button type="reset" class="btn btn-default" id="searchbtn" (click)="clearSearchProduct()">
+                 <img src="assets/img/DashboardIcons/Refresh.svg" />
+                Clear
+              </button>
+            </div>
+          </div>
+          }
+        </div>
+        <div class="panel-body no-padding panel-udata">
+          @if (createAccess) {
+          <div class="pcol col-md-6">
+            <div class="dbox">
+              <a (click)="createBulkConsumption()" class="curson_pointer">
+                <img src="../../../assets/img/i01.png" style="width: 32px" />
+                <h5>Create Bulk Consumption</h5>
+              </a>
+            </div>
+          </div>
+          }
+          <div class="pcol col-md-6">
+            <div class="dbox">
+              <a (click)="this.clearSearchProduct()" class="curson_pointer">
+                <img src="../../../assets/img/i01.png" style="width: 32px" />
+                <h5>Search Bulk Consumption</h5>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row">
+  @if (this.listView) {
+  <div class="col-md-12">
+    <div class="panel">
+      <div class="panel-heading">
+        <h3 class="panel-title">Bulk Consumption</h3>
+        <div class="right">
+          <button type="button" class="btn-toggle-collapse" data-toggle="collapse" data-target="#listBulk"
+            aria-expanded="false" aria-controls="listBulk">
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+      <div id="listBulk" class="panel-collapse collapse in">
+        <div class="panel-body table-responsive">
+          <div>
+            <div class="row">
+              <div class="col-lg-12 col-md-12">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Product</th>
+                      <th>Quantity</th>
+                      <th>Item Type</th>
+                      <th>Approval Status</th>
+                      @if (deleteAccess || showMacAddressAccess || createAccess) {
+                      <th>Action</th>
+                      }
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (
+                    product of productListData
+                    | paginate
+                    : {
+                    id: 'stateListData',
+                    itemsPerPage: productListdataitemsPerPage,
+                    currentPage: currentPageProductListdata,
+                    totalItems: productListdatatotalRecords
+                    }; track
+                    product; let i = $index) {
+                    <tr>
+                      <td class="curson_pointer" (click)="getBulkConsumptionDetails(product.id)" style="color: #f7941e">
+                        {{ product.bulkConsumptionName }}
+                      </td>
+                      <td>{{ product.productName }}</td>
+                      <td>{{ product.qty }}</td>
+                      <td>{{ product.itemType }}</td>
+                      @if (product.approvalStatus == 'Pending') {
+                      <td>
+                        <span class="badge badge-primary">Pending</span>
+                      </td>
+                      }
+                      @if (product.approvalStatus == 'Approve') {
+                      <td>
+                        <span class="badge badge-success">Approve</span>
+                      </td>
+                      }
+                      @if (product.approvalStatus == 'Rejected') {
+                      <td>
+                        <span class="badge badge-danger">Rejected</span>
+                      </td>
+                      }
+                      @if (deleteAccess || showMacAddressAccess || createAccess) {
+                      <td class="btnAction">
+                        @if (deleteAccess) {
+                        <button style="
+                            border: none;
+                            background: transparent;
+                            padding: 0;
+                            margin-right: 3px;
+                            cursor: pointer;
+                          " id="delete-button" href="javascript:void(0)"
+                          [disabled]="product.approvalStatus !== 'Pending'" title="delete"
+                          (click)="deleteConfirmProduct(product.id)">
+                           <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                        </button>
+                        }
+                        @if (createAccess) {
+                        <button style="
+                            border: none;
+                            background: transparent;
+                            padding: 0;
+                            margin-right: 3px;
+                            cursor: pointer;
+                          " id="edit-button" style="
+                            border: none;
+                            background: transparent;
+                            padding: 0;
+                            margin-right: 3px;
+                          " title="Approve" [disabled]="
+                            product.approvalStatus !== 'Pending' ||
+                            product.createdById != loggedInStaffId
+                          " (click)="approveChangeStatus(product.id)">
+                         <img src="assets/img/DashboardIcons/Assign.svg">
+                        </button>
+                        }
+                        @if (createAccess) {
+                        <button style="
+                            border: none;
+                            background: transparent;
+                            padding: 0;
+                            margin-right: 3px;
+                            cursor: pointer;
+                          " id="edit-button" title="Rejected" [disabled]="
+                            product.approvalStatus !== 'Pending' ||
+                            product.createdById != loggedInStaffId
+                          " (click)="rejectChangeStatus(product.id)">
+                           <img src="assets/img/DashboardIcons/Reject.svg">
+                        </button>
+                        }
+                        @if (showMacAddressAccess) {
+                        <button style="
+                            border: none;
+                            background: transparent;
+                            padding: 0;
+                            margin-right: 3px;
+                            cursor: pointer;
+                          " id="edit-button" (click)="ShowMACandSerial(product.id)" class="curson_pointer">
+                          <img src="assets/img/E_Status_Y.png" />
+                        </button>
+                        }
+                      </td>
+                      }
+                    </tr>
+                    }
+                  </tbody>
+                </table>
+                <div class="pagination_Dropdown">
+                  <pagination-controls id="stateListData" [maxSize]="10" [directionLinks]="true" previousLabel=""
+                    nextLabel=""
+                    (pageChange)="pageChangedProductList((currentPageProductListdata = $event))"></pagination-controls>
+                  <div id="itemPerPageDropdown">
+                    <p-dropdown [(ngModel)]="productListdataitemsPerPage" [options]="pageLimitOptions"
+                      optionLabel="value" optionValue="value" (onChange)="TotalItemPerPage($event)"></p-dropdown>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+  @if (this.createView) {
+  <div class="col-md-12">
+    <div class="panel">
+      <div class="panel-heading">
+        <h3 class="panel-title">{{ this.editMode ? "Update" : "Create" }} Bulk Consumption</h3>
+        <div class="right">
+          <button type="button" class="btn-toggle-collapse" data-toggle="collapse" data-target="#createProduct"
+            aria-expanded="false" aria-controls="createProduct">
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+      <div id="createProduct" class="panel-collapse collapse in">
+        <div class="panel-body">
+          @if (!createAccess && !editAccess) {
+          <div>
+            Sorry you have not privilege to add or edit operation!
+          </div>
+          }
+          @if (createAccess || editAccess) {
+          <div>
+            <form [formGroup]="bulkConsumptionFormGroup">
+              <fieldset style="margin-top: 0px">
+                <legend>Basic Details</legend>
+                <div class="boxWhite">
+                  <div class="row">
+                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                      <div class="form-group">
+                        <label>Name*</label>
+                        <input type="text" class="form-control" placeholder="Enter Name"
+                          formControlName="bulkConsumptionName" />
+                        @if (
+                        submitted &&
+                        bulkConsumptionFormGroup.controls.bulkConsumptionName.errors
+                        ) {
+                        <div class="errorWrap text-danger">
+                          @if (
+                          submitted &&
+                          bulkConsumptionFormGroup.controls.bulkConsumptionName.errors.required
+                          ) {
+                          <div class="error text-danger">
+                            Name is required.
+                          </div>
+                          }
+                        </div>
+                        }
+                      </div>
+                    </div>
+                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                      <div class="form-group">
+                        <label>Item Type*</label>
+                        <p-dropdown (onChange)="getSelItemType($event)" [options]="this.ItemSelectionType" filter="true"
+                          filterBy="label" formControlName="itemType" optionLabel="label" optionValue="value"
+                          placeholder="Select Item Type"></p-dropdown>
+                        @if (
+                        submitted && this.bulkConsumptionFormGroup.controls.itemType.errors
+                        ) {
+                        <div class="errorWrap text-danger">
+                          @if (
+                          submitted &&
+                          this.bulkConsumptionFormGroup.controls.itemType.errors.required
+                          ) {
+                          <div class="error text-danger">
+                            Item Type is required.
+                          </div>
+                          }
+                        </div>
+                        }
+                      </div>
+                    </div>
+                    @if (getSerializedProductFlag) {
+                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                      <div class="form-group">
+                        <label>Product*</label>
+                        <p-dropdown [options]="allActiveProducts" (onChange)="getSourceType()" filterBy="name"
+                          filter="true" formControlName="productId" optionLabel="name" optionValue="id"
+                          placeholder="Select Product">
+                        </p-dropdown>
+                        @if (submitted && bulkConsumptionFormGroup.controls.productId.errors) {
+                        <div class="errorWrap text-danger">
+                          @if (
+                          submitted &&
+                          bulkConsumptionFormGroup.controls.productId.errors.required
+                          ) {
+                          <div class="error text-danger">
+                            Product is required.
+                          </div>
+                          }
+                        </div>
+                        }
+                      </div>
+                    </div>
+                    }
+                    @if (getAllNonSerializedProductFlag) {
+                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                      <div class="form-group">
+                        <label>Product*</label>
+                        @if (getAllNonSerializedProductFlag) {
+                        <p-dropdown (onChange)="getSourceType()" [options]="allActiveNonTrackableProducts" filter="true"
+                          filterBy="name" formControlName="productId" optionLabel="name" optionValue="id"
+                          placeholder="Select Product"></p-dropdown>
+                        }
+                        @if (submitted && bulkConsumptionFormGroup.controls.productId.errors) {
+                        <div class="errorWrap text-danger">
+                          @if (
+                          submitted &&
+                          bulkConsumptionFormGroup.controls.productId.errors.required
+                          ) {
+                          <div class="error text-danger">
+                            Product is required.
+                          </div>
+                          }
+                        </div>
+                        }
+                      </div>
+                    </div>
+                    }
+                  </div>
+                  @if (getSerializedProductFlag && sourceTypeFlag) {
+                  <div class="row">
+                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                      <div class="form-group">
+                        <label>Owner Type*</label>
+                        <p-dropdown [options]="sourceType" optionValue="label" optionLabel="label" filter="true"
+                          filterBy="label" placeholder="Select Owner Type" formControlName="ownerType" (onChange)="
+                            this.getSources(this.bulkConsumptionFormGroup.controls.ownerType.value)
+                          "></p-dropdown>
+                        @if (submitted && bulkConsumptionFormGroup.controls.ownerType.errors) {
+                        <div class="errorWrap text-danger">
+                          <div class="error text-danger">Owner Type is required.</div>
+                        </div>
+                        }
+                      </div>
+                    </div>
+                    @if (
+                    getSerializedProductFlag &&
+                    sourceTypeFlag &&
+                    sourceFlag &&
+                    !sourceTypeAsStaffFlag
+                    ) {
+                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                      <div class="form-group">
+                        <label> Owner*</label>
+                        <p-dropdown [options]="sources" formControlName="ownerId" optionLabel="name" optionValue="id"
+                          filter="true" filterBy="name" placeholder="Select owner" (onChange)="
+                            this.getAllSerializedProductItem(
+                              this.bulkConsumptionFormGroup.controls.productId.value,
+                              this.bulkConsumptionFormGroup.controls.ownerId.value,
+                              this.bulkConsumptionFormGroup.controls.ownerType.value
+                            )
+                          "></p-dropdown>
+                        @if (submitted && this.bulkConsumptionFormGroup.controls.ownerId.errors) {
+                        <div class="errorWrap text-danger">
+                          @if (
+                          submitted &&
+                          this.bulkConsumptionFormGroup.controls.ownerId.errors.required
+                          ) {
+                          <div class="errorWrap text-danger">
+                            Owner is required.
+                          </div>
+                          }
+                        </div>
+                        }
+                      </div>
+                    </div>
+                    }
+                    @if (
+                    getSerializedProductFlag &&
+                    sourceTypeFlag &&
+                    sourceFlag &&
+                    sourceTypeAsStaffFlag
+                    ) {
+                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                      <div class="form-group">
+                        <label> Owner*</label>
+                        <p-dropdown [options]="sources" formControlName="ownerId" optionLabel="username"
+                          optionValue="id" filter="true" filterBy="username" placeholder="Select owner" (onChange)="
+                            this.getAllSerializedProductItem(
+                              this.bulkConsumptionFormGroup.controls.productId.value,
+                              this.bulkConsumptionFormGroup.controls.ownerId.value,
+                              this.bulkConsumptionFormGroup.controls.ownerType.value
+                            )
+                          "></p-dropdown>
+                        @if (submitted && this.bulkConsumptionFormGroup.controls.ownerId.errors) {
+                        <div class="errorWrap text-danger">
+                          @if (
+                          submitted &&
+                          this.bulkConsumptionFormGroup.controls.ownerId.errors.required
+                          ) {
+                          <div class="errorWrap text-danger">
+                            Owner is required.
+                          </div>
+                          }
+                        </div>
+                        }
+                      </div>
+                    </div>
+                    }
+                  </div>
+                  }
+                  @if (getAllNonSerializedProductFlag && sourceTypeFlag) {
+                  <div class="row">
+                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                      <div class="form-group">
+                        <label>Owner Type*</label>
+                        <p-dropdown [options]="sourceType" optionValue="label" optionLabel="label" filter="true"
+                          filterBy="label" placeholder="Select Owner Type" formControlName="ownerType" (onChange)="
+                            this.getSources(this.bulkConsumptionFormGroup.controls.ownerType.value)
+                          "></p-dropdown>
+                        @if (submitted && bulkConsumptionFormGroup.controls.ownerType.errors) {
+                        <div class="errorWrap text-danger">
+                          <div class="error text-danger">Owner Type is required.</div>
+                        </div>
+                        }
+                      </div>
+                    </div>
+                    @if (
+                    getAllNonSerializedProductFlag &&
+                    sourceTypeFlag &&
+                    sourceFlag &&
+                    !sourceTypeAsStaffFlag
+                    ) {
+                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                      <div class="form-group">
+                        <label> Owner*</label>
+                        <p-dropdown [options]="sources" formControlName="ownerId" optionLabel="name" optionValue="id"
+                          filter="true" filterBy="name" placeholder="Select Owner" (onChange)="
+                            this.getAvailableQtyByProductAndSource(
+                              this.bulkConsumptionFormGroup.controls.productId.value,
+                              this.bulkConsumptionFormGroup.controls.ownerId.value,
+                              this.bulkConsumptionFormGroup.controls.ownerType.value
+                            )
+                          "></p-dropdown>
+                        @if (submitted && this.bulkConsumptionFormGroup.controls.ownerId.errors) {
+                        <div class="errorWrap text-danger">
+                          @if (
+                          submitted &&
+                          this.bulkConsumptionFormGroup.controls.ownerId.errors.required
+                          ) {
+                          <div class="errorWrap text-danger">
+                            Owner is required.
+                          </div>
+                          }
+                        </div>
+                        }
+                      </div>
+                    </div>
+                    }
+                    @if (
+                    getAllNonSerializedProductFlag &&
+                    sourceTypeFlag &&
+                    sourceFlag &&
+                    sourceTypeAsStaffFlag
+                    ) {
+                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                      <div class="form-group">
+                        <label> Owner*</label>
+                        <p-dropdown [options]="sources" formControlName="ownerId" optionLabel="username"
+                          optionValue="id" filter="true" filterBy="username" placeholder="Select Owner" (onChange)="
+                            this.getAvailableQtyByProductAndSource(
+                              this.bulkConsumptionFormGroup.controls.productId.value,
+                              this.bulkConsumptionFormGroup.controls.ownerId.value,
+                              this.bulkConsumptionFormGroup.controls.ownerType.value
+                            )
+                          "></p-dropdown>
+                        @if (submitted && this.bulkConsumptionFormGroup.controls.ownerId.errors) {
+                        <div class="errorWrap text-danger">
+                          @if (
+                          submitted &&
+                          this.bulkConsumptionFormGroup.controls.ownerId.errors.required
+                          ) {
+                          <div class="errorWrap text-danger">
+                            Owner is required.
+                          </div>
+                          }
+                        </div>
+                        }
+                      </div>
+                    </div>
+                    }
+                  </div>
+                  }
+                </div>
+              </fieldset>
+              @if (getAllNonSerializedItemFlag) {
+              <fieldset>
+ <div> --
+                <legend>Non Serialized Product Details</legend>
+                <div class="boxWhite">
+                  <tr>
+                    <th>
+                      @if (availableQtyFlag) {
+                      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <div class="form-group">
+                          <label style="margin-bottom: 1.5rem"> Available Quantity </label>
+                          <br />
+                          <label>
+                            {{ this.availableQty }}
+                          </label>
+                        </div>
+                      </div>
+                      }
+                    </th>
+                    <th>
+                      @if (availableQtyFlag) {
+                      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <div class="form-group">
+                          <label>Assign Quantity*</label>
+                          <input type="number" class="form-control" placeholder="Enter Assign Quantity"
+                            formControlName="nonSerializedQty" (keypress)="assignQuantityValidation($event)" [ngClass]="{
+                              'is-invalid':
+                                submitted &&
+                                bulkConsumptionFormGroup.controls.nonSerializedQty.errors
+                            }" />
+                          @if (this.showQtyError) {
+                          <div class="error text-danger">
+                            Assign quantity must be less than available quantity.
+                          </div>
+                          }
+                          @if (this.negativeAssignQtyError) {
+                          <div class="error text-danger">
+                            Assign quantity must be greater than 0.
+                          </div>
+                          }
+                          @if (
+                          submitted && bulkConsumptionFormGroup.controls.nonSerializedQty.errors
+                          ) {
+                          <div class="errorWrap text-danger">
+                            @if (
+                            submitted &&
+                            bulkConsumptionFormGroup.controls.nonSerializedQty.required
+                            ) {
+                            <div class="error text-danger">
+                              Assign Quantity is required.
+                            </div>
+                            }
+                            @if (
+                            submitted &&
+                            bulkConsumptionFormGroup.controls.nonSerializedQty.errors.pattern
+                            ) {
+                            <div class="error text-danger">
+                              Only Numeric value are allowed.
+                            </div>
+                            }
+                          </div>
+                          }
+                        </div>
+                      </div>
+                      }
+                    </th>
+                  </tr>
+                </div>
+               </div> --
+              </fieldset>
+              }
+              @if (getAllSingleItemMacFlag) {
+              <fieldset>
+                <div class="modal-body"> --
+                <legend>Serialized Item Selection</legend>
+                <div class="boxWhite">
+                  <p-table #dt [value]="macAddressList" [(selection)]="selectedMACAddress" dataKey="id"
+                    styleClass="p-datatable-customers" [rowHover]="true" [rows]="5"
+                    [rowsPerPageOptions]="[5, 10,  20, 50, 100]" [showCurrentPageReport]="true" [paginator]="true"
+                    [loading]="loading" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                    [filterDelay]="0" responsiveLayout="scroll" [scrollable]="true" scrollHeight="300px"
+                    [globalFilterFields]="['condition', 'itemId', 'serialNumber', 'macAddress']">
+                    <ng-template pTemplate="header">
+                      <tr>
+                        <th style="width: 10%"></th>
+                        <th>Item Id</th>
+                        <th>Item Type</th>
+                        @if (this.hasMac) {
+                        <th>MAC Address</th>
+                        }
+                        @if (this.hasSerial) {
+                        <th>Serial Number*</th>
+                        }
+                      </tr>
+                    </ng-template>
+                    <ng-template let-product pTemplate="body" let-rowIndex="rowIndex">
+                      <tr>
+                        <td style="width: 10%">
+                          @if (getSerializedProductFlag && product.customerId == null) {
+                          <p-tableCheckbox [value]="product" onclick="oneSelect()"></p-tableCheckbox>
+                          }
+                        </td>
+                        <td>
+                          <input name="itemId" class="form-control" [value]="product.itemId" disabled />
+                        </td>
+                        <td>
+                          {{ product.condition }}
+                        </td>
+                        @if (this.hasMac) {
+                        <td>
+                          <input type="text" name="macAddress" class="form-control" [value]="product.macAddress"
+                            [(ngModel)]="product.macAddress" [ngModelOptions]="{ standalone: true }" />
+                        </td>
+                        }
+                        @if (this.hasSerial) {
+                        <td>
+                          <input type="text" name="serialNumber" class="form-control" [value]="product.serialNumber"
+                            [(ngModel)]="product.serialNumber" [ngModelOptions]="{ standalone: true }" />
+                        </td>
+                        }
+                      </tr>
+                    </ng-template>
+                  </p-table>
+                </div>
+                 </div> --
+              </fieldset>
+              }
+              <br />
+              @if (getSerializedProductFlag) {
+              <div class="addUpdateBtn">
+                <button type="submit" class="btn btn-primary" id="submit" (click)="submitSerialized()"
+                  [disabled]="!bulkConsumptionFormGroup.valid">
+                  <i class="fa fa-check-circle"></i>
+                  {{ editMode ? "Update" : "Add" }} Bulk Consumption
+                </button>
+                <br />
+              </div>
+              }
+              @if (getAllNonSerializedProductFlag) {
+              <div class="addUpdateBtn">
+                <button type="submit" class="btn btn-primary" id="submit" (click)="submitNonSerialized()"
+                  [disabled]="!bulkConsumptionFormGroup.valid">
+                  <i class="fa fa-check-circle"></i>
+                  {{ editMode ? "Update" : "Add" }} Bulk Consumption
+                </button>
+                <br />
+              </div>
+              }
+            </form>
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+</div>
+@if (detailView) {
+<div class="row">
+  <div class="col-md-12 col-sm-12">
+    <div class="panel">
+      <div class="panel-heading">
+        <div class="displayflex">
+          <button type="button" class="btn btn-secondary backbtn" data-toggle="tooltip" data-placement="bottom"
+            title="Go to Tax Details" (click)="WarehouseList()">
+            <i class="fa fa-arrow-circle-left" style="color: #f7941e !important; font-size: 28px"></i>
+          </button>
+          <h3 class="panel-title">
+            {{ viewBulkConsumptionDetails.bulkConsumptionName }} Bulk Consumption
+          </h3>
+        </div>
+        <div class="right">
+          <button type="button" class="btn-toggle-collapse" data-toggle="collapse" data-target="#outwardDetail"
+            aria-expanded="false" aria-controls="taxalldea">
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+      <div id="outwardDetail" class="panel-collapse collapse in">
+        <div class="panel-body table-responsive">
+          <fieldset style="margin-top: 0rem; margin-bottom: 2rem">
+            <legend>Basic Details</legend>
+            <div class="boxWhite">
+              <div class="row">
+                <div class="col-lg-4 col-md-4 dataGroup">
+                  <label class="datalbl">Name :</label>
+                  <span>{{ viewBulkConsumptionDetails.bulkConsumptionName }}</span>
+                </div>
+                <div class="col-lg-4 col-md-4 dataGroup">
+                  <label class="datalbl">Product :</label>
+                  <span>{{ viewBulkConsumptionDetails.productName }}</span>
+                </div>
+                <div class="col-lg-4 col-md-4 dataGroup">
+                  <label class="datalbl">Quantity :</label>
+                  <span>{{ viewBulkConsumptionDetails.qty }}</span>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-lg-4 col-md- dataGroup">
+                  <label class="datalbl">Item Type :</label>
+                  <span>{{ viewBulkConsumptionDetails.itemType }}</span>
+                </div>
+                <div class="col-lg-4 col-md- dataGroup">
+                  <label class="datalbl">Approval Status :</label>
+                  <span>{{ viewBulkConsumptionDetails.approvalStatus }}</span>
+                </div>
+
+              </div>
+            </div>
+          </fieldset>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+}
+<p-dialog header="Change Approval Status" [(visible)]="approveChangeStatusModal" [style]="{ width: '40%' }"
+  [modal]="true" [responsive]="true" [draggable]="false" [closable]="true" (onHide)="closeApproveInventoryModal()">
+  <div class="modal-body">
+    <form [formGroup]="assignInwardForm">
+      <div class="row">
+        <div class="col-lg-2 col-md-3 col-sm-4 col-xs-12">
+          <label>Remark*:</label>
+        </div>
+        <div class="col-lg-10 col-md-9 col-sm-8 col-xs-12">
+          <textarea class="form-control" formControlName="remark" name="remark"></textarea>
+          @if (assignInwardSubmitted && assignInwardForm.controls.remark.errors) {
+          <div class="errorWrap text-danger">
+            @if (assignInwardSubmitted && assignInwardForm.controls.remark.errors.required) {
+            <div class="error text-danger">
+              Remark is required.
+            </div>
+            }
+          </div>
+          }
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button (click)="approveInventory()" class="btn btn-primary" id="submit" type="submit">
+      <i class="fa fa-check-circle"></i>
+      Approve
+    </button>
+    <button class="btn btn-default" data-dismiss="modal" (click)="closeApproveInventoryModal()" type="button">
+      Close
+    </button>
+  </div>
+</p-dialog>
+<p-dialog header="Change Approval Status" [(visible)]="rejectChangeStatusModal" [style]="{ width: '40%' }"
+  [modal]="true" [responsive]="true" [draggable]="false" [closable]="true" (onHide)="closeRejectInventoryModal()">
+  <div class="modal-body">
+    <form [formGroup]="rejectInwardForm">
+      <div class="row">
+        <div class="col-lg-2 col-md-3 col-sm-4 col-xs-12">
+          <label>Remark*:</label>
+        </div>
+        <div class="col-lg-10 col-md-9 col-sm-8 col-xs-12">
+          <textarea class="form-control" formControlName="remark" name="remark"></textarea>
+          @if (rejectInwardSubmitted && rejectInwardForm.controls.remark.errors) {
+          <div class="errorWrap text-danger">
+            @if (rejectInwardSubmitted && rejectInwardForm.controls.remark.errors.required) {
+            <div class="error text-danger">
+              Remark is required.
+            </div>
+            }
+          </div>
+          }
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button (click)="rejectInventory()" class="btn btn-primary" id="submit" type="submit">
+      <i class="fa fa-check-circle"></i>
+      Reject
+    </button>
+    <button class="btn btn-default" (click)="closeRejectInventoryModal()" data-dismiss="modal" type="button">
+      Close
+    </button>
+  </div>
+</p-dialog>
+
+<p-dialog header="Inward MAC Mapping" [(visible)]="MACShowModal" [style]="{ width: '50%' }" [modal]="true"
+  [responsive]="true" [draggable]="false" [closable]="true" (onHide)="closeMACandSerialModal()">
+  <div class="modal-body">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>MAC Address</th>
+          <th>Serial Number</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (
+        inward of inwardMacList
+        | paginate
+        : {
+        id: 'inwardMacListData',
+        itemsPerPage: inwardMacdataitemsPerPage,
+        currentPage: currentPageinwardMacdata,
+        totalItems: inwardMacdatatotalRecords
+        }; track
+        inward; let i = $index) {
+        <tr>
+          <td>{{ inward.macAddress }}</td>
+          <td>{{ inward.serialNumber }}</td>
+        </tr>
+        }
+      </tbody>
+    </table>
+    <pagination-controls id="inwardMacListData" [maxSize]="10" [directionLinks]="true" previousLabel="" nextLabel=""
+      (pageChange)="pageChangedMacSerialList($event)"></pagination-controls>
+  </div>
+  <div class="modal-footer">
+    <div class="addUpdateBtn">
+      <button type="button" class="btn btn-danger btn-sm" (click)="closeMACandSerialModal()">
+        Close
+      </button>
+    </div>
+  </div>
+</p-dialog> -->
+<div class="row header-row">
+    <mat-card class="cardWithShadow w-100">
+        <mat-card-content class="mat-card-content-border">
+            <div class="row">
+                <div class="col-sm-9 d-flex">
+                    <mat-form-field appearance="outline" class="w-100 hide-hint mr-10 m-l-16">
+                        <input class="input-p-5" [(ngModel)]="searchProductCatName" matInput
+                            placeholder="Enter Bulk Consumption Name" (keydown.enter)="searchProduct()" />
+                        <mat-icon matSuffix class="search-header-search-icon">
+                            <i class="pi pi-search icon-size"></i>
+                        </mat-icon>
+                    </mat-form-field>
+
+                    <button mat-button mat-flat-button color="primary" class="button-normal m-r-10"
+                        (click)="searchProduct()">
+                        Search
+                    </button>
+                    <button mat-stroked-button matButton="outlined" class="button-normal"
+                        (click)="clearSearchProduct()">
+                        Clear
+                    </button>
+                </div>
+
+                <div class="col-sm-3 search-div">
+                    @if (createAccess) {
+                    <button mat-button mat-flat-button color="primary" (click)="createBulkConsumption()"
+                        class="button-normal mr-10">
+                        Add Bulk Consumption
+                    </button>
+                    }
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+
+<div class="container-fluid contain-flud">
+    <div class="row">
+        <div class="col-md-12">
+            @if (listView) {
+            <mat-card class="cardWithShadow">
+                <mat-card-content class="mat-card-content-border">
+                    <div class="country-table-list">
+                        <div class="table-container">
+                            <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8 w-100">
+                                <ng-container matColumnDef="id">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">ID</th>
+                                    <td mat-cell *matCellDef="let product">
+                                        {{ product.id }}
+                                    </td>
+                                </ng-container>
+                                <ng-container matColumnDef="bulkConsumptionName">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Name
+                                    </th>
+                                    <td mat-cell *matCellDef="let product">
+                                        {{ product.bulkConsumptionName }}
+                                    </td>
+                                </ng-container>
+                                <ng-container matColumnDef="productName">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Product
+                                    </th>
+                                    <td mat-cell *matCellDef="let product" class="f-s-14">
+                                        {{ product.productName }}
+                                    </td>
+                                </ng-container>
+                                <ng-container matColumnDef="qty">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Quantity
+                                    </th>
+                                    <td mat-cell *matCellDef="let product" class="f-s-14">
+                                        {{ product.qty }}
+                                    </td>
+                                </ng-container>
+                                <ng-container matColumnDef="itemType">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Item Type
+                                    </th>
+                                    <td mat-cell *matCellDef="let product" class="f-s-14">
+                                        {{ product.itemType }}
+                                    </td>
+                                </ng-container>
+                                <ng-container matColumnDef="approvalStatus">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Approval Status
+                                    </th>
+                                    <td mat-cell *matCellDef="let product" class="f-s-14">
+                                        <span class="status-badge" [ngClass]="{
+                        'status-info': product.approvalStatus === 'Pending',
+                        'status-success': product.approvalStatus === 'Approve',
+                        'status-danger': product.approvalStatus === 'Rejected'
+                      }">
+                                            {{ product.approvalStatus }}
+                                        </span>
+                                    </td>
+                                </ng-container>
+                                @if (deleteAccess || showMacAddressAccess || createAccess) {
+                                <ng-container matColumnDef="action">
+                                    <th mat-header-cell *matHeaderCellDef stickyEnd class="table-header-title">
+                                        Action
+                                    </th>
+                                    <td mat-cell *matCellDef="let product">
+                                        <a mat-icon-button matTooltip="view" href="javascript:void(0)"
+                                            (click)="getBulkConsumptionDetails(product.id)">
+                                            <img src="assets/img/DashboardIcons/eye-svgrepo-com (1) 1.svg">
+                                        </a>
+                                        @if (deleteAccess) {
+                                        <a mat-icon-button matTooltip="delete" href="javascript:void(0)"
+                                            [disabled]="product.approvalStatus !== 'Pending'" title="delete"
+                                            (click)="disabledProductIds.has(product.id) || product.approvalStatus === 'Pending' && deleteConfirmProductDialog(product)">
+                                            <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                        </a>
+                                        }
+                                        @if (createAccess) {
+                                        <a mat-icon-button matTooltip="approve" href="javascript:void(0)"
+                                            [disabled]="product.approvalStatus !== 'Pending' || product.createdById != loggedInStaffId"
+                                            (click)="onApproveClick(product.id)"
+                                            [class.disabled]="disabledProductIds.has(product.id) || product.approvalStatus !== 'Pending' || product.createdById !== loggedInId">
+                                            <img src="assets/img/DashboardIcons/Assign.svg">
+                                        </a>
+                                        <a mat-icon-button matTooltip="reject" href="javascript:void(0)"
+                                            [disabled]=" product.approvalStatus !== 'Pending' ||product.createdById != loggedInStaffId"
+                                            (click)="onRejectClick(product.id)"
+                                            [class.disabled]="disabledProductIds.has(product.id) || product.approvalStatus !== 'Pending' || product.createdById !== loggedInId">
+                                            <img src="assets/img/DashboardIcons/Reject.svg">
+                                        </a>}
+                                        @if (showMacAddressAccess) {
+                                        <a mat-icon-button matTooltip="id-card" href="javascript:void(0)"
+                                            matTooltip="Show MAC and Serial" (click)="ShowMACandSerial(product.id)">
+                                            <img src="assets/img/DashboardIcons/Status.svg">
+
+
+                                        </a> }
+                                    </td>
+                                </ng-container> }
+                                <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"
+                                    class="table-header-bg"></tr>
+                                <tr mat-row *matRowDef="let row; columns: displayedColumns" class="table-content-row">
+                                </tr>
+                            </table>
+
+                            <mat-paginator [length]="productListdatatotalRecords"
+                                [pageSize]="productListdataitemsPerPage" [pageSizeOptions]="[5,10,20,50,100]"
+                                showFirstLastButtons (page)="pageChangedProductList($event)">
+                            </mat-paginator>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+            }
+        </div>
+    </div>
+</div>
+
+<ng-template #detailDialog>
+    <div class="dialog-container">
+        <div class="dialog-header">
+            View Bulk Consumption
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="onCancel()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+            <div class="col-md-12">
+
+                <mat-card class="cardWithShadow">
+                    <div class="dialog-header">
+                        Basic Details
+                    </div>
+                    <mat-card-content>
+                        <div class="row">
+                            <div class="col-lg-6 col-md-6 dataGroup">
+                                <div class="field">
+                                    <span class="label-text">Name</span>
+                                    <span class="colon">:</span>
+                                    <span class="m-l-10">{{ viewBulkConsumptionDetails.bulkConsumptionName }}</span>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6 col-md-6 dataGroup">
+                                <div class="field">
+                                    <span class="label-text">Product</span>
+                                    <span class="colon">:</span>
+                                    <span class="m-l-10">{{ viewBulkConsumptionDetails.productName }}</span>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6 col-md-6 dataGroup">
+                                <div class="field">
+                                    <span class="label-text">Item Type</span>
+                                    <span class="colon">:</span>
+                                    <span class="m-l-10">{{ viewBulkConsumptionDetails.itemType }}</span>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6 col-md-6 dataGroup">
+                                <div class="field">
+                                    <span class="label-text">Approval Status</span>
+                                    <span class="colon">:</span>
+                                    <span class="m-l-10">{{ viewBulkConsumptionDetails.approvalStatus }}</span>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6 col-md-6 dataGroup">
+                                <div class="field">
+                                    <span class="label-text">Quantity</span>
+                                    <span class="colon">:</span>
+                                    <span class="m-l-10">{{ viewBulkConsumptionDetails.qty }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+        </div>
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+            <button mat-stroked-button matButton="outlined" type="button" color="primary" class="button-normal"
+                (click)="onCancel()">
+                Close
+            </button>
+        </div>
+    </div>
+</ng-template>
+
+
+<ng-template #createEditDialog>
+    <div class="dialog-container">
+        <div class="dialog-header">
+            {{ editMode ? "Update" : "Create" }} Bulk Consumption
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="onCancel()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+            <div class="col-md-12">
+                @if (!createAccess && !editAccess) {
+                <mat-card-content class="matcard-content">
+                    <div class="panel-body table-responsive">
+                        Sorry you have not privilege to add or edit operation!
+                    </div>
+                </mat-card-content>
+                }
+                @if (createAccess || editAccess) {
+                <mat-card-content class="matcardContent">
+                    <form [formGroup]="bulkConsumptionFormGroup" class="card-form mb-3">
+                        <div class="row g-3">
+                            <div class="col-md-4 col-sm-6 col-xs-12 mb-4">
+                                <label class="inputLabel">Name*</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <input matInput class="input-p-5" placeholder="Enter Name"
+                                        formControlName="bulkConsumptionName"
+                                        [ngClass]="{ 'is-invalid': submitted && bulkConsumptionFormGroup.controls.bulkConsumptionName.errors }"
+                                        maxlength="250" />
+                                    <mat-error
+                                        *ngIf="submitted && bulkConsumptionFormGroup.get('bulkConsumptionName')?.hasError('required')">
+                                        Name is required.
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <div class="col-md-4 col-sm-6 col-xs-12 mb-4">
+                                <label class="inputLabel">Item Type*</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select class="input-p-5" placeholder="Select Item Type"
+                                        formControlName="itemType" (selectionChange)="getSelItemType($event)"
+                                        [ngClass]="{ 'is-invalid': submitted && bulkConsumptionFormGroup.controls.itemType.errors }">
+                                        <mat-option *ngFor="let option of ItemSelectionType" [value]="option.value">
+                                            {{ option.label }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error
+                                        *ngIf="submitted && bulkConsumptionFormGroup.get('itemType')?.hasError('required')">
+                                        Item Type is required.
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <div *ngIf="getSerializedProductFlag" class="col-md-4 col-sm-6 col-xs-12 mb-4">
+                                <label class="inputLabel">Product*</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select class="input-p-5" placeholder="Select Product"
+                                        formControlName="productId" (selectionChange)="getSourceType()"
+                                        [ngClass]="{ 'is-invalid': submitted && bulkConsumptionFormGroup.controls.productId.errors }">
+                                        <mat-option *ngFor="let p of allActiveProducts" [value]="p.id">
+                                            {{ p.name }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error
+                                        *ngIf="submitted && bulkConsumptionFormGroup.get('productId')?.hasError('required')">
+                                        Product is required.
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <div *ngIf="getAllNonSerializedProductFlag" class="col-md-4 col-sm-6 col-xs-12 mb-4">
+                                <label class="inputLabel">Product*</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select class="input-p-5" placeholder="Select Product"
+                                        formControlName="productId" (selectionChange)="getSourceType()"
+                                        [ngClass]="{ 'is-invalid': submitted && bulkConsumptionFormGroup.controls.productId.errors }">
+                                        <mat-option *ngFor="let p of allActiveNonTrackableProducts" [value]="p.id">
+                                            {{ p.name }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error
+                                        *ngIf="submitted && bulkConsumptionFormGroup.get('productId')?.hasError('required')">
+                                        Product is required.
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <div *ngIf="(getSerializedProductFlag || getAllNonSerializedProductFlag) && sourceTypeFlag"
+                                class="col-md-4 col-sm-6 col-xs-12 mb-4">
+                                <label class="inputLabel">Owner Type*</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select class="input-p-5" placeholder="Select Owner Type"
+                                        formControlName="ownerType"
+                                        (selectionChange)="getSources(bulkConsumptionFormGroup.controls.ownerType.value)"
+                                        [ngClass]="{ 'is-invalid': submitted && bulkConsumptionFormGroup.controls.ownerType.errors }">
+                                        <mat-option *ngFor="let o of sourceType" [value]="o.label">
+                                            {{ o.label }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error
+                                        *ngIf="submitted && bulkConsumptionFormGroup.get('ownerType')?.hasError('required')">
+                                        Owner Type is required.
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <div *ngIf="(getSerializedProductFlag || getAllNonSerializedProductFlag) && sourceTypeFlag && sourceFlag"
+                                class="col-md-4 col-sm-6 col-xs-12 mb-4">
+                                <label class="inputLabel">Owner*</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select class="input-p-5" placeholder="Select Owner" formControlName="ownerId"
+                                        (selectionChange)="
+                      getSerializedProductFlag
+                        ? getAllSerializedProductItem(
+                            bulkConsumptionFormGroup.controls.productId.value,
+                            bulkConsumptionFormGroup.controls.ownerId.value,
+                            bulkConsumptionFormGroup.controls.ownerType.value
+                          )
+                        : getAvailableQtyByProductAndSource(
+                            bulkConsumptionFormGroup.controls.productId.value,
+                            bulkConsumptionFormGroup.controls.ownerId.value,
+                            bulkConsumptionFormGroup.controls.ownerType.value
+                          )
+                      " [ngClass]="{ 'is-invalid': submitted && bulkConsumptionFormGroup.controls.ownerId.errors }">
+                                        <mat-option *ngFor="let s of sources" [value]="s.id">
+                                            {{ sourceTypeAsStaffFlag ? s.username : s.name }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error
+                                        *ngIf="submitted && bulkConsumptionFormGroup.get('ownerId')?.hasError('required')">
+                                        Owner is required.
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <div *ngIf="getAllNonSerializedItemFlag" class="col-lg-12">
+                                <mat-card class="cardWithShadow">
+                                    <mat-card-header>
+                                        <mat-card-title>Non Serialized Product Details</mat-card-title>
+                                    </mat-card-header>
+                                    <mat-card-content class="matcardContent">
+                                        <div class="row" *ngIf="availableQtyFlag">
+                                            <div class="col-md-6">
+                                                <label class="inputLabel">Available Quantity</label>
+                                                <div>{{ availableQty }}</div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="inputLabel">Assign Quantity*</label>
+                                                <mat-form-field appearance="outline" class="w-100">
+                                                    <input class="input-p-5" matInput type="number"
+                                                        placeholder="Enter Assign Quantity"
+                                                        formControlName="nonSerializedQty"
+                                                        (keypress)="assignQuantityValidation($event)"
+                                                        [ngClass]="{'is-invalid': submitted && bulkConsumptionFormGroup.controls.nonSerializedQty.errors}" />
+                                                    <mat-error *ngIf="showQtyError">
+                                                        Assign quantity must be less than available quantity.
+                                                    </mat-error>
+                                                    <mat-error *ngIf="negativeAssignQtyError">
+                                                        Assign quantity must be greater than 0.
+                                                    </mat-error>
+                                                    <mat-error
+                                                        *ngIf="submitted && bulkConsumptionFormGroup.get('nonSerializedQty')?.hasError('required')">
+                                                        Assign Quantity is required.
+                                                    </mat-error>
+                                                    <mat-error
+                                                        *ngIf="submitted && bulkConsumptionFormGroup.get('nonSerializedQty')?.hasError('pattern')">
+                                                        Only Numeric values are allowed.
+                                                    </mat-error>
+                                                </mat-form-field>
+                                            </div>
+                                        </div>
+                                    </mat-card-content>
+                                </mat-card>
+                            </div>
+
+                            <div *ngIf="getAllSingleItemMacFlag">
+                                <div class="col-md-12">
+                                    <mat-card class="cardWithShadow">
+                                        <mat-card-header>
+                                            <mat-card-title>Serialized Item Selection</mat-card-title>
+                                        </mat-card-header>
+                                        <mat-card-content class="mat-card-content-border">
+                                            <div class="country-table-list">
+                                                <div class="table-container">
+                                                    <table mat-table [dataSource]="macAddressList" matSort
+                                                        class="mat-elevation-z8 w-100" stickyHeader>
+
+                                                        <!-- Checkbox Column -->
+                                                        <ng-container matColumnDef="select">
+                                                            <th mat-header-cell *matHeaderCellDef style="width: 10%">
+                                                            </th>
+                                                            <td mat-cell *matCellDef="let product">
+                                                                <mat-checkbox
+                                                                    *ngIf="getSerializedProductFlag && product.customerId == null"
+                                                                    (change)="onSelect(product, $event)"
+                                                                    [checked]="isSelected(product)"></mat-checkbox>
+                                                            </td>
+                                                        </ng-container>
+
+                                                        <!-- Item Id Column -->
+                                                        <ng-container matColumnDef="itemId">
+                                                            <th mat-header-cell *matHeaderCellDef mat-sort-header>Item
+                                                                Id</th>
+                                                            <td mat-cell *matCellDef="let product">
+                                                                <mat-form-field appearance="outline"
+                                                                    class="w-100 m-t-10">
+                                                                    <input matInput class="input-p-5"
+                                                                        [value]="product.itemId" disabled />
+                                                                </mat-form-field>
+                                                            </td>
+                                                        </ng-container>
+
+                                                        <!-- Item Type Column -->
+                                                        <ng-container matColumnDef="condition">
+                                                            <th mat-header-cell *matHeaderCellDef mat-sort-header>Item
+                                                                Type</th>
+                                                            <td mat-cell *matCellDef="let product">{{ product.condition
+                                                                }}</td>
+                                                        </ng-container>
+
+                                                        <!-- MAC Address Column -->
+                                                        <ng-container *ngIf="hasMac" matColumnDef="macAddress">
+                                                            <th mat-header-cell *matHeaderCellDef mat-sort-header>MAC
+                                                                Address</th>
+                                                            <td mat-cell *matCellDef="let product">
+                                                                <mat-form-field appearance="outline"
+                                                                    class="w-100 m-t-10">
+                                                                    <input matInput type="text" class="input-p-5"
+                                                                        [(ngModel)]="product.macAddress"
+                                                                        [ngModelOptions]="{standalone:true}" />
+                                                                </mat-form-field>
+                                                            </td>
+                                                        </ng-container>
+
+                                                        <!-- Serial Number Column -->
+                                                        <ng-container *ngIf="hasSerial" matColumnDef="serialNumber">
+                                                            <th mat-header-cell *matHeaderCellDef mat-sort-header>Serial
+                                                                Number*</th>
+                                                            <td mat-cell *matCellDef="let product">
+                                                                <mat-form-field appearance="outline"
+                                                                    class="w-100 m-t-10">
+                                                                    <input matInput type="text" class="input-p-5"
+                                                                        [(ngModel)]="product.serialNumber"
+                                                                        [ngModelOptions]="{standalone:true}" />
+                                                                </mat-form-field>
+                                                            </td>
+                                                        </ng-container>
+
+                                                        <tr mat-header-row
+                                                            *matHeaderRowDef="displayedColumns1; sticky: true"></tr>
+                                                        <tr mat-row *matRowDef="let row; columns: displayedColumns1;">
+                                                        </tr>
+                                                    </table>
+                                                    <mat-paginator [length]="macAddressList.length" [pageSize]="5"
+                                                        [pageSizeOptions]="[5,10,20,50,100]" showFirstLastButtons
+                                                        (page)="pageChangedMacSerialList($event)">
+                                                    </mat-paginator>
+                                                </div>
+                                            </div>
+                                        </mat-card-content>
+                                    </mat-card>
+                                </div>
+                            </div>
+
+                        </div>
+                    </form>
+                </mat-card-content>
+                }
+            </div>
+        </div>
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+            <button mat-button mat-flat-button color="primary" class="button-normal" type="submit"
+                [disabled]="!bulkConsumptionFormGroup.valid"
+                (click)="getSerializedProductFlag ? submitSerialized() : submitNonSerialized()">
+                {{ editMode ? "Update" : "Add" }} Bulk Consumption
+            </button>
+            <button mat-stroked-button matButton="outlined" type="button" color="primary" class="button-normal"
+                (click)="onCancel()">
+                Cancel
+            </button>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #approveChangeStatusDialog>
+    <div class="dialog-container">
+        <div class="dialog-header">
+            Change Approval Status
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="onCancel()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+            <form [formGroup]="assignInwardForm" class="p-3">
+                <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Remark*</mat-label>
+                    <textarea matInput formControlName="remark" rows="4"></textarea>
+                    <mat-error *ngIf="assignInwardSubmitted && assignInwardForm.get('remark')?.hasError('required')">
+                        Remark is required.
+                    </mat-error>
+                </mat-form-field>
+            </form>
+        </div>
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+            <button mat-flat-button color="primary" (click)="approveInventory()" [disabled]="assignInwardForm.invalid">
+                Approve
+            </button>
+            <button mat-stroked-button color="primary" (click)="onCancel()">
+                Close
+            </button>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #rejectChangeStatusDialog>
+    <div class="dialog-container">
+        <div class="dialog-header">
+            Change Approval Status
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="onCancel()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+            <form [formGroup]="rejectInwardForm" class="p-3">
+                <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Remark*</mat-label>
+                    <textarea matInput formControlName="remark" rows="4"></textarea>
+                    <mat-error *ngIf="rejectInwardSubmitted && rejectInwardForm.get('remark')?.hasError('required')">
+                        Remark is required.
+                    </mat-error>
+                </mat-form-field>
+            </form>
+        </div>
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+            <button mat-flat-button color="primary" (click)="rejectInventory()" [disabled]="rejectInwardForm.invalid">
+                Reject
+            </button>
+            <button mat-stroked-button color="primary" (click)="onCancel()">
+                Close
+            </button>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #macMappingDialog>
+    <div class="dialog-container">
+        <div class="dialog-header">
+            Inward MAC Mapping
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="onCancel()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+            <table mat-table [dataSource]="inwardMacList" class="mat-elevation-z2 w-100" matSort>
+                <ng-container matColumnDef="macAddress">
+                    <th mat-header-cell *matHeaderCellDef class="table-header-title">MAC Address</th>
+                    <td mat-cell *matCellDef="let element">{{ element.macAddress }}</td>
+                </ng-container>
+                <ng-container matColumnDef="serialNumber">
+                    <th mat-header-cell *matHeaderCellDef class="table-header-title">Serial Number</th>
+                    <td mat-cell *matCellDef="let element">{{ element.serialNumber }}</td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="['macAddress', 'serialNumber']"></tr>
+                <tr mat-row *matRowDef="let row; columns: ['macAddress', 'serialNumber'];"></tr>
+            </table>
+
+            <mat-paginator [length]="inwardMacdatatotalRecords" [pageSize]="inwardMacdataitemsPerPage"
+                [pageSizeOptions]="[5, 10,  20, 50, 100]" showFirstLastButtons (page)="pageChangedMacSerialList($event)">
+            </mat-paginator>
+        </div>
+
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+            <button mat-stroked-button color="warn" (click)="onCancel()">
+                Close
+            </button>
+        </div>
+    </div>
+</ng-template>

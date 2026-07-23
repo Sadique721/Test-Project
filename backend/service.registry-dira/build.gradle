@@ -1,0 +1,60 @@
+plugins {
+	id 'org.springframework.boot' version '2.3.11.RELEASE'
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+	id 'java'
+	id 'org.sonarqube' version '3.1.1'
+	id 'jacoco'
+}
+
+group = 'com.savbill.service.registry'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+ext 
+{
+	//set('springCloudVersion', "Greenwich.SR6")
+	set('springCloudVersion', "Hoxton.SR11")
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-server'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+	}
+}
+
+sonarqube {
+    properties {
+        property "sonar.sourceEncoding", "UTF-8"
+    }
+}
+
+task fatJar(type: Jar) {
+	manifest {
+        attributes 'SavbillServiceRegistryServer': 'Gradle Jar SavbillServiceRegistryServer',  
+        	'Implementation-Version': version,
+        	'Main-Class': 'com.savbill.service.registry.SavbillServiceRegistryApplication'
+    }
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
+test {
+	systemProperty "spring.profiles.active", "test"
+}

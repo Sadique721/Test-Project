@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="create-tblcharges-001" author="initial-change">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="tblcharges"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="tblcharges">
+            <column name="CHARGEID" type="BIGINT" >
+                <constraints primaryKey="true" nullable="false" unique="true" />
+            </column>
+            <column name="CHARGENAME" type="VARCHAR(750)" />
+            <column name="DESCRIPTION" type="VARCHAR(255)" />
+            <column name="CHARGETYPE" type="VARCHAR(32)" />
+            <column name="PRICE" type="DECIMAL(16,4)" />
+            <column name="TAXID" type="BIGINT" />
+            <column name="DISCOUNTID" type="BIGINT" />
+            <column name="CREATEDATE" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CREATEDBYSTAFFID" type="DECIMAL(20,0)" />
+            <column name="LASTMODIFIEDBYSTAFFID" type="DECIMAL(20,0)" />
+            <column name="LASTMODIFIEDDATE" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP" />
+            <column name="actual_price" type="DECIMAL(20,4)" />
+            <column name="dbr" type="DECIMAL(20,4)" defaultValue="0.0000" />
+            <column name="is_delete" type="TINYINT(1)" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="chargecategory" type="VARCHAR(50)" />
+            <column name="createbyname" type="VARCHAR(100)" />
+            <column name="updatebyname" type="VARCHAR(100)" />
+            <column name="saccode" type="VARCHAR(100)" />
+            <column name="taxamount" type="DECIMAL(16,4)" />
+            <column name="MVNOID" type="BIGINT" />
+            <column name="BUID" type="BIGINT" />
+            <column name="service" type="VARCHAR(255)" />
+            <column name="status" type="VARCHAR(255)" />
+            <column name="LEDGER_ID" type="VARCHAR(40)" />
+            <column name="royalty_payable" type="BIT(1)" defaultValueBoolean="false" />
+            <column name="business_type" type="VARCHAR(20)" />
+            <column name="currency" type="VARCHAR(50)" />
+            <column name="pushable_ledger_id" type="VARCHAR(100)" />
+            <column name="isinventorycharge" type="TINYINT(1)" defaultValue="0" />
+            <column name="inventorychargetype" type="VARCHAR(100)" />
+            <column name="productid" type="BIGINT" />
+            <column name="mvno_name" type="VARCHAR(150)" />
+        </createTable>
+
+        <!-- Indexes -->
+        <createIndex tableName="tblcharges" indexName="tblcharges_taxid_fk">
+            <column name="TAXID"/>
+        </createIndex>
+
+        <createIndex tableName="tblcharges" indexName="tblcharges_discountid_fk">
+            <column name="DISCOUNTID"/>
+        </createIndex>
+
+        <createIndex tableName="tblcharges" indexName="TBLCHARGES_ibfk_1">
+            <column name="MVNOID"/>
+        </createIndex>
+
+        <createIndex tableName="tblcharges" indexName="businessunit_charge_fk">
+            <column name="BUID"/>
+        </createIndex>
+
+        <!-- Foreign Key Constraints -->
+        <addForeignKeyConstraint constraintName="businessunit_charge_fk"
+                                 baseTableName="tblcharges"
+                                 baseColumnNames="BUID"
+                                 referencedTableName="tblmbusinessunit"
+                                 referencedColumnNames="businessunitid"
+                                 onDelete="RESTRICT"
+                                 onUpdate="CASCADE"/>
+
+        <addForeignKeyConstraint constraintName="tblcharges_discountid_fk"
+                                 baseTableName="tblcharges"
+                                 baseColumnNames="DISCOUNTID"
+                                 referencedTableName="tblmdiscount"
+                                 referencedColumnNames="DISCOUNTID"
+                                 onDelete="RESTRICT"
+                                 onUpdate="CASCADE"/>
+
+        <addForeignKeyConstraint constraintName="TBLCHARGES_ibfk_1"
+                                 baseTableName="tblcharges"
+                                 baseColumnNames="MVNOID"
+                                 referencedTableName="tblmmvno"
+                                 referencedColumnNames="MVNOID"
+                                 onDelete="RESTRICT"
+                                 onUpdate="CASCADE"/>
+
+        <addForeignKeyConstraint constraintName="tblcharges_taxid_fk"
+                                 baseTableName="tblcharges"
+                                 baseColumnNames="TAXID"
+                                 referencedTableName="tblmtax"
+                                 referencedColumnNames="TAXID"
+                                 onDelete="RESTRICT"
+                                 onUpdate="CASCADE"/>
+    </changeSet>
+
+</databaseChangeLog>

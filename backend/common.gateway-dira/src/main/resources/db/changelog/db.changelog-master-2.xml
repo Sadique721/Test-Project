@@ -1,0 +1,3325 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd
+http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.8.xsd">
+
+    <!--    Delete Column location_id from Staff User Table-->
+    <changeSet id="DB0000000053" author="Darshan Bharambe">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="tblmstaffuser" columnName="location_id"></columnExists>
+        </preConditions>
+        <dropColumn tableName="tblmstaffuser">
+            <column name="location_id"></column>
+        </dropColumn>
+    </changeSet>
+    <!--    Delete Column location_name from Staff User Table-->
+    <changeSet id="DB0000000054" author="Darshan Bharambe">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="tblmstaffuser" columnName="location_name"></columnExists>
+        </preConditions>
+        <dropColumn tableName="tblmstaffuser">
+            <column name="location_name"></column>
+        </dropColumn>
+    </changeSet>
+    <!--    Create Staff Location Master Mapping Table for IWF-->
+    <changeSet id="DB0000000055" author="Darshan Bharambe">
+        <preConditions>
+            <not>
+                <tableExists tableName="tbltstafflocationmapping"></tableExists>
+            </not>
+        </preConditions>
+        <createTable tableName="tbltstafflocationmapping">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"
+                             primaryKeyName="tbltstafflocationmapping_id_pk"/>
+            </column>
+            <column name="staff_id" type="bigint"></column>
+            <column name="location_id" type="bigint"></column>
+            <column name="location_name" type="VARCHAR(255)"></column>
+            <column name="created_on" type="TIMESTAMP"
+                    defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="lastmodified_on" type="TIMESTAMP"
+                    defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="createdate" type="TIMESTAMP"
+                    defaultValueComputed="CURRENT_TIMESTAMP">
+            </column>
+            <column name="lastmodifieddate" type="TIMESTAMP"
+                    defaultValueComputed="CURRENT_TIMESTAMP">
+            </column>
+            <column name="createbyname" type="varchar(100)"/>
+            <column name="updatebyname" type="varchar(100)"/>
+            <column name="createdbystaffid" type="bigint"/>
+            <column name="lastmodifiedbystaffid" type="bigint"/>
+        </createTable>
+    </changeSet>
+    <!--    Add Foreignkey Constraint for Staff Id between Staff User Master and Location Staff Relation Table-->
+    <changeSet id="DB0000000056" author="Darshan Bharambe">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists
+                        foreignKeyName="tbltstafflocationmapping_staff_id_fk"></foreignKeyConstraintExists>
+            </not>
+        </preConditions>
+        <addForeignKeyConstraint
+                baseColumnNames="staff_id"
+                baseTableName="tbltstafflocationmapping"
+                constraintName="tbltstafflocationmapping_staff_id_fk"
+                referencedColumnNames="staffid"
+                referencedTableName="tblmstaffuser"/>
+    </changeSet>
+    <changeSet id="DK0000000058" author="Dhaval Khalasi">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmpaymentconfig t WHERE t.payment_config_name='RAZORPAY';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmpaymentconfig">
+            <column name="payment_config_name" value="RAZORPAY"/>
+            <column name="is_delete" value="0"/>
+            <column name="create_date" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </insert>
+    </changeSet>
+    <changeSet id="DK0000000059" author="Dhaval Khalasi">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmpaymentconfigmapping t WHERE t.payment_config_id=(select id FROM (select t2.id
+                from tblmpaymentconfig t2 where t2.payment_config_name = 'RAZORPAY' and t2.mvnoid IS NULL) AS temp);
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'RAZORPAY' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="RAZORPAY_CURRENCY"></column>
+            <column name="payment_parameter_description" value="This will provide Razorpay currency"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'RAZORPAY' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="RAZORPAY_KEY_ID"></column>
+            <column name="payment_parameter_description" value="This will provide Razorpay key id"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'RAZORPAY' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="RAZORPAY_SECRET_KEY"></column>
+            <column name="payment_parameter_description" value="This will provide Razorpay secret key"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'RAZORPAY' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="CAPTIVE_REDIRECT_URL"></column>
+            <column name="payment_parameter_description" value="This will provide url for starting internet."></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'RAZORPAY' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="CWSC_REDIRECT_URL"></column>
+            <column name="payment_parameter_description" value="This will provide url after start of cwsc."></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'RAZORPAY' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="RAZORPAY_CALLBACK_URL"></column>
+            <column name="payment_parameter_description"
+                    value="This will provide callback after payment done."></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'RAZORPAY' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="REDIRECT_TIME_IN_SECONDS"></column>
+            <column name="payment_parameter_description" value="It will provide seconds for receipt."></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'RAZORPAY' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="STAFFUSER_USERNAME"></column>
+            <column name="payment_parameter_description" value="It will provide staff username."></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'RAZORPAY' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="STAFFUSER_PASSWORD"></column>
+            <column name="payment_parameter_description" value="It will provide staff password."></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+    </changeSet>
+
+
+    <changeSet id="AMBUDPAY001" author="Akshay Mewada">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmpaymentconfig t WHERE t.payment_config_name='BUDPAY';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmpaymentconfig">
+            <column name="payment_config_name" value="BUDPAY"/>
+            <column name="is_delete" value="0"/>
+            <column name="create_date" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </insert>
+    </changeSet>
+
+
+    <changeSet id="AMBUDPAY002" author="Akshay Mewada" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmpaymentconfigmapping t WHERE t.payment_config_id=(select id FROM (select t2.id
+                from tblmpaymentconfig t2 where t2.payment_config_name = 'BUDPAY' and t2.mvnoid IS NULL) AS temp);
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'BUDPAY' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="BUDPAY_SECRET_KEY"></column>
+            <column name="payment_parameter_description"
+                    value="This key is used to established secured authentication of BUDPAY"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'BUDPAY' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="BUDPAY_PUBLIC_KEY"></column>
+            <column name="payment_parameter_description"
+                    value="This key is used to established secured authentication of BUDPAY"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'BUDPAY' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="BUDPAY_REQUEST_URL"></column>
+            <column name="payment_parameter_description" value="This url is used to intitate the payment"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'BUDPAY' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="BUDPAY_CALLBACK_URL"></column>
+            <column name="payment_parameter_description"
+                    value="This url is a system url which works as callback url"></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'BUDPAY' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="BUDPAY_REDIRECT_URL"></column>
+            <column name="payment_parameter_description"
+                    value="This url is a system url which works as callback url"></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'BUDPAY' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="REDIRECT_TIME_IN_SECONDS"></column>
+            <column name="payment_parameter_description" value="It will provide seconds for receipt."></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="YG0000000003" author="Yash Godhani">
+        <insert tableName="tblmdemographicmapping">
+            <column name="current_name" value="MVNO"></column>
+            <column name="new_name" value="MVNO"></column>
+            <column name="validation_regex" value="String"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="YG0000000004" author="Yash Godhani" runOnChange="true">
+        <preConditions>
+            <not>
+                <columnExists tableName="tblmservicearea" columnName="blockno"></columnExists>
+            </not>
+        </preConditions>
+        <addColumn tableName="tblmservicearea">
+            <column name="blockno" type="text"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="AMSERVICEAREAMVNOLIST001" author="AKSHAY MEWADA">
+        <preConditions>
+            <not>
+                <columnExists tableName="tblmservicearea" columnName="mvno_lists"></columnExists>
+            </not>
+        </preConditions>
+        <addColumn tableName="tblmservicearea">
+            <column name="mvno_lists" type="varchar(250)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="YP0000000134" author="Yogesh Patil">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="tbltmvnodiscountmapping"/>
+            </not>
+        </preConditions>
+        <createTable tableName="tbltmvnodiscountmapping">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="discount" type="DOUBLE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="mvnoid" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="count_from" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="count_to" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="charge_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CREATEDATE" type="TIMESTAMP"
+                    defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="LASTMODIFIEDDATE" type="TIMESTAMP"
+                    defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CREATEDBYSTAFFID" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="LASTMODIFIEDBYSTAFFID" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="createbyname" type="varchar(100)"></column>
+            <column name="updatebyname" type="varchar(100)"></column>
+        </createTable>
+        <addAutoIncrement tableName="tbltmvnodiscountmapping"
+                          columnName="id" columnDataType="bigint" startWith="1"
+                          incrementBy="1"/>
+        <addForeignKeyConstraint
+                baseColumnNames="mvnoid" baseTableName="tbltmvnodiscountmapping"
+                constraintName="fk_mvnoid" referencedColumnNames="MVNOID"
+                referencedTableName="tblmmvno"/>
+    </changeSet>
+    <changeSet id="DKDEMOGRA000001" author="Dhaval Khalasi">
+        <insert tableName="tblmdemographicmapping">
+            <column name="current_name" value="PREPAID_CUSTOMER"></column>
+            <column name="new_name" value="Prepaid Customer"></column>
+            <column name="validation_regex" value="String"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="DKDEMOGRA000002" author="Dhaval Khalasi">
+        <insert tableName="tblmdemographicmapping">
+            <column name="current_name" value="POSTPAID_CUSTOMER"></column>
+            <column name="new_name" value="Postpaid Customer"></column>
+            <column name="validation_regex" value="String"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="DKBUDPAY001" author="Dhaval Khalasi">
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'BUDPAY' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="BUDPAY_CALLBACK_CWSC_BUY_URL"></column>
+            <column name="payment_parameter_description"
+                    value="This url is a system url which works as callback url for buy plan from cwsc"></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+    </changeSet>
+
+    <changeSet id="AMCDATA0001" author="Akshay Mewada" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice Where NAME ='CDATA_MANUFACTURER';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="SERVICEID"
+                    valueNumeric="(select COALESCE(SERVICEID + 1)  from tblmclientservice t order by SERVICEID desc limit 1)"></column>
+            <column name="NAME" value="CDATA_MANUFACTURER"/>
+            <column name="VALUE" value="C-DATA"/>
+            <column name="MVNOID" value="1"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="AMCDATA0003" author="Akshay Mewada" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice Where NAME ='CDATA_ENABLE';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="SERVICEID"
+                    valueNumeric="(select COALESCE(SERVICEID + 1)  from tblmclientservice t order by SERVICEID desc limit 1)"></column>
+            <column name="NAME" value="CDATA_ENABLE"/>
+            <column name="VALUE" value="0"/>
+            <column name="MVNOID" value="1"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="AMCDATA0002" author="Akshay Mewada" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice Where NAME ='CDATA_MANUFACTURER' and mvnoid ='2';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="SERVICEID"
+                    valueNumeric="(select COALESCE(SERVICEID + 1)  from tblmclientservice t order by SERVICEID desc limit 1)"></column>
+            <column name="NAME" value="CDATA_MANUFACTURER"/>
+            <column name="VALUE" value="C-DATA"/>
+            <column name="MVNOID" value="2"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="AMCDATA0004" author="Akshay Mewada" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice Where NAME ='CDATA_ENABLE' and mvnoid='2';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="SERVICEID"
+                    valueNumeric="(select COALESCE(SERVICEID + 1)  from tblmclientservice t order by SERVICEID desc limit 1)"></column>
+            <column name="NAME" value="CDATA_ENABLE"/>
+            <column name="VALUE" value="0"/>
+            <column name="MVNOID" value="2"/>
+        </insert>
+    </changeSet>
+    <changeSet id="VAC0000000008" author="Vikas Anand">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice where name="duedate_by_StartDate_or_CreatedDate" and MVNOID=2;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="NAME" value="duedate_by_StartDate_or_CreatedDate"></column>
+            <column name="VALUE" value="StartDate"></column>
+            <column name="MVNOID" value="2"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="VAC0000000009" author="Vikas Anand">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice where name="Due_Days" and MVNOID=2;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="NAME" value="Due_Days"></column>
+            <column name="VALUE" value="0"></column>
+            <column name="MVNOID" value="2"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="OTP0000001" author="Yash Godhani" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="TBLMOTPMANAGEMENT"></tableExists>
+            </not>
+        </preConditions>
+        <createTable tableName="TBLMOTPMANAGEMENT">
+            <column name="profile_id" type="bigint">
+                <constraints primaryKey="true"
+                             primaryKeyName="order_management_profile_id_pk"/>
+            </column>
+            <column name="profile_name" type="varchar(250)"/>
+            <column name="otp_length" type="bigint"/>
+            <column name="otp_validity" type="bigint"/>
+            <column name="generation_type" type="varchar(250)"/>
+            <column name="type" type="varchar(1000)"/>
+            <column name="mvnoid" type="bigint"/>
+            <column name="CREATEDATE" type="TIMESTAMP"/>
+            <column name="LASTMODIFIEDDATE" type="TIMESTAMP"/>
+            <column name="CREATEDBYSTAFFID" type="bigint"/>
+            <column name="LASTMODIFIEDBYSTAFFID" type="bigint"/>
+            <column name="static_otp" type="varchar(250)"></column>
+        </createTable>
+        <addAutoIncrement tableName="TBLMOTPMANAGEMENT"
+                          columnName="profile_id" columnDataType="bigint" startWith="1"
+                          incrementBy="1"/>
+    </changeSet>
+    <changeSet id="OTP0000002" author="Yash Godhani">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="tbltotp"/>
+            </not>
+        </preConditions>
+        <createTable tableName="tbltotp">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"
+                             primaryKeyName="tbltotp_id_pk"
+                             unique="true"
+                             uniqueConstraintName="tbltotp_id_unq"/>
+            </column>
+            <column name="otp" type="varchar(200)"/>
+            <column name="mobile_email" type="varchar(250)"/>
+            <column name="generated_time" type="timestamp"/>
+            <column name="valid_till_time" type="timestamp"/>
+            <column name="status" type="varchar(250)"/>
+            <column name="countrycode" type="varchar(10)"/>
+            <column name="mvnoid" type="bigint"/>
+        </createTable>
+        <addAutoIncrement tableName="tbltotp"
+                          columnName="id" columnDataType="bigint" startWith="1"
+                          incrementBy="1"/>
+    </changeSet>
+    <changeSet id="OTP000000003" author="Yash Godhani">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmotpmanagement WHERE profile_name="OTP";
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmotpmanagement">
+            <column name="profile_id" value="1"></column>
+            <column name="profile_name" value="OTP"></column>
+            <column name="otp_length" value="5"></column>
+            <column name="otp_validity" value="5"></column>
+            <column name="generation_type" value="ALWAYS_NEW"></column>
+            <column name="type" value="NUMBER"></column>
+            <column name="mvnoid" value="2"></column>
+        </insert>
+    </changeSet>
+
+    <changeSet id="OTP000000004" author="Akshay Mewada" runOnChange="true">
+        <preConditions>
+            <not>
+                <columnExists tableName="tblmmvno" columnName="is_two_factor_enabled"></columnExists>
+            </not>
+        </preConditions>
+        <addColumn tableName="tblmmvno">
+            <column name="is_two_factor_enabled" type="boolean"/>
+        </addColumn>
+    </changeSet>
+
+
+    <changeSet id="OTP000000005" author="Akshay Mewada" runOnChange="true">
+        <preConditions>
+            <not>
+                <columnExists tableName="tblmmvno" columnName="auth_event_name"></columnExists>
+            </not>
+        </preConditions>
+        <addColumn tableName="tblmmvno">
+            <column name="auth_event_name" type="varchar(250)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="OTP000000006" author="Akshay Mewada" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblcommonlist WHERE list_type = 'OTP_AUTH_TYPE' AND MVNOID = 1;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblcommonlist">
+            <column name="list_text" value="OTP BY EMAIL"/>
+            <column name="list_value" value="OTP BY EMAIL"/>
+            <column name="list_type" value="OTP_AUTH_TYPE"/>
+            <column name="status" value="Active"/>
+            <column name="MVNOID" valueNumeric="1"/>
+        </insert>
+    </changeSet>
+
+
+    <changeSet id="AMPHONEPAY001" author="Akshay Mewada">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmpaymentconfig t WHERE t.payment_config_name='PHONEPE';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmpaymentconfig">
+            <column name="payment_config_name" value="PHONEPE"/>
+            <column name="is_delete" value="0"/>
+            <column name="create_date" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </insert>
+    </changeSet>
+
+
+    <changeSet id="AMPHONEPAY002" author="Akshay Mewada" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmpaymentconfigmapping t WHERE t.payment_config_id=(select id FROM (select t2.id
+                from tblmpaymentconfig t2 where t2.payment_config_name = 'PHONEPE' and t2.mvnoid IS NULL) AS temp);
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'PHONEPE' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="PHONEPE_MERCHANT_ID"></column>
+            <column name="payment_parameter_description"
+                    value="This key used to store merchant id of the PHONEPE"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'PHONEPE' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="PHONEPE_CALLBACK_URL"></column>
+            <column name="payment_parameter_description"
+                    value="This key is used to set callback url for the PHONEPE"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'PHONEPE' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="PHONEPE_SALT_INDEX"></column>
+            <column name="payment_parameter_description" value="This key used to intitate the PHONEPE payment"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'PHONEPE' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="PHONEPE_SALT_KEY"></column>
+            <column name="payment_parameter_description"
+                    value="This key used to initaiate the PHONEPE payment"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'PHONEPE' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="PHONEPE_MERCHANT_USERID"></column>
+            <column name="payment_parameter_description"
+                    value="This key used to initaiate the PHONEPE payment"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'PHONEPE' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="PHONEPE_REDIRECT_URL"></column>
+            <column name="payment_parameter_description"
+                    value="This key used to initaiate the PHONEPE payment"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'PHONEPE' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="PHONPE_REDIRECT_MODE"></column>
+            <column name="payment_parameter_description"
+                    value="This key used to initaiate the PHONEPE payment"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'PHONEPE' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="PHONPE_PAYMENT_INSTRUMENT_TYPE"></column>
+            <column name="payment_parameter_description"
+                    value="This key used to initaiate the PHONEPE payment"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'PHONEPE' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="PHONPE_GATEWAY_URL"></column>
+            <column name="payment_parameter_description"
+                    value="This key used to initaiate the PHONEPE payment"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'PHONEPE' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="REDIRECT_IN_SECONDS"></column>
+            <column name="payment_parameter_description"
+                    value="This key used to initaiate the PHONEPE payment"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'PHONEPE' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="STAFFUSER_USERNAME"></column>
+            <column name="payment_parameter_description"
+                    value="This key used to initaiate the PHONEPE payment"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'PHONEPE' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="STAFFUSER_PASSWORD"></column>
+            <column name="payment_parameter_description"
+                    value="This key used to initaiate the PHONEPE payment"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+
+    </changeSet>
+
+    <changeSet id="AM0000000080" author="Akshay Mewada">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice where name="FeedBack";
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="NAME" value="FeedBack"></column>
+            <column name="VALUE" value="Satisfied,Not Satisfied,Don't Know,Neutral"></column>
+            <column name="MVNOID" value="1"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="AM0000000081" author="Akshay Mewada">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice where name="FeedBack" and MVNOID="2";
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="NAME" value="FeedBack"></column>
+            <column name="VALUE" value="Satisfied,Not Satisfied,Don't Know,Neutral"></column>
+            <column name="MVNOID" value="2"></column>
+        </insert>
+    </changeSet>
+
+
+    <changeSet id="AMPHONEPAY003" author="Akshay Mewada" runOnChange="true">
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'PHONEPE' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="PARTNER_REDIRECT_URL"></column>
+            <column name="payment_parameter_description"
+                    value="This key used to redirect partner to system when payment is successful"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+
+    </changeSet>
+    <changeSet id="DKClientSRV001" author="Dhaval Khalasi">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice where name="IS_WORKFLOW_ALL_ASSIGN";
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="NAME" value="IS_WORKFLOW_ALL_ASSIGN"></column>
+            <column name="VALUE" value="false"></column>
+            <column name="MVNOID" value="1"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="DKClientSRV002" author="Dhaval Khalasi" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice where name="IS_WORKFLOW_ALL_ASSIGN" and MVNOID=2;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="NAME" value="IS_WORKFLOW_ALL_ASSIGN"></column>
+            <column name="VALUE" value="false"></column>
+            <column name="MVNOID" value="2"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="YGCS00000001" author="Yash Godhani" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice Where name = "bulkvlanpath" and MVNOID='2';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="NAME" value="bulkvlanpath"/>
+            <column name="VALUE" value="//var/document/bulkvlanpath/"/>
+            <column name="MVNOID" value="2"/>
+        </insert>
+    </changeSet>
+    <changeSet id="YGPC00000001" author="Yash Godhani" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                SELECT COUNT(*) FROM tblmpaymentconfigmapping t WHERE t.payment_config_id=(select id FROM (select t2.id
+                from tblmpaymentconfig t2 where t2.payment_config_name = 'PHONEPE' and t2.mvnoid IS NULL) AS temp) and
+                t.payment_parameter_name = 'STAFFUSER_USERNAME' and payment_parameter_for = 'GATEWAY';
+            </sqlCheck>
+        </preConditions>
+        <update tableName="tblmpaymentconfigmapping">
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+            <where>
+                payment_parameter_name='STAFFUSER_USERNAME' and payment_config_id = (select id FROM (select t2.id from
+                tblmpaymentconfig t2 where t2.payment_config_name = 'PHONEPE' and t2.mvnoid IS NULL) AS temp)
+            </where>
+        </update>
+    </changeSet>
+    <changeSet id="YGPC00000002" author="Yash Godhani" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                SELECT COUNT(*) FROM tblmpaymentconfigmapping t WHERE t.payment_config_id=(select id FROM (select t2.id
+                from tblmpaymentconfig t2 where t2.payment_config_name = 'PHONEPE' and t2.mvnoid IS NULL) AS temp) and
+                t.payment_parameter_name = 'STAFFUSER_PASSWORD' and payment_parameter_for = 'GATEWAY';
+            </sqlCheck>
+        </preConditions>
+        <update tableName="tblmpaymentconfigmapping">
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+            <where>
+                payment_parameter_name='STAFFUSER_PASSWORD' and payment_config_id = (select id FROM (select t2.id from
+                tblmpaymentconfig t2 where t2.payment_config_name = 'PHONEPE' and t2.mvnoid IS NULL) AS temp)
+            </where>
+        </update>
+    </changeSet>
+    <changeSet id="YGPC00000003" author="Yash Godhani" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                SELECT COUNT(*) FROM tblmpaymentconfigmapping t WHERE t.payment_config_id=(select id FROM (select t2.id
+                from tblmpaymentconfig t2 where t2.payment_config_name = 'PHONEPE' and t2.mvnoid IS NULL) AS temp) and
+                t.payment_parameter_name = 'PARTNER_REDIRECT_URL' and payment_parameter_for = 'GATEWAY';
+            </sqlCheck>
+        </preConditions>
+        <update tableName="tblmpaymentconfigmapping">
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+            <where>
+                payment_parameter_name='PARTNER_REDIRECT_URL' and payment_config_id = (select id FROM (select t2.id from
+                tblmpaymentconfig t2 where t2.payment_config_name = 'PHONEPE' and t2.mvnoid IS NULL) AS temp)
+            </where>
+        </update>
+    </changeSet>
+    <changeSet id="DB0000000057" author="Darshan Bharambe">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="tblmmvno" columnName="event_id"></columnExists>
+            </not>
+        </preConditions>
+        <addColumn tableName="tblmmvno">
+            <column name="event_id" type="bigint"></column>
+        </addColumn>
+    </changeSet>
+    <changeSet id="VAC0000000012" author="Vikas Anand">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="tblmmvno" columnName="clientid"></columnExists>
+            </not>
+        </preConditions>
+        <addColumn tableName="tblmmvno">
+            <column name="clientid" type="varchar(100)"></column>
+        </addColumn>
+    </changeSet>
+    <changeSet id="DKCLIENT0002" author="Dhaval Khalasi">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice Where name = "COMPLEMENTARY_PLAN_ID" and MVNOID='1';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="NAME" value="COMPLEMENTARY_PLAN_ID"/>
+            <column name="VALUE" value="0"/>
+            <column name="MVNOID" value="1"/>
+        </insert>
+    </changeSet>
+    <changeSet id="DKCLIENT0003" author="Dhaval Khalasi">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice Where name = "COMPLEMENTARY_PLAN_ID" and MVNOID='2';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="NAME" value="COMPLEMENTARY_PLAN_ID"/>
+            <column name="VALUE" value="0"/>
+            <column name="MVNOID" value="2"/>
+        </insert>
+    </changeSet>
+    <changeSet id="KB0000000001" author="Keval Bavisi">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice where name="IS_USED_INACTIVE_SERVICEAREA_CAF" and MVNOID="2";
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="NAME" value="IS_USED_INACTIVE_SERVICEAREA_CAF"></column>
+            <column name="VALUE" value="0"></column>
+            <column name="MVNOID" value="2"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="KB0000000002" author="Keval Bavisi">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice where name="IS_USED_INACTIVE_SERVICEAREA_CAF" and MVNOID="1";
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="NAME" value="IS_USED_INACTIVE_SERVICEAREA_CAF"></column>
+            <column name="VALUE" value="0"></column>
+            <column name="MVNOID" value="1"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="KSMOMOPAY001" author="Kalp Shah">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmpaymentconfig t WHERE t.payment_config_name='MOMOPE';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmpaymentconfig">
+            <column name="payment_config_name" value="MOMOPE"/>
+            <column name="is_delete" value="0"/>
+            <column name="create_date" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </insert>
+    </changeSet>
+    <changeSet id="KSMOMOPAY002" author="Kalp Shah" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmpaymentconfigmapping t WHERE t.payment_config_id=(select id FROM (select t2.id
+                from tblmpaymentconfig t2 where t2.payment_config_name = 'MOMOPE' and t2.mvnoid IS NULL) AS temp);
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'MOMOPE' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="MOMOPE_SUBSCRIPTION_KEY"></column>
+            <column name="payment_parameter_description"
+                    value="This key used to store subscription key of the MOMOPE"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'MOMOPE' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="MOMOPE_CALLBACK_URL"></column>
+            <column name="payment_parameter_description"
+                    value="This key is used to set callback url for the MOMOPE"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'MOMOPE' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="MOMOPE_GATEWAY_URL"></column>
+            <column name="payment_parameter_description"
+                    value="This key is used to set gateway url for the MOMOPE"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'MOMOPE' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="MOMOPE_TARGET_ENVIRONMENT"></column>
+            <column name="payment_parameter_description"
+                    value="This key is used to set target environment for the MOMOPE"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'MOMOPE' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="MOMOPE_CURRENCY"></column>
+            <column name="payment_parameter_description"
+                    value="This key is used to set currency for the MOMOPE"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'MOMOPE' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="MOMOPE_PAYERMESSAGE"></column>
+            <column name="payment_parameter_description"
+                    value="This key is used to set payer message for the MOMOPE"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'MOMOPE' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="MOMOPE_PAYEENOTE"></column>
+            <column name="payment_parameter_description"
+                    value="This key is used to set payee note for the MOMOPE"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'MOMOPE' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="STAFFUSER_USERNAME"></column>
+            <column name="payment_parameter_description" value="It will provide staff username."></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'MOMOPE' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="STAFFUSER_PASSWORD"></column>
+            <column name="payment_parameter_description" value="It will provide staff password."></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'MOMOPE' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="REDIRECT_TIME_IN_SECONDS"></column>
+            <column name="payment_parameter_description" value="It will provide seconds for receipt."></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="KSMOMOPAY003" author="Kalp Shah" runOnChange="true">
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'MOMOPE' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="MOMOPE_API_KEY"></column>
+            <column name="payment_parameter_description"
+                    value="This key used to store api key of the MOMOPE"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="DKMOPAY003" author="Dhaval Khalasi" runOnChange="true">
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'MOMOPE' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="MOMOPE_API_USER"></column>
+            <column name="payment_parameter_description"
+                    value="This key used to store api USER of the MOMOPE"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+    </changeSet>
+
+
+    <changeSet id="VS0000000351" author="Virendra Soni">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice where name="IS_ISP_PAYLOAD_SEND" and MVNOID="1";
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="NAME" value="IS_ISP_PAYLOAD_SEND"></column>
+            <column name="VALUE" value="0"></column>
+            <column name="MVNOID" value="1"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="KB0000000010" author="Keval Bavisi">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice where name="IS_USED_UNDERDEVELOPMENT_SERVICEAREA" and MVNOID="2";
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="NAME" value="IS_USED_UNDERDEVELOPMENT_SERVICEAREA"></column>
+            <column name="VALUE" value="0"></column>
+            <column name="MVNOID" value="2"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="KB0000000011" author="Keval Bavisi">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice where name="IS_USED_UNDERDEVELOPMENT_SERVICEAREA" and MVNOID="1";
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="NAME" value="IS_USED_UNDERDEVELOPMENT_SERVICEAREA"></column>
+            <column name="VALUE" value="0"></column>
+            <column name="MVNOID" value="1"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="VK00000000106" author="Varun Kumar">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmclientservice WHERE NAME='TASK_COUNT';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="serviceid" valueNumeric="(select COALESCE(serviceid + 1)  from tblmclientservice t order by serviceid desc limit 1)"></column>
+            <column name="NAME" value="TASK_COUNT"></column>
+            <column name="VALUE" value="1"></column>
+            <column name="MVNOID" value="2"></column>
+        </insert>
+        <insert tableName="tblmclientservice">
+            <column name="serviceid" valueNumeric="(select COALESCE(serviceid + 1)  from tblmclientservice t order by serviceid desc limit 1)"></column>
+            <column name="name" value="TASK_COUNT_IN_LAST_DAYS"></column>
+            <column name="value" value="30"></column>
+            <column name="MVNOID" value="2"></column>
+        </insert>
+        <insert tableName="tblmclientservice">
+            <column name="serviceid" valueNumeric="(select COALESCE(serviceid + 1)  from tblmclientservice t order by serviceid desc limit 1)"></column>
+            <column name="name" value="TASK_COUNT_SAME_CATEGORY"></column>
+            <column name="value" value="3"></column>
+            <column name="MVNOID" value="2"></column>
+        </insert>
+        <insert tableName="tblmclientservice">
+            <column name="serviceid" valueNumeric="(select COALESCE(serviceid + 1)  from tblmclientservice t order by serviceid desc limit 1)"></column>
+            <column name="name" value="TASK_COUNT_SAME_CATEGORY_DAYS"></column>
+            <column name="value" value="30"></column>
+            <column name="MVNOID" value="2"></column>
+        </insert>
+        <insert tableName="tblmclientservice">
+            <column name="serviceid" valueNumeric="(select COALESCE(serviceid + 1)  from tblmclientservice t order by serviceid desc limit 1)"></column>
+            <column name="name" value="ALLOWED_TASK_DOCUMENT_SIZE"></column>
+            <column name="value" value="500"></column>
+            <column name="MVNOID" value="2"></column>
+        </insert>
+        <insert tableName="tblmclientservice">
+            <column name="serviceid" valueNumeric="(select COALESCE(serviceid + 1)  from tblmclientservice t order by serviceid desc limit 1)"></column>
+            <column name="name" value="taskFollowUpReminderTime"></column>
+            <column name="value" value="15"></column>
+            <column name="MVNOID" value="2"></column>
+        </insert>
+        <insert tableName="tblmclientservice">
+            <column name="serviceid" valueNumeric="(select COALESCE(serviceid + 1)  from tblmclientservice t order by serviceid desc limit 1)"></column>
+            <column name="name" value="taskpathread"/>
+            <column name="value" value="//var/document/taskdoc/"/>
+            <column name="MVNOID" value="2"/>
+        </insert>
+        <insert tableName="tblmclientservice">
+            <column name="serviceid" valueNumeric="(select COALESCE(serviceid + 1)  from tblmclientservice t order by serviceid desc limit 1)"></column>
+            <column name="name" value="taskpath"></column>
+            <column name="value" value="//var/document/taskdoc/"/>
+            <column name="MVNOID" value="2"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="KB0000000300" author="Keval Bavisi" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice where name="assignInventoryDocPath";
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="serviceid" valueNumeric="(select COALESCE(serviceid + 1)  from tblmclientservice t order by serviceid desc limit 1)"></column>
+            <column name="NAME" value="assignInventoryDocPath"></column>
+            <column name="VALUE" value="//var/document/productDoc"></column>
+            <column name="MVNOID" value="2"/>
+        </insert>
+    </changeSet>
+    <changeSet id="KSCUST000001" author="Kalp Shah">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="tblcustomers" columnName="blockno"></columnExists>
+            </not>
+        </preConditions>
+        <addColumn tableName="tblcustomers">
+            <column name="blockno" type="text"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="KB0000000301" author="Keval Bavisi" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice where name="ALLOWED_ASSIGN_INVENTORY_DOCUMENT_SIZE";
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="serviceid" valueNumeric="(select COALESCE(serviceid + 1)  from tblmclientservice t order by serviceid desc limit 1)" />
+            <column name="NAME" value="ALLOWED_ASSIGN_INVENTORY_DOCUMENT_SIZE"></column>
+            <column name="VALUE" value="500"></column>
+            <column name="MVNOID" value="2"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="KB0000000302" author="Keval Bavisi" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice where name="productDocPath";
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="serviceid" valueNumeric="(select COALESCE(serviceid + 1)  from tblmclientservice t order by serviceid desc limit 1)" />
+            <column name="NAME" value="productDocPath"></column>
+            <column name="VALUE" value="//var/document/productDoc"></column>
+            <column name="MVNOID" value="2"/>
+        </insert>
+    </changeSet>
+    <changeSet id="KB0000000304" author="Keval Bavisi" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice where name="productDocPath" and MVNOID="1";
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="serviceid" valueNumeric="(select COALESCE(serviceid + 1)  from tblmclientservice t order by serviceid desc limit 1)" />
+            <column name="NAME" value="productDocPath"></column>
+            <column name="VALUE" value="//var/document/productDoc"></column>
+            <column name="MVNOID" value="1"/>
+        </insert>
+    </changeSet>
+    <changeSet id="VK000000020" author="Varun Kumar">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmclientservice t WHERE t.NAME='TASK_COUNT' and t.MVNOID=1;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="serviceid" valueNumeric="(select COALESCE(serviceid + 1)  from tblmclientservice t order by serviceid desc limit 1)"></column>
+            <column name="NAME" value="TASK_COUNT"></column>
+            <column name="VALUE" value="1"></column>
+            <column name="MVNOID" value="1"></column>
+        </insert>
+        <insert tableName="tblmclientservice">
+            <column name="serviceid" valueNumeric="(select COALESCE(serviceid + 1)  from tblmclientservice t order by serviceid desc limit 1)"></column>
+            <column name="name" value="TASK_COUNT_IN_LAST_DAYS"></column>
+            <column name="value" value="30"></column>
+            <column name="MVNOID" value="1"></column>
+        </insert>
+        <insert tableName="tblmclientservice">
+            <column name="serviceid" valueNumeric="(select COALESCE(serviceid + 1)  from tblmclientservice t order by serviceid desc limit 1)"></column>
+            <column name="name" value="TASK_COUNT_SAME_CATEGORY"></column>
+            <column name="value" value="3"></column>
+            <column name="MVNOID" value="1"></column>
+        </insert>
+        <insert tableName="tblmclientservice">
+            <column name="serviceid" valueNumeric="(select COALESCE(serviceid + 1)  from tblmclientservice t order by serviceid desc limit 1)"></column>
+            <column name="name" value="TASK_COUNT_SAME_CATEGORY_DAYS"></column>
+            <column name="value" value="30"></column>
+            <column name="MVNOID" value="1"></column>
+        </insert>
+        <insert tableName="tblmclientservice">
+            <column name="serviceid" valueNumeric="(select COALESCE(serviceid + 1)  from tblmclientservice t order by serviceid desc limit 1)"></column>
+            <column name="name" value=""></column>
+            <column name="value" value="500"></column>
+            <column name="MVNOID" value="1"></column>
+        </insert>
+        <insert tableName="tblmclientservice">
+            <column name="serviceid" valueNumeric="(select COALESCE(serviceid + 1)  from tblmclientservice t order by serviceid desc limit 1)"></column>
+            <column name="name" value="taskFollowUpReminderTime"></column>
+            <column name="value" value="15"></column>
+            <column name="MVNOID" value="1"></column>
+        </insert>
+        <insert tableName="tblmclientservice">
+            <column name="serviceid" valueNumeric="(select COALESCE(serviceid + 1)  from tblmclientservice t order by serviceid desc limit 1)"></column>
+            <column name="name" value="taskpathread"/>
+            <column name="value" value="//var/document/taskdoc/"/>
+            <column name="MVNOID" value="1"/>
+        </insert>
+        <insert tableName="tblmclientservice">
+            <column name="serviceid" valueNumeric="(select COALESCE(serviceid + 1)  from tblmclientservice t order by serviceid desc limit 1)"></column>
+            <column name="name" value="taskpath"></column>
+            <column name="value" value="//var/document/taskdoc/"/>
+            <column name="MVNOID" value="1"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="DKDEMOGRA000003" author="Dhaval Khalasi">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmdemographicmapping where current_name="CUSTOMER_VRN";
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmdemographicmapping">
+            <column name="current_name" value="CUSTOMER_VRN"></column>
+            <column name="new_name" value="Customer VAT Registration Number"></column>
+            <column name="validation_regex" value="String"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="DKDEMOGRA000004" author="Dhaval Khalasi">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmdemographicmapping where current_name="CUSTOMER_NID";
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmdemographicmapping">
+            <column name="current_name" value="CUSTOMER_NID"></column>
+            <column name="new_name" value="Customer National Identification"></column>
+            <column name="validation_regex" value="String"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="DKCLI000001" author="Dhaval Khalasi" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice where name="PAN_NUMBER_LENGTH";
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="serviceid" valueNumeric="(select COALESCE(serviceid + 1)  from tblmclientservice t order by serviceid desc limit 1)" />
+            <column name="NAME" value="PAN_NUMBER_LENGTH"></column>
+            <column name="VALUE" value="10"></column>
+            <column name="MVNOID" value="2"/>
+        </insert>
+    </changeSet>
+    <changeSet id="DKCLI000002" author="Dhaval Khalasi" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice where name="PAN_NUMBER_LENGTH" and MVNOID="1";
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="serviceid" valueNumeric="(select COALESCE(serviceid + 1)  from tblmclientservice t order by serviceid desc limit 1)" />
+            <column name="NAME" value="PAN_NUMBER_LENGTH"></column>
+            <column name="VALUE" value="10"></column>
+            <column name="MVNOID" value="1"/>
+        </insert>
+    </changeSet>
+    <changeSet id="DKAIRTELPAY001" author="Dhaval Khalasi">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmpaymentconfig t WHERE t.payment_config_name='AIRTEL';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmpaymentconfig">
+            <column name="payment_config_name" value="AIRTEL"/>
+            <column name="is_delete" value="0"/>
+            <column name="create_date" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </insert>
+    </changeSet>
+    <changeSet id="DKAIRTELPAY002" author="Dhaval Khalasi" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmpaymentconfigmapping t WHERE t.payment_config_id=(select id FROM (select t2.id
+                from tblmpaymentconfig t2 where t2.payment_config_name = 'AIRTEL' and t2.mvnoid IS NULL) AS temp);
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'AIRTEL' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="AIRTEL_CLIENT_ID"></column>
+            <column name="payment_parameter_description"
+                    value="This key used to store client id  of the AIRTEL"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'AIRTEL' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="AIRTEL_CLIENT_SECRET"></column>
+            <column name="payment_parameter_description"
+                    value="This key used to store client secret  of the AIRTEL"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'AIRTEL' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="AIRTEL_GRANT_TYPE"></column>
+            <column name="payment_parameter_description"
+                    value="This key used to store grant type of the  AIRTEL"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'AIRTEL' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="AIRTEL_REFERENCE"></column>
+            <column name="payment_parameter_description"
+                    value="This key used to get Airtel Reference"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'AIRTEL' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="AIRTEL_API_URL"></column>
+            <column name="payment_parameter_description"
+                    value="This key is used to set base api for  api url"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'AIRTEL' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="COUNTRY"></column>
+            <column name="payment_parameter_description"
+                    value="This key is used to set country for the airtel"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'AIRTEL' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="CURRENCY"></column>
+            <column name="payment_parameter_description"
+                    value="This key is used to set curreny for airtel"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'AIRTEL' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="AIRTEL_CWSC_CALLBACK_URL"></column>
+            <column name="payment_parameter_description"
+                    value="This key used for callback url for cwsc"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'AIRTEL' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="AIRTEL_CWSC_CAPTIVE_URL"></column>
+            <column name="payment_parameter_description"
+                    value="This key used to create callback url for captive"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'AIRTEL' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="STAFFUSER_USERNAME"></column>
+            <column name="payment_parameter_description" value="It will provide staff username."></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'AIRTEL' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="STAFFUSER_PASSWORD"></column>
+            <column name="payment_parameter_description" value="It will provide staff password."></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'AIRTEL' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="REDIRECT_TIME_IN_SECONDS"></column>
+            <column name="payment_parameter_description" value="It will provide seconds for receipt."></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'AIRTEL' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="SCHEDULED_CALL_TIME"></column>
+            <column name="payment_parameter_description" value="It will get which time api called sometimes."></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="KSSELECOMPAY001" author="Kalp Shah">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmpaymentconfig t WHERE t.payment_config_name='SELCOM';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmpaymentconfig">
+            <column name="payment_config_name" value="SELCOM"/>
+            <column name="is_delete" value="0"/>
+            <column name="create_date" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </insert>
+    </changeSet>
+    <changeSet id="KSSELECOMPAY002" author="Kalp Shah" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmpaymentconfigmapping t WHERE t.payment_config_id=(select id FROM (select t2.id
+                from tblmpaymentconfig t2 where t2.payment_config_name = 'SELCOM' and t2.mvnoid IS NULL) AS temp);
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'SELCOM' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="SELCOM_VENDOR"></column>
+            <column name="payment_parameter_description"
+                    value="This key used to vendor of the SELCOM"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'SELCOM' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="SELCOM_API_KEY"></column>
+            <column name="payment_parameter_description"
+                    value="This key used to store api key of the SELCOM"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'SELCOM' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="SELCOM_SECRET_KEY"></column>
+            <column name="payment_parameter_description"
+                    value="This key used to store api key of the SELCOM"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'SELCOM' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="SELCOM_GATEWAY_URL"></column>
+            <column name="payment_parameter_description"
+                    value="This key used to store api key of the SELCOM"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'SELCOM' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="SELCOM_WEBHOOK_URL"></column>
+            <column name="payment_parameter_description"
+                    value="This key used to web hook url of the SELCOM"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'SELCOM' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="SELCOM_PAYMENT_METHODS"></column>
+            <column name="payment_parameter_description"
+                    value="This key used to payment methods of the SELCOM"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'SELCOM' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="SELCOM_CURRENCY"></column>
+            <column name="payment_parameter_description"
+                    value="This key used to payment methods of the SELCOM"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'SELCOM' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="SELCOM_SCHEDULE_TIME"></column>
+            <column name="payment_parameter_description"
+                    value="This key used to payment methods of the SELCOM"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'SELCOM' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="STAFFUSER_USERNAME"></column>
+            <column name="payment_parameter_description" value="It will provide staff username."></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'SELCOM' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="STAFFUSER_PASSWORD"></column>
+            <column name="payment_parameter_description" value="It will provide staff password."></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'SELCOM' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="REDIRECT_TIME_IN_SECONDS"></column>
+            <column name="payment_parameter_description" value="It will provide seconds for receipt."></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="KB0000000022" author="Keval Bavisi" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+                <tableExists tableName="tblmpaymentconfig"/>
+        </preConditions>
+
+        <update tableName="tblmpaymentconfig">
+            <column name="payment_config_name" value="MoMo Pay"/>
+            <where>payment_config_name='MOMOPE'</where>
+        </update>
+    </changeSet>
+    <changeSet id="DB0000000058" author="Darshan Bharambe">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice Where NAME ='NMS_INTEGRATION_ENABLE';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="SERVICEID" valueNumeric="(select COALESCE(SERVICEID + 1)  from tblmclientservice t order by SERVICEID desc limit 1)"></column>
+            <column name="NAME" value="NMS_INTEGRATION_ENABLE"/>
+            <column name="VALUE" value="true"/>
+            <column name="MVNOID" value="1"/>
+        </insert>
+    </changeSet>
+    <changeSet id="HR0000000020" author="Harshad Rangholiya">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmdemographicmapping where current_name='Address';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmdemographicmapping">
+            <column name="current_name" value="Address"/>
+            <column name="new_name" value="Address"/>
+            <column name="validation_regex" value="String"/>
+        </insert>
+    </changeSet>
+    <changeSet id="YGCLI0000001" author="Yash Godhani">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice where name="IS_MOBILE_AND_EMAIL_REQUIRED" and MVNOID="1";
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="serviceid" valueNumeric="(select COALESCE(serviceid + 1)  from tblmclientservice t order by serviceid desc limit 1)"></column>
+            <column name="NAME" value="IS_MOBILE_AND_EMAIL_REQUIRED"></column>
+            <column name="VALUE" value="true"></column>
+            <column name="MVNOID" value="1"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="YGCLI0000002" author="Yash Godhani">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice where name="IS_MOBILE_AND_EMAIL_REQUIRED" and MVNOID="2";
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="serviceid" valueNumeric="(select COALESCE(serviceid + 1)  from tblmclientservice t order by serviceid desc limit 1)"></column>
+            <column name="NAME" value="IS_MOBILE_AND_EMAIL_REQUIRED"></column>
+            <column name="VALUE" value="true"></column>
+            <column name="MVNOID" value="2"></column>
+        </insert>
+    </changeSet>
+
+    <changeSet id="VK00000000105" author="Varun Kumar" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="tblmbuildingref"></tableExists>
+            </not>
+        </preConditions>
+     <createTable tableName="tblmbuildingref">
+         <column name="id" type="bigint" autoIncrement="true">
+             <constraints nullable="false" primaryKey="true"
+                          primaryKeyName="tblmbuildingref_id_pk"
+                          unique="true"
+                          uniqueConstraintName="tblmbuildingref_id_unq"/>
+         </column>
+         <column name="name" type="varchar(100)" ></column>
+         <column name="mvnoid" type="bigint" ></column>
+         <column name="mapping_from" type="varchar(100)" ></column>
+     </createTable>
+        <addAutoIncrement tableName="tblmbuildingref"
+                          columnName="id" columnDataType="bigint" startWith="1"
+                          incrementBy="1"/>
+    </changeSet>
+    <changeSet id="DKPAYAIRTELADD001" author="Dhaval Khalasi" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <!-- Ensure the AIRTEL configuration exists before inserting -->
+            <sqlCheck expectedResult="1">
+                SELECT COUNT(*) FROM tblmpaymentconfig WHERE payment_config_name = 'AIRTEL' AND mvnoid IS NULL;
+            </sqlCheck>
+
+            <!-- Ensure the entry does not already exist in tblmpaymentconfigmapping -->
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmpaymentconfigmapping WHERE payment_config_id =
+                (SELECT id FROM tblmpaymentconfig WHERE payment_config_name = 'AIRTEL' AND mvnoid IS NULL)
+                AND payment_parameter_name = 'AIRTEL_PREFIX';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'AIRTEL' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="AIRTEL_PREFIX"></column>
+            <column name="payment_parameter_description"
+                    value="This key used for check mobile number prefix for AIRTEL"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="DKPAYMOMOADD001" author="Dhaval Khalasi" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <!-- Ensure the AIRTEL configuration exists before inserting -->
+            <sqlCheck expectedResult="1">
+                SELECT COUNT(*) FROM tblmpaymentconfig WHERE payment_config_name = 'MoMo Pay' AND mvnoid IS NULL;
+            </sqlCheck>
+
+            <!-- Ensure the entry does not already exist in tblmpaymentconfigmapping -->
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmpaymentconfigmapping WHERE payment_config_id =
+                (SELECT id FROM tblmpaymentconfig WHERE payment_config_name = 'MoMo Pay' AND mvnoid IS NULL)
+                AND payment_parameter_name = 'MOMO_PAY_PREFIX';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'MoMo Pay' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="MOMO_PAY_PREFIX"></column>
+            <column name="payment_parameter_description"
+                    value="This key used for check mobile number prefix for AIRTEL"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+    </changeSet>
+
+
+    <changeSet id="VK00000000107U" author="Varun Kumar" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmdemographicmapping where current_name='Sub Area';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmdemographicmapping">
+            <column name="current_name" value="Sub Area"></column>
+            <column name="new_name" value="Sub Area"></column>
+            <column name="validation_regex" value="String"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="VK00000000108U" author="Varun Kumar" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmdemographicmapping where current_name='Building';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmdemographicmapping">
+            <column name="current_name" value="Building"></column>
+            <column name="new_name" value="Building"></column>
+            <column name="validation_regex" value="String"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="PT0000000059" author="Payal Thummar">
+        <preConditions onFail="MARK_RAN">
+            <columnExists columnName="mobile" tableName="tblcustomers"/>
+        </preConditions>
+        <sql dbms="mysql" splitStatements="true" >
+            ALTER TABLE tblcustomers MODIFY COLUMN mobile varchar(100) NULL;
+        </sql>
+    </changeSet>
+
+    <changeSet id="ADMBILLTYPE001" author="Akshay Mewada">
+        <preConditions>
+            <not>
+                <columnExists tableName="tblmmvno" columnName="bill_type"></columnExists>
+            </not>
+        </preConditions>
+        <addColumn tableName="tblmmvno">
+            <column name="bill_type" type="varchar(250)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="AMLEADCAFVISIBILITY0001" author="Akshay Mewada" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice Where NAME ='LEAD_CAF_VISIBILITY_RISTRICT';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="SERVICEID"
+                    valueNumeric="(select COALESCE(SERVICEID + 1)  from tblmclientservice t order by SERVICEID desc limit 1)"></column>
+            <column name="NAME" value="LEAD_CAF_VISIBILITY_RISTRICT"/>
+            <column name="VALUE" value="false"/>
+            <column name="MVNOID" value="1"/>
+        </insert>
+    </changeSet>
+
+
+    <changeSet id="AMLEADCAFVISIBILITY0002" author="Akshay Mewada">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                SELECT COUNT(*)
+                FROM tblmclientservice
+                WHERE MVNOID = 1
+                  AND NAME = 'LEAD_CAF_VISIBILITY_RISTRICT'
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            INSERT INTO tblmclientservice (
+                SERVICEID,
+                NAME,
+                VALUE,
+                MVNOID
+            )
+            SELECT
+                NULL,
+                src.NAME,
+                src.VALUE,
+                mvnos.MVNOID
+            FROM (
+                     SELECT NAME, VALUE
+                     FROM tblmclientservice
+                     WHERE MVNOID = 1 AND NAME = 'LEAD_CAF_VISIBILITY_RISTRICT'
+                 ) src
+                     JOIN tblmmvno mvnos
+                          ON mvnos.MVNOID &lt;&gt; 1
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM tblmclientservice existing
+                WHERE LOWER(TRIM(existing.NAME)) = LOWER(TRIM(src.NAME))
+                  AND LOWER(TRIM(existing.VALUE)) = LOWER(TRIM(src.VALUE))
+                  AND existing.MVNOID = mvnos.MVNOID
+            );
+        </sql>
+    </changeSet>
+
+    <changeSet id="NS16042025" author="Nikhil Sankhala" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="tblmsubarea" columnName="filename"></columnExists>
+            </not>
+        </preConditions>
+        <addColumn tableName="tblmsubarea">
+            <column name="filename" type="varchar(250)"/>
+            <column name="uniquename" type="varchar(250)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="NS1604202501" author="Nikhil Sankhala" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice where name="subareaDocPath";
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="serviceid" valueNumeric="(select COALESCE(serviceid + 1)  from tblmclientservice t order by serviceid desc limit 1)" />
+            <column name="NAME" value="subareaDocPath"></column>
+            <column name="VALUE" value="//var/document/subareaDoc"></column>
+            <column name="MVNOID" value="2"/>
+        </insert>
+    </changeSet>
+    <changeSet id="VK00000000110" author="Varun Kumar" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice where name="WORKFLOW_HYBRID_ASSIGN" and MVNOID=2;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="SERVICEID" valueNumeric="(select COALESCE(SERVICEID + 1)  from tblmclientservice t order by SERVICEID desc limit 1)"></column>
+            <column name="NAME" value="WORKFLOW_HYBRID_ASSIGN"></column>
+            <column name="VALUE" value="false"></column>
+            <column name="MVNOID" value="2"></column>
+        </insert>
+    </changeSet>
+
+    <changeSet id="AMFEEDBACKDEV001" author="Akshay Mewada" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="tblmfeedbackconfig"></tableExists>
+            </not>
+        </preConditions>
+        <createTable tableName="tblmfeedbackconfig">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="event" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_active" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="channel" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_madatory" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="feedback_message" type="VARCHAR(1000)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rating_scale" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rating_display_type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="frequency" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="mvnoid" type="INT">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- Auditable fields -->
+            <column name="createbyname" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="updatebyname" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="CREATEDATE" type="DATETIME">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="LASTMODIFIEDDATE" type="DATETIME">
+                <constraints nullable="true"/>
+            </column>
+            <column name="CREATEDBYSTAFFID" type="INT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="LASTMODIFIEDBYSTAFFID" type="INT">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+
+    <changeSet id="AMFEEDBACKFREQUENCY01" author="Akshay Mewada" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice Where NAME ='FEEDBACKFORM_FREQUENCY' and MVNOID=1;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="SERVICEID"
+                    valueNumeric="(select COALESCE(SERVICEID + 1)  from tblmclientservice t order by SERVICEID desc limit 1)"></column>
+            <column name="NAME" value="FEEDBACKFORM_FREQUENCY"/>
+            <column name="VALUE" value="MONTHLY"/>
+            <column name="MVNOID" value="1"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="AMFEEDBACKFREQUENCY02" author="Akshay Mewada" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice Where NAME ='FEEDBACKFORM_FREQUENCY' and MVNOID=2;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="SERVICEID"
+                    valueNumeric="(select COALESCE(SERVICEID + 1)  from tblmclientservice t order by SERVICEID desc limit 1)"></column>
+            <column name="NAME" value="FEEDBACKFORM_FREQUENCY"/>
+            <column name="VALUE" value="MONTHLY"/>
+            <column name="MVNOID" value="2"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="UMFEEDBACKDEV002" author="Umesh Sharma">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="tblmfeedbackconfig" />
+            <columnExists tableName="tblmfeedbackconfig" columnName="frequency"/>
+        </preConditions>
+        <dropNotNullConstraint tableName="tblmfeedbackconfig" columnName="frequency" columnDataType="VARCHAR(50)"/>
+    </changeSet>
+
+    <changeSet id="KSCLIENTHTI001" author="Kalp Shah" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice where name="knowledgeBaseDocPath";
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="serviceid" valueNumeric="(select COALESCE(serviceid + 1)  from tblmclientservice t order by serviceid desc limit 1)" />
+            <column name="NAME" value="knowledgeBaseDocPath"></column>
+            <column name="VALUE" value="//var/document/knowledgeBaseDocPath"></column>
+            <column name="MVNOID" value="2"/>
+        </insert>
+    </changeSet>
+    <changeSet id="KSOKDOLLAR001" author="Kalp Shah">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmpaymentconfig t WHERE t.payment_config_name='OKDOLLAR';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmpaymentconfig">
+            <column name="payment_config_name" value="OKDOLLAR"/>
+            <column name="is_delete" value="0"/>
+            <column name="create_date" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </insert>
+    </changeSet>
+    <changeSet id="KSOKDOLLAR003" author="Kalp Shah" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                SELECT COUNT(*) FROM tblmpaymentconfig t WHERE t.payment_config_name='OKDOLLAR';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'OKDOLLAR' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="STAFFUSER_USERNAME"></column>
+            <column name="payment_parameter_description" value="It will provide staff username."></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'OKDOLLAR' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="STAFFUSER_PASSWORD"></column>
+            <column name="payment_parameter_description" value="It will provide staff password."></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'OKDOLLAR' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="REDIRECT_TIME_IN_SECONDS"></column>
+            <column name="payment_parameter_description" value="It will provide seconds for receipt."></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="VK00000000111" author="Varun Kumar" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice where name="WORKFLOW_HYBRID_ASSIGN" and MVNOID=1;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="SERVICEID" valueNumeric="(select COALESCE(SERVICEID + 1)  from tblmclientservice t order by SERVICEID desc limit 1)"></column>
+            <column name="NAME" value="WORKFLOW_HYBRID_ASSIGN"></column>
+            <column name="VALUE" value="false"></column>
+            <column name="MVNOID" value="1"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="VK00000000112" author="Varun Kumar" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                SELECT COUNT(*) FROM tblmclientservice WHERE NAME = 'NMS_ENABLE'
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            UPDATE tblmclientservice SET VALUE = 'false' WHERE NAME = 'NMS_ENABLE'
+        </sql>
+    </changeSet>
+    <changeSet id="VK00000000113" author="Varun Kumar" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice where name="IS_WORKFLOW_ALL_ASSIGN" and MVNOID=1;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="SERVICEID" valueNumeric="(select COALESCE(SERVICEID + 1)  from tblmclientservice t order by SERVICEID desc limit 1)"></column>
+            <column name="NAME" value="IS_WORKFLOW_ALL_ASSIGN"></column>
+            <column name="VALUE" value="false"></column>
+            <column name="MVNOID" value="1"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="VK00000000114" author="Varun Kumar" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice where name="IS_WORKFLOW_ALL_ASSIGN" and MVNOID=2;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="SERVICEID" valueNumeric="(select COALESCE(SERVICEID + 1)  from tblmclientservice t order by SERVICEID desc limit 1)"></column>
+            <column name="NAME" value="IS_WORKFLOW_ALL_ASSIGN"></column>
+            <column name="VALUE" value="false"></column>
+            <column name="MVNOID" value="2"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="DB0000000059" author="Darshan Bharambe">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sqlCheck expectedResult="0">
+                    select count(*) from tblmclientservice where name="assignInventoryDocPath";
+                </sqlCheck>
+            </not>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="serviceid" valueNumeric="(select COALESCE(serviceid + 1)  from tblmclientservice t order by serviceid desc limit 1)"></column>
+            <column name="NAME" value="assignInventoryDocPath"></column>
+            <column name="VALUE" value="//var/document/productDoc"></column>
+            <column name="MVNOID" value="1"/>
+        </insert>
+    </changeSet>
+    <changeSet id="KSWAVEMONEYP001" author="Kalp Shah">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmpaymentconfig t WHERE t.payment_config_name='WAVEMONEY';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmpaymentconfig">
+            <column name="payment_config_name" value="WAVEMONEY"/>
+            <column name="is_delete" value="0"/>
+            <column name="create_date" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </insert>
+    </changeSet>
+    <changeSet id="KSWAVEMONEYP002" author="Kalp Shah" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmpaymentconfigmapping t WHERE t.payment_config_id=(select id FROM (select t2.id
+                from tblmpaymentconfig t2 where t2.payment_config_name = 'WAVEMONEY' and t2.mvnoid IS NULL) AS temp);
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(SELECT id FROM (SELECT t2.id FROM tblmpaymentconfig t2 WHERE t2.payment_config_name = 'WAVEMONEY' AND t2.mvnoid IS NULL) AS temp)" />
+            <column name="payment_parameter_name" value="WAVEMONEY_MERCHANTID" />
+            <column name="payment_parameter_description" value="This key defines the merchant ID for WAVEMONEY." />
+            <column name="payment_parameter_for" value="GATEWAY" />
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(SELECT id FROM (SELECT t2.id FROM tblmpaymentconfig t2 WHERE t2.payment_config_name = 'WAVEMONEY' AND t2.mvnoid IS NULL) AS temp)"/>
+            <column name="payment_parameter_name" value="WAVEMONEY_SECRET_KEY"/>
+            <column name="payment_parameter_description" value="This key is used to store secret key of WAVEMONEY"/>
+            <column name="payment_parameter_for" value="GATEWAY"/>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(SELECT id FROM (SELECT t2.id FROM tblmpaymentconfig t2 WHERE t2.payment_config_name = 'WAVEMONEY' AND t2.mvnoid IS NULL) AS temp)" />
+            <column name="payment_parameter_name" value="WAVEMONEY_GATEWAY_URL" />
+            <column name="payment_parameter_description" value="This key is used to store the gateway URL for WAVEMONEY." />
+            <column name="payment_parameter_for" value="GATEWAY" />
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(SELECT id FROM (SELECT t2.id FROM tblmpaymentconfig t2 WHERE t2.payment_config_name = 'WAVEMONEY' AND t2.mvnoid IS NULL) AS temp)" />
+            <column name="payment_parameter_name" value="WAVEMONEY_CURRENCY" />
+            <column name="payment_parameter_description" value="This key is used to define the currency for WAVEMONEY." />
+            <column name="payment_parameter_for" value="GATEWAY" />
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(SELECT id FROM (SELECT t2.id FROM tblmpaymentconfig t2 WHERE t2.payment_config_name = 'WAVEMONEY' AND t2.mvnoid IS NULL) AS temp)" />
+            <column name="payment_parameter_name" value="WAVEMONEY_CALLBACK_URL" />
+            <column name="payment_parameter_description" value="This key is used to define the webhook URL for WAVEMONEY." />
+            <column name="payment_parameter_for" value="GATEWAY" />
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(SELECT id FROM (SELECT t2.id FROM tblmpaymentconfig t2 WHERE t2.payment_config_name = 'WAVEMONEY' AND t2.mvnoid IS NULL) AS temp)" />
+            <column name="payment_parameter_name" value="WAVEMONEY_SCHEDULE_TIME" />
+            <column name="payment_parameter_description" value="This key is used for schedule time configuration of WAVEMONEY." />
+            <column name="payment_parameter_for" value="GATEWAY" />
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'WAVEMONEY' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="STAFFUSER_USERNAME"></column>
+            <column name="payment_parameter_description" value="It will provide staff username."></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'WAVEMONEY' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="STAFFUSER_PASSWORD"></column>
+            <column name="payment_parameter_description" value="It will provide staff password."></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'WAVEMONEY' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="REDIRECT_TIME_IN_SECONDS"></column>
+            <column name="payment_parameter_description" value="It will provide seconds for receipt."></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="PTONEPAYMONEYP001" author="Payal Thummar" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmpaymentconfig t WHERE t.payment_config_name='ONEPAY';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmpaymentconfig">
+            <column name="payment_config_name" value="ONEPAY"/>
+            <column name="is_delete" value="0"/>
+            <column name="create_date" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </insert>
+    </changeSet>
+    <changeSet id="PTONEPAYMONEYP002" author="Payal Thummar" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmpaymentconfigmapping t WHERE t.payment_config_id=(select id FROM (select t2.id
+                from tblmpaymentconfig t2 where t2.payment_config_name = 'ONEPAY' and t2.mvnoid IS NULL) AS temp);
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(SELECT id FROM (SELECT t2.id FROM tblmpaymentconfig t2 WHERE t2.payment_config_name = 'ONEPAY' AND t2.mvnoid IS NULL) AS temp)" />
+            <column name="payment_parameter_name" value="ONEPAY_MERCHANTID" />
+            <column name="payment_parameter_description" value="This key defines the merchant ID for ONEPAY." />
+            <column name="payment_parameter_for" value="GATEWAY" />
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(SELECT id FROM (SELECT t2.id FROM tblmpaymentconfig t2 WHERE t2.payment_config_name = 'ONEPAY' AND t2.mvnoid IS NULL) AS temp)"/>
+            <column name="payment_parameter_name" value="ONEPAY_SECRET_KEY"/>
+            <column name="payment_parameter_description" value="This key is used to store secret key of ONEPAY"/>
+            <column name="payment_parameter_for" value="GATEWAY"/>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(SELECT id FROM (SELECT t2.id FROM tblmpaymentconfig t2 WHERE t2.payment_config_name = 'ONEPAY' AND t2.mvnoid IS NULL) AS temp)" />
+            <column name="payment_parameter_name" value="ONEPAY_GATEWAY_URL" />
+            <column name="payment_parameter_description" value="This key is used to store the gateway URL for ONEPAY." />
+            <column name="payment_parameter_for" value="GATEWAY" />
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(SELECT id FROM (SELECT t2.id FROM tblmpaymentconfig t2 WHERE t2.payment_config_name = 'ONEPAY' AND t2.mvnoid IS NULL) AS temp)" />
+            <column name="payment_parameter_name" value="ONEPAY_CURRENCY" />
+            <column name="payment_parameter_description" value="This key is used to define the currency for ONEPAY." />
+            <column name="payment_parameter_for" value="GATEWAY" />
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(SELECT id FROM (SELECT t2.id FROM tblmpaymentconfig t2 WHERE t2.payment_config_name = 'ONEPAY' AND t2.mvnoid IS NULL) AS temp)" />
+            <column name="payment_parameter_name" value="ONEPAY_CALLBACK_URL" />
+            <column name="payment_parameter_description" value="This key is used to define the webhook URL for ONEPAY." />
+            <column name="payment_parameter_for" value="GATEWAY" />
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(SELECT id FROM (SELECT t2.id FROM tblmpaymentconfig t2 WHERE t2.payment_config_name = 'ONEPAY' AND t2.mvnoid IS NULL) AS temp)" />
+            <column name="payment_parameter_name" value="ONEPAY_SCHEDULE_TIME" />
+            <column name="payment_parameter_description" value="This key is used for schedule time configuration of ONEPAY." />
+            <column name="payment_parameter_for" value="GATEWAY" />
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'ONEPAY' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="STAFFUSER_USERNAME"></column>
+            <column name="payment_parameter_description" value="It will provide staff username."></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'ONEPAY' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="STAFFUSER_PASSWORD"></column>
+            <column name="payment_parameter_description" value="It will provide staff password."></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'ONEPAY' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="REDIRECT_TIME_IN_SECONDS"></column>
+            <column name="payment_parameter_description" value="It will provide seconds for receipt."></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(SELECT id FROM (SELECT t2.id FROM tblmpaymentconfig t2 WHERE t2.payment_config_name = 'ONEPAY' AND t2.mvnoid IS NULL) AS temp)" />
+            <column name="payment_parameter_name" value="ONEPAY_CHANNEL" />
+            <column name="payment_parameter_description" value="This channel is used for  configuration of ONEPAY." />
+            <column name="payment_parameter_for" value="GATEWAY" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="AM001_NMS_ENABLE_FALSE" author="Akshay Mewada">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <sqlCheck expectedResult="0">
+                    SELECT COUNT(*) FROM tblmclientservice WHERE name = 'NMS_INTEGRATION_ENABLE'
+                </sqlCheck>
+            </not>
+        </preConditions>
+        <update tableName="tblmclientservice">
+            <column name="value" value="false"/>
+            <where>name = 'NMS_INTEGRATION_ENABLE'</where>
+        </update>
+    </changeSet>
+
+
+    <changeSet id="KSKBZPAY001" author="Kalp Shah">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmpaymentconfig t WHERE t.payment_config_name='KBZPAY';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmpaymentconfig">
+            <column name="payment_config_name" value="KBZPAY"/>
+            <column name="is_delete" value="0"/>
+            <column name="create_date" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </insert>
+    </changeSet>
+    <changeSet id="KSKBZPAY002" author="Kalp Shah" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmpaymentconfigmapping t WHERE t.payment_config_id=(select id FROM (select t2.id
+                from tblmpaymentconfig t2 where t2.payment_config_name = 'KBZPAY' and t2.mvnoid IS NULL) AS temp);
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(SELECT id FROM (SELECT t2.id FROM tblmpaymentconfig t2 WHERE t2.payment_config_name = 'KBZPAY' AND t2.mvnoid IS NULL) AS temp)" />
+            <column name="payment_parameter_name" value="KBZPAY_MERCHANT_CODE" />
+            <column name="payment_parameter_description" value="This key defines the merchant ID for KBZPAY." />
+            <column name="payment_parameter_for" value="GATEWAY" />
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(SELECT id FROM (SELECT t2.id FROM tblmpaymentconfig t2 WHERE t2.payment_config_name = 'KBZPAY' AND t2.mvnoid IS NULL) AS temp)"/>
+            <column name="payment_parameter_name" value="KBZPAY_APP_ID"/>
+            <column name="payment_parameter_description" value="This key is used to store App Id of KBZPAY"/>
+            <column name="payment_parameter_for" value="GATEWAY"/>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(SELECT id FROM (SELECT t2.id FROM tblmpaymentconfig t2 WHERE t2.payment_config_name = 'KBZPAY' AND t2.mvnoid IS NULL) AS temp)"/>
+            <column name="payment_parameter_name" value="KBZPAY_APP_KEY"/>
+            <column name="payment_parameter_description" value="This key is used to store App Key of KBZPAY"/>
+            <column name="payment_parameter_for" value="GATEWAY"/>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(SELECT id FROM (SELECT t2.id FROM tblmpaymentconfig t2 WHERE t2.payment_config_name = 'KBZPAY' AND t2.mvnoid IS NULL) AS temp)" />
+            <column name="payment_parameter_name" value="KBZPAY_GATEWAY_URL" />
+            <column name="payment_parameter_description" value="This key is used to store the gateway URL for KBZPAY." />
+            <column name="payment_parameter_for" value="GATEWAY" />
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(SELECT id FROM (SELECT t2.id FROM tblmpaymentconfig t2 WHERE t2.payment_config_name = 'KBZPAY' AND t2.mvnoid IS NULL) AS temp)" />
+            <column name="payment_parameter_name" value="KBZPAY_CURRENCY" />
+            <column name="payment_parameter_description" value="This key is used to define the currency for KBZPAY." />
+            <column name="payment_parameter_for" value="GATEWAY" />
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(SELECT id FROM (SELECT t2.id FROM tblmpaymentconfig t2 WHERE t2.payment_config_name = 'KBZPAY' AND t2.mvnoid IS NULL) AS temp)" />
+            <column name="payment_parameter_name" value="KBZPAY_CALLBACK_URL" />
+            <column name="payment_parameter_description" value="This key is used to define the webhook URL for KBZPAY." />
+            <column name="payment_parameter_for" value="GATEWAY" />
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(SELECT id FROM (SELECT t2.id FROM tblmpaymentconfig t2 WHERE t2.payment_config_name = 'KBZPAY' AND t2.mvnoid IS NULL) AS temp)" />
+            <column name="payment_parameter_name" value="KBZPAY_PAYMENT_URL" />
+            <column name="payment_parameter_description" value="This key is used to define the webhook URL for KBZPAY." />
+            <column name="payment_parameter_for" value="GATEWAY" />
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(SELECT id FROM (SELECT t2.id FROM tblmpaymentconfig t2 WHERE t2.payment_config_name = 'KBZPAY' AND t2.mvnoid IS NULL) AS temp)" />
+            <column name="payment_parameter_name" value="SAVBILL_DOMAIN_URL" />
+            <column name="payment_parameter_description" value="This key is used to define the webhook URL for KBZPAY." />
+            <column name="payment_parameter_for" value="GATEWAY" />
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(SELECT id FROM (SELECT t2.id FROM tblmpaymentconfig t2 WHERE t2.payment_config_name = 'KBZPAY' AND t2.mvnoid IS NULL) AS temp)" />
+            <column name="payment_parameter_name" value="KBZPAY_SCHEDULE_TIME" />
+            <column name="payment_parameter_description" value="This key is used for schedule time configuration of KBZPAY." />
+            <column name="payment_parameter_for" value="GATEWAY" />
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'KBZPAY' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="STAFFUSER_USERNAME"></column>
+            <column name="payment_parameter_description" value="It will provide staff username."></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'KBZPAY' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="STAFFUSER_PASSWORD"></column>
+            <column name="payment_parameter_description" value="It will provide staff password."></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'KBZPAY' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="REDIRECT_TIME_IN_SECONDS"></column>
+            <column name="payment_parameter_description" value="It will provide seconds for receipt."></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+    </changeSet>
+
+
+    <changeSet id="VK00000000115" author="Varun Kumar" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="tbltdepartmentplanmapping"></tableExists>
+            </not>
+        </preConditions>
+        <createTable tableName="tbltdepartmentplanmapping">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true"
+                             primaryKeyName="department_planmapping_id_pk"/>
+            </column>
+            <column name="department_id" type="bigint"/>
+            <column name="plan_id" type="bigint"/>
+        </createTable>
+        <addAutoIncrement tableName="tbltdepartmentplanmapping"
+                          columnName="id" columnDataType="bigint" startWith="1"
+                          incrementBy="1"/>
+    </changeSet>
+
+    <changeSet id="USPAYSTACKPAY001" author="Umesh Sharma">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmpaymentconfig t WHERE t.payment_config_name='PAYSTACK';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmpaymentconfig">
+            <column name="payment_config_name" value="PAYSTACK"/>
+            <column name="is_delete" value="0"/>
+            <column name="create_date" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </insert>
+    </changeSet>
+    <changeSet id="USPAYSTACKPAY002" author="Umesh Sharma" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmpaymentconfigmapping t WHERE t.payment_config_id=(select id FROM (select t2.id
+                                                                                                           from tblmpaymentconfig t2 where t2.payment_config_name = 'PAYSTACK' and t2.mvnoid IS NULL) AS temp);
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'PAYSTACK' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="PAYSTACK_SECRET_KEY"></column>
+            <column name="payment_parameter_description"
+                    value="This key is used to established secured authentication of PAYSTACK"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'PAYSTACK' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="PAYSTACK_PUBLIC_KEY"></column>
+            <column name="payment_parameter_description"
+                    value="This key is used to established secured authentication of PAYSTACK"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'PAYSTACK' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="PAYSTACK_REQUEST_URL"></column>
+            <column name="payment_parameter_description" value="This url is used to intitate the payment"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'PAYSTACK' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="PAYSTACK_VERIFY_URL"></column>
+            <column name="payment_parameter_description" value="This url is used to verify the payment"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'PAYSTACK' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="PAYSTACK_CALLBACK_URL"></column>
+            <column name="payment_parameter_description"
+                    value="This url is a system url which works as callback url"></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'PAYSTACK' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="PAYSTACK_SCHEDULE_TIME"></column>
+            <column name="payment_parameter_description"
+                    value="This schedule time works to verify payment"></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'PAYSTACK' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="PAYSTACK_REDIRECT_URL"></column>
+            <column name="payment_parameter_description"
+                    value="This url is a system url which works as callback url"></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'PAYSTACK' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="REDIRECT_TIME_IN_SECONDS"></column>
+            <column name="payment_parameter_description" value="It will provide seconds for receipt."></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+    </changeSet>
+
+
+
+    <changeSet id="AM001POLYGONEDEV" author="Akshay Mewada" runOnChange="true">
+        <preConditions>
+            <not>
+                <columnExists tableName="tblmpolygone" columnName="polygone_name"></columnExists>
+            </not>
+        </preConditions>
+        <addColumn tableName="tblmpolygone">
+            <column name="polygone_name" type="varchar(250)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="SNK2205202501" author="Navin Sankhala" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmpaymentconfigmapping t
+                WHERE t.payment_parameter_name = 'COMMISSION(%)'
+                  AND t.payment_config_id = (
+                    SELECT id FROM (
+                                       SELECT t2.id
+                                       FROM tblmpaymentconfig t2
+                                       WHERE t2.payment_config_name = 'KBZPAY'
+                                         AND t2.mvnoid IS NULL
+                                   ) AS temp
+                );
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(SELECT id FROM (SELECT t2.id FROM tblmpaymentconfig t2 WHERE t2.payment_config_name = 'KBZPAY' AND t2.mvnoid IS NULL) AS temp)" />
+            <column name="payment_parameter_name" value="COMMISSION(%)" />
+            <column name="payment_parameter_description" value="This key defines the commission value for KBZPAY." />
+            <column name="payment_parameter_for" value="GATEWAY" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="SNK2205202502" author="Navin Sankhala" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmpaymentconfigmapping t
+                WHERE t.payment_parameter_name = 'COMMISSION(%)'
+                  AND t.payment_config_id = (
+                    SELECT id FROM (
+                                       SELECT t2.id
+                                       FROM tblmpaymentconfig t2
+                                       WHERE t2.payment_config_name = 'ONEPAY'
+                                         AND t2.mvnoid IS NULL
+                                   ) AS temp
+                );
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(SELECT id FROM (SELECT t2.id FROM tblmpaymentconfig t2 WHERE t2.payment_config_name = 'ONEPAY' AND t2.mvnoid IS NULL) AS temp)" />
+            <column name="payment_parameter_name" value="COMMISSION(%)" />
+            <column name="payment_parameter_description" value="This key defines the commission value for ONEPAY." />
+            <column name="payment_parameter_for" value="GATEWAY" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="SNK2205202503" author="Navin Sankhala" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmpaymentconfigmapping t
+                WHERE t.payment_parameter_name = 'COMMISSION(%)'
+                  AND t.payment_config_id = (
+                    SELECT id FROM (
+                                       SELECT t2.id
+                                       FROM tblmpaymentconfig t2
+                                       WHERE t2.payment_config_name = 'WAVEMONEY'
+                                         AND t2.mvnoid IS NULL
+                                   ) AS temp
+                );
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(SELECT id FROM (SELECT t2.id FROM tblmpaymentconfig t2 WHERE t2.payment_config_name = 'WAVEMONEY' AND t2.mvnoid IS NULL) AS temp)" />
+            <column name="payment_parameter_name" value="COMMISSION(%)" />
+            <column name="payment_parameter_description" value="This key defines the commission value for WAVEMONEY." />
+            <column name="payment_parameter_for" value="GATEWAY" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="AMDOCVERIFYCON001" author="Akshay Mewada">
+        <insert tableName="tblcommonlist">
+            <column name="list_text" value="Department"/>
+            <column name="list_value" value="DEPARTMENT"/>
+            <column name="list_type" value="DOCUMENT_VERIFICATION_CONDITION"/>
+            <column name="status" value="Active"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="DKDEMOGRA000005" author="Dhaval Khalasi">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmdemographicmapping where current_name="Department";
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmdemographicmapping">
+            <column name="current_name" value="Department"></column>
+            <column name="new_name" value="Department"></column>
+            <column name="validation_regex" value="String"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="KSWAVEMONEYP003" author="Kalp Shah" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="tblmpaymentconfig"/>
+        </preConditions>
+        <update tableName="tblmpaymentconfig">
+            <column name="payment_config_name" value="Wave Pay"/>
+            <where>payment_config_name='WAVEMONEY'</where>
+        </update>
+    </changeSet>
+    <changeSet id="DB0000000060" author="Darshan Bharambe">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice where name="subareaDocPath" and MVNOID=1;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="serviceid" valueNumeric="(select COALESCE(serviceid + 1)  from tblmclientservice t order by serviceid desc limit 1)" />
+            <column name="NAME" value="subareaDocPath"></column>
+            <column name="VALUE" value="//var/document/subareaDoc"></column>
+            <column name="MVNOID" value="1"/>
+        </insert>
+    </changeSet>
+
+<!--    TRANSACTEASE payment gateway changesets-->
+    <changeSet id="USTRANSACTEASE001" author="Umesh Sharma">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmpaymentconfig t WHERE t.payment_config_name='TRANSACTEASE';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmpaymentconfig">
+            <column name="payment_config_name" value="TRANSACTEASE"/>
+            <column name="is_delete" value="0"/>
+            <column name="create_date" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="USTRANSACTEASE002" author="Umesh Sharma" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmpaymentconfigmapping t WHERE t.payment_config_id=(select id FROM (select t2.id
+                                                                                                           from tblmpaymentconfig t2 where t2.payment_config_name = 'TRANSACTEASE' and t2.mvnoid IS NULL) AS temp);
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'TRANSACTEASE' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="TRANSACTEASE_SECRET_KEY"></column>
+            <column name="payment_parameter_description"
+                    value="This key is used to established secured authentication of TRANSACTEASE"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'TRANSACTEASE' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="TRANSACTEASE_REQUEST_URL"></column>
+            <column name="payment_parameter_description" value="This url is used to intitate the payment"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'TRANSACTEASE' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="TRANSACTEASE_MERCHANT_ID"></column>
+            <column name="payment_parameter_description" value="This is the transactease merchant id"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'TRANSACTEASE' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="TRANSACTEASE_CHANNEL"></column>
+            <column name="payment_parameter_description" value="This is the transactease channel name"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'TRANSACTEASE' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="TRANSACTEASE_ACCESS_KEY"></column>
+            <column name="payment_parameter_description" value="This is the transactease access key"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'TRANSACTEASE' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="TRANSACTEASE_ALLOWED_PAYMENT_METHOD"></column>
+            <column name="payment_parameter_description" value="This is the transactease allowed payment method"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'TRANSACTEASE' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="TRANSACTEASE_INS_ID"></column>
+            <column name="payment_parameter_description" value="This is the transactease Ins Id"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'TRANSACTEASE' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="TRANSACTEASE_EXPIRED_TIME_IN_SECONDS"></column>
+            <column name="payment_parameter_description" value="This is the transactease payment request expired time in seconds"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'TRANSACTEASE' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="TRANSACTEASE_CLIENTSECRET"></column>
+            <column name="payment_parameter_description" value="This is the transactease client secret"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+<!--        system config mappings-->
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'TRANSACTEASE' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="TRANSACTEASE_CALLBACK_URL"></column>
+            <column name="payment_parameter_description" value="This is the transactease callback url"></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'TRANSACTEASE' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="REDIRECT_TIME_IN_SECONDS"></column>
+            <column name="payment_parameter_description" value="This is the redirect time in seconds of transactease"></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'TRANSACTEASE' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="TRANSACTEASE_REDIRECT_URL"></column>
+            <column name="payment_parameter_description" value="This is the redirect url of transactease"></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'TRANSACTEASE' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="TRANSACTEASE_SCHEDULE_TIME"></column>
+            <column name="payment_parameter_description" value="This is for set schedule for verify payment in minutes"></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'TRANSACTEASE' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="TRANSACTEASE_CURRENCY"></column>
+            <column name="payment_parameter_description" value="This is for set default currency for payment"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="USTRANSACTEASE003" author="Umesh Sharma" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmpaymentconfigmapping t
+                WHERE t.payment_parameter_name = 'TRANSACTEASE_COUNTRY'
+                  AND t.payment_config_id = (
+                    SELECT id FROM (
+                                       SELECT t2.id
+                                       FROM tblmpaymentconfig t2
+                                       WHERE t2.payment_config_name = 'TRANSACTEASE'
+                                         AND t2.mvnoid IS NULL
+                                   ) AS temp
+                );
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(SELECT id FROM (SELECT t2.id FROM tblmpaymentconfig t2 WHERE t2.payment_config_name = 'TRANSACTEASE' AND t2.mvnoid IS NULL) AS temp)" />
+            <column name="payment_parameter_name" value="TRANSACTEASE_COUNTRY" />
+            <column name="payment_parameter_description" value="This key defines the commission value for TRANSACTEASE." />
+            <column name="payment_parameter_for" value="GATEWAY" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="AMUPDATETEAMPRODUCTNOTNULL" author="Akshay Mewada">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="tblmteams" columnName="product"></columnExists>
+        </preConditions>
+        <dropNotNullConstraint
+                tableName="tblmteams"
+                columnName="product"
+                columnDataType="varchar(100)"/>
+    </changeSet>
+    <changeSet id="KSKBZPAY003" author="Kalp Shah" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmpaymentconfigmapping t
+                WHERE t.payment_parameter_name = 'KBZPAY_REDIRECT_URL'
+                  AND t.payment_config_id = (
+                    SELECT id FROM (
+                                       SELECT t2.id
+                                       FROM tblmpaymentconfig t2
+                                       WHERE t2.payment_config_name = 'KBZPAY'
+                                         AND t2.mvnoid IS NULL
+                                   ) AS temp
+                );
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(SELECT id FROM (SELECT t2.id FROM tblmpaymentconfig t2 WHERE t2.payment_config_name = 'KBZPAY' AND t2.mvnoid IS NULL) AS temp)" />
+            <column name="payment_parameter_name" value="KBZPAY_REDIRECT_URL" />
+            <column name="payment_parameter_description" value="This key defines the commission value for KBZPAY." />
+            <column name="payment_parameter_for" value="GATEWAY" />
+        </insert>
+    </changeSet>
+    <changeSet id="KSWAVEMONEYP004" author="Kalp Shah" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmpaymentconfigmapping t
+                WHERE t.payment_parameter_name = 'WAVEMONEY_REDIRECT_URL'
+                  AND t.payment_config_id = (
+                    SELECT id FROM (
+                                       SELECT t2.id
+                                       FROM tblmpaymentconfig t2
+                                       WHERE t2.payment_config_name = 'Wave Pay'
+                                         AND t2.mvnoid IS NULL
+                                   ) AS temp
+                );
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(SELECT id FROM (SELECT t2.id FROM tblmpaymentconfig t2 WHERE t2.payment_config_name = 'Wave Pay' AND t2.mvnoid IS NULL) AS temp)" />
+            <column name="payment_parameter_name" value="WAVEMONEY_REDIRECT_URL" />
+            <column name="payment_parameter_description" value="This key defines the commission value for Wave Pay." />
+            <column name="payment_parameter_for" value="GATEWAY" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="AMCUSTOMERCLIENTSERV001" author="Akshay Mewada" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice Where NAME ='DEFAULT_CUSTOMER_CATEG0RY';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="SERVICEID"
+                    valueNumeric="(select COALESCE(SERVICEID + 1)  from tblmclientservice t order by SERVICEID desc limit 1)"></column>
+            <column name="NAME" value="DEFAULT_CUSTOMER_CATEG0RY"/>
+            <column name="VALUE" value="Silver"/>
+            <column name="MVNOID" value="1"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="AMCUSTOMERCLIENTSERV002" author="Akshay Mewada" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice Where NAME ='DEFAULT_CUSTOMER_CATEG0RY' and MVNOID=2 ;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="SERVICEID"
+                    valueNumeric="(select COALESCE(SERVICEID + 1)  from tblmclientservice t order by SERVICEID desc limit 1)"></column>
+            <column name="NAME" value="DEFAULT_CUSTOMER_CATEG0RY"/>
+            <column name="VALUE" value="Silver"/>
+            <column name="MVNOID" value="2"/>
+        </insert>
+    </changeSet>
+
+
+    <changeSet id="AMCLIENTSERVICE_UNIQUE_CONSTRAINT_001" author="Akshay Mewada" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists
+                        indexName="uq_name_mvno"
+                        tableName="tblmclientservice"
+                        />
+            </not>
+        </preConditions>
+
+        <sql>
+            ALTER TABLE tblmclientservice
+                ADD UNIQUE KEY uq_name_mvno (name, mvnoid);
+        </sql>
+    </changeSet>
+
+    <changeSet id="AMCLIENTSERVICE_COPY_MISSING_001" author="Akshay Mewada" runOnChange="true">
+        <comment>
+            Insert missing clientservice entries from MVNO 2 to MVNO 1 with new service IDs
+        </comment>
+
+        <sql>
+            INSERT INTO tblmclientservice (serviceid, name, value, mvnoid)
+            SELECT
+                    (SELECT MAX(serviceid) FROM tblmclientservice) +
+                    ROW_NUMBER() OVER (ORDER BY src.name) AS new_serviceid,
+                    src.name,
+                    src.value,
+                    1 AS target_mvnoid
+            FROM tblmclientservice src
+            WHERE src.mvnoid = 2
+              AND NOT EXISTS (
+                SELECT 1
+                FROM tblmclientservice tgt
+                WHERE tgt.mvnoid = 1
+                  AND tgt.name = src.name
+            );
+        </sql>
+    </changeSet>
+
+
+    <changeSet id="AMCLIENTSERVICE_COPY_MISSING_002" author="Akshay Mewada" runOnChange="true">
+        <comment>
+            Insert missing clientservice entries from MVNO 1 to MVNO 2 with new service IDs
+        </comment>
+
+        <sql>
+            INSERT INTO tblmclientservice (serviceid, name, value, mvnoid)
+            SELECT
+                    (SELECT MAX(serviceid) FROM tblmclientservice) +
+                    ROW_NUMBER() OVER (ORDER BY src.name) AS new_serviceid,
+                    src.name,
+                    src.value,
+                    2 AS target_mvnoid
+            FROM tblmclientservice src
+            WHERE src.mvnoid = 1
+              AND NOT EXISTS (
+                SELECT 2
+                FROM tblmclientservice tgt
+                WHERE tgt.mvnoid = 2
+                  AND tgt.name = src.name
+            );
+        </sql>
+    </changeSet>
+
+    <changeSet id="AMTYPOFIX001" author="Akshay Mewada">
+        <comment>Fix typo in DEFAULT_CUSTOMER_CATEG0RY to DEFAULT_CUSTOMER_CATEGORY</comment>
+        <sql>
+            UPDATE tblmclientservice
+            SET name = 'DEFAULT_CUSTOMER_CATEGORY'
+            WHERE name = 'DEFAULT_CUSTOMER_CATEG0RY';
+        </sql>
+    </changeSet>
+
+
+
+
+
+
+    <!--    MPESA payment gateway changesets-->
+    <changeSet id="NBMPESA001" author="Nishit Bhandva">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmpaymentconfig t WHERE t.payment_config_name='MPESA';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmpaymentconfig">
+            <column name="payment_config_name" value="MPESA"/>
+            <column name="is_delete" value="0"/>
+            <column name="create_date" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </insert>
+    </changeSet>
+
+
+    <changeSet id="NBMPESA002" author="Nishit Bhandva" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmpaymentconfigmapping t WHERE t.payment_config_id=(select id FROM (select t2.id
+                from tblmpaymentconfig t2 where t2.payment_config_name = 'MPESA' and t2.mvnoid IS NULL) AS temp);
+            </sqlCheck>
+        </preConditions>
+
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'MPESA' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="MPESA_REQUEST_URL"></column>
+            <column name="payment_parameter_description" value="This url is used to intitate the payment"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'MPESA' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="MPESA_CONSUMER_KEY"></column>
+            <column name="payment_parameter_description"
+                    value="This key is used to established secured authentication of MPESA"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'MPESA' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="MPESA_CONSUMER_SECRET"></column>
+            <column name="payment_parameter_description"
+                    value="This key is used to established secured authentication of MPESA"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'MPESA' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="MPESA_PARTY_A"></column>
+            <column name="payment_parameter_description"
+                    value="This key is mpesa party A short code"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'MPESA' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="MPESA_CERTIFICATE_PATH"></column>
+            <column name="payment_parameter_description"
+                    value="This key is mpesa party A short code"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'MPESA' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="MPESA_COMMAND_ID"></column>
+            <column name="payment_parameter_description"
+                    value="This key is mpesa Mpesa type"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'MPESA' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="QR_CODE_TRANSACTION_TYPE"></column>
+            <column name="payment_parameter_description"
+                    value="This key is mpesa Mpesa Qr Code type"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+
+        <!--        system config mappings-->
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'MPESA' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="MPESA_QUEUE_TIMEOUT_URL"></column>
+            <column name="payment_parameter_description" value="This is the transactease callback url"></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'MPESA' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="REDIRECT_TIME_IN_SECONDS"></column>
+            <column name="payment_parameter_description" value="This is the redirect time in seconds of Mpesa"></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'MPESA' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="MPESA_RESULT_URL"></column>
+            <column name="payment_parameter_description" value="This is the redirect url of Mpesa"></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'MPESA' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="MPESA_SCHEDULE_TIME"></column>
+            <column name="payment_parameter_description" value="This is for set schedule for verify payment in minutes"></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'MPESA' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="MPESA_EXPRESS_SIMULATE_CALLBACK_URL"></column>
+            <column name="payment_parameter_description" value="This is for set schedule for verify payment in minutes"></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'MPESA' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="MPESA_PASSKEY"></column>
+            <column name="payment_parameter_description"
+                    value="This key is mpesa passkey"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'MPESA' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="EXPRESS_SIMULATE_TRANSACTION_TYPE"></column>
+            <column name="payment_parameter_description"
+                    value="This is mpesa EXPRESS_SIMULATE_TRANSACTION_TYPE for c2b"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'MPESA' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="CWSC_REDIRECT_URL"></column>
+            <column name="payment_parameter_description"
+                    value="This is mpesa cwsc redirect url"></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+    </changeSet>
+    <changeSet id="USMPESA003" author="Umesh Sharma" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmpaymentconfigmapping t
+                WHERE t.payment_parameter_name = 'MPESA_EXPRESS_PARTY_B'
+                  AND t.payment_config_id = (
+                    SELECT id FROM (
+                                       SELECT t2.id
+                                       FROM tblmpaymentconfig t2
+                                       WHERE t2.payment_config_name = 'MPESA'
+                                         AND t2.mvnoid IS NULL
+                                   ) AS temp
+                );
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'MPESA' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="MPESA_EXPRESS_PARTY_B"></column>
+            <column name="payment_parameter_description"
+                    value="This is mpesa express simulate party b"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+
+        </insert>
+    </changeSet>
+
+    <changeSet id="NBMPESA003" author="Nishit Bhandva" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmpaymentconfigmapping t
+                WHERE t.payment_parameter_name = 'MPESA_INITIATOR_NAME'
+                AND t.payment_config_id = ( SELECT id FROM ( SELECT t2.id
+                FROM tblmpaymentconfig t2
+                WHERE t2.payment_config_name = 'MPESA'
+                AND t2.mvnoid IS NULL
+                ) AS temp
+                );
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'MPESA' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="MPESA_INITIATOR_NAME"></column>
+            <column name="payment_parameter_description"
+                    value="This key is mpesa initiator name"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'MPESA' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="MPESA_INITIATOR_PASSWORD"></column>
+            <column name="payment_parameter_description"
+                    value="This key is initiator passwword"></column>
+            <column name="payment_parameter_for" value="GATEWAY"></column>
+        </insert>
+    </changeSet>
+
+    <!-- MPESA Vodacom payment gateway changesets-->
+    <changeSet id="GOS000204202601" author="IG_D022" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmpaymentconfig t WHERE t.payment_config_name='MPESA Vodacom';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmpaymentconfig">
+            <column name="payment_config_name" value="MPESA Vodacom"/>
+            <column name="is_delete" value="0"/>
+            <column name="create_date" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </insert>
+    </changeSet>
+
+
+    <changeSet id="GOS000204202602" author="IG_D022" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmpaymentconfigmapping t WHERE t.payment_config_id=(select id FROM (select t2.id
+                from tblmpaymentconfig t2 where t2.payment_config_name = 'MPESA Vodacom' and t2.mvnoid IS NULL) AS temp);
+            </sqlCheck>
+        </preConditions>
+
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'MPESA Vodacom' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="MPESA_VODACOM_SP_ID"></column>
+            <column name="payment_parameter_description" value="This ID is used to establish secured authentication of MPESA Vodacom"></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'MPESA Vodacom' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="MPESA_VODACOM_SP_PASSWORD"></column>
+            <column name="payment_parameter_description"
+                    value="This key is used to establish secured authentication of MPESA Vodacom"></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'MPESA Vodacom' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="MPESA_VODACOM_CALLBACK_URL"></column>
+            <column name="payment_parameter_description"
+                    value="This is the MPESA Vodacom callback url"></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'MPESA Vodacom' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="MPESA_VODACOM_CALLBACK_INITIATOR"></column>
+            <column name="payment_parameter_description"
+                    value="This is the MPESA Vodacom callback initiator"></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'MPESA Vodacom' and t2.mvnoid IS NULL) AS temp)"></column>
+            <column name="payment_parameter_name" value="MPESA_VODACOM_CALLBACK_INITIATOR_PASSWORD"></column>
+            <column name="payment_parameter_description"
+                    value="This is the MPESA Vodacom callback initiator password"></column>
+            <column name="payment_parameter_for" value="SYSTEM"></column>
+        </insert>
+    </changeSet>
+
+    <changeSet id="VK00000000125" author="Varun Kumar" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice where name="subareaDocPath" and MVNOID=2;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="serviceid" valueNumeric="(select COALESCE(serviceid + 1)  from tblmclientservice t order by serviceid desc limit 1)" />
+            <column name="NAME" value="subareaDocPath"></column>
+            <column name="VALUE" value="//var/document/subareaDoc"></column>
+            <column name="MVNOID" value="2"/>
+        </insert>
+    </changeSet>
+    <changeSet id="USTRANSACTEASE004" author="Nishit Bhandva" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmpaymentconfigmapping t
+                WHERE t.payment_parameter_name = 'COMMISSION(%)'
+                AND t.payment_config_id = (
+                SELECT id FROM (
+                SELECT t2.id
+                FROM tblmpaymentconfig t2
+                WHERE t2.payment_config_name = 'TRANSACTEASE'
+                AND t2.mvnoid IS NULL
+                ) AS temp
+                );
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(SELECT id FROM (SELECT t2.id FROM tblmpaymentconfig t2 WHERE t2.payment_config_name = 'TRANSACTEASE' AND t2.mvnoid IS NULL) AS temp)" />
+            <column name="payment_parameter_name" value="COMMISSION(%)" />
+            <column name="payment_parameter_description" value="This key defines the commission value for TRANSACTEASE." />
+            <column name="payment_parameter_for" value="GATEWAY" />
+        </insert>
+    </changeSet>
+
+    <changeSet id="CDNSATA0003" author="Nikhil Sankhala" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice Where NAME = "TOTAL_INSTALLMENTS" and MVNOID = 1;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="SERVICEID"
+                    valueNumeric="(select COALESCE(SERVICEID + 1)  from tblmclientservice t order by SERVICEID desc limit 1)"></column>
+            <column name="NAME" value="TOTAL_INSTALLMENTS"/>
+            <column name="VALUE" value="50"/>
+            <column name="MVNOID" value="1"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="CDNSATA0004" author="Nikhil Sankhala" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice Where NAME = "TOTAL_INSTALLMENTS" and MVNOID = 2 ;
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="SERVICEID"
+                    valueNumeric="(select COALESCE(SERVICEID + 1)  from tblmclientservice t order by SERVICEID desc limit 1)"></column>
+            <column name="NAME" value="TOTAL_INSTALLMENTS"/>
+            <column name="VALUE" value="50"/>
+            <column name="MVNOID" value="2"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="RDS0012082501" author="Raj Sompura" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="jv_snapshot" columnName="state"/>
+        </preConditions>
+        <modifyDataType tableName="jv_snapshot" columnName="state" newDataType="longtext" />
+    </changeSet>
+
+    <changeSet id="RDS0012082502" author="Raj Sompura" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="tblmdemographicmapping"/>
+                <columnExists tableName="tblmdemographicmapping" columnName="current_name"/>
+                <columnExists tableName="tblmdemographicmapping" columnName="new_name"/>
+                <columnExists tableName="tblmdemographicmapping" columnName="validation_regex"/>
+                <sqlCheck expectedResult="0">
+                    select count(*) from tblmdemographicmapping where current_name='PAN/TIN';
+                </sqlCheck>
+            </and>
+        </preConditions>
+
+        <insert tableName="tblmdemographicmapping">
+            <column name="current_name" value="PAN/TIN"/>
+            <column name="new_name" value="KRA PIN"/>
+            <column name="validation_regex" value="String"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="AJ0029112501" author="IG_D0010" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice Where NAME ='CAF_VISIBILITY_RISTRICT';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="SERVICEID"
+                    valueNumeric="(select COALESCE(SERVICEID + 1)  from tblmclientservice t order by SERVICEID desc limit 1)"></column>
+            <column name="NAME" value="CAF_VISIBILITY_RISTRICT"/>
+            <column name="VALUE" value="false"/>
+            <column name="MVNOID" value="1"/>
+        </insert>
+    </changeSet>
+
+
+    <changeSet id="AJ0029112502" author="IG_D0010" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">
+                SELECT COUNT(*)
+                FROM tblmclientservice
+                WHERE MVNOID = 1
+                AND NAME = 'CAF_VISIBILITY_RISTRICT'
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            SET @row := (SELECT COALESCE(MAX(SERVICEID), 0) FROM tblmclientservice);
+
+            INSERT INTO tblmclientservice (
+            SERVICEID,
+            NAME,
+            VALUE,
+            MVNOID
+            )
+            SELECT
+            @row := @row + 1,
+            src.NAME,
+            src.VALUE,
+            mvnos.MVNOID
+            FROM (
+            SELECT NAME, VALUE
+            FROM tblmclientservice
+            WHERE MVNOID = 1 AND NAME = 'CAF_VISIBILITY_RISTRICT'
+            ) src
+            JOIN tblmmvno mvnos
+            ON mvnos.MVNOID &lt;&gt; 1
+            WHERE NOT EXISTS (
+            SELECT 1
+            FROM tblmclientservice existing
+            WHERE LOWER(TRIM(existing.NAME)) = LOWER(TRIM(src.NAME))
+            AND LOWER(TRIM(existing.VALUE)) = LOWER(TRIM(src.VALUE))
+            AND existing.MVNOID = mvnos.MVNOID
+            );
+        </sql>
+    </changeSet>
+
+    <changeSet id="RDS00201202601" author="IG_D003" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice where name='AutoRenewFreePlan' and MVNOID='1';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="serviceid" valueNumeric="(select COALESCE(serviceid + 1) from tblmclientservice t order by serviceid desc limit 1)" />
+            <column name="NAME" value="AutoRenewFreePlan"/>
+            <column name="VALUE" value="false"/>
+            <column name="MVNOID" value="1"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="RDS00201202602" author="IG_D003" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice where name='AutoRenewFreePlan' and MVNOID='2';
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="serviceid" valueNumeric="(select COALESCE(serviceid + 1) from tblmclientservice t order by serviceid desc limit 1)" />
+            <column name="NAME" value="AutoRenewFreePlan"/>
+            <column name="VALUE" value="false"/>
+            <column name="MVNOID" value="2"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="RDS000303202601" author="IG_D003" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice where name='AllowWorkflowForFollowUpTicket' and MVNOID="1";
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="NAME" value="AllowWorkflowForFollowUpTicket"/>
+            <column name="VALUE" value="false"/>
+            <column name="MVNOID" value="1"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="RDS000303202602" author="IG_D003" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                select count(*) from tblmclientservice where name='AllowWorkflowForFollowUpTicket' and MVNOID="2";
+            </sqlCheck>
+        </preConditions>
+        <insert tableName="tblmclientservice">
+            <column name="NAME" value="AllowWorkflowForFollowUpTicket"/>
+            <column name="VALUE" value="false"/>
+            <column name="MVNOID" value="2"/>
+        </insert>
+    </changeSet>
+
+    <!-- CRDB Bank payment gateway changesets -->
+
+    <changeSet id="GOS000204202603" author="IG_D022" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmpaymentconfig t WHERE t.payment_config_name='CRDB Bank';
+            </sqlCheck>
+        </preConditions>
+
+        <insert tableName="tblmpaymentconfig">
+            <column name="payment_config_name" value="CRDB Bank"/>
+            <column name="is_delete" value="0"/>
+            <column name="create_date" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </insert>
+    </changeSet>
+
+
+    <changeSet id="GOS000125202601" author="IG_D022" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM tblmpaymentconfigmapping t
+                WHERE t.payment_config_id=(
+                select id FROM (
+                select t2.id
+                from tblmpaymentconfig t2
+                where t2.payment_config_name = 'CRDB Bank'
+                and t2.mvnoid IS NULL
+                ) AS temp
+                );
+            </sqlCheck>
+        </preConditions>
+
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'CRDB' and t2.mvnoid IS NULL) AS temp)"/>
+            <column name="payment_parameter_name" value="CRDB_AMOUNT_TYPE"/>
+            <column name="payment_parameter_description"
+                    value="This is the CRDB amount type"/>
+            <column name="payment_parameter_for" value="SYSTEM"/>
+        </insert>
+
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'CRDB' and t2.mvnoid IS NULL) AS temp)"/>
+            <column name="payment_parameter_name" value="CRDB_DEFAULT_CURRENCY"/>
+            <column name="payment_parameter_description"
+                    value="This is the CRDB default currency"/>
+            <column name="payment_parameter_for" value="SYSTEM"/>
+        </insert>
+
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'CRDB' and t2.mvnoid IS NULL) AS temp)"/>
+            <column name="payment_parameter_name" value="CRDB_PAYMENT_TYPE"/>
+            <column name="payment_parameter_description"
+                    value="This is the CRDB payment type"/>
+            <column name="payment_parameter_for" value="SYSTEM"/>
+        </insert>
+
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'CRDB' and t2.mvnoid IS NULL) AS temp)"/>
+            <column name="payment_parameter_name" value="CRDB_PAYMENT_DESC"/>
+            <column name="payment_parameter_description"
+                    value="This is the CRDB payment description"/>
+            <column name="payment_parameter_for" value="SYSTEM"/>
+        </insert>
+
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'CRDB' and t2.mvnoid IS NULL) AS temp)"/>
+            <column name="payment_parameter_name" value="INSTITUTION_ID"/>
+            <column name="payment_parameter_description"
+                    value="This is the CRDB institution ID"/>
+            <column name="payment_parameter_for" value="SYSTEM"/>
+        </insert>
+
+        <insert tableName="tblmpaymentconfigmapping">
+            <column name="payment_config_id"
+                    valueNumeric="(select id FROM (select t2.id from tblmpaymentconfig t2 where t2.payment_config_name = 'CRDB' and t2.mvnoid IS NULL) AS temp)"/>
+            <column name="payment_parameter_name" value="TRANSACTION_CHANNEL"/>
+            <column name="payment_parameter_description"
+                    value="This is the CRDB transaction channel"/>
+            <column name="payment_parameter_for" value="SYSTEM"/>
+        </insert>
+
+    </changeSet>
+</databaseChangeLog>

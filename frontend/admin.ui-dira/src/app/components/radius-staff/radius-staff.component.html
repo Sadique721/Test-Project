@@ -1,0 +1,2241 @@
+<!-- --------------search start-------------------- -->
+<div class="row header-row">
+    <mat-card class="cardWithShadow w-100">
+        <mat-card-content class="mat-card-content-border">
+            <div class="d-flex align-items-center justify-content-between flex-wrap">
+                <div class="d-flex align-items-center flex-wrap gap-10">
+                    <!-- Search Option Dropdown -->
+                    <mat-form-field appearance="outline" class="hide-hint">
+                        <mat-select class="input-p-5" placeholder="Select a Search Option" [(ngModel)]="searchOption">
+                            @for (option of searchOptionSelect; track option) {
+                            <mat-option [value]="option.value">{{ option.label }}</mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+
+                    <!-- Global Search -->
+                    @if (searchOption == 'globalsearch') {
+                    <mat-form-field appearance="outline" class="hide-hint">
+                        <input class="input-p-5" matInput placeholder="Global Search Filter" [(ngModel)]="searchDeatil"
+                            (keydown.enter)="searchStaffData()" />
+                    </mat-form-field>
+                    }
+
+                    <!-- Receipt No -->
+                    @if (searchOption == 'reciept') {
+                    <mat-form-field appearance="outline" class="hide-hint">
+                        <input class="input-p-5" matInput type="number" placeholder="Enter receipt number"
+                            [(ngModel)]="searchDeatil" (keydown.enter)="searchStaffData()" />
+                    </mat-form-field>
+
+
+                    <!-- Prefix -->
+                    <mat-form-field appearance="outline" class="hide-hint">
+                        <input class="input-p-5" matInput placeholder="Enter prefix" [(ngModel)]="prefikx"
+                            (keydown.enter)="searchStaffData()" />
+                    </mat-form-field>
+                    }
+
+                    <!-- Buttons -->
+                    @if (searchOption) {
+                    <button mat-flat-button color="primary" class="button-normal m-r-10" (click)="searchStaffData()"
+                        [disabled]="!searchDeatil">
+                        Search
+                    </button>
+                    <button mat-stroked-button class="button-normal" (click)="clearSearchForm()">
+                        Clear
+                    </button>
+                    }
+
+                </div>
+
+                <!-- Right side: Add Staff button -->
+                <div>
+                    <button mat-flat-button color="primary" class="button-normal mr-10"
+                        (click)="addEditRadiusStaffDialog()">
+                        Add Staff
+                    </button>
+                </div>
+
+            </div>
+
+        </mat-card-content>
+    </mat-card>
+</div>
+
+<!-- --------change p/w start------- -->
+<ng-template #changePasswordDialog>
+    <div class="dialog-container">
+        <!-- Header -->
+        <div class="dialog-header">
+            Change Password
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="onCancelChangePassword()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <!-- Dialog Content -->
+        <div mat-dialog-content>
+            <mat-card-content class="matcardContent">
+                <form [formGroup]="changePasswordForm" class="card-form">
+
+                    <!-- Username -->
+                    <div class="row">
+                        <div class="col-md-12 mb-4">
+                            <label class="inputLabel">User Name</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input class="input-p-5" matInput formControlName="userName" placeholder="User Name" />
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <!-- New Password -->
+                    @if (!ifgenerateOtpField) {
+                    <div class="row">
+                        <div class="col-md-12 mb-4">
+                            <label class="inputLabel">New Password *</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input class="input-p-5" matInput [type]="_passwordNewType"
+                                    formControlName="newPassword" placeholder="Enter New Password" />
+                                <button mat-icon-button matSuffix type="button" (click)="toggleNewPasswordVisibility()">
+                                    <mat-icon>
+                                        {{ showNewPassword ? 'visibility' : 'visibility_off' }}
+                                    </mat-icon>
+                                </button>
+                                <mat-error
+                                    *ngIf="submitted && changePasswordForm.controls.newPassword.errors?.required">
+                                    New Password is required.
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                    }
+
+                    <!-- OTP -->
+                    @if (ifgenerateOtpField) {
+                    <div class="row">
+                        <div class="col-md-12 mb-4">
+                            <label class="inputLabel">OTP *</label>
+
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input class="input-p-5" matInput type="text" placeholder="Enter OTP"
+                                    [(ngModel)]="staffOTPValue" [ngModelOptions]="{ standalone: true }"
+                                    name="staffOTPValue" />
+                            </mat-form-field>
+                        </div>
+                    </div>
+                    }
+
+                    <!-- Generate OTP Button -->
+                    @if (ifgenerateOtpField) {
+                    <div class="text-end">
+                        <button mat-flat-button color="primary" type="button" (click)="genrateOtp()">
+
+                            Generate OTP
+                        </button>
+                    </div>
+                    }
+                </form>
+            </mat-card-content>
+        </div>
+
+        <!-- Footer Actions -->
+        <mat-dialog-actions align="end">
+            @if (ifgenerateOtpField) {
+            <button mat-flat-button color="primary" (click)="ValidOtp()" [disabled]="!staffOTPValue">
+                Validate OTP-
+            </button>
+            }
+
+            @if (!ifgenerateOtpField) {
+            <button mat-flat-button color="primary" (click)="changePassword()" [disabled]="!changePasswordForm.valid">
+                Save
+            </button>
+            }
+
+            <button mat-stroked-button color="warn" (click)="clearChangePasswordForm()">
+                Clear
+            </button>
+
+            <button mat-stroked-button (click)="onCancelChangePassword()">
+                Close
+            </button>
+        </mat-dialog-actions>
+    </div>
+</ng-template>
+<!-- --------change p/w end------- -->
+
+<!-- ---------------------list start----------------- -->
+
+<!-- @if (isStaffList) { -->
+<div class="container-fluid contain-flud">
+    <div class="row">
+        <!-- staff list table start -->
+        <div class="col-md-12">
+            <mat-card class="cardWithShadow">
+                <!-- <mat-card-header>
+            <mat-card-title>Staff</mat-card-title>
+          </mat-card-header> -->
+
+                <mat-card-content class="mat-card-content-border">
+                    <div class="staff-table-list">
+                        <div class="table-container">
+                            <table mat-table [dataSource]="dataSourceStaff" matSort class="mat-elevation-z8 w-100">
+                                <!-- Firstname Column -->
+                                <ng-container matColumnDef="firstname">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Firstname
+                                    </th>
+                                    <td mat-cell *matCellDef="let staff" class="curson_pointer f-s-14"
+                                        [routerLink]="['/home/mystaff', staff.id]" href="javascript:void(0)"
+                                        color="primary"
+                                        class="cursor-pointer text-primary f-w-500 text-decoration-none">
+                                        {{ staff.firstname }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Lastname Column -->
+                                <ng-container matColumnDef="lastname">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Lastname
+                                    </th>
+                                    <td mat-cell *matCellDef="let staff" class="f-s-14">
+                                        {{ staff.lastname }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Username Column -->
+                                <ng-container matColumnDef="username">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Username
+                                    </th>
+                                    <td mat-cell *matCellDef="let staff" class="f-s-14">
+                                        {{ staff.username }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Email Column -->
+                                <ng-container matColumnDef="email">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Email
+                                    </th>
+                                    <td mat-cell *matCellDef="let staff" class="f-s-14">
+                                        {{ staff.email }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Status Column -->
+                                <ng-container matColumnDef="status">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Status
+                                    </th>
+                                    <td mat-cell *matCellDef="let staff" class="f-s-14">
+                                        <span class="status-badge" [ngClass]="{
+                          'status-success': staff.status?.toLowerCase() === 'active',
+                          'status-danger': staff.status?.toLowerCase() !== 'active'
+                        }">
+                                            {{ staff.status }}
+                                        </span>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Action Column -->
+                                @if (changePassAccess || createReceiptAccess || editAccess) {
+                                <ng-container matColumnDef="action">
+                                    <th mat-header-cell *matHeaderCellDef stickyEnd class="table-header-title">
+                                        Action
+                                    </th>
+                                    <td mat-cell *matCellDef="let staff" class="btnAction">
+
+                                        <!-- Edit Button -->
+                                        @if (editAccess) {
+                                        <button mat-icon-button color="primary" matTooltip="Edit"
+                                            (click)="editStaffById(staff)" [disabled]="staff.status === 'TERMINATED'">
+                                            <img src="assets/img/DashboardIcons/Edit.svg">
+                                        </button>
+                                        }
+
+                                        <!-- Change Password -->
+                                        @if (changePassAccess) {
+                                        <button mat-icon-button color="accent" matTooltip="Change Password"
+                                            (click)="getCustomerDataForPasswordChange(staff)">
+                                            <img src="assets/img/DashboardIcons/Key.svg" class=" icon-size">
+                                        </button>
+                                        }
+
+                                        <!-- Add Receipt -->
+                                        @if (createReceiptAccess) {
+                                        <button mat-icon-button color="warn" matTooltip="Add New Receipt"
+                                            (click)="addNewReceipt(staff)">
+                                            <!-- <i class="pi pi-receipt icon-size"></i> -->
+                                            <img class="icon" src="assets/img/DashboardIcons\Add Receipt.svg" />
+                                        </button>
+                                        }
+                                    </td>
+                                </ng-container>
+                                }
+
+                                <!-- Header & Rows -->
+                                <tr mat-header-row class="table-header-bg"
+                                    *matHeaderRowDef="getDisplayedPlanDetailsColumns(); sticky: true"></tr>
+                                <tr mat-row class="table-content-row"
+                                    *matRowDef="let row; columns: getDisplayedPlanDetailsColumns()"></tr>
+                            </table>
+
+                            <!-- Paginator -->
+                            <mat-paginator [length]="totalRecords" [pageSize]="itemsPerPage"
+                                [pageSizeOptions]="[5, 10, 20, 50, 100]" showFirstLastButtons (page)="pageChanged($event)">
+                            </mat-paginator>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+        <!-- staff list table end -->
+    </div>
+</div>
+<!-- } -->
+<!-- ---------------------list end----------------- -->
+
+<!-- -----------for create start---------- -->
+<ng-template #staffDialogTemplate>
+    <div class="dialog-container">
+        <div class="dialog-header">
+            {{ editMode ? "Update" : "Create" }} Staff
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="onCancel()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+            @if (!createAccess && !editAccess) {
+            <mat-card-content class="matcard-content">
+                <div class="panel-body table-responsive">
+                    Sorry you have not privilege to create operation!
+                </div>
+            </mat-card-content>
+            }
+            @if (createAccess || editAccess) {
+            <mat-card-content>
+                <form [formGroup]="staffGroupForm" class="mvno-form">
+                    <div class="form-group row">
+                        <div class="col-md-12 ml-12">
+                            @if (!imageUrl) {
+                            <div class="borderuploadphoto" style="
+          border: 1px solid black !important;
+          background: url('../assets/img/user.png');
+          background-size: cover;
+          background-position: center;
+        ">
+                                <button type="button" mat-icon-button class="upload_btn-profileimage"
+                                    style="width: 23%; height: 35px; padding: 5px">
+                                    <label for="upload-profileImage" style="cursor: pointer; margin: 0">
+                                        <mat-icon>camera_alt</mat-icon>
+                                    </label>
+                                    <input type="file" name="photo" id="upload-profileImage"
+                                        (change)="onFileChangeUpload($event.target.files)" accept=".jpg, .jpeg, .png"
+                                        maxlength="2097152" style="display: none" />
+                                </button>
+                            </div>
+                            }
+                            @if (imageUrl) {
+                            <div class="borderuploadphoto" style="
+          border: 1px solid black !important;
+          background: url('{{ imageUrl }}');
+          background-size: cover;
+          background-position: center;
+        ">
+                                <button type="button" mat-icon-button class="upload_btn-profileimage"
+                                    style="width: 23%; height: 35px; padding: 5px">
+                                    <label for="upload-profileImage" style="cursor: pointer; margin: 0">
+                                        <mat-icon>camera_alt</mat-icon>
+                                    </label>
+                                    <input type="file" name="photo" id="upload-profileImage"
+                                        (change)="onFileChangeUpload($event.target.files)" accept="image/*"
+                                        style="display: none" />
+                                </button>
+                                <button type="button" mat-icon-button color="warn" class="upload_btn-profileimage"
+                                    title="Remove Image" style="width: 23%; height: 35px; padding: 5px; margin: 2px"
+                                    (click)="removeImage()">
+                                    <mat-icon>close</mat-icon>
+                                </button>
+                            </div>
+                            }
+                            <label style=" text-align: center; display: flex; justify-content: center">Profile
+                                Image</label>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        <!-- Username -->
+                        <div class="col-md-4">
+                            <label class="inputLabel">Username*</label>
+                            <mat-form-field appearance="outline" style="width: 100%">
+                                <input class="input-p-5" matInput id="username" type="text" name="username"
+                                    placeholder="Enter username" formControlName="username" />
+                                @if (!editMode) {
+                                <span matSuffix style="margin-right: 10px">{{ usernamee }}</span>
+                                }
+                                @if (staffGroupForm.controls['username'].hasError('required')) {
+                                <mat-error>Username is required</mat-error>
+                                }
+                            </mat-form-field>
+                        </div>
+                        <!-- Password -->
+                        @if (staffGroupForm.controls.password.enabled) {
+                        <div class="col-md-4">
+                            <label class="inputLabel">Password *</label>
+                            <mat-form-field appearance="outline" style="width: 100%">
+                                <input class="input-p-5" matInput id="password" [type]="_passwordType" name="password"
+                                    placeholder="Enter password" formControlName="password" />
+                                <button mat-icon-button matSuffix type="button"
+                                    (click)="showPassword = !showPassword; _passwordType = showPassword ? 'text' : 'password'">
+                                    <mat-icon>{{ showPassword ? 'visibility' : 'visibility_off' }}</mat-icon>
+                                </button>
+                                @if (staffGroupForm.controls['password'].hasError('required')) {
+                                <mat-error>Password is required</mat-error>
+                                }
+                                @if (staffGroupForm.controls['password'].hasError('cannotContainSpace')) {
+                                <mat-error>White space are not allowed</mat-error>
+                                }
+                            </mat-form-field>
+                            <!-- <mat-form-field appearance="outline" class="w-100">
+            <input class="input-p-5"
+              matInput
+              [type]="_passwordType"
+              placeholder="Enter password"
+              formControlName="password"
+            />
+            <button
+              mat-icon-button
+              matSuffix
+              (click)="togglePasswordVisibility()"
+              type="button"
+            >
+              <mat-icon>{{ showPassword ? 'visibility' : 'visibility_off' }}</mat-icon>
+            </button>
+            <mat-error *ngIf="submitted && staffGroupForm.controls.password.errors?.required">
+              Password is required
+            </mat-error>
+            <mat-error *ngIf="staffGroupForm.controls.password.errors?.cannotContainSpace">
+              White spaces are not allowed
+            </mat-error>
+          </mat-form-field> -->
+                        </div>
+                        }
+
+                        <!-- Email -->
+                        <div class="col-md-4">
+                            <label class="inputLabel">Email *</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input class="input-p-5" matInput formControlName="email" placeholder="Enter email" />
+                                <mat-error *ngIf="submitted && staffGroupForm.controls.email.errors?.required">
+                                    Email is required
+                                </mat-error>
+                                <mat-error *ngIf="submitted && staffGroupForm.controls.email.errors?.email">
+                                    Invalid email address
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- HRMS ID -->
+                        @if (editMode) {
+                        <div class="col-md-4">
+                            <label class="inputLabel">HRMS ID</label>
+                            <mat-form-field appearance="outline" style="width: 100%">
+                                <input class="input-p-5" matInput type="text" placeholder="Enter HRMS ID"
+                                    formControlName="hrmsId" />
+                            </mat-form-field>
+                        </div>
+                        }
+                    </div>
+                    <!-- Row 2 -->
+                    <div class="row">
+
+                        <!-- First Name -->
+                        <div class="col-md-4">
+                            <label class="inputLabel">First Name *</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input class="input-p-5" matInput formControlName="firstname"
+                                    placeholder="Enter first name" />
+                                <mat-error *ngIf="submitted && staffGroupForm.controls.firstname.errors?.required">
+                                    First name is required
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Last Name -->
+                        <div class="col-md-4">
+                            <label class="inputLabel">Last Name *</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input class="input-p-5" matInput formControlName="lastname"
+                                    placeholder="Enter last name" />
+                                <mat-error *ngIf="submitted && staffGroupForm.controls.lastname.errors?.required">
+                                    Last name is required
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="col-md-4">
+                            <label class="inputLabel">Status *</label>
+                            <mat-form-field appearance="outline" style="width: 100%">
+                                <mat-select class="input-p-5" formControlName="status" placeholder="Select a Status">
+                                    @for (status of statusList; track status.value_field) {
+                                    <mat-option [value]="status.value_field">
+                                        {{ status.display_field }}
+                                    </mat-option>
+                                    }
+                                </mat-select>
+                                @if (staffGroupForm.controls['status'].hasError('required')) {
+                                <mat-error>Status is required</mat-error>
+                                }
+                            </mat-form-field>
+                        </div>
+
+                    </div>
+
+                    <!-- Row 3: Mobile -->
+                    <div class="row">
+                        <!-- <div class="col-md-4">
+                            <label class="inputLabel">Mobile *</label>
+                            <div class="d-flex align-items-center">
+                                <mat-form-field appearance="outline" class="w-25 mr-2">
+                                    <mat-select class="input-p-5" formControlName="countryCode">
+                                        @for (c of countries; track c) {
+                                        <mat-option [value]="c.dial_code">{{ c.dial_code }}</mat-option>
+                                        }
+                                    </mat-select>
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" class="w-75">
+                                    <input class="input-p-5" matInput type="number" placeholder="Enter mobile number"
+                                        formControlName="phone" (keypress)="onKeyPress($event)"
+                                        (input)="checkMobileLength()" />
+                                    <mat-error *ngIf="staffGroupForm.controls.phone.errors?.required">
+                                        Mobile number is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                        </div> -->
+                        <!-- <div class="form-group row"> -->
+                        <div class="col-md-4">
+                            <label class="inputLabel">Mobile *</label>
+                            <div style="display: flex; gap: 8px; width: 100%;">
+                                <mat-form-field appearance="outline" style="width: 40%">
+                                    <mat-select class="input-p-5" id="countryCode" formControlName="countryCode"
+                                        placeholder="+91">
+                                        @for (country of countries; track country.code + country.dial_code) {
+                                        <mat-option [value]="country.dial_code">
+                                            {{ country.dial_code }}
+                                        </mat-option>
+                                        }
+                                    </mat-select>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" style="width: 60%">
+                                    <input class="input-p-5" matInput type="number" formControlName="phone"
+                                        [attr.maxLength]="commondropdownService.maxMobileLength"
+                                        placeholder="Enter Mobile" (keypress)="onKeyPress($event)"
+                                        (input)="checkMobileLength()" />
+                                    @if (staffGroupForm.controls['phone'].hasError('required')) {
+                                    <mat-error>Mobile Number is required</mat-error>
+                                    }
+                                    @if (
+                                    staffGroupForm.controls['phone'].hasError('minlength') ||
+                                    staffGroupForm.controls['phone'].hasError('maxlength')
+                                    ) {
+                                    <mat-error>
+                                        @if (commondropdownService.minMobileLength ===
+                                        commondropdownService.maxMobileLength) {
+                                        Mobile Number must be exactly {{ commondropdownService.minMobileLength }} digits
+                                        } @else {
+                                        Mobile Number must be between {{ commondropdownService.minMobileLength }} and
+                                        {{ commondropdownService.maxMobileLength }} digits
+                                        }
+                                    </mat-error>
+                                    }
+                                </mat-form-field>
+                            </div>
+                        </div>
+                        <!-- Roles -->
+                        <div class="col-md-4">
+                            <label class="inputLabel">Roles *</label>
+                            <mat-form-field appearance="outline" style="width: 100%">
+                                <mat-select class="input-p-5" formControlName="roleIds" placeholder="Select a Roles">
+                                    @for (role of loggedInUserRoleList; track role.id) {
+                                    <mat-option [value]="role.id">
+                                        {{ role.rolename }}
+                                    </mat-option>
+                                    }
+                                </mat-select>
+                                @if (staffGroupForm.controls['roleIds'].hasError('required')) {
+                                <mat-error>Roles is required</mat-error>
+                                }
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Teams -->
+                        <div class="col-md-4">
+                            <label class="inputLabel">Teams</label>
+                            <mat-form-field appearance="outline" style="width: 100%">
+                                <mat-select class="input-p-5" formControlName="teamIds" placeholder="Select teams"
+                                    multiple>
+                                    @for (team of teams; track team.id) {
+                                    <mat-option [value]="team.id">
+                                        {{ team.name }}
+                                    </mat-option>
+                                    }
+                                </mat-select>
+                                @if (staffGroupForm.controls['teamIds'].hasError('required')) {
+                                <mat-error>Teams is required</mat-error>
+                                }
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <div class="row">
+
+                        <!-- Service Area -->
+                        <div class="col-md-4">
+                            <label class="inputLabel">Service Area</label>
+                            <mat-form-field appearance="outline" style="width: 100%">
+                                <mat-select class="input-p-5" formControlName="serviceAreaIdsList"
+                                    placeholder="Select Area" multiple (selectionChange)="serviceAreaEvent($event)">
+                                    @for (area of commondropdownService.serviceAreaList; track area.id) {
+                                    <mat-option [value]="area.id">
+                                        {{ area.name }}
+                                        @if (area.isUnderDevelopment) {
+                                        <span class="badge badge-info underDevelopBadge">UnderDevelopment</span>
+                                        }
+                                    </mat-option>
+                                    }
+                                </mat-select>
+                                @if (staffGroupForm.controls['serviceAreaIdsList'].hasError('required')) {
+                                <mat-error>Service area is required</mat-error>
+                                }
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Business Unit -->
+                        <div class="col-md-4">
+                            <label class="inputLabel">Business Unit</label>
+                            <mat-form-field appearance="outline" style="width: 100%">
+                                <mat-select class="input-p-5" formControlName="businessUnitIdsList"
+                                    placeholder="Select Business Unit" multiple>
+                                    @for (unit of businessData; track unit.id) {
+                                    <mat-option [value]="unit.id">
+                                        {{ unit.buname }}
+                                    </mat-option>
+                                    }
+                                </mat-select>
+                                @if (staffGroupForm.controls['businessUnitIdsList'].hasError('required')) {
+                                <mat-error>Business Unit is required</mat-error>
+                                }
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Partner -->
+                        <div class="col-md-4">
+                            <label class="inputLabel">Partner*</label>
+                            <mat-form-field appearance="outline" style="width: 100%">
+                                <mat-select class="input-p-5" formControlName="partnerid"
+                                    placeholder="Select a Partner">
+                                    @for (partner of commondropdownService.partnerAllNAme; track partner.id) {
+                                    <mat-option [value]="partner.id">
+                                        {{ partner.name }}
+                                    </mat-option>
+                                    }
+                                </mat-select>
+                                @if (staffGroupForm.controls['partnerid'].hasError('required')) {
+                                <mat-error>Partner is required</mat-error>
+                                }
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Branch -->
+                        <div class="col-md-4">
+                            <label class="inputLabel">Branch</label>
+                            <mat-form-field appearance="outline" style="width: 100%">
+                                <mat-select class="input-p-5" formControlName="branchId" placeholder="Select a Branch">
+
+                                    <!-- Show branches if data exists -->
+                                    @if (branchData?.length > 0) {
+                                    @for (branch of branchData; track branch.id) {
+                                    <mat-option [value]="branch.id">
+                                        {{ branch.name }}
+                                    </mat-option>
+                                    }
+                                    }
+
+                                    <!-- Show 'No record found' if list is empty -->
+                                    @if (branchData?.length === 0) {
+                                    <mat-option [disabled]="true">
+                                        No record found
+                                    </mat-option>
+                                    }
+                                    <!-- @for (branch of branchData; track branch.id) {
+                                    <mat-option [value]="branch.id">
+                                        {{ branch.name }}
+                                    </mat-option>
+                                    } -->
+                                </mat-select>
+                                @if (staffGroupForm.controls['branchId'].hasError('required')) {
+                                <mat-error>Branch is required</mat-error>
+                                }
+                            </mat-form-field>
+                        </div>
+                        @if (tacacsAccess && statusCheckService.isActiveTacacs) {
+                        <div class="col-md-4">
+                            <label class="inputLabel">Access Level Group</label>
+                            <mat-form-field appearance="outline" style="width: 100%">
+                                <mat-select class="input-p-5" formControlName="tacacsAccessLevelGroup"
+                                    placeholder="Select a tacacs Access Level Group">
+                                    @for (tacacs of TacacsDeviceList; track tacacs.accessLevelGroupName) {
+                                    <mat-option [value]="tacacs.accessLevelGroupName">
+                                        {{ tacacs.accessLevelGroupName }}
+                                    </mat-option>
+                                    }
+                                </mat-select>
+                                @if (staffGroupForm.controls['tacacsAccessLevelGroup'].hasError('required')) {
+                                <mat-error>Access Level Group is required</mat-error>
+                                }
+                            </mat-form-field>
+                        </div>
+                        }
+                        @if (!editMode) {
+                        <div class="col-md-4">
+                            <label class="inputLabel">HRMS ID</label>
+                            <mat-form-field appearance="outline" style="width: 100%">
+                                <input class="input-p-5" matInput type="text" placeholder="Enter HRMS ID"
+                                    formControlName="hrmsId" />
+                            </mat-form-field>
+                        </div>
+                        }
+
+                        <!-- @if (staffGroupForm.controls.parentStaffId.enabled) { -->
+                        <div class="col-md-4">
+                            <label class="inputLabel">Parent Staff</label>
+                            <div class="d-flex">
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <input matInput readonly formControlName="parentStaffName" class="input-p-5"
+                                        [placeholder]="'Select a Parent Staff'">
+                                </mat-form-field>
+
+                                <button mat-icon-button color="primary" type="button"
+                                    (click)="openSelectorDialogComponent()">
+                                    <img src="assets/img/DashboardIcons/Add.svg">
+                                </button>
+                            </div>
+                            <!-- <mat-form-field appearance="outline" style="width: 100%">
+                                <mat-select class="input-p-5" formControlName="parentStaffId"
+                                    placeholder="Select a Parent Staff">
+                                    @for (staff of parentStaffList; track staff.id) {
+                                    <mat-option [value]="staff.id">
+                                        {{ staff.fullName }}
+                                    </mat-option>
+                                    }
+                                </mat-select>
+                            </mat-form-field> -->
+                        </div>
+                        <!-- } -->
+                        <div class="col-md-4">
+                            <label class="inputLabel">Accessible Roles</label>
+                            <mat-form-field appearance="outline" style="width: 100%">
+                                <mat-select class="input-p-5" formControlName="assignableRoleIds"
+                                    placeholder="Select accessible roles" multiple>
+                                    @for (role of roleList; track role.assignableRoleId) {
+                                    <mat-option [value]="role.assignableRoleId">
+                                        {{ role.assignableRoleName }}
+                                    </mat-option>
+                                    }
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Department -->
+                        <div class="col-md-4">
+                            <label class="inputLabel">Department</label>
+                            <mat-form-field appearance="outline" style="width: 100%">
+                                <mat-select class="input-p-5" formControlName="department"
+                                    placeholder="Select a Department">
+                                    @for (dept of departmentData; track dept.id) {
+                                    <mat-option [value]="dept.id">
+                                        {{ dept.name }}
+                                    </mat-option>
+                                    }
+                                </mat-select>
+                                @if (staffGroupForm.controls['department'].hasError('required')) {
+                                <mat-error>Department is required</mat-error>
+                                }
+                            </mat-form-field>
+                        </div>
+
+                    </div>
+                </form>
+            </mat-card-content>
+            }
+            <!-- </mat-card> -->
+        </div>
+
+        <mat-dialog-actions align="end">
+
+            <button mat-flat-button color="primary" (click)="addStaff()">
+                {{ editMode ? 'Update' : 'Create' }} Staff
+            </button>
+
+            <button mat-stroked-button (click)="onCancel()">Cancel</button>
+
+        </mat-dialog-actions>
+
+    </div>
+</ng-template>
+<!-- ----------------------------------create end------------- -->
+<!-- ----------------------------------new receipt start------------- -->
+
+
+<ng-template #paymentReceiptDialog>
+    <div class="dialog-container">
+        <!-- Header -->
+        <div class="dialog-header">
+            New Receipt
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="onClosePaymentReceiptDialog()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <div mat-dialog-content>
+            <mat-card-content class="matcardContent">
+                <form class="card-form mb-3" [formGroup]="paymentReciptForm">
+                    <div class="row">
+                        <!-- Prefix -->
+                        <div class="col-md-12 mb-4">
+                            <label class="inputLabel">Prefix *</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input matInput placeholder="Enter Prefix" formControlName="prefix" class="input-p-5" />
+                                @if (submitted && paymentReciptForm.controls.prefix.errors?.required) {
+                                <mat-error>
+                                    Prefix is required.
+                                </mat-error>
+                                }
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Receipt From -->
+                        <div class="col-md-12 mb-4">
+                            <label class="inputLabel">Receipt From *</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input matInput type="number" placeholder="Enter Receipt From"
+                                    formControlName="receiptFrom" class="input-p-5" />
+                                @if (submitted && paymentReciptForm.controls.receiptFrom.errors?.required) {
+                                <mat-error>
+                                    Receipt From is required.
+                                </mat-error>
+                                }
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Receipt To -->
+                        <div class="col-md-12 mb-4">
+                            <label class="inputLabel">Receipt To *</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input matInput type="number" placeholder="Enter Receipt To" formControlName="receiptTo"
+                                    class="input-p-5" />
+                                @if (submitted && paymentReciptForm.controls.receiptTo.errors?.required) {
+                                <mat-error>
+                                    Receipt To is required.
+                                </mat-error>
+                                }
+                            </mat-form-field>
+                        </div>
+                    </div>
+                </form>
+            </mat-card-content>
+        </div>
+
+        <!-- Footer -->
+        <mat-dialog-actions align="end">
+            <button mat-flat-button color="primary" (click)="saveNewRecipt()" [disabled]="!paymentReciptForm.valid">
+                Save
+            </button>
+
+            <button mat-stroked-button color="accent" (click)="clearpaymentReciptForm()">
+                Clear
+            </button>
+
+            <button mat-stroked-button color="warn" (click)="onClosePaymentReceiptDialog()">
+                Close
+            </button>
+        </mat-dialog-actions>
+    </div>
+</ng-template>
+<!-- ----------------------------------new receipt end------------- -->
+
+
+
+
+
+<!-- --------------search end-------------------- -->
+<!-- <div class="childComponent"> -->
+<!-- <div class="row">
+        <div class="col-md-12">
+            <div class="panel top">
+                <div class="panel-heading">
+          <h3 class="panel-title">Staff Management</h3>
+          <div class="right">
+            <button
+              type="button"
+              class="btn-toggle-collapse"
+              data-toggle="collapse"
+              data-target="#searchstaff"
+              aria-expanded="false"
+              aria-controls="searchstaff"
+              >
+              <i class="fa fa-minus-circle"></i>
+            </button>
+          </div>
+        </div>
+
+                <div id="searchstaff" class="panel-collapse collapse in">
+                    @if (isStaffList) {
+                    <div class="panel-body">
+                        <div class="searchForm row">
+                            <div class="col-lg-3 col-md-3">
+                                <p-dropdown [options]="searchOptionSelect" optionValue="value" optionLabel="label"
+                                    filter="true" filterBy="label" placeholder="Select a Search Option"
+                                    [(ngModel)]="searchOption"></p-dropdown>
+                            </div>
+                            @if (searchOption == 'globalsearch') {
+                            <div class="col-md-3">
+                                <input id="searchStaffName" type="text" name="username" class="form-control"
+                                    placeholder="Global Search Filter" [(ngModel)]="searchDeatil"
+                                    (keydown.enter)="searchStaffData()" />
+                            </div>
+                            }
+                            @if (searchOption == 'reciept') {
+                            <div class="col-md-2">
+                                <input id="searchStaffName" type="number" name="username" class="form-control"
+                                    placeholder="Reciept No *" [(ngModel)]="searchDeatil"
+                                    (keydown.enter)="searchStaffData()" />
+                            </div>
+                            }
+                            @if (searchOption == 'reciept') {
+                            <div class="col-md-2">
+                                <input id="searchStaffName" type="text" name="username" class="form-control"
+                                    placeholder="Prefix" [(ngModel)]="prefikx" (keydown.enter)="searchStaffData()" />
+                            </div>
+                            }
+                            @if (searchOption) {
+                            <div class="col-md-3 marginTopSearchBtn">
+                             
+                                <button type="submit" class="btn btn-primary" (click)="searchStaffData()"
+                                    [disabled]="!searchDeatil">
+                                    <i class="fa fa-search"></i>
+                                    Search
+                                </button>
+                                &nbsp;
+                                <button type="reset" class="btn btn-default" (click)="clearSearchForm()">
+                                     <img src="assets/img/DashboardIcons/Refresh.svg" />
+                                    Clear
+                                </button>
+                            </div>
+                            }
+                        </div>
+                    </div>
+                    }
+                    <div class="panel-body no-padding panel-udata">
+                        @if (!isShowStaffMenu && createAccess) {
+                        <div class="col-md-6 pcol">
+                            <div class="dbox">
+                                <a class="curson_pointer" (click)="openStaffCreateMenu()">
+                                    <img src="../../../assets/img/i01.png" style="width: 32px" />
+                                    <h5>Create Staff</h5>
+                                </a>
+                            </div>
+                        </div>
+                        }
+                        <div class="pcol" [ngClass]="isShowStaffMenu ? 'col-md-3' : 'col-md-6'">
+                            <div class="dbox">
+                                <a class="curson_pointer" (click)="openStaffListMenu()">
+                                    <img src="../../../assets/img/i01.png" style="width: 32px" />
+                                    @if (!isShowStaffMenu) {
+                                    <h5>Staff List</h5>
+                                    }
+                                    @if (isShowStaffMenu) {
+                                    <h5>Home</h5>
+                                    }
+                                </a>
+                            </div>
+                        </div>
+                        @if (isShowStaffMenu) {
+                        <div class="pcol" [ngClass]="isShowStaffMenu ? 'col-md-3' : 'col-md-6'">
+                            <div class="dbox">
+                                <a class="curson_pointer" (click)="openStaffStaffReceipt()">
+                                    <img src="../../../assets/img/i01.png" style="width: 32px" />
+                                    <h5>Staff Receipt Management</h5>
+                                </a>
+                            </div>
+                        </div>
+                        }
+                        @if (isShowStaffMenu) {
+                        <div class="pcol" [ngClass]="isShowStaffMenu ? 'col-md-3' : 'col-md-6'">
+                            <div class="dbox">
+                                <a class="curson_pointer" (click)="openStaffWallet()">
+                                    <img src="../../../assets/img/i01.png" style="width: 32px" />
+                                    <h5>Wallet</h5>
+                                </a>
+                            </div>
+                        </div>
+                        }
+                        @if (isShowStaffMenu) {
+                        <div class="pcol" [ngClass]="isShowStaffMenu ? 'col-md-3' : 'col-md-6'">
+                            <div class="dbox">
+                                <a class="curson_pointer" data-title="Change Password" title="Change Password"
+                                    data-target="#changePasswordModal" data-toggle="modal" data-backdrop="static"
+                                    data-keyboard="false" class="curson_pointer"
+                                    (click)="getCustomerDataForPasswordChange(satffUserData)">
+                                    <img src="../../../assets/img/i01.png" style="width: 32px" />
+                                    <h5>Change Password</h5>
+                                </a>
+                            </div>
+                        </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> -->
+<!-- @if (isStaffList) {
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Staff</h3>
+                    <div class="right">
+                        <button type="button" class="btn-toggle-collapse" data-toggle="collapse"
+                            data-target="#liststaff" aria-expanded="false" aria-controls="liststaff">
+                            <i class="fa fa-minus-circle"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="liststaff" class="panel-collapse collapse in">
+                    <div class="panel-body table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Firstname</th>
+                                    <th>Lastname</th>
+                                    <th>Username</th>
+                                    <th>Email</th>
+                                    <th>Status</th>
+                                    @if (changePassAccess || createReceiptAccess || editAccess) {
+                                    <th>Action</th>
+                                    }
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (
+                                staff of staffData
+                                | paginate
+                                : {
+                                id: 'listing_staffdata',
+                                itemsPerPage: itemsPerPage,
+                                currentPage: currentPage,
+                                totalItems: totalRecords
+                                }; track
+                                staff; let i = $index) {
+                                <tr>
+                                    <td class="curson_pointer" [routerLink]="['/home/mystaff', staff.id]"
+                                        style="color: #f7941e">
+                                        {{ staff.firstname }}
+                                    </td>
+                                    <td>{{ staff.lastname }}</td>
+                                    <td>{{ staff.username }}</td>
+                                    <td>{{ staff.email }}</td>
+                                    @if (staff.status.toLowerCase() == 'active') {
+                                    <td>
+                                        <span class="badge badge-success">Active</span>
+                                    </td>
+                                    }
+                                    @if (staff.status.toLowerCase() !== 'active') {
+                                    <td>
+                                        <span class="badge badge-danger">{{ staff.status }}</span>
+                                    </td>
+                                    }
+                                    @if (changePassAccess || createReceiptAccess || editAccess) {
+                                    <td class="btnAction">
+                                        <button class="btn-toggle-collapse approve-btn" type="button"
+                                            href="javascript:void(0)" title="Edit" (click)="editStaffById(staff, i)"
+                                            [disabled]="staff.status === 'TERMINATED'">
+                                            @if (editAccess) {
+                                          <img src="assets/img/DashboardIcons/Edit.svg" >
+                                            }
+                                        </button>
+                                       
+                                        @if (changePassAccess) {
+                                        <a data-title="Change Password" title="Change Password"
+                                            data-target="#changePasswordModal" data-toggle="modal"
+                                            data-backdrop="static" data-keyboard="false" class="curson_pointer"
+                                            (click)="getCustomerDataForPasswordChange(staff)">
+                                            <img class="icon" src="assets/img/icons-04.png" />
+                                        </a>
+                                        }
+                                        @if (createReceiptAccess) {
+                                        <a data-title="Add New Receipt" title="Add New Receipt"
+                                            data-target="#paymentReciptModal" data-toggle="modal" data-backdrop="static"
+                                            data-keyboard="false" class="curson_pointer" (click)="addNewReceipt(staff)">
+                                            <img class="icon" src="assets/img/23_Receipt-Management_Y.png" />
+                                        </a>
+                                        }
+                                    </td>
+                                    }
+                                </tr>
+                                }
+                            </tbody>
+                        </table>
+                        <br />
+                        <div class="pagination_Dropdown">
+                            <pagination-controls id="listing_staffdata" maxSize="10" directionLinks="true"
+                                previousLabel="" nextLabel="" (pageChange)="pageChanged($event)"></pagination-controls>
+                            <div id="itemPerPageDropdown">
+                                <p-dropdown [(ngModel)]="itemsPerPage" [options]="pageLimitOptions" optionLabel="value"
+                                    optionValue="value" (onChange)="TotalItemPerPage($event)"></p-dropdown>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    } -->
+<!-- @if (isStaffCreateOrEdit) {
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel">
+                <div class="panel-heading">
+                    <h3 class="panel-title">{{ editMode ? "Update" : "Create" }} Staff</h3>
+                    <div class="right">
+                        <button type="button" class="btn-toggle-collapse" data-toggle="collapse"
+                            data-target="#createstaff" aria-expanded="false" aria-controls="createstaff">
+                            <i class="fa fa-minus-circle"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="createstaff" class="panel-collapse collapse in">
+                    <div class="panel-body">
+                        <div>
+                            <form class="form-auth-small" [formGroup]="staffGroupForm">
+                                <div class="panel-body">
+                                    <div class="form-group row">
+                                        <div class="col-md-12 ml-12">
+                                            @if (!imageUrl) {
+                                            <div class="borderuploadphoto" style="
+                          border: 1px solid black !important;
+                          background: url(&quot;../assets/img/user.png&quot;);
+                        ">
+                                                <button type="button" class="upload_btn-profileimage"
+                                                    style="border: none; width: 23%; height: 35px; padding: 5px">
+                                                    <label for="upload-profileImage"> <i
+                                                            class="fa fa-camera"></i></label>
+                                                    <input type="file" name="photo" id="upload-profileImage"
+                                                        (change)="onFileChangeUpload($event.target.files)"
+                                                        accept=".jpg, .jpeg, .png" maxlength="2097152"
+                                                        style="display: none" />
+                                                </button>
+                                            </div>
+                                            }
+                                            @if (imageUrl) {
+                                            <div class="borderuploadphoto" style="
+                            border: 1px solid black !important;
+                            background: url('{{ imageUrl }}');
+                          ">
+                                                <button type="button" class="upload_btn-profileimage"
+                                                    style="border: none; width: 23%; height: 35px; padding: 5px">
+                                                    <label for="upload-profileImage"><i
+                                                            class="fa fa-camera"></i></label>
+                                                    <input type="file" name="photo" id="upload-profileImage"
+                                                        (change)="onFileChangeUpload($event.target.files)"
+                                                        accept="image/*" style="display: none" />
+                                                </button>
+                                                <button type="button" class="upload_btn-profileimage"
+                                                    title="Remove Image"
+                                                    style="border: none; width: 23%; height: 35px; padding: 5px; margin: 2px"
+                                                    (click)="removeImage()">
+                                                    <label for="upload-profileImage"><i class="fa fa-close"></i></label>
+                                                </button>
+                                            </div>
+                                            }
+                                            <label
+                                                style="text-align: center; display: flex; justify-content: center">Profile
+                                                Image</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-md-4 ml-15">
+                                            <label>Username*</label>
+                                            <div class="p-inputgroup">
+                                                <input id="username" type="text" name="username" class="form-control"
+                                                    placeholder="Enter username" formControlName="username" [ngClass]="{
+                            'is-invalid': submitted && staffGroupForm.controls.username.errors
+                          }" />
+                                                @if (!editMode) {
+                                                <span class="p-inputgroup-addon" style="width: 20vw">{{
+                                                    usernamee
+                                                    }}</span>
+                                                }
+                                            </div>
+                                            @if (
+                                            staffGroupForm.controls['username'].invalid &&
+                                            (staffGroupForm.controls['username'].dirty ||
+                                            staffGroupForm.controls['username'].touched)
+                                            ) {
+                                            <div>
+                                                @if (staffGroupForm.controls['username'].errors.required) {
+                                                <div class="position">
+                                                    <p class="error">Username is required</p>
+                                                </div>
+                                                }
+                                            </div>
+                                            }
+                                        </div>
+                                        @if (staffGroupForm.controls.password.enabled) {
+                                        <div class="col-md-4 ml-15">
+                                            <div>
+                                                <label>Password *</label>
+                                                <div class="form-control displayflex">
+                                                    <div style="width: 95%">
+                                                        <input id="password" [type]="_passwordType"
+                                                            class="inputPassword" name="password"
+                                                            placeholder="Enter password" formControlName="password"
+                                                            [ngClass]="{
+                                'is-invalid': submitted && staffGroupForm.controls.password.errors
+                              }" />
+                                                    </div>
+                                                    <div style="width: 5%">
+                                                        @if (showPassword) {
+                                                        <div>
+                                                            <i class="fa fa-eye"
+                                                                (click)="showPassword = false; _passwordType = 'password'"></i>
+                                                        </div>
+                                                        }
+                                                        @if (!showPassword) {
+                                                        <div>
+                                                            <i class="fa fa-eye-slash"
+                                                                (click)="showPassword = true; _passwordType = 'text'"></i>
+                                                        </div>
+                                                        }
+                                                    </div>
+                                                </div>
+                                                @if (
+                                                staffGroupForm.controls['password'].invalid &&
+                                                (staffGroupForm.controls['password'].dirty ||
+                                                staffGroupForm.controls['password'].touched)
+                                                ) {
+                                                <div>
+                                                    @if (submitted &&
+                                                    staffGroupForm.controls['password'].errors.required) {
+                                                    <div class="position">
+                                                        <p class="error">Password is required</p>
+                                                    </div>
+                                                    }
+                                                    @if (
+                                                    submitted &&
+                                                    staffGroupForm.controls.password.errors?.cannotContainSpace
+                                                    ) {
+                                                    <div class="position">
+                                                        <p class="error">White space are not allowed.</p>
+                                                    </div>
+                                                    }
+                                                </div>
+                                                }
+                                            </div>
+                                          
+                                        </div>
+                                        }
+                                        <div class="col-md-4 ml-15">
+                                            <label>Email*</label>
+                                            <input id="email" type="text" name="email" class="form-control"
+                                                placeholder="Enter email" formControlName="email" [ngClass]="{
+                          'is-invalid': submitted && staffGroupForm.controls.email.errors
+                        }" />
+                                            @if (submitted && staffGroupForm.controls.email.errors) {
+                                            <div class="errorWrap text-danger">
+                                                @if (submitted && staffGroupForm.controls.email.errors.required)
+                                                {
+                                                <div class="error text-danger">
+                                                    Email is required.
+                                                </div>
+                                                }
+                                                @if (submitted && staffGroupForm.controls.email.errors.email) {
+                                                <div class="error text-danger">
+                                                    Email is not valid.
+                                                </div>
+                                                }
+                                            </div>
+                                            }
+                                        </div>
+                                        @if (editMode) {
+                                        <div class="col-md-4 ml-15">
+                                            <label>HRMS ID</label>
+                                            <input type="text" class="form-control" placeholder="Enter HRMS ID"
+                                                formControlName="hrmsId" />
+                                        </div>
+                                        }
+                                      
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-md-4 ml-15">
+                                            <label>First Name*</label>
+                                            <input id="firstname" type="text" name="firstname" class="form-control"
+                                                placeholder="Enter firstname" formControlName="firstname" [ngClass]="{
+                          'is-invalid': submitted && staffGroupForm.controls.firstname.errors
+                        }" />
+                                            @if (submitted && staffGroupForm.controls.firstname.errors) {
+                                            <div class="errorWrap text-danger">
+                                                @if (submitted &&
+                                                staffGroupForm.controls.firstname.errors.required) {
+                                                <div class="error text-danger">
+                                                    Firstname is required.
+                                                </div>
+                                                }
+                                            </div>
+                                            }
+                                        </div>
+                                        <div class="col-md-4 ml-15">
+                                            <label>Last Name*</label>
+                                            <input id="lastname" type="text" name="lastname" class="form-control"
+                                                placeholder="Enter lastname" formControlName="lastname" [ngClass]="{
+                          'is-invalid': submitted && staffGroupForm.controls.lastname.errors
+                        }" />
+                                            @if (submitted && staffGroupForm.controls.lastname.errors) {
+                                            <div class="errorWrap text-danger">
+                                                @if (submitted &&
+                                                staffGroupForm.controls.lastname.errors.required) {
+                                                <div class="error text-danger">
+                                                    Lastname is required.
+                                                </div>
+                                                }
+                                            </div>
+                                            }
+                                        </div>
+                                        <div class="col-md-4 ml-15">
+                                            <label for="status">Status*</label>
+                                            <p-dropdown [options]="statusList" optionValue="value_field"
+                                                optionLabel="display_field" filter="true" filterBy="display_field"
+                                                placeholder="Select a Status" formControlName="status" [ngClass]="{
+                          'is-invalid': submitted && staffGroupForm.controls.status.errors
+                        }"></p-dropdown>
+                                            <div></div>
+                                            @if (submitted && staffGroupForm.controls.status.errors) {
+                                            <div class="errorWrap text-danger">
+                                                @if (submitted &&
+                                                staffGroupForm.controls.status.errors.required) {
+                                                <div class="error text-danger">
+                                                    Status is required.
+                                                </div>
+                                                }
+                                            </div>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 ml-15">
+                                            <label>Mobile *</label>
+                                            <div style="display: flex">
+                                                <div style="width: 27%; height: 34px">
+                                                    <p-dropdown id="countryCode" [filter]="true" [options]="countries"
+                                                        optionLabel="dial_code" optionValue="dial_code"
+                                                        formControlName="countryCode" placeholder="+91"></p-dropdown>
+                                                </div>
+                                                <div style="width: 73%">
+                                                    <input type="number" formControlName="phone"
+                                                        [attr.maxLength]="commondropdownService.maxMobileLength"
+                                                        placeholder="Enter Mobile" class="form-control"
+                                                        (keypress)="onKeyPress($event)" (input)="checkMobileLength()"
+                                                        [ngClass]="{
+                              'is-invalid': submitted && staffGroupForm.controls.phone.errors
+                            }" />
+                                                    @if (submitted && staffGroupForm.controls.phone.errors) {
+                                                    <div *ngIf="
+                              !submitted &&
+                              isMobileNumberFocus &&
+                              commondropdownService.minMobileLength ===
+                                commondropdownService.maxMobileLength
+                            " class="errorWrap text-danger">
+                                                        Mobile Number must be exactly
+                                                        {{ commondropdownService.minMobileLength }} digits.
+                                                    </div>
+                                                    <div class="errorWrap text-danger">
+                                                        @if (staffGroupForm.controls.phone.errors.required) {
+                                                        <div>
+                                                            Mobile Number is required.
+                                                        </div>
+                                                        }
+                                                        @if (
+                                                        staffGroupForm.controls.phone.errors.minlength ||
+                                                        staffGroupForm.controls.phone.errors.maxlength
+                                                        ) {
+                                                        <div>
+                                                            @if (
+                                                            commondropdownService.minMobileLength ===
+                                                            commondropdownService.maxMobileLength) {
+                                                            Mobile Number must be exactly
+                                                            {{ commondropdownService.minMobileLength }} digits.
+                                                            } @else {
+                                                            Mobile Number must be between
+                                                            {{ commondropdownService.minMobileLength }} and
+                                                            {{ commondropdownService.maxMobileLength }} digits.
+                                                            }
+                                                        </div>
+                                                        }
+                                                    </div>
+                                                    }
+                                                </div>
+                                            </div>
+                                            <br />
+                                        </div>
+                                        <div class="col-md-4 ml-15">
+                                            <label for="roleIds">Roles*</label>
+                                            <p-dropdown id="roles" [options]="loggedInUserRoleList"
+                                                placeholder="Select a Roles" formControlName="roleIds"
+                                                defaultLabel="Select roles" optionLabel="rolename" optionValue="id"
+                                                [ngClass]="{
+                          'is-invalid': submitted && staffGroupForm.controls.roleIds.errors
+                        }"></p-dropdown>
+                                      
+                                            @if (submitted && staffGroupForm.controls.roleIds.errors) {
+                                            <div class="errorWrap text-danger">
+                                                @if (submitted &&
+                                                staffGroupForm.controls.roleIds.errors.required) {
+                                                <div class="error text-danger">
+                                                    Roles is required.
+                                                </div>
+                                                }
+                                            </div>
+                                            }
+                                        </div>
+                                        <div class="col-md-4 ml-15">
+                                            <label for="teamIds">Teams</label>
+                                            <p-multiSelect id="teams" [options]="teams" formControlName="teamIds"
+                                                defaultLabel="Select teams" optionLabel="name" optionValue="id"
+                                                [ngClass]="{
+                          'is-invalid': submitted && staffGroupForm.controls.teamIds.errors
+                        }"></p-multiSelect>
+                                            <div></div>
+                                        
+                                            @if (submitted && staffGroupForm.controls.teamIds.errors) {
+                                            <div class="errorWrap text-danger">
+                                                @if (submitted &&
+                                                staffGroupForm.controls.teamIds.errors.required) {
+                                                <div class="error text-danger">
+                                                    Teams is required.
+                                                </div>
+                                                }
+                                            </div>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-md-4 ml-15">
+                                            <label for="serviceAreaId">Service area</label>
+                                            <p-multiSelect id="roles" [options]="commondropdownService.serviceAreaList"
+                                                formControlName="serviceAreaIdsList" defaultLabel="Select Area"
+                                                optionLabel="name" optionValue="id"
+                                                (onChange)="serviceAreaEvent($event)" [ngClass]="{
+                          'is-invalid':
+                            submitted && staffGroupForm.controls.serviceAreaIdsList.errors
+                        }">
+                                                <ng-template let-option pTemplate="item">
+                                                    <span>
+                                                        {{ option.name }}
+                                                        &nbsp;
+                                                        @if (option.isUnderDevelopment) {
+                                                        <span class="badge badge-info underDevelopBadge">
+                                                            UnderDevelopment
+                                                        </span>
+                                                        }
+                                                    </span>
+                                                </ng-template>
+                                            </p-multiSelect>
+                                            <div></div>
+                                            @if (submitted && staffGroupForm.controls.serviceAreaIdsList.errors)
+                                            {
+                                            <div class="errorWrap text-danger">
+                                                @if (
+                                                submitted &&
+                                                staffGroupForm.controls.serviceAreaIdsList.errors.required
+                                                ) {
+                                                <div class="error text-danger">
+                                                    Service area is required.
+                                                </div>
+                                                }
+                                            </div>
+                                            }
+                                        </div>
+                                        <div class="col-md-4 ml-15">
+                                            <label for="serviceAreaId">Business Unit</label>
+                                            <p-multiSelect id="businessUnit" [options]="businessData"
+                                                formControlName="businessUnitIdsList"
+                                                defaultLabel="Select Business Unit" optionLabel="buname"
+                                                optionValue="id" optionDisabled="flag">
+                                            </p-multiSelect>
+                                            <div></div>
+                                            @if (submitted &&
+                                            staffGroupForm.controls.businessUnitIdsList.errors) {
+                                            <div class="errorWrap text-danger">
+                                                @if (
+                                                submitted &&
+                                                staffGroupForm.controls.businessUnitIdsList.errors.required
+                                                ) {
+                                                <div class="error text-danger">
+                                                    Service area is required.
+                                                </div>
+                                                }
+                                            </div>
+                                            }
+                                        </div>
+                                        <div class="col-md-4 ml-15">
+                                            <label for="parentStaffId">Partner*</label>
+                                            <p-dropdown [options]="commondropdownService.partnerAllNAme"
+                                                optionValue="id" optionLabel="name" filter="true" filterBy="name"
+                                                placeholder="Select a Partner" formControlName="partnerid" [ngClass]="{
+                          'is-invalid': submitted && staffGroupForm.controls.partnerid.errors
+                        }"></p-dropdown>
+                                            <div></div>
+                                          
+                                            @if (submitted && staffGroupForm.controls.partnerid.errors) {
+                                            <div class="errorWrap text-danger">
+                                                @if (submitted &&
+                                                staffGroupForm.controls.partnerid.errors.required) {
+                                                <div class="error text-danger">
+                                                    Partner is required.
+                                                </div>
+                                                }
+                                            </div>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-md-4 ml-15">
+                                            <label for="branchId">Branch</label>
+                                            <p-dropdown [options]="branchData" optionValue="id" optionLabel="name"
+                                                filter="true" filterBy="name" placeholder="Select a Branch"
+                                                formControlName="branchId" [ngClass]="{
+                          'is-invalid': submitted && staffGroupForm.controls.branchId.errors
+                        }">
+                                            </p-dropdown>
+                                        </div>
+                                        @if (tacacsAccess && statusCheckService.isActiveTacacs) {
+                                        <div class="col-md-4 ml-15">
+                                            <label>Access Level Group</label>
+                                            <p-dropdown [options]="TacacsDeviceList" optionValue="accessLevelGroupName"
+                                                optionLabel="accessLevelGroupName" filter="true" filterBy="name"
+                                                placeholder="Select a tacacs Access Level Group"
+                                                formControlName="tacacsAccessLevelGroup" [ngClass]="{
+                          'is-invalid':
+                            submitted && staffGroupForm.controls.tacacsAccessLevelGroup.errors
+                        }">
+                                            </p-dropdown>
+                                        </div>
+                                        }
+                                        @if (!editMode) {
+                                        <div class="col-md-4 ml-15">
+                                            <label>HRMS ID</label>
+                                            <input type="text" class="form-control" placeholder="Enter HRMS ID"
+                                                formControlName="hrmsId" />
+                                        </div>
+                                        }
+                                        @if (staffGroupForm.controls.parentStaffId.enabled) {
+                                        <div class="col-md-4 ml-15">
+                                            <label for="parentStaffId">Parent Staff</label>
+                                            <p-dropdown [options]="parentStaffList" optionValue="id"
+                                                optionLabel="fullName" filter="true" filterBy="fullName"
+                                                placeholder="Select a Parent Staff" formControlName="parentStaffId">
+                                            </p-dropdown>
+                                            <div></div>
+                                          
+                                        </div>
+                                        }
+                                        <div class="col-md-4 ml-15">
+                                            <label for="assignableRoleIds">Accessible Roles</label>
+                                            <p-multiSelect id="roles" [options]="roleList"
+                                                formControlName="assignableRoleIds"
+                                                defaultLabel="Select accessible roles" optionLabel="assignableRoleName"
+                                                optionValue="assignableRoleId"></p-multiSelect>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-md-4 ml-15">
+                                            <label for="department">Department</label>
+                                            <p-dropdown [options]="departmentData" optionValue="id" optionLabel="name"
+                                                filter="true" filterBy="name" placeholder="Select a Department"
+                                                formControlName="department" [disabled]="editMode" [ngClass]="{
+                          'is-invalid': submitted && staffGroupForm.controls.department.errors
+                        }">
+                                            </p-dropdown>
+                                        </div>
+                                    </div>
+                                    <div class="addUpdateBtn">
+                                        <button type="submit" class="btn btn-primary" (click)="addStaff()">
+                                            <i class="fa fa-check-circle"></i>
+                                            {{ editMode ? "Update" : "Add" }} Staff
+                                        </button>
+                                        <br />
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    } -->
+<!-- </div> -->
+
+<!-- @if (isStaffPersonalData) {
+<div class="row">
+    <div class="col-md-12 col-sm-12">
+        <div class="panel">
+            <div class="panel-heading">
+                <div class="displayflex">
+                    <button type="button" class="btn btn-secondary backbtn" data-toggle="tooltip"
+                        data-placement="bottom" title="Go to Staff All Details" (click)="openStaffListMenu()">
+                        <i class="fa fa-arrow-circle-left" style="color: #f7941e !important; font-size: 28px"></i>
+                    </button>
+                    <h3 class="panel-title">{{ satffUserData.firstname }} Staff</h3>
+                </div>
+                <div class="right">
+                    <button type="button" class="btn-toggle-collapse" data-toggle="collapse"
+                        data-target="#staffdeatilsview" aria-expanded="false" aria-controls="staffdeatilsview">
+                        <i class="fa fa-minus-circle"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="staffdeatilsview" class="panel-collapse collapse in">
+                <div class="panel-body table-responsive">
+                    <fieldset style="margin-top: 0rem">
+                        <legend>Basic Details</legend>
+                        <div class="boxWhite">
+                            <div class="row">
+                                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 dataGroup"
+                                    style="display: flex; justify-content: center; align-items: center">
+                                    @if (!satffUserData.profileImage) {
+                                    <img src="../assets/img/user.png" class="staggImg" />
+                                    }
+                                    @if (satffUserData.profileImage) {
+                                    <img [src]="staffImg" alt="Teacher" class="staggImg" />
+                                    }
+                                </div>
+                                <div class="col-lg-9 col-md-9 col-sm-6 col-xs-12 dataGroup">
+                                    <div class="row">
+                                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                                            <label class="datalbl">Firstname :</label>
+                                            <span>{{ satffUserData.firstname }}</span>
+                                        </div>
+                                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                                            <label class="datalbl"> Lastname :</label>
+                                            <span>{{ satffUserData.lastname }}</span>
+                                        </div>
+                                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                                            <label class="datalbl">Username :</label>
+                                            <span>{{ satffUserData.username }}</span>
+                                        </div>
+                                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                                            <label class="datalbl">Email :</label>
+                                            <span>{{ satffUserData.email }}</span>
+                                        </div>
+                                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                                            <label class="datalbl">Mobile :</label>
+                                            <span>({{ satffUserData.countryCode }}) {{ satffUserData.phone
+                                                }}</span>
+                                        </div>
+                                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                                            <label class="datalbl">Roles :</label>
+                                            @for (list of satffUserData.roleName; track list; let j = $index) {
+                                            <span>
+                                                {{ list }},&nbsp;
+                                            </span>
+                                            }
+                                        </div>
+                                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                                            <label class="datalbl">Service area :</label>
+                                            @if (this.satffUserData.serviceAreasNameList.length > 0) {
+                                            <span class="HoverEffect" data-target="#serviceareaModal"
+                                                data-toggle="modal" data-backdrop="static" data-keyboard="false"
+                                                title="Go To service Area List">
+                                                Click here
+                                            </span>
+                                            }
+                                            @if (this.satffUserData.serviceAreasNameList.length == 0) {
+                                            <span>
+                                                {{ "-" }}
+                                            </span>
+                                            }
+                                           
+                                        </div>
+                                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                                            <label class="datalbl">Business Unit :</label>
+                                            <span class="HoverEffect" data-target="#bussinessModal" data-toggle="modal"
+                                                data-backdrop="static" data-keyboard="false"
+                                                title="Go To Business List">
+                                                Click here
+                                            </span>
+                                            
+                                        </div>
+                                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                                            <label class="datalbl">Team :</label>
+                                            @if (this.satffUserData.teamNameList.length > 0) {
+                                            <span class="HoverEffect" data-target="#teamModal" data-toggle="modal"
+                                                data-backdrop="static" data-keyboard="false" title="Go To Team List">
+                                                Click here
+                                            </span>
+                                            }
+                                            @if (this.satffUserData.teamNameList.length == 0) {
+                                            <span>
+                                                {{ "-" }}
+                                            </span>
+                                            }
+                                          
+                                        </div>
+                                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                                            <label class="datalbl">Parent Staff :</label>
+                                            @if (satffUserData.parentstaffname) {
+                                            <span>{{
+                                                satffUserData.parentstaffname
+                                                }}</span>
+                                            }
+                                            @if (!satffUserData.parentstaffname) {
+                                            <span>-</span>
+                                            }
+                                        </div>
+                                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                                            <label class="datalbl">Partner :</label>
+                                            <span>{{ satffUserData.partnerName }}</span>
+                                        </div>
+                                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                                            <label class="datalbl">HRMS ID :</label>
+                                            <span>{{ satffUserData.hrmsId }}</span>
+                                        </div>
+                                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                                            <label class="datalbl">Branch Name :</label>
+                                            <span>{{ satffUserData.branchName }}</span>
+                                        </div>
+                                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                                            <label class="datalbl">Status :</label>
+                                            @if (satffUserData.status == 'ACTIVE') {
+                                            <span class="badge badge-success">
+                                                Active
+                                            </span>
+                                            }
+                                            @if (satffUserData.status == 'INACTIVE') {
+                                            <span class="badge badge-danger">
+                                                Inactive
+                                            </span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+} -->
+
+<!-- @if (isStaffReceiptData) {
+<div>
+    <div class="row">
+        <div class="col-md-12 col-sm-12">
+            <div class="panel">
+                <div class="panel-heading">
+                    <div class="displayflex">
+                        <button type="button" class="btn btn-secondary backbtn" data-toggle="tooltip"
+                            data-placement="bottom" title="Go to Staff All Details"
+                            (click)="staffDetialsOpen(this.openStaffID)">
+                            <i class="fa fa-arrow-circle-left" style="color: #f7941e !important; font-size: 28px"></i>
+                        </button>
+                        <h3 class="panel-title">{{ satffUserData.firstname }} Staff Receipt</h3>
+                    </div>
+                    <div class="right">
+                        <button type="button" class="btn-toggle-collapse" data-toggle="collapse"
+                            data-target="#staffdeatilsview" aria-expanded="false" aria-controls="staffdeatilsview">
+                            <i class="fa fa-minus-circle"></i>
+                        </button>
+                    </div>
+                </div>
+                <div id="staffdeatilsview" class="panel-collapse collapse in">
+                    <div class="panel-body table-responsive">
+                      
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Prefix</th>
+                                    <th>From Receipt Number</th>
+                                    <th>To Receipt Number</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (
+                                staff of staffreciptMappingList
+                                | paginate
+                                : {
+                                id: 'listing_staffdata',
+                                itemsPerPage: itemsReceiptPerPage,
+                                currentPage: currentReceiptPage,
+                                totalItems: totalReceiptRecords
+                                }; track
+                                staff; let i = $index) {
+                                <tr>
+                                    <td>{{ staff.prefix }}</td>
+                                    <td>{{ staff.fromreceiptnumber }}</td>
+                                    <td>{{ staff.toreceiptnumber }}</td>
+                                </tr>
+                                }
+                            </tbody>
+                        </table>
+                        <br />
+                        <div class="pagination_Dropdown">
+                            <pagination-controls id="listing_staffdata" maxSize="10" directionLinks="true"
+                                previousLabel="" nextLabel=""
+                                (pageChange)="pageReceiptChanged($event)"></pagination-controls>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+  
+</div>
+} -->
+
+<!-- Change Password Modal -->
+<!-- <div class="modal fade" id="changePasswordModal" role="dialog">
+    <div class="modal-dialog" style="width: 35%">
+       
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="panel-title">Change Password</h3>
+            </div>
+            <div class="modal-body">
+                <form [formGroup]="changePasswordForm">
+                    <div class="form-group">
+                        <label for="userName">User Name :</label>
+                        <input type="text" class="form-control" id="userName" name="userName" formControlName="userName"
+                            value="{{ userName }}" disabled />
+                    </div>
+
+                    @if (!ifgenerateOtpField) {
+                    <div class="form-group" [ngClass]="{
+              'has-error':
+                changePasswordForm.get('newPassword').errors &&
+                (changePasswordForm.get('newPassword').touched ||
+                  changePasswordForm.get('newPassword').dirty)
+            }">
+                        <label for="newPassword">New Password :</label>
+                        <div class="form-control displayflex">
+                            <div style="width: 95%">
+                                <input [type]="_passwordNewType" class="inputPassword" id="newPassword"
+                                    placeholder="Enter New Password" name="newPassword" formControlName="newPassword" />
+                            </div>
+                            <div style="width: 5%">
+                                @if (showNewPassword) {
+                                <div>
+                                    <i class="fa fa-eye"
+                                        (click)="showNewPassword = false; _passwordNewType = 'password'"></i>
+                                </div>
+                                }
+                                @if (!showNewPassword) {
+                                <div>
+                                    <i class="fa fa-eye-slash"
+                                        (click)="showNewPassword = true; _passwordNewType = 'text'"></i>
+                                </div>
+                                }
+                            </div>
+                        </div>
+                        @if (
+                        (changePasswordForm.get('newPassword').touched ||
+                        changePasswordForm.get('newPassword').dirty) &&
+                        changePasswordForm.get('newPassword').hasError('required')
+                        ) {
+                        <div class="help-block">
+                            New Password is mandatory
+                        </div>
+                        }
+
+                    </div>
+                    }
+                </form>
+                @if (ifgenerateOtpField) {
+                <div style="display: flex; justify-content: flex-end">
+                    <button type="submit" class="btn btn-primary btn-sm" (click)="genrateOtp()">
+                        <i class="fa fa-check-circle"></i>
+                        Generate Otp
+                    </button>
+                </div>
+                }
+                @if (ifgenerateOtpField) {
+                <div class="form-group">
+                    <label for="OTP">OTP :</label>
+                    <input type="text" class="form-control" id="OTP" name="OTP" [(ngModel)]="staffOTPValue" />
+                </div>
+                }
+            </div>
+            <div class="modal-footer">
+                <div class="addUpdateBtn">
+                    @if (ifgenerateOtpField) {
+                    <button type="submit" class="btn btn-primary btn-sm" (click)="ValidOtp()"
+                        [disabled]="!staffOTPValue">
+                        <i class="fa fa-check-circle"></i>
+                        Valid OTP
+                    </button>
+                    }
+                    @if (!ifgenerateOtpField) {
+                    <button type="submit" class="btn btn-primary btn-sm" (click)="changePassword()"
+                        [disabled]="!changePasswordForm.valid">
+                        <i class="fa fa-check-circle"></i>
+                        Save
+                    </button>
+                    }
+                    <button id="btn" type="button" class="btn btn-default btn-sm" (click)="clearChangePasswordForm()">
+                         <img src="assets/img/DashboardIcons/Refresh.svg" />
+                        Clear
+                    </button>
+                    <button type="button" class="btn btn-danger btn-sm" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> -->
+
+<!-- payment Recipt Modal Modal -->
+<!-- <div class="modal fade" id="paymentReciptModal" role="dialog">
+    <div class="modal-dialog" style="width: 35%">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="panel-title">New Receipt</h3>
+            </div>
+            <div class="modal-body">
+                <form [formGroup]="paymentReciptForm">
+                    <div class="form-group">
+                        <label for="prefix">Prefix *:</label>
+                        <input type="text" class="form-control" id="Prefix" name="Prefix" formControlName="prefix" />
+                    </div>
+                    <div class="form-group">
+                        <label for="receiptFrom">Receipt From *:</label>
+                        <input type="number" class="form-control" id="receiptFrom " name="receiptFrom "
+                            formControlName="receiptFrom" />
+                    </div>
+                    <div class="form-group">
+                        <label for="receiptTo">Receipt To *:</label>
+                        <input type="number" class="form-control" id="receiptTo" name="receiptTo"
+                            formControlName="receiptTo" />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <div class="addUpdateBtn">
+                    <button type="submit" class="btn btn-primary btn-sm" (click)="saveNewRecipt()"
+                        [disabled]="!paymentReciptForm.valid">
+                        <i class="fa fa-check-circle"></i>
+                        Save
+                    </button>
+                    <button id="btn" type="button" class="btn btn-default btn-sm" (click)="clearpaymentReciptForm()">
+                         <img src="assets/img/DashboardIcons/Refresh.svg" />
+                        Clear
+                    </button>
+                    <button type="button" class="btn btn-danger btn-sm" data-dismiss="modal"
+                        (click)="clearpaymentReciptForm()">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> -->
+
+<!-- @if (ifWalletStaffShow) {
+<div class="row">
+    <div class="col-md-12 col-sm-12">
+        <div class="panel">
+            <div class="panel-heading">
+                <div class="displayflex">
+                    <button type="button" class="btn btn-secondary backbtn" data-toggle="tooltip"
+                        data-placement="bottom" title="Go to Staff All Details"
+                        (click)="staffDetialsOpen(this.openStaffID)">
+                        <i class="fa fa-arrow-circle-left" style="color: #f7941e !important; font-size: 28px"></i>
+                    </button>
+                    <h3 class="panel-title">{{ satffUserData.firstname }} Wallet</h3>
+                </div>
+                <div class="right">
+                    <button aria-controls="radiusStaffWallet" aria-expanded="false" class="btn-toggle-collapse"
+                        class="btn-toggle-collapse" data-target="#radiusStaffWallet" data-toggle="collapse"
+                        type="button">
+                        <i class="fa fa-minus-circle"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="panel-body table-responsive" id="radiusStaffWallet">
+              
+                <div style="margin-bottom: 2rem">
+                    @if (this.WalletAmount > 0) {
+                    <button (click)="showWithdrawalAmountModel()" class="btn btn-primary" id="submit" type="submit">
+                        <i class="fa fa-check-circle"></i>
+                        Withdrawal Amount
+                    </button>
+                    }
+                </div>
+                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                    <label class="datalbl">Wallet Balance :</label>
+                    <span>{{ WalletAmount }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 col-sm-12">
+        <div class="panel">
+            <div class="panel-heading">
+                <div class="displayflex">
+                    <button type="button" class="btn btn-secondary backbtn" data-toggle="tooltip"
+                        data-placement="bottom" title="Go to Staff All Details"
+                        (click)="staffDetialsOpen(this.openStaffID)">
+                        <i class="fa fa-arrow-circle-left" style="color: #f7941e !important; font-size: 28px"></i>
+                    </button>
+                    <h3 class="panel-title">{{ satffUserData.firstname }} Ledger</h3>
+                </div>
+                <div class="right">
+                    <button aria-controls="radiusStaffLeager" aria-expanded="false" class="btn-toggle-collapse"
+                        class="btn-toggle-collapse" data-target="#radiusStaffLeager" data-toggle="collapse"
+                        type="button">
+                        <i class="fa fa-minus-circle"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="panel-body table-responsive" id="radiusStaffLeager">
+                <div class="panel-body table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Action</th>
+                                <th>Amount</th>
+                                <th>Payment Mode</th>
+                                <th>Transaction Type</th>
+                                <th>Date</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (
+                            staff of staffLegderData
+                            | paginate
+                            : {
+                            id: 'listing_staffLegderdata',
+                            itemsPerPage: itemsLegderPerPage,
+                            currentPage: currentLegderPage,
+                            totalItems: totalLegderRecords
+                            }; track
+                            staff; let i = $index) {
+                            <tr>
+                                <td>{{ staff.action }}</td>
+                                <td>{{ staff.amount }}</td>
+                                <td>{{ staff.paymentMode }}</td>
+                                <td>{{ staff.transactionType }}</td>
+                                <td>{{ staff.date }}</td>
+                                <td>{{ staff.remarks }}</td>
+                            </tr>
+                            }
+                        </tbody>
+                    </table>
+                    <br />
+                    <div class="pagination_Dropdown">
+                        <pagination-controls id="listing_staffLegderdata" maxSize="10" directionLinks="true"
+                            previousLabel="" nextLabel=""
+                            (pageChange)="pageLegderChanged($event)"></pagination-controls>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+} -->
+
+<!-- Wallet Modal Modal -->
+<!-- <div class="modal fade" id="staffWalletModal" role="dialog">
+    <div class="modal-dialog" style="width: 35%">
+        
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="panel-title">Wallet</h3>
+            </div>
+            <div class="modal-body">
+                <form [formGroup]="radiusWalletGroupForm">
+                    <div class="form-group">
+                        <label for="date">Date :</label>
+                        <input type="date" class="form-control" id="date" name="date" formControlName="date" />
+                    </div>
+                    <div class="form-group">
+                        <label for="amount">Amount :</label>
+                        <input type="number" class="form-control" id="amount " name="amount " formControlName="amount"
+                            placeholder="Enter a Amount" />
+                    </div>
+                    <div class="form-group">
+                        <label for="bank">Bank :</label>
+
+                        <p-dropdown [options]="bankDataList" optionValue="id" optionLabel="bankname" filter="true"
+                            filterBy="bankname" placeholder="Select a Bank" formControlName="bankId">
+                            <ng-template let-data pTemplate="item">
+                                <div class="item-drop1">
+                                    <span class="item-value1"> {{ data.bankname }} ( {{ data.accountnum }} )
+                                    </span>
+                                </div>
+                            </ng-template>
+                        </p-dropdown>
+                    </div>
+                    <div class="form-group">
+                        <label for="remarks">Remarks :</label>
+                        <textarea type="text" class="form-control" id="remarks" name="remarks" formControlName="remarks"
+                            placeholder="Enter a Remarks"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <div class="addUpdateBtn">
+                    <button type="submit" class="btn btn-primary btn-sm" (click)="saveManageBalance()"
+                        [disabled]="!radiusWalletGroupForm.valid">
+                        <i class="fa fa-check-circle"></i>
+                        Save
+                    </button>
+                    <button id="btn" type="button" class="btn btn-default btn-sm" (click)="clearWalletStaffForm()">
+                         <img src="assets/img/DashboardIcons/Refresh.svg" />
+                        Clear
+                    </button>
+                    <button type="button" class="btn btn-danger btn-sm" data-dismiss="modal"
+                        (click)="clearWalletStaffForm()">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> -->
+
+<!-- service area list -->
+<!-- <div class="modal fade" id="serviceareaModal" role="dialog">
+    <div class="modal-dialog" style="width: 35%">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h3 class="panel-title">{{ satffUserData.fullName }} Service Area List</h3>
+            </div>
+            <div class="modal-body" style="max-height: 45rem !important; overflow: auto !important">
+                <div class="panel-body table-responsive" id="networkDeviceTabel">
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <td><label class="networkLabel">Service Area :</label></td>
+                                <td>
+                                    @for (serviceName of satffUserData.serviceAreasNameList; track serviceName)
+                                    {
+                                    <span style="word-break: break-all">
+                                        <span>
+                                            {{ serviceName }},
+                                            <br />
+                                        </span>
+                                    </span>
+                                    }
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div> -->
+
+<!-- bussiness list -->
+<!-- <div class="modal fade" id="bussinessModal" role="dialog">
+    <div class="modal-dialog" style="width: 35%">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h3 class="panel-title">{{ satffUserData.fullName }} Business List</h3>
+            </div>
+            <div class="modal-body" style="max-height: 45rem !important; overflow: auto !important">
+                <div class="panel-body table-responsive" id="networkDeviceTabel">
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <td><label class="networkLabel">Business List :</label></td>
+                                <td>
+                                    @for (name of satffUserData.businessUnitNamesList; track name) {
+                                    <span style="word-break: break-all">
+                                        <span>
+                                            {{ name }},
+                                            <br />
+                                        </span>
+                                    </span>
+                                    }
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div> -->
+<!-- <div class="modal fade" id="teamModal" role="dialog">
+    <div class="modal-dialog" style="width: 35%">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h3 class="panel-title">{{ satffUserData.fullName }} Business List</h3>
+            </div>
+            <div class="modal-body" style="max-height: 45rem !important; overflow: auto !important">
+                <div class="panel-body table-responsive" id="networkDeviceTabel">
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <td><label class="networkLabel">Team List :</label></td>
+                                <td>
+                                    @for (name of satffUserData.teamNameList; track name) {
+                                    <span style="word-break: break-all">
+                                        <span>
+                                            {{ name }},
+                                            <br />
+                                        </span>
+                                    </span>
+                                    }
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div> -->

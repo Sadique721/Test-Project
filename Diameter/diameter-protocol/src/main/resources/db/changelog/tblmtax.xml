@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="create-tblmtax-001" author="initial-change">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="tblmtax"/>
+            </not>
+        </preConditions>
+
+
+        <createTable tableName="tblmtax">
+            <column name="TAXID" type="BIGINT" >
+                <constraints primaryKey="true" nullable="false" unique="true" />
+            </column>
+            <column name="NAME" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="DESCRIPTION" type="VARCHAR(255)"/>
+            <column name="TAXTYPE" type="VARCHAR(8)"/>
+            <column name="STATUS" type="CHAR(1)" defaultValue="Y">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CREATEDATE" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="CREATEDBYSTAFFID" type="DECIMAL(20,0)"/>
+            <column name="LASTMODIFIEDBYSTAFFID" type="DECIMAL(20,0)"/>
+            <column name="LASTMODIFIEDDATE" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="MVNOID" type="BIGINT"/>
+            <column name="is_delete" type="TINYINT(1)" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="createbyname" type="VARCHAR(100)"/>
+            <column name="updatebyname" type="VARCHAR(100)"/>
+            <column name="BUID" type="BIGINT"/>
+            <column name="mvno_name" type="VARCHAR(150)"/>
+        </createTable>
+
+        <!-- Indexes -->
+        <createIndex tableName="tblmtax" indexName="tblmtax_ibfk_1">
+            <column name="MVNOID"/>
+        </createIndex>
+
+        <createIndex tableName="tblmtax" indexName="businessunit_tax_fk">
+            <column name="BUID"/>
+        </createIndex>
+
+        <!-- Foreign Keys -->
+        <addForeignKeyConstraint
+                constraintName="tblmtax_ibfk_1"
+                baseTableName="tblmtax"
+                baseColumnNames="MVNOID"
+                referencedTableName="tblmmvno"
+                referencedColumnNames="MVNOID"
+                onDelete="RESTRICT"
+                onUpdate="CASCADE"/>
+
+        <addForeignKeyConstraint
+                constraintName="businessunit_tax_fk"
+                baseTableName="tblmtax"
+                baseColumnNames="BUID"
+                referencedTableName="tblmbusinessunit"
+                referencedColumnNames="businessunitid"
+                onDelete="RESTRICT"
+                onUpdate="CASCADE"/>
+    </changeSet>
+
+</databaseChangeLog>

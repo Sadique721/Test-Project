@@ -1,0 +1,613 @@
+<!-- search header part start -->
+<div class="row header-row">
+  <mat-card class="cardWithShadow w-100">
+    <mat-card-content class="mat-card-content-border">
+      <form class="form-auth-small" [formGroup]="searchForm">
+        <div class="row">
+          <div class="col-sm-9 d-flex">
+            <mat-form-field
+              appearance="outline"
+              style="margin-left: 16px"
+              class="w-100 hide-hint mr-10"
+            >
+              <input
+                class="input-p-5"
+                matInput
+                placeholder="Search {{ title }} Name"
+                (keydown.enter)="searchByName()"
+                formControlName="name"
+                [ngClass]="{
+                  'is-invalid': searchSubmitted && searchForm.controls.name.errors
+                }"
+              />
+              <mat-icon matSuffix class="search-header-search-icon">
+                <i class="pi pi-search icon-size"></i>
+              </mat-icon>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="w-100 hide-hint mr-10">
+              <mat-select
+                class="input-p-5"
+                (selectionChange)="searchByName()"
+                placeholder="Select a Type"
+                formControlName="type"
+              >
+                <mat-option *ngFor="let option of typeOfProfile" [value]="option.label">
+                  {{ option.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <button
+              mat-button
+              mat-flat-button
+              color="primary"
+              class="button-normal mr-10"
+              (click)="searchByName()"
+            >
+              Search
+            </button>
+            <button
+              mat-stroked-button
+              matButton="outlined"
+              class="button-normal"
+              (click)="clearSearchForm()"
+            >
+              Clear
+            </button>
+          </div>
+
+          <div class="col-sm-3 search-div">
+            <button
+              mat-button
+              mat-flat-button
+              color="primary"
+              (click)="createCoa()"
+              class="button-normal m-r-10"
+            >
+              Add {{ title }}
+            </button>
+          </div>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>
+<!-- search header part end -->
+
+<!-- body part start -->
+<div class="container-fluid contain-flud">
+  <div class="row">
+    <!-- sub-country list table start -->
+    <div class="col-md-12">
+      <mat-card class="cardWithShadow">
+        <mat-card-content class="mat-card-content-border">
+          <div class="country-table-list">
+            <div class="table-container">
+              <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8 w-100">
+                <!-- Id Column -->
+                <ng-container matColumnDef="id">
+                  <th mat-header-cell *matHeaderCellDef class="table-header-title">ID</th>
+
+                  <td mat-cell *matCellDef="let coa">
+                    {{ coa.coaDMProfileId }}
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="profile">
+                  <th
+                    mat-header-cell
+                    *matHeaderCellDef
+                    mat-sort-header
+                    class="table-header-title"
+                    sticky
+                  >
+                    CoA/DM Profile
+                  </th>
+                  <td mat-cell *matCellDef="let coa" class="f-s-14">
+                    {{ coa.name }}
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="type">
+                  <th
+                    mat-header-cell
+                    *matHeaderCellDef
+                    mat-sort-header
+                    class="table-header-title"
+                    sticky
+                  >
+                    Type
+                  </th>
+                  <td mat-cell *matCellDef="let coa" class="f-s-14">
+                    {{ coa.type }}
+                  </td>
+                </ng-container>
+                <ng-container matColumnDef="port">
+                  <th
+                    mat-header-cell
+                    *matHeaderCellDef
+                    mat-sort-header
+                    class="table-header-title"
+                    sticky
+                  >
+                    Port
+                  </th>
+                  <td mat-cell *matCellDef="let coa" class="f-s-14">
+                    {{ coa.port }}
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="c-on">
+                  <th
+                    mat-header-cell
+                    *matHeaderCellDef
+                    mat-sort-header
+                    class="table-header-title"
+                    sticky
+                  >
+                    Created On
+                  </th>
+
+                  <td mat-cell *matCellDef="let coa" class="f-s-14">
+                    {{ coa.createDate | date: "dd-MM-yyy HH:mm" }}
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="action">
+                  @if (editAccess || deleteAccess) {
+                    <th mat-header-cell *matHeaderCellDef class="table-header-title">Action</th>
+                  }
+
+                  <td mat-cell *matCellDef="let coa; let i = index">
+                    <a
+                      mat-icon-button matTooltip="view"
+                      href="javascript:void(0)"
+                      (click)="showCoaDetail(coa.coaDMProfileId)"
+                    >
+                     <img src="assets/img/DashboardIcons/eye-svgrepo-com (1) 1.svg" >
+                    </a>
+
+                    @if (editAccess) {
+                      <a
+                        mat-icon-button matTooltip="edit"
+                        href="javascript:void(0)"
+                        (click)="editCoaById(coa.coaDMProfileId, i, coa.mvnoId)"
+                      >
+                        <img src="assets/img/DashboardIcons/Edit.svg" >
+                      </a>
+                    }
+
+                    @if (deleteAccess) {
+                      <a
+                        mat-icon-button matTooltip="delete"
+                        href="javascript:void(0)"
+                        (click)="deleteConfirm(coa, coa.mvnoId, i)"
+                      >
+                        <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                      </a>
+                    }
+                  </td>
+                </ng-container>
+
+                <tr
+                  mat-header-row
+                  class="table-header-bg"
+                  *matHeaderRowDef="
+                    getDisplayedPlanDetailsColumns()
+                    sticky: true
+                  "
+                ></tr>
+                <tr
+                  mat-row
+                  class="table-content-row"
+                  *matRowDef="let row; columns: getDisplayedPlanDetailsColumns()"
+                ></tr>
+              </table>
+
+              <mat-paginator
+                class="custome-paginator"
+                stickyEnd
+                [length]="totalRecords"
+                [pageSize]="itemsPerPage"
+                [pageSizeOptions]="[5,10,20,50,100]"
+                showFirstLastButtons
+                (page)="pageChanged($event)"
+              >
+              </mat-paginator>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+    <!-- sub-country list table end -->
+  </div>
+</div>
+<!-- body part end -->
+
+<!-- Add-Edit coa/dm profile start -->
+<ng-template #addEditcoadmDialog>
+ 
+    <div class="dialog-container">
+      <div class="dialog-header">
+        {{ editMode ? "Update" : "Create" }} {{ title }}
+        <span>
+          <a mat-icon-button href="javascript:void(0)" (click)="closeDialog()">
+             <img src="assets/img/DashboardIcons/Reject.svg">
+          </a>
+        </span>
+      </div>
+      <div mat-dialog-content>
+        <div class="col-md-12">
+          <ng-container *ngIf="!createAccess && !editAccess">
+                            <mat-card-content class="matcard-content">
+                                <div class="panel-body table-responsive">
+                                    Sorry you have not privilege to create operation!
+                                </div>
+                            </mat-card-content>
+                        </ng-container>
+          @if (editAccess || createAccess) {
+          <mat-card-content class="matcardContent">
+            <form class="card-form mb-3" [formGroup]="coaForm">
+              <!-- create basic detail card start -->
+              <mat-card class="mb-4 basic-details">
+                <mat-card-header>
+                  <mat-card-title class="font-900">CoA/DM Basic Parameters</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <div class="row g-3">
+                    <div class="col-md-6 mb-5">
+                      <label for="countryname" class="inputLabel">CoA/DM Profile Name*</label>
+                      <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                        <input
+                          id="countryname"
+                          type="text"
+                          class="input-p-5"
+                          matInput
+                          [readonly]="editMode"
+                          placeholder="Enter CoA/DM Profile Name"
+                          formControlName="name"
+                          [ngClass]="{
+                            'is-invalid': submitted && coaForm.controls.name.errors
+                          }"
+                        />
+                      </mat-form-field>
+                      @if (submitted && coaForm.controls.name.errors) {
+                        <div class="errorWrap text-danger" style="margin-top: -15px">
+                          @if (submitted && coaForm.controls.name.errors.required) {
+                            <div class="error text-danger">Please enter CoA/DM Profile name.</div>
+                          }
+                        </div>
+                      }
+                    </div>
+
+                    <div class="col-md-6 mb-5">
+                      <label for="countryname" class="inputLabel">Type *</label>
+                      <mat-form-field appearance="outline" class="w-100 hide-hint mr-10">
+                        <mat-select
+                          [disabled]="editMode"
+                          class="input-p-5"
+                          (selectionChange)="searchByName()"
+                          placeholder="Select a Type"
+                          formControlName="type"
+                          [ngClass]="{
+                            'is-invalid': submitted && coaForm.controls.type.errors
+                          }"
+                        >
+                          <mat-option *ngFor="let option of typeOfProfile" [value]="option.label">
+                            {{ option.label }}
+                          </mat-option>
+                        </mat-select>
+                      </mat-form-field>
+                      @if (submitted && coaForm.controls.type.errors) {
+                        <div class="errorWrap text-danger">
+                          @if (submitted && submitted && coaForm.controls.type.errors.required) {
+                            <div class="error text-danger">Please select type.</div>
+                          }
+                        </div>
+                      }
+                    </div>
+
+                    <div class="col-md-6 mb-5">
+                      <label for="countryname" class="inputLabel">Shared Key*</label>
+                      <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                        <input
+                          id="countryname"
+                          type="text"
+                          class="input-p-5"
+                          matInput
+                          placeholder="Enter Shared Key"
+                          formControlName="sharedkey"
+                          [ngClass]="{
+                            'is-invalid': submitted && coaForm.controls.sharedkey.errors
+                          }"
+                        />
+                      </mat-form-field>
+                      @if (submitted && coaForm.controls.sharedkey.errors) {
+                        <div class="errorWrap text-danger" style="margin-top: -15px">
+                          @if (submitted && coaForm.controls.sharedkey.errors.required) {
+                            <div class="error text-danger">Please enter Shared key.</div>
+                          }
+                        </div>
+                      }
+                    </div>
+
+                    <div class="col-md-6 mb-5">
+                      <label for="countryname" class="inputLabel">Port*</label>
+                      <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                        <input
+                          id="countryname"
+                          class="input-p-5"
+                          type="number"
+                          min="0"
+                          matInput
+                          placeholder="Enter Port"
+                          formControlName="port"
+                          [ngClass]="{
+                            'is-invalid': submitted && coaForm.controls.port.errors
+                          }"
+                        />
+                      </mat-form-field>
+                      @if (submitted && coaForm.controls.port.errors) {
+                        <div class="errorWrap text-danger" style="margin-top: -15px">
+                          @if (submitted && coaForm.controls.port.errors.required) {
+                            <span class="error text-danger"> Please enter Port. </span>
+                          }
+                          @if (submitted && coaForm.controls.port.errors) {
+                            <span class="error text-danger"> Enter valid Port number. </span>
+                          }
+                        </div>
+                      }
+                    </div>
+
+                    <div class="col-md-6 mb-5">
+                      <label for="countryname" class="inputLabel">Timeout (In ms) *</label>
+                      <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                        <input
+                          id="countryname"
+                          class="input-p-5"
+                          type="number"
+                          min="1"
+                          matInput
+                          placeholder="Enter Timeout"
+                          formControlName="timevar"
+                          [ngClass]="{
+                            'is-invalid': submitted && coaForm.controls.timevar.errors
+                          }"
+                        />
+                      </mat-form-field>
+                      @if (submitted && coaForm.controls.timevar.errors) {
+                        <div class="errorWrap text-danger" style="margin-top: -15px">
+                          @if (submitted && coaForm.controls.timevar.errors.required) {
+                            <div class="error text-danger">Timeout is required.</div>
+                          }
+                        </div>
+                      }
+                    </div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+              <!-- create basic detail card end -->
+
+              <!-- attribute maping start -->
+              <mat-card class="mb-4 basic-details">
+                <div
+                  class="dialog-header"
+                  style="
+                    border-top-left-radius: 7px !important;
+                    border-top-right-radius: 7px !important;
+                  "
+                >
+                  Attribute Mapping
+                  <button
+                    mat-stroked-button
+                    matButton="outlined"
+                    type="button"
+                    color="primary"
+                    class="button-normal"
+                    (click)="onAddAttribute()"
+                  >
+                    Add
+                  </button>
+                </div>
+                <mat-card-content class="table-cont">
+                  <table
+                    [dataSource]="dataSourcess"
+                    mat-table
+                    class="mat-elevation-z8 full-width-table"
+                  >
+                    <ng-container matColumnDef="check-i" class="m-t-5">
+                      <th mat-header-cell *matHeaderCellDef class="m-t-5 f-s-12">Check Item</th>
+
+                      <td mat-cell *matCellDef="let row; let i = index" class="m-t-5">
+                        <mat-form-field appearance="outline" class="w-100 m-t-10">
+                          <input
+                            matInput
+                            type="text"
+                            placeholder="Enter Check Item"
+                            class="input-p-5"
+                            [formControl]="row.get('checkitem')"
+                          />
+                        </mat-form-field>
+                      </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="profile-a" class="m-t-5">
+                      <th mat-header-cell *matHeaderCellDef class="m-t-5 f-s-12">
+                        Profile Attribute
+                      </th>
+
+                      <td mat-cell *matCellDef="let row; let i = index" class="m-t-5">
+                        <mat-form-field appearance="outline" class="w-100 m-t-10">
+                          <input
+                            matInput
+                            type="text"
+                            placeholder="Enter Profile Attribute"
+                            class="input-p-5"
+                            [formControl]="row.get('profileAtt')"
+                            [ngClass]="{
+                              'is-invalid': submitted && row.get('profileAtt').invalid
+                            }"
+                          />
+                          @if (submitted && row.get("profileAtt").errors) {
+                            <mat-error>
+                              Please enter Profile Attribute OR delete the row.
+                            </mat-error>
+                          }
+                        </mat-form-field>
+                      </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="radius-a" class="m-t-5">
+                      <th mat-header-cell *matHeaderCellDef class="m-t-5 f-s-12">
+                        Radius Attribute
+                      </th>
+                      <td mat-cell *matCellDef="let row; let i = index" class="m-t-5">
+                        <mat-form-field appearance="outline" class="w-100 m-t-10">
+                          <mat-select
+                            class="input-p-5"
+                            (selectionChange)="searchByName()"
+                            placeholder="Select Radius Attribute"
+                            [formControl]="row.get('radiusAtt')"
+                          >
+                            <mat-option
+                              *ngFor="let option of dictionaryAttributeData.dictionaryAttributeList"
+                              [value]="option.name"
+                            >
+                              {{ option.name }}
+                            </mat-option>
+                          </mat-select>
+                          @if (submitted && row.get("radiusAtt").errors) {
+                            <mat-error>
+                              Please select Radius Attribute OR delete the row.
+                            </mat-error>
+                          }
+                        </mat-form-field>
+                      </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="delete" class="m-t-5">
+                      <th mat-header-cell *matHeaderCellDef class="m-t-5 f-s-12">Delete</th>
+                      <td
+                        mat-cell
+                        *matCellDef="let row; let i = index"
+                        class="text-start justify-content-start d-flex m-t-10"
+                        style="border-bottom: none"
+                      >
+                        <a
+                          mat-icon-button
+                          href="javascript:void(0)"
+                          (click)="deleteConfirmAttribute(
+  i,
+  row.get('coaDMProfileAttributeMappingId')?.value,
+  row.get('mvnoId')?.value
+)"
+
+                        >
+                          <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                        </a>
+                      </td>
+                    </ng-container>
+
+                    <tr
+                      mat-header-row
+                      *matHeaderRowDef="['check-i', 'profile-a', 'radius-a', 'delete']"
+                    ></tr>
+                    <tr
+                      mat-row
+                      *matRowDef="let row; columns: ['check-i', 'profile-a', 'radius-a', 'delete']"
+                    ></tr>
+                  </table>
+                </mat-card-content>
+              </mat-card>
+              <!-- attribute maping end -->
+            </form>
+          </mat-card-content>
+        }
+        </div>
+      </div>
+      <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+        <div class="button-normal m-r-10">
+          <button
+            mat-button
+            mat-flat-button
+            color="primary"
+            class="button-normal"
+            type="submit"
+            (click)="addCoA()"
+          >
+            {{ editMode ? `Update ${title}` : `Add ${title}` }}
+          </button>
+        </div>
+        <div class="button-normal">
+          <button
+            mat-stroked-button
+            matButton="outlined"
+            type="button"
+            color="primary"
+            class="button-normal w-100"
+            (click)="closeDialog()"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  
+</ng-template>
+<!-- Add-Edit coa/dm profile end -->
+
+<!--view dialog start -->
+<ng-template #viewCoaDialog>
+  <div class="container-fluid p-0">
+    <div class="dialog-header dialog-title">
+      View {{ title }}
+      <span>
+        <a mat-icon-button (click)="closeDialog()">
+           <img src="assets/img/DashboardIcons/Reject.svg">
+        </a>
+      </span>
+    </div>
+
+    <mat-dialog-content>
+      <!-- basic detail card start -->
+      <mat-card class="">
+        <mat-card-header>
+          <mat-card-title class="font-900">{{ coa.name }} Details</mat-card-title>
+        </mat-card-header>
+        <div class="row p-15 m-t-10">
+          <!-- Name -->
+          <div class="col-md-6 field-row detail-row">
+            <span class="field-label f-s-15 f-w-700 label">CoA/DM Profile</span>
+            <span class="field-label f-s-15 f-w-700 colon">:</span>
+            <span class="field-value value m-l-10">{{ coa.name }}</span>
+          </div>
+
+          <!-- Status -->
+          <div class="col-md-6 field-row detail-row">
+            <span class="field-label f-s-15 f-w-700 label">Shared Key</span>
+            <span class="field-label f-s-15 f-w-700 colon">:</span>
+            <span class="field-value value m-l-10">{{ coa.sharedkey }}</span>
+          </div>
+
+          <!-- Response Time -->
+          <div class="col-md-6 field-row detail-row">
+            <span class="field-label f-s-15 f-w-700 label">Port</span>
+            <span class="field-label f-s-15 f-w-700 colon" style="margin-left: 10px">:</span>
+            <span class="field-value value m-l-10">{{ coa.port }}</span>
+          </div>
+
+          <div class="col-md-6 field-row detail-row">
+            <span class="field-label f-s-15 f-w-700 label">Type</span>
+            <span class="field-label f-s-15 f-w-700 colon">:</span>
+            <span class="field-value value m-l-10">{{ coa.type }}</span>
+          </div>
+        </div>
+      </mat-card>
+      <!-- basic detail card start -->
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+      <button mat-stroked-button color="warn" (click)="closeDialog()">Close</button>
+    </mat-dialog-actions>
+  </div>
+</ng-template>
+<!--view dialog end -->

@@ -1,0 +1,1553 @@
+<!-- outwards card header search part start -->
+<div class="row header-row">
+    <mat-card class="cardWithShadow w-100">
+        <mat-card-content class="mat-card-content-border">
+            <div class="row">
+                <div class="col-sm-3">
+                    <mat-form-field appearance="outline" style="margin-left: 16px"
+                        class="w-100 hide-hint mr-10 header-input">
+                        <mat-select id="optselect" class="input-p-5" placeholder="Select a Search Option"
+                            [(ngModel)]="searchOutwardOption" (selectionChange)="selSearchOption($event)">
+                            <mat-option *ngFor="let opt of searchOptionSelect" [value]="opt.value">
+                                {{ opt.label }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                @if (
+                searchOption != "status" &&
+                searchOption != "cafStatus" &&
+                searchOption != "custtype" &&
+                searchOption != "currentAssigneeName" &&
+                searchOption != "cafCreatedDate" &&
+                searchOption != "currentAssignedTeam"
+                ) {
+                <div class="col-sm-3 d-flex">
+                    <mat-form-field appearance="outline" style="margin-left: 16px"
+                        class="w-100 hide-hint mr-10 header-input">
+                        <input class="input-p-5" [(ngModel)]="searchOutward" matInput placeholder="Enter Search Detail"
+                            (keydown.enter)="searchOutwardData()" />
+                        <mat-icon matSuffix class="search-header-search-icon">
+                            <i class="pi pi-search icon-size"></i>
+                        </mat-icon>
+                    </mat-form-field>
+                </div>
+                }
+                @if (searchOption === "status" || searchOption === "cafStatus") {
+                <div class="col-sm-3">
+                    <mat-form-field appearance="outline" style="margin-left: 16px" class="w-100 hide-hint mr-10">
+                        <mat-select id="optselect" class="input-p-5" placeholder="Select a Status"
+                            [(ngModel)]="searchOutward">
+                            <mat-option *ngFor="let opt of commondropdownService.CustomerStatusValue"
+                                [value]="opt.value">
+                                {{ opt.text }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                }
+                @if (searchOption === "custtype") {
+                <div class="col-sm-3">
+                    <mat-form-field appearance="outline" style="margin-left: 16px" class="w-100 hide-hint mr-10">
+                        <mat-select id="optselect" class="input-p-5" placeholder="Select a Customer Type"
+                            [(ngModel)]="searchOutward">
+                            <mat-option *ngFor="let opt of commondropdownService.customerTypeSearchOption"
+                                [value]="opt.value">
+                                {{ opt.label }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                }
+                @if (searchOption === "currentAssigneeName") {
+                <div class="col-sm-3">
+                    <mat-form-field appearance="outline" style="margin-left: 16px" class="w-100 hide-hint mr-10">
+                        <mat-select id="optselect" class="input-p-5" placeholder="Select a Assigned Staff"
+                            [(ngModel)]="searchOutward">
+                            <mat-option *ngFor="let opt of commondropdownService.activeStaffList"
+                                [value]="opt.username">
+                                {{ opt.username }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                }
+                @if (searchOption === "currentAssignedTeam") {
+                <div class="col-sm-3">
+                    <mat-form-field appearance="outline" style="margin-left: 16px" class="w-100 hide-hint mr-10">
+                        <mat-select id="optselect" class="input-p-5" placeholder="Select a Assigned Team"
+                            [(ngModel)]="searchOutward">
+                            <mat-option *ngFor="let opt of commondropdownService.teamListData" [value]="opt.name">
+                                {{ opt.name }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                }
+                <div class="col-sm-3 d-flex">
+                    <button mat-button mat-flat-button color="primary" class="button-normal m-r-10"
+                        (click)="searchOutwardData()">
+                        Search
+                    </button>
+                    <button mat-stroked-button matButton="outlined" class="button-normal"
+                        (click)="clearSearchOutward()">
+                        Clear
+                    </button>
+                </div>
+                <div class="col-sm-3 search-div">
+                    <button mat-button mat-flat-button color="primary" class="button-normal m-r-10"
+                        (click)="this.createOutward()">
+                        Add {{ title }}
+                    </button>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+<!-- outwards  card header search part end -->
+
+@if (this.listView) {
+<!-- body part start -->
+<div class="container-fluid contain-flud">
+    <div class="row">
+        <!-- sub-country list table start -->
+        <div class="col-md-12">
+            <mat-card class="cardWithShadow">
+                <mat-card-content class="mat-card-content-border">
+                    <div class="country-table-list">
+                        <div class="table-container">
+                            <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8 w-100">
+                                <!-- Id Column -->
+                                <ng-container matColumnDef="id">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">ID</th>
+
+                                    <td mat-cell *matCellDef="let outward">
+                                        {{ outward.id }}
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="outwordNumber">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Outward Number
+                                    </th>
+                                    <td mat-cell *matCellDef="let outward" class="f-s-14">
+                                        {{ outward.outwardNumber }}
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="productName">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Product Name
+                                    </th>
+                                    <td mat-cell *matCellDef="let outward" class="f-s-14">
+                                        @if (outward.group == true) {
+                                        <a (click)="openProductDialog(outward)" class="text-primary">
+                                            <!-- {{ outward.productId?.name }} -->
+                                            View Products
+                                        </a>
+                                        } @else {
+                                        {{ outward.productId?.name }}
+                                        }
+                                    </td>
+                                </ng-container>
+                                <ng-container matColumnDef="quantity">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Quantity
+                                    </th>
+
+                                    <td mat-cell *matCellDef="let outward" class="f-s-14">
+                                        @if (outward.group == true) {
+                                        <!-- {{ outward.productId?.name }} -->
+                                        -
+                                        } @else {
+                                        {{ outward.qty }}
+                                        }
+                                    </td>
+                                </ng-container>
+                                <ng-container matColumnDef="inTransatQuantity">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        InTransit Quantity
+                                    </th>
+                                    <td mat-cell *matCellDef="let outward" class="f-s-14">
+                                        @if (outward.group == true) {
+                                        <!-- {{ outward.productId?.name }} -->
+                                        -
+                                        } @else {
+                                        {{ outward.inTransitQty }}
+                                        }
+
+                                    </td>
+                                </ng-container>
+                                <ng-container matColumnDef="createdBy">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Created By
+                                    </th>
+                                    <td mat-cell *matCellDef="let outward" class="f-s-14">
+                                        {{ outward.createdBy }}
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="Status">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Status
+                                    </th>
+
+                                    <td mat-cell *matCellDef="let outward" class="f-s-14">
+                                        <span class="status-badge" [ngClass]="{
+                          'status-success': outward.status === 'ACTIVE',
+                          'status-danger': outward.status === 'INACTIVE'
+                        }">
+                                            {{ outward.status }}
+                                        </span>
+                                    </td>
+                                </ng-container>
+                                <ng-container matColumnDef="approvalStatus">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Approval Status
+                                    </th>
+
+                                    <td mat-cell *matCellDef="let outward" class="f-s-14">
+                                        <span class="status-badge" [ngClass]="{
+                          'status-success': outward.approvalStatus === 'Approve',
+                          'status-danger': outward.approvalStatus === 'Rejected',
+                          'status-info': outward.approvalStatus === 'Pending'
+                        }">
+                                            {{ outward.approvalStatus }}
+                                        </span>
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="Action">
+                                    @if (
+                                    deleteAccess || editAccess || addMacAddressAccess || showMacAddressAccess
+                                    ) {
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">Action</th>
+                                    }
+                                    @if (
+                                    deleteAccess || editAccess || addMacAddressAccess || showMacAddressAccess
+                                    ) {
+                                    <td mat-cell *matCellDef="let outward" style="width: 192px">
+                                        <a mat-icon-button href="javascript:void(0)"
+                                            (click)="getOutwardDetails(outward.id)" matTooltip="View">
+                                            <img src="assets/img/DashboardIcons/eye-svgrepo-com (1) 1.svg">
+                                        </a>
+
+                                        @if (editAccess) {
+                                        <a mat-icon-button href="javascript:void(0)"
+                                            [disabled]="outward.approvalStatus != 'Pending'"
+                                            (click)="editOutward(outward.id)" matTooltip="Edit">
+                                            <img src="assets/img/DashboardIcons/Edit.svg">
+                                        </a>
+                                        }
+
+                                        @if (deleteAccess) {
+                                        <a mat-icon-button href="javascript:void(0)" disabled
+                                            (click)="this.deleteConfirmonOutwardDialog(outward)" matTooltip="Delete">
+                                            <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                        </a>
+                                        }
+                                        @if (addMacAddressAccess && outward.group !== true) {
+                                        <a mat-icon-button href="javascript:void(0)" disabled
+                                            matTooltip="Add Mac Address" (click)="addMAC(outward)" [disabled]="
+                              outward.approvalStatus == 'Rejected' ||
+                              outward.approvalStatus == 'Approve' ||
+                              outward.status == 'INACTIVE'
+                            " [ngClass]="{
+                              'status-success': outward.approvalStatus === 'Approve',
+                              'status-danger': outward.approvalStatus === 'Rejected',
+                              'status-info': outward.approvalStatus === 'Pending'
+                            }">
+                                            <img src="assets/img/DashboardIcons/Add MAC.svg">
+
+                                        </a>
+                                        }
+                                        @if (showMacAddressAccess && outward.group !== true) {
+                                        <a mat-icon-button href="javascript:void(0)" disabled (click)="showMac(outward)"
+                                            [disabled]="outward.approvalStatus == 'Rejected'" [ngClass]="{
+                              'status-danger': outward.approvalStatus === 'Rejected'
+                            }" [class.disabled-link]="outward.approvalStatus === 'Rejected'"
+                                            matTooltip="Outward Mac Mapping">
+                                            <img src="assets/img/DashboardIcons/MAC Mapping.svg">
+
+                                        </a>
+                                        }
+                                    </td>
+                                    }
+                                </ng-container>
+
+                                <tr mat-header-row class="table-header-bg"
+                                    *matHeaderRowDef="getDisplayedPlanDetailsColumns(); sticky: true"></tr>
+                                <tr mat-row class="table-content-row"
+                                    *matRowDef="let row; columns: getDisplayedPlanDetailsColumns()">
+                                </tr>
+                            </table>
+
+                            <mat-paginator #paginator class="custome-paginator" [length]="productListdatatotalRecords"
+                                [pageSize]="productListdataitemsPerPage" [pageSizeOptions]="[5, 10, 20, 50, 100]"
+                                showFirstLastButtons (page)="pageChangedProductList($event)">
+                            </mat-paginator>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+        <!-- sub-country list table end -->
+    </div>
+</div>
+<!-- body part end -->
+}
+
+<!-- add-edit outward dialog start -->
+<ng-template #addEDitDialogOutward>
+    @if (this.createView) {
+    <div class="container-fluid p-0">
+        <div class="dialog-header dialog-title" style="display: flex; justify-content: space-between;">
+            {{ this.editMode ? "Update" : "Create Multiple" }} Outwards
+            <a mat-icon-button (click)="closeDialog()">
+                <img src="assets/img/DashboardIcons/Reject.svg">
+            </a>
+        </div>
+        <mat-dialog-content>
+            <!-- @if (!this.editMode) {
+            <div class="row m-b-10" style="padding: 15px;">
+                <div class="col-sm-12">
+                    <mat-button-toggle-group [(ngModel)]="outwardCreationMode" aria-label="Creation Mode">
+                        <mat-button-toggle value="manual">Manual Entry & Add to List</mat-button-toggle>
+                        <mat-button-toggle value="bulk">Bulk File Upload</mat-button-toggle>
+                    </mat-button-toggle-group>
+                </div>
+            </div>
+            } -->
+
+            @if (outwardCreationMode === 'manual' || this.editMode) {
+            <form [formGroup]="this.outwardFormGroup" class="row p-15">
+                @if (!createAccess && !editAccess) {
+                <mat-card-content class="matcard-content">
+                    <div class="panel-body table-responsive">
+                        Sorry you have not privilege to create operation!
+                    </div>
+                </mat-card-content>
+                }
+                @if (createAccess || editAccess) {
+                <!-- Outward Number -->
+                @if(editMode){
+                <div class="col-sm-4">
+                    <label for="name" class="inputLabel">Outward Number *</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <input matInput placeholder="Enter outward number" class="input-p-5"
+                            formControlName="outwardNumber" [readonly]="editMode" />
+                    </mat-form-field>
+                </div>
+                }
+
+                <!-- Request Inventory Name -->
+                @if(ifRedirectInventoryModule){
+                <div class="col-sm-4">
+                    <label for="name" class="inputLabel">Request Inventory Name</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <input matInput formControlName="requestInventoryName" class="input-p-5" [readonly]="editMode"
+                            [disabled]="true" />
+                    </mat-form-field>
+                </div>
+                }
+
+
+                <!-- Product Dropdown -->
+                <div class="col-sm-4">
+                    <label for="name" class="inputLabel">Product *</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-select placeholder="Select Product" class="country-input" class="input-p-5" #ddlProduct
+                            formControlName="product" (selectionChange)="getUnit($event, ddlProduct)"
+                            [disabled]="this.editMode || ifRedirectInventoryModule">
+                            <mat-option *ngFor="let prod of this.products" [value]="prod.id">
+                                {{ prod.name }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    @if (submitted && this.outwardFormGroup.controls.product.errors) {
+                    <div class="errorWrap text-danger">
+                        @if (
+                        submitted && this.outwardFormGroup.controls.product.errors.required
+                        ) {
+                        <div class="error text-danger">
+                            Product is required.
+                        </div>
+                        }
+                    </div>
+                    }
+                </div>
+
+                <!-- Unit Field -->
+                <div class="col-sm-4">
+                    <label for="name" class="inputLabel">Unit</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <input matInput formControlName="unit" class="input-p-5" [disabled]="true" />
+                    </mat-form-field>
+                </div>
+
+                <!-- Source Type -->
+                <div class="col-sm-4">
+                    <label for="name" class="inputLabel">Source Type *</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-select placeholder="Select Source Type" class="input-p-5" formControlName="sourceType"
+                            (selectionChange)=" this.getSources(this.outwardFormGroup.controls.sourceType.value)"
+                            [disabled]="this.editMode || ifRedirectInventoryModule || bulkOutwardsList.length > 0"
+                            [ngClass]="{
+                          'is-invalid': submitted && outwardFormGroup.controls.sourceType.errors
+                        }">
+                            <mat-option *ngFor="let st of sourceType" [value]="st.label">
+                                {{ st.label }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    @if (submitted && outwardFormGroup.controls.sourceType.errors) {
+                    <div class="errorWrap text-danger">
+                        <div class="error text-danger">Source Type is required.</div>
+                    </div>
+                    }
+                </div>
+
+                <!-- Source (Conditionally Rendered) -->
+                @if(!isSourceAStaffOrCustomer && !sourceTypeAsStaffFlag){
+                <div class="col-sm-4">
+                    <label for="name" class="inputLabel">Select Source*</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-select placeholder="Select Source Type" class="input-p-5" formControlName="source"
+                            (selectionChange)="
+                  this.getAvailableQtyByProductAndSource(
+                              this.outwardFormGroup.controls.product.value,
+                              this.outwardFormGroup.controls.source.value,
+                              this.outwardFormGroup.controls.sourceType.value
+                            )
+                " [disabled]="this.editMode || ifRedirectInventoryModule || bulkOutwardsList.length > 0">
+                            <mat-option *ngFor="let src of sources" [value]="src.id">
+                                {{ src.name }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    @if (submitted && this.outwardFormGroup.controls.source.errors) {
+                    <div class="errorWrap text-danger">
+                        @if (
+                        submitted && this.outwardFormGroup.controls.source.errors.required
+                        ) {
+                        <div class="errorWrap text-danger">
+                            Source is required.
+                        </div>
+                        }
+                    </div>
+                    }
+                </div>
+                }
+
+                @if(sourceTypeAsStaffFlag){
+                <div class="col-sm-4">
+                    <label for="name" class="inputLabel">Select Source*</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-select placeholder="Select Source Type" class="input-p-5" formControlName="source"
+                            (selectionChange)="
+                 this.getAvailableQtyByProductAndSource(
+                              this.outwardFormGroup.controls.product.value,
+                              this.outwardFormGroup.controls.source.value,
+                              this.outwardFormGroup.controls.sourceType.value
+                            )
+                " [disabled]="this.editMode || ifRedirectInventoryModule || bulkOutwardsList.length > 0">
+                            <mat-option *ngFor="let src of sources" [value]="src.id">
+                                {{ src.username }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    @if (submitted && this.outwardFormGroup.controls.source.errors) {
+                    <div class="errorWrap text-danger">
+                        @if (
+                        submitted && this.outwardFormGroup.controls.source.errors.required
+                        ) {
+                        <div class="errorWrap text-danger">
+                            Source is required.
+                        </div>
+                        }
+                    </div>
+                    }
+                </div>
+                }
+
+                @if (!this.editMode) {
+                <!-- Available Quantity (Read-only) -->
+                <div class="col-sm-4">
+                    <label for="name" class="inputLabel">Available Quantity</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <input class="input-p-5" matInput [value]="availableQty" readonly disabled />
+                    </mat-form-field>
+                </div>
+                }
+
+                <!-- Destination Type -->
+                <div class="col-sm-4">
+                    <label for="name" class="inputLabel">Destination Type *</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-select placeholder="Select Destination Type" class="input-p-5"
+                            formControlName="destinationType"
+                            (selectionChange)="this.getDestinations(this.outwardFormGroup.controls.destinationType.value)"
+                            [disabled]="this.editMode || bulkOutwardsList.length > 0" [ngClass]="{
+                          'is-invalid':
+                            submitted && outwardFormGroup.controls.destinationType.errors
+                        }">
+                            <mat-option *ngFor="let dest of destinationType" [value]="dest.label">
+                                {{ dest.label }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    @if (submitted && outwardFormGroup.controls.destinationType.errors) {
+                    <div class="errorWrap text-danger">
+                        <div class="error text-danger">Destination Type is required.</div>
+                    </div>
+                    }
+                </div>
+
+                @if (!isDestAStaffOrCustomer) {
+                <div class="col-sm-4">
+                    <label for="name" class="inputLabel">Select Destination *</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-select placeholder="Select Destination Type" class="input-p-5"
+                            formControlName="destination" [disabled]="this.editMode || bulkOutwardsList.length > 0">
+                            <mat-option *ngFor="let dest of destinations" [value]="dest.id">
+                                {{ dest.name }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                }
+                @if (isDestAStaffOrCustomer) {
+                <div class="col-sm-4">
+                    <label for="name" class="inputLabel">Select Destination *</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-select placeholder="Select Destination Type" class="input-p-5"
+                            formControlName="destination" [disabled]="this.editMode || bulkOutwardsList.length > 0">
+                            <mat-option *ngFor="let dest of this.destinations" [value]="dest.id">
+                                {{ dest.username }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    @if (submitted && this.outwardFormGroup.controls.destination.errors) {
+                    <div class="errorWrap text-danger">
+                        @if (
+                        submitted && this.outwardFormGroup.controls.destination.errors.required
+                        ) {
+                        <div class="error text-danger">
+                            Please select destination.
+                        </div>
+                        }
+                    </div>
+                    }
+                </div>
+                }
+
+
+                <!-- Quantity Out -->
+                <div class="col-sm-4">
+                    <label for="name" class="inputLabel">Quantity Out {{ unit }} *</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <input class="input-p-5" matInput type="number" placeholder="Enter Quantity"
+                            formControlName="inTransitQty" (keypress)="quantityOutValidation($event)" [ngClass]="{
+                            'is-invalid':
+                              submitted && this.outwardFormGroup.controls.inTransitQty.errors
+                          }" [readonly]="this.editMode" />
+                    </mat-form-field>
+                    @if (this.showQtyError) {
+                    <div class="error text-danger">
+                        {{ this.qtyErroMsg }}
+                    </div>
+                    }
+                    @if (
+                    submitted &&
+                    this.outwardFormGroup.controls.inTransitQty.errors &&
+                    !this.showQtyError
+                    ) {
+                    <div>
+                        @if (
+                        submitted &&
+                        this.outwardFormGroup.controls.inTransitQty.errors.required
+                        ) {
+                        <div class="error text-danger">
+                            Quantity is required.
+                        </div>
+                        }
+                    </div>
+                    }
+                </div>
+
+                <!-- Outward Date -->
+                <div class="col-sm-4">
+                    <label for="name" class="inputLabel">Outward Date *</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <input class="input-p-5" matInput [matDatepicker]="picker" formControlName="outwardDateTime"
+                            [disabled]="this.editMode" />
+                        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                        <mat-datepicker #picker></mat-datepicker>
+                    </mat-form-field>
+                    @if (submitted && this.outwardFormGroup.controls.outwardDateTime.errors)
+                    {
+                    <div class="errorWrap text-danger">
+                        @if (
+                        submitted &&
+                        this.outwardFormGroup.controls.qty.errors &&
+                        !this.showQtyError
+                        ) {
+                        <div>
+                            @if (
+                            submitted && this.outwardFormGroup.controls.qty.errors.required
+                            ) {
+                            <div class="error text-danger">
+                                Quantity is required.
+                            </div>
+                            }
+                            @if (submitted && this.outwardFormGroup.controls.qty.errors.min)
+                            {
+                            <div class="error text-danger">
+                                Please enter more then 0 quantity.
+                            </div>
+                            }
+                        </div>
+                        }
+                    </div>
+                    }
+                </div>
+
+                <!-- Status -->
+                <div class="col-sm-4">
+                    <label for="name" class="inputLabel">Status *</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-select class="input-p-5" placeholder="Select Status" formControlName="status">
+                            <mat-option *ngFor="let s of status" [value]="s.value">
+                                {{ s.label }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    @if (submitted && this.outwardFormGroup.controls.status.errors) {
+                    <div class="errorWrap text-danger">
+                        @if (
+                        submitted && this.outwardFormGroup.controls.status.errors.required
+                        ) {
+                        <div class="error text-danger">
+                            Outward status is required.
+                        </div>
+                        }
+                    </div>
+                    }
+                </div>
+
+                <!-- Description -->
+                <div class="col-sm-8">
+                    <label for="name" class="inputLabel">Description *</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <textarea matInput rows="3" placeholder="Enter Description"
+                            formControlName="description"></textarea>
+                    </mat-form-field>
+                </div>
+                }
+
+            </form>
+
+            @if (!this.editMode) {
+            <div class="row p-15" style="display: flex; justify-content: flex-end;">
+                <button [disabled]="disableButton || showQtyError || !outwardFormGroup.valid" mat-flat-button
+                    color="accent" (click)="addToBulkList()">
+                    <i class="pi pi-plus"></i> Add to List
+                </button>
+            </div>
+            }
+
+            @if (!this.editMode && bulkOutwardsList.length > 0) {
+            <div class="dialog-header dialog-title" style="margin-top: 15px; font-size: 16px; font-weight: 500;">
+                Outwards List
+            </div>
+            <div class="row p-15">
+                <div class="col-12 table-responsive">
+                    <table class="table table-bordered table-striped table-hover cursor-pointer" style="width: 100%;">
+                        <thead class="table-header-bg">
+                            <tr>
+                                <th class="table-header-title">S.No</th>
+                                <th class="table-header-title">Product</th>
+                                <th class="table-header-title">Qty</th>
+                                <th class="table-header-title">Source</th>
+                                <th class="table-header-title">Destination</th>
+                                <th class="table-header-title">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let item of bulkOutwardsList; let i = index" class="table-content-row">
+                                <td class="f-s-14">{{ i + 1 }}</td>
+                                <td class="f-s-14">{{ getProductName(item.productId) }}</td>
+                                <td class="f-s-14">{{ item.qty || item.inTransitQty }}</td>
+                                <td class="f-s-14">{{ getSourceName(item.sourceId, item.sourceType) }}</td>
+                                <td class="f-s-14">{{ getDestName(item.destinationId, item.destinationType) }}</td>
+                                <td>
+                                    <a mat-icon-button color="warn" (click)="removeBulkItem(i)" matTooltip="Remove">
+                                        <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg"
+                                            width="20">
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            }
+            }
+        </mat-dialog-content>
+        <mat-dialog-actions align="end" style="display: flex; gap: 8px">
+            @if (!this.editMode && outwardCreationMode === 'manual') {
+            <!-- <button [disabled]="bulkOutwardsList.length === 0" mat-flat-button
+                color="primary" (click)="submitBulkOutwards()" class="button-normal clear-btn">
+                Create All ({{ bulkOutwardsList.length }}) Outwards
+            </button> -->
+            <button [disabled]="bulkOutwardsList.length === 0" mat-flat-button color="primary"
+                (click)="submitBulkOutwards()" class="button-normal clear-btn">
+                Create All Outwards
+            </button>
+            }
+            @if (this.editMode) {
+            <button [disabled]="showQtyError || !outwardFormGroup.valid" mat-flat-button color="primary"
+                (click)="submit()" class="button-normal clear-btn">
+                Update Outward
+            </button>
+            }
+            <!-- @if (!this.editMode && outwardCreationMode === 'bulk') {
+            <button [disabled]="!bulkOutwardFile" mat-flat-button color="primary" (click)="uploadBulkFile()"
+                class="button-normal clear-btn">
+                Save
+            </button>
+            } -->
+
+            <button mat-stroked-button color="warn" class="button-normal" (click)="closeDialog()">
+                Close
+            </button>
+        </mat-dialog-actions>
+    </div>
+    }
+</ng-template>
+<!-- add-edit outward dialog end -->
+
+<!-- detail view outward dialog start -->
+<ng-template #viewOutwardDetail>
+    @if (this.detailView) {
+    <div class="container-fluid p-0">
+        <div class="dialog-header dialog-title">
+            <a mat-icon-button (click)="closeDialogView()">
+                <i class="pi pi-arrow-left f-s-15"></i>
+            </a>
+            <span style="margin-left: -70%;"> View Outwards </span>
+            <span>
+                <a mat-icon-button (click)="closeDialogView()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <mat-dialog-content>
+            <div class="row p-15 m-t-10">
+
+                <div class="col-md-4 field-row detail-row">
+                    <span class="field-label f-s-15 f-w-700 label">Outward Name</span>
+                    <span class="field-label f-s-15 f-w-700 colon">:</span>
+                    <span class="field-value value m-l-10">{{ viewOutwardDetails.productId.name }}</span>
+                </div>
+
+                <div class="col-md-4 field-row detail-row">
+                    <span class="field-label f-s-15 f-w-700 label">Category Type</span>
+                    <span class="field-label f-s-15 f-w-700 colon">:</span>
+                    <span class="field-value value m-l-10">{{ viewOutwardDetails.categoryType }}</span>
+                </div>
+
+                <div class="col-md-4 field-row detail-row">
+                    <span class="field-label f-s-15 f-w-700 label">Status</span>
+                    <span class="field-label f-s-15 f-w-700 colon">:</span>
+                    <span class="field-value value m-l-10">{{ viewOutwardDetails.status }}</span>
+                </div>
+
+                <div class="col-md-4 field-row detail-row">
+                    <span class="field-label f-s-15 f-w-700 label">Destination Type</span>
+                    <span class="field-label f-s-15 f-w-700 colon" style="margin-left: -14px">:</span>
+                    <span class="field-value value m-l-10">{{ viewOutwardDetails.destinationType }}</span>
+                </div>
+
+                <div class="col-md-4 field-row detail-row">
+                    <span class="field-label f-s-15 f-w-700 label">Destination</span>
+                    <span class="field-label f-s-15 f-w-700 colon">:</span>
+                    <span class="field-value value m-l-10">{{ viewOutwardDetails.destination }}</span>
+                </div>
+
+                <div class="col-md-4 field-row detail-row">
+                    <span class="field-label f-s-15 f-w-700 label">Transit Quantity</span>
+                    <span class="field-label f-s-15 f-w-700 colon" style="margin-left: -10px">:</span>
+                    <span class="field-value value m-l-10">{{ viewOutwardDetails.inTransitQty }}</span>
+                </div>
+
+                <div class="col-md-4 field-row detail-row">
+                    <span class="field-label f-s-15 f-w-700 label">Source Type</span>
+                    <span class="field-label f-s-15 f-w-700 colon">:</span>
+                    <span class="field-value value m-l-10">{{ viewOutwardDetails.sourceType }}</span>
+                </div>
+
+                <div class="col-md-4 field-row detail-row">
+                    <span class="field-label f-s-15 f-w-700 label">Source</span>
+                    <span class="field-label f-s-15 f-w-700 colon">:</span>
+                    <span class="field-value value m-l-10">{{ viewOutwardDetails.source }}</span>
+                </div>
+
+                <div class="col-md-4 field-row detail-row">
+                    <span class="field-label f-s-15 f-w-700 label">Quantity</span>
+                    <span class="field-label f-s-15 f-w-700 colon">:</span>
+                    <span class="field-value value m-l-10">{{viewOutwardDetails.qty }}</span>
+                </div>
+
+                <div class="col-md-4 field-row detail-row">
+                    <span class="field-label f-s-15 f-w-700 label">Quantity</span>
+                    <span class="field-label f-s-15 f-w-700 colon">:</span>
+                    <span class="field-value value m-l-10">{{viewOutwardDetails.qty }}</span>
+                </div>
+
+                <div class="col-md-4 field-row detail-row">
+                    <span class="field-label f-s-15 f-w-700 label">Outward Date</span>
+                    <span class="field-label f-s-15 f-w-700 colon">:</span>
+                    <span class="field-value value m-l-10">{{viewOutwardDetails.outwardDateTime
+                        | date: "dd-MM-yyy h:mm a "}}</span>
+                </div>
+
+                <div class="col-md-4 field-row detail-row">
+                    <span class="field-label f-s-15 f-w-700 label">Remark</span>
+                    <span class="field-label f-s-15 f-w-700 colon">:</span>
+                    <span class="field-value value m-l-10">{{viewOutwardDetails.description}}</span>
+                </div>
+            </div>
+        </mat-dialog-content>
+        <mat-dialog-actions align="end" style="display: flex; gap: 8px">
+            <button mat-stroked-button color=" warn" class="button-normal" (click)="closeDialogView()">
+                Close
+            </button>
+        </mat-dialog-actions>
+    </div>
+    }
+</ng-template>
+<!-- detail view outward dialog end -->
+
+<!-- outward  MACAssignModalOutwardDialog (send ma open thy a ) dialog start -->
+<ng-template #MACAssignModalOutwardDialog>
+    <div class="dialog-container">
+        <div class="dialog-header dialog-title">
+            Outward MAC Mapping
+            <span>
+                <a mat-icon-button (click)="closeDialog()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+
+        <div mat-dialog-content>
+            <div class="row m-b-10">
+                <div class="col-sm-12">
+                    <mat-button-toggle-group [(ngModel)]="macAddMode" name="fontStyle" aria-label="Font Style"
+                        [hideSingleSelectionIndicator]="true">
+                        <mat-button-toggle value="manual">Add Manually MAC Address</mat-button-toggle>
+
+                        <mat-button-toggle value="bulk">Upload Bulk MAC Address</mat-button-toggle>
+                    </mat-button-toggle-group>
+                </div>
+            </div>
+
+            @if (macAddMode === 'manual') {
+            <div class="row">
+                <div class="col-sm-3">
+                    <label for="name" class="inputLabel">Search Option</label>
+                    <mat-form-field appearance="outline">
+                        <mat-select class="input-p-5" placeholder="Select a Search Option" [(ngModel)]="searchOption"
+                            [disabled]="searchOption==='msisdn'" (ngModelChange)="selMacSearchOption($event)">
+                            <mat-option *ngFor="let option of macOptionSelect" [value]="option.value">
+                                {{ option.label }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                @if (searchOption === 'itemId') {
+                <div class="col-sm-3">
+                    <label for="name" class="inputLabel">Enter Item Id</label>
+                    <mat-form-field appearance="outline" class="hide-hint">
+                        <input [(ngModel)]="searchMacDeatil" type="text" class="input-p-5" matInput
+                            placeholder="Enter Search Detail" (keydown.enter)="searchAddMac()" />
+                    </mat-form-field>
+                </div>
+                }
+                @if (searchOption === 'mac') {
+                <div class="col-sm-3">
+                    <label for="name" class="inputLabel">Enter MAC Addressd</label>
+                    <mat-form-field appearance="outline" class="w-100 hide-hint">
+                        <input [(ngModel)]="searchMacDeatil" tyep="text" class="input-p-5" matInput
+                            placeholder="Enter Mac" (keydown.enter)="searchAddMac()" />
+                    </mat-form-field>
+                </div>
+                }
+                @if (searchOption === 'serialNumber') {
+                <div class="col-sm-3">
+                    <label for="name" class="inputLabel">Enter Serial Number</label>
+                    <mat-form-field appearance="outline" class="w-100 hide-hint">
+                        <input [(ngModel)]="searchMacDeatil" tyep="text" class="input-p-5" matInput
+                            placeholder="Enter Serial Number" (keydown.enter)="searchAddMac()" />
+                    </mat-form-field>
+                </div>
+                }
+                @if (searchOption === 'assetId ') {
+                <div class="col-sm-3">
+                    <label for="name" class="inputLabel">Enter Asset Id</label>
+                    <mat-form-field appearance="outline" class="w-100 hide-hint">
+                        <input [(ngModel)]="searchMacDeatil" type="text" class="input-p-5" matInput
+                            placeholder="Enter Asset Id" (keydown.enter)="searchAddMac()" />
+                    </mat-form-field>
+                </div>
+                }
+                @if (searchOption === 'itemType') {
+                <div class="col-sm-3">
+                    <label for="name" class="inputLabel">Enter Item Type</label>
+                    <mat-form-field appearance="outline" class="w-100 hide-hint">
+                        <input [(ngModel)]="searchMacDeatil" tyep="text" class="input-p-5" matInput
+                            placeholder="Enter Item Type" (keydown.enter)="searchAddMac()" />
+                    </mat-form-field>
+                </div>
+                }
+                @if (searchOption === 'imsi') {
+                <div class="col-sm-3">
+                    <label for="name" class="inputLabel">Enter IMSI</label>
+                    <mat-form-field appearance="outline" class="w-100 hide-hint">
+                        <input [(ngModel)]="searchMacDeatil" type="text" class="input-p-5" matInput
+                            placeholder="Enter IMSI" (keydown.enter)="searchAddMac()" />
+                    </mat-form-field>
+                </div>
+                }
+                @if (searchOption === 'iccid') {
+                <div class="col-sm-3">
+                    <label for="name" class="inputLabel">Enter ICCID</label>
+                    <mat-form-field appearance="outline" class="w-100 hide-hint">
+                        <input [(ngModel)]="searchMacDeatil" type="text" class="input-p-5" matInput
+                            placeholder="Enter ICCID" (keydown.enter)="searchAddMac()" />
+                    </mat-form-field>
+                </div>
+                }
+
+                <div class="col-sm-3 d-flex btn-div" style="margin-left: 25px;">
+                    <button mat-button mat-flat-button color="primary" class="button-normal m-r-10" style="height: 51px"
+                        (click)="searchAddMac()">
+                        Search
+                    </button>
+                    <button mat-stroked-button matButton="outlined" style="height: 51px" class="button-normal"
+                        (click)="clearAddMac()">
+                        Clear
+                    </button>
+                </div>
+            </div>
+            <div class="row m-t-5">
+                <div class="col-sm-4">
+                    <span class="f-s-16 f-w-600">Required Quantity: {{ inTransQty }}</span>
+                </div>
+                <div class="col-sm-4">
+                    <span class="f-s-16 f-w-600">Already Selected Quantity: {{ selectedItemsCount }}</span>
+                </div>
+                <div class="col-sm-4">
+                    <span class="f-s-16 f-w-600">Current Selected Quantity: {{ selectedCheckBoxes.length }}</span>
+                </div>
+            </div>
+
+            <div class="country-table-list">
+                <div class="table-container">
+                    <table mat-table matSort [dataSource]="this.inwardMacList" class="mat-elevation-z8 w-100 m-t-5">
+
+                        <ng-container matColumnDef="c-box">
+                            <th mat-header-cell *matHeaderCellDef class="table-header-title ">
+                                <mat-checkbox [checked]="isAllSelected()" (change)="toggleSelectAll($event.checked)">
+                                </mat-checkbox>
+                            </th>
+                            <td mat-cell *matCellDef="let product; let rowIndex = index">
+                                <mat-checkbox [checked]="selectedCheckBoxes.includes(product.id)"
+                                    (change)="selectedRow(product.id, $event.checked)">
+                                </mat-checkbox>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="id">
+                            <th mat-header-cell *matHeaderCellDef class="table-header-title">Item Id</th>
+                            <td mat-cell *matCellDef="let product">
+                                <mat-form-field class="mat-form-field" appearance="outline" class="w-100 m-t-10">
+                                    <input id="countryname" readonly (click)="InventoryDetails(product.id)"
+                                        [value]="product.id" class="input-p-5 m-t-10" matInput />
+                                </mat-form-field>
+                            </td>
+                        </ng-container>
+
+
+
+                        @if (this.hasMac) {
+                        <ng-container matColumnDef="macAddress">
+                            <th mat-header-cell *matHeaderCellDef class="table-header-title">MAC Address</th>
+                            @if (this.hasMac) {
+                            <td mat-cell *matCellDef="let product">
+                                <mat-form-field class="mat-form-field" appearance="outline" class="w-100 m-t-10">
+                                    <input id="countryname" [(ngModel)]="product.macAddress" disabled
+                                        [value]="product.macAddress" class="input-p-5 m-t-10" matInput />
+                                </mat-form-field>
+                            </td>
+                            }
+                        </ng-container>
+                        }
+                        @if (this.hasSerial) {
+                        <ng-container matColumnDef="serialNumber">
+                            <th mat-header-cell *matHeaderCellDef class="table-header-title">Serial Number</th>
+                            @if (this.hasSerial) {
+                            <td mat-cell *matCellDef="let product">
+                                <mat-form-field class="mat-form-field" appearance="outline" class="w-100 m-t-10">
+                                    <input id="countryname" [(ngModel)]="product.serialNumber" disabled
+                                        [value]="product.serialNumber" class="input-p-5 m-t-10" matInput />
+                                </mat-form-field>
+                            </td>
+                            }
+                        </ng-container>
+                        }
+
+                        @if (this.hasImsi) {
+                        <ng-container matColumnDef="imsi">
+                            <th mat-header-cell *matHeaderCellDef class="table-header-title">IMSI</th>
+                            <td mat-cell *matCellDef="let product">
+                                <mat-form-field class="mat-form-field" appearance="outline" class="w-100 m-t-10">
+                                    <input [(ngModel)]="product.imsi" disabled [value]="product.imsi"
+                                        class="input-p-5 m-t-10" matInput />
+                                </mat-form-field>
+                            </td>
+                        </ng-container>
+                        }
+
+                        @if (this.hasIccid) {
+                        <ng-container matColumnDef="iccid">
+                            <th mat-header-cell *matHeaderCellDef class="table-header-title">ICCID</th>
+                            <td mat-cell *matCellDef="let product">
+                                <mat-form-field class="mat-form-field" appearance="outline" class="w-100 m-t-10">
+                                    <input [(ngModel)]="product.iccid" disabled [value]="product.iccid"
+                                        class="input-p-5 m-t-10" matInput />
+                                </mat-form-field>
+                            </td>
+                        </ng-container>
+                        }
+
+                        @if (this.hasMsisdn) {
+                        <ng-container matColumnDef="msisdn">
+                            <th mat-header-cell *matHeaderCellDef class="table-header-title">MSISDN</th>
+                            <td mat-cell *matCellDef="let product">
+                                <mat-form-field class="mat-form-field" appearance="outline" class="w-100 m-t-10">
+                                    <input [(ngModel)]="product.msisdn" disabled [value]="product.msisdn"
+                                        class="input-p-5 m-t-10" matInput />
+                                </mat-form-field>
+                            </td>
+                        </ng-container>
+                        }
+
+                        <!-- Asset Id Column -->
+                        <ng-container matColumnDef="assetId">
+                            <th mat-header-cell *matHeaderCellDef class="table-header-title">Asset Id</th>
+                            <td mat-cell *matCellDef="let product" class="input-p-5">
+                                {{ product.assetId || "-" }}
+                            </td>
+                        </ng-container>
+
+                        <!-- Item Type Column -->
+                        <ng-container matColumnDef="itemType">
+                            <th mat-header-cell *matHeaderCellDef class="table-header-title">Item Type</th>
+                            <td mat-cell *matCellDef="let product">
+                                {{ product.condition || "-" }}
+                            </td>
+                        </ng-container>
+
+                        <tr mat-header-row *matHeaderRowDef="getDisplayedMacTableColumns()">
+                        </tr>
+                        <tr class="row-hover" mat-row *matRowDef="let row; columns: getDisplayedMacTableColumns()">
+                        </tr>
+                    </table>
+
+                    <mat-paginator #paginator [length]="outwardMappingMacListdatatotalRecords"
+                        [pageSize]="outwardMappingMacListitemsPerPage" [pageIndex]="currentPageOutwardMacMapping - 1"
+                        [pageSizeOptions]="[5, 10, 20, 50, 100, 1000, 5000, 10000,15000,20000,25000,30000]"
+                        showFirstLastButtons (page)="paginateOutwardMapping($event)">
+                    </mat-paginator>
+                </div>
+            </div>
+            }
+
+            @if (macAddMode === 'bulk') {
+
+
+            <mat-card class="cardWithShadow m-t-10">
+                <mat-card-content>
+                    @if (!bulkMacFile) {
+                    <div class="upload-area"
+                        style="border: 2px dashed #e0e0e0; border-radius: 8px; padding: 8px 20px; text-align: center; background-color: #fafafa; cursor: pointer;"
+                        (click)="fileInput.click()" (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)"
+                        (drop)="onDrop($event)">
+
+                        <div class="upload-icon">
+                            <mat-icon style="font-size: 64px; width: 64px; height: 64px;"
+                                color="primary">folder_open</mat-icon>
+                        </div>
+
+                        <div class="upload-text">
+                            <h3 class="f-s-16 f-w-600" style="margin-bottom: 8px; color: #333;">Drag and
+                                drop a
+                                file
+                            </h3>
+                            <p class="f-s-12" style="color: #757575; margin-bottom: 1px;">
+                                CSV or Excel file. Max 10MB
+                            </p>
+                        </div>
+                        <div class="divider" style="margin: 10px 0;">
+                            <span style="color: #757575; font-size: 14px;">OR</span>
+                        </div>
+
+                        <button mat-stroked-button class="button-normal" type="button">
+                            Browse Files
+                        </button>
+
+                        <input #fileInput type="file" accept=".csv,.xlsx,.xls" style="display: none;"
+                            (change)="onBulkFileSelect($event)" />
+                    </div>
+                    }
+                    @if (bulkMacFile) {
+                    <div class="uploaded-files-section m-t-20">
+                        <h3 class="f-s-16 f-w-600 m-b-15">Uploaded File</h3>
+
+                        <div class="file-card"
+                            style="border: 1px solid #e0e0e0; border-radius: 8px; padding: 16px; display: flex; align-items: center; justify-content: space-between;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <mat-icon style="color: #757575;">description</mat-icon>
+                                <div>
+                                    <div class="f-s-14 f-w-600">{{ bulkMacFile.name }}</div>
+                                    <!-- <span class="f-s-12" style="color: #bd3030;">{{ bulkMacFile.size || 'Unknown file
+                                        type' }}</span><br>
+                                    <div class="f-s-12" style="color: #757575;">{{ (bulkMacFile.size / (1024
+                                        *
+                                        1024)).toFixed(2) }}mb</div> -->
+                                    <div class="f-s-12" style="color: #757575;">{{ formatFileSize(bulkMacFile.size) }}
+                                    </div>
+                                </div>
+                            </div>
+                            <button mat-icon-button (click)="removeBulkFile()" matTooltip="Remove file">
+                                <mat-icon>close</mat-icon>
+                            </button>
+                        </div>
+                    </div>
+                    }
+                </mat-card-content>
+            </mat-card>
+
+            }
+
+            <!--    skip record start -->
+            @if (macAddMode === 'bulk' && showSkippedTable) {
+
+            <mat-card>
+                <mat-card-header>
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <!-- Left side: Back button + title -->
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <mat-card-title>Skipping row details</mat-card-title>
+                        </div>
+                        <div>
+                            <button mat-icon-button color="primary" matTooltip="Refresh"
+                                (click)="getSkipRecord(inwardIdForMac)">
+                                <img src="assets/img/DashboardIcons/Refresh.svg" alt="Refresh">
+                            </button>
+                        </div>
+                    </div>
+                </mat-card-header>
+                <mat-card-content>
+                    <!-- <div class="mt-3"> -->
+                    <div class="table-responsive">
+
+                        <!-- Table -->
+                        <table mat-table [dataSource]="getData" class="mat-elevation-z2 w-100" matSort>
+
+                            @for (column of displayedMacShowColumns2; track column.field) {
+                            <ng-container [matColumnDef]="column.field">
+                                <th mat-header-cell *matHeaderCellDef>
+                                    {{ column.header }}
+                                </th>
+                                <td mat-cell *matCellDef="let element">
+                                    {{ element[column.field] }}
+                                </td>
+                            </ng-container>
+                            }
+
+                            <tr mat-header-row *matHeaderRowDef="displayedMacShowColumnsFields"></tr>
+                            <tr mat-row *matRowDef="let row; columns: displayedMacShowColumnsFields"></tr>
+                        </table>
+
+                        <!-- No Record Found -->
+                        <div *ngIf="!skippedTotalRecords || skippedTotalRecords.length === 0"
+                            class="no-record text-center mt-5">
+                            No Record Found.
+                        </div>
+                    </div>
+
+                    <mat-paginator [length]="skippedTotalRecords" [pageSize]="skiptemsPerPage"
+                        [pageSizeOptions]="[5,10,20,50,100]" (page)="pageChangedSkipList($event)" showFirstLastButtons>
+                    </mat-paginator>
+                    <!-- </div> -->
+                </mat-card-content>
+            </mat-card>
+
+            }
+            <!--  skip record end -->
+
+        </div>
+        <div mat-dialog-actions class="dialog-action-adjust">
+            <button mat-flat-button color="primary" class="button-normal" (click)="mapMACOutward()"
+                [disabled]="isSaving">
+                Save
+            </button>
+
+            <button mat-stroked-button mat-dialog-close (click)="closeDialog()">
+                Close
+            </button>
+        </div>
+    </div>
+</ng-template>
+<!-- outward  MACAssignModalOutwardDialog dialog end -->
+
+<!-- outward macAddressDialog (circle ma open thy a ) dialog start -->
+<ng-template #macAddressDialog>
+    <div class="dialog-header dialog-title">
+        Outward MAC Mapping
+        <span>
+            <a mat-icon-button (click)="closeDialog()">
+                <img src="assets/img/DashboardIcons/Reject.svg">
+            </a>
+        </span>
+    </div>
+
+    <mat-dialog-content>
+        <div class="row">
+            <div class="col-sm-3">
+                <label for="name" class="inputLabel">Search Option</label>
+                <mat-form-field appearance="outline">
+                    <mat-select class="input-p-5" placeholder="Select a Search Option" [(ngModel)]="searchOption"
+                        (ngModelChange)="selMacSearchOption($event.value)">
+                        <mat-option *ngFor="let option of macOptionSelect" [value]="option.value">
+                            {{ option.label }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+            @if (searchOption === 'itemId') {
+            <div class="col-sm-3">
+                <label for="name" class="inputLabel">Enter Item Id</label>
+                <mat-form-field appearance="outline" class="w-100 hide-hint">
+                    <input [(ngModel)]="searchMacDeatil" class="input-p-5" matInput placeholder="Enter Search Detail"
+                        (keydown.enter)="searchMac()" />
+                </mat-form-field>
+            </div>
+            }
+            @if (searchOption === 'mac') {
+            <div class="col-sm-3">
+                <label for="name" class="inputLabel">Enter MAC Addressd</label>
+                <mat-form-field appearance="outline" class="w-100 hide-hint">
+                    <input [(ngModel)]="searchMacDeatil" class="input-p-5" matInput placeholder="Enter Search Detail"
+                        (keydown.enter)="searchMac()" />
+                </mat-form-field>
+            </div>
+            }
+            @if (searchOption === "serialNumber") {
+            <div class="col-sm-3">
+                <label for="name" class="inputLabel">Enter Serial Number</label>
+                <mat-form-field appearance="outline" class="w-100 hide-hint">
+                    <input [(ngModel)]="searchMacDeatil" class="input-p-5" matInput placeholder="Enter Search Detail"
+                        (keydown.enter)="searchMac()" />
+                </mat-form-field>
+            </div>
+            }
+            @if (searchOption === "assetId") {
+            <div class="col-sm-3">
+                <label for="name" class="inputLabel">Enter Asset Id</label>
+                <mat-form-field appearance="outline" class="w-100 hide-hint">
+                    <input [(ngModel)]="searchMacDeatil" class="input-p-5" matInput placeholder="Enter Search Detail"
+                        (keydown.enter)="searchMac()" />
+                </mat-form-field>
+            </div>
+            }
+            @if (searchOption === "itemType") {
+            <div class="col-sm-3">
+                <label for="name" class="inputLabel">Enter Item Type</label>
+                <mat-form-field appearance="outline" class="w-100 hide-hint">
+                    <input [(ngModel)]="searchMacDeatil" class="input-p-5" matInput placeholder="Enter Search Detail"
+                        (keydown.enter)="searchMac()" />
+                </mat-form-field>
+            </div>
+            }
+            <div class="col-sm-3 d-flex btn-div">
+                <button mat-button mat-flat-button color="primary" class="button-normal m-r-10" style="height: 51px"
+                    (click)="searchMac()">
+                    Search
+                </button>
+                <button mat-stroked-button matButton="outlined" style="height: 51px" class="button-normal"
+                    (click)="clearMac()">
+                    Clear
+                </button>
+            </div>
+        </div>
+        <div class="country-table-list">
+            <div class="table-container">
+                <table mat-table matSort [dataSource]="this.inwardMacList" class="mat-elevation-z8 w-100 m-t-5">
+                    <!-- Item Id Column -->
+                    <ng-container matColumnDef="id">
+                        <th mat-header-cell *matHeaderCellDef class="table-header-title">Item Id</th>
+                        <td mat-cell *matCellDef="let product" (click)="InventoryDetails(product.id)">
+                            <input matInput [value]="product.id" readonly class="input-p-5" disabled
+                                style="background: white;border: 0px" />
+                        </td>
+                    </ng-container>
+
+                    @if (this.hasMac) {
+                    <ng-container matColumnDef="macAddress">
+                        <th mat-header-cell *matHeaderCellDef class="table-header-title">MAC Address</th>
+                        <td mat-cell *matCellDef="let product">
+                            <input matInput [value]="product.macAddress" disabled class="input-p-5"
+                                style="background: white;border: 0px" />
+                        </td>
+                    </ng-container>
+                    }
+                    @if (this.hasSerial) {
+                    <ng-container matColumnDef="serialNumber">
+                        <th mat-header-cell *matHeaderCellDef class="table-header-title">Serial Number</th>
+                        <td mat-cell *matCellDef="let product">
+                            <input matInput [value]="product.serialNumber" disabled class="input-p-5"
+                                style="background: white;border: 0px" />
+                        </td>
+                    </ng-container>
+                    }
+
+                    <!-- Asset Id Column -->
+                    <ng-container matColumnDef="assetId">
+                        <th mat-header-cell *matHeaderCellDef class="table-header-title">Asset Id</th>
+                        <td mat-cell *matCellDef="let product" class="input-p-5" disabled>
+                            {{ product.assetId || "-" }}
+                        </td>
+                    </ng-container>
+
+                    <!-- Item Type Column -->
+                    <ng-container matColumnDef="itemType">
+                        <th mat-header-cell *matHeaderCellDef class="table-header-title">Item Type</th>
+                        <td mat-cell *matCellDef="let product" disabled>
+                            {{ product.condition || "-" }}
+                        </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="['id', 'macAddress', 'serialNumber', 'assetId', 'itemType']">
+                    </tr>
+                    <tr class="row-hover" mat-row
+                        *matRowDef="let row; columns: ['id', 'macAddress', 'serialNumber', 'assetId', 'itemType']"></tr>
+                </table>
+
+                <mat-paginator #paginatorMapping class="custome-paginator-mapping"
+                    [length]="outwardMappingListdatatotalRecords" [pageSize]="outwardMappingListitemsPerPage"
+                    [pageSizeOptions]="[5, 10, 20, 50, 100, 1000, 5000, 10000,15000,20000,25000,30000]"
+                    showFirstLastButtons (page)="paginate($event)">
+                </mat-paginator>
+            </div>
+        </div>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+        <button mat-stroked-button matButton="outlined" style="height: 51px" class="button-normal"
+            (click)="closeDialog()">
+            Close
+        </button>
+    </mat-dialog-actions>
+</ng-template>
+<!-- outward macAddressDialog dialog end -->
+
+<!-- outward inventoryDetailModalDialog dialog start -->
+<ng-template #inventoryDetailDialog>
+    <div class="dialog-header dialog-title">
+        Inventory Specification Parameter Details
+        <span>
+            <a mat-icon-button (click)="closeDialog()">
+                <img src="assets/img/DashboardIcons/Reject.svg">
+            </a>
+        </span>
+    </div>
+
+    <mat-dialog-content>
+        <div class="country-table-list">
+            <div class="table-container">
+                <table mat-table matSort [dataSource]="inventorySpecificationDetails"
+                    class="mat-elevation-z8 w-100 m-t-5">
+                    <!-- Item Id Column -->
+                    <ng-container matColumnDef="Parameter">
+                        <th mat-header-cell *matHeaderCellDef class="table-header-title">Parameter</th>
+                        <td mat-cell *matCellDef="let param">
+                            {{ param.paramName }}
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="Mandatory">
+                        <th mat-header-cell *matHeaderCellDef class="table-header-title">Mandatory</th>
+                        <td mat-cell *matCellDef="let param">
+                            {{ param.isMandatory }}
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="Value">
+                        <th mat-header-cell *matHeaderCellDef class="table-header-title">Value</th>
+                        <td mat-cell *matCellDef="let param">
+                            {{ param.paramValue }}
+                        </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="['Parameter', 'Mandatory', 'Value']"></tr>
+                    <tr class="row-hover" mat-row *matRowDef="let row; columns: ['Parameter', 'Mandatory', 'Value']" ;>
+                    </tr>
+                </table>
+
+                <mat-paginator #paginator class="custome-paginator-mapping" [length]="" [pageSize]=""
+                    [pageSizeOptions]="[5, 10, 20, 50, 100, 1000, 5000, 10000,15000,20000,25000,30000]"
+                    showFirstLastButtons (page)="paginate($event)">
+                </mat-paginator>
+            </div>
+        </div>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+        <button mat-button mat-flat-button color="primary" class="button-normal"></button>
+        <button mat-stroked-button matButton="outlined" style="height: 51px" class="button-normal"
+            (click)="closeDialog()">
+            Close
+        </button>
+    </mat-dialog-actions>
+</ng-template>
+<!-- outward inventoryDetailModalDialog dialog end -->
+
+<!-- product details dialog for null group -->
+<ng-template #productDetailsDialog>
+    <div class="dialog-header dialog-title" style="display: flex; justify-content: space-between;">
+        Product Details
+        <a mat-icon-button (click)="closeProductDialog()">
+            <img src="assets/img/DashboardIcons/Reject.svg">
+        </a>
+    </div>
+    <mat-dialog-content>
+        <div class="p-15" style="min-width: 600px; padding: 20px;">
+            <!-- <p style="margin-bottom: 15px; font-size: 15px;"><strong>Selected Product:</strong> {{
+                selectedProductForDetails?.productId?.name || '-' }}</p> -->
+
+            @if (isProductDetailsLoading) {
+            <div style="display: flex; justify-content: center; align-items: center; padding: 40px;">
+                <mat-spinner diameter="40"></mat-spinner>
+            </div>
+            } @else {
+            <div class="table-responsive">
+
+                <table mat-table [dataSource]="productDetailsList" class="mat-elevation-z8" style="width: 100%;">
+
+                    <!-- Product Name -->
+                    <ng-container matColumnDef="productName">
+                        <th mat-header-cell *matHeaderCellDef> Product Name </th>
+                        <td mat-cell *matCellDef="let item" class="text-center">
+                            {{ item.productId?.name }}
+                        </td>
+                    </ng-container>
+
+                    <!-- Quantity -->
+                    <ng-container matColumnDef="quantity">
+                        <th mat-header-cell *matHeaderCellDef> Quantity </th>
+                        <td mat-cell *matCellDef="let item" class="text-center">
+                            {{ item.qty || item.inTransitQty }}
+                        </td>
+                    </ng-container>
+
+                    <!-- Status -->
+                    <ng-container matColumnDef="status">
+                        <th mat-header-cell *matHeaderCellDef> Status </th>
+                        <td mat-cell *matCellDef="let item">
+                            <span class="status-badge" [ngClass]="{
+                          'status-success': item.status === 'ACTIVE',
+                          'status-danger': item.status === 'INACTIVE'
+                        }">
+                                {{ item.status }}
+                            </span>
+                        </td>
+                    </ng-container>
+
+                    <!-- Outward Number -->
+                    <ng-container matColumnDef="outwardNumber">
+                        <th mat-header-cell *matHeaderCellDef> Outward Number </th>
+                        <td mat-cell *matCellDef="let item" class="text-center">
+                            {{ item.outwardNumber }}
+                        </td>
+                    </ng-container>
+
+                    <!-- Action -->
+                    <ng-container matColumnDef="action">
+                        <th mat-header-cell *matHeaderCellDef> Action </th>
+                        <td mat-cell *matCellDef="let item" style="width:120px;">
+
+                            <!-- Add MAC -->
+                            <a mat-icon-button href="javascript:void(0)" matTooltip="Add Mac Address"
+                                (click)="addMAC(item)" [disabled]="
+                          item.approvalStatus == 'Rejected' ||
+                          item.approvalStatus == 'Approve' ||
+                          item.status == 'INACTIVE' ||
+                          (!item.productId?.productCategory?.hasMac && !item.productId?.productCategory?.hasSerial)
+                        ">
+                                <img src="assets/img/DashboardIcons/Add MAC.svg" [style.opacity]="
+                            item.approvalStatus == 'Rejected' ||
+                            item.approvalStatus == 'Approve' ||
+                            item.status == 'INACTIVE' ||
+                            (!item.productId?.productCategory?.hasMac && !item.productId?.productCategory?.hasSerial)
+                              ? 0.5 : 1">
+                            </a>
+
+                            <!-- Show MAC -->
+                            <a mat-icon-button href="javascript:void(0)" (click)="showMac(item)"
+                                matTooltip="Outward Mac Mapping" [disabled]="item.approvalStatus == 'Rejected' ||
+                          (!item.productId?.productCategory?.hasMac && !item.productId?.productCategory?.hasSerial)">
+                                <img src="assets/img/DashboardIcons/MAC Mapping.svg" [style.opacity]="
+                            item.approvalStatus == 'Rejected' ||
+                            (!item.productId?.productCategory?.hasMac && !item.productId?.productCategory?.hasSerial)
+                              ? 0.5 : 1">
+                            </a>
+
+                        </td>
+                    </ng-container>
+
+                    <!-- Header Row -->
+                    <tr mat-header-row *matHeaderRowDef="displayedColumnsOut"></tr>
+
+                    <!-- Data Row -->
+                    <tr mat-row *matRowDef="let row; columns: displayedColumnsOut;"></tr>
+
+                    <!-- No Data Row -->
+                    <tr class="mat-row" *ngIf="productDetailsList.length === 0">
+                        <td class="mat-cell text-center" colspan="5">
+                            No product details available.
+                        </td>
+                    </tr>
+
+                </table>
+            </div>
+            }
+        </div>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+        <button mat-stroked-button color="warn" class="button-normal m-r-10" (click)="closeProductDialog()">
+            Close
+        </button>
+    </mat-dialog-actions>
+</ng-template>
+<!-- product details dialog end -->

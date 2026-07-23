@@ -1,0 +1,265 @@
+<!-- <div class="row">
+  <div class="col-md-12">
+    <div class="panel">
+      <div class="panel-heading">
+        <h3 class="panel-title">{{ editMode ? "Update" : "Create" }} Role</h3>
+        <div class="right">
+          <button
+            type="button"
+            class="btn-toggle-collapse"
+            data-toggle="collapse"
+            data-target="#createrole"
+            aria-expanded="false"
+            aria-controls="createrole"
+            >
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+      <div id="createrole" class="panel-collapse collapse in">
+        <div class="panel-body">
+          <form class="form-auth-small" [formGroup]="roleGroupForm">
+            <div class="form-group row">
+              <div class="col-md-4 ml-15">
+                <label>Name *</label>
+                <input
+                  id="rolename"
+                  type="text"
+                  name="rolename"
+                  class="form-control"
+                  placeholder="Enter name"
+                  formControlName="rolename"
+                  [ngClass]="{
+                    'is-invalid': submitted && roleGroupForm.controls.rolename.errors
+                  }"
+                  [readOnly]="editMode"
+                  />
+
+                  @if (submitted && roleGroupForm.controls.rolename.errors) {
+                    <div
+                      class="errorWrap text-danger"
+                      >
+                      <div class="error text-danger">Name is required.</div>
+                    </div>
+                  }
+                </div>
+                <div class="col-md-4 ml-15">
+                  <label>Status *</label>
+                  <p-dropdown
+                    [options]="commonStatusList"
+                    optionValue="value"
+                    optionLabel="text"
+                    filter="true"
+                    filterBy="text"
+                    placeholder="Select a Status"
+                    formControlName="status"
+                  [ngClass]="{
+                    'is-invalid': submitted && roleGroupForm.controls.status.errors
+                  }"
+                  ></p-dropdown>
+                  <div></div>
+
+                  @if (submitted && roleGroupForm.controls.status.errors) {
+                    <div
+                      class="errorWrap text-danger"
+                      >
+                      <div class="error text-danger">Status is required.</div>
+                    </div>
+                  }
+                </div>
+              </div>
+            </form>
+            <div class="row pt-3">
+              <div class="col-md-12">
+                <div class="card">
+                  <p-treeTable
+                    [value]="data"
+                    selectionMode="single"
+                    [metaKeySelection]="true"
+                    [(selection)]="selectedNodes"
+                    [scrollable]="true"
+                    [tableStyle]="{ 'min-width': '50rem' }"
+                    (onNodeExpand)="onNodeExpand($event)"
+                    >
+                    <ng-template pTemplate="header" let-columns>
+                      <tr>
+                       
+                        <th>Operations</th>
+                        <th class="flex-class">
+                          <p-checkbox
+                            class="p-field-checkbox"
+                            name="checkAccess"
+                            [(ngModel)]="isSelectAll"
+                            (onChange)="onNodeSelect($event, null)"
+                            [binary]="true"
+                            ></p-checkbox
+                            ><span class="pl-1"> Permissions </span>
+                          </th>
+                        </tr>
+                      </ng-template>
+                      <ng-template pTemplate="body" let-rowNode let-rowData="rowData">
+                        <tr
+                          [ttRow]="rowNode"
+                          [ngClass]="{ 'custom-tree-row': true }"
+                          [style.background-color]="rowNode.level == 0 ? 'rgb(240, 240, 240)' : ''"
+                          >
+                        
+                          <td>
+                            <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
+                            <span
+                          [style.font-weight]="
+                            rowNode.node.children?.length > 0 ? 'bold' : 'normal'
+                          "
+                              >
+                              {{ rowData.name }}
+                            </span>
+                          </td>
+                         
+                          <td>
+                            <p-checkbox
+                              class="p-field-checkbox"
+                              name="checkAccess"
+                              [(ngModel)]="rowData.isSelected"
+                              (onChange)="onNodeSelect($event, rowNode)"
+                              [binary]="true"
+                            ></p-checkbox>
+                          </td>
+                        </tr>
+                      </ng-template>
+                    </p-treeTable>
+                  </div>
+                </div>
+              </div>
+
+              <div class="addUpdateBtn pt-3">
+                <button type="submit" class="btn btn-primary" (click)="addUpdateRole()" id="submit">
+                  <i class="fa fa-check-circle"></i>
+                  {{ editMode ? "Update" : "Add" }} Role
+                </button>
+                <br />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div> -->
+<div class="dialog-container">
+  <div class="dialog-header">
+    {{ editMode ? "Update" : "Create" }} Role
+    <span>
+      <a mat-icon-button href="javascript:void(0)" (click)="onCancel()">
+         <img src="assets/img/DashboardIcons/Reject.svg">
+      </a>
+    </span>
+  </div>
+  <div mat-dialog-content>
+    <div class="col-md-12">
+      <mat-card-content class="matcardContent">
+        <form [formGroup]="roleGroupForm" class="card-form mb-3">
+          <div class="row g-3">
+            <div class="col-md-6 mb-4">
+              <label for="rolename" class="inputLabel">Name *</label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input
+                  id="rolename"
+                  matInput
+                  placeholder="Enter name"
+                  formControlName="rolename"
+                  [readonly]="editMode"
+                  maxlength="250"
+                  [ngClass]="{ 'is-invalid': submitted && roleGroupForm.controls.rolename.errors }"
+                  class="input-p-5"
+                />
+                <mat-error *ngIf="submitted && roleGroupForm.get('rolename')?.hasError('required')">
+                  Name is required.
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="col-md-6 mb-4">
+              <label for="status" class="inputLabel">Status *</label>
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-select
+                  id="status"
+                  formControlName="status"
+                  placeholder="Select a Status"
+                  [ngClass]="{ 'is-invalid': submitted && roleGroupForm.controls.status.errors }"
+                  class="input-p-5"
+                >
+                  <mat-option *ngFor="let option of commonStatusList" [value]="option.value">
+                    {{ option.text }}
+                  </mat-option>
+                </mat-select>
+                <mat-error *ngIf="submitted && roleGroupForm.get('status')?.hasError('required')">
+                  Status is required.
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+        </form>
+        <mat-checkbox
+          [(ngModel)]="isSelectAll"
+          [indeterminate]="isIndeterminate"
+          (change)="onSelectAllChange($event.checked)"
+          class="select-all-checkbox"
+        >
+          <span class="select-all-label">All Permissions</span>
+        </mat-checkbox>
+        <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="mat-elevation-z8">
+          <mat-tree-node *matTreeNodeDef="let node" matTreeNodePadding>
+            <mat-checkbox
+              [(ngModel)]="node.isSelected"
+              (change)="onPermissionChange(node, $event.checked)"
+              (click)="$event.stopPropagation()"
+            >
+              {{ node.data.name }}
+            </mat-checkbox>
+          </mat-tree-node>
+
+          <mat-nested-tree-node *matTreeNodeDef="let node; when: hasChild">
+            <div class="mat-tree-node" matTreeNodePadding>
+              <button mat-icon-button (click)="toggleNode(node); $event.stopPropagation()">
+                <mat-icon>{{
+                  treeControl.isExpanded(node) ? "expand_less" : "expand_more"
+                }}</mat-icon>
+              </button>
+              <mat-checkbox
+                [(ngModel)]="node.isSelected"
+                (change)="onPermissionChange(node, $event.checked)"
+                (click)="$event.stopPropagation()"
+              >
+                {{ node.data.name }}
+              </mat-checkbox>
+            </div>
+            <div [hidden]="!treeControl.isExpanded(node)">
+              <ng-container matTreeNodeOutlet></ng-container>
+            </div>
+          </mat-nested-tree-node>
+        </mat-tree>
+      </mat-card-content>
+    </div>
+  </div>
+
+  <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+    <button
+      mat-button
+      mat-flat-button
+      color="primary"
+      class="button-normal m-r-10"
+      type="submit"
+      (click)="addUpdateRole()"
+    >
+      {{ editMode ? "Update" : "Create" }} Role
+    </button>
+    <button
+      mat-stroked-button
+      matButton="outlined"
+      type="button"
+      color="primary"
+      class="button-normal"
+      (click)="onCancel()"
+    >
+      Cancel
+    </button>
+  </div>
+</div>

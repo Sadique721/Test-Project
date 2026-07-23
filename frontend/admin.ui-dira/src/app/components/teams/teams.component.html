@@ -1,0 +1,623 @@
+@if(listView){
+<div class="row header-row">
+    <mat-card class="cardWithShadow w-100">
+        <mat-card-content class="mat-card-content-border">
+            <div class="row">
+                <div class="col-sm-9 d-flex">
+                    <mat-form-field appearance="outline" style="margin-left: 16px;"
+                        class="w-100 hide-hint mr-10 header-input">
+                        <input class="input-p-5" [(ngModel)]="searchTeamName" matInput placeholder="Enter Team Name"
+                            (keydown.enter)="searchTrc()" />
+                        <mat-icon matSuffix class="search-header-search-icon">
+                            <i class="pi pi-search icon-size"></i>
+                        </mat-icon>
+                    </mat-form-field>
+
+                    <button mat-button mat-flat-button color="primary" class="button-normal m-r-10"
+                        (click)="searchTrc()">Search </button>
+                    <button mat-stroked-button matButton="outlined" class="button-normal"
+                        (click)="clearSearchTrc()">Clear
+                    </button>
+                </div>
+
+                <div class="col-sm-3 search-div">
+                    <button mat-button mat-flat-button color="primary" (click)="openTeamDialog()"
+                        class="button-normal m-r-10" style="width: auto;">
+
+                        Add Team</button>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+}
+
+<div class="container-fluid contain-flud">
+    <div class="row">
+        <div class="col-md-12">
+            <mat-card class="cardWithShadow">
+                <mat-card-content class="mat-card-content-border">
+                    <div class="team-table-list">
+                        <div class="table-responsive" style="overflow-x: hidden;">
+                            <table mat-table [dataSource]="teamListData" matSort class="mat-elevation-z8 w-100">
+
+                                <ng-container matColumnDef="id">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">ID</th>
+                                    <td mat-cell *matCellDef="let team">{{ team.id }}</td>
+                                </ng-container>
+
+
+                                <ng-container matColumnDef="name">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title">
+                                        Name</th>
+                                    <td mat-cell *matCellDef="let team" class="f-s-14">{{ team.name }}</td>
+                                </ng-container>
+
+
+                                <ng-container matColumnDef="status">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title">
+                                        Status</th>
+                                    <td mat-cell *matCellDef="let team">
+                                        <span class="status-badge" [ngClass]="{
+                        'status-success': team.status === 'active',
+                        'status-danger': team.status !== 'active'
+                      }">
+                                            {{ team.status }}
+                                        </span>
+                                    </td>
+                                </ng-container>
+
+
+                                <ng-container *ngIf="editAccess || deleteAccess" matColumnDef="action">
+                                    <th mat-header-cell *matHeaderCellDef stickyEnd class="table-header-title"
+                                        style="text-align: center;">Action</th>
+                                    <td mat-cell *matCellDef="let team; let i = index" class="btnAction"
+                                        style="text-align: center;">
+
+
+                                        <a *ngIf="editAccess" mat-icon-button matTooltip="edit"
+                                            (click)="editTeamById(team.id, i)" title="Edit">
+                                            <img src="assets/img/DashboardIcons/Edit.svg">
+                                        </a>
+
+
+                                        <a *ngIf="deleteAccess" mat-icon-button matTooltip="delete"
+                                            (click)="deleteConfirmonTeamDialog(team)" title="Delete">
+                                            <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                        </a>
+
+                                        <!-- Hierarchy -->
+                                        <a mat-icon-button matTooltip="sitemap" (click)="teamHierarchyModalOpen(team)"
+                                            title="Team Hierarchy">
+
+                                            <img style="width: 30px" src="assets/img/DashboardIcons/Diagram.svg" />
+                                        </a>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Table Rows -->
+                                <tr mat-header-row class="table-header-bg"
+                                    *matHeaderRowDef="getDisplayedPlanDetailsColumns()"></tr>
+                                <tr mat-row class="table-content-row"
+                                    *matRowDef="let row; columns:  getDisplayedPlanDetailsColumns()">
+                                </tr>
+                            </table>
+
+                            <!-- No Record Found -->
+                            <div *ngIf="teamListData?.length === 0" class="no-record">
+                                No Record Found.
+                            </div>
+
+                            <!-- Paginator -->
+                            <mat-paginator [length]="totalRecords" [pageSize]="itemsPerPage"
+                                [pageSizeOptions]="[5,10,20,50,100]" showFirstLastButtons (page)="pageChanged($event)">
+                            </mat-paginator>
+
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </div>
+</div>
+
+
+<ng-template #teamDialogTemplate>
+    <div class="dialog-container">
+        <div class="dialog-header ">
+            {{ editMode ? 'Update Team' : 'Create Team' }}
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="onCancel()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <div mat-dialog-content style="overflow-y: hidden;">
+            <ng-container *ngIf="!createAccess && !editMode">
+                <mat-card-content class="matcard-content">
+                    <div class="panel-body table-responsive">
+                        Sorry you have not privilege to create operation!
+                    </div>
+                </mat-card-content>
+            </ng-container>
+            @if (createAccess || (editMode && editAccess)) {
+            <mat-card-content class="matcardContent">
+                <form [formGroup]="teamFormGroup">
+                    <div class="row g-3">
+                        <div class="col-md-12 mb-4">
+                            <label for="name" class="inputLabel">Name*</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input matInput id="name" placeholder="Enter Name" formControlName="name"
+                                    class="input p-5"
+                                    [ngClass]="{ 'is-invalid': submitted && teamFormGroup.controls.name.errors }">
+                                <mat-error *ngIf="submitted && teamFormGroup.controls.name.errors?.['required']">
+                                    Name is required.
+                                </mat-error>
+
+
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <label for="status" class="inputLabel">Status*</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-select id="status" formControlName="status" placeholder="Select a Status"
+                                    class="input p-5">
+                                    <mat-option *ngFor="let option of statusList" [value]="option.value_field">
+                                        {{ option.display_field }}
+                                    </mat-option>
+                                </mat-select>
+                                <mat-error *ngIf="submitted && teamFormGroup.controls.status.errors?.['required']">
+                                    Status is required.
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <label for="type" class="inputLabel">Team Type</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-select id="type" formControlName="teamType" placeholder="Select a Type"
+                                    class="input p-5">
+                                    <mat-option *ngFor="let type of teamtypedata" [value]="type.value">
+                                        {{ type.text }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                </form>
+            </mat-card-content>
+            }
+        </div>
+        @if (createAccess || (editMode && editAccess)) {
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+
+            <button mat-button mat-flat-button color="primary" class="button-normal " (click)="addUpdateTeam()">
+                {{ editMode ? 'Update' : 'Add' }} Team
+            </button>
+
+
+            <button mat-stroked-button matButton="outlined" type="button" color="primary" class="button-normal "
+                (click)="onCancel()">
+                Cancel
+            </button>
+        </div>
+        }
+
+    </div>
+</ng-template>
+
+<ng-template #teamHierarchyDialog let-data>
+    <div class="dialog-container">
+        <div class="dialog-header" role="dialog">
+            Team Hierarchy
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="closeHierarchyDialog()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <div mat-dialog-content>
+            <div class="networkParent">
+                <p-organizationChart [value]="teamHierarchyData" selectionMode="single" [(selection)]="selectedNode"
+                    styleClass="company">
+                    <ng-template let-node pTemplate="person">
+
+                        <div class="node-header">{{ node.label }}</div>
+
+                    </ng-template>
+
+                </p-organizationChart>
+            </div>
+        </div>
+
+        <div mat-dialog-actions>
+            <button mat-stroked-button color="primary" (click)="closeHierarchyDialog()">Close</button>
+        </div>
+    </div>
+</ng-template>
+
+
+
+
+
+<!-- 
+<div class="row">
+  <div class="col-md-12">
+    <!- User Data ->
+    <div class="panel top">
+      <div class="panel-heading">
+        <h3 class="panel-title">Teams Management</h3>
+        <div class="right">
+          <button
+            type="button"
+            class="btn-toggle-collapse"
+            data-toggle="collapse"
+            data-target="#searchTeamMa"
+            aria-expanded="false"
+            aria-controls="searchTeamMa"
+            >
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+
+      <div id="searchTeamMa" class="panel-collapse collapse in">
+        @if (listView) {
+          <div class="panel-body">
+            <div class="row">
+              <div class="col-lg-3 col-md-3">
+                <input
+                  id="taxName"
+                  type="text"
+                  [(ngModel)]="searchTeamName"
+                  class="form-control"
+                  placeholder="Enter Team Name"
+                  (keydown.enter)="searchTrc()"
+                  />
+                </div>
+                <div class="col-lg-3 col-md-4 marginTopSearchBtn">
+                  <button
+                    type="button"
+                    class="btn btn-primary"
+                    id="searchbtn"
+                    (click)="searchTrc()"
+                    [disabled]="!searchTeamName"
+                    >
+                    <i class="fa fa-search"></i>
+                    Search
+                  </button>
+                  <button
+                    type="reset"
+                    class="btn btn-default"
+                    id="searchbtn"
+                    (click)="clearSearchTrc()"
+                    >
+                     <img src="assets/img/DashboardIcons/Refresh.svg" />
+                    Clear
+                  </button>
+                </div>
+              </div>
+            </div>
+          }
+          <div class="panel-body no-padding panel-udata">
+            @if (createAccess) {
+              <div class="col-md-6 pcol">
+                <div class="dbox">
+                  <a (click)="openTeamCreateMenu()" class="curson_pointer">
+                    <img src="../../../assets/img/i01.png" style="width: 32px" />
+                    <h5>Create Team</h5>
+                  </a>
+                </div>
+              </div>
+            }
+            <div class="col-md-6 pcol">
+              <div class="dbox">
+                <a (click)="openTeamListMenu()" class="curson_pointer">
+                  <img src="../../../assets/img/i01.png" style="width: 32px" />
+                  <h5>Team List</h5>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!- END User Data ->
+    </div>
+  </div>
+  @if (isTeamList) {
+    <div class="row">
+      <div class="col-md-12">
+        <!- Data Table ->
+        <div class="panel">
+          <div class="panel-heading">
+            <h3 class="panel-title">Teams</h3>
+            <div class="right">
+              <button
+                type="button"
+                class="btn-toggle-collapse"
+                data-toggle="collapse"
+                data-target="#listTeamM"
+                aria-expanded="false"
+                aria-controls="listTeamM"
+                >
+                <i class="fa fa-minus-circle"></i>
+              </button>
+            </div>
+          </div>
+          <div id="listTeamM" class="panel-collapse collapse in">
+            <div class="panel-body table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Status</th>
+                    @if (editAccess || deleteAccess) {
+                      <th>Action</th>
+                    }
+                  </tr>
+                </thead>
+                @if (teamListData?.length > 0) {
+                  <tbody>
+                    @for (
+                      team of teamListData
+                      | paginate
+                      : {
+                      id: 'listing_teamdata',
+                      itemsPerPage: itemsPerPage,
+                      currentPage: currentPage,
+                      totalItems: totalRecords
+                      }; track
+                      team; let i = $index) {
+                      <tr
+                        >
+                        <td>{{ team.name }}</td>
+                        @if (team.status == 'active') {
+                          <td>
+                            <span class="badge badge-success">Active</span>
+                          </td>
+                        }
+                        @if (team.status !== 'active') {
+                          <td>
+                            <span class="badge badge-danger">{{ team.status }}</span>
+                          </td>
+                        }
+                        @if (editAccess || deleteAccess) {
+                          <td class="btnAction">
+                            @if (editAccess) {
+                              <a
+                                type="button"
+                                (click)="editTeamById(team.id, i)"
+                                title="Edit"
+                                class="curson_pointer"
+                                >
+                              <img src="assets/img/DashboardIcons/Edit.svg" >
+                              </a>
+                            }
+                            @if (deleteAccess) {
+                              <a
+                                (click)="deleteConfirmonTeam(team)"
+                                title="Delete"
+                                class="curson_pointer"
+                                >
+                                 <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                              </a>
+                            }
+                            <a
+                              href="javascript:void(0)"
+                              (click)="teamHierarchyModalOpen(team)"
+                              title="Team Hierarchy"
+                              >
+                              <img style="width: 30px" src="assets/img/diagram.png" />
+                            </a>
+                          </td>
+                        }
+                      </tr>
+                    }
+                  </tbody>
+                }
+                @if (teamListData?.length === 0) {
+                  <tr>
+                    <td colspan="5">No Record Found.</td>
+                  </tr>
+                }
+              </table>
+              <br />
+              @if (teamListData?.length > 0) {
+                <div class="pagination_Dropdown">
+                  <pagination-controls
+                    id="listing_teamdata"
+                    maxSize="10"
+                    directionLinks="true"
+                    previousLabel=""
+                    nextLabel=""
+                    (pageChange)="pageChanged($event)"
+                  ></pagination-controls>
+                  <div id="itemPerPageDropdown">
+                    <p-dropdown
+                      [(ngModel)]="pageSize"
+                      [options]="pageLimitOptions"
+                      optionLabel="value"
+                      optionValue="value"
+                      (onChange)="TotalItemPerPage($event)"
+                    ></p-dropdown>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+        <!- END Data Table ->
+      </div>
+    </div>
+  }
+  @if (isTeamCreateOrEdit) {
+    <div class="row">
+      <div class="col-md-12">
+        <!- Form Design ->
+        <div class="panel">
+          <div class="panel-heading">
+            <h3 class="panel-title">{{ editMode ? "Update" : "Create" }} Team</h3>
+            <div class="right">
+              <button
+                type="button"
+                class="btn-toggle-collapse"
+                data-toggle="collapse"
+                data-target="#createTeamM"
+                aria-expanded="false"
+                aria-controls="createTeamM"
+                >
+                <i class="fa fa-minus-circle"></i>
+              </button>
+            </div>
+          </div>
+          <div id="createTeamM" class="panel-collapse collapse in">
+            <div>
+              <form class="form-auth-small" [formGroup]="teamFormGroup">
+                <div class="panel-body">
+                  <div class="form-group row">
+                    <div class="col-md-4 ml-15">
+                      <label>Name</label>
+                      <input
+                        id="name"
+                        type="text"
+                        name="name"
+                        class="form-control"
+                        placeholder="Enter name"
+                        formControlName="name"
+                    [ngClass]="{
+                      'is-invalid': submitted && teamFormGroup.controls.name.errors
+                    }"
+                        />
+                        @if (submitted && teamFormGroup.controls.name.errors) {
+                          <div
+                            class="errorWrap text-danger"
+                            >
+                            @if (submitted && teamFormGroup.controls.name.errors.required) {
+                              <div
+                                class="error text-danger"
+                                >
+                                Name is required.
+                              </div>
+                            }
+                          </div>
+                        }
+                        <!- <div
+                *ngIf="
+                  teamFormGroup.controls['name'].invalid &&
+                  (teamFormGroup.controls['name'].dirty ||
+                    teamFormGroup.controls['name'].touched)
+                "
+                        >
+                        <div
+                          class="position"
+                          *ngIf="teamFormGroup.controls['name'].errors.required"
+                          >
+                          <p class="error">Name is required</p>
+                        </div>
+                      </div> ->
+                    </div>
+                    <div class="col-md-4 ml-15">
+                      <label for="status">Status *</label>
+                      <p-dropdown
+                        [options]="statusList"
+                        optionValue="value_field"
+                        optionLabel="display_field"
+                        filter="true"
+                        filterBy="display_field"
+                        placeholder="Select a Status"
+                        formControlName="status"
+                    [ngClass]="{
+                      'is-invalid': submitted && teamFormGroup.controls.status.errors
+                    }"
+                      ></p-dropdown>
+                      <div></div>
+                      @if (submitted && teamFormGroup.controls.status.errors) {
+                        <div
+                          class="errorWrap text-danger"
+                          >
+                          @if (submitted && teamFormGroup.controls.status.errors.required) {
+                            <div
+                              class="error text-danger"
+                              >
+                              Status is required.
+                            </div>
+                          }
+                        </div>
+                      }
+                      <!- <div
+                *ngIf="
+                  teamFormGroup.controls['status'].invalid &&
+                  (teamFormGroup.controls['status'].dirty ||
+                    teamFormGroup.controls['status'].touched)
+                "
+                      >
+                      <div
+                        class="position"
+                        *ngIf="teamFormGroup.controls['status'].errors.required"
+                        >
+                        <p class="error">Status is required</p>
+                      </div>
+                    </div> ->
+                  </div>
+                  <div class="col-md-4 ml-15">
+                    <label for="type">Team Type</label>
+                    <p-dropdown
+                      [options]="teamtypedata"
+                      filter="true"
+                      filterBy="text"
+                      placeholder="Select a Type"
+                      formControlName="teamType"
+                      optionLabel="text"
+                      optionValue="value"
+                    ></p-dropdown>
+                    <div></div>
+                  </div>
+                </div>
+                <div class="addUpdateBtn">
+                  <button type="submit" class="btn btn-primary" (click)="addUpdateTeam()">
+                    <i class="fa fa-check-circle"></i>
+                    {{ editMode ? "Update" : "Add" }} Team
+                  </button>
+                  <br />
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+      <!- END Form Design ->
+    </div>
+  </div>
+}
+
+<!- team Hierarchy Modal ->
+<div class="modal fade" id="teamHierarchyModal" role="dialog">
+  <div class="modal-dialog" style="width: 75%">
+    <!- Modal content->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h3 class="panel-title">Team Hierarchy</h3>
+      </div>
+      <div class="modal-body" style="overflow-x: scroll">
+        <div class="networkPerent">
+          <p-organizationChart
+            [value]="teamHierarchyData"
+            selectionMode="single"
+            [(selection)]="selectedNode"
+            styleClass="company"
+            >
+            <ng-template let-node pTemplate="person">
+              <div class="node-header">{{ node.label }}</div>
+            </ng-template>
+          </p-organizationChart>
+        </div>
+        <!- <p-organizationChart [value]="teamHierarchyData"></p-organizationChart> ->
+      </div>
+    </div>
+  </div>
+</div> -->

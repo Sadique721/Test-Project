@@ -1,0 +1,1315 @@
+<div class="row header-row">
+    <mat-card class="cardWithShadow w-100">
+        <mat-card-content class="mat-card-content-border">
+            <div class="row">
+                <div class="col-sm-9 d-flex"></div>
+                <div class="col-sm-3 search-div">
+                    <button mat-button mat-flat-button color="primary" (click)="opencustomerdocumentDialog(false)"
+                        class="button-normal mr-10" style="width: auto">
+                        Add Customer Document
+                    </button>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+
+
+<div class="container-fluid contain-flud">
+    <div class="row">
+        <div class="col-md-12">
+            <mat-card class="cardWithShadow">
+                <mat-card-header class="align-items-center">
+                    <div class="displayflex align-items-center">
+                        <!-- Back Button -->
+                        <a mat-icon-button matTooltip="Go to Customer List" color="primary" (click)="listCustomer()"
+                            class="m-r-2">
+                            <img src="assets/img/DashboardIcons/Reject.svg" alt="Back" />
+                        </a>
+
+                        <!-- Title -->
+                        <mat-card-title class="font-900 m-r-2">Customer Documents</mat-card-title>
+
+                        <!-- Download All -->
+                        <a mat-icon-button matTooltip="Download All Documents" color="primary" (click)="downloadAll()">
+
+                            <img src="assets/img/DashboardIcons/Document Download.svg" alt="Download All" />
+                        </a>
+                    </div>
+                </mat-card-header>
+
+                <mat-card-content class="mat-card-content-border">
+                    <div class="discount-table-list">
+                        <div class="table-container">
+                            <table mat-table [dataSource]="custmerDocList" matSort class="mat-elevation-z8 w-100">
+
+                                <!-- Document Type -->
+                                <ng-container matColumnDef="docType">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header
+                                        class="table-header-title text-center">
+                                        Documents Type
+                                    </th>
+                                    <td mat-cell *matCellDef="let doc" class="text-center">
+                                        {{ doc.docType | titlecase }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Document Sub Type -->
+                                <ng-container matColumnDef="docSubType">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title text-center">
+                                        Documents Sub Type
+                                    </th>
+                                    <td mat-cell *matCellDef="let doc" class="text-center">
+                                        {{ doc.docSubType }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Document Number -->
+                                <ng-container matColumnDef="documentNumber">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title text-center">
+                                        Document Number
+                                    </th>
+                                    <td mat-cell *matCellDef="let doc" class="text-center">
+                                        {{ doc.documentNumber || '-' }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Document Status -->
+                                <ng-container matColumnDef="docStatus">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title text-center">
+                                        Documents Status
+                                    </th>
+                                    <td mat-cell *matCellDef="let doc" class="text-center">
+                                        <span class="status-badge" [ngClass]="{
+                        'status-success': doc.docStatus === 'Verified' || doc.docStatus === 'Active',
+                        'status-warning': doc.docStatus === 'Pending',
+                        'status-danger': doc.docStatus === 'Rejected'
+                      }">
+                                            {{ doc.docStatus }}
+                                        </span>
+                                    </td>
+                                </ng-container>
+
+                                <!-- File Name -->
+                                <ng-container matColumnDef="filename">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title text-center">
+                                        File Name
+                                    </th>
+                                    <td mat-cell *matCellDef="let doc" class="text-center">
+                                        @if (doc.filename) {
+                                        <a href="javascript:void(0)" class="link-blue"
+                                            (click)="downloadDoc(doc.filename, doc.docId, doc.custId)">
+                                            {{ doc.filename }}
+                                        </a>
+                                        }
+                                        @else {
+                                        <span>-</span>
+                                        }
+                                    </td>
+                                </ng-container>
+
+                                <!-- Remark -->
+                                <ng-container matColumnDef="remark">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title text-center">Remark
+                                    </th>
+                                    <td mat-cell *matCellDef="let doc" class="text-center">
+                                        {{ doc.remark || '-' }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Mode -->
+                                <ng-container matColumnDef="mode">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title text-center">
+                                        Document Mode
+                                    </th>
+                                    <td mat-cell *matCellDef="let doc" class="text-center">
+                                        {{ doc.mode }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Action -->
+                                <ng-container matColumnDef="action">
+                                    <th mat-header-cell *matHeaderCellDef stickyEnd
+                                        class="table-header-title text-center">
+                                        Action
+                                    </th>
+                                    <td mat-cell *matCellDef="let doc" class="text-center btnAction">
+                                        <!-- Edit -->
+                                        @if (editAccess) {
+                                        <button mat-icon-button matTooltip="Edit"
+                                            [disabled]="doc.docStatus == 'Rejected'"
+                                            (click)="editCustDocById(doc.docId)">
+                                            <img src="assets/img/DashboardIcons/Edit.svg" />
+                                        </button>
+                                        }
+
+                                        <!-- Delete -->
+                                        @if (deleteAccess) {
+                                        <button mat-icon-button matTooltip="Delete" (click)="deleteConfirm(doc)">
+                                            <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" />
+                                        </button>
+                                        }
+
+                                        <!-- Verify -->
+                                        @if (doc.mode === 'Online') {
+                                        <button mat-icon-button matTooltip="Verify Document" [disabled]="true"
+                                            (click)="verifyDocument(doc)">
+                                            <img class="IconVerifyBtn"
+                                                src="assets\img\DashboardIcons\Document Verify.svg" />
+
+                                        </button>
+                                        }
+
+                                        <!-- Pick (Pending) -->
+                                        @if (doc.docStatus == 'pending') {
+                                        <button mat-icon-button matTooltip="Pick" [disabled]="doc.nextStaff != null"
+                                            (click)="pickModalOpen(doc)">
+                                            <img src="assets/img/DashboardIcons/Pick-ticket-to-resolve.svg" />
+                                        </button>
+                                        }
+
+                                        <!-- Pick (Verified) -->
+                                        @if (doc.docStatus == 'verified') {
+                                        <button mat-icon-button matTooltip="Pick" [disabled]="doc.nextStaff != staffID"
+                                            (click)="pickModalOpen(doc)">
+                                            <img src="assets/img/DashboardIcons/Pick-ticket-to-resolve.svg" />
+                                        </button>
+                                        }
+
+                                        <!-- Approve -->
+                                        <button mat-icon-button matTooltip="Approve"
+                                            (click)="approvestatusModalOpen(doc)" [disabled]="doc.nextStaff != staffID">
+                                            <img src="assets/img/DashboardIcons/Assign.svg" />
+                                        </button>
+
+                                        <!-- Reject -->
+                                        <button mat-icon-button matTooltip="Reject" (click)="rejectstatusModalOpen(doc)"
+                                            [disabled]="doc.nextStaff != staffID">
+                                            <img src="assets/img/DashboardIcons/Reject.svg" />
+                                        </button>
+
+                                        <!-- Workflow Audit -->
+                                        <button mat-icon-button matTooltip="Audit & Documents Details"
+                                            (click)="openWorkFlowAudit('customerDocumentWorkflowAuidt', doc.docId)">
+                                            <img width="32" height="32"
+                                                src="assets/img/DashboardIcons/WorkFlow status Details.svg" />
+                                        </button>
+
+                                        <!-- Reassign -->
+                                        <button mat-icon-button matTooltip="Reassign Document"
+                                            (click)="StaffReasignList(doc)" [disabled]="doc.nextStaff != staffID">
+                                            <img width="32" height="32"
+                                                src="assets/img/DashboardIcons/send-svgrepo-com 1.svg" />
+                                        </button>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Table Header & Rows -->
+                                <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+                                <tr mat-row class="table-content-row" *matRowDef="let row; columns: displayedColumns">
+                                </tr>
+                            </table>
+
+                            <!-- Paginator -->
+                            <mat-paginator [length]="totalRecords" [pageSize]="itemsPerPage"
+                                [pageSizeOptions]="[5,10,20,50,100]" (page)="pageChanged($event)"
+                                showFirstLastButtons></mat-paginator>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </div>
+</div>
+
+
+
+<ng-template #customerDocumentDialogTemplate>
+    <div class="dialog-container">
+        <!-- Header -->
+        <div class="dialog-header">
+            {{ editMode ? 'Update Customer Document' : 'Create Customer Document' }}
+            <span>
+                <a mat-icon-button color="primary" (click)="onCancel()" class="m-r-2">
+                    <img src="assets/img/DashboardIcons/Reject.svg" alt="Back" />
+                </a>
+            </span>
+        </div>
+
+        <!-- Dialog Content -->
+        <div mat-dialog-content style="overflow-y: hidden;">
+            <mat-card-content class="matcardContent">
+                <form [formGroup]="insertCustomerDocumentForm" class="row g-3 table-layout-fixed"
+                    style="padding: 0px 20px;">
+                    <!-- Verification Mode -->
+                    <div class="col-md-4 mb-3">
+                        <label for="mode" class="inputLabel">Verification Mode *</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <mat-select id="mode" placeholder="Select Verification Mode" formControlName="mode"
+                                (selectionChange)="documentType($event.value)" class="input-p-5">
+                                <mat-option *ngFor="let item of VerificationModeValue" [value]="item.text">
+                                    {{ item.text }}
+                                </mat-option>
+                            </mat-select>
+                            <mat-error *ngIf="submitted && insertCustomerDocumentForm.controls.mode.errors">
+                                Verification Mode is required.
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Document Type -->
+                    <div class="col-md-4 mb-3">
+                        <label for="docType" class="inputLabel">Document Type *</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <mat-select id="docType" placeholder="Select Document Type" formControlName="docType"
+                                (selectionChange)="documentSubType($event.value)" class="input-p-5">
+                                <mat-option *ngFor="let item of docTypeList" [value]="item.value">
+                                    {{ item.text }}
+                                </mat-option>
+                            </mat-select>
+                            <mat-error *ngIf="submitted && insertCustomerDocumentForm.controls.docType.errors">
+                                Document Type is required.
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Document Sub Type -->
+                    <div class="col-md-4 mb-3">
+                        <label for="docSubType" class="inputLabel">Document Sub Type *</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <mat-select id="docSubType" placeholder="Select Document Sub Type"
+                                formControlName="docSubType" [readonly]="editMode" class="input-p-5">
+                                <mat-option *ngFor="let item of docSubTypeList" [value]="item.text">
+                                    {{ item.text }}
+                                </mat-option>
+                            </mat-select>
+                            <mat-error *ngIf="submitted && insertCustomerDocumentForm.controls.docSubType.errors">
+                                Document Sub Type is required.
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Document Number (Conditional) -->
+                    <div class="col-md-4 mb-3" *ngIf="ifModeInput">
+                        <label for="documentNumber" class="inputLabel">Document Number *</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <input matInput id="documentNumber" type="text" placeholder="Enter Document Number"
+                                formControlName="documentNumber" class="input-p-5" />
+                            <mat-error *ngIf="submitted && insertCustomerDocumentForm.controls.documentNumber.errors">
+                                Document Number is required.
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- File Upload -->
+                    <!-- <div class="col-md-4 mb-3" *ngIf="!ifModeInput">
+                        <label class="inputLabel">Select Document *</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <input matInput type="file" id="txtSelectDocument" (change)="onFileChange($event)"
+                                class="input p-5" />
+                        </mat-form-field>
+                        <span *ngIf="custmerDoc?.file">{{ custmerDoc.file }}</span>
+                        <mat-error *ngIf="submitted && insertCustomerDocumentForm.controls.file.errors">
+                            Document is required.
+                        </mat-error>
+                    </div> -->
+                    @if (!ifModeInput) {
+                    <div class="col-md-4 ml-15">
+                        <label>Select Document *</label>
+                        <input type="file" id="txtSelectDocument" class="form-control" formControlName="file"
+                            placeholder="Select Document" style="padding: 2px; width: 100%;margin-top: 20px;"
+                            (change)="onFileChange($event)" />
+                        @if (this.custmerDoc.file) {
+                        <span> {{
+                            this.custmerDoc.file }} </span> }
+                        @if (submitted &&
+                        insertCustomerDocumentForm.controls.file.errors)
+                        { <div class="errorWrap text-danger">
+                            <div class="error text-danger">Document is required.</div>
+                        </div>
+                        }
+                    </div>
+                    } @if (ifModeInput) {
+                    <div class="col-md-4 ml-15"> <label>Select Document</label>
+                        <input type="file" id="txtSelectDocument" class="form-control" formControlName="file"
+                            placeholder="Select Document" style="padding: 2px; width: 100%;margin-top:20px"
+                            (change)="onFileChange($event)" /> @if (this.custmerDoc.file) { <span> {{
+                            this.custmerDoc.file }} </span> }
+                    </div> }
+
+
+
+                    <!-- Document Status -->
+                    <div class="col-md-4 mb-3">
+                        <label for="docStatus" class="inputLabel">Document Status *</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <mat-select id="docStatus" placeholder="Select Document Status" formControlName="docStatus"
+                                [disabled]="editMode" class="input-p-5">
+                                <mat-option *ngFor="let status of documentStatusList" [value]="status.value">
+                                    {{ status.value }}
+                                </mat-option>
+                            </mat-select>
+                            <mat-error *ngIf="submitted && insertCustomerDocumentForm.controls.docStatus.errors">
+                                Document Status is required.
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+
+                    <!-- Start Date -->
+                    <div class="col-md-4 mb-3">
+                        <label for="startDate" class="inputLabel">Start Date *</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <input matInput [matDatepicker]="pickerFrom" formControlName="startDate"
+                                [max]="selectedEndDate" (dateChange)="onStartDateChange($event)" class="input-p-5"
+                                placeholder="Select Date" />
+                            <mat-datepicker-toggle matSuffix [for]="pickerFrom"></mat-datepicker-toggle>
+                            <mat-datepicker #pickerFrom></mat-datepicker>
+
+                            <mat-error
+                                *ngIf="insertCustomerDocumentForm.get('startDate')?.hasError('required') && (submitted || insertCustomerDocumentForm.get('startDate')?.touched)">
+                                Start Date is required.
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- End Date -->
+                    <div class="col-md-4 mb-3">
+                        <label for="endDate" class="inputLabel">End Date *</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <input matInput [matDatepicker]="pickerUpto" formControlName="endDate"
+                                [min]="selectedStartDate" (dateChange)="onEndDateChange($event)" class="input-p-5"
+                                placeholder="Select Date" />
+                            <mat-datepicker-toggle matSuffix [for]="pickerUpto"></mat-datepicker-toggle>
+                            <mat-datepicker #pickerUpto></mat-datepicker>
+
+                            <mat-error
+                                *ngIf="insertCustomerDocumentForm.get('endDate')?.hasError('required') && (submitted || insertCustomerDocumentForm.get('endDate')?.touched)">
+                                End Date is required.
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Remarks -->
+                    <div class="col-md-4 mb-3">
+                        <label for="remark" class="inputLabel">Remarks</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <textarea matInput id="remark" rows="2" placeholder="Enter Remarks" formControlName="remark"
+                                maxlength="100" class="input p-5"></textarea>
+                        </mat-form-field>
+                    </div>
+                </form>
+            </mat-card-content>
+        </div>
+
+        <!-- Dialog Actions -->
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+            <button mat-button mat-flat-button color="primary" class="button-normal" (click)="addDocument()">
+                {{ editMode ? 'Update' : 'Create' }} Document
+            </button>
+
+            <button mat-stroked-button matButton="outlined" type="button" color="primary" class="button-normal"
+                (click)="onCancel()">
+                Cancel
+            </button>
+        </div>
+    </div>
+</ng-template>
+<ng-template #approvePlanDialogTemplate let-dialogRef="dialogRef">
+    <div class="dialog-container">
+
+        <!-- Header -->
+        <div class="dialog-header">
+            {{ ifApproveStatus ? 'Approve Status' : 'Reject Status' }}
+            <span>
+                <a mat-icon-button mat-dialog-close>
+                    <img src="assets/img/DashboardIcons/Reject.svg" alt="Back" />
+                </a>
+
+            </span>
+        </div>
+
+        <!-- Content -->
+        <mat-dialog-content>
+            <div class="modal-body p-3">
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Remark</mat-label>
+                            <textarea matInput placeholder="Remarks" [(ngModel)]="approveRejectRemark" name="remark"
+                                rows="4">
+              </textarea>
+                        </mat-form-field>
+                    </div>
+                </div>
+            </div>
+        </mat-dialog-content>
+
+        <!-- Footer -->
+        <mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust d-flex justify-content-end gap-2">
+            <button mat-flat-button color="primary" (click)="statusApporevedRejected()"
+                [disabled]="!approveRejectRemark">
+                Save
+            </button>
+
+            <button mat-stroked-button color="primary" (click)="closeStatusApporevedRejected()" mat-dialog-close>
+                Close
+            </button>
+        </mat-dialog-actions>
+
+    </div>
+</ng-template>
+
+<ng-template #workFlowDialogTemplate let-dialogRef="dialogRef">
+    @if (ifModelIsShow) {
+    <app-workflow-audit-details-modal [auditcustid]="auditcustid" dialogId="custauditWorkflowModal"
+        (closeParentCustt)="closeParentCustt()"></app-workflow-audit-details-modal>
+    }
+</ng-template>
+
+
+
+
+
+<!-- <div class="childComponent">
+  <div class="row">
+    <div class="col-md-12">
+      <!- User Data ->
+      <div class="panel top">
+        <div class="panel-heading">
+          <h3 class="panel-title">Customer Document Management</h3>
+          <div class="right">
+            <button type="button" class="btn-toggle-collapse">
+              <i class="fa fa-minus-circle"></i>
+            </button>
+          </div>
+        </div>
+        <div class="panel-body no-padding panel-udata">
+          @if (createAccess || (editMode && editAccess)) {
+            <div class="col-md-6 pcol">
+              <div class="dbox">
+                <a class="curson_pointer" (click)="openCustmerDocCreateMenu()">
+                  <img src="../../../assets/img/i01.png" style="width: 32px" />
+                  <h5>Create Customer Document</h5>
+                  <!- <p>Create Staff</p> ->
+                </a>
+              </div>
+            </div>
+          }
+          <div class="col-md-6 pcol">
+            <div class="dbox">
+              <a class="curson_pointer" (click)="openCustmerDocListMenu()">
+                <img src="../../../assets/img/i01.png" style="width: 32px" />
+                <h5>Customer Document List</h5>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-END User Data ->
+    </div>
+  </div>
+
+
+
+  @if (isCustmerDocList) {
+    <div class="row">
+      <div class="col-md-12">
+        <!- Data Table ->
+        <div class="panel">
+          <div class="panel-heading">
+            <div class="displayflex">
+              <button
+                type="button"
+                class="btn btn-secondary backbtn"
+                data-toggle="tooltip"
+                data-placement="bottom"
+                title="Go to Customer List"
+                (click)="listCustomer()"
+                >
+                <i
+                  class="fa fa-arrow-circle-left"
+                  style="color: #f7941e !important; font-size: 28px"
+                ></i>
+              </button>
+              <h3 class="panel-title">Customer Documents</h3>
+              <a
+                class="detailOnAnchorClick"
+                style="margin-left: 10px"
+                title="Download All Documents"
+                (click)="downloadAll()"
+                >
+                <img class="icon" src="assets/img/E_Status_Y.png" />
+              </a>
+            </div>
+            <div class="right">
+              <button type="button" class="btn-toggle-collapse">
+                <i class="fa fa-minus-circle"></i>
+              </button>
+            </div>
+          </div>
+          <div class="panel-body table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Documents Type</th>
+                  <th>Documents Sub Type</th>
+                  <th>Document Number</th>
+                  <th>Documents Status</th>
+                  <th>File Name</th>
+                  <th>Remark</th>
+                  <th>Document Mode</th>
+                  <th style="width: 15%">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (
+                  custDocObj of custmerDocList
+                  | paginate
+                  : {
+                  id: 'listing_docListdata',
+                  itemsPerPage: itemsPerPage,
+                  currentPage: currentPage,
+                  totalItems: totalRecords
+                  }; track
+                  custDocObj; let i = $index) {
+                  <tr
+                    >
+                    <td>{{ custDocObj.docType | titlecase }}</td>
+                    <td>{{ custDocObj.docSubType }}</td>
+                    <td>
+                      @if (custDocObj.documentNumber) {
+                        <span>
+                          {{ custDocObj.documentNumber }}
+                        </span>
+                      }
+                      @if (!custDocObj.documentNumber) {
+                        <span>-</span>
+                      }
+                    </td>
+                    <td>{{ custDocObj.docStatus }}</td>
+                    @if (custDocObj.filename) {
+                      <td>
+                        <a
+                          href="javascript:void(0)"
+                          style="color: blue"
+                          (click)="downloadDoc(custDocObj.filename, custDocObj.docId, custDocObj.custId)"
+                          >
+                          {{ custDocObj.filename }}
+                        </a>
+                      </td>
+                    }
+                    @if (!custDocObj.filename) {
+                      <td>-</td>
+                    }
+                    <td>
+                      @if (custDocObj.remark) {
+                        <span>{{ custDocObj.remark }}</span>
+                      }
+                      @if (!custDocObj.remark) {
+                        <span>-</span>
+                      }
+                    </td>
+                    <td>{{ custDocObj.mode }}</td>
+                    <td class="btnAction" style="width: 15%">
+                      @if (editAccess) {
+                        <button
+                          class="approve-btn"
+                          type="button"
+                          [disabled]="custDocObj.docStatus == 'Rejected'"
+                          (click)="editCustDocById(custDocObj.docId, i)"
+                          >
+                        <img src="assets/img/DashboardIcons/Edit.svg" >
+                        </button>
+                      }
+                      @if (deleteAccess) {
+                        <button
+                          class="approve-btn"
+                          (click)="deleteConfirm(custDocObj)"
+                          >
+                           <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                        </button>
+                      }
+                      @if (custDocObj.mode === 'Online') {
+                        <button
+                          class="approve-btn"
+                          title="Verify Document"
+                          (click)="verifyDocument(custDocObj)"
+                          [disabled]="true"
+                          >
+                    <!-  [disabled]="
+                      (custDocObj.docStatus == 'Verified' && custDocObj.mode === 'Online') ||
+                      custDocObj.docStatus == 'verified'
+                    " ->
+                          <img class="IconVerifyBtn" src="assets/img/verifyicon.svg" />
+                        </button>
+                      }
+                      @if (custDocObj.docStatus == 'pending') {
+                        <button
+                          class="approve-btn"
+                          style="border: none; background: transparent; padding: 0; margin-right: 3px"
+                          type="button"
+                          title="Pick"
+                          [disabled]="custDocObj.nextStaff != null"
+                          (click)="pickModalOpen(custDocObj)"
+                          >
+                         <img src="assets/img/DashboardIcons/Pick-ticket-to-resolve.svg" />
+                        </button>
+                      }
+                      @if (custDocObj.docStatus == 'verified') {
+                        <button
+                          class="approve-btn"
+                          style="border: none; background: transparent; padding: 0; margin-right: 3px"
+                          type="button"
+                          title="Pick"
+                          [disabled]="custDocObj.nextStaff != staffID"
+                          (click)="pickModalOpen(custDocObj)"
+                          >
+                         <img src="assets/img/DashboardIcons/Pick-ticket-to-resolve.svg" />
+                        </button>
+                      }
+                      <button
+                        (click)="approvestatusModalOpen(custDocObj)"
+                        [disabled]="custDocObj.nextStaff != this.staffID"
+                        class="btn btn-success gridbtn"
+                        style="padding: 5px 1px"
+                        title="Approve"
+                        type="button"
+                        >
+                       <img src="assets/img/DashboardIcons/Assign.svg">
+                      </button>
+                      <button
+                        (click)="rejectstatusModalOpen(custDocObj)"
+                        [disabled]="custDocObj.nextStaff != this.staffID"
+                        class="btn btn-danger gridbtn"
+                        style="padding: 5px 3px"
+                        title="Reject"
+                        type="button"
+                        >
+                         <img src="assets/img/DashboardIcons/Reject.svg">
+                      </button>
+                      <button
+                        (click)="openWorkFlowAudit('customerDocumentWorkflowAuidt', custDocObj.docId)"
+                        class="approve-btn"
+                        style="border: none; background: transparent; padding: 0; margin-right: 3px"
+                        title="Audit & Documents Details"
+                        type="button"
+                        >
+                               <img width="32" height="32" src="assets/img/DashboardIcons/WorkFlow status Details.svg" />
+                      </button>
+                      <button
+                        (click)="StaffReasignList(custDocObj)"
+                        class="approve-btn"
+                        id="assign-button"
+                        style="border: none; background: transparent; padding: 0; margin-right: 3px"
+                        title="Reassign docId"
+                        type="button"
+                        [disabled]="custDocObj.nextStaff != staffID"
+                        >
+                        <img width="32" height="32" alt="Assign docId" src="assets/img/DashboardIcons/send-svgrepo-com 1.svg" />
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+            <br />
+            <div class="row">
+              <div class="col-md-12">
+                <pagination-controls
+                  id="listing_docListdata"
+                  maxSize="10"
+                  directionLinks="true"
+                  previousLabel
+                  nextLabel
+                  (pageChange)="pageChanged($event)"
+                ></pagination-controls>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!- END Data Table ->
+      </div>
+    </div>
+  }
+  @if (isCustmerDocCreateOrEdit) {
+    <div class="row">
+      <div class="col-md-12">
+        <!- Form Design ->
+        <div class="panel">
+          <form class="form-auth-small" [formGroup]="insertCustomerDocumentForm">
+            @if (isCustmerDocCreateOrEdit) {
+              <div class="row">
+                <div class="col-md-12">
+                  <!- Form Design ->
+                  <div class="panel">
+                    <div class="panel-heading">
+                      <h3 class="panel-title">
+                        {{ editMode ? "Update" : "Create" }} Customer Document
+                      </h3>
+                      <div class="right">
+                        <button type="button" class="btn-toggle-collapse">
+                          <i class="fa fa-minus-circle"></i>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="panel-body">
+                      <div class="form-group row">
+                        <div class="col-md-4 ml-15">
+                          <label for="mode">Verification Mode *</label>
+                          <p-dropdown
+                            [options]="VerificationModeValue"
+                            optionValue="text"
+                            optionLabel="text"
+                            filter="true"
+                            filterBy="text"
+                            placeholder="Select a Verification Mode"
+                            formControlName="mode"
+                            [disabled]="editMode"
+                            (onChange)="documentType($event.value)"
+                        [ngClass]="{
+                          'is-invalid': submitted && insertCustomerDocumentForm.controls.mode.errors
+                        }"
+                          ></p-dropdown>
+                          <!- (onChange)="OnVerificationMode($event)" ->
+                          @if (submitted && insertCustomerDocumentForm.controls.mode.errors) {
+                            <div
+                              class="errorWrap text-danger"
+                              >
+                              <div class="error text-danger">Verification Mode is required.</div>
+                            </div>
+                          }
+                        </div>
+                        <div class="col-md-4 ml-15">
+                          <label for="docType">Document Type *</label>
+                          <p-dropdown
+                            [options]="docTypeList"
+                            optionValue="value"
+                            optionLabel="text"
+                            filter="true"
+                            filterBy="text"
+                            placeholder="Select a Document Type"
+                            formControlName="docType"
+                            [disabled]="editMode"
+                            (onChange)="documentSubType($event.value)"
+                        [ngClass]="{
+                          'is-invalid':
+                            submitted && insertCustomerDocumentForm.controls.docType.errors
+                        }"
+                          ></p-dropdown>
+                          @if (submitted && insertCustomerDocumentForm.controls.docType.errors) {
+                            <div
+                              class="errorWrap text-danger"
+                              >
+                              <div class="error text-danger">Document Type is required.</div>
+                            </div>
+                          }
+                        </div>
+                        <div class="col-md-4 ml-15">
+                          <label for="docSubType">Document Sub Type *</label>
+                          <p-dropdown
+                            [options]="docSubTypeList"
+                            optionValue="text"
+                            optionLabel="text"
+                            filter="true"
+                            filterBy="text"
+                            placeholder="Select a Document SubType"
+                            formControlName="docSubType"
+                        [ngClass]="{
+                          'is-invalid':
+                            submitted && insertCustomerDocumentForm.controls.docSubType.errors
+                        }"
+                          ></p-dropdown>
+                          <!- (onChange)="OnDocumentType($event)" ->
+                          @if (submitted && insertCustomerDocumentForm.controls.docSubType.errors) {
+                            <div
+                              class="errorWrap text-danger"
+                              >
+                              <div class="error text-danger">Document Sub Type is required.</div>
+                            </div>
+                          }
+                        </div>
+                      </div>
+                      <div class="row">
+                        @if (ifModeInput) {
+                          <div class="col-md-4 ml-15">
+                            <label for="docStatus">Document Number *</label>
+                            <input
+                              id="documentNumber"
+                              type="text"
+                              class="form-control"
+                              placeholder="Enter Document No. "
+                              formControlName="documentNumber"
+                              [readonly]="editMode"
+                        [ngClass]="{
+                          'is-invalid':
+                            submitted && insertCustomerDocumentForm.controls.documentNumber.errors
+                        }"
+                              />
+                              @if (
+                                submitted && insertCustomerDocumentForm.controls.documentNumber.errors
+                                ) {
+                                <div
+                                  class="errorWrap text-danger"
+                                  >
+                                  Please Document number required.
+                                </div>
+                              }
+                            </div>
+                          }
+                          @if (!ifModeInput) {
+                            <div class="col-md-4 ml-15">
+                              <label>Select Document *</label>
+                              <input
+                                type="file"
+                                id="txtSelectDocument"
+                                class="form-control"
+                                formControlName="file"
+                                placeholder="Select Document"
+                                style="padding: 2px; width: 100%"
+                                (change)="onFileChange($event)"
+                                />
+                                @if (this.custmerDoc.file) {
+                                  <span>
+                                    {{ this.custmerDoc.file }}
+                                  </span>
+                                }
+                                @if (submitted && insertCustomerDocumentForm.controls.file.errors) {
+                                  <div
+                                    class="errorWrap text-danger"
+                                    >
+                                    <div class="error text-danger">Document is required.</div>
+                                  </div>
+                                }
+                              </div>
+                            }
+                            @if (ifModeInput) {
+                              <div class="col-md-4 ml-15">
+                                <label>Select Document</label>
+                                <input
+                                  type="file"
+                                  id="txtSelectDocument"
+                                  class="form-control"
+                                  formControlName="file"
+                                  placeholder="Select Document"
+                                  style="padding: 2px; width: 100%"
+                                  (change)="onFileChange($event)"
+                                  />
+                                  @if (this.custmerDoc.file) {
+                                    <span>
+                                      {{ this.custmerDoc.file }}
+                                    </span>
+                                  }
+                                </div>
+                              }
+                              <div class="col-md-4 ml-15">
+                                <label for="docStatus">Document Status *</label>
+                                @if (!isEnableStatus) {
+                                  <div>
+                                    <p-dropdown
+                                      [options]="documentStatusList"
+                                      optionLabel="value"
+                                      optionValue="value"
+                                      formControlName="docStatus"
+                                      [readonly]="isstatus"
+                                      filter="true"
+                                      filterBy="value"
+                                    ></p-dropdown>
+                                  </div>
+                                }
+                                @if (isEnableStatus) {
+                                  <div>
+                                    <p-dropdown
+                                      [options]="documentStatusList"
+                                      optionLabel="value"
+                                      optionValue="value"
+                                      [readonly]="editMode"
+                                      formControlName="docStatus"
+                                      filter="true"
+                                      filterBy="value"
+                                    ></p-dropdown>
+                                  </div>
+                                }
+                                @if (submitted && insertCustomerDocumentForm.controls.docStatus.errors) {
+                                  <div
+                                    class="errorWrap text-danger"
+                                    >
+                                    <div class="error text-danger">Document Status is required.</div>
+                                  </div>
+                                }
+                              </div>
+                              @if (!ifModeInput) {
+                                <div class="col-md-4 ml-15">
+                                  <label>Start Date</label>
+                                  <input
+                                    type="date"
+                                    class="form-control"
+                                    placeholder="Enter Start Date"
+                                    formControlName="startDate"
+                                    [max]="maxDate | date: 'dd-MM-yyyy'"
+                                    />
+                                  </div>
+                                }
+                              </div>
+                              <div class="row">
+                                @if (ifModeInput) {
+                                  <div class="col-md-4 ml-15">
+                                    <label>Start Date</label>
+                                    <input
+                                      type="date"
+                                      class="form-control"
+                                      placeholder="Enter Start Date"
+                                      formControlName="startDate"
+                                      [max]="maxDate | date: 'dd-MM-yyyy'"
+                                      />
+                                    </div>
+                                  }
+                                  <div class="col-md-4 ml-15">
+                                    <label>End Date</label>
+                                    <input
+                                      type="date"
+                                      class="form-control"
+                                      placeholder="Enter End Date"
+                                      formControlName="endDate"
+                                      />
+                                      @if (submitted && insertCustomerDocumentForm.controls.endDate.errors) {
+                                        <div
+                                          class="errorWrap text-danger"
+                                          >
+                                          <div class="error text-danger">End Date is required.</div>
+                                        </div>
+                                      }
+                                    </div>
+                                    <div class="col-md-4 ml-15">
+                                      <label>Remarks</label>
+                                      <textarea
+                                        class="form-control"
+                                        id="textarea"
+                                        rows="3"
+                                        placeholder="Enter Remarks"
+                                        formControlName="remark"
+                                        maxlength="100"
+                                      ></textarea>
+                                    </div>
+                                  </div>
+                                  <div class="addUpdateBtn" style="margin-top: 1rem">
+                                    <button type="submit" class="btn btn-primary" (click)="addDocument()">
+                                      <i class="fa fa-check-circle"></i>
+                                      {{ editMode ? "Update Document" : "Add Document" }}
+                                    </button>
+                                    <br />
+                                  </div>
+                                </div>
+                              </div>
+                              <!- END Form Design ->
+                            </div>
+                          </div>
+                        }
+                      </form>
+                      <div
+                        class="modal fade"
+                        id="remarkModal"
+                        tabindex="-1"
+                        role="dialog"
+                        aria-labelledby="myModalLabel"
+                        >
+                        <div class="modal-dialog" role="document">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                              </button>
+                              <h4>Add Remark</h4>
+                            </div>
+                            <div class="modal-body">
+                              <div class="row">
+                                <div class="col-md-12">
+                                  <div class="form-group row">
+                                    <div class="col-md-2">
+                                      <label for="normal-field">Remarks *</label>
+                                    </div>
+                                    <div class="col-md-10">
+                                      <textarea
+                                        class="form-control"
+                                        rows="4"
+                                        cols="60"
+                                        placeholder="Enter Remarks"
+                          [ngClass]="{
+                            'border-danger': !remark && remarksubmit
+                          }"
+                                      ></textarea>
+                                      @if (!remark && remarksubmit) {
+                                        <div class="text-danger">
+                                          This field is required
+                                        </div>
+                                      }
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="col-md-10"></div>
+                              </div>
+                            </div>
+                            <div class="modal-footer">
+                              <button
+                                type="submit"
+                                class="btn btn-primary"
+                                (click)="approvedCustDoc(approveDataobj)"
+                                >
+                                Approve
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+            <p-dialog
+              header="Approve Document "
+              [(visible)]="assignCustomerDocumentForApproval"
+              [style]="{ width: '40%' }"
+              [modal]="true"
+              [responsive]="true"
+              [draggable]="false"
+              [closable]="false"
+              >
+              <div class="modal-body" style="margin: 10px">
+                <form [formGroup]="this.assignDocForm">
+                  <div class="row">
+                    <div class="row">
+                      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                        <div class="row">
+                          <div class="col-md-6">
+                            <input
+                              id="searchStaffName"
+                              type="text"
+                              name="username"
+                              class="form-control"
+                              placeholder="Global Search Filter"
+                              [(ngModel)]="searchStaffDeatil"
+                              (keydown.enter)="searchStaffByName()"
+                              [ngModelOptions]="{ standalone: true }"
+                              />
+                            </div>
+                            <div class="col-lg-6 col-md-6 col-sm-12">
+                              <button
+                                (click)="searchStaffByName()"
+                                class="btn btn-primary"
+                                id="searchbtn"
+                                type="submit"
+                                [disabled]="!searchStaffDeatil"
+                                >
+                                <i class="fa fa-search"></i>
+                                Search
+                              </button>
+                              <button
+                                (click)="clearSearchForm()"
+                                class="btn btn-default"
+                                id="searchbtn"
+                                type="reset"
+                                >
+                                 <img src="assets/img/DashboardIcons/Refresh.svg" />
+                                Clear
+                              </button>
+                            </div>
+                          </div>
+                          <div class="card">
+                            <h5>Select Staff</h5>
+                            <p-table
+                              [(selection)]="this.assignedStaff"
+                              [value]="assignStaffListData"
+                              responsiveLayout="scroll"
+                              [paginator]="true"
+                              [rows]="5"
+                              [rowsPerPageOptions]="[5,10,20,50,100]"
+                              >
+                              <ng-template pTemplate="header">
+                                <tr>
+                                  <th style="width: 3rem"></th>
+                                  <th>Name</th>
+                                  <th>Username</th>
+                                </tr>
+                              </ng-template>
+                              <ng-template let-product pTemplate="body">
+                                <tr>
+                                  <td>
+                                    <p-tableRadioButton [value]="product.id"></p-tableRadioButton>
+                                  </td>
+                                  <td>{{ product.fullName }}</td>
+                                  <td>
+                                    {{ product.username }}
+                                  </td>
+                                </tr>
+                              </ng-template>
+                            </p-table>
+                          </div>
+                        </div>
+                        <br />
+                      </div>
+                    </div>
+                  </form>
+                </div>
+                <div class="modal-footer">
+                  <button
+                    class="btn btn-primary"
+                    id="submitButtonForApprove"
+                    type="submit"
+                    (click)="assignToStaff()"
+                    >
+                    <i class="fa fa-check-circle"></i>
+                    Assign
+                  </button>
+                  <button
+                    class="btn btn-default"
+                    (click)="closeAssignCustomerDocumentForApproval()"
+                    data-dismiss="modal"
+                    type="button"
+                    >
+                    Close
+                  </button>
+                </div>
+              </p-dialog>
+              <p-dialog
+                header="{{ ifApproveStatus ? 'Approve Status' : 'Reject Status' }}"
+                [(visible)]="ApproveRejectModal"
+                [style]="{ width: '40%' }"
+                [modal]="true"
+                [responsive]="true"
+                [draggable]="false"
+                [closable]="false"
+                >
+                <div class="modal-body">
+                  <div class="row">
+                    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                      <label>Remark</label>
+                      <textarea
+                        placeholder="Remarks"
+                        [(ngModel)]="approveRejectRemark"
+                        class="form-control"
+                        name="remark"
+                      ></textarea>
+                    </div>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button
+                    (click)="statusApporevedRejected()"
+                    [disabled]="!approveRejectRemark"
+                    class="btn btn-primary"
+                    id="submit"
+                    type="submit"
+                    >
+                    <i class="fa fa-check-circle"></i>
+                    Save
+                  </button>
+
+                  <button
+                    class="btn btn-default"
+                    (click)="closeStatusApporevedRejected()"
+                    data-dismiss="modal"
+                    type="button"
+                    >
+                    Close
+                  </button>
+                </div>
+              </p-dialog>
+
+
+              
+              @if (ifModelIsShow) {
+                <app-workflow-audit-details-modal
+                  [auditcustid]="auditcustid"
+                  dialogId="custauditWorkflowModal"
+                  (closeParentCustt)="closeParentCustt()"
+                ></app-workflow-audit-details-modal>
+              }
+              <div
+                class="modal fade"
+                id="reAssignPLANModal"
+                tabindex="-1"
+                role="dialog"
+                aria-labelledby="myModalLabel"
+                >
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                      <h4 class="modal-title" id="myModalLabel" style="color: #fff !important">
+                        Approve Document
+                      </h4>
+                    </div>
+                    <div class="modal-body">
+                      <form [formGroup]="assignDocForm">
+                        <div class="row">
+                          <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                            <div class="card">
+                              <h5>Select Staff</h5>
+                              <p-table
+                                [value]="approvableStaff"
+                                [(selection)]="selectStaff"
+                                responsiveLayout="scroll"
+                                >
+                                <ng-template pTemplate="header">
+                                  <tr>
+                                    <th style="width: 3rem"></th>
+                                    <th>Name</th>
+                                    <th>Username</th>
+                                  </tr>
+                                </ng-template>
+                                <ng-template pTemplate="body" let-product>
+                                  <tr>
+                                    <td>
+                                      <p-tableRadioButton [value]="product.id"></p-tableRadioButton>
+                                    </td>
+                                    <td>{{ product.fullName }}</td>
+                                    <td>
+                                      {{ product.username }}
+                                    </td>
+                                  </tr>
+                                </ng-template>
+                              </p-table>
+                            </div>
+                          </div>
+                          <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                            <label>Remark*</label>
+                            <textarea
+                              class="form-control"
+                              name="remark"
+                              formControlName="remark"
+                [ngClass]="{
+                  'is-invalid': assignPlansubmitted && assignPlanForm.controls.remark.errors
+                }"
+                            ></textarea>
+                            @if (assignPlansubmitted && assignPlanForm.controls.remark.errors) {
+                              <div
+                                class="errorWrap text-danger"
+                                >
+                                @if (assignPlansubmitted && assignPlanForm.controls.remark.errors.required) {
+                                  <div
+                                    class="error text-danger"
+                                    >
+                                    Remark is required.
+                                  </div>
+                                }
+                              </div>
+                            }
+                            <br />
+                          </div>
+                        </div>
+                      </form>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="submit" class="btn btn-primary" id="submit" (click)="reassignWorkflow()">
+                        <i class="fa fa-check-circle"></i>
+                        Assign
+                      </button>
+
+                      <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                  </div>
+                </div>
+              </div> -->

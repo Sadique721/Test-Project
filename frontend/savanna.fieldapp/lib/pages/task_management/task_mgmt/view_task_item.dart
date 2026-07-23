@@ -1,0 +1,782 @@
+import 'package:savbill/pages/task_management/model/response/view_task_response.dart';
+import 'package:savbill/pages/task_management/task_mgmt/view_task_mgmt_controller.dart';
+import 'package:savbill/theme/app_theme.dart';
+import 'package:savbill/util/Extensions.dart';
+import 'package:savbill/util/constant.dart';
+import 'package:savbill/util/resources.dart';
+import 'package:savbill/util/strings.dart';
+import 'package:savbill/widgets/coustom_text.dart';
+import 'package:savbill/widgets/status_bg_view.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_countdown_timer/countdown_timer_controller.dart';
+import 'package:flutter_countdown_timer/current_remaining_time.dart';
+import 'package:flutter_countdown_timer/flutter_countdown_timer.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:intl/intl.dart';
+
+class ViewTaskItem extends StatefulWidget {
+  ViewTaskDataList item;
+  int userid;
+  ViewTaskMgmtController? controller;
+  final Function()? onTapStaffDetail;
+  final Function()? onTapCustomerDetail;
+  final Function()? onTapTicketDetail;
+  final Function()? onTapEdit;
+  final Function()? onTapPick;
+
+  bool? showActionBtn = false, forSelection = false;
+
+  ViewTaskItem({
+    Key? key,
+    required this.item,
+    required this.userid,
+    this.controller,
+    this.onTapTicketDetail,
+    this.onTapStaffDetail,
+    this.onTapCustomerDetail,
+    this.onTapEdit,
+    this.onTapPick,
+    this.showActionBtn,
+    this.forSelection,
+  }) : super(key: key);
+
+  @override
+  State<ViewTaskItem> createState() => _ViewTaskItemState();
+}
+
+class _ViewTaskItemState extends State<ViewTaskItem> {
+  bool showEdit = false,
+      showApprove = false,
+      showReject = false,
+      showChangePriority = false,
+      showPick = false,
+      showFollowup = false,
+      showLink = true,
+      showUploadDoc = true,
+      showChangeProblemDomain = true,
+      showETRTicket = true,
+      showTicketRemark = true;
+
+  bool? showAssignTicket, showSLACounter = false;
+
+  CountdownTimerController? timeController;
+  int? endTime;
+
+  @override
+  void initState() {
+    super.initState();
+    endTime = DateTime.now().millisecondsSinceEpoch + 1000 * 30; // 30 seconds
+    initTimer();
+  }
+
+  void initTimer() {
+    timeController?.dispose();
+    timeController = CountdownTimerController(
+      endTime: endTime ?? 0,
+      onEnd: onEnd,
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant ViewTaskItem oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    initTimer();
+  }
+
+  @override
+  void dispose() {
+    timeController?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    var followFormatDate;
+    int? endTime = 0;
+    Color? statusTxtColor, typeBgColor = AppTheme.colorGreen;
+    String? followUpTimeFormated = "";
+    if (widget.item.nextFollowupDate != null &&
+        widget.item.nextFollowupDate!.isNotEmpty) {
+      followUpTimeFormated =
+          "${widget.item.nextFollowupDate} ${widget.item.nextFollowupTime}";
+      DateTime followTime = DateTime.parse(followUpTimeFormated);
+      followFormatDate =
+          DateFormat(Constant.API_DATE_TIME_FORMAT_AM_PM).format(followTime);
+      endTime = followTime.toLocal().millisecondsSinceEpoch;
+      timeController = CountdownTimerController(endTime: endTime, onEnd: onEnd);
+    } else {
+      followFormatDate = null;
+    }
+
+    if (widget.item.caseStatus != null && widget.item.caseStatus!.isNotEmpty) {
+      if (widget.item.caseStatus!.equalsIgnoreCase("Resolved")) {
+        statusTxtColor = AppTheme.statusClosedGreen;
+      } else if (widget.item.caseStatus!.equalsIgnoreCase("In Progress") ||
+          widget.item.caseStatus!.equalsIgnoreCase("open")) {
+        statusTxtColor = AppTheme.statusAssignOrange;
+      } else if (widget.item.caseStatus!.equalsIgnoreCase("On Hold")) {
+        statusTxtColor = AppTheme.statusOnHold;
+      } else if (widget.item.caseStatus!.equalsIgnoreCase("Completed")) {
+        statusTxtColor = AppTheme.statusClosedGreen;
+      } else if (widget.item.caseStatus!.equalsIgnoreCase("Closed") ||
+          widget.item.caseStatus!.equalsIgnoreCase("Raise and Close")) {
+        statusTxtColor = AppTheme.statusClosedGreen;
+      } else if (widget.item.caseStatus!.equalsIgnoreCase("Assigned")) {
+        statusTxtColor = AppTheme.statusAssignOrange;
+      } else {
+        statusTxtColor = AppTheme.statusUnAssignGray;
+      }
+    } else {
+      statusTxtColor = AppTheme.statusUnAssignGray;
+    }
+
+    if (widget.item.caseStatus != null && widget.item.caseStatus!.isNotEmpty) {
+      if (widget.item.caseStatus!.equalsIgnoreCase("In Progress")) {
+        typeBgColor = AppTheme.colorGreen;
+      } else if (widget.item.caseStatus!.equalsIgnoreCase("Resolved")) {
+        typeBgColor = AppTheme.colorGreen;
+      } else if (widget.item.caseStatus!.equalsIgnoreCase("Completed")) {
+        typeBgColor = AppTheme.colorGreen;
+      } else if (widget.item.caseStatus!.equalsIgnoreCase("Open")) {
+        typeBgColor = AppTheme.colorGreen;
+      } else if (widget.item.caseStatus!.equalsIgnoreCase("Raise and Close") ||
+          widget.item.caseStatus!.equalsIgnoreCase("Follow Up")) {
+        typeBgColor = AppTheme.colorBlueRView;
+      } else if (widget.item.caseStatus!.equalsIgnoreCase("Closed")) {
+        typeBgColor = AppTheme.colorError;
+      } else if (widget.item.caseStatus!.equalsIgnoreCase("rejected")) {
+        typeBgColor = AppTheme.colorError;
+      } else if (widget.item.caseStatus!.equalsIgnoreCase("Pending") ||
+          widget.item.caseStatus!.equalsIgnoreCase("Re-open") ||
+          widget.item.caseStatus!.equalsIgnoreCase("On Hold") ||
+          widget.item.caseStatus!.equalsIgnoreCase("Out of domain")) {
+        typeBgColor = AppTheme.colorBlueRView;
+      }
+    }
+
+    if (widget.item.caseStatus != null && widget.item.caseStatus!.isNotEmpty) {
+      if (widget.item.caseStatus!.equalsIgnoreCase("approved") ||
+          widget.item.caseStatus!.equalsIgnoreCase("rejected") ||
+          widget.item.caseStatus!.equalsIgnoreCase("closed") ||
+          widget.item.caseStatus!.equalsIgnoreCase("Raise and Close") ||
+          (widget.item.currentAssigneeId != null &&
+              widget.item.currentAssigneeId != widget.userid)) {
+        showApprove = false;
+        showReject = false;
+      } else {
+        if ((widget.item.currentAssigneeId != null &&
+            widget.item.currentAssigneeId == widget.userid)) {
+          showApprove = true;
+          showReject = true;
+        } else {
+          showApprove = false;
+          showReject = false;
+        }
+      }
+      if (widget.item.caseStatus!.equalsIgnoreCase("Raise and Close") ||
+          widget.item.caseStatus!.equalsIgnoreCase("closed")) {
+        showEdit = false;
+        showPick = false;
+        if (widget.item.currentAssigneeId != null) {
+          showFollowup = true;
+        } else {
+          showFollowup = false;
+        }
+      } else {
+        showEdit = true;
+        showPick = true;
+        showFollowup = false;
+      }
+
+      if (widget.item.caseStatus!.equalsIgnoreCase("closed")) {
+        showAssignTicket = false;
+      } else {
+        showAssignTicket = true;
+      }
+      if ((widget.item.currentAssigneeId != null &&
+          widget.item.currentAssigneeId == widget.userid)) {
+        showChangePriority = true;
+      } else {
+        showChangePriority = false;
+      }
+    }
+
+    if (widget.item.caseStatus != null &&
+            widget.item.caseStatus!.equalsIgnoreCase("Open") ||
+        widget.item.caseStatus!.equalsIgnoreCase("Closed") ||
+        widget.item.caseStatus!.equalsIgnoreCase("Raise and Close") ||
+        widget.item.currentAssigneeId != widget.userid) {
+      showEdit = true;
+    } else {
+      showEdit = false;
+    }
+
+    if (widget.item.caseStatus != null &&
+            widget.item.caseStatus!.equalsIgnoreCase("Closed") ||
+        widget.item.caseStatus!.equalsIgnoreCase("Done") ||
+        widget.item.caseStatus!.equalsIgnoreCase("Raise and Close") ||
+        widget.item.caseStatus!.equalsIgnoreCase("rejected") ||
+        widget.item.caseStatus!.equalsIgnoreCase("Resolved") ||
+        widget.item.currentAssigneeId != null) {
+      showPick = true;
+    } else {
+      showPick = false;
+    }
+
+    if (widget.item.caseStatus != null &&
+            widget.item.caseStatus!.equalsIgnoreCase("Open") ||
+        widget.item.caseStatus!.equalsIgnoreCase("approved") ||
+        widget.item.caseStatus!.equalsIgnoreCase("rejected") ||
+        widget.item.caseStatus!.equalsIgnoreCase("Closed") ||
+        widget.item.caseStatus!.equalsIgnoreCase("Raise and Close") ||
+        widget.item.currentAssigneeId == null) {
+      showTicketRemark = true;
+    } else {
+      showTicketRemark = false;
+    }
+
+    if (widget.item.currentAssigneeId != null ||
+        widget.item.currentAssigneeId == widget.userid) {
+      showAssignTicket = true;
+    } else {
+      showAssignTicket = false;
+    }
+
+    if (widget.item.caseStatus!.equalsIgnoreCase("Closed") ||
+        widget.item.caseStatus!.equalsIgnoreCase("Raise and Close") ||
+        widget.item.caseStatus!.equalsIgnoreCase("rejected") ||
+        widget.item.caseStatus!.equalsIgnoreCase("Follow Up") ||
+        widget.item.caseStatus!.equalsIgnoreCase("On Hold") ||
+        widget.item.caseStatus!.equalsIgnoreCase("Pending") ||
+        widget.item.caseStatus!.equalsIgnoreCase("Out of domain")) {
+      showSLACounter = true;
+    } else {
+      showSLACounter = false;
+    }
+    if (widget.item.currentAssigneeId != null && widget.controller != null) {
+      if (widget.item.caseStatus!.equalsIgnoreCase("Follow Up") ||
+          widget.item.caseStatus!.equalsIgnoreCase("rejected") ||
+          widget.item.caseStatus!.equalsIgnoreCase("Raise and Close") ||
+          // widget.item.caseStatus!.equalsIgnoreCase("In Progress") ||
+          (widget.item.currentAssigneeId !=
+              widget.controller!.assignStaffParentId)) {
+        showAssignTicket = true;
+      } else {
+        if (widget.item.caseStatus != "Closed" &&
+            widget.item.caseStatus != "Raise and Close") {
+          showAssignTicket = false;
+        }
+      }
+    }
+
+    if (widget.item.caseStatus!.equalsIgnoreCase("approved") ||
+            widget.item.caseStatus!.equalsIgnoreCase("rejected") ||
+            widget.item.caseStatus!.equalsIgnoreCase("Closed") ||
+            widget.item.caseStatus!.equalsIgnoreCase("Raise and Close") ||
+            (widget.item.currentAssigneeId != widget.userid)
+        /*widget.item.currentAssigneeId !=
+            widget.controller!.userDetail!.userId*/
+        ) {
+      showETRTicket = true;
+      showApprove = true;
+    } else {
+      showETRTicket = false;
+      showApprove = false;
+    }
+
+    if (widget.controller != null) {
+      if (widget.item.caseStatus!.equalsIgnoreCase("Closed") ||
+          widget.item.teamHierarchyMappingId == null ||
+          widget.item.caseStatus!.equalsIgnoreCase("Raise and Close") ||
+          widget.item.caseStatus!.equalsIgnoreCase("rejected") ||
+          widget.item.caseStatus!.equalsIgnoreCase("Resolved") ||
+          (widget.item.caseStatus!.equalsIgnoreCase("In Progress") &&
+              widget.item.currentAssigneeId !=
+                  widget.controller!.assignStaffParentId)) {
+        showChangeProblemDomain = true;
+      } else {
+        showChangeProblemDomain = false;
+      }
+    }
+
+    if (widget.item.caseStatus!.equalsIgnoreCase("approved") ||
+        widget.item.caseStatus!.equalsIgnoreCase("rejected") ||
+        widget.item.caseStatus!.equalsIgnoreCase("Closed") ||
+        widget.item.caseStatus!.equalsIgnoreCase("Raise and Close") ||
+        widget.item.caseOrder == 1 ||
+        widget.item.currentAssigneeId != widget.userid) {
+      showReject = true;
+    } else {
+      showReject = false;
+    }
+
+    if (widget.item.currentAssigneeId == null ||
+        widget.item.caseStatus!.equalsIgnoreCase("Closed") ||
+        widget.item.caseStatus!.equalsIgnoreCase("Raise and Close") ||
+        widget.item.caseStatus!.equalsIgnoreCase("Resolved") ||
+        widget.item.caseStatus!.equalsIgnoreCase("rejected") ||
+        !(widget.item.caseStatus!.equalsIgnoreCase(
+            "In Progress") /*&&
+            widget.controller!.userDetail!.userId == widget.controller!.assignStaffParentId*/
+        )) {
+      showChangePriority = true;
+    } else {
+      showChangePriority = false;
+    }
+
+    if (widget.item.caseStatus!.equalsIgnoreCase("Closed") ||
+        widget.item.caseStatus!.equalsIgnoreCase("Raise and Close") ||
+        widget.item.caseStatus!.equalsIgnoreCase("rejected")) {
+      showLink = true;
+      showUploadDoc = true;
+    } else {
+      showLink = false;
+      showUploadDoc = false;
+    }
+
+    return Container(
+      margin: const EdgeInsets.only(
+        bottom: Constant.MEDIUM_PADDING,
+      ),
+      child: Material(
+        color: AppTheme.colorWhite,
+        elevation: 0.5,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(Constant.BTN_ROUNDED_CORNER)),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          const SizedBox(
+            height: Constant.SMALL_PADDING,
+          ),
+          InkWell(
+            onTap: (widget.forSelection != null && widget.forSelection == true)
+                ? null
+                : widget.onTapTicketDetail,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: Constant.SMALL_PADDING),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      (widget.forSelection != null &&
+                              widget.forSelection == true)
+                          ? widget.item.selected == true
+                              ? Icon(
+                                  Icons.check_circle,
+                                  color: AppTheme.statusClosedGreen,
+                                  size: Constant.ICON_SIZE,
+                                )
+                              : const Icon(
+                                  Icons.check_circle,
+                                  color: Colors.black38,
+                                  size: Constant.ICON_SIZE,
+                                )
+                          : Container(),
+                      (widget.forSelection != null &&
+                              widget.forSelection == true)
+                          ? const SizedBox(
+                              width: Constant.VERY_SMALL_PADDING,
+                            )
+                          : Container(),
+                      RichText(
+                        maxLines: 2,
+                        softWrap: false,
+                        text: TextSpan(
+                          text: "#${widget.item.caseNumber.toString()} ",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: AppTheme.small + 1,
+                            color: AppTheme.colorPrimary,
+                          ),
+                          children: [
+                            // TextSpan(
+                            //   text: widget.item.caseTitle,
+                            //   style: TextStyle(
+                            //     fontSize: AppTheme.small + 1,
+                            //     fontWeight: FontWeight.normal,
+                            //     color: AppTheme.title_dark,
+                            //   ),
+                            // ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      /*statusBgView(
+                        status: item.caseType!,
+                        bgColor: typeBgColor,
+                        textColor: AppTheme.colorWhite,
+                        fontSize: AppTheme.verySmall,
+                        fontWeight: FontWeight.normal,
+                      ),
+                      const SizedBox(
+                        height: 5,
+                      ),*/
+                      /*  CustomText(
+                          title: item.caseStatus,
+                          colors: statusTxtColor,
+                          textAlign: TextAlign.start,
+                          fontSize: AppTheme.verySmall,
+                          fontWeight: FontWeight.w600),*/
+                      statusBgView(
+                        status: widget.item.caseStatus!,
+                        bgColor: typeBgColor,
+                        textColor: AppTheme.colorWhite,
+                        fontSize: AppTheme.verySmall,
+                        fontWeight: FontWeight.normal,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Divider(
+            color: AppTheme.title_dark,
+            thickness: 0.5,
+            height: Constant.MEDIUM_PADDING,
+          ),
+          const SizedBox(
+            height: Constant.VERY_SMALL_PADDING,
+          ),
+          const SizedBox(
+            height: Constant.SMALL_PADDING,
+          ),
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: Constant.SMALL_PADDING),
+            // child: basicDetailItem(
+            //     Strings.customer,
+            //     (widget.item.userName != null &&
+            //             widget.item.userName!.isNotEmpty)
+            //         ? "${widget.item.userName}"
+            //         : "-",
+            //     Strings.assignee,
+            //     (widget.item.currentAssigneeName != null &&
+            //             widget.item.currentAssigneeName!.isNotEmpty)
+            //         ? "${widget.item.currentAssigneeName}"
+            //         : "-"),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      titleWidget(Strings.issue),
+                      const SizedBox(height: Constant.VERY_SMALL_PADDING - 1),
+                      InkWell(
+                        onTap: widget.onTapCustomerDetail,
+                        child: CustomText(
+                          title: (widget.item.caseTitle != null &&
+                                  widget.item.caseTitle!.isNotEmpty)
+                              ? "${widget.item.caseTitle}"
+                              : "-",
+                          colors: AppTheme.colorPrimary,
+                          textAlign: TextAlign.start,
+                          decoration: TextDecoration.underline,
+                          fontSize: AppTheme.small + 1,
+                          fontWeight: FontWeight.normal,
+                          maxLines: 2,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      titleWidget(
+                        Strings.assignee,
+                      ),
+                      const SizedBox(height: Constant.VERY_SMALL_PADDING - 1),
+                      InkWell(
+                        onTap: (Strings.assignee.isNotEmpty &&
+                                Strings.assignee
+                                    .equalsIgnoreCase(Strings.assignee))
+                            ? widget.onTapStaffDetail
+                            : null,
+                        child: CustomText(
+                          title: (widget.item.currentAssigneeName != null &&
+                                  widget.item.currentAssigneeName!.isNotEmpty)
+                              ? "${widget.item.currentAssigneeName}"
+                              : "-",
+                          colors: AppTheme.colorPrimary,
+                          textAlign: TextAlign.start,
+                          decoration: TextDecoration.underline,
+                          fontSize: AppTheme.small + 1,
+                          fontWeight: FontWeight.normal,
+                          maxLines: 1,
+                        ),
+                      )
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ),
+          const SizedBox(
+            height: Constant.SMALL_PADDING,
+          ),
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: Constant.SMALL_PADDING),
+            child: basicDetailItem(
+                Strings.followup_date,
+                followFormatDate ?? "-",
+                Strings.type,
+                (widget.item.caseType != null &&
+                        widget.item.caseType!.isNotEmpty)
+                    ? "${widget.item.caseType}"
+                    : "-"),
+          ),
+          const SizedBox(
+            height: Constant.SMALL_PADDING,
+          ),
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: Constant.SMALL_PADDING),
+            child: basicDetailItem(
+                "${Strings.create_date} & ${Strings.api_time}",
+                (widget.item.createdate ?? "-"),
+                "${Strings.last_modified_date} & ${Strings.api_time}",
+                (widget.item.updatedate ?? "-")),
+          ),
+          const SizedBox(
+            height: Constant.SMALL_PADDING,
+          ),
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: Constant.SMALL_PADDING),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    titleWidget(Strings.remaining_time),
+                    const SizedBox(height: Constant.VERY_SMALL_PADDING - 1),
+                    widget.item.caseStatus!.equalsIgnoreCase("Raise and Close")
+                        ? valueWidget("00:00:00:00")
+                        : CountdownTimer(
+                            controller: timeController,
+                            endTime: endTime ?? 00,
+                            onEnd: onEnd,
+                            widgetBuilder: (_, CurrentRemainingTime? time) {
+                              if (!mounted) return const SizedBox.shrink();
+                              if (time == null) {
+                                return valueWidget(
+                                  "00:00:00:00",
+                                );
+                              }
+                              return valueWidget(
+                                "${time.days ?? 00}:${time.hours ?? 00}:${time.min ?? 00}:${time.sec ?? 00}",
+                              );
+                            },
+                          )
+                  ],
+                ),
+              ],
+            ), /*basicDetailItem(
+                "${Strings.followup_date} & ${Strings.api_time}",
+                (followFormatDate.isNotEmpty) ? followFormatDate : "-",
+                "${Strings.remaining_time}",
+                ("$days : $hours : $minutes : $seconds" ?? "-")),*/
+          ),
+          const SizedBox(
+            height: Constant.SMALL_PADDING,
+          ),
+          const SizedBox(
+            height: Constant.SMALL_PADDING,
+          ),
+          (widget.showActionBtn != null && widget.showActionBtn == true)
+              ? Align(
+                  alignment: FractionalOffset.topRight,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: Constant.SMALL_PADDING, vertical: 1),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                // showEdit == false
+                                //     ? buttonView(
+                                //         editSvg,
+                                //         AppTheme.custEditLight,
+                                //         AppTheme.custEditDark,
+                                //         widget.onTapEdit!)
+                                //     : buttonView(
+                                //         editSvg,
+                                //         AppTheme.colorTransparent
+                                //             .withOpacity(0.005),
+                                //         AppTheme.colorWhite,
+                                //         null),
+                                // const SizedBox(
+                                //   width: Constant.SMALL_PADDING,
+                                // ),
+                                showPick == false
+                                    ? buttonView(
+                                        pickTicketSvg,
+                                        AppTheme.custNearLocationLight,
+                                        AppTheme.custNearLocationDark,
+                                        widget.onTapPick!)
+                                    : buttonView(
+                                        pickTicketSvg,
+                                        AppTheme.colorTransparent
+                                            .withOpacity(0.005),
+                                        AppTheme.colorWhite,
+                                        null),
+                                const SizedBox(
+                                  width: Constant.SMALL_PADDING,
+                                ),
+                              ])
+                        ],
+                      ),
+                    ),
+                  ),
+                )
+              : Container(),
+          (widget.showActionBtn != null && widget.showActionBtn == true)
+              ? const SizedBox(
+                  height: Constant.SMALL_PADDING,
+                )
+              : Container(),
+        ]),
+      ),
+    );
+  }
+
+  buttonView(String btnName, Color bgColor, Color txtColor, Function()? onTap) {
+    return InkWell(
+      onTap: onTap,
+      child: Material(
+        elevation: 1.5,
+        color: bgColor,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(Constant.BTN_ROUNDED_CORNER)),
+        child: Container(
+          height: Constant.BTN_HEIGHT_M - 10,
+          width: Constant.BTN_HEIGHT_M - 10,
+          alignment: Alignment.center,
+          padding: const EdgeInsets.all(Constant.SMALL_PADDING - 1),
+          child: SvgPicture.asset(
+            btnName,
+            height: Constant.ICON_SIZE,
+            width: Constant.ICON_SIZE,
+            color: txtColor,
+            fit: BoxFit.fill,
+          ),
+        ),
+      ),
+    );
+  }
+
+  basicDetailItem(
+      String title1, String? value1, String title2, String? value2) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Expanded(
+          flex: 2,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              titleWidget(title1),
+              const SizedBox(height: Constant.VERY_SMALL_PADDING - 1),
+              valueWidget(
+                value1,
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          flex: 1,
+          child: InkWell(
+            onTap:
+                (title2.isNotEmpty && title2.equalsIgnoreCase(Strings.assignee))
+                    ? widget.onTapStaffDetail
+                    : null,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                titleWidget(title2),
+                const SizedBox(height: Constant.VERY_SMALL_PADDING - 1),
+                valueWidget(
+                  value2,
+                ),
+              ],
+            ),
+          ),
+        )
+      ],
+    );
+  }
+
+  titleWidget(String title) {
+    return CustomText(
+      title: title,
+      colors: AppTheme.lable_noramal,
+      textAlign: TextAlign.start,
+      fontSize: AppTheme.verySmall,
+      fontWeight: FontWeight.w400,
+      maxLines: 2,
+    );
+  }
+
+  valueWidget(
+    String? value,
+  ) {
+    return CustomText(
+      title: value!.isNotEmpty ? value : "",
+      colors: AppTheme.title_dark,
+      textAlign: TextAlign.start,
+      fontSize: AppTheme.small + 1,
+      fontWeight: FontWeight.normal,
+      maxLines: 2,
+    );
+  }
+
+  void onEnd() {
+    if (timeController != null) {
+      timeController!.disposeTimer();
+    }
+  }
+
+// void setCountDown() {
+//   final reduceSecondsBy = 1;
+//   final seconds = myDuration!.inSeconds - reduceSecondsBy;
+//
+//   log("reduceSecondsBy=>$seconds");
+//   if (seconds < 0) {
+//     countdownTimer!.cancel();
+//   } else {
+//     myDuration = Duration(seconds: seconds);
+//     log("myDuration$myDuration");
+//   }
+//   // widget.controller!.update();
+// }
+}

@@ -1,0 +1,1759 @@
+<div class="row header-row p-0 m-0" style="margin-left: -2%">
+    <mat-card class="cardWithShadow w-100">
+        <mat-card-content class="mat-card-content-border">
+            <form [formGroup]="searchDictionaryForm">
+                <div class="row">
+                    <div class="col-lg-2 col-sm-2 p-0 m-0">
+                        <mat-form-field appearance="outline" class="w-100 hide-hint mr-10 header-input"
+                            style="padding-left: 16px">
+                            <input matInput class="input-p-5" id="vendor" placeholder="Enter vendor"
+                                formControlName="vendor" (click)="searchDictionary()" />
+                        </mat-form-field>
+                    </div>
+                    <div class="col-lg-2 col-sm-2 p-0 m-0">
+                        <mat-form-field appearance="outline" class="w-100 hide-hint mr-10 header-input"
+                            style="padding-left: 9px">
+                            <input matInput class="input-p-5" id="vendorId" placeholder="Enter vendor id"
+                                formControlName="vendorId" (click)="searchDictionary()" />
+                        </mat-form-field>
+                    </div>
+                    <div class="col-lg-2 col-sm-2 p-0 m-0">
+                        <mat-form-field appearance="outline" class="w-100 hide-hint mr-10 header-input"
+                            style="padding-left: 9px">
+                            <mat-select class="input-p-5" placeholder="Select Vendor Type" formControlName="vendorType"
+                                (click)="searchDictionary()">
+                                <mat-option *ngFor="let option of vendoreTypeAll" [value]="option.label">
+                                    {{ option.label }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                    <div class="col-lg-3 col-sm-3">
+                        <div class="d-flex" style="margin-left: -2%">
+                            <button mat-button mat-flat-button color="primary" class="button-normal mr-10"
+                                (click)="searchDictionary()">
+                                Search
+                            </button>
+
+                            <button mat-stroked-button matButton="outlined" class="button-normal"
+                                (click)="clearSearchForm()">
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-3 col-sm-3 search-div">
+                        <div class="d-flex justify-content-end">
+                            @if (createDictAccess) {
+                            <button mat-button mat-flat-button color="primary" (click)="openDictionaryPopup()"
+                                class="button-normal mr-10" style="width: fit-content" [disabled]="!isSuperAdmin">
+                                Add Dictionary
+                            </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </mat-card-content>
+    </mat-card>
+</div>
+
+<div class="container-fluid contain-flud">
+    <div class="row">
+        <div class="col-md-12">
+            <mat-card class="cardWithShadow">
+                <mat-card-content class="mat-card-content-border">
+                    <div class="country-table-list">
+                        <div class="example-container mat-elevation-z8" tabindex="0">
+                            <table mat-table [dataSource]="
+                  dictionaryData.slice(
+                    currentPage_Dic * itemsPerPage_Dic,
+                    currentPage_Dic * itemsPerPage_Dic + itemsPerPage_Dic
+                  )
+                " class="mat-elevation-z2 w-100-table">
+                                <ng-container matColumnDef="id">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef>ID</th>
+                                    <td mat-cell *matCellDef="let element">{{ element.dictionaryId }}</td>
+                                </ng-container>
+                                <!-- Vendor -->
+                                <ng-container matColumnDef="vendor">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef>Vendor</th>
+                                    <td mat-cell *matCellDef="let element">{{ element.vendor }}</td>
+                                </ng-container>
+
+                                <!-- Id -->
+                                <ng-container matColumnDef="vendorId">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef>Id</th>
+                                    <td mat-cell *matCellDef="let element">{{ element.vendorId }}</td>
+                                </ng-container>
+
+                                <!-- Vendor Type -->
+                                <ng-container matColumnDef="vendorType">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef>Vendor Type</th>
+                                    <td mat-cell *matCellDef="let element">{{ element.vendorType }}</td>
+                                </ng-container>
+
+                                <!-- Action -->
+                                <ng-container *ngIf="editDictAccess || deleteDictAccess" matColumnDef="action">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef>Action</th>
+                                    <td mat-cell *matCellDef="let element; let i = index">
+                                        <a mat-icon-button href="javascript:void(0)" *ngIf="editDictAccess"
+                                            (click)="editDictionaryById(element.mvnoId, i, element.dictionaryId)"
+                                            matTooltip="Edit">
+                                            <img src="assets/img/DashboardIcons/Edit.svg">
+                                        </a>
+
+                                        <a mat-icon-button href="javascript:void(0)" *ngIf="deleteDictAccess"
+                                            (click)="deleteConfirm(element.dictionaryId, element.vendor, element.mvnoId)"
+                                            matTooltip="Delete">
+                                            <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                        </a>
+                                    </td>
+                                </ng-container>
+
+                                <tr mat-header-row *matHeaderRowDef="getDisplayedPlanDetailsColumns()"></tr>
+                                <tr mat-row *matRowDef="let row; columns: getDisplayedPlanDetailsColumns()"
+                                    [ngClass]="{ 'selected-row-background': row.vendor === selectedRowVendorName }"
+                                    (click)="getDictionaryAttributes(row.dictionaryId, row.vendor, row.mvnoId, true)"
+                                    class="cursor-pointer"></tr>
+                            </table>
+                        </div>
+                        <mat-paginator [length]="totalRecords_Dic" [pageSize]="itemsPerPage_Dic"
+                            [pageIndex]="currentPage_Dic" [pageSizeOptions]="[5,10,20,50,100]" showFirstLastButtons
+                            (page)="currentPage_Dic = $event.pageIndex; itemsPerPage_Dic = $event.pageSize">
+                        </mat-paginator>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </div>
+</div>
+<ng-template #dictionarAttributeDailog let-dialogRef="dialogRef">
+    <div class="dialog-container">
+        <div class="dialog-header dailog-title">
+            Dictionary Attributes
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <mat-dialog-content>
+            <mat-card class="cardWithShadow w-100">
+                <mat-card-content class="mat-card-content-border">
+                    <form [formGroup]="searchDictionaryAttributeForm">
+                        <div class="row">
+                            <div class="col-lg-4 col-sm-4 p-0 m-0">
+                                <mat-form-field appearance="outline" class="w-100 hide-hint mr-10"
+                                    style="padding-left: 16px">
+                                    <input class="input-p-5" matInput formControlName="name"
+                                        placeholder="Enter Name" (keydown.enter)="searchDictionaryAttribute()" />
+                                    <mat-icon matSuffix class="search-header-search-icon">
+                                        <i class="pi pi-search icon-size"></i>
+                                    </mat-icon>
+                                </mat-form-field>
+                            </div>
+
+                            <div class="col-lg-4 col-sm-4">
+                                <div class="d-flex m-r-10">
+                                    <button mat-button mat-flat-button color="primary"
+                                        class="button-normal m-r-10" (click)="searchDictionaryAttribute()">
+                                        Search
+                                    </button>
+
+                                    <button mat-stroked-button matButton="outlined"
+                                        class="button-normal" (click)="clearAttributeSearchForm()">
+                                        Clear
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-4 col-sm-4 search-div">
+                                <div class="d-flex justify-content-end">
+                                    <button mat-button mat-flat-button color="primary" *ngIf="createDictAttrAccess"
+                                        [disabled]="!isSuperAdmin" (click)="openDictionaryAttributePopup()"
+                                        class="search-btn" style="width: fit-content">
+                                        Add Dictionary Attributes
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </mat-card-content>
+            </mat-card>
+
+            <!-- Attributes Table -->
+            <mat-card class="cardWithShadow w-100">
+                <mat-card-content class="mat-card-content-border">
+                    <div class="example-container mat-elevation-z8" tabindex="0">
+                        <table mat-table [dataSource]="
+                dictionaryAttributeData.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize)
+              " class="mat-elevation-z2 w-100-table">
+                            <!-- Name -->
+                            <ng-container matColumnDef="name">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Name</th>
+                                <td mat-cell *matCellDef="let element">
+                                    <a class="cursor-pointer" class="text-primary"
+                                        (click)="showDictionaryAttributeDetail(element.dictionaryAttributeId)"
+                                        matTooltip="Click to see Attribute Detail">
+                                        {{ element.name }}
+                                    </a>
+                                </td>
+                            </ng-container>
+
+                            <!-- Category -->
+                            <ng-container matColumnDef="category">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Category</th>
+                                <td mat-cell *matCellDef="let element" class="text-primary"
+                                    (click)="attributesRowClick()">
+                                    {{ element.category }}
+                                </td>
+                            </ng-container>
+
+                            <!-- Type -->
+                            <ng-container matColumnDef="type">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Type</th>
+                                <td mat-cell *matCellDef="let element">{{ element.type }}</td>
+                            </ng-container>
+
+                            <!-- Action -->
+                            <ng-container *ngIf="editDictAttrAccess || deleteDictAttrAccess" matColumnDef="action">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Action</th>
+                                <td mat-cell *matCellDef="let element; let i = index">
+                                    <a mat-icon-button href="javascript:void(0)" *ngIf="editDictAttrAccess" (click)="
+                      editDictionaryAttributeById(element.mvnoId, i, element.dictionaryAttributeId)
+                    " matTooltip="Edit">
+                                        <img src="assets/img/DashboardIcons/Edit.svg">
+                                    </a>
+
+                                    <a mat-icon-button href="javascript:void(0)" *ngIf="deleteDictAttrAccess"
+                                        (click)="deleteConfirmAttribute(element.dictionaryAttributeId, element.mvnoId)"
+                                        matTooltip="Delete">
+                                        <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                    </a>
+                                </td>
+                            </ng-container>
+
+                            <tr mat-header-row *matHeaderRowDef="dictionaryAttrDisplayedColumns"></tr>
+                            <tr mat-row *matRowDef="let row; columns: dictionaryAttrDisplayedColumns"
+                                [ngClass]="{ 'selected-row-background': row.name === selectedRowDicAttrName }"></tr>
+                        </table>
+                    </div>
+                    <mat-paginator [length]="dictionaryAttributeData.length" [pageSize]="pageSize"
+                        [pageIndex]="pageIndex" [pageSizeOptions]="[5,10,20,50,100]" showFirstLastButtons
+                        (page)="pageIndex = $event.pageIndex; pageSize = $event.pageSize">
+                    </mat-paginator>
+                    <!-- <mat-paginator
+            [length]="totalRecords_DicAttr"
+            [pageSize]="itemsPerPage_DicAttr"
+            [pageSizeOptions]="[5,10,20,50,100]"
+            (page)="pageChangedForDictionaryAttribute($event)"
+            showFirstLastButtons
+          >
+          </mat-paginator> -->
+                </mat-card-content>
+            </mat-card>
+        </mat-dialog-content>
+    </div>
+</ng-template>
+
+<!-- Add / Update Dictionary Dialog -->
+<ng-template #dictionaryDialog let-dialogRef="dialogRef">
+    <div class="dialog-container">
+        <div class="dialog-header dailog-title">
+            {{ editMode ? "Update" : "Add" }} Dictionary
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <mat-dialog-content [formGroup]="dictionaryForm">
+            <!-- Vendor -->
+            <mat-label>Vendor*</mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+                <input matInput class="input-p-5" formControlName="vendor" placeholder="Enter vendor" />
+                <mat-error *ngIf="dictionaryForm.get('vendor')?.hasError('required')">
+                    Vendor is required
+                </mat-error>
+            </mat-form-field>
+            <br />
+
+            <!-- Vendor Id -->
+            <mat-label>Vendor Id*</mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+                <input matInput class="input-p-5" formControlName="vendorId" placeholder="Enter vendor ID" />
+                <mat-error *ngIf="dictionaryForm.get('vendorId')?.hasError('required')">
+                    Vendor Id is required
+                </mat-error>
+            </mat-form-field>
+            <br />
+
+            <!-- Vendor Type -->
+            <mat-label>Vendor Type*</mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+                <mat-select placeholder="Enter vendor Type" class="input-p-5" formControlName="vendorType">
+                    <mat-option *ngFor="let type of vendoreTypeAll" [value]="type.label">
+                        {{ type.label }}
+                    </mat-option>
+                </mat-select>
+                <mat-error *ngIf="dictionaryForm.get('vendorType')?.hasError('required')">
+                    Please select Vendor Type
+                </mat-error>
+            </mat-form-field>
+        </mat-dialog-content>
+
+        <div class="dialog-action-adjust d-flex justify-content-end" style="gap: 8px">
+            <button mat-button mat-flat-button color="primary" class="button-normal" type="submit"
+                (click)="submitDictionary(dialogRef)">
+                {{ editMode ? "Update" : "Add" }} Dictionary
+            </button>
+            <button mat-stroked-button matButton="outlined" type="button" color="primary" class="button-normal"
+                mat-dialog-close>
+                Close
+            </button>
+        </div>
+    </div>
+</ng-template>
+
+<!-- Add / Update Dictionary Attribute Dialog -->
+<ng-template #dictionaryAttributeDialog let-dialogRef="dialogRef">
+    <div class="dialog-container">
+        <div class="dialog-header dailog-title">
+            {{ attributeEditMode ? "Update" : "Add" }} Dictionary Attribute
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <mat-dialog-content [formGroup]="dictionaryAttributeForm">
+            <!-- Name -->
+            <mat-label>Name</mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+                <input matInput class="input-p-5" formControlName="name" placeholder="Enter Attribute Name" />
+                <mat-error *ngIf="dictionaryAttributeForm.get('name')?.hasError('required')">
+                    Dictionary attribute name is required
+                </mat-error>
+            </mat-form-field>
+            <br />
+            <!-- Attribute Id -->
+            <mat-label>Attribute Id</mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+                <input matInput class="input-p-5" formControlName="attributeId" placeholder="Enter Attribute Id" />
+                <mat-error *ngIf="dictionaryAttributeForm.get('attributeId')?.hasError('required')">
+                    Dictionary attribute id is required
+                </mat-error>
+            </mat-form-field>
+            <br />
+            <!-- Type -->
+            <mat-label>Attribute Type</mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+                <input matInput class="input-p-5" formControlName="type" placeholder="Enter Attribute Type" />
+                <mat-error *ngIf="dictionaryAttributeForm.get('type')?.hasError('required')">
+                    Dictionary attribute type is required
+                </mat-error>
+            </mat-form-field>
+            <br />
+            <!-- Vendor (disabled) -->
+            <mat-label>Vendor</mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+                <input matInput class="input-p-5" formControlName="vendor" placeholder="Enter Vendor" disabled />
+            </mat-form-field>
+            <br />
+            <!-- Category -->
+            <mat-label>Category</mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+                <mat-select placeholder="Select a Category" class="input-p-5" formControlName="category">
+                    <mat-option *ngFor="let cat of attributeCategoryList" [value]="cat.label">
+                        {{ cat.label }}
+                    </mat-option>
+                </mat-select>
+                <mat-error *ngIf="dictionaryAttributeForm.get('category')?.hasError('required')">
+                    Please select dictionary attribute category
+                </mat-error>
+            </mat-form-field>
+        </mat-dialog-content>
+
+        <div class="dialog-action-adjust d-flex justify-content-end" style="gap: 8px">
+            <button mat-button mat-flat-button color="{{ editMode ? 'accent' : 'primary' }}" color="primary"
+                class="button-normal" type="submit" (click)="submitDictionaryAttribute()"
+                [disabled]="dictionaryAttributeForm.invalid">
+                {{ attributeEditMode ? "Update" : "Add" }} Dictionary Attribute
+            </button>
+            <button mat-stroked-button matButton="outlined" type="button" color="primary" class="button-normal"
+                mat-dialog-close (click)="closeDicAttrAddUpdatePopup()">
+                Close
+            </button>
+        </div>
+    </div>
+</ng-template>
+
+<!-- Dictionary Attribute Detail Dialog -->
+<ng-template #dictionaryAttributeDetailDialog let-dialogRef="dialogRef">
+    <div class="dialog-container">
+        <div class="dialog-header dailog-title">
+            {{ dictionaryAttribute.name }} Detail
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <mat-dialog-content>
+            <div class="row">
+                <div class="col-lg-6 col-md-6 dataGroup" *ngIf="dictionaryAttribute" style="margin-top: 1rem">
+                    <div class="field">
+                        <span class="label-text f-w-600 f-s-15">Name</span>
+                        <span class="colon">:</span>
+                        <span class="m-l-10">{{ dictionaryAttribute.name }}</span>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-6 dataGroup" style="margin-top: 1rem">
+                    <div class="field">
+                        <span class="label-text f-w-600 f-s-15">Type</span>
+                        <span class="colon">:</span>
+                        <span class="m-l-10">{{ dictionaryAttribute.type }}</span>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-6 dataGroup" style="margin-top: 1rem">
+                    <div class="field">
+                        <span class="label-text f-w-600 f-s-15">Category</span>
+                        <span class="colon">:</span>
+                        <span class="m-l-10">{{ dictionaryAttribute.category }}</span>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-6 dataGroup" style="margin-top: 1rem">
+                    <div class="field">
+                        <span class="label-text f-w-600 f-s-15">Attribute Id</span>
+                        <span class="colon">:</span>
+                        <span class="m-l-10">{{ dictionaryAttribute.attributeId }}</span>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-6 dataGroup" style="margin-top: 1rem">
+                    <div class="field">
+                        <span class="label-text f-w-600 f-s-15">Vendor</span>
+                        <span class="colon">:</span>
+                        <span class="m-l-10">{{ dictionaryOfAttribute.vendor }}</span>
+                    </div>
+                </div>
+            </div>
+        </mat-dialog-content>
+
+        <div class="dialog-action-adjust d-flex justify-content-end" style="gap: 8px">
+            <button mat-stroked-button matButton="outlined" type="button" color="primary" class="button-normal"
+                mat-dialog-close (click)="closeDicAttrDetailPopup()">
+                Close
+            </button>
+        </div>
+    </div>
+</ng-template>
+<!-- Dictionary Value Management Dialog -->
+<ng-template #dictionaryValueDialog let-dialogRef="dialogRef">
+    <div class="dialog-container">
+        <div class="dialog-header dailog-title">
+            Dictionary Value Management
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <mat-dialog-content>
+            <mat-card class="cardWithShadow w-100">
+                <mat-card-content class="mat-card-content-border">
+                    <form [formGroup]="searchDictionaryValueForm">
+                        <div class="row">
+                            <div class="col-lg-2 col-sm-2 p-0 m-0">
+                                <mat-form-field appearance="outline" class="w-100 hide-hint mr-10">
+                                    <input matInput class="input-p-5" formControlName="name" placeholder="Enter Name" />
+                                </mat-form-field>
+                            </div>
+                            <div class="col-lg-2 col-sm-2">
+                                <mat-form-field appearance="outline" class="w-100 hide-hint mr-10">
+                                    <input matInput class="input-p-5" formControlName="value"
+                                        placeholder="Enter Value" />
+                                </mat-form-field>
+                            </div>
+                            <div class="col-lg-4 col-sm-4">
+                                <div class="d-flex m-r-10">
+                                    <button mat-button mat-flat-button color="primary"
+                                        class="button-normal m-r-10" (click)="searchDictionaryValue()">
+                                        Search
+                                    </button>
+
+                                    <button mat-stroked-button matButton="outlined"
+                                        class="button-normal" (click)="clearSearchDictionaryValueForm()">
+                                        Clear
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-4 col-sm-3 search-div">
+                                <div class="d-flex justify-content-end">
+                                    <button mat-button mat-flat-button color="primary"
+                                        (click)="openDictonryValueDailog()" class="search-btn"
+                                        style="width: fit-content">
+                                        Add Dictionary Values
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </mat-card-content>
+            </mat-card>
+
+            <mat-card class="cardWithShadow w-100" *ngIf="viewAttrValueAccess">
+                <mat-card-content class="mat-card-content-border">
+                    <div class="table-responsive tableViewScrollHeight example-container">
+                        <table mat-table [dataSource]="dictionaryValueData.dictionaryValueList"
+                            class="mat-elevation-z2 w-100-table">
+                            <!-- Name Column -->
+                            <ng-container matColumnDef="name">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Name</th>
+                                <td mat-cell *matCellDef="let row">{{ row.name }}</td>
+                            </ng-container>
+
+                            <!-- Type Column -->
+                            <ng-container matColumnDef="type">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Type</th>
+                                <td mat-cell *matCellDef="let row">{{ row.type }}</td>
+                            </ng-container>
+
+                            <!-- Value Column -->
+                            <ng-container matColumnDef="value">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Value</th>
+                                <td mat-cell *matCellDef="let row">{{ row.value }}</td>
+                            </ng-container>
+
+                            <!-- Action Column -->
+                            <ng-container matColumnDef="action" *ngIf="editAttrValueAccess || deleteAttrValueAccess">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Action</th>
+                                <td mat-cell *matCellDef="let row; let i = index">
+                                    <a mat-icon-button href="javascript:void(0)" *ngIf="editAttrValueAccess"
+                                        (click)="editDictionaryValueById(row.dictionaryValueId, i, row.mvnoId)">
+                                        <img src="assets/img/DashboardIcons/Edit.svg">
+                                    </a>
+                                    <a mat-icon-button href="javascript:void(0)" *ngIf="deleteAttrValueAccess"
+                                        (click)="deleteConfirmValue(row.dictionaryValueId, row.mvnoId)">
+                                        <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                    </a>
+                                </td>
+                            </ng-container>
+
+                            <tr mat-header-row *matHeaderRowDef="displayedColumnsValue"></tr>
+                            <tr mat-row *matRowDef="let row; columns: displayedColumnsValue"></tr>
+                        </table>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+
+            <!-- <div class="value-form-section">
+          <h3 class="section-title">{{ dicValueEditMode ? "Update" : "Add" }} Dictionary Value</h3>
+
+          <div *ngIf="!createAttrValueAccess && !dicValueEditMode">
+            Sorry, you do not have privilege to create operation!
+          </div>
+
+          <form
+            *ngIf="createAttrValueAccess || (dicValueEditMode && editAttrValueAccess)"
+            [formGroup]="dictionaryValueForm"
+            (ngSubmit)="submitDictionaryValue()"
+          >
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Name</mat-label>
+              <input matInput class="input-p-5" formControlName="name" placeholder="Enter Name" />
+              <mat-error *ngIf="dictionaryValueForm.get('name')?.hasError('required')">
+                Dictionary value name is required
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Value</mat-label>
+              <input matInput class="input-p-5" formControlName="value" placeholder="Enter Value" />
+              <mat-error *ngIf="dictionaryValueForm.get('value')?.hasError('required')">
+                Value is required
+              </mat-error>
+            </mat-form-field>
+
+            <button
+              mat-raised-button
+              color="primary"
+              type="submit"
+              [disabled]="dictionaryValueForm.invalid || !isSuperAdmin"
+            >
+             <img src="assets/img/DashboardIcons/Assign.svg">
+              {{ dicValueEditMode ? "Update" : "Add" }} Dictionary Value
+            </button>
+          </form>
+        </div> -->
+            <!-- </div> -->
+        </mat-dialog-content>
+        <div class="dialog-action-adjust d-flex justify-content-end" style="gap: 8px">
+            <button mat-stroked-button matButton="outlined" type="button" color="primary" class="button-normal"
+                mat-dialog-close (click)="removeRowSelection()">
+                Close
+            </button>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #createDictionaryValueDailog let-dialogRef="dialogRef">
+    <div class="dialog-container">
+        <div class="dialog-header dailog-title">
+            {{ dicValueEditMode ? "Update" : "Add" }} Dictionary Value
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <mat-dialog-content>
+            <div *ngIf="!createAttrValueAccess && !dicValueEditMode">
+                Sorry, you do not have privilege to create operation!
+            </div>
+
+            <form *ngIf="createAttrValueAccess || (dicValueEditMode && editAttrValueAccess)"
+                [formGroup]="dictionaryValueForm">
+                <mat-label>Name</mat-label>
+                <mat-form-field appearance="outline" class="w-100">
+                    <input matInput class="input-p-5" formControlName="name" placeholder="Enter Name" />
+                    <mat-error *ngIf="dictionaryValueForm.get('name')?.hasError('required')">
+                        Dictionary value name is required
+                    </mat-error>
+                </mat-form-field>
+                <br />
+                <mat-label>Value</mat-label>
+                <mat-form-field appearance="outline" class="w-100">
+                    <input matInput class="input-p-5" formControlName="value" placeholder="Enter Value" />
+                    <mat-error *ngIf="dictionaryValueForm.get('value')?.hasError('required')">
+                        Value is required
+                    </mat-error>
+                </mat-form-field>
+            </form>
+        </mat-dialog-content>
+
+        <div class="dialog-action-adjust d-flex justify-content-end" style="gap: 8px">
+            <button mat-button mat-flat-button color="{{ editMode ? 'accent' : 'primary' }}" color="primary"
+                class="button-normal" type="submit" (click)="submitDictionaryValue(dialogRef)"
+                [disabled]="dictionaryValueForm.invalid || !isSuperAdmin">
+                {{ dicValueEditMode ? "Update" : "Add" }} Dictionary Value
+            </button>
+            <button mat-stroked-button matButton="outlined" type="button" color="primary" class="button-normal"
+                mat-dialog-close>
+                Close
+            </button>
+        </div>
+    </div>
+</ng-template>
+<ng-template #confirmDialog let-data>
+    <div class="dialog-container">
+        <div class="dialog-header dialog-header-titleFont">
+            {{ data.title || "Delete Confirmation" }}
+            <span class="w-h-18">
+                <a mat-icon-button href="javascript:void(0)" mat-dialog-close="false">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+            <p class="dialog-description">{{ data.description }}</p>
+
+            <div mat-dialog-actions class="p-0">
+                <button mat-flat-button type="button" class="primary" [mat-dialog-close]="true">
+                    {{ data.yesLabel || "Confirm" }}
+                </button>
+                <button mat-stroked-button matButton="outlined" color="primary" mat-dialog-close="false">
+                    {{ data.noLabel || "Cancel" }}
+                </button>
+            </div>
+        </div>
+    </div>
+</ng-template>
+<!-- <div class="childComponent">
+    <div class="col-md-12">
+    
+      <div class="panel top">
+        <div class="panel-heading">
+          <h3 class="panel-title">Dictionary Management</h3>
+          <div class="right">
+            <button
+              type="button"
+              class="btn-toggle-collapse"
+              data-toggle="collapse"
+              data-target="#dictionarySearchPanel"
+              aria-expanded="false"
+              aria-controls="dictionarySearchPanel"
+            >
+              <i class="fa fa-minus-circle"></i>
+            </button>
+          </div>
+        </div>
+        <div id="dictionarySearchPanel" class="panel-collapse collapse in">
+          <div class="panel-body">
+            <div class="searchForm">
+              <form
+                class="form-inline"
+                [formGroup]="searchDictionaryForm"
+                (ngSubmit)="searchDictionary()"
+              >
+                <div class="row">
+                  <div class="col-md-1" style="padding-right: 0%; text-align: right">
+                    <label style="padding: 5px">Vendor : &nbsp;</label>
+                  </div>
+                  <div class="col-md-3" style="padding: 0%">
+                    <input
+                      type="text"
+                      id="vendor"
+                      formControlName="vendor"
+                      class="form-control"
+                      placeholder="Enter vendor"
+                      style="width: 100%"
+                      (click)="searchDictionary()"
+                    />
+                  </div>
+                  <div class="col-md-1" style="padding: 0%; text-align: right">
+                    <label style="padding: 5px">Vendor Id : &nbsp;</label>
+                  </div>
+                  <div class="col-md-3" style="padding: 0%">
+                    <input
+                      type="text"
+                      id="vendorId"
+                      formControlName="vendorId"
+                      class="form-control"
+                      placeholder="Enter vendor id"
+                      style="width: 100%"
+                      (click)="searchDictionary()"
+                    />
+                  </div>
+                  <div class="col-md-1" style="padding: 0%; text-align: right">
+                    <label style="padding: 5px">Vendor Type:</label>
+                  </div>
+                  <div class="col-md-3" style="padding-left: 0%">
+                    <p-dropdown
+                      [options]="vendoreTypeAll"
+                      placeholder="Select Vendor Type"
+                      optionLabel="label"
+                      optionValue="label"
+                      filter="true"
+                      filterBy="label"
+                      formControlName="vendorType"
+                      (click)="searchDictionary()"
+                    ></p-dropdown>
+                  </div>
+                </div>
+                <div class="searchbtn">
+                  <button
+                    type="submit"
+                    class="btn btn-primary"
+                    title="Search Dictionary Details"
+                    data-toggle="tooltip"
+                    id="searchbtn"
+                  >
+                    <i class="fa fa-search"></i>
+                    Search
+                  </button>
+                  <button
+                    type="reset"
+                    class="btn btn-default"
+                    title="Delete Dictionary Details"
+                    data-toggle="tooltip"
+                    (click)="clearSearchForm()"
+                    id="searchbtn"
+                  >
+                     <img src="assets/img/DashboardIcons/Refresh.svg" />
+                    Clear
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+    </div>
+  </div>  -->
+<!-- <div class="row">
+    <div class="col-md-6 left">
+
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">Dictionaries</h3>
+          <div class="right">
+            <button
+              type="button"
+              class="btn-toggle-collapse"
+              data-toggle="collapse"
+              data-target="#dictionaryTablePanel"
+              aria-expanded="false"
+              aria-controls="dictionaryTablePanel"
+            >
+              <i class="fa fa-minus-circle"></i>
+            </button>
+          </div>
+        </div>
+        <div id="dictionaryTablePanel" class="panel-collapse collapse in">
+          <div class="panel-body table-responsive">
+            <div style="text-align: right; margin-right: 5px">
+              @if (createDictAccess) {
+                <button
+                  [disabled]="!isSuperAdmin"
+                  type="button"
+                  class="btn btn-primary btn-xs"
+                  data-target="#addUpdateModal"
+                  data-toggle="modal"
+                  data-backdrop="static"
+                  data-keyboard="false"
+                  (click)="openDictionaryPopup()"
+                >
+                  <i class="fa fa-plus-square" aria-hidden="true"></i>
+                  Add Dictionary
+                </button>
+              }
+            </div>
+            <table class="table" id="myTable">
+              <thead>
+                <tr>
+                  <th>Vendor</th>
+                  <th>Id</th>
+                  <th>Vendor Type</th>
+                  @if (deleteDictAccess || editDictAccess) {
+                    <th>Action</th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @for (
+                  dictionary of dictionaryData
+                    | paginate
+                      : {
+                          id: "listing_dictionaryData",
+                          itemsPerPage: itemsPerPage_Dic,
+                          currentPage: currentPage_Dic,
+                          totalItems: totalRecords_Dic
+                        };
+                  track dictionary;
+                  let i = $index
+                ) {
+                  <tr
+                    (click)="
+                      getDictionaryAttributes(
+                        dictionary.dictionaryId,
+                        dictionary.vendor,
+                        dictionary.mvnoId
+                      )
+                    "
+                    class="curson_pointer"
+                    [ngClass]="{
+                      'selected-row-background': dictionary.vendor === selectedRowVendorName
+                    }"
+                  >
+                    <td>{{ dictionary.vendor }}</td>
+                    <td>{{ dictionary.vendorId }}</td>
+                    <td>{{ dictionary.vendorType }}</td>
+                    @if (editDictAccess || deleteDictAccess) {
+                      <td class="btnAction">
+                        @if (editDictAccess) {
+                          <a
+                            type="button"
+                            data-title="Edit"
+                            class="curson_pointer"
+                            (click)="
+                              editDictionaryById(dictionary.mvnoId, i, dictionary.dictionaryId)
+                            "
+                          >
+                            <img
+                              <img src="assets/img/DashboardIcons/Edit.svg" >
+                              data-target="#addUpdateModal"
+                              data-toggle="modal"
+                              data-backdrop="static"
+                              data-keyboard="false"
+                            />
+                          </a>
+                        }
+                        @if (deleteDictAccess) {
+                          <a
+                            type="button"
+                            data-title="Delete"
+                            data-toggle="tooltip"
+                            class="curson_pointer"
+                            (click)="
+                              deleteConfirm(
+                                dictionary.dictionaryId,
+                                dictionary.vendor,
+                                dictionary.mvnoId
+                              )
+                            "
+                          >
+                             <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                          </a>
+                        }
+                      </td>
+                    }
+                  </tr>
+                }
+              </tbody>
+            </table>
+            <br />
+            <div class="row">
+              <div class="col-md-12" style="display: flex">
+                <pagination-controls
+                  id="listing_dictionaryData"
+                  [maxSize]="10"
+                  [directionLinks]="true"
+                  previousLabel=""
+                  nextLabel=""
+                  (pageChange)="pageChangedForDictionary($event)"
+                ></pagination-controls>
+                <div id="itemPerPageDropdown" style="display: flex">
+                  <p-dropdown
+                    [options]="pageLimitOptions_Dic"
+                    optionLabel="value"
+                    optionValue="value"
+                    (onChange)="TotalItemPerPage_Dic($event)"
+                  ></p-dropdown>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    @if (viewDictAttrAccess && clickViewDictAtt) {
+      <div class="col-md-6 right">
+       
+        <div class="panel">
+          <div class="panel-heading">
+            <h3 class="panel-title">Dictionary Attributes</h3>
+            <div class="right">
+              <button
+                type="button"
+                class="btn-toggle-collapse"
+                data-toggle="collapse"
+                data-target="#dictionaryFormPanel"
+                aria-expanded="false"
+                aria-controls="dictionaryFormPanel"
+              >
+                <i class="fa fa-minus-circle"></i>
+              </button>
+            </div>
+          </div>
+          <div id="dictionaryFormPanel" class="panel-collapse collapse in">
+            <div class="panel-body table-responsive">
+              <div class="panel-collapse collapse in">
+                @if (showAddDicAttrButton) {
+                  <div class="searchForm">
+                    <form
+                      class="form-inline"
+                      [formGroup]="searchDictionaryAttributeForm"
+                      (ngSubmit)="searchDictionaryAttribute()"
+                    >
+                      <div>
+                        <label>Name : &nbsp;</label>
+                        <input
+                          type="text"
+                          id="name"
+                          formControlName="name"
+                          class="form-control"
+                          placeholder="Enter Name"
+                        />
+                        <button type="submit" class="btn btn-primary btn-xs" id="searchbtn">
+                          <i class="fa fa-search"></i>
+                          Search
+                        </button>
+                        <button
+                          type="reset"
+                          class="btn btn-default btn-xs"
+                          (click)="clearAttributeSearchForm()"
+                          id="searchbtn"
+                        >
+                           <img src="assets/img/DashboardIcons/Refresh.svg" />
+                          Clear
+                        </button>
+                        @if (createDictAttrAccess) {
+                          <button
+                            [disabled]="!isSuperAdmin"
+                            type="button"
+                            class="btn btn-primary btn-xs"
+                            data-target="#dictionaryAttributeModal"
+                            data-toggle="modal"
+                            data-backdrop="static"
+                            data-keyboard="false"
+                            (click)="openDictionaryAttributePopup()"
+                          >
+                            <i class="fa fa-plus-square" aria-hidden="true"></i>
+                            Add
+                          </button>
+                        }
+                      </div>
+                    </form>
+                  </div>
+                }
+                &nbsp;
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Category</th>
+                      <th>Type</th>
+                      @if (deleteDictAttrAccess || editDictAttrAccess) {
+                        <th>Action</th>
+                      }
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (
+                      dictionaryAttribute of dictionaryAttributeData
+                        | paginate
+                          : {
+                              id: "listing_dictionaryAttributeData",
+                              itemsPerPage: itemsPerPage_DicAttr,
+                              currentPage: currentPage_DicAttr,
+                              totalItems: totalRecords_DicAttr
+                            };
+                      track dictionaryAttribute;
+                      let i = $index
+                    ) {
+                      <tr
+                        [ngClass]="{
+                          'selected-row-background':
+                            dictionaryAttribute.name === selectedRowDicAttrName
+                        }"
+                      >
+                        <td class="detailOnAnchorClick">
+                          <a
+                            (click)="
+                              showDictionaryAttributeDetail(
+                                dictionaryAttribute.dictionaryAttributeId
+                              )
+                            "
+                            title="Click To See Attribute Detail"
+                            data-toggle="modal"
+                            data-target="#dictionaryAttributeDetailModal"
+                            class="curson_pointer"
+                            data-keyboard="false"
+                            data-backdrop="static"
+                            style="color: #f7941e"
+                          >
+                            {{ dictionaryAttribute.name }}
+                          </a>
+                        </td>
+                        <td
+                          (click)="attributesRowClick()"
+                          class="curson_pointer"
+                          style="color: #f7941e"
+                        >
+                          {{ dictionaryAttribute.category }}
+                        </td>
+                        <td>
+                          {{ dictionaryAttribute.type }}
+                        </td>
+                        @if (deleteDictAttrAccess || editDictAttrAccess) {
+                          <td class="btnAction">
+                            @if (editDictAttrAccess) {
+                              <a
+                                type="button"
+                                title="Edit Dictionary Details"
+                                data-toggle="tooltip"
+                                class="curson_pointer"
+                                (click)="
+                                  editDictionaryAttributeById(
+                                    dictionaryAttribute.mvnoId,
+                                    i,
+                                    dictionaryAttribute.dictionaryAttributeId
+                                  )
+                                "
+                              >
+                              <img src="assets/img/DashboardIcons/Edit.svg" >
+                              </a>
+                            }
+                            @if (deleteDictAttrAccess) {
+                              <a
+                                type="button"
+                                title="Delete Dictionary Details"
+                                data-toggle="tooltip"
+                                class="curson_pointer"
+                                (click)="
+                                  deleteConfirmAttribute(
+                                    dictionaryAttribute.dictionaryAttributeId,
+                                    dictionaryAttribute.mvnoId
+                                  )
+                                "
+                              >
+                                 <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                              </a>
+                            }
+                          </td>
+                        }
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+                <br />
+                <div class="row">
+                  <div class="col-md-12" style="display: flex">
+                    <pagination-controls
+                      id="listing_dictionaryAttributeData"
+                      [maxSize]="10"
+                      [directionLinks]="true"
+                      previousLabel=""
+                      nextLabel=""
+                      (pageChange)="pageChangedForDictionaryAttribute($event)"
+                    ></pagination-controls>
+                    <div id="itemPerPageDropdown" style="display: flex">
+                      <p-dropdown
+                        [options]="pageLimitOptions_DicAttr"
+                        optionLabel="value"
+                        optionValue="value"
+                        (onChange)="TotalItemPerPage_DicAttr($event)"
+                      ></p-dropdown>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+         
+        </div>
+      </div>
+    }
+  </div> -->
+
+<!-- Add Update Dictionary Model -->
+<!-- @if (dictionaryPopupIsOpen) {
+    <div class="modal fade" id="addUpdateModal" role="dialog">
+      <div class="modal-dialog" style="width: 40%">
+      
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3 class="panel-title">{{ editMode ? "Update" : "Add" }} Dictionary</h3>
+          </div>
+          <div class="modal-body">
+            <form
+              name="dictionaryForm"
+              [formGroup]="dictionaryForm"
+              (ngSubmit)="submitDictionaryAttribute()"
+            >
+              <div
+                class="form-group"
+                [ngClass]="{
+                  'has-error':
+                    dictionaryForm.get('vendor').errors &&
+                    (dictionaryForm.get('vendor').touched || dictionaryForm.get('vendor').dirty)
+                }"
+              >
+                <label for="vendor">Vendor:</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="vendor"
+                  placeholder="Enter vendor"
+                  name="vendor"
+                  formControlName="vendor"
+                />
+                @if (
+                  (dictionaryForm.get("vendor").touched || dictionaryForm.get("vendor").dirty) &&
+                  dictionaryForm.get("vendor").hasError("required")
+                ) {
+                  <span class="help-block"> Vendor is required </span>
+                }
+              </div>
+              <div
+                class="form-group"
+                [ngClass]="{
+                  'has-error':
+                    dictionaryForm.get('vendorId').errors &&
+                    (dictionaryForm.get('vendorId').touched || dictionaryForm.get('vendorId').dirty)
+                }"
+              >
+                <label for="vendorId">Vendor Id:</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="vendorId"
+                  placeholder="Enter vendor id"
+                  name="vendorId"
+                  formControlName="vendorId"
+                />
+                @if (
+                  (dictionaryForm.get("vendorId").touched ||
+                    dictionaryForm.get("vendorId").dirty) &&
+                  dictionaryForm.get("vendorId").hasError("required")
+                ) {
+                  <span class="help-block"> Vendor Id is required </span>
+                }
+              </div>
+              <div
+                class="form-group"
+                [ngClass]="{
+                  'has-error':
+                    dictionaryForm.get('vendorType').errors &&
+                    (dictionaryForm.get('vendorType').touched ||
+                      dictionaryForm.get('vendorType').dirty)
+                }"
+              >
+                <label for="vendorType">Vendor Type:</label>
+                <p-dropdown
+                  [options]="vendoreTypeAll"
+                  placeholder="Select Vendor Type"
+                  optionLabel="label"
+                  optionValue="label"
+                  filter="true"
+                  filterBy="label"
+                  formControlName="vendorType"
+                ></p-dropdown>
+
+                @if (
+                  (dictionaryForm.get("vendorType").touched ||
+                    dictionaryForm.get("vendorType").dirty) &&
+                  dictionaryForm.get("vendorType").hasError("required")
+                ) {
+                  <span class="help-block"> Please select Vendor Type </span>
+                }
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <div class="addUpdateBtn">
+              <button
+                type="submit"
+                class="btn btn-primary btn-sm"
+                (click)="submitDictionary()"
+                [disabled]="!dictionaryForm.valid"
+              >
+                <i class="fa fa-check-circle"></i>
+                {{ editMode ? "Update" : "Add" }} Dictionary
+              </button>
+              <button id="btn" type="button" class="btn btn-default btn-sm" (click)="reset()">
+                 <img src="assets/img/DashboardIcons/Refresh.svg" />
+                Clear
+              </button>
+              <button
+                type="button"
+                #closebutton
+                class="btn btn-danger btn-sm"
+                data-dismiss="modal"
+                (click)="closeDictionaryPopup()"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  } -->
+
+<!-- Add Update Dictionary Attribute Model -->
+<!-- <div class="modal fade" id="dictionaryAttributeModal" role="dialog">
+    <div class="modal-dialog" style="width: 40%">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="panel-title">
+            {{ attributeEditMode ? "Update" : "Add" }} Dictionary Attribute
+          </h3>
+        </div>
+        <div class="modal-body">
+          <form
+            name="dictionaryAttributeForm"
+            [formGroup]="dictionaryAttributeForm"
+            (ngSubmit)="submitDictionary()"
+          >
+            <div
+              class="form-group"
+              [ngClass]="{
+                'has-error':
+                  dictionaryAttributeForm.get('name').errors &&
+                  (dictionaryAttributeForm.get('name').touched ||
+                    dictionaryAttributeForm.get('name').dirty)
+              }"
+            >
+              <label for="name">Name:</label>
+              <input
+                type="text"
+                class="form-control"
+                id="name"
+                placeholder="Enter Attribute Name"
+                name="name"
+                formControlName="name"
+              />
+              @if (
+                (dictionaryAttributeForm.get("name").touched ||
+                  dictionaryAttributeForm.get("name").dirty) &&
+                dictionaryAttributeForm.get("name").hasError("required")
+              ) {
+                <span class="help-block"> Dictionary attribute name is required </span>
+              }
+            </div>
+            <div
+              class="form-group"
+              [ngClass]="{
+                'has-error':
+                  dictionaryAttributeForm.get('attributeId').errors &&
+                  (dictionaryAttributeForm.get('attributeId').touched ||
+                    dictionaryAttributeForm.get('attributeId').dirty)
+              }"
+            >
+              <label for="attributeId">Attribute Id:</label>
+              <input
+                type="text"
+                class="form-control"
+                id="attributeId"
+                placeholder="Enter Attribute Id"
+                name="attributeId"
+                formControlName="attributeId"
+              />
+              @if (
+                (dictionaryAttributeForm.get("attributeId").touched ||
+                  dictionaryAttributeForm.get("attributeId").dirty) &&
+                dictionaryAttributeForm.get("attributeId").hasError("required")
+              ) {
+                <span class="help-block"> Dictionary attribute id is required </span>
+              }
+            </div>
+            <div
+              class="form-group"
+              [ngClass]="{
+                'has-error':
+                  dictionaryAttributeForm.get('type').errors &&
+                  (dictionaryAttributeForm.get('type').touched ||
+                    dictionaryAttributeForm.get('type').dirty)
+              }"
+            >
+              <label for="type">Attribute Type:</label>
+              <input
+                type="text"
+                class="form-control"
+                id="type"
+                placeholder="Enter Attribute Type"
+                name="type"
+                formControlName="type"
+              />
+              @if (
+                (dictionaryAttributeForm.get("type").touched ||
+                  dictionaryAttributeForm.get("type").dirty) &&
+                dictionaryAttributeForm.get("type").hasError("required")
+              ) {
+                <span class="help-block"> Dictionary attribute type is required </span>
+              }
+            </div>
+            <div class="form-group">
+              <label for="vendor">Vendor:</label>
+              <input
+                type="text"
+                class="form-control"
+                id="vendor"
+                placeholder="Enter Vendor"
+                name="vendor"
+                formControlName="vendor"
+                disabled="disabled"
+              />
+            </div>
+            <div
+              class="form-group"
+              [ngClass]="{
+                'has-error':
+                  dictionaryAttributeForm.get('category').errors &&
+                  (dictionaryAttributeForm.get('category').touched ||
+                    dictionaryAttributeForm.get('category').dirty)
+              }"
+            >
+              <label for="category">Category:</label>
+              <p-dropdown
+                [options]="attributeCategoryList"
+                optionValue="label"
+                optionLabel="label"
+                filter="true"
+                filterBy="label"
+                placeholder="Select a Category"
+                formControlName="category"
+              ></p-dropdown>
+
+              @if (
+                (dictionaryAttributeForm.get("category").touched ||
+                  dictionaryAttributeForm.get("category").dirty) &&
+                dictionaryAttributeForm.get("category").hasError("required")
+              ) {
+                <span class="help-block"> Please select dictionary attribute category </span>
+              }
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <div class="addUpdateBtn">
+            <button
+              type="submit"
+              class="btn btn-primary btn-sm"
+              (click)="submitDictionaryAttribute()"
+              [disabled]="!dictionaryAttributeForm.valid"
+            >
+              <i class="fa fa-check-circle"></i>
+              {{ attributeEditMode ? "Update" : "Add" }} Dictionary Attribute
+            </button>
+            <button id="btn" type="button" class="btn btn-default btn-sm" (click)="resetDictAttr()">
+               <img src="assets/img/DashboardIcons/Refresh.svg" />
+              Clear
+            </button>
+            <button
+              type="button"
+              #closeDicAttrPopupButton
+              class="btn btn-danger btn-sm"
+              data-dismiss="modal"
+              (click)="closeDicAttrAddUpdatePopup()"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div> -->
+
+<!-- Show dictionary Attribute Detail Modal -->
+<!-- <div class="modal fade" id="dictionaryAttributeDetailModal" role="dialog">
+  <div class="modal-dialog" style="width: 35%">
+  
+    <div class="modal-content">
+      <div class="modal-header">
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          (click)="closeDicAttrDetailPopup()"
+        >
+          &times;
+        </button>
+        <h3 class="panel-title">{{ dictionaryAttribute.name }} Detail</h3>
+      </div>
+      <div class="modal-body">
+        <div class="container-fluid">
+          <div class="row" id="viewDetail">
+            <div class="col-md-5">
+              <label for="name">Name :</label>
+            </div>
+            <div class="col-md-7">
+              <label for="nameValue">{{ dictionaryAttribute.name }}</label>
+            </div>
+          </div>
+          <div class="row" id="viewDetail">
+            <div class="col-md-5">
+              <label for="type">Type :</label>
+            </div>
+            <div class="col-md-7">
+              <label for="typeValue">{{ dictionaryAttribute.type }}</label>
+            </div>
+          </div>
+          <div class="row" id="viewDetail">
+            <div class="col-md-5">
+              <label for="category">Category :</label>
+            </div>
+            <div class="col-md-7">
+              <label for="categoryValue">
+                {{ dictionaryAttribute.category }}
+              </label>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-5">
+              <label for="attributeId">Attribute Id :</label>
+            </div>
+            <div class="col-md-7">
+              <label for="attributeIdValue">
+                {{ dictionaryAttribute.attributeId }}
+              </label>
+            </div>
+          </div>
+          <div class="row" id="viewDetail">
+            <div class="col-md-5">
+              <label for="dictionaryId">Vendor :</label>
+            </div>
+            <div class="col-md-7">
+              <label for="dictionaryIdValue">
+                {{ dictionaryOfAttribute.vendor }}
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="button"
+          class="btn btn-default"
+          data-dismiss="modal"
+          (click)="closeDicAttrDetailPopup()"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div> -->
+
+<!-- Dictionary Value Modal -->
+
+<!-- <p-dialog
+    header="Dictionary Value Management"
+    [(visible)]="myModal"
+    [style]="{ width: '70%' }"
+    [modal]="true"
+    [responsive]="true"
+    [draggable]="false"
+    [closable]="true"
+    (onHide)="removeRowSelection()"
+  >
+    <div class="modal-body" style="background-color: #dddddd">
+      @if (viewAttrValueAccess) {
+        <div class="row">
+          <div class="col-md-12">
+            <div class="panel">
+              <div class="panel-body">
+                <div class="searchForm">
+                  <form
+                    class="form-inline"
+                    [formGroup]="searchDictionaryValueForm"
+                    (ngSubmit)="searchDictionaryValue()"
+                  >
+                    <div>
+                      <label>Name : &nbsp;</label>
+                      <input
+                        type="text"
+                        id="name"
+                        formControlName="name"
+                        class="form-control"
+                        placeholder="Enter Name"
+                      />
+                      &nbsp; &nbsp;
+                      <label>Value : &nbsp;</label>
+                      <input
+                        type="text"
+                        id="value"
+                        formControlName="value"
+                        class="form-control"
+                        placeholder="Enter Value"
+                      />
+                      &nbsp; &nbsp;
+                      <button type="submit" class="btn btn-primary" id="searchbtn">
+                        <i class="fa fa-search"></i>
+                        Search
+                      </button>
+                      <button
+                        type="reset"
+                        class="btn btn-default"
+                        (click)="clearSearchDictionaryValueForm()"
+                        id="searchbtn"
+                      >
+                         <img src="assets/img/DashboardIcons/Refresh.svg" />
+                        Clear
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+      @if (viewAttrValueAccess) {
+        <div class="row">
+          <div class="col-md-6">
+            <div class="panel">
+              <div class="panel-heading">
+                <h3 class="panel-title" style="font-size: 21px">Dictionary Values</h3>
+                <div class="right">
+                  <button type="button" class="btn-toggle-collapse">
+                    <i class="fa fa-minus-circle"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="panel-body table-responsive">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Type</th>
+                      <th>Value</th>
+                      @if (editAttrValueAccess || deleteAttrValueAccess) {
+                        <th>Action</th>
+                      }
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (
+                      dictionaryValue of dictionaryValueData.dictionaryValueList
+                        | paginate
+                          : {
+                              id: "listing_dictionaryValueData",
+                              itemsPerPage: itemsPerPage_DicValue,
+                              currentPage: currentPage_DicValue,
+                              totalItems: totalRecords_DicValue
+                            };
+                      track dictionaryValue;
+                      let i = $index
+                    ) {
+                      <tr>
+                        <td>{{ dictionaryValue.name }}</td>
+                        <td>{{ dictionaryValue.type }}</td>
+                        <td>{{ dictionaryValue.value }}</td>
+                        @if (editAttrValueAccess || deleteAttrValueAccess) {
+                          <td class="btnAction">
+                            @if (editAttrValueAccess) {
+                              <a
+                                type="button"
+                                class="curson_pointer"
+                                (click)="
+                                  editDictionaryValueById(
+                                    dictionaryValue.dictionaryValueId,
+                                    i,
+                                    dictionaryValue.mvnoId
+                                  )
+                                "
+                              >
+                              <img src="assets/img/DashboardIcons/Edit.svg" >
+                              </a>
+                            }
+                            @if (deleteAttrValueAccess) {
+                              <a
+                                type="button"
+                                class="curson_pointer"
+                                (click)="
+                                  deleteConfirmValue(
+                                    dictionaryValue.dictionaryValueId,
+                                    dictionaryValue.mvnoId
+                                  )
+                                "
+                              >
+                                 <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                              </a>
+                            }
+                          </td>
+                        }
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+                <br />
+                <div class="row">
+                  <div class="col-md-12">
+                    <pagination-controls
+                      id="listing_dictionaryValueData"
+                      maxSize="10"
+                      directionLinks="true"
+                      previousLabel=""
+                      nextLabel=""
+                      (pageChange)="pageChangedForDictionaryValue($event)"
+                    ></pagination-controls>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="panel">
+              <div class="panel-heading">
+                <h3 class="panel-title" style="font-size: 21px">
+                  {{ dicValueEditMode ? "Update" : "Create" }} Dictionary Value
+                </h3>
+                <div class="right">
+                  <button type="button" class="btn-toggle-collapse">
+                    <i class="fa fa-minus-circle"></i>
+                  </button>
+                </div>
+              </div>
+              @if (!createAttrValueAccess && !dicValueEditMode) {
+                <div class="panel-body table-responsive">
+                  Sorry you have not privilege to create operation!
+                </div>
+              }
+              @if (createAttrValueAccess || (dicValueEditMode && editAttrValueAccess)) {
+                <div id="radiusClientFormTabel" class="panel-collapse collapse in">
+                  <form [formGroup]="dictionaryValueForm" (ngSubmit)="submitDictionaryValue()">
+                    <div class="panel-body">
+                      <div
+                        class="form-group"
+                        [ngClass]="{
+                          'has-error':
+                            dictionaryValueForm.get('name').errors &&
+                            (dictionaryValueForm.get('name').touched ||
+                              dictionaryValueForm.get('name').dirty)
+                        }"
+                      >
+                        <label>Name</label>
+                        <input
+                          type="text"
+                          id="name"
+                          formControlName="name"
+                          class="form-control"
+                          placeholder="Enter Name"
+                        />
+                        @if (
+                          (dictionaryValueForm.get("name").touched ||
+                            dictionaryValueForm.get("name").dirty) &&
+                          dictionaryValueForm.get("name").hasError("required")
+                        ) {
+                          <span class="help-block"> Dictionary value name is required </span>
+                        }
+                      </div>
+
+                      <div
+                        class="form-group"
+                        [ngClass]="{
+                          'has-error':
+                            dictionaryValueForm.get('value').errors &&
+                            (dictionaryValueForm.get('value').touched ||
+                              dictionaryValueForm.get('value').dirty)
+                        }"
+                      >
+                        <label>Value</label>
+                        <input
+                          type="text"
+                          name="value"
+                          formControlName="value"
+                          class="form-control"
+                          placeholder="Enter Value"
+                        />
+                        @if (
+                          (dictionaryValueForm.get("value").touched ||
+                            dictionaryValueForm.get("value").dirty) &&
+                          dictionaryValueForm.get("value").hasError("required")
+                        ) {
+                          <span class="help-block"> Value is required </span>
+                        }
+                      </div>
+                      <div class="addUpdateBtn">
+                        <button
+                          type="submit"
+                          class="btn btn-primary"
+                          [disabled]="!dictionaryValueForm.valid || !isSuperAdmin"
+                        >
+                          <i class="fa fa-check-circle"></i>
+                          {{ dicValueEditMode ? "Update" : "Add" }} Dictionary Value
+                        </button>
+                        <br />
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+    <div class="modal-footer">
+      <button
+        type="button"
+        (click)="removeRowSelection()"
+        class="btn btn-default"
+        data-dismiss="modal"
+      >
+        Close
+      </button>
+    </div>
+  </p-dialog> -->
+<!-- </div> -->

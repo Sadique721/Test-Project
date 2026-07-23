@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="create-tblmslabtax-001" author="initial-change">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="tblmslabtax"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="tblmslabtax">
+            <column name="SLABTAXID" type="BIGINT" >
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="NAME" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="RANGEFROM" type="DECIMAL(16,4)"/>
+            <column name="RANGEUPTO" type="DECIMAL(16,4)"/>
+            <column name="RATE" type="DECIMAL(10,2)"/>
+            <column name="TAXID" type="BIGINT"/>
+            <column name="before_discount" type="BIT(1)" defaultValueBoolean="false"/>
+        </createTable>
+
+        <!-- Unique constraint -->
+        <addUniqueConstraint columnNames="SLABTAXID" tableName="tblmslabtax" constraintName="mslabtax_slabtaxId_unq"/>
+
+        <!-- Foreign key -->
+        <addForeignKeyConstraint baseTableName="tblmslabtax"
+                                 baseColumnNames="TAXID"
+                                 constraintName="tblmslabtax_ibfk_1"
+                                 referencedTableName="tblmtax"
+                                 referencedColumnNames="TAXID"
+                                 onDelete="SET NULL"/>
+    </changeSet>
+
+</databaseChangeLog>

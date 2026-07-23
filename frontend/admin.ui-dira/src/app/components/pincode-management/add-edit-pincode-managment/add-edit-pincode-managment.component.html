@@ -1,0 +1,201 @@
+<div class="dialog-container">
+  <div class="dialog-header">
+    {{ data.title }}
+    <span>
+      <a mat-icon-button href="javascript:void(0)" (click)="onCancel()">
+         <img src="assets/img/DashboardIcons/Reject.svg">
+      </a>
+    </span>
+  </div>
+  <div mat-dialog-content>
+    <!-- create new country card start -->
+    <div class="col-md-12">
+      @if (!data.createAcS && !isPincodeEdit) {
+        <mat-card-content class="matcard-content">
+          <div class="panel-body table-responsive">
+            Sorry you have not privilege to create operation!
+          </div>
+        </mat-card-content>
+      }
+      @if (data.createAcS || (isPincodeEdit && data.editAcs)) {
+        <mat-card-content class="matcardContent">
+          <form class="card-form mb-3" [formGroup]="pincodeFormGroup">
+            <div class="row g-3">
+              <!-- Input with label -->
+              <div class="col-md-6 mb-4">
+                <label for="countryname" class="inputLabel">{{data?.pincodeTitle}} *</label>
+                <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                  <input
+                    id="countryname"
+                    class="input-p-5"
+                    matInput
+                    placeholder="Enter {{data?.pincodeTitle}} Name"
+                    formControlName="name"
+                    [ngClass]="{ 'is-invalid': submitted && pincodeFormGroup.controls.name.errors }"
+                    maxLength="250"
+                  />
+                  <mat-error
+                    *ngIf="
+                      pincodeFormGroup.get('name')?.errors?.['required'] &&
+                      (submitted || pincodeFormGroup.get('name')?.touched)
+                    "
+                  >
+                    {{data?.pincodeTitle}} is required
+                  </mat-error>
+                  <mat-error
+                    *ngIf="
+                      submitted && pincodeFormGroup.get('name')?.hasError('cannotContainSpace')
+                    "
+                  >
+                    {{data?.pincodeTitle}} cannot contain only spaces
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <!-- select OLT -->
+              <div class="col-md-6 mb-4">
+                <label for="statusSelect" class="inputLabel">{{data?.cityTitle}} *</label>
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-select
+                    id="statusSelect"
+                    class="input-p-5"
+                    placeholder="Select {{data?.cityTitle}}"
+                    formControlName="cityId"
+                    (selectionChange)="selectCityChange($event)"
+                    [ngClass]="{
+                      'is-invalid': submitted && pincodeFormGroup.controls.status.errors
+                    }"
+                    maxLength="250"
+                  >
+                    <mat-option *ngFor="let city of cityListData" [value]="city.id">
+                      {{ city.name }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error
+                    *ngIf="
+                      pincodeFormGroup.get('cityId')?.errors?.['required'] &&
+                      (submitted || pincodeFormGroup.get('cityId')?.touched)
+                    "
+                  >
+                    {{data?.cityTitle}} is required.
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <!-- select country -->
+              <div class="col-md-6 mb-4">
+                <label for="statusSelect" class="inputLabel">{{data?.countryTitle}} *</label>
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-select
+                    id="statusSelect"
+                    class="input-p-5"
+                    placeholder="Select {{data?.countryTitle}}"
+                    formControlName="countryId"
+                    [ngClass]="{
+                      'is-invalid': submitted && pincodeFormGroup.controls.status.errors
+                    }"
+                    maxLength="250"
+                  >
+                    <mat-option *ngFor="let country of countryListData" [value]="country.id">
+                      {{ country.name }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error
+                    *ngIf="
+                      pincodeFormGroup.get('countryId')?.errors?.['required'] &&
+                      (submitted || pincodeFormGroup.get('countryId')?.touched)
+                    "
+                  >
+                    {{data?.countryTitle}} is required
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <!-- select sub-country -->
+              <div class="col-md-6 mb-4">
+                <label for="statusSelect" class="inputLabel">{{data?.subCountryTitle}} *</label>
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-select
+                    id="statusSelect"
+                    class="input-p-5"
+                    placeholder="Select {{data?.subCountryTitle}}"
+                    formControlName="stateId"
+                    [ngClass]="{
+                      'is-invalid': submitted && pincodeFormGroup.controls.status.errors
+                    }"
+                    maxLength="250"
+                  >
+                    <mat-option *ngFor="let state of stateListData" [value]="state.id">
+                      {{ state.name }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error
+                    *ngIf="
+                      pincodeFormGroup.get('stateId')?.errors?.['required'] &&
+                      (submitted || pincodeFormGroup.get('stateId')?.touched)
+                    "
+                  >
+                    {{data?.subCountryTitle}} is required
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <!-- Select with status -->
+              <div class="col-md-6 mb-4">
+                <label for="statusSelect" class="inputLabel">Status*</label>
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-select
+                    id="statusSelect"
+                    class="input-p-5"
+                    placeholder="Select Status"
+                    formControlName="status"
+                    [ngClass]="{
+                      'is-invalid': submitted && pincodeFormGroup.controls.status.errors
+                    }"
+                    maxLength="250"
+                  >
+                    <mat-option *ngFor="let option of statusOptions" [value]="option.label">
+                      {{ option.label }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error
+                    *ngIf="
+                      pincodeFormGroup.get('status')?.errors?.['required'] &&
+                      (submitted || pincodeFormGroup.get('status')?.touched)
+                    "
+                  >
+                    Status is required
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+          </form>
+        </mat-card-content>
+      }
+    </div>
+    <!-- create new country card end -->
+  </div>
+
+  <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+    <button
+      mat-button
+      mat-flat-button
+      color="primary"
+      class="button-normal"
+      type="submit"
+      (click)="onSubmit()"
+    >
+      {{ data.title }}
+    </button>
+    <button
+      mat-stroked-button
+      matButton="outlined"
+      type="button"
+      color="primary"
+      class="button-normal"
+      (click)="onCancel()"
+    >
+      {{ data.noLabel || "Cancel" }}
+    </button>
+  </div>
+</div>

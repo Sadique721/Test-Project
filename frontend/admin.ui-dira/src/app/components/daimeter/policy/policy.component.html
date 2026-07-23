@@ -1,0 +1,414 @@
+<div class="row header-row p-0 m-0">
+    <mat-card class="cardWithShadow w-100">
+        <mat-card-content class="mat-card-content-border">
+            <div class="row">
+                <div class="col-lg-3 col-sm-3 p-0 m-0">
+                    <mat-form-field appearance="outline" class="w-100 hide-hint mr-10 header-input"
+                        style="padding-left: 16px">
+                        <input class="input-p-5" matInput [(ngModel)]="searchkey" placeholder="Enter Name"
+                            (keydown.enter)="getsearch()" />
+                        <mat-icon matSuffix class="search-header-search-icon">
+                            <i class="pi pi-search icon-size"></i>
+                        </mat-icon>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-lg-4 col-sm-4">
+                    <div class="d-flex" style="margin-left: -2%">
+                        <button class="button-normal mr-10" mat-button mat-flat-button color="primary"
+                            (click)="getsearch()">
+                            Search
+                        </button>
+
+                        <button mat-stroked-button matButton="outlined" class="button-normal " (click)="listViewData()">
+                            Clear
+                        </button>
+                    </div>
+                </div>
+
+                <div class="col-lg-5 col-sm-5 search-div d-flex justify-content-end">
+                    <!-- <div class="d-flex justify-content-end">
+                        <button mat-button mat-flat-button color="primary" (click)="createData()"
+                            class="button-normal mr-10" style="width: auto">
+                            Add Policy
+                        </button>
+                    </div> -->
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+<div class="container-fluid contain-flud">
+
+    <div class="row">
+        <div class="col-md-12">
+            <mat-card class="cardWithShadow">
+                <mat-card-content class="mat-card-content-border">
+                    <div class="country-table-list">
+                        <div class="example-container mat-elevation-z8" tabindex="0">
+                            <table mat-table [dataSource]="dataSource.data.slice(
+            currentPageIndex * itemsPerPage,
+            currentPageIndex * itemsPerPage + itemsPerPage
+          )" class="mat-elevation-z8" style="width: 100%;">
+
+                                <!-- Policy ID Column -->
+                                <ng-container matColumnDef="id">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef> Policy ID </th>
+                                    <td mat-cell *matCellDef="let element"> {{element.id}} </td>
+                                </ng-container>
+
+                                <!-- Name Column -->
+                                <ng-container matColumnDef="name">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef> Name </th>
+                                    <td mat-cell *matCellDef="let element"> {{element.name}} </td>
+                                </ng-container>
+
+                                <!-- Description Column -->
+                                <ng-container matColumnDef="description">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef> Description </th>
+                                    <td mat-cell *matCellDef="let element">
+                                        {{element.description || '—'}}
+                                    </td>
+                                </ng-container>
+
+                                <!-- QoS Speed Column -->
+                                <ng-container matColumnDef="qosSpeed">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef> QoS Speed </th>
+                                    <td mat-cell *matCellDef="let element">
+                                        <span class="speed-badge">{{element.qosSpeed}} Mbps</span>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Type Column -->
+                                <ng-container matColumnDef="type">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef> Type </th>
+                                    <td mat-cell *matCellDef="let element">
+                                        <span class="type-badge"
+                                            [ngClass]="'type-' + (element.type || 'default')?.toLowerCase()">
+                                            {{element.type || '—'}}
+                                        </span>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Created By Column -->
+                                <ng-container matColumnDef="createByName">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef> Created By </th>
+                                    <td mat-cell *matCellDef="let element"> {{element.createByName || '—'}} </td>
+                                </ng-container>
+                                <ng-container matColumnDef="action">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef> Action </th>
+                                    <td mat-cell *matCellDef="let element"> <a mat-icon-button matTooltip="view"
+                                            href="javascript:void(0)" (click)="AllDetails(element)">
+                                            <img src="assets/img/DashboardIcons/eye-svgrepo-com (1) 1.svg">
+                                        </a>
+                                        <!-- <a mat-icon-button matTooltip="edit" href="javascript:void(0)"
+                                            *ngIf="editAccess" (click)="edit(element)">
+                                            <img src="assets/img/DashboardIcons/Edit.svg">
+                                        </a> -->
+                                        <!-- <a mat-icon-button matTooltip="delete" href="javascript:void(0)"
+                                            *ngIf="deleteAccess" (click)="delete(element)">
+                                            <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                        </a> -->
+                                    </td>
+                                </ng-container>
+
+                                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                            </table>
+                        </div>
+                        <mat-paginator [length]="dataSource.data.length" [pageSize]="itemsPerPage"
+                            [pageIndex]="currentPageIndex" [pageSizeOptions]="[5,10,20,50,100]" showFirstLastButtons
+                            (page)="currentPageIndex = $event.pageIndex; itemsPerPage = $event.pageSize">
+                        </mat-paginator>
+
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </div>
+</div>
+<ng-template #addEditDialog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <!-- Header -->
+        <div class="dialog-header dialog-title">
+            {{ isPolicyEdit ? "Update" : "Create" }} Policy
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <form [formGroup]="policyForm">
+            <div mat-dialog-content>
+                <div class="row header-row p-0 m-0">
+                    <mat-card class="cardWithShadow w-100">
+                        <mat-card-content class="mat-card-content-border">
+                            <ng-container *ngIf="!createAccess && !isPolicyEdit">
+                                <mat-card-content class="matcard-content">
+                                    <div class="panel-body table-responsive">
+                                        Sorry you have not privilege to create operation!
+                                    </div>
+                                </mat-card-content>
+                            </ng-container>
+                            @if (createAccess || (isPolicyEdit && editAccess)) {
+                            <div class="row">
+                                <!-- Name -->
+                                <div class="col-md-6">
+                                    <label class="inputLabel">Name *</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <input matInput formControlName="name" placeholder="Enter policy name"
+                                            maxlength="100" />
+                                        <mat-error *ngIf="policyForm.controls.name.errors?.required">
+                                            Name is required
+                                        </mat-error>
+                                        <mat-error *ngIf="policyForm.controls.name.errors?.minlength">
+                                            Name must be at least 2 characters
+                                        </mat-error>
+                                        <mat-error *ngIf="policyForm.controls.name.errors?.maxlength">
+                                            Name cannot exceed 100 characters
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Description -->
+                                <div class="col-md-6">
+                                    <label class="inputLabel">Description *</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <input matInput formControlName="description" placeholder="Enter description"
+                                            maxlength="500" />
+                                        <mat-error *ngIf="policyForm.controls.description.errors?.required">
+                                            Description is required
+                                        </mat-error>
+                                        <mat-error *ngIf="policyForm.controls.description.errors?.maxlength">
+                                            Description cannot exceed 500 characters
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- TH Policy Name -->
+                                <div class="col-md-6">
+                                    <label class="inputLabel">TH Policy Name *</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <input matInput formControlName="thPolicyName"
+                                            placeholder="Enter TH policy name" maxlength="100" />
+                                        <mat-error *ngIf="policyForm.controls.thPolicyName.errors?.required">
+                                            TH Policy Name is required
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Base Policy Name -->
+                                <div class="col-md-6">
+                                    <label class="inputLabel">Base Policy Name *</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <input matInput formControlName="basePolicyName"
+                                            placeholder="Enter base policy name" maxlength="100" />
+                                        <mat-error *ngIf="policyForm.controls.basePolicyName.errors?.required">
+                                            Base Policy Name is required
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- MVNO ID -->
+                                <div class="col-md-4">
+                                    <label class="inputLabel">MVNO ID *</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select formControlName="mvnoid" placeholder="Select MVNO">
+                                            <mat-option *ngFor="let mvno of mvnoList" [value]="mvno.id">
+                                                {{ mvno.name }} (ID: {{ mvno.id }})
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error *ngIf="policyForm.controls.mvnoid.errors?.required">
+                                            MVNO ID is required
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Type -->
+                                <div class="col-md-4">
+                                    <label class="inputLabel">Type</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select formControlName="type" placeholder="Select type">
+                                            <mat-option *ngFor="let t of typeList" [value]="t.value">
+                                                {{ t.label }}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- QoS Speed -->
+                                <div class="col-md-4">
+                                    <label class="inputLabel">QoS Speed *</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select formControlName="qosSpeed" placeholder="Select QoS speed">
+                                            <mat-option *ngFor="let speed of qosSpeedList" [value]="speed.value">
+                                                {{ speed.label }}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error *ngIf="policyForm.controls.qosSpeed.errors?.required">
+                                            QoS Speed is required
+                                        </mat-error>
+                                        <mat-error *ngIf="policyForm.controls.qosSpeed.errors?.pattern">
+                                            QoS Speed must be a number
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Base Parameters -->
+                                <div class="col-md-4">
+                                    <label class="inputLabel">Base Param 1</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <input matInput formControlName="baseParam1" placeholder="Enter base param 1" />
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="inputLabel">Base Param 2</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <input matInput formControlName="baseParam2" placeholder="Enter base param 2" />
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="inputLabel">Base Param 3</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <input matInput formControlName="baseParam3" placeholder="Enter base param 3" />
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- TH Parameters -->
+                                <div class="col-md-4">
+                                    <label class="inputLabel">TH Param 1</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <input matInput formControlName="thParam1" placeholder="Enter TH param 1" />
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="inputLabel">TH Param 2</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <input matInput formControlName="thParam2" placeholder="Enter TH param 2" />
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="inputLabel">TH Param 3</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <input matInput formControlName="thParam3" placeholder="Enter TH param 3" />
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Profile UIDs -->
+                                <div class="col-md-6">
+                                    <label class="inputLabel">Upstream Profile UID</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <input matInput type="number" formControlName="upstreamProfileUID"
+                                            placeholder="Enter upstream profile UID" />
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="inputLabel">Downstream Profile UID</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <input matInput type="number" formControlName="downstreamProfileUID"
+                                            placeholder="Enter downstream profile UID" />
+                                    </mat-form-field>
+                                </div>
+                            </div>
+
+                            }
+                        </mat-card-content>
+                    </mat-card>
+                </div>
+            </div>
+            <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+                <button mat-button mat-flat-button color="primary" class="button-normal" type="submit"
+                    (click)="onSubmit(dialogRef)">
+                    {{ isPolicyEdit ? "Update" : "Create" }} Policy
+                </button>
+                <button mat-stroked-button matButton="outlined" type="button" color="primary" class="button-normal"
+                    (click)="dialogRef.close()">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+</ng-template>
+
+
+
+<ng-template #detailsDialog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <!-- Header -->
+        <div class="dialog-header dialog-title">
+            {{ viewTrcData?.name }} Policy Details
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <div mat-dialog-content>
+            <mat-card>
+                <mat-card-content>
+                    <div class="row mt-4">
+                        <div class="col-lg-4 col-md-4 col-sm-12 dataGroup" *ngFor="let field of policyDetailFields">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">{{ field.label }}</span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">
+                                    <ng-container [ngSwitch]="field.key">
+                                        <span *ngSwitchCase="'qosSpeed'" class="speed-badge">
+                                            {{ viewTrcData[field.key] || '—' }} Mbps
+                                        </span>
+                                        <span *ngSwitchCase="'type'" class="type-badge"
+                                            [ngClass]="'type-' + (viewTrcData[field.key] || 'default')?.toLowerCase()">
+                                            {{ viewTrcData[field.key] || '—' }}
+                                        </span>
+                                        <span *ngSwitchCase="'createDate'">
+                                            {{ viewTrcData[field.key] | date:'medium' || '—' }}
+                                        </span>
+                                        <span *ngSwitchCase="'lastModifiedDate'">
+                                            {{ viewTrcData[field.key] | date:'medium' || '—' }}
+                                        </span>
+                                        <span *ngSwitchDefault>
+                                            {{ viewTrcData[field.key] || '—' }}
+                                        </span>
+                                    </ng-container>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </div>
+</ng-template>
+<ng-template #confirmDialog let-data>
+    <div class="dialog-container">
+        <div class="dialog-header dialog-header-titleFont">
+            {{ data.title || "Delete Confirmation" }}
+            <span class="w-h-18">
+                <a mat-icon-button href="javascript:void(0)" mat-dialog-close="false">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+            <p class="dialog-description">{{ data.description }}</p>
+
+            <div mat-dialog-actions class="p-0">
+                <button mat-flat-button type="button" class="primary" [mat-dialog-close]="true">
+                    {{ data.yesLabel || "Confirm" }}
+                </button>
+                <button mat-stroked-button matButton="outlined" color="primary" mat-dialog-close="false">
+                    {{ data.noLabel || "Cancel" }}
+                </button>
+            </div>
+        </div>
+    </div>
+</ng-template>

@@ -1,0 +1,17 @@
+package com.savbill.cpm.modules.InventoryManagement.ItemGroup;
+
+import lombok.Data;
+
+import java.util.List;
+
+@Data
+public class ItemAssemblyProductMappingDto {
+
+    private Long id;
+
+    private Long itemid;
+
+    private List<ItemAssemblyDto>  itemGroup;
+
+
+}

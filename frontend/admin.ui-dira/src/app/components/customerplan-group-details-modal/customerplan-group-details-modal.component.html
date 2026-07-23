@@ -1,0 +1,109 @@
+<!-- Modal -->
+<div
+  class="modal fade"
+  id="{{ dialogId }}"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="myModalLabel"
+  >
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title" id="myModalLabel" style="color: #fff !important">Plan Details</h4>
+      </div>
+
+      <div class="modal-body">
+        <div class="panel-body table-responsive">
+          <div class="row">
+            @if (planMappingList.length !== 0) {
+              <div class="col-lg-12 col-md-12">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <!-- <th>Service</th> -->
+                      <th>Plan</th>
+                      <th>Invoice Type</th>
+                      <th>Validity</th>
+                      <th>
+                        @if (this.customerBill == 'ORGANIZATION') {
+                          <span>Old offerPrice</span>
+                        }
+                        @if (this.customerBill !== 'ORGANIZATION') {
+                          <span>Offer Price</span>
+                        }
+                      </th>
+                      @if (this.customerBill == 'ORGANIZATION') {
+                        <th>New offerPrice</th>
+                      }
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (
+                      plan of planMappingList
+                      | paginate
+                      : {
+                      id: 'custPlanpageData',
+                      itemsPerPage: MasteritemsPerPage,
+                      currentPage: currentPageMasterSlab,
+                      totalItems: MastertotalRecords
+                      }; track
+                      plan; let i = $index) {
+                      <tr
+                        >
+                        <td>
+                          {{ plan.planName }}
+                        </td>
+                        <td>{{ plan.invoiceType !== null ? plan.invoiceType : "-" }}</td>
+                        <td>
+                          @for (list of dataPlan; track list; let j = $index) {
+                            <span>
+                              @if (i === j) {
+                                <span>
+                                  {{ list.validity }} {{ list.unitsOfValidity }}
+                                </span>
+                              }
+                            </span>
+                          }
+                        </td>
+                        <td>
+                          {{ plan.offerPrice | number : "1.2-2" }}
+                        </td>
+                        @if (this.customerBill == 'ORGANIZATION') {
+                          <td>
+                            {{ plan.newAmount }}
+                          </td>
+                        }
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+                <br />
+                <div class="pagination_Dropdown">
+                  <pagination-controls
+                    id="custPlanpageData"
+                    maxSize="10"
+                    directionLinks="true"
+                    previousLabel=""
+                    nextLabel=""
+                    (pageChange)="pageChangedMasterList($event)"
+                  ></pagination-controls>
+                </div>
+              </div>
+            }
+            @if (planMappingList.length === 0) {
+              <div class="col-lg-12 col-md-12">
+                Details are not available
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,1728 @@
+<div class="container-fluid service-management-container">
+    <!-- EXTERNAL COMPONENTS - KEEP AS IS -->
+    @if (displaySelectParentCustomer) {
+    <app-customer-select [type]="custType" [custId]="custData.id" [selectedCust]="selectedParentCust"
+        (selectedCustChange)="selectedCustChange($event)" (closeParentCust)="closeParentCust()"></app-customer-select>
+    }
+
+    @if (showPlanConnectionNo) {
+    <app-plan-connection-no [planForConnection]="planForConnection"
+        (closeDialog)="closeDialog()"></app-plan-connection-no>
+    }
+
+    @if (ifModelIsShow) {
+    <app-workflow-audit-details-modal [auditcustid]="auditcustid" dialogId="custauditWorkflowModal"
+        (closeParentCustt)="closeParentCustt()"></app-workflow-audit-details-modal>
+    }
+
+    <!-- HEADER SECTION -->
+    <div class="row" *ngIf="!ifcustCaf">
+        <div class="col-md-12">
+            <mat-card class="cardWithShadow">
+                <mat-card-header>
+                    <img src="assets/img/DashboardIcons/Back Arrow.svg" alt="arrow back" class="m-r-10"
+                        (click)="customerDetailOpen()">
+                    <div style="font-size:x-large; align-items: center; font-weight: 500; align-content: center;">
+                        {{ custData.title }} {{ custData.firstname }} {{ custData.lastname }} - Service Details
+                    </div>
+                    <div class="m-l-auto">
+                        <!-- Bulk Action Buttons -->
+                        <button
+                            *ngIf="custData.status !== 'newactivation' && custData.status && serviceTerminationAccess"
+                            mat-icon-button color="warn" [disabled]="!serviceStopBulkFlag"
+                            (click)="openPaushSearviceModel('', 'Delete')" matTooltip="Service Termination">
+                            <img width="32" height="32" src="assets/img/DashboardIcons/Service Termination.svg" />
+                        </button>
+
+                        <button *ngIf="custData.status !== 'newactivation' && serviceHoldAccess" mat-icon-button
+                            color="accent" [disabled]="!serviceStopBulkFlag" (click)="
+                          isServiceResumeValid()
+                            ? openPaushSearviceModel('', 'Start')
+                            : openPaushSearviceModel('', 'Pause')
+                        " matTooltip="Service Hold/Resume">
+
+                            <img width="32" height="32" src="assets/img/DashboardIcons/Resume & Pause.svg" />
+
+                        </button>
+
+                        <button *ngIf="custData.status !== 'newactivation' && custData.status && serviceStopAccess"
+                            mat-icon-button color="warn" [disabled]="!serviceStopBulkFlag"
+                            (click)="openPaushSearviceModel('', 'Stop')" matTooltip="Service Stop">
+                            <img width="32" height="32" src="assets/img/DashboardIcons/Service Stop.svg" />
+                        </button>
+
+                        <button mat-icon-button (click)="getActivePlanDetails()" matTooltip="Refresh">
+                            <img src="assets/img/DashboardIcons/Refresh.svg" />
+                        </button>
+                    </div>
+                </mat-card-header>
+
+                <mat-card-content>
+                    <div class="m-b-20">
+                        <button *ngIf="createServiceAccess" mat-flat-button color="primary"
+                            (click)="openAddServiceModal()" [disabled]="
+                        commondropdownService.isPlanOnDemand ||
+                        custData?.status?.toLowerCase() == 'rejected' ||
+                        custData?.status?.toLowerCase() === 'suspended' ||
+                        custData?.status?.toLowerCase() === 'inactive' ||
+                        custData?.status?.toLowerCase() === 'terminated'
+                      ">
+                            <mat-icon>add</mat-icon> Add Service
+                        </button>
+                    </div>
+                    <!-- SERVICES TABLE -->
+                    <div style="overflow-x:auto !important" *ngIf="custCurrentPlanList?.length > 0">
+                        <table mat-table [dataSource]="custCurrentPlanList" class="w-100 mat-elevation-z2">
+                            <!-- Checkbox Column -->
+                            <ng-container matColumnDef="select">
+                                <th mat-header-cell *matHeaderCellDef style="width: 50px"></th>
+                                <td mat-cell *matCellDef="let plan">
+                                    <mat-checkbox *ngIf="
+                  plan.custPlanStatus?.toLowerCase() != 'terminate' &&
+                  plan.custPlanStatus?.toLowerCase() != 'disable' &&
+                  plan.invoiceType != 'Group' &&
+                  chekcPlanGroup(plan, custCurrentPlanList)
+                " (change)="seviceStopBulk(plan, $event)" [checked]="plan.selected" color="primary"></mat-checkbox>
+                                </td>
+                            </ng-container>
+
+                            <!-- Service Name -->
+                            <ng-container matColumnDef="service">
+                                <th mat-header-cell *matHeaderCellDef>Service Name</th>
+                                <td mat-cell *matCellDef="let plan">{{ plan.service }}</td>
+                            </ng-container>
+
+                            <!-- Serial No -->
+                            <ng-container matColumnDef="serialNo">
+                                <th mat-header-cell *matHeaderCellDef>Serial No</th>
+                                <td mat-cell *matCellDef="let plan">
+                                    <a href="javascript:void(0)" (click)="openPlanConnectionModal(plan)"
+                                        class="link-text">
+                                        {{ getSerialNumber(plan) !== "" ? getSerialNumber(plan) : "NA" }}
+                                    </a>
+                                </td>
+                            </ng-container>
+
+                            <!-- Invoice Type -->
+                            <ng-container matColumnDef="invoiceType">
+                                <th mat-header-cell *matHeaderCellDef>Invoice Type</th>
+                                <td mat-cell *matCellDef="let plan">
+                                    {{ plan.invoiceType !== null ? plan.invoiceType : "-" }}
+                                </td>
+                            </ng-container>
+
+                            <!-- Current Plan -->
+                            <ng-container matColumnDef="currentPlan">
+                                <th mat-header-cell *matHeaderCellDef>Current Plan</th>
+                                <td mat-cell *matCellDef="let plan">{{ plan.planName }}</td>
+                            </ng-container>
+
+                            <!-- Expiry Date -->
+                            <ng-container matColumnDef="expiryDate">
+                                <th mat-header-cell *matHeaderCellDef>Expiry Date</th>
+                                <td mat-cell *matCellDef="let plan">
+                                    <span *ngIf="custType == 'Prepaid'">
+                                        {{ plan.serviceEndDate ? (plan.serviceEndDate | date: "dd/MM/yyyy hh:mm a") :
+                                        "-" }}
+                                    </span>
+                                    <span *ngIf="custType != 'Prepaid'">N/A</span>
+                                </td>
+                            </ng-container>
+
+                            <!-- Service Hold Date -->
+                            <ng-container matColumnDef="serviceHoldDate">
+                                <th mat-header-cell *matHeaderCellDef>Service Hold Date</th>
+                                <td mat-cell *matCellDef="let plan">
+                                    {{ plan.serviceHoldDate ? (plan.serviceHoldDate | date: "dd/MM/yyyy hh:mm a") : "-"
+                                    }}
+                                </td>
+                            </ng-container>
+
+                            <!-- Service Resume Date -->
+                            <ng-container matColumnDef="serviceResumeDate">
+                                <th mat-header-cell *matHeaderCellDef>Service Resume Date</th>
+                                <td mat-cell *matCellDef="let plan">
+                                    {{
+                                    plan.serviceResumeDate ? (plan.serviceResumeDate | date: "dd/MM/yyyy hh:mm a") : "-"
+                                    }}
+                                </td>
+                            </ng-container>
+
+                            <!-- Status -->
+                            <ng-container matColumnDef="status">
+                                <th mat-header-cell *matHeaderCellDef>Status</th>
+                                <td mat-cell *matCellDef="let plan">
+                                    <span class="status-badge" [ngClass]="{
+                  'status-active': getStatusDisplay(plan) === 'Active',
+                  'status-hold': getStatusDisplay(plan) === 'Hold',
+                  'status-inactive': getStatusDisplay(plan) === 'Inactive',
+                  'status-disabled': getStatusDisplay(plan) === 'Disabled',
+                  'status-terminated': getStatusDisplay(plan) === 'Terminated'
+                }">
+                                        {{ getStatusDisplay(plan) }}
+                                    </span>
+                                </td>
+                            </ng-container>
+
+                            <!-- Hold By -->
+                            <ng-container matColumnDef="holdBy">
+                                <th mat-header-cell *matHeaderCellDef>Hold by</th>
+                                <td mat-cell *matCellDef="let plan">{{ plan.serviceHoldBy }}</td>
+                            </ng-container>
+
+                            <!-- Resume By -->
+                            <!-- <ng-container matColumnDef="resumeBy">
+                                <th mat-header-cell *matHeaderCellDef>Resume By</th>
+                                <td mat-cell *matCellDef="let plan">{{ plan.serviceResumeBy }}</td>
+                            </ng-container> -->
+
+                            <!-- Remarks -->
+                            <ng-container matColumnDef="remarks">
+                                <th mat-header-cell *matHeaderCellDef>Remarks</th>
+                                <td mat-cell *matCellDef="let plan">
+                                    {{
+                                    plan.custPlanStatus?.toLowerCase() === "hold"
+                                    ? plan.serviceHoldRemarks
+                                    : plan.serviceResumeRemarks
+                                    }}
+                                </td>
+                            </ng-container>
+
+                            <!-- Action Column -->
+                            <!-- ============================================ -->
+                            <!-- ACTION COLUMN - SERVICE MANAGEMENT -->
+                            <!-- ============================================ -->
+                            <ng-container matColumnDef="action">
+                                <th mat-header-cell *matHeaderCellDef style="width: 280px; text-align: center;">Action
+                                </th>
+                                <td mat-cell *matCellDef="let plan">
+                                    <div
+                                        class="action-buttons d-flex flex-wrap gap-1 justify-content-center align-items-center">
+
+                                        <!-- ========== PRIMARY ACTIONS ========== -->
+
+                                        <!-- Service Termination -->
+                                        <button *ngIf="serviceTerminationAccess" mat-icon-button color="warn"
+                                            matTooltip="Service Termination" matTooltipPosition="above" [disabled]="!(plan.nextStaff == null && plan.nextTeamHierarchyMappingId == null) ||
+                                                           plan.custServMappingStatus?.toLowerCase() == 'rejected' ||
+                                                           plan.custServMappingStatus?.toLowerCase() === 'terminate' ||
+                                                           custData.status?.toLowerCase() === 'newactivation'"
+                                            (click)="openPaushSearviceModel(plan, 'Delete')">
+
+                                            <img width="32" height="32"
+                                                src="assets/img/DashboardIcons/Service Termination.svg" />
+
+                                        </button>
+
+                                        <!-- ========== WORKFLOW ACTIONS ========== -->
+
+                                        <!-- Pick Service -->
+                                        <button *ngIf="plan.custServMappingStatus?.toLowerCase() !== 'newactivation' &&
+                                                       plan.nextStaff == null && 
+                                                       plan.nextTeamHierarchyMappingId !== null" mat-icon-button
+                                            color="primary" matTooltip="Pick Service" matTooltipPosition="above"
+                                            [disabled]="(plan.nextStaff != null && plan.nextTeamHierarchyMappingId == null) ||
+                                                           (plan.nextStaff == null && plan.nextTeamHierarchyMappingId == null) ||
+                                                           plan.custPlanStatus?.toLowerCase() === 'stop' ||
+                                                           plan.custServMappingStatus?.toLowerCase() == 'rejected' ||
+                                                           plan.custServMappingStatus?.toLowerCase() === 'stop' ||
+                                                           (plan.nextStaff != null && plan.nextTeamHierarchyMappingId != null) ||
+                                                           custData.status?.toLowerCase() === 'newactivation'"
+                                            (click)="pickModalOpen(plan)">
+                                            <mat-icon>assignment_ind</mat-icon>
+                                        </button>
+
+                                        <!-- Approve Service -->
+                                        <button *ngIf="plan.custServMappingStatus?.toLowerCase() !== 'newactivation'"
+                                            mat-icon-button color="primary" matTooltip="Approve Service"
+                                            matTooltipPosition="above" [disabled]="plan.nextStaff != staffUserId ||
+                                                           plan?.custServMappingStatus?.toLowerCase() == 'rejected' ||
+                                                           custData?.status?.toLowerCase() === 'newactivation' ||
+                                                           plan?.discountFlowInProcess?.toLowerCase() == 'yes'"
+                                            (click)="approvePlanOpen(plan.planId, '', plan.customerServiceMappingId, '')">
+                                            <img src="assets/img/DashboardIcons/Verify.svg" alt="Approve" />
+                                        </button>
+
+                                        <!-- Reject Service -->
+                                        <button *ngIf="plan.custServMappingStatus?.toLowerCase() !== 'newactivation'"
+                                            mat-icon-button color="warn" matTooltip="Reject Service"
+                                            matTooltipPosition="above" [disabled]="plan.nextStaff != staffUserId ||
+                                                           plan.custServMappingStatus?.toLowerCase() == 'rejected' ||
+                                                           custData.status?.toLowerCase() === 'newactivation' ||
+                                                           plan.custPlanStatus?.toLowerCase() === 'stop' ||
+                                                           plan.discountFlowInProcess?.toLowerCase() == 'yes'"
+                                            (click)="rejectPlanOpen(plan.planId, '', plan.customerServiceMappingId, '')">
+                                            <img src="assets/img/DashboardIcons/Reject.svg" />
+                                        </button>
+
+                                        <!-- Reassign Service -->
+                                        <button *ngIf="plan.custServMappingStatus?.toLowerCase() !== 'newactivation'"
+                                            mat-icon-button color="accent" matTooltip="Reassign Service"
+                                            matTooltipPosition="above" [disabled]="plan.nextStaff != staffUserId ||
+                                                           plan.custPlanStatus?.toLowerCase() === 'stop' ||
+                                                           plan.custServMappingStatus?.toLowerCase() === 'stop' ||
+                                                           plan.custServMappingStatus?.toLowerCase() == 'rejected' ||
+                                                           custData.status?.toLowerCase() === 'newactivation' ||
+                                                           plan.discountFlowInProcess?.toLowerCase() == 'yes'"
+                                            (click)="StaffReasignList(plan)">
+                                            <img width="32" height="32" src="assets/img/DashboardIcons/Refresh.svg" />
+                                        </button>
+
+                                        <!-- ========== NEW ACTIVATION WORKFLOW ========== -->
+
+                                        <!-- New Activation - Pick -->
+                                        <button *ngIf="plan.custServMappingStatus?.toLowerCase() === 'newactivation' &&
+                                                       plan.nextStaff == null && 
+                                                       plan.nextTeamHierarchyMappingId !== null" mat-icon-button
+                                            color="primary" matTooltip="Pick Service" matTooltipPosition="above"
+                                            [disabled]="(plan.nextStaff != null && plan.nextTeamHierarchyMappingId == null) ||
+                                                           (plan.nextStaff == null && plan.nextTeamHierarchyMappingId == null) ||
+                                                           plan.custPlanStatus?.toLowerCase() === 'stop' ||
+                                                           plan.custServMappingStatus?.toLowerCase() === 'stop' ||
+                                                           plan.custServMappingStatus?.toLowerCase() == 'rejected' ||
+                                                           custData.status?.toLowerCase() === 'newactivation' ||
+                                                           (plan.nextStaff != null && plan.nextTeamHierarchyMappingId != null)"
+                                            (click)="pickModalOpen(plan)">
+                                            <mat-icon>assignment_ind</mat-icon>
+                                        </button>
+
+                                        <!-- New Activation - Approve -->
+                                        <button *ngIf="plan.custServMappingStatus?.toLowerCase() === 'newactivation'"
+                                            mat-icon-button color="primary" matTooltip="Approve Service"
+                                            matTooltipPosition="above" [disabled]="plan.custPlanStatus?.toLowerCase() === 'stop' ||
+                                                           plan.nextStaff != staffUserId ||
+                                                           plan.custServMappingStatus?.toLowerCase() == 'rejected' ||
+                                                           custData.status?.toLowerCase() === 'newactivation' ||
+                                                           plan.discountFlowInProcess?.toLowerCase() == 'yes'"
+                                            (click)="approvePlanOpen(plan.planId, '', plan.customerServiceMappingId, plan.custServMappingStatus)">
+                                            <mat-icon>check_circle</mat-icon>
+                                        </button>
+
+                                        <!-- New Activation - Reject -->
+                                        <button *ngIf="plan.custServMappingStatus?.toLowerCase() === 'newactivation'"
+                                            mat-icon-button color="warn" matTooltip="Reject Service"
+                                            matTooltipPosition="above" [disabled]="plan.custPlanStatus?.toLowerCase() === 'stop' ||
+                                                           plan.nextStaff != staffUserId ||
+                                                           plan.custServMappingStatus?.toLowerCase() == 'rejected' ||
+                                                           custData.status?.toLowerCase() === 'newactivation' ||
+                                                           plan.discountFlowInProcess?.toLowerCase() == 'yes'"
+                                            (click)="rejectPlanOpen(plan.planId, '', plan.customerServiceMappingId, plan.custServMappingStatus)">
+                                            <mat-icon>cancel</mat-icon>
+                                        </button>
+
+                                        <!-- New Activation - Reassign -->
+                                        <button *ngIf="plan.custServMappingStatus?.toLowerCase() === 'newactivation'"
+                                            mat-icon-button color="accent" matTooltip="Reassign Service"
+                                            matTooltipPosition="above" [disabled]="plan.nextStaff != staffUserId ||
+                                                           plan.custPlanStatus?.toLowerCase() === 'stop' ||
+                                                           plan.custServMappingStatus?.toLowerCase() == 'rejected' ||
+                                                           plan.custServMappingStatus?.toLowerCase() === 'stop' ||
+                                                           custData.status?.toLowerCase() === 'newactivation' ||
+                                                           plan.discountFlowInProcess?.toLowerCase() == 'yes'"
+                                            (click)="StaffReasignList(plan)">
+                                            <img width="32" height="32" src="assets/img/DashboardIcons/Refresh.svg" />
+                                        </button>
+
+                                        <!-- ========== WORKFLOW STATUS DETAILS ========== -->
+
+                                        <!-- Workflow Status - New Activation (Add) -->
+                                        <button *ngIf="plan.custServMappingStatus?.toLowerCase() === 'newactivation'"
+                                            mat-icon-button color="primary" matTooltip="Workflow Status Details (Add)"
+                                            matTooltipPosition="above" [disabled]="plan.custPlanStatus?.toLowerCase() === 'stop' ||
+                                                           plan.custServMappingStatus?.toLowerCase() === 'stop'"
+                                            (click)="openAddWorkFlow('custauditWorkflowModalService', plan.customerServiceMappingId)">
+                                            <mat-icon>playlist_add_check</mat-icon>
+                                        </button>
+
+                                        <!-- Workflow Status - Edit -->
+                                        <button *ngIf="plan.custServMappingStatus?.toLowerCase() !== 'newactivation'"
+                                            mat-icon-button color="primary" matTooltip="Workflow Status Details (Edit)"
+                                            matTooltipPosition="above" [disabled]="plan.custPlanStatus?.toLowerCase() === 'stop' ||
+                                                           plan.custServMappingStatus?.toLowerCase() === 'stop'"
+                                            (click)="openEditWorkFlow('custauditWorkflowModalService', plan.customerServiceMappingId)">
+                                            <img width="32" height="32"
+                                                src="assets/img/DashboardIcons/WorkFlow status Details.svg" />
+                                        </button>
+
+                                        <!-- ========== AUDIT DETAILS ========== -->
+
+                                        <!-- Audit Details -->
+                                        <button mat-icon-button color="primary" matTooltip="Audit Details"
+                                            matTooltipPosition="above" [disabled]="plan.custPlanStatus?.toLowerCase() === 'stop' ||
+                                                           plan.custServMappingStatus?.toLowerCase() === 'stop'"
+                                            (click)="openAudit(plan.customerServiceMappingId)">
+                                            <img width="32" height="32"
+                                                src="assets/img/DashboardIcons/Audit-Detail.svg" />
+
+                                        </button>
+
+                                        <!-- ========== SERVICE CONTROL ACTIONS ========== -->
+
+                                        <!-- Hold Service -->
+                                        <button *ngIf="plan.custPlanStatus?.toLowerCase() === 'active' &&
+                                                       plan.custPlanStatus?.toLowerCase() !== 'disable' &&
+                                                       serviceHoldAccess &&
+                                                       chekcPlanGroup(plan, custCurrentPlanList)" mat-icon-button
+                                            color="accent" matTooltip="Service Hold" matTooltipPosition="above"
+                                            [disabled]="(plan.invoiceType == 'Group' && custData.parentCustomerId) || (plan.serviceEndDate && (plan.serviceEndDate | date:'yyyyMMdd') < (currentDate | date:'yyyyMMdd'))"
+                                            (click)="openPaushSearviceModel(plan, 'Pause')">
+                                            <img width="32" height="32"
+                                                src="assets/img/DashboardIcons/Resume & Pause.svg" />
+                                        </button>
+
+                                        <!-- Resume Service (from Hold) -->
+                                        <button *ngIf="plan.custPlanStatus?.toLowerCase() != 'disable' &&
+                                                       plan.custPlanStatus?.toLowerCase() === 'hold' &&
+                                                       serviceHoldAccess &&
+                                                       chekcPlanGroup(plan, custCurrentPlanList)" mat-icon-button
+                                            color="primary" matTooltip="Service Resume" matTooltipPosition="above"
+                                            [disabled]="plan.invoiceType == 'Group' || 
+                                                           plan.custPlanStatus?.toLowerCase() === 'stop'"
+                                            (click)="openPaushSearviceModel(plan, 'Start')">
+                                            <img width="32" height="32"
+                                                src="assets/img/DashboardIcons/Resume & Pause.svg" />
+                                        </button>
+
+                                        <!-- Resume Service (from In Progress) -->
+                                        <button *ngIf="plan.custPlanStatus?.toLowerCase() === 'in progress'"
+                                            mat-icon-button color="primary" matTooltip="Service Resume"
+                                            matTooltipPosition="above" [disabled]="plan.invoiceType === 'Group' || 
+                                                           plan.custPlanStatus?.toLowerCase() === 'stop'"
+                                            (click)="openPaushSearviceModel(plan, 'Resume')">
+                                            <img width="32" height="32"
+                                                src="assets/img/DashboardIcons/Resume & Pause.svg" />
+                                        </button>
+
+                                        <!-- Service Stop -->
+                                        <button *ngIf="serviceStopAccess" mat-icon-button color="warn"
+                                            matTooltip="Service Stop" matTooltipPosition="above" [disabled]="plan.custServMappingStatus?.toLowerCase() === 'terminate' ||
+                                                           plan.custPlanStatus?.toLowerCase() === 'stop' ||
+                                                           plan.custPlanStatus?.toLowerCase() == 'disable' ||
+                                                           plan.custServMappingStatus?.toLowerCase() === 'stop' ||
+                                                           plan.custPlanStatus?.toLowerCase() === 'hold'"
+                                            (click)="openPaushSearviceModel(plan, 'Stop')">
+                                            <img width="32" height="32"
+                                                src="assets/img/DashboardIcons/Service Stop.svg" />
+
+                                        </button>
+
+                                        <!-- Service Enable (from Disable) -->
+                                        <button *ngIf="plan.custPlanStatus?.toLowerCase() === 'disable'" mat-icon-button
+                                            color="primary" matTooltip="Service Enable" matTooltipPosition="above"
+                                            [disabled]="plan.custPlanStatus?.toLowerCase() !== 'disable'"
+                                            (click)="openReactivateModel(plan.customerServiceMappingId, 'Start')">
+                                            <mat-icon>power_settings_new</mat-icon>
+                                        </button>
+
+                                    </div>
+                                </td>
+                            </ng-container>
+
+
+                            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                            <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+                        </table>
+
+                        <!-- Paginator -->
+                        <mat-paginator [length]="servicePlantotalRecords" [pageSize]="servicePlanItemPerPage"
+                            [pageSizeOptions]="[5, 10, 20, 50, 100]" (page)="pageChange($event)"
+                            showFirstLastButtons></mat-paginator>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div *ngIf="!custCurrentPlanList || custCurrentPlanList.length === 0" class="empty-state py-5">
+                        <mat-icon class="empty-icon">engineering</mat-icon>
+                        <p class="text-muted">No services available.</p>
+                    </div>
+                </mat-card-content>
+
+            </mat-card>
+        </div>
+    </div>
+
+    <!-- ==================== MATERIAL MODALS ==================== -->
+    <!-- ============================================ -->
+    <!-- STOP/PAUSE/RESUME/DELETE SERVICE DIALOG -->
+    <!-- ============================================ -->
+    <ng-template #stopServiceDialog>
+
+        <!-- Dialog Header -->
+        <div class="dialog-header">
+            <h2 mat-dialog-title class="dialog-title">
+                {{ ifselecResonType }} Reason
+            </h2>
+            <button mat-icon-button mat-dialog-close class="close-button">
+                <img src="assets/img/DashboardIcons/Reject.svg">
+            </button>
+        </div>
+
+        <!-- Dialog Content -->
+        <mat-dialog-content class="dialog-content">
+
+            <!-- Deactivate Reason (for Pause, Delete, Stop, Resume, Hold) -->
+            @if (ifselecResonType === 'Pause' || ifselecResonType === 'Delete' ||
+            ifselecResonType === 'Stop' || ifselecResonType === 'Resume' ||
+            ifselecResonType === 'Hold') {
+            <div class="row mb-3">
+                <div class="col-12">
+                    <label class="inputLabel">Deactivate Reason</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Select a Reason</mat-label>
+                        <mat-select [(ngModel)]="selectDeactivateReason" placeholder="Select a Reason">
+                            @for (option of deactiveDataList; track option.value) {
+                            <mat-option [value]="option.value">
+                                {{ option.text }}
+                            </mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+            </div>
+            }
+
+            <!-- Remark Textarea -->
+            <div class="row">
+                <div class="col-12">
+                    <label class="inputLabel">Remark</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Enter your remarks</mat-label>
+                        <textarea matInput [(ngModel)]="serviceStropRemarks"
+                            placeholder="Please provide detailed remarks..." rows="4">
+                        </textarea>
+                    </mat-form-field>
+                </div>
+            </div>
+
+        </mat-dialog-content>
+
+        <!-- Dialog Footer -->
+        <mat-dialog-actions class="dialog-actions" align="end">
+
+            <!-- Pause Button -->
+            @if (ifselecResonType === 'Pause') {
+            <button mat-flat-button color="accent" [disabled]="!serviceStropRemarks" (click)="pauseService()">
+                <mat-icon>pause_circle</mat-icon>
+                Save
+            </button>
+            }
+
+            <!-- Resume Button -->
+            @if (ifselecResonType === 'Resume' || ifselecResonType === 'Start') {
+            <button mat-flat-button color="primary" [disabled]="!serviceStropRemarks" (click)="playService()">
+                <mat-icon>play_circle</mat-icon>
+                Save
+            </button>
+            }
+
+            <!-- Stop Button -->
+            @if (ifselecResonType === 'Stop') {
+            <button mat-flat-button color="warn" [disabled]="!serviceStropRemarks" (click)="serviceStop()">
+                <mat-icon>stop_circle</mat-icon>
+                Save
+            </button>
+            }
+
+            <!-- Delete Button -->
+            @if (ifselecResonType === 'Delete') {
+            <button mat-flat-button color="warn" [disabled]="!selectDeactivateReason || !serviceStropRemarks"
+                (click)="deleteServicePlanData()">
+                <mat-icon>delete</mat-icon>
+                Delete
+            </button>
+            }
+
+            <!-- Close Button -->
+            <button mat-stroked-button mat-dialog-close>
+                Close
+            </button>
+
+        </mat-dialog-actions>
+
+    </ng-template>
+    <!-- ============================================ -->
+    <!-- APPROVE SERVICE DIALOG -->
+    <!-- ============================================ -->
+    <ng-template #approveServiceDialog>
+        <div class="container-fluid p-0">
+
+            <!-- Dialog Header -->
+
+
+
+            <div class="dialog-header">
+                <mat-card-title class="font-900"> Approve Service</mat-card-title>
+                <span>
+                    <a mat-icon-button href="javascript:void(0)" mat-dialog-close>
+                        <img src="assets/img/DashboardIcons/Reject.svg">
+                    </a>
+                </span>
+            </div>
+            <!-- Dialog Content -->
+            <mat-dialog-content class="dialog-content">
+                <form [formGroup]="assignPlanForm">
+
+                    <!-- Select Staff (Approved state) -->
+                    @if (approved) {
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <h5 class="section-title">Select Staff</h5>
+                            <div class="table-responsive">
+                                <table mat-table [dataSource]="approvePlanData" class="mat-elevation-z2 w-100">
+
+                                    <!-- Radio Button Column -->
+                                    <ng-container matColumnDef="select">
+                                        <th mat-header-cell *matHeaderCellDef style="width: 60px;">Select</th>
+                                        <td mat-cell *matCellDef="let staff">
+                                            <mat-radio-button [value]="staff.id" [(ngModel)]="selectStaff"
+                                                [ngModelOptions]="{standalone: true}">
+                                            </mat-radio-button>
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- Name Column -->
+                                    <ng-container matColumnDef="name">
+                                        <th mat-header-cell *matHeaderCellDef>Name</th>
+                                        <td mat-cell *matCellDef="let staff">{{ staff.fullName }}</td>
+                                    </ng-container>
+
+                                    <!-- Username Column -->
+                                    <ng-container matColumnDef="username">
+                                        <th mat-header-cell *matHeaderCellDef>Username</th>
+                                        <td mat-cell *matCellDef="let staff">{{ staff.username }}</td>
+                                    </ng-container>
+
+                                    <tr mat-header-row *matHeaderRowDef="['select', 'name', 'username']"></tr>
+                                    <tr mat-row *matRowDef="let row; columns: ['select', 'name', 'username']"></tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    }
+
+                    <!-- Remark (Not Approved state) -->
+                    @if (!approved) {
+                    <div class="row">
+                        <div class="col-12">
+                            <label class="inputLabel">Remark</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-label>Enter remark</mat-label>
+                                <textarea matInput formControlName="remark" placeholder="Please provide remarks..."
+                                    rows="4">
+                                </textarea>
+                                <mat-error *ngIf="assignPlanForm.get('remark')?.hasError('required')">
+                                    Remark is required.
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                    }
+
+                </form>
+            </mat-dialog-content>
+
+            <!-- Dialog Footer -->
+            <mat-dialog-actions class="dialog-actions" align="end">
+
+                <!-- Approve Button (Not Approved) -->
+                @if (!approved) {
+                <button mat-flat-button color="primary" (click)="assignPlan()">
+                    <mat-icon>check_circle</mat-icon>
+                    Approve
+                </button>
+                }
+
+                <!-- Assign Button (Approved) -->
+                @if (approved) {
+                <button mat-flat-button color="primary" (click)="assignToStaff(true)">
+                    <mat-icon>assignment_ind</mat-icon>
+                    Assign
+                </button>
+                }
+
+                <!-- Close Button -->
+                <button mat-stroked-button mat-dialog-close (click)="close()">
+                    Close
+                </button>
+
+            </mat-dialog-actions>
+
+        </div>
+    </ng-template>
+    <!-- ============================================ -->
+    <!-- REJECT SERVICE DIALOG -->
+    <!-- ============================================ -->
+    <ng-template #rejectServiceDialog>
+        <div class="container-fluid p-0">
+
+            <!-- Dialog Header -->
+            <div class="dialog-header reject-header">
+                <h2 mat-dialog-title class="dialog-title">
+                    <!-- <mat-icon>cancel</mat-icon> -->
+                    Reject Service
+                </h2>
+                <button mat-icon-button mat-dialog-close class="close-button">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+
+                </button>
+            </div>
+
+            <!-- Dialog Content -->
+            <mat-dialog-content class="dialog-content">
+                <form [formGroup]="rejectPlanForm">
+
+                    <!-- Select Staff (Reject state) -->
+                    @if (reject) {
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <h5 class="section-title">Select Staff</h5>
+                            <div class="table-responsive">
+                                <table mat-table [dataSource]="rejectPlanData" class="mat-elevation-z2 w-100">
+
+                                    <!-- Radio Button Column -->
+                                    <ng-container matColumnDef="select">
+                                        <th mat-header-cell *matHeaderCellDef style="width: 60px;">Select</th>
+                                        <td mat-cell *matCellDef="let staff">
+                                            <mat-radio-button [value]="staff.id" [(ngModel)]="selectStaffReject"
+                                                [ngModelOptions]="{standalone: true}">
+                                            </mat-radio-button>
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- Name Column -->
+                                    <ng-container matColumnDef="name">
+                                        <th mat-header-cell *matHeaderCellDef>Name</th>
+                                        <td mat-cell *matCellDef="let staff">{{ staff.fullName }}</td>
+                                    </ng-container>
+
+                                    <!-- Username Column -->
+                                    <ng-container matColumnDef="username">
+                                        <th mat-header-cell *matHeaderCellDef>Username</th>
+                                        <td mat-cell *matCellDef="let staff">{{ staff.username }}</td>
+                                    </ng-container>
+
+                                    <tr mat-header-row *matHeaderRowDef="['select', 'name', 'username']"></tr>
+                                    <tr mat-row *matRowDef="let row; columns: ['select', 'name', 'username']"></tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    }
+
+                    <!-- Remark (Not Reject state) -->
+                    @if (!reject) {
+                    <div class="row">
+                        <div class="col-12">
+                            <label class="inputLabel">Remark</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-label>Enter remark</mat-label>
+                                <textarea matInput formControlName="remark"
+                                    placeholder="Please provide rejection reason..." rows="4">
+                                </textarea>
+                                <mat-error *ngIf="rejectPlanForm.get('remark')?.hasError('required')">
+                                    Remark is required.
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                    }
+
+                </form>
+            </mat-dialog-content>
+
+            <!-- Dialog Footer -->
+            <mat-dialog-actions class="dialog-actions" align="end">
+
+                <!-- Reject Button (Not Reject state) -->
+                @if (!reject) {
+                <button mat-flat-button color="warn" (click)="rejectPlan()">
+                    <mat-icon>cancel</mat-icon>
+                    Reject
+                </button>
+                }
+
+                <!-- Assign Button (Reject state - No selection) -->
+                @if (reject && !selectStaffReject) {
+                <button mat-flat-button color="warn" disabled>
+                    <mat-icon>assignment_ind</mat-icon>
+                    Assign
+                </button>
+                }
+
+                <!-- Assign Button (Reject state - With selection) -->
+                @if (reject && selectStaffReject) {
+                <button mat-flat-button color="warn" (click)="assignToStaff(false)">
+                    <mat-icon>assignment_ind</mat-icon>
+                    Assign
+                </button>
+                }
+
+                <!-- Close Button -->
+                <button mat-stroked-button mat-dialog-close (click)="closeRejectPlanModal()">
+                    Close
+                </button>
+
+            </mat-dialog-actions>
+
+        </div>
+    </ng-template>
+    <!-- ============================================ -->
+    <!-- REASSIGN SERVICE DIALOG -->
+    <!-- ============================================ -->
+    <ng-template #reassignServiceDialog>
+        <div class="container-fluid p-0">
+
+            <!-- Dialog Header -->
+            <div class="dialog-header">
+                <h2 mat-dialog-title class="dialog-title">
+                    <mat-icon>swap_horiz</mat-icon>
+                    Reassign Service
+                </h2>
+                <button mat-icon-button mat-dialog-close class="close-button">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+
+                </button>
+            </div>
+
+            <!-- Dialog Content -->
+            <mat-dialog-content class="dialog-content">
+                <form [formGroup]="assignPlanForm">
+
+                    <!-- Select Staff -->
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <h5 class="section-title">Select Staff</h5>
+                            <div class="table-responsive">
+                                <table mat-table [dataSource]="approvableStaff" class="mat-elevation-z2 w-100">
+
+                                    <!-- Radio Button Column -->
+                                    <ng-container matColumnDef="select">
+                                        <th mat-header-cell *matHeaderCellDef style="width: 60px;">Select</th>
+                                        <td mat-cell *matCellDef="let staff">
+                                            <mat-radio-button [value]="staff.id" [(ngModel)]="selectStaff"
+                                                [ngModelOptions]="{standalone: true}">
+                                            </mat-radio-button>
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- Name Column -->
+                                    <ng-container matColumnDef="name">
+                                        <th mat-header-cell *matHeaderCellDef>Name</th>
+                                        <td mat-cell *matCellDef="let staff">{{ staff.fullName }}</td>
+                                    </ng-container>
+
+                                    <!-- Username Column -->
+                                    <ng-container matColumnDef="username">
+                                        <th mat-header-cell *matHeaderCellDef>Username</th>
+                                        <td mat-cell *matCellDef="let staff">{{ staff.username }}</td>
+                                    </ng-container>
+
+                                    <tr mat-header-row *matHeaderRowDef="['select', 'name', 'username']"></tr>
+                                    <tr mat-row *matRowDef="let row; columns: ['select', 'name', 'username']"></tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Remark -->
+                    <div class="row">
+                        <div class="col-12">
+                            <label class="inputLabel">Remark</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-label>Enter remark</mat-label>
+                                <textarea matInput formControlName="remark"
+                                    placeholder="Please provide reassignment reason..." rows="4">
+                            </textarea>
+                                <mat-error *ngIf="assignPlanForm.get('remark')?.hasError('required')">
+                                    Remark is required.
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                </form>
+            </mat-dialog-content>
+
+            <!-- Dialog Footer -->
+            <mat-dialog-actions class="dialog-actions" align="end">
+
+                <!-- Assign Button -->
+                <button mat-flat-button color="primary" [disabled]="!assignPlanForm.valid" (click)="reassignWorkflow()">
+                    <!-- <mat-icon>swap_horiz</mat-icon> -->
+                    Assign
+                </button>
+
+                <!-- Close Button -->
+                <button mat-stroked-button mat-dialog-close (click)="closedisplayApprovePlan()">
+                    Close
+                </button>
+
+            </mat-dialog-actions>
+
+        </div>
+    </ng-template>
+    <!-- ============================================ -->
+    <!-- PICK SERVICE DIALOG -->
+    <!-- ============================================ -->
+    <ng-template #pickServiceDialog>
+        <div class="container-fluid p-0">
+
+            <!-- Dialog Header -->
+            <div class="dialog-header">
+                <h2 mat-dialog-title class="dialog-title">
+                    <!-- <mat-icon>assignment_ind</mat-icon> -->
+                    Pick Service
+                </h2>
+                <button mat-icon-button mat-dialog-close class="close-button">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+
+                </button>
+            </div>
+
+            <!-- Dialog Content -->
+            <mat-dialog-content class="dialog-content">
+
+                <div class="alert alert-info" role="alert">
+                    <mat-icon>info</mat-icon>
+                    <span>Are you sure you want to pick this service?</span>
+                </div>
+
+                <div class="service-details">
+                    <h5 class="section-title">Service Details</h5>
+                    <div class="detail-item">
+                        <span class="label">Service Name:</span>
+                        <span class="value">{{ selectedPlan?.service }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="label">Plan Name:</span>
+                        <span class="value">{{ selectedPlan?.planName }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="label">Status:</span>
+                        <span class="value">{{ selectedPlan?.custServMappingStatus }}</span>
+                    </div>
+                </div>
+
+            </mat-dialog-content>
+
+            <!-- Dialog Footer -->
+            <mat-dialog-actions class="dialog-actions" align="end">
+
+                <!-- Pick Button -->
+                <button mat-flat-button color="primary" (click)="confirmPickService()">
+                    <mat-icon>assignment_ind</mat-icon>
+                    Pick Service
+                </button>
+
+                <!-- Close Button -->
+                <button mat-stroked-button mat-dialog-close>
+                    Cancel
+                </button>
+
+            </mat-dialog-actions>
+
+        </div>
+    </ng-template>
+    <!-- ============================================ -->
+    <!-- AUDIT DETAILS DIALOG -->
+    <!-- ============================================ -->
+    <ng-template #auditDetailsDialog>
+        <div class="dialog-container">
+            <div class="dialog-header">
+                Audit Details
+                <span>
+                    <a mat-icon-button href="javascript:void(0)" (click)="auditCloseModal()">
+                        <img src="assets/img/DashboardIcons/Reject.svg">
+                    </a>
+                </span>
+            </div>
+
+            <!-- Dialog Content -->
+            <mat-dialog-content class="dialog-content">
+
+                <div class="table-responsive">
+                    <table mat-table [dataSource]="auditData" class="mat-elevation-z2 w-100">
+
+                        <!-- Action Date Column -->
+                        <ng-container matColumnDef="actionDate">
+                            <th mat-header-cell *matHeaderCellDef>Action Date</th>
+                            <td mat-cell *matCellDef="let audit">
+                                {{ audit.serviceStopTime | date: 'yyyy-MM-dd hh:mm a' }}
+                            </td>
+                        </ng-container>
+
+                        <!-- Action Column -->
+                        <ng-container matColumnDef="action">
+                            <th mat-header-cell *matHeaderCellDef>Action</th>
+                            <td mat-cell *matCellDef="let audit">{{ audit.action }}</td>
+                        </ng-container>
+
+                        <!-- Staff Name Column -->
+                        <ng-container matColumnDef="staffName">
+                            <th mat-header-cell *matHeaderCellDef>Staff Name</th>
+                            <td mat-cell *matCellDef="let audit">{{ audit.staffName }}</td>
+                        </ng-container>
+
+                        <!-- Action Reason Column -->
+                        <ng-container matColumnDef="reason">
+                            <th mat-header-cell *matHeaderCellDef>Action Reason</th>
+                            <td mat-cell *matCellDef="let audit">{{ audit.reason }}</td>
+                        </ng-container>
+
+                        <!-- Remark Column -->
+                        <ng-container matColumnDef="remarks">
+                            <th mat-header-cell *matHeaderCellDef>Remark</th>
+                            <td mat-cell *matCellDef="let audit">{{ audit.remarks }}</td>
+                        </ng-container>
+
+                        <tr mat-header-row
+                            *matHeaderRowDef="['actionDate', 'action', 'staffName', 'reason', 'remarks']">
+                        </tr>
+                        <tr mat-row
+                            *matRowDef="let row; columns: ['actionDate', 'action', 'staffName', 'reason', 'remarks']">
+                        </tr>
+                    </table>
+                </div>
+
+                <mat-paginator [length]="audittotalRecords" [pageSize]="auditItemPerPage"
+                    [pageSizeOptions]="[5, 10, 20, 50]" showFirstLastButtons (page)="pageChangedauditList($event)">
+                </mat-paginator>
+
+            </mat-dialog-content>
+
+            <!-- Dialog Footer -->
+            <mat-dialog-actions class="dialog-actions" align="end">
+                <button mat-stroked-button mat-dialog-close (click)="auditCloseModal()">
+                    Close
+                </button>
+            </mat-dialog-actions>
+
+        </div>
+    </ng-template>
+    <!-- ============================================ -->
+    <!-- GRACE PERIOD DIALOG -->
+    <!-- ============================================ -->
+    <ng-template #gracePeriodDialog>
+        <div class="container-fluid p-0">
+
+            <!-- Dialog Header -->
+            <div class="dialog-header">
+                <h2 mat-dialog-title class="dialog-title">
+                    <mat-icon>schedule</mat-icon>
+                    Add Grace Period
+                </h2>
+                <button mat-icon-button mat-dialog-close class="close-button">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+
+                </button>
+            </div>
+
+            <!-- Dialog Content -->
+            <mat-dialog-content class="dialog-content">
+
+                <div class="row">
+                    <div class="col-12">
+                        <label class="inputLabel">Grace Period (Days)</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Enter Grace Period</mat-label>
+                            <input matInput type="number" [(ngModel)]="gracePeriod"
+                                placeholder="Enter Grace Period in days" min="0">
+                        </mat-form-field>
+                    </div>
+                </div>
+
+            </mat-dialog-content>
+
+            <!-- Dialog Footer -->
+            <mat-dialog-actions class="dialog-actions" align="end">
+
+                <!-- Save Button -->
+                <button mat-flat-button color="primary" (click)="saveGracePeriod()">
+                    <mat-icon>save</mat-icon>
+                    Add Grace Period
+                </button>
+
+                <!-- Close Button -->
+                <button mat-stroked-button mat-dialog-close (click)="closeGracePeriod()">
+                    Cancel
+                </button>
+
+            </mat-dialog-actions>
+
+        </div>
+    </ng-template>
+
+    <!-- Service Action Modal (Pause/Start/Stop/Terminate) -->
+    <ng-template #serviceActionDialog>
+        <div class="dialog-container">
+            <div class="dialog-header">
+                {{ serviceActionTitle }}
+                <span>
+                    <a mat-icon-button href="javascript:void(0)" (click)="closeServiceActionModal()">
+                        <img src="assets/img/DashboardIcons/Reject.svg" alt="close" />
+                    </a>
+                </span>
+            </div>
+
+            <div mat-dialog-content>
+                <div class="col-md-12">
+                    <mat-card-content>
+                        <form>
+                            <div class="row">
+                                <div class="col-12">
+                                    <label class="inputLabel">Remarks *</label>
+                                    <mat-form-field appearance="outline" class="w-100 hide-hint">
+                                        <textarea matInput [(ngModel)]="serviceActionRemarks" name="remarks" rows="4"
+                                            placeholder="Enter remarks..." required></textarea>
+                                        <mat-error>Remarks are required</mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Date fields for specific actions -->
+                                <div class="col-12"
+                                    *ngIf="serviceActionType === 'Pause' || serviceActionType === 'Start'">
+                                    <label class="inputLabel">
+                                        {{ serviceActionType === "Pause" ? "Hold Date" : "Resume Date"}} *</label>
+                                    <mat-form-field appearance="outline" class="w-100 hide-hint">
+                                        <input matInput [matDatepicker]="picker" [(ngModel)]="serviceActionDate"
+                                            name="actionDate" required />
+                                        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                                        <mat-datepicker #picker></mat-datepicker>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+                        </form>
+                    </mat-card-content>
+                </div>
+            </div>
+
+            <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+                <button mat-stroked-button type="button" class="button-normal m-r-10"
+                    (click)="closeServiceActionModal()">
+                    Cancel
+                </button>
+                <button mat-flat-button color="primary" type="button" class="button-normal"
+                    (click)="submitServiceAction()" [disabled]="!serviceActionRemarks">
+                    <!-- <mat-icon>check</mat-icon> -->
+                    Submit
+                </button>
+            </div>
+        </div>
+    </ng-template>
+
+    <!-- Grace Period Modal -->
+    <ng-template #gracePeriodDialog>
+        <div class="dialog-container">
+            <div class="dialog-header">
+                Grace Period
+                <span>
+                    <a mat-icon-button href="javascript:void(0)" (click)="closeGracePeriodModal()">
+                        <img src="assets/img/DashboardIcons/Reject.svg" alt="close" />
+                    </a>
+                </span>
+            </div>
+
+            <div mat-dialog-content>
+                <div class="col-md-12">
+                    <mat-card-content>
+                        <form>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label class="inputLabel">Grace Period Days *</label>
+                                    <mat-form-field appearance="outline" class="w-100 hide-hint">
+                                        <input matInput type="number" [(ngModel)]="gracePeriodDays" name="days" min="1"
+                                            required />
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="inputLabel">Start Date *</label>
+                                    <mat-form-field appearance="outline" class="w-100 hide-hint">
+                                        <input matInput [matDatepicker]="gracePicker" [(ngModel)]="gracePeriodStartDate"
+                                            name="startDate" required />
+                                        <mat-datepicker-toggle matSuffix [for]="gracePicker"></mat-datepicker-toggle>
+                                        <mat-datepicker #gracePicker></mat-datepicker>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="inputLabel">Remarks</label>
+                                    <mat-form-field appearance="outline" class="w-100 hide-hint">
+                                        <textarea matInput [(ngModel)]="gracePeriodRemarks" name="graceRemarks" rows="3"
+                                            placeholder="Enter remarks..."></textarea>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+                        </form>
+                    </mat-card-content>
+                </div>
+            </div>
+
+            <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+                <button mat-stroked-button type="button" class="button-normal m-r-10" (click)="closeGracePeriodModal()">
+                    Cancel
+                </button>
+                <button mat-flat-button color="primary" type="button" class="button-normal"
+                    (click)="submitGracePeriod()" [disabled]="!gracePeriodDays || !gracePeriodStartDate">
+                    <mat-icon>check</mat-icon>
+                    Submit
+                </button>
+            </div>
+        </div>
+    </ng-template>
+
+    <!-- Approve Service Modal -->
+    <ng-template #approveServiceDialog>
+        <div class="dialog-container">
+            <div class="dialog-header">
+                Approve Service
+                <span>
+                    <a mat-icon-button href="javascript:void(0)" (click)="closeApproveServiceModal()">
+                        <img src="assets/img/DashboardIcons/Reject.svg" alt="close" />
+                    </a>
+                </span>
+            </div>
+
+            <div mat-dialog-content>
+                <div class="col-md-12">
+                    <mat-card-content>
+                        <!-- Service Details -->
+                        <div class="service-details"
+                            style="margin-bottom: 20px; padding: 15px; background: #f5f5f5; border-radius: 4px;">
+                            <h6 style="margin-bottom: 15px; font-weight: 600;">Service Details</h6>
+                            <div class="row">
+                                <div class="col-md-6" style="margin-bottom: 10px;">
+                                    <strong>Service:</strong>
+                                    <span style="margin-left: 5px;">{{ selectedServiceForApproval?.service }}</span>
+                                </div>
+                                <div class="col-md-6" style="margin-bottom: 10px;">
+                                    <strong>Plan:</strong>
+                                    <span style="margin-left: 5px;">{{ selectedServiceForApproval?.planName }}</span>
+                                </div>
+                                <div class="col-md-6" style="margin-bottom: 10px;">
+                                    <strong>Serial No:</strong>
+                                    <span style="margin-left: 5px;">{{ getSerialNumber(selectedServiceForApproval)
+                                        }}</span>
+                                </div>
+                                <div class="col-md-6" style="margin-bottom: 10px;">
+                                    <strong>Status:</strong>
+                                    <span style="margin-left: 5px;">{{ selectedServiceForApproval?.custServMappingStatus
+                                        }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <form>
+                            <div class="row">
+                                <div class="col-12">
+                                    <label class="inputLabel">Remarks *</label>
+                                    <mat-form-field appearance="outline" class="w-100 hide-hint">
+                                        <textarea matInput [(ngModel)]="approveServiceRemarks" name="approveRemarks"
+                                            rows="3" placeholder="Enter approval remarks..." required></textarea>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+                        </form>
+                    </mat-card-content>
+                </div>
+            </div>
+
+            <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+                <button mat-stroked-button type="button" class="button-normal m-r-10"
+                    (click)="closeApproveServiceModal()">
+                    Cancel
+                </button>
+                <button mat-stroked-button color="warn" type="button" class="button-normal m-r-10"
+                    (click)="rejectService()">
+                    <mat-icon>cancel</mat-icon>
+                    Reject
+                </button>
+                <button mat-flat-button color="primary" type="button" class="button-normal" (click)="approveService()"
+                    [disabled]="!approveServiceRemarks">
+                    <mat-icon>check_circle</mat-icon>
+                    Approve
+                </button>
+            </div>
+        </div>
+    </ng-template>
+
+    <!-- Add Service Modal -->
+    <!-- ============================================ -->
+    <!-- ADD SERVICE DIALOG - MATERIAL DESIGN -->
+    <!-- ============================================ -->
+    <ng-template #addServiceDialog>
+        <div class="container-fluid p-0 add-service-dialog-container">
+
+            <!-- Dialog Header -->
+            <div class="dialog-header">
+                <h2 mat-dialog-title class="dialog-title">
+                    <!-- <mat-icon>add_circle</mat-icon> -->
+                    Create Service
+                </h2>
+                <button mat-icon-button mat-dialog-close class="close-button">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+
+                </button>
+            </div>
+
+            <!-- Dialog Content -->
+            <mat-dialog-content class="dialog-content">
+
+                <form [formGroup]="serviceForm">
+
+                    <!-- ========== PLAN DETAILS SECTION ========== -->
+                    <fieldset class="form-fieldset">
+                        <legend class="form-legend">
+                            <mat-icon>business</mat-icon>
+                            Plan Details
+                        </legend>
+
+                        <div class="row mb-3">
+
+                            <!-- Plan Category -->
+                            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Plan Category</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-label>Plan Category</mat-label>
+                                    <mat-select formControlName="planCategory" [disabled]="true">
+                                        @for (category of planDetailsCategory; track category.value) {
+                                        <mat-option [value]="category.value">{{ category.label }}</mat-option>
+                                        }
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Bill To -->
+                            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Bill To</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-label>Select Bill To</mat-label>
+                                    <mat-select formControlName="billTo" [disabled]="true">
+                                        @for (bill of commondropdownService.billToData; track bill.value) {
+                                        <mat-option [value]="bill.value">{{ bill.text }}</mat-option>
+                                        }
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Billable To -->
+                            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Billable To</label>
+                                <div class="d-flex align-items-center gap-2">
+                                    <mat-form-field appearance="outline" class="flex-grow-1">
+                                        <mat-label>Select Billable Customer</mat-label>
+                                        <mat-select formControlName="billableCustomerId" [disabled]="true">
+                                            @for (cust of billableCusList; track cust.id) {
+                                            <mat-option [value]="cust.id">{{ cust.name }}</mat-option>
+                                            }
+                                        </mat-select>
+                                    </mat-form-field>
+
+                                    <!-- Add Parent Customer Button -->
+                                    <button mat-mini-fab color="primary" type="button" matTooltip="Add Parent Customer"
+                                        (click)="modalOpenParentCustomer()">
+                                        <mat-icon>add</mat-icon>
+                                    </button>
+
+                                    <!-- Remove Parent Customer Button -->
+                                    <button mat-mini-fab color="warn" type="button" matTooltip="Remove Parent Customer"
+                                        (click)="removeSelParentCust()">
+                                        <mat-icon>delete</mat-icon>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Invoice To Org -->
+                            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12"
+                                *ngIf="serviceForm.controls['isInvoiceToOrg'].enabled">
+                                <label class="inputLabel">Invoice To Org</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-label>Select Invoice to Org</mat-label>
+                                    <mat-select formControlName="isInvoiceToOrg" [disabled]="true">
+                                        @for (invoice of isInvoiceData; track invoice.value) {
+                                        <mat-option [value]="invoice.value">{{ invoice.label }}</mat-option>
+                                        }
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+
+                        </div>
+                    </fieldset>
+
+                    <!-- ========== SERVICE & PLAN SELECTION (Non-Group) ========== -->
+                    <form [formGroup]="planGroupForm"
+                        *ngIf="!isPlanCategoryGroup && servicePlanFormArray.value.length === 0" class="mt-4">
+
+                        <div class="row mb-3">
+
+                            <!-- Service Selection -->
+                            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Service</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-label>Select a Service</mat-label>
+                                    <mat-select formControlName="service"
+                                        (selectionChange)="serviceBasePlanDATA($event)"
+                                        [class.is-invalid]="plansubmitted && planGroupForm.controls['service'].errors">
+                                        <mat-option>
+                                            <mat-form-field appearance="outline" class="search-field">
+                                                <mat-icon matPrefix>search</mat-icon>
+                                                <input matInput placeholder="Search..."
+                                                    (keydown)="$event.stopPropagation()">
+                                            </mat-form-field>
+                                        </mat-option>
+                                        @for (service of serviceAreaBYserviceList; track service.name) {
+                                        <mat-option [value]="service.name">{{ service.name }}</mat-option>
+                                        }
+                                    </mat-select>
+                                    <mat-error *ngIf="plansubmitted && planGroupForm.controls['service'].errors">
+                                        Service is required.
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Plan Selection -->
+                            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Plan</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-label>Select a Plan</mat-label>
+                                    <mat-select formControlName="planId" (selectionChange)="getPlanValidity($event)"
+                                        [class.is-invalid]="plansubmitted && planGroupForm.controls['planId'].errors">
+                                        <mat-option>
+                                            <mat-form-field appearance="outline" class="search-field">
+                                                <mat-icon matPrefix>search</mat-icon>
+                                                <input matInput placeholder="Search..."
+                                                    (keydown)="$event.stopPropagation()">
+                                            </mat-form-field>
+                                        </mat-option>
+                                        @for (plan of plantypaSelectData; track plan.id) {
+                                        <mat-option [value]="plan.id">{{ plan.name }}</mat-option>
+                                        }
+                                    </mat-select>
+                                    <mat-error *ngIf="plansubmitted && planGroupForm.controls['planId'].errors">
+                                        Plan is required.
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Validity (Prepaid Only) -->
+                            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12" *ngIf="custType === 'Prepaid'">
+                                <label class="inputLabel">Validity</label>
+                                <div class="validity-container">
+                                    <mat-form-field appearance="outline" class="validity-number">
+                                        <mat-label>Enter Validity</mat-label>
+                                        <input matInput type="number" formControlName="validity" placeholder="Validity"
+                                            min="1" readonly>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="outline" class="validity-unit">
+                                        <mat-label>Unit</mat-label>
+                                        <mat-select formControlName="validityUnit" [disabled]="true">
+                                            @for (unit of commondropdownService.validityUnitData; track unit.label) {
+                                            <mat-option [value]="unit.label">{{ unit.label }}</mat-option>
+                                            }
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+
+                            <!-- Invoice Type (Billable Customer) -->
+                            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12"
+                                *ngIf="serviceForm.value.parentCustomerId !== null && serviceForm.value.parentCustomerId !== ''">
+                                <label class="inputLabel">Invoice Type</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-label>Select Invoice Type</mat-label>
+                                    <mat-select formControlName="invoiceType"
+                                        [class.is-invalid]="plansubmitted && planGroupForm.controls['invoiceType'].errors">
+                                        @for (type of invoiceTypes; track type.value) {
+                                        <mat-option [value]="type.value">{{ type.label }}</mat-option>
+                                        }
+                                    </mat-select>
+                                    <mat-error *ngIf="plansubmitted && planGroupForm.controls['invoiceType'].errors">
+                                        Invoice Type is required.
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                        </div>
+
+                        <div class="row mb-3">
+
+                            <!-- Offer Price -->
+                            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Offer Price</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-label>Old Offer Price</mat-label>
+                                    <input matInput type="number" formControlName="offerprice" placeholder="Offer Price"
+                                        readonly>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Discount Type (Non-Organization Bill To) -->
+                            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12"
+                                *ngIf="serviceForm.value.billTo !== 'ORGANIZATION'">
+                                <label class="inputLabel">Discount Type</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-label>Select Discount Type</mat-label>
+                                    <mat-select formControlName="discountType" [(ngModel)]="discountType">
+                                        @for (type of chargeType; track type.label) {
+                                        <mat-option [value]="type.label">{{ type.label }}</mat-option>
+                                        }
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Discount -->
+                            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Discount (%)</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-label>Discount</mat-label>
+                                    <input matInput type="number" formControlName="discount"
+                                        placeholder="Enter Discount"
+                                        [class.is-invalid]="plansubmitted && planGroupForm.controls['discount'].errors">
+                                    <mat-error *ngIf="planGroupForm.controls['discount'].errors?.['max']">
+                                        Maximum 99% allowed.
+                                    </mat-error>
+                                    <mat-error
+                                        *ngIf="plansubmitted && planGroupForm.controls['discount'].errors?.['required']">
+                                        Discount is required.
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Discount Expiry Date (Recurring) -->
+                            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12"
+                                *ngIf="serviceForm.value.billTo !== 'ORGANIZATION' && planGroupForm.value.discountType === 'Recurring'">
+                                <label class="inputLabel">Discount Expiry Date</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-label>Select Expiry Date</mat-label>
+                                    <input matInput [matDatepicker]="discountPicker"
+                                        formControlName="discountExpiryDate" [min]="dateTime"
+                                        placeholder="Enter Discount Expiry Date">
+                                    <mat-datepicker-toggle matSuffix [for]="discountPicker"></mat-datepicker-toggle>
+                                    <mat-datepicker #discountPicker></mat-datepicker>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Serial Number (If Required) -->
+                            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12" *ngIf="isSerialNumberShow">
+                                <label class="inputLabel">Serial Number</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-label>Serial Number</mat-label>
+                                    <input matInput type="text" formControlName="serialNumber"
+                                        placeholder="Enter Serial Number">
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Trial Plan Checkbox (Non-Organization) -->
+                            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 d-flex align-items-center"
+                                *ngIf="serviceForm.value.billTo !== 'ORGANIZATION'">
+                                <mat-checkbox formControlName="istrialplan" color="primary">
+                                    Trial Plan
+                                </mat-checkbox>
+                            </div>
+
+                        </div>
+
+                    </form>
+
+                    <!-- Add Button -->
+                    <div class="row mb-3" *ngIf="!isPlanCategoryGroup">
+                        <div class="col-12 text-end">
+                            <button mat-raised-button color="primary" type="button" (click)="onAddPlanServiceField()">
+                                <mat-icon>add</mat-icon>
+                                Add Service
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ========== ADDED SERVICES TABLE ========== -->
+                    <div class="table-responsive mt-4"
+                        *ngIf="!isPlanCategoryGroup && servicePlanFormArray.controls.length > 0">
+                        <table mat-table [dataSource]="servicePlanFormArray.controls" class="mat-elevation-z2 w-100">
+
+                            <!-- Service Column -->
+                            <ng-container matColumnDef="service">
+                                <th mat-header-cell *matHeaderCellDef>Service</th>
+                                <td mat-cell *matCellDef="let row">
+                                    {{ row.value.service }}
+                                </td>
+                            </ng-container>
+
+                            <!-- Plan Column -->
+                            <ng-container matColumnDef="plan">
+                                <th mat-header-cell *matHeaderCellDef>Plan</th>
+                                <td mat-cell *matCellDef="let row">
+                                    {{ getPlanName(row.value.planId) }}
+                                </td>
+                            </ng-container>
+
+                            <!-- Validity Column -->
+                            <ng-container matColumnDef="validity">
+                                <th mat-header-cell *matHeaderCellDef>Validity</th>
+                                <td mat-cell *matCellDef="let row">
+                                    <span *ngIf="custType === 'Prepaid'">
+                                        {{ row.value.validity }} {{ row.value.validityUnit }}
+                                    </span>
+                                    <span *ngIf="custType !== 'Prepaid'">NA</span>
+                                </td>
+                            </ng-container>
+
+                            <!-- Offer Price Column -->
+                            <ng-container matColumnDef="offerprice">
+                                <th mat-header-cell *matHeaderCellDef>Offer Price</th>
+                                <td mat-cell *matCellDef="let row">
+                                    {{ row.value.offerprice | currency:'INR':'symbol':'1.2-2' }}
+                                </td>
+                            </ng-container>
+                            <!-- <ng-container matColumnDef="discountType">
+                                <th mat-header-cell *matHeaderCellDef
+                                    *ngIf="serviceForm.value.billTo !== 'ORGANIZATION'">
+                                    Discount Type
+                                </th>
+                                <td mat-cell *matCellDef="let row" *ngIf="serviceForm.value.billTo !== 'ORGANIZATION'">
+                                    {{ row.value.discountType }}
+                                </td>
+                            </ng-container>
+                            <ng-container matColumnDef="discount">
+                                <th mat-header-cell *matHeaderCellDef
+                                    *ngIf="serviceForm.value.billTo !== 'ORGANIZATION'">
+                                    Discount (%)
+                                </th>
+                                <td mat-cell *matCellDef="let row" *ngIf="serviceForm.value.billTo !== 'ORGANIZATION'">
+                                    {{ row.value.discount }}%
+                                </td>
+                            </ng-container>
+                            <ng-container matColumnDef="discountExpiryDate">
+                                <th mat-header-cell *matHeaderCellDef
+                                    *ngIf="serviceForm.value.billTo !== 'ORGANIZATION'">
+                                    Discount Expiry
+                                </th>
+                                <td mat-cell *matCellDef="let row" *ngIf="serviceForm.value.billTo !== 'ORGANIZATION'">
+                                    <span *ngIf="row.value.discountType === 'Recurring'">
+                                        {{ row.value.discountExpiryDate | date:'dd/MM/yyyy' }}
+                                    </span>
+                                    <span *ngIf="row.value.discountType !== 'Recurring'">-</span>
+                                </td>
+                            </ng-container>
+                            <ng-container matColumnDef="invoiceType">
+                                <th mat-header-cell *matHeaderCellDef
+                                    *ngIf="serviceForm.value.parentCustomerId !== null && serviceForm.value.parentCustomerId !== ''">
+                                    Invoice Type
+                                </th>
+                                <td mat-cell *matCellDef="let row"
+                                    *ngIf="serviceForm.value.parentCustomerId !== null && serviceForm.value.parentCustomerId !== ''">
+                                    {{ row.value.invoiceType }}
+                                </td>
+                            </ng-container>
+                            <ng-container matColumnDef="istrialplan">
+                                <th mat-header-cell *matHeaderCellDef
+                                    *ngIf="serviceForm.value.billTo !== 'ORGANIZATION'">
+                                    Trial Plan
+                                </th>
+                                <td mat-cell *matCellDef="let row" *ngIf="serviceForm.value.billTo !== 'ORGANIZATION'">
+                                    <mat-icon *ngIf="row.value.istrialplan" color="primary">check_circle</mat-icon>
+                                    <mat-icon *ngIf="!row.value.istrialplan" color="warn">cancel</mat-icon>
+                                </td>
+                            </ng-container>
+                            <ng-container matColumnDef="serialNumber">
+                                <th mat-header-cell *matHeaderCellDef *ngIf="isSerialNumberShow">Serial Number</th>
+                                <td mat-cell *matCellDef="let row" *ngIf="isSerialNumberShow">
+                                    {{ row.value.serialNumber || '-' }}
+                                </td>
+                            </ng-container> -->
+
+                            <!-- Delete Column -->
+                            <ng-container matColumnDef="delete">
+                                <th mat-header-cell *matHeaderCellDef style="width: 80px; text-align: center;">Delete
+                                </th>
+                                <td mat-cell *matCellDef="let row; let index = index" style="text-align: center;">
+                                    <button mat-icon-button color="warn" (click)="deleteConfirmonChargeField(index)"
+                                        matTooltip="Delete Service">
+
+                                    </button>
+                                </td>
+                            </ng-container>
+
+                            <tr mat-header-row *matHeaderRowDef="getDisplayedColumns()"></tr>
+                            <tr mat-row *matRowDef="let row; columns: getDisplayedColumns()"></tr>
+                        </table>
+
+                        <!-- Paginator -->
+                        <mat-paginator *ngIf="servicePlanFormArray.controls.length > 5"
+                            [length]="servicePlantotalRecords" [pageSize]="servicePlanItemPerPage"
+                            [pageSizeOptions]="[5,10,20,50,100]" (page)="pageChangedPlanService($event)">
+                        </mat-paginator>
+                    </div>
+
+                </form>
+
+            </mat-dialog-content>
+
+            <!-- Dialog Footer -->
+            <mat-dialog-actions class="dialog-actions" align="end">
+
+                <!-- Save Button -->
+                <button mat-flat-button color="primary" type="button" (click)="addPlanService()">
+
+                    Save
+                </button>
+
+                <!-- Close Button -->
+                <button mat-stroked-button mat-dialog-close>
+
+                    Close
+                </button>
+
+            </mat-dialog-actions>
+
+        </div>
+    </ng-template>
+    <!-- ============================================ -->
+    <!-- LEAD CONFIRMATION DIALOG -->
+    <!-- ============================================ -->
+    <ng-template #leadConfirmationDialog>
+        <div class="lead-confirmation-container">
+
+            <!-- Dialog Header -->
+            <div class="dialog-header warning-header">
+                <h2 mat-dialog-title class="dialog-title">
+
+                    Lead Required
+                </h2>
+            </div>
+
+            <!-- Dialog Content -->
+            <mat-dialog-content class="dialog-content">
+
+                <div class="confirmation-message">
+                    <mat-icon class="warning-icon">info</mat-icon>
+                    <div class="message-text">
+                        <p class="lead-text">
+                            You need to create a <strong>Lead</strong> first in order to add service.
+                        </p>
+                        <p class="question-text">
+                            Do you want to create a lead now?
+                        </p>
+                    </div>
+                </div>
+
+            </mat-dialog-content>
+
+            <!-- Dialog Footer -->
+            <mat-dialog-actions class="dialog-actions" align="end">
+
+                <!-- Yes - Create Lead Button -->
+                <button mat-flat-button color="primary" (click)="confirmLeadCreation()">
+                    <mat-icon>check</mat-icon>
+                    Yes, Create Lead
+                </button>
+
+                <!-- No - Cancel Button -->
+                <button mat-stroked-button mat-dialog-close (click)="cancelLeadCreation()">
+                    <mat-icon>close</mat-icon>
+                    No, Cancel
+                </button>
+
+            </mat-dialog-actions>
+
+        </div>
+    </ng-template>

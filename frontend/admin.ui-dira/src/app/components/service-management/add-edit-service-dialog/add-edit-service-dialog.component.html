@@ -1,0 +1,238 @@
+<div class="dialog-container">
+    <div class="dialog-header">
+        {{ isServiceEdit ? "Update" : "Create" }} Service
+        <span>
+            <a mat-icon-button href="javascript:void(0)" (click)="onCancel()">
+                <img src="assets/img/DashboardIcons/Reject.svg">
+            </a>
+        </span>
+    </div>
+    <div mat-dialog-content>
+        <div class="col-md-12 p-0">
+            <mat-card-content>
+                @if (!data.createAccess && !isServiceEdit) {
+                <div class="text-center text-muted p-3">
+                    Sorry, you don’t have privilege to create operation!
+                </div>
+                }
+
+                @if (data.createAccess || (isServiceEdit && editAccess)) {
+                <form class="card-form mb-3" [formGroup]="serviceGroupForm">
+                    <div class="row g-3">
+                        <!-- Service Name -->
+
+                        <div class="col-lg-4 col-sm-6">
+                            <label for="servicename" class="inputLabel">Service Name*</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input id="servicename" matInput placeholder="Enter Service Name" formControlName="name"
+                                    maxlength="250" class="input-p-5" [ngClass]="{
+                      'is-invalid':
+                        (submitted || serviceGroupForm.get('name')?.touched) &&
+                        serviceGroupForm.get('name')?.invalid
+                    }" />
+
+                                @if (
+                                serviceGroupForm.get("name")?.invalid &&
+                                (serviceGroupForm.get("name")?.touched || submitted)
+                                ) {
+                                <mat-error>
+                                    @if (serviceGroupForm.get("name")?.hasError("required")) {
+                                    Service Name is required.
+                                    }
+                                    @if (serviceGroupForm.get("name")?.hasError("cannotContainSpace")) {
+                                    White space not allowed.
+                                    }
+                                </mat-error>
+                                }
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Display Name -->
+                        <div class="col-lg-4 col-sm-6">
+                            <label for="displayname" class="inputLabel">Display Name</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input id="displayname" matInput placeholder="Enter Display Name"
+                                    formControlName="displayName" maxlength="250" class="input-p-5" />
+                            </mat-form-field>
+                        </div>
+
+                        <!-- IC Name -->
+                        <div class="col-lg-4 col-sm-6">
+                            <label for="icname" class="inputLabel">IC Name</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-select id="icname" class="input-p-5" placeholder="Select IC Code"
+                                    formControlName="icname" [disabled]="isServiceEdit && serviceGroupForm.value.icname"
+                                    (selectionChange)="getSelIcName($event)">
+                                    @for (ic of ICListdata; track ic.icname) {
+                                    <mat-option [value]="ic.icname">{{ ic.icname }}</mat-option>
+                                    }
+                                </mat-select>
+                                <mat-error>
+                                    @if (
+                                    (submitted || serviceGroupForm.get("icname")?.touched) &&
+                                    serviceGroupForm.get("icname")?.errors
+                                    ) {
+                                    <span> IC Name is required.</span>
+                                    }
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- IC Code -->
+                        <div class="col-lg-4 col-sm-6">
+                            <label for="iccode" class="inputLabel">IC Code</label>
+                            <mat-form-field appearance="outline" class="w-100 readonly-field">
+                                <input id="iccode" matInput placeholder="Enter IC Code" formControlName="iccode"
+                                    readonly class="input-p-5" />
+                                <mat-error>
+                                    @if (
+                                    (submitted || serviceGroupForm.get("iccode")?.touched) &&
+                                    serviceGroupForm.get("iccode")?.errors
+                                    ) {
+                                    @let errors = serviceGroupForm.get("iccode")?.errors;
+                                    @if (errors?.["required"]) {
+                                    <span>IC Code is required.</span>
+                                    }
+                                    @if (errors?.["pattern"]) {
+                                    <span>Special characters not allowed.</span>
+                                    }
+                                    }
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Ledger Id -->
+                        <div class="col-lg-4 col-sm-6">
+                            <label for="ledgerId" class="inputLabel">Ledger Id</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input id="ledgerId" matInput placeholder="Enter Ledger Id" formControlName="ledgerId"
+                                    class="input-p-5" />
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Is DTV Service -->
+                        <div class="col-lg-4 col-sm-6">
+                            <label for="is_dtv" class="inputLabel">Is DTV Service</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-select id="is_dtv" class="input-p-5" placeholder="Select Is DTV Service"
+                                    formControlName="is_dtv" (selectionChange)="onchangeEventForDTV($event.value)">
+                                    @for (option of isDTV; track option.value) {
+                                    <mat-option [value]="option.value">
+                                        {{ option.label }}
+                                    </mat-option>
+                                    }
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Expiry -->
+                        <div class="col-lg-4 col-sm-6">
+                            <label for="expiry" class="inputLabel">Expiry</label>
+                            <mat-form-field appearance="outline" class="w-100"
+                                [ngClass]="{ 'readonly-field': isreadonlyfield === true }">
+                                <mat-select id="expiry" class="input-p-5" placeholder="Select Expire Type"
+                                    formControlName="expiry" [disabled]="expiryFlag"
+                                    (selectionChange)="getExpireTypeType($event)">
+                                    @for (option of selectExpireType; track option.value) {
+                                    <mat-option [value]="option.value">{{ option.label }}</mat-option>
+                                    }
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Service Parameters -->
+                        <div class="col-lg-4 col-sm-6 alignment">
+                            <label class="inputLabel btn-label">Service Parameters</label>
+                            <button mat-button mat-flat-button color="primary" type="button"
+                                (click)="addServiceParameter()">
+                                Service Parameters
+                            </button>
+                        </div>
+                        <br />
+                        <br />
+
+                        <!-- Checkboxes -->
+                        <div class="col-lg-8 d-flex flex-wrap gap-3">
+                            <mat-checkbox formControlName="feasibility"
+                                [disabled]="isServiceEdit">Feasibility</mat-checkbox>
+                            <mat-checkbox formControlName="installation"
+                                [disabled]="isServiceEdit">Installation</mat-checkbox>
+                            <mat-checkbox formControlName="poc" [disabled]="isServiceEdit">POC</mat-checkbox>
+                            <mat-checkbox formControlName="isPriceEditable" [disabled]="isServiceEdit">Allow Price
+                                Override</mat-checkbox>
+                            <mat-checkbox formControlName="provisioning"
+                                [disabled]="isServiceEdit">Provisioning</mat-checkbox>
+                        </div>
+
+                        <!-- Action Button -->
+                        <!-- <div class="col-12">
+                            @if (!isServiceEdit) {
+                            <div class="col-md-12 addcountry-div">
+                                <button mat-button mat-flat-button color="primary" class="addcountry-btn w-100"
+                                    (click)="addEditService('')" type="submit">Add Service
+                                </button>
+
+                            </div>
+                            }
+                            @if (isServiceEdit) {
+                            <div class="col-md-12 addcountry-div">
+                                <button mat-button mat-flat-button color="primary" class="addcountry-btn w-100"
+                                    type="submit" (click)="addEditService(viewServiceListData.id)">
+                                    <img src="assets/img/DashboardIcons/Assign.svg"> Update Service
+                                </button>
+                                <button mat-button mat-flat-button color="primary" class="addcountry-btn w-100"
+                                    type="submit">
+                                    <img src="assets/img/DashboardIcons/Assign.svg"> Update Service
+                                </button>
+                                <button mat-stroked-button color="warn" class="addcountry-btn w-100"
+                                    (click)="closeModal()">
+                                    Close
+                                </button>
+                                <button mat-stroked-button color="warn" (click)="closeModal()"
+                                    class="custom-dialog-button">Close</button>
+                            </div>
+
+                            }
+                        </div> -->
+
+                        <!-- <div class="addUpdateBtn">
+                            <button type="submit" mat-button mat-flat-button color="primary" id="submit"
+                                *ngIf="!isServiceEdit" (click)="addEditService('')">
+                                <i class="fa fa-check-circle"></i>
+                                Add Service
+                            </button>
+                            <button type="submit" mat-button mat-flat-button color="primary" id="submit"
+                                *ngIf="isServiceEdit" (click)="addEditService(viewServiceListData.id)">
+                                <i class="fa fa-check-circle"></i>
+                                Update Service
+                            </button>
+                            <br />
+                        </div> -->
+                    </div>
+                </form>
+                }
+            </mat-card-content>
+        </div>
+    </div>
+    @if (!isServiceEdit) {
+    <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+        <button mat-button mat-flat-button color="primary" class="button-normal" (click)="onSubmit()">
+            Add Service
+        </button>
+        <button mat-stroked-button color="warn" (click)="closeModal()" class="button-normal">
+            Close
+        </button>
+    </div>
+    }
+
+    @if (isServiceEdit) {
+    <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+        <button mat-button mat-flat-button color="primary" class="button-normal" (click)="onSubmit()">
+            Update Service
+        </button>
+        <button mat-stroked-button color="warn" (click)="closeModal()" class="button-normal">
+            Close
+        </button>
+    </div>
+    }
+</div>

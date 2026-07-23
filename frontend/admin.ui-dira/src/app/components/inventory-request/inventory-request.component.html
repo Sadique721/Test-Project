@@ -1,0 +1,2889 @@
+<div class="row">
+    <div class="col-md-12">
+        <div class="">
+            <div class="panel-body no-padding">
+                <mat-tab-group [(selectedIndex)]="activeTabIndex" (selectedTabChange)="onTabChange($event)">
+
+                    <mat-tab label="My Inventory Request">
+                        <div class="f-s-14 p-16 rounded m-t-12">
+                            <div class="container-fluid contain-flud">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <mat-card class="cardWithShadow">
+
+
+                                            <div class="dialog-header">
+                                                My Inventory Request
+                                                <span>
+                                                    <a mat-icon-button href="javascript:void(0)"
+                                                        (click)="getMyRequestInventoryData('')">
+                                                        <i class="pi pi-sync f-s-15"></i>
+                                                    </a>
+                                                </span>
+                                            </div>
+
+                                            <mat-card-content class="mat-card-content-border">
+                                                <div class="team-table-list">
+                                                    <div class="table-responsive">
+
+                                                        <!-- Raised Inventory Button -->
+
+
+
+                                                        <button mat-button mat-flat-button color="primary"
+                                                            (click)="openinventoryDailog()()" class="search-btn"
+                                                            style="width: auto;">
+
+                                                            Raised Inventory Request</button>
+
+
+                                                        <br>
+                                                        <br>
+
+                                                        <!-- Inventory Table -->
+                                                        <table mat-table [dataSource]="myRequestInventory" matSort
+                                                            class="mat-elevation-z8 w-100">
+
+                                                            <!-- Request ID -->
+                                                            <ng-container matColumnDef="requestId">
+                                                                <th mat-header-cell *matHeaderCellDef
+                                                                    class="table-header-title">Request Id</th>
+                                                                <td mat-cell *matCellDef="let request">
+
+                                                                    {{ request.requestInventoryName }}
+
+                                                                </td>
+                                                            </ng-container>
+
+                                                            <!-- On Behalf Of -->
+                                                            <ng-container matColumnDef="onBehalfOf">
+                                                                <th mat-header-cell *matHeaderCellDef
+                                                                    class="table-header-title">On Behalf Of</th>
+                                                                <td mat-cell *matCellDef="let request">{{
+                                                                    request.onBehalfOf }}</td>
+                                                            </ng-container>
+
+                                                            <!-- Requester -->
+                                                            <ng-container matColumnDef="requester">
+                                                                <th mat-header-cell *matHeaderCellDef
+                                                                    class="table-header-title">Requester</th>
+                                                                <td mat-cell *matCellDef="let request">{{
+                                                                    request.requesterName }}</td>
+                                                            </ng-container>
+
+                                                            <!-- Request To -->
+                                                            <ng-container matColumnDef="requestTo">
+                                                                <th mat-header-cell *matHeaderCellDef
+                                                                    class="table-header-title">Request To</th>
+                                                                <td mat-cell *matCellDef="let request">{{
+                                                                    request.requestToName }}</td>
+                                                            </ng-container>
+
+                                                            <!-- Reason -->
+                                                            <ng-container matColumnDef="reason">
+                                                                <th mat-header-cell *matHeaderCellDef
+                                                                    class="table-header-title">Reason</th>
+                                                                <td mat-cell *matCellDef="let request"
+                                                                    style="white-space: pre-line">{{ request.reason }}
+                                                                </td>
+                                                            </ng-container>
+
+                                                            <!-- Status -->
+                                                            <!-- Inventory Request Status -->
+                                                            <ng-container matColumnDef="status">
+                                                                <th mat-header-cell *matHeaderCellDef
+                                                                    class="table-header-title"
+                                                                    style="text-align: center;">
+                                                                    Status
+                                                                </th>
+                                                                <td mat-cell *matCellDef="let request"
+                                                                    style="text-align: center;">
+                                                                    <span class="status-badge" [ngClass]="{
+            'status-success': request.status === 'Approve',
+            'status-danger': request.status === 'Rejected',
+            'status-info': request.status === 'Pending'
+          }">
+                                                                        {{ request.status }}
+                                                                    </span>
+                                                                </td>
+                                                            </ng-container>
+
+
+                                                            <!-- Inventory Request Status -->
+                                                            <ng-container matColumnDef="inventoryStatus">
+                                                                <th mat-header-cell *matHeaderCellDef
+                                                                    class="table-header-title">Inventory Request Status
+                                                                </th>
+                                                                <td mat-cell *matCellDef="let request">
+                                                                    <span class="status-badge" [ngClass]="{
+                      'status-success': request.inventoryRequestStatus === 'Complted',
+                      'status-danger': request.inventoryRequestStatus === 'Rejected',
+                      'status-info': request.inventoryRequestStatus === 'Waiting for Approval',
+                      'status-primary': request.inventoryRequestStatus === 'In-Progress'
+                    }" [style.background-color]="request.inventoryRequestStatus === 'Partially Completed' ? '#f7941e' : ''">
+                                                                        {{ request.inventoryRequestStatus }}
+                                                                    </span>
+                                                                </td>
+                                                            </ng-container>
+
+                                                            <!-- Action -->
+                                                            <ng-container *ngIf="deleteAccess" matColumnDef="action">
+                                                                <th mat-header-cell *matHeaderCellDef
+                                                                    class="table-header-title"
+                                                                    style="text-align:center;">Action</th>
+                                                                <td mat-cell *matCellDef="let request" class="btnAction"
+                                                                    style="text-align:center;">
+
+                                                                    <a mat-icon-button matTooltip="view" color="primary"
+                                                                        (click)="openInventoryRequestDetails(request.id)">
+                                                                        <img
+                                                                            src="assets/img/DashboardIcons/eye-svgrepo-com (1) 1.svg">
+                                                                    </a>
+
+                                                                    <a mat-icon-button matTooltip="delete"
+                                                                        *ngIf="deleteAccess" href="javascript:void(0)"
+                                                                        [disabled]="request.status == 'Approve'"
+                                                                        (click)="deleteConfirmonReqInventory(request)">
+                                                                        <img
+                                                                            src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                                                    </a>
+
+                                                                </td>
+                                                            </ng-container>
+
+                                                            <!-- Table Rows -->
+                                                            <tr mat-header-row class="table-header-bg"
+                                                                *matHeaderRowDef="getDisplayedPlanDetailsColumns()">
+                                                            </tr>
+                                                            <tr mat-row class="table-content-row"
+                                                                *matRowDef="let row; columns: getDisplayedPlanDetailsColumns();">
+                                                            </tr>
+                                                        </table>
+
+                                                        <!-- No Record Found -->
+                                                        <div *ngIf="myRequestInventory?.length === 0" class="no-record">
+                                                            No Record Found.
+                                                        </div>
+
+                                                        <!-- Paginator -->
+                                                        <mat-paginator [length]="myRequestInventoryListdatatotalRecords"
+                                                            [pageSize]="myRequestInventoryListdataitemsPerPage"
+                                                            [pageSizeOptions]=[5,10,20,50,100] showFirstLastButtons
+                                                            (page)="pageChangedMyReqInvList($event)"></mat-paginator>
+
+                                                    </div>
+                                                </div>
+                                            </mat-card-content>
+                                        </mat-card>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </mat-tab>
+
+                    <mat-tab label="Assigned Inventory Request" *ngIf="reisedIntReqAccess">
+                        <div class="f-s-14 p-16 rounded m-t-12">
+                            <!-- Repeat table layout for assigned inventory here, similar to My Inventory Request -->
+
+                            <div class="container-fluid contain-flud">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <mat-card class="cardWithShadow">
+
+
+
+                                            <div class="dialog-header">
+                                                <span (click)="getAllRequestInventoryData('')" style="cursor: pointer;">
+                                                    Assigned Inventory Request
+                                                </span>
+                                                <!-- <span>
+                                                    <a mat-icon-button href="javascript:void(0)"
+                                                        >
+                                                        Assigned Inventory Request
+                                                    </a>
+                                                </span> -->
+                                            </div>
+
+                                            <mat-card-content class="mat-card-content-border">
+                                                <div class="team-table-list">
+                                                    <div class="example-container mat-elevation-z8" tabindex="0">
+
+                                                        <!-- Table -->
+                                                        <table mat-table [dataSource]="allRequestInventory" matSort
+                                                            class="mat-elevation-z8 w-100">
+
+                                                            <!-- Request ID -->
+                                                            <ng-container matColumnDef="requestId">
+                                                                <th mat-header-cell *matHeaderCellDef
+                                                                    class="table-header-title">Request ID</th>
+                                                                <td mat-cell *matCellDef="let request">
+
+                                                                    {{ request.requestInventoryName }}
+
+                                                                </td>
+                                                            </ng-container>
+
+                                                            <!-- On Behalf Of -->
+                                                            <ng-container matColumnDef="onBehalfOf">
+                                                                <th mat-header-cell *matHeaderCellDef
+                                                                    class="table-header-title">On Behalf Of</th>
+                                                                <td mat-cell *matCellDef="let request">{{
+                                                                    request.onBehalfOf }}</td>
+                                                            </ng-container>
+
+                                                            <!-- Requester -->
+                                                            <ng-container matColumnDef="requester">
+                                                                <th mat-header-cell *matHeaderCellDef
+                                                                    class="table-header-title">Requester</th>
+                                                                <td mat-cell *matCellDef="let request">{{
+                                                                    request.requesterName }}</td>
+                                                            </ng-container>
+
+                                                            <!-- Request To -->
+                                                            <ng-container matColumnDef="requestTo">
+                                                                <th mat-header-cell *matHeaderCellDef
+                                                                    class="table-header-title">Request To</th>
+                                                                <td mat-cell *matCellDef="let request">{{
+                                                                    request.requestToName }}</td>
+                                                            </ng-container>
+
+                                                            <!-- Reason -->
+                                                            <ng-container matColumnDef="reason">
+                                                                <th mat-header-cell *matHeaderCellDef
+                                                                    class="table-header-title">Reason</th>
+                                                                <td mat-cell *matCellDef="let request"
+                                                                    style="white-space: pre-line;">
+                                                                    {{ request.reason }}
+                                                                </td>
+                                                            </ng-container>
+
+                                                            <!-- Status -->
+                                                            <ng-container matColumnDef="status">
+                                                                <th mat-header-cell *matHeaderCellDef
+                                                                    class="table-header-title"
+                                                                    style="text-align: center;">
+                                                                    Status
+                                                                </th>
+                                                                <td mat-cell *matCellDef="let request"
+                                                                    style="text-align:center;">
+                                                                    <span class="status-badge" [ngClass]="{
+                            'status-primary': request.status === 'Pending',
+                            'status-danger': request.status === 'Rejected',
+                            'status-success': request.status === 'Approve'
+                          }">
+                                                                        {{ request.status }}
+                                                                    </span>
+                                                                </td>
+                                                            </ng-container>
+
+                                                            <!-- Action -->
+                                                            <ng-container matColumnDef="action">
+                                                                <th mat-header-cell *matHeaderCellDef
+                                                                    style="text-align:center;"
+                                                                    class="table-header-title">Action</th>
+                                                                <td mat-cell *matCellDef="let request" class="btnAction"
+                                                                    style="text-align:center;">
+
+                                                                    <a mat-icon-button color="primary"
+                                                                        (click)="getInventoryRequestDetails(request.id)">
+                                                                        <img
+                                                                            src="assets/img/DashboardIcons/eye-svgrepo-com (1) 1.svg">
+                                                                    </a>
+
+
+                                                                    <!-- Approve -->
+                                                                    <button mat-icon-button color="primary"
+                                                                        (click)="approveChangeStatus(request.id)"
+                                                                        matTooltip="Approve"
+                                                                        [disabled]="request.status != 'Pending'">
+                                                                        <img src="assets/img/DashboardIcons/Assign.svg">
+                                                                    </button>
+
+                                                                    <!-- Reject -->
+                                                                    <button mat-icon-button color="warn"
+                                                                        (click)="rejectChangeStatus(request.id)"
+                                                                        matTooltip="Reject"
+                                                                        [disabled]="request.status != 'Pending'">
+                                                                        <img src="assets/img/DashboardIcons/Reject.svg"
+                                                                            width="20" height="20" />
+                                                                    </button>
+
+                                                                    <!-- Forward To Warehouse -->
+                                                                    @if (forwardToWarehouseAccess) {
+                                                                    <button mat-icon-button color="accent"
+                                                                        (click)="openReturnInventoryModal(request)"
+                                                                        [disabled]="request.status == 'Rejected' || request.status == 'Approve'"
+                                                                        matTooltip="Forward To Warehouse">
+                                                                        <img src="assets/img/All_Icons/17_Inventory_Management/03_Forward-To-Warehouse.png"
+                                                                            width="20" height="20" />
+                                                                    </button>
+                                                                    }
+
+                                                                    <!-- Fulfillment -->
+                                                                    @if (fullfillmentAccess) {
+                                                                    <button mat-icon-button color="accent"
+                                                                        (click)="openInventoryReqModal(request.id)"
+                                                                        [disabled]="request.status == 'Pending' || request.status == 'Rejected' || request.inventoryRequestStatus == 'Partially Completed'"
+                                                                        matTooltip="Fulfilment">
+                                                                        <img src="assets/img/All_Icons/17_Inventory_Management/04_Fulfillment-Inventory.png"
+                                                                            width="20" height="20" />
+                                                                    </button>
+                                                                    }
+
+                                                                </td>
+                                                            </ng-container>
+
+                                                            <!-- Header & Rows -->
+                                                            <tr mat-header-row *matHeaderRowDef="displayedColumns1">
+                                                            </tr>
+                                                            <tr mat-row class="table-content-row"
+                                                                *matRowDef="let row; columns: displayedColumns1;"></tr>
+                                                        </table>
+                                                    </div>
+                                                    <!-- No Record -->
+                                                    <div *ngIf="allRequestInventory?.length === 0" class="no-record">
+                                                        No Record Found.
+                                                    </div>
+
+                                                    <!-- Paginator -->
+                                                    <mat-paginator [length]="allRequestInventoryListdatatotalRecords"
+                                                        [pageSize]="allRequestInventoryListdataitemsPerPage"
+                                                        [pageSizeOptions]="[5,10,20,50,100]" showFirstLastButtons
+                                                        (page)="pageChangedMyReqInvList($event)">
+                                                    </mat-paginator>
+
+                                                </div>
+                                            </mat-card-content>
+                                        </mat-card>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </mat-tab>
+
+                </mat-tab-group>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<ng-template #inventoryDialogTemplate>
+    <div class="dialog-container">
+        <div class="dialog-header">
+            Raised Inventory Request
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="onCancel()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <div mat-dialog-content>
+            @if (!reisedIntReqAccess) {
+            <mat-card-content class="matcard-content">
+                <div class="panel-body table-responsive">
+                    Sorry you have not privilege to Raise Inventory!
+                </div>
+            </mat-card-content>
+            }
+            @if (reisedIntReqAccess) {
+            <mat-card-content class="matcardContent">
+                <!-- 🔹 Basic Details Section -->
+                <mat-card class="cardWithShadow w-100">
+                    <mat-card-header>
+                        <mat-card-title class="font-900">Basic Details</mat-card-title>
+                    </mat-card-header>
+
+                    <mat-card-content class="mat-card-content-border">
+                        <form [formGroup]="inventoryRequestFrom" class="row g-3">
+                            <!-- On Behalf Of -->
+                            <div class="col-md-3 mb-3">
+                                <label class="inputLabel">On Behalf Of *</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select class="input-p-5" placeholder="Enter a sdsad" class="input-p-5"
+                                        formControlName="onBehalfOf" (selectionChange)="getRequesterData($event)"
+                                        placeholder="Select On Behalf Of">
+                                        <mat-option *ngFor="let item of behalfListType" [value]="item.value">
+                                            {{ item.label }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error
+                                        *ngIf="submitted && inventoryRequestFrom.get('onBehalfOf')?.hasError('required')">
+                                        On Behalf Of is required.
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Requester -->
+                            <div class="col-md-3 mb-3">
+                                <label class="inputLabel">Requester *</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select class="input-p-5" placeholder="Enter a sdsad" class="input-p-5"
+                                        formControlName="requestNameId" [disabled]="!requesterFlag"
+                                        (selectionChange)="getSelRequester($event)" placeholder="Select Requester">
+                                        <mat-option *ngFor="let req of requesterList" [value]="req.id">
+                                            {{ req.name }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error
+                                        *ngIf="submitted && inventoryRequestFrom.get('requestNameId')?.hasError('required')">
+                                        Requester is required.
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Request To -->
+                            <div class="col-md-3 mb-3">
+                                <label class="inputLabel">Request To *</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select class="input-p-5" placeholder="Enter a sdsad" class="input-p-5"
+                                        formControlName="requestToWarehouseId" [disabled]="!requestToFlag"
+                                        placeholder="Select Request To">
+                                        <mat-option *ngFor="let wh of wareHouseData" [value]="wh.id">
+                                            {{ wh.name }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error
+                                        *ngIf="submitted && inventoryRequestFrom.get('requestToWarehouseId')?.hasError('required')">
+                                        Request To is required.
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Reason -->
+                            <div class="col-md-3 mb-3">
+                                <label class="inputLabel">Reason *</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <input class="input-p-5" matInput class="input-p-5" placeholder="Enter Reason"
+                                        formControlName="reason"
+                                        [ngClass]="{'is-invalid': submitted && inventoryRequestFrom.controls.reason.errors}" />
+                                    <mat-error
+                                        *ngIf="submitted && inventoryRequestFrom.get('reason')?.hasError('required')">
+                                        Reason is required.
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                        </form>
+                    </mat-card-content>
+                </mat-card>
+
+                <!-- 🔹 Product Details Section -->
+                <mat-card class="cardWithShadow w-100 mt-3">
+                    <mat-card-header>
+                        <mat-card-title class="font-900">Product Details</mat-card-title>
+                    </mat-card-header>
+
+                    <mat-card-content class="mat-card-content-border">
+                        <form [formGroup]="inventoryRequestMappingFrom" class="row g-3">
+                            <!-- Product Category -->
+                            <div class="col-md-3 mb-3">
+
+                                <label class="inputLabel">Product Category *</label>
+                                <mat-form-field appearance="outline" class="w-100" style="width: 94%;">
+                                    <mat-select class="input-p-5" placeholder="Enter a Product Category"
+                                        class="input-p-5" formControlName="productCategoryId"
+                                        placeholder="Select Product Category"
+                                        (selectionChange)="getProductbyCategory($event)" disabled>
+                                        <mat-option *ngFor="let cat of productCategoryList" [value]="cat.id">
+                                            {{ cat.name }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error
+                                        *ngIf="inventoryProductMappingSubmitted && inventoryRequestMappingFrom.get('productCategoryId')?.hasError('required')">
+                                        Product Category is required.
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Product -->
+                            <div class="col-md-3 mb-3">
+                                <label class="inputLabel">Product *</label>
+                                <mat-form-field appearance="outline" class="w-100" style="margin-left: -16px;">
+                                    <mat-select class="input-p-5" placeholder="Enter a Product" class="input-p-5"
+                                        formControlName="productId" placeholder="Select Product"
+                                        [disabled]="!inventoryRequestFrom.valid">
+                                        <mat-option *ngFor="let prod of productList" [value]="prod.id">
+                                            {{ prod.name }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Type -->
+                            <div class="col-md-3 mb-3">
+                                <label class="inputLabel">Type *</label>
+                                <mat-form-field appearance="outline" class="w-100" style="margin-left: -16px;">
+                                    <mat-select class="input-p-5" placeholder="Enter a Type" class="input-p-5"
+                                        formControlName="itemType" placeholder="Select Type"
+                                        [disabled]="!inventoryRequestFrom.valid">
+                                        <mat-option *ngFor="let type of types" [value]="type.value">
+                                            {{ type.label }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error
+                                        *ngIf="inventoryProductMappingSubmitted && inventoryRequestMappingFrom.get('itemType')?.hasError('required')">
+                                        Type is required.
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Quantity -->
+                            <div class="col-md-2 mb-3">
+                                <label class="inputLabel">Quantity *</label>
+                                <mat-form-field appearance="outline" class="w-100" style="margin-left: -16px;">
+                                    <input class="input-p-5" matInput class="input-p-5" type="number" min="1"
+                                        formControlName="quantity" (keypress)="quantityInValidation($event)"
+                                        placeholder="Enter Quantity" />
+                                    <mat-error
+                                        *ngIf="inventoryProductMappingSubmitted && inventoryRequestMappingFrom.get('quantity')?.hasError('required')">
+                                        Quantity is required.
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Add Button -->
+                            <div class="col-md-1 d-flex align-items-end"
+                                style="margin-bottom: 20px;margin-left: -16px;">
+                                <button mat-flat-button class="button-normal" color="primary"
+                                    (click)="onAddRequestInventoryProductField()"
+                                    [disabled]="!inventoryRequestMappingFrom.valid">
+                                    Add
+                                </button>
+                            </div>
+                        </form>
+                        <!-- Table -->
+                        <div class="table-container mt-4">
+                            <table mat-table [dataSource]="dataSource" class="mat-elevation-z8 w-100">
+
+                                <!-- Product Category Column -->
+                                <ng-container matColumnDef="productCategory">
+                                    <th mat-header-cell *matHeaderCellDef style="text-align: center;">Product Category*
+                                    </th>
+                                    <td mat-cell *matCellDef="let row">
+                                        <mat-form-field appearance="outline" class="w-100">
+                                            <mat-select class="input-p-5" placeholder="Enter a Product Category"
+                                                [formControl]="row.get('productCategoryId')" class="input-p-5" disabled>
+                                                <mat-option *ngFor="let cat of productCategoryList" [value]="cat.id">{{
+                                                    cat.name }}</mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Product Column -->
+                                <ng-container matColumnDef="product">
+                                    <th mat-header-cell *matHeaderCellDef style="text-align: center;">Product*</th>
+                                    <td mat-cell *matCellDef="let row">
+                                        <mat-form-field appearance="outline" class="w-100">
+                                            <mat-select class="input-p-5" placeholder="Enter a Product"
+                                                [formControl]="row.get('productId')" class="input-p-5" disabled>
+                                                <mat-option *ngFor="let prod of allActiveProduct" [value]="prod.id">{{
+                                                    prod.name }}</mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Type Column -->
+                                <ng-container matColumnDef="type">
+                                    <th mat-header-cell *matHeaderCellDef style="text-align: center;">Type*</th>
+                                    <td mat-cell *matCellDef="let row">
+                                        <mat-form-field appearance="outline" class="w-100">
+                                            <mat-select class="input-p-5" placeholder="Enter a Type"
+                                                [formControl]="row.get('itemType')" class="input-p-5" disabled>
+                                                <mat-option *ngFor="let type of types" [value]="type.value">{{
+                                                    type.label }}</mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Quantity Column -->
+                                <ng-container matColumnDef="quantity">
+                                    <th mat-header-cell *matHeaderCellDef style="text-align: center;">Quantity*</th>
+                                    <td mat-cell *matCellDef="let row">
+                                        <mat-form-field appearance="outline" class="w-100">
+                                            <input matInput class="input-p-5" type="number"
+                                                [formControl]="row.get('quantity')" class="input-p-5" disabled />
+                                        </mat-form-field>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Delete Column -->
+                                <ng-container matColumnDef="delete">
+                                    <th mat-header-cell *matHeaderCellDef style="text-align: center;">Delete</th>
+                                    <td mat-cell *matCellDef="let row; let i = index" style="text-align: center;">
+
+                                        <a mat-icon-button href="javascript:void(0)"
+                                            (click)="deleteConfirmonReqInventoryProdMapping(i)">
+                                            <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                        </a>
+                                    </td>
+                                </ng-container>
+
+                                <tr mat-header-row
+                                    *matHeaderRowDef="['productCategory', 'product', 'type', 'quantity', 'delete']">
+                                </tr>
+                                <tr mat-row
+                                    *matRowDef="let row; columns: ['productCategory', 'product', 'type', 'quantity', 'delete']">
+                                </tr>
+                            </table>
+
+                            <!-- Paginator -->
+                            <mat-paginator [length]="reqInventoryProMappingTotalRecords"
+                                [pageSize]="reqInventoryProMappingItemsPerPage" [pageSizeOptions]="[5,10,20,50,100]"
+                                showFirstLastButtons (page)="reqInventoryProductpageChangedData($event)">
+                            </mat-paginator>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+            </mat-card-content>
+            }
+        </div>
+
+        <!-- 🔹 Dialog Actions -->
+
+
+        <div mat-dialog-actions align="end" class="p-0 m-t-10 dialog-action-adjust">
+            <button mat-button mat-flat-button color="primary" class="button-normal" (click)="saveInventoryRequest()">
+                Save
+            </button>
+            <button matButton="outlined" mat-stroked-button color="primary" class="button-normal" (click)="onCancel()">
+                Cancel
+            </button>
+        </div>
+    </div>
+</ng-template>
+<ng-template #inventoryRequestDialog let-dialogRef="dialogRef">
+    <div class="dialog-container">
+
+
+        <div class="dialog-header">
+            Inventory Request
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+
+        <div mat-dialog-content>
+
+
+            <mat-card class="cardWithShadow w-100">
+                <mat-card-header>
+                    <mat-card-title class="font-900">Basic Details</mat-card-title>
+                </mat-card-header>
+
+                <mat-card-content class="mat-card-content-border">
+                    <div class="row" style="margin-top: 20px;">
+
+                        <!-- Request ID -->
+                        <div class="col-4 m-b-5 dataGroup field">
+                            <span class="label-text">Request ID</span>
+                            <span class="colon">:</span>
+                            <span class="m-l-10">{{ viewReqInventoryData?.requestInventoryName || '-' }}</span>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="col-4 m-b-5 dataGroup field">
+                            <span class="label-text">Status</span>
+                            <span class="colon">:</span>
+                            <span class="m-l-10 status-badge" [ngClass]="{
+                        'status-info': viewReqInventoryData?.status === 'Pending',
+                        'status-success': viewReqInventoryData?.status === 'Approve',
+                        'status-danger': viewReqInventoryData?.status === 'Rejected'
+                      }">
+                                {{ viewReqInventoryData?.status || '-' }}
+                            </span>
+                        </div>
+
+                        <!-- Reason -->
+                        <div class="col-4 m-b-5 dataGroup field">
+                            <span class="label-text">Reason</span>
+                            <span class="colon">:</span>
+                            <span class="m-l-10">{{ viewReqInventoryData?.reason || '-' }}</span>
+                        </div>
+
+                        <!-- On Behalf Of -->
+                        <div class="col-4 m-b-5 dataGroup field">
+                            <span class="label-text">On Behalf Of</span>
+                            <span class="colon">:</span>
+                            <span class="m-l-10">{{ viewReqInventoryData?.onBehalfOf || '-' }}</span>
+                        </div>
+
+                        <!-- Requester -->
+                        <div class="col-4 m-b-5 dataGroup field">
+                            <span class="label-text">Requester</span>
+                            <span class="colon">:</span>
+                            <span class="m-l-10">{{ viewReqInventoryData?.requesterName || '-' }}</span>
+                        </div>
+
+                        <!-- Request To -->
+                        <div class="col-4 m-b-5 dataGroup field">
+                            <span class="label-text">Request To</span>
+                            <span class="colon">:</span>
+                            <span class="m-l-10">{{ viewReqInventoryData?.requestToName || '-' }}</span>
+                        </div>
+
+                    </div>
+                </mat-card-content>
+
+            </mat-card>
+
+
+            <mat-card class="cardWithShadow w-100 mt-3">
+                <mat-card-header>
+                    <mat-card-title class="font-900">Product Details</mat-card-title>
+                </mat-card-header>
+
+                <mat-card-content class="mat-card-content-border">
+
+                    <table mat-table [dataSource]="viewReqInventoryData?.requestInvenotryProductMappings"
+                        class="mat-elevation-z8 w-100">
+
+                        <!-- Product Category -->
+                        <ng-container matColumnDef="productCategoryName">
+                            <th mat-header-cell *matHeaderCellDef>Product Category</th>
+                            <td mat-cell *matCellDef="let row">{{ row.productCategoryName }}</td>
+                        </ng-container>
+
+                        <!-- Product -->
+                        <ng-container matColumnDef="productName">
+                            <th mat-header-cell *matHeaderCellDef>Product</th>
+                            <td mat-cell *matCellDef="let row">{{ row.productName }}</td>
+                        </ng-container>
+
+                        <!-- Item Type -->
+                        <ng-container matColumnDef="itemType">
+                            <th mat-header-cell *matHeaderCellDef>Item Type</th>
+                            <td mat-cell *matCellDef="let row">{{ row.itemType }}</td>
+                        </ng-container>
+
+                        <!-- Quantity -->
+                        <ng-container matColumnDef="quantity">
+                            <th mat-header-cell *matHeaderCellDef>Quantity</th>
+                            <td mat-cell *matCellDef="let row">{{ row.quantity }}</td>
+                        </ng-container>
+
+                        <!-- Request Status -->
+                        <ng-container matColumnDef="requestStatus">
+                            <th mat-header-cell *matHeaderCellDef>Request Status</th>
+                            <td mat-cell *matCellDef="let row">
+                                <span class="status-badge" [ngClass]="{
+                            'status-info': row.requestStatus === 'Pending' || !row.requestStatus,
+                            'status-success': row.requestStatus === 'Approve' || row.requestStatus === 'Close',
+                            'status-danger': row.requestStatus === 'Rejected',
+                            'status-primary': row.requestStatus === 'Open' || row.requestStatus === 'Partial_Open'
+                          }">
+                                    {{ row.requestStatus || 'Pending' }}
+                                </span>
+                            </td>
+                        </ng-container>
+
+
+                        <tr mat-header-row
+                            *matHeaderRowDef="['productCategoryName','productName','itemType','quantity','requestStatus']">
+                        </tr>
+                        <tr mat-row
+                            *matRowDef="let row; columns: ['productCategoryName','productName','itemType','quantity','requestStatus']">
+                        </tr>
+                    </table>
+
+
+
+                    @if (this.ifForwardCase) {<div class="d-flex  justify-content-center  ">
+                        <button mat-button mat-flat-button color="'primary'"
+                            (click)="dataforwardToOutwardScreen(dialogRef)">
+                            Click To FulFill
+                        </button>
+                    </div>
+                    }
+                </mat-card-content>
+            </mat-card>
+
+        </div>
+
+
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+            <button mat-stroked-button color="primary" class="button-normal" (click)="dialogRef.close()">
+                Close
+            </button>
+        </div>
+
+    </div>
+</ng-template>
+
+<!-- Approve Change Status Dialog -->
+<ng-template #approveDialog>
+    <div class="dialog-container">
+        <!-- Header -->
+        <div class="dialog-header">
+            Change Approval Status
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="approveDialogRef.close()">
+                    <mat-icon>close</mat-icon>
+                </a>
+            </span>
+        </div>
+
+        <!-- Dialog Content -->
+        <div mat-dialog-content>
+            <form [formGroup]="approveRequestRemarkForm" class="w-100">
+                <div class="row">
+                    <div class="col-12">
+                        <label class="inputLabel">Remark *</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <textarea matInput formControlName="requestRemark" rows="4"
+                                placeholder="Enter remark"></textarea>
+                            <mat-error *ngIf="
+                approveRequestSubmitted &&
+                approveRequestRemarkForm.get('requestRemark')?.hasError('required')
+              ">
+                                Remark is required.
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Footer Actions -->
+        <mat-dialog-actions align="end">
+            <button mat-flat-button color="primary" (click)="approveRequest()">
+
+                Approve
+            </button>
+            <button mat-stroked-button color="warn" (click)="closeApproveInventoryModal(); approveDialogRef.close()">
+                Close
+            </button>
+        </mat-dialog-actions>
+    </div>
+</ng-template>
+
+<!-- Reject Change Status Dialog -->
+<ng-template #rejectDialog>
+    <div class="dialog-container">
+        <!-- Header -->
+        <div class="dialog-header">
+            Change Approval Status
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="rejectDialogRef.close()">
+                    <mat-icon>close</mat-icon>
+                </a>
+            </span>
+        </div>
+
+        <!-- Dialog Content -->
+        <div mat-dialog-content>
+            <form [formGroup]="rejectRequestRemarkForm" class="w-100">
+                <div class="row">
+                    <div class="col-12">
+                        <label class="inputLabel">Remark *</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <textarea matInput formControlName="requestRemark" rows="4"
+                                placeholder="Enter remark"></textarea>
+                            <mat-error *ngIf="
+                rejectRequestSubmitted &&
+                rejectRequestRemarkForm.get('requestRemark')?.hasError('required')
+              ">
+                                Remark is required.
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Footer Buttons -->
+        <mat-dialog-actions align="end">
+            <button mat-flat-button color="warn" (click)="rejectRequest()">
+
+                Reject
+            </button>
+            <button mat-stroked-button color="primary" (click)="closeRejectInventoryModal(); rejectDialogRef.close()">
+                Close
+            </button>
+        </mat-dialog-actions>
+    </div>
+</ng-template>
+
+<!-- <ng-template #approveChangeStatusModalDialog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+       
+        <div class="dialog-header dialog-title">
+            Change Approval Status
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+      
+        <div mat-dialog-content>
+            <mat-card>
+                <mat-card-content>
+                    <form [formGroup]="approveRequestRemarkForm">
+                        <div class="row">
+                            <div class="col-12">
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <label class="inputLabel">Remark *</label>
+                                    <textarea matInput class="input-p-5" formControlName="requestRemark"
+                                        placeholder="Enter your remark" rows="3"></textarea>
+                                    <mat-error
+                                        *ngIf="approveRequestSubmitted && approveRequestRemarkForm.controls.requestRemark.errors?.required">
+                                        Remark is required.
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                    </form>
+                </mat-card-content>
+            </mat-card>
+
+        </div>
+
+        <div class="dialog-action-adjust d-flex justify-content-end" style="gap:8px">
+            <button mat-button mat-flat-button color="'primary'" (click)="approveRequest(dialogRef)">
+                Approve
+            </button>
+            <button mat-stroked-button mat-dialog-close (click)="dialogRef.close()">Close</button>
+        </div>
+    </div>
+</ng-template>
+<ng-template #rejectChangeStatusModalDialog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+       
+        <div class="dialog-header dialog-title">
+            Change Approval Status
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+      
+        <div mat-dialog-content>
+            <mat-card>
+                <mat-card-content>
+                    <form [formGroup]="rejectRequestRemarkForm">
+                        <label class="inputLabel">Remark *</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <textarea matInput class="input-p-5" formControlName="requestRemark"
+                                placeholder="Enter remark" rows="3"></textarea>
+                            <mat-error
+                                *ngIf="rejectRequestSubmitted && rejectRequestRemarkForm.controls.requestRemark.errors?.required">
+                                Remark is required.
+                            </mat-error>
+                        </mat-form-field>
+                    </form>
+                </mat-card-content>
+            </mat-card>
+
+        </div>
+
+        <div class="dialog-action-adjust d-flex justify-content-end" style="gap:8px">
+            <button mat-button mat-flat-button color="'primary'" (click)="rejectRequest(dialogRef)">
+                Reject
+            </button>
+            <button mat-stroked-button mat-dialog-close (click)="dialogRef.close()">Close</button>
+        </div>
+    </div>
+</ng-template> -->
+<ng-template #inventoryReturnModalDialog>
+    <div class="container-fluid p-0">
+        <!-- Header -->
+        <div class="dialog-header dialog-title">
+            Forward to Inventory Request
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <div mat-dialog-content>
+            <mat-card>
+                <mat-card-content>
+                    <form [formGroup]="inventoryReturntFrom">
+
+                        <div class="row">
+                            <!-- Request Inventory Name -->
+                            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12"><label class="inputLabel">Request
+                                    Inventory Name *</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <input matInput class="input-p-5" formControlName="requestInventoryName" readonly />
+                                </mat-form-field>
+                            </div>
+
+                            <!-- On Behalf Of -->
+                            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12"><label class="inputLabel">On Behalf Of
+                                    *</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <input matInput class="input-p-5" formControlName="onBehalfOf" readonly />
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Requester -->
+                            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12"><label class="inputLabel">Requester
+                                    *</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <input matInput class="input-p-5" formControlName="requestNameId" readonly />
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Request To -->
+                            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12"><label class="inputLabel">Request To
+                                    *</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select class="input-p-5" placeholder="Enter a Request To"
+                                        formControlName="requestToWarehouseId">
+                                        <mat-option *ngFor="let warehouse of wareHouseData" [value]="warehouse.id">
+                                            {{ warehouse.name }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error
+                                        *ngIf="submitted && inventoryReturntFrom.controls.requestToWarehouseId.errors?.required">
+                                        Request To is required.
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Reason -->
+                            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12"><label class="inputLabel">Reason *</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <input matInput class="input-p-5" formControlName="reason"
+                                        placeholder="Enter Reason" readonly />
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Remark -->
+                            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+                                <label class="inputLabel">Remark *</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <input matInput class="input-p-5" formControlName="remarks"
+                                        placeholder="Enter Remark" />
+                                    <mat-error
+                                        *ngIf="submitted && inventoryReturntForm?.controls?.remarks?.errors?.required">
+                                        Remark is required.
+                                    </mat-error>
+                                </mat-form-field>
+
+                            </div>
+                        </div>
+                    </form>
+                </mat-card-content>
+            </mat-card>
+
+        </div>
+
+        <div class="dialog-action-adjust d-flex justify-content-end" style="gap:8px">
+            <button mat-button mat-flat-button color="'primary'" (click)="saveForwardRequest(dialogRef)">
+                Save
+            </button>
+            <button mat-stroked-button mat-dialog-close (click)="onCloseDialog()">Close</button>
+        </div>
+    </div>
+</ng-template>
+<ng-template #viewInventoryFulfillmentModalDialog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <!-- Header -->
+        <div class="dialog-header dialog-title">
+            Inventory Fulfilment
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <div mat-dialog-content>
+            <form [formGroup]="outwardFormGroup">
+                <!-- Basic Details -->
+                <mat-card> <mat-card-header>
+                        <mat-card-title>Basic Details</mat-card-title></mat-card-header>
+                    <mat-card-content>
+                        <div class="row">
+                            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12"><label class="inputLabel">Request
+                                    Inventory Name</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <input matInput class="input-p-5" formControlName="requestInventoryName" readonly />
+                                </mat-form-field>
+                            </div>
+                            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12"><label class="inputLabel">Source Type
+                                    *</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select class="input-p-5" placeholder="Enter a Source Type"
+                                        formControlName="sourceType"
+                                        (selectionChange)="getSources(outwardFormGroup.get('sourceType')?.value)"
+                                        [readonly]="true" [disabled]="true">
+                                        <mat-option *ngFor="let s of sourceType" [value]="s.label">
+                                            {{ s.label }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error
+                                        *ngIf="submitted && outwardFormGroup?.controls?.sourceType?.errors?.required">
+                                        Source Type is required.
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12"><label class="inputLabel">Select Source
+                                    *</label>
+                                <mat-form-field appearance="outline" class="w-100"
+                                    *ngIf="!isSourceAStaffOrCustomer && !sourceTypeAsStaffFlag">
+                                    <input matInput class="input-p-5" formControlName="source" readonly />
+                                    <mat-error
+                                        *ngIf="submitted && outwardFormGroup?.controls?.source?.errors?.required">
+                                        Source is required.
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12"><label class="inputLabel">Destination Type
+                                    *</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select class="input-p-5" placeholder="Enter a Destination Type"
+                                        formControlName="destinationType"
+                                        (selectionChange)="getDestinations(outwardFormGroup.get('destinationType')?.value)">
+                                        <mat-option *ngFor="let d of destinationType" [value]="d.label">
+                                            {{ d.label }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error
+                                        *ngIf="submitted && outwardFormGroup?.controls?.destinationType?.errors?.required">
+                                        Destination Type is required.
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12"><label class="inputLabel">Select
+                                    Destination *</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select class="input-p-5" placeholder="Enter a Select Destination"
+                                        formControlName="destination" [disabled]="editMode">
+                                        <mat-option *ngFor="let dest of destinations"
+                                            [value]="isDestAStaffOrCustomer ? dest.id : dest.id">
+                                            {{ isDestAStaffOrCustomer ? dest.username : dest.name }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error
+                                        *ngIf="submitted && outwardFormGroup?.controls?.destination?.errors?.required">
+                                        Please select a destination.
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+            </form>
+            <!-- Product Details -->
+            <mat-card> <mat-card-header>
+                    <mat-card-title>Product Details</mat-card-title></mat-card-header>
+                <mat-card-content>
+                    <div class="example-container mat-elevation-z8" tabindex="0">
+                        <table mat-table [dataSource]="products.controls" class="mat-elevation-z8 w-full">
+                            <!-- Checkbox -->
+                            <ng-container matColumnDef="select">
+                                <th mat-header-cell *matHeaderCellDef>
+                                    <mat-checkbox formControlName="ispaymentChecked"
+                                        (change)="allSelectBatch($event)"></mat-checkbox>
+                                </th>
+                                <td mat-cell *matCellDef="let group; let i = index" [formGroup]="group">
+                                    <mat-checkbox formControlName="isSinglepaymentChecked"
+                                        (change)="addbatchChecked(i, $event)" [disabled]="
+                          group.get('requestStatus')?.value !== 'Open' ||
+                          group.get('quantity')?.value > group.get('availableQty')?.value ||
+                          !group.get('quantity')?.value
+                        "></mat-checkbox>
+                                </td>
+                            </ng-container>
+
+                            <!-- Product Columns -->
+                            <ng-container matColumnDef="productCategory">
+                                <th mat-header-cell *matHeaderCellDef>Product Category</th>
+                                <td mat-cell *matCellDef="let group">
+                                    {{ group.get('productCategoryName')?.value }}
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="productName">
+                                <th mat-header-cell *matHeaderCellDef>Product Name</th>
+                                <td mat-cell *matCellDef="let group">
+                                    {{ group.get('productName')?.value }}
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="availableQty">
+                                <th mat-header-cell *matHeaderCellDef>Available Qty</th>
+                                <td mat-cell *matCellDef="let group">
+                                    {{ group.get('availableQty')?.value }}
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="quantity">
+                                <th mat-header-cell *matHeaderCellDef>Fulfilment Qty*</th>
+                                <td mat-cell *matCellDef="let group">
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <input matInput type="number" [formControl]="group.get('quantity')"
+                                            [readonly]="group.get('requestStatus')?.value !== 'Open'" />
+                                        <mat-error *ngIf="!group.get('quantity')?.value">
+                                            Please fill the quantity other than 0
+                                        </mat-error>
+                                    </mat-form-field>
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="requestStatus">
+                                <th mat-header-cell *matHeaderCellDef>Status</th>
+                                <td mat-cell *matCellDef="let group">
+                                    <span [ngClass]="{
+                          'badge-info': group.get('requestStatus')?.value === 'Open' || group.get('requestStatus')?.value === 'Partial_Open',
+                          'badge-success': group.get('requestStatus')?.value === 'Close',
+                          'badge-danger': group.get('requestStatus')?.value === 'Rejected',
+                          'badge-primary': !group.get('requestStatus')?.value
+                        }" class="badge">
+                                        {{ group.get('requestStatus')?.value || 'Pending' }}
+                                    </span>
+                                </td>
+                            </ng-container>
+
+                            <tr mat-header-row
+                                *matHeaderRowDef="['select', 'productCategory', 'productName', 'availableQty', 'quantity', 'requestStatus']">
+                            </tr>
+                            <tr mat-row
+                                *matRowDef="let row; columns: ['select', 'productCategory', 'productName', 'availableQty', 'quantity', 'requestStatus']">
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- Submit -->
+                    <div class="d-flex justify-content-center">
+                        <button mat-button mat-flat-button color="'primary'" (click)="submit(dialogRef)"
+                            [disabled]="!outwardFormGroup.valid">
+                            {{ editMode ? 'Update' : 'Add' }} Outward
+                        </button>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+
+        </div>
+
+        <div class="dialog-action-adjust d-flex justify-content-end" style="gap:8px">
+
+            <button mat-stroked-button mat-dialog-close (click)="dialogRef.close()">Close</button>
+        </div>
+    </div>
+</ng-template>
+<!-- <div class="row">
+  <div class="col-md-12">
+    <div class="panel top">
+      <div class="panel-heading">
+        <h3 class="panel-title">Inventory Request Management</h3>
+        <div class="right">
+          <button
+            type="button"
+            class="btn-toggle-collapse"
+            data-toggle="collapse"
+            data-target="#searchInventoryRequest"
+            aria-expanded="false"
+            aria-controls="searchtax"
+            >
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+
+      <div id="searchInventoryRequest" class="panel-collapse collapse in">
+        <div class="panel-body no-padding panel-udata">
+          <div class="col-md-6 pcol">
+            <div class="dbox" [ngClass]="{ activeSubMenu: isMyInventoryShow }">
+              <a (click)="myInventoryOpen()" class="curson_pointer">
+                <img src="../../../assets/img/i01.png" style="width: 32px" />
+                <h5>My Inventory Request</h5>
+              </a>
+            </div>
+          </div>
+          @if (reisedIntReqAccess) {
+            <div class="col-md-6 pcol">
+              <div class="dbox" [ngClass]="{ activeSubMenu: isAssignedInventoryShow }">
+                <a (click)="assignedInventoryOpen()" class="curson_pointer">
+                  <img src="../../../assets/img/i01.png" style="width: 32px" />
+                  <h5>Assigned Inventory Request</h5>
+                </a>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+@if (isMyInventoryShow) {
+  <div class="row">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">My Inventory Request</h3>
+          <div class="right">
+            <button class="btn refreshbtn" type="reset" (click)="getMyRequestInventoryData('')">
+               <img src="assets/img/DashboardIcons/Refresh.svg" />
+            </button>
+            <button
+              type="button"
+              class="btn-toggle-collapse"
+              data-toggle="collapse"
+              data-target="#myInventoryList"
+              aria-expanded="false"
+              aria-controls="listTax"
+              >
+              <i class="fa fa-minus-circle"></i>
+            </button>
+          </div>
+        </div>
+        <div id="myInventoryList" class="panel-collapse collapse in">
+          <div class="panel-body table-responsive">
+            @if (reisedIntReqAccess) {
+              <button
+                type="submit"
+                class="btn btn-primary statusbtn"
+                class="yellowBtn"
+                style="margin: 0 0 10px 0"
+                (click)="openRequestInventoryModal()"
+                >
+                Raised Inventory Request
+              </button>
+            }
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Request Id</th>
+                  <th>on Behalf of</th>
+                  <th>Requester</th>
+                  <th>Request To</th>
+                  <th>Reason</th>
+                  <th>Status</th>
+                  <th>Inventory Request Status</th>
+                  @if (deleteAccess) {
+                    <th>Action</th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @for (
+                  request of myRequestInventory
+                  | paginate
+                  : {
+                  id: 'myRequestInventorypageData',
+                  itemsPerPage: myRequestInventoryListdataitemsPerPage,
+                  currentPage: currentPageMyRequestInventoryListdata,
+                  totalItems: myRequestInventoryListdatatotalRecords
+                  }; track
+                  request; let i = $index) {
+                  <tr
+                    >
+                    <td>
+                      <a
+                        href="javascript:void(0)"
+                        class="curson_pointer"
+                        (click)="openInventoryRequestDetails(request.id)"
+                        style="color: #f7941e"
+                        >{{ request.requestInventoryName }}</a
+                        >
+                      </td>
+                      <td>{{ request.onBehalfOf }}</td>
+                      <td>{{ request.requesterName }}</td>
+                      <td>{{ request.requestToName }}</td>
+                      <td>{{ request.reason }}</td>
+                      <td>
+                        @if (request.status == 'Pending') {
+                          <span class="badge badge-primary">{{
+                            request.status
+                          }}</span>
+                        }
+                        @if (request.status == 'Rejected') {
+                          <span class="badge badge-danger">{{
+                            request.status
+                          }}</span>
+                        }
+                        @if (request.status == 'Approve') {
+                          <span class="badge badge-success">{{
+                            request.status
+                          }}</span>
+                        }
+                      </td>
+                      <td>
+                        @if (request.inventoryRequestStatus == 'In-Progress') {
+                          <span
+                            class="badge badge-info"
+                            >{{ request.inventoryRequestStatus }}</span
+                            >
+                          }
+                          @if (request.inventoryRequestStatus == 'Waiting for Approval') {
+                            <span
+                              class="badge badge-primary"
+                              >{{ request.inventoryRequestStatus }}</span
+                              >
+                            }
+                            @if (request.inventoryRequestStatus == 'Complted') {
+                              <span
+                                class="badge badge-success"
+                                >{{ request.inventoryRequestStatus }}</span
+                                >
+                              }
+                              @if (request.inventoryRequestStatus == 'Rejected') {
+                                <span
+                                  class="badge badge-danger"
+                                  >{{ request.inventoryRequestStatus }}</span
+                                  >
+                                }
+                                @if (request.inventoryRequestStatus == 'Partially Completed') {
+                                  <span
+                                    class="badge"
+                                    style="background-color: #f7941e"
+                                    >{{ request.inventoryRequestStatus }}</span
+                                    >
+                                  }
+                                </td>
+                                @if (deleteAccess) {
+                                  <td class="btnAction">
+                                    @if (deleteAccess) {
+                                      <button
+                                        id="delete-button"
+                                        href="javascript:void(0)"
+                                        title="Delete"
+                                        [disabled]="request.status == 'Approve'"
+                                        class="curson_pointer approve-btn"
+                                        (click)="deleteConfirmonReqInventory(request.id)"
+                                        >
+                                         <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                                      </button>
+                                    }
+                                  </td>
+                                }
+                              </tr>
+                            }
+                          </tbody>
+                        </table>
+                        <div class="pagination_Dropdown">
+                          <pagination-controls
+                            id="myRequestInventorypageData"
+                            maxSize="10"
+                            directionLinks="true"
+                            previousLabel=""
+                            nextLabel=""
+                            (pageChange)="pageChangedMyReqInvList($event)"
+                          ></pagination-controls>
+                          <div id="itemPerPageDropdown">
+                            <p-dropdown
+                              [(ngModel)]="myRequestInventoryListdataitemsPerPage"
+                              [options]="pageLimitOptions"
+                              optionLabel="value"
+                              optionValue="value"
+                              (onChange)="TotalItemPerPageMyReqInv($event)"
+                            ></p-dropdown>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+            @if (isAssignedInventoryShow) {
+              <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                  <div class="panel">
+                    <div class="panel-heading">
+                      <h3 class="panel-title">Assigned Inventory Request</h3>
+                      <div class="right">
+                        <button class="btn refreshbtn" type="reset" (click)="getAllRequestInventoryData('')">
+                           <img src="assets/img/DashboardIcons/Refresh.svg" />
+                        </button>
+                        <button
+                          type="button"
+                          class="btn-toggle-collapse"
+                          data-toggle="collapse"
+                          data-target="#myInventoryList"
+                          aria-expanded="false"
+                          aria-controls="listTax"
+                          >
+                          <i class="fa fa-minus-circle"></i>
+                        </button>
+                      </div>
+                    </div>
+                    <div id="myInventoryList" class="panel-collapse collapse in">
+                      <div class="panel-body table-responsive">
+                        <table class="table">
+                          <thead>
+                            <tr>
+                              <th>Request Id</th>
+                              <th>on Behalf of</th>
+                              <th>Requester</th>
+                              <th>Request To</th>
+                              <th>Reason</th>
+                              <th>Status</th>
+                              
+                              <th>Action</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            @for (
+                              request of allRequestInventory
+                              | paginate
+                              : {
+                              id: 'allRequestInventorypageData',
+                              itemsPerPage: allRequestInventoryListdataitemsPerPage,
+                              currentPage: currentPageAllRequestInventoryListdata,
+                              totalItems: allRequestInventoryListdatatotalRecords
+                              }; track
+                              request; let i = $index) {
+                              <tr
+                                >
+                                <td>
+                                  <a
+                                    href="javascript:void(0)"
+                                    class="curson_pointer"
+                                    (click)="getInventoryRequestDetails(request.id)"
+                                    style="color: #f7941e"
+                                    >{{ request.requestInventoryName }}</a
+                                    >
+                                  </td>
+                                  <td>{{ request.onBehalfOf }}</td>
+                                  <td>{{ request.requesterName }}</td>
+                                  <td>{{ request.requestToName }}</td>
+                                  <td>{{ request.reason }}</td>
+                                  <td>
+                                    @if (request.status == 'Pending') {
+                                      <span class="badge badge-primary">{{
+                                        request.status
+                                      }}</span>
+                                    }
+                                    @if (request.status == 'Rejected') {
+                                      <span class="badge badge-danger">{{
+                                        request.status
+                                      }}</span>
+                                    }
+                                    @if (request.status == 'Approve') {
+                                      <span class="badge badge-success">{{
+                                        request.status
+                                      }}</span>
+                                    }
+                                  </td>
+                                  <td class="btnAction">
+                                    <button
+                                      id="approve-button"
+                                      type="button"
+                                      (click)="approveChangeStatus(request.id)"
+                                      title="Approve"
+                                      [disabled]="request.status != 'Pending'"
+                                      class="curson_pointer approve-btn"
+                                      >
+                                     <img src="assets/img/DashboardIcons/Assign.svg">
+                                    </button>
+                                    <button
+                                      id="reject-button"
+                                      type="button"
+                                      title="Reject"
+                                      (click)="rejectChangeStatus(request.id)"
+                                      class="curson_pointer approve-btn"
+                                      [disabled]="request.status != 'Pending'"
+                                      >
+                                       <img src="assets/img/DashboardIcons/Reject.svg">
+                                    </button>
+                                    @if (forwardToWarehouseAccess) {
+                                      <button
+                                        id="reject-button"
+                                        type="button"
+                                        title="ForwardToWarehouse"
+                                        [disabled]="request.status == 'Rejected' || request.status == 'Approve'"
+                                        (click)="openReturnInventoryModal(request)"
+                                        class="curson_pointer approve-btn"
+                                        >
+                                        <img
+                                          src="assets/img/All_Icons/17_Inventory_Management/03_Forward-To-Warehouse.png"
+                                          />
+                                        </button>
+                                      }
+                                      @if (fullfillmentAccess) {
+                                        <button
+                                          id="reject-button"
+                                          type="button"
+                                          title="Fulfilment"
+                                          [disabled]="request.status == 'Pending' || request.status == 'Rejected'"
+                                          (click)="openInventoryReqModal(request.id)"
+                                          class="curson_pointer approve-btn"
+                                          >
+                                          <img
+                                            src="assets/img/All_Icons/17_Inventory_Management/04_Fulfillment-Inventory.png"
+                                            />
+                                          </button>
+                                        }
+                                      </td>
+                                    </tr>
+                                  }
+                                </tbody>
+                              </table>
+                              <div class="pagination_Dropdown">
+                                <pagination-controls
+                                  id="allRequestInventorypageData"
+                                  maxSize="10"
+                                  directionLinks="true"
+                                  previousLabel=""
+                                  nextLabel=""
+                                  (pageChange)="pageChangedAllReqInvList($event)"
+                                ></pagination-controls>
+                                <div id="itemPerPageDropdown">
+                                  <p-dropdown
+                                    [(ngModel)]="allRequestInventoryListdataitemsPerPage"
+                                    [options]="pageLimitOptions"
+                                    optionLabel="value"
+                                    optionValue="value"
+                                    (onChange)="TotalItemPerPageAllReqInv($event)"
+                                  ></p-dropdown>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  }
+                  
+
+                <p-dialog
+                  header="Raised Inventory Request"
+                  [(visible)]="inventoryRequestModal"
+                  [style]="{ width: '75%' }"
+                  [modal]="true"
+                  [responsive]="true"
+                  [draggable]="false"
+                  [closable]="true"
+                  (onHide)="closeRequestInventoryModal()"
+                  >
+                  <div class="modal-body">
+                    <form [formGroup]="inventoryRequestFrom">
+                      <fieldset style="margin-top: 0">
+                        <legend>Basic Details</legend>
+                        <div class="boxWhite">
+                          <div class="row">
+                            <div class="col-lg-3 col-md-3 col-sm-4 col-xs-12">
+                              <div class="form-group">
+                                <label class="inputLabel">On Behalf Of *</label>
+                                <p-dropdown
+                                  (onChange)="getRequesterData($event)"
+                                  [options]="behalfListType"
+                                  filter="true"
+                                  filterBy="label"
+                                  formControlName="onBehalfOf"
+                                  optionLabel="label"
+                                  optionValue="value"
+                                  placeholder="Select a on Behalf Of"
+                                ></p-dropdown>
+                                @if (submitted && inventoryRequestFrom.controls.onBehalfOf.errors) {
+                                  <div
+                                    class="errorWrap text-danger"
+                                    >
+                                    @if (submitted && inventoryRequestFrom.controls.onBehalfOf.errors.required) {
+                                      <div
+                                        class="error text-danger"
+                                        >
+                                        On Behalf Of is required.
+                                      </div>
+                                    }
+                                  </div>
+                                }
+                              </div>
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-4 col-xs-12">
+                              <div class="form-group">
+                                <label class="inputLabel">Requester *</label>
+                                <p-dropdown
+                                  [disabled]="!requesterFlag"
+                                  (onChange)="getSelRequester($event)"
+                                  [options]="requesterList"
+                                  filter="true"
+                                  filterBy="name"
+                                  formControlName="requestNameId"
+                                  optionLabel="name"
+                                  optionValue="id"
+                                  placeholder="Select a Requester"
+                                ></p-dropdown>
+                                @if (submitted && inventoryRequestFrom.controls.requestNameId.errors) {
+                                  <div
+                                    class="errorWrap text-danger"
+                                    >
+                                    @if (submitted && inventoryRequestFrom.controls.requestNameId.errors.required) {
+                                      <div
+                                        class="error text-danger"
+                                        >
+                                        Requester is required.
+                                      </div>
+                                    }
+                                  </div>
+                                }
+                              </div>
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-4 col-xs-12">
+                              <div class="form-group">
+                                <label class="inputLabel">Request To *</label>
+                                <p-dropdown
+                                  [disabled]="!requestToFlag"
+                                  [options]="wareHouseData"
+                                  filter="true"
+                                  filterBy="name"
+                                  formControlName="requestToWarehouseId"
+                                  optionLabel="name"
+                                  optionValue="id"
+                                  placeholder="Select a Request To"
+                                ></p-dropdown>
+                                @if (submitted && inventoryRequestFrom.controls.requestToWarehouseId.errors) {
+                                  <div
+                                    class="errorWrap text-danger"
+                                    >
+                                    @if (
+                                      submitted &&
+                                      inventoryRequestFrom.controls.requestToWarehouseId.errors.required
+                                      ) {
+                                      <div
+                                        class="error text-danger"
+                                        >
+                                        Request To is required.
+                                      </div>
+                                    }
+                                  </div>
+                                }
+                              </div>
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-4 col-xs-12">
+                              <div class="form-group">
+                                <label class="inputLabel">Reason *</label>
+                                <input
+                  [ngClass]="{
+                    'is-invalid': submitted && inventoryRequestFrom.controls.reason.errors
+                  }"
+                                  class="form-control"
+                                  formControlName="reason"
+                                  placeholder="Enter Reason"
+                                  type="text"
+                                  />
+                                  @if (submitted && inventoryRequestFrom.controls.reason.errors) {
+                                    <div
+                                      class="errorWrap text-danger"
+                                      >
+                                      @if (submitted && inventoryRequestFrom.controls.reason.errors.required) {
+                                        <div
+                                          class="error text-danger"
+                                          >
+                                          Reason is required.
+                                        </div>
+                                      }
+                                    </div>
+                                  }
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </fieldset>
+                        <fieldset>
+                          <legend>Product Details</legend>
+                          <div class="boxWhite">
+                            <div class="row" [formGroup]="inventoryRequestMappingFrom">
+                              <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+                                <div class="form-group">
+                                  <label class="inputLabel">Product Category*</label>
+                                  <p-dropdown
+                                    [disabled]="!inventoryRequestFrom.valid"
+                                    (onChange)="getProductbyCategory($event)"
+                                    [options]="productCategoryList"
+                                    filter="true"
+                                    filterBy="name"
+                                    formControlName="productCategoryId"
+                                    optionLabel="name"
+                                    optionValue="id"
+                                    placeholder="Select a Product Category"
+                                  ></p-dropdown>
+                                  @if (
+                                    inventoryProductMappingSubmitted &&
+                                    inventoryRequestMappingFrom.controls.productCategoryId.errors
+                                    ) {
+                                    <div
+                                      class="errorWrap text-danger"
+                                      >
+                                      @if (
+                                        inventoryProductMappingSubmitted &&
+                                        inventoryRequestMappingFrom.controls.productCategoryId.errors.required
+                                        ) {
+                                        <div
+                                          class="error text-danger"
+                                          >
+                                          Product Category is required.
+                                        </div>
+                                      }
+                                    </div>
+                                  }
+                                </div>
+                              </div>
+                              <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+                                <div class="form-group">
+                                  <label class="inputLabel">Product*</label>
+                                  <p-dropdown
+                                    [disabled]="!inventoryRequestFrom.valid"
+                                    [options]="productList"
+                                    filter="true"
+                                    filterBy="name"
+                                    formControlName="productId"
+                                    optionLabel="name"
+                                    optionValue="id"
+                                    placeholder="Select a Product"
+                                  ></p-dropdown>
+                                </div>
+                              </div>
+                              <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                <div class="form-group">
+                                  <label class="inputLabel">Type*</label>
+                                  <p-dropdown
+                                    [disabled]="!inventoryRequestFrom.valid"
+                                    [options]="types"
+                                    formControlName="itemType"
+                                    optionLabel="label"
+                                    optionValue="value"
+                                    filter="true"
+                                    filterBy="label"
+                                    placeholder="Select type"
+                                  ></p-dropdown>
+                                  @if (
+                                    inventoryProductMappingSubmitted &&
+                                    inventoryRequestMappingFrom.controls.itemType.errors
+                                    ) {
+                                    <div
+                                      class="errorWrap text-danger"
+                                      >
+                                      @if (
+                                        inventoryProductMappingSubmitted &&
+                                        inventoryRequestMappingFrom.controls.itemType.errors.required
+                                        ) {
+                                        <div
+                                          class="error text-danger"
+                                          >
+                                          Type is required.
+                                        </div>
+                                      }
+                                    </div>
+                                  }
+                                </div>
+                              </div>
+                              <div class="col-lg-2 col-md-2 col-sm-4 col-xs-12">
+                                <div class="form-group">
+                                  <label class="inputLabel">Quantity*</label>
+                                  <input
+                  [ngClass]="{
+                    'is-invalid':
+                      inventoryProductMappingSubmitted &&
+                      inventoryRequestMappingFrom.controls.quantity.errors
+                  }"
+                                    (keypress)="quantityInValidation($event)"
+                                    class="form-control"
+                                    formControlName="quantity"
+                                    min="1"
+                                    placeholder="Enter Quantity"
+                                    type="number"
+                                    />
+                                    @if (
+                                      inventoryProductMappingSubmitted &&
+                                      inventoryRequestMappingFrom.controls.quantity.errors
+                                      ) {
+                                      <div
+                                        class="errorWrap text-danger"
+                                        >
+                                        @if (
+                                          inventoryProductMappingSubmitted &&
+                                          inventoryRequestMappingFrom.controls.quantity.errors.required
+                                          ) {
+                                          <div
+                                            class="error text-danger"
+                                            >
+                                            Quantity is required.
+                                          </div>
+                                        }
+                                        @if (
+                                          inventoryProductMappingSubmitted &&
+                                          inventoryRequestMappingFrom.controls.quantity.errors.minlength
+                                          ) {
+                                          <div
+                                            class="error text-danger"
+                                            >
+                                            Minimum 1 Allowed.
+                                          </div>
+                                        }
+                                      </div>
+                                    }
+                                  </div>
+                                </div>
+                                <div class="col-lg-2 col-md-2 col-sm-4 col-xs-12">
+                                  <div class="form-group">
+                                    <br />
+                                    <button
+                                      (click)="onAddRequestInventoryProductField()"
+                                      class="btn btn-primary"
+                                      id="addAtt"
+                                      style="object-fit: cover; padding: 5px 8px"
+                                      [disabled]="!inventoryRequestMappingFrom.valid"
+                                      >
+                                      <i aria-hidden="true" class="fa fa-plus-square"></i>
+                                      Add
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                              <table class="table coa-table" style="margin-top: 10px">
+                                <thead>
+                                  <tr>
+                                    <th style="text-align: center">Product Category*</th>
+                                    <th style="text-align: center">Product*</th>
+                                    <th style="text-align: center">Type*</th>
+                                    <th style="text-align: center">Quantity*</th>
+                                    <th style="text-align: center">Delete</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  @for (
+                                    row of inventoryRequestFromArray.controls
+                                    | paginate
+                                    : {
+                                    id: 'reqInventoryProductMappingData',
+                                    itemsPerPage: reqInventoryProMappingItemsPerPage,
+                                    currentPage: currentPageReqInventoryProMapping,
+                                    totalItems: reqInventoryProMappingTotalRecords
+                                    }; track
+                                    row; let index = $index) {
+                                    <tr
+                                      >
+                                      <td style="padding-left: 5px">
+                                        <p-dropdown
+                                          [options]="productCategoryList"
+                                          filter="true"
+                                          filterBy="name"
+                                          [formControl]="row.get('productCategoryId')"
+                                          optionLabel="name"
+                                          optionValue="id"
+                                          placeholder="Select a Product Category"
+                                          [disabled]="true"
+                                        ></p-dropdown>
+                                      </td>
+                                      <td style="padding-left: 5px">
+                                        <p-dropdown
+                                          [options]="allActiveProduct"
+                                          filter="true"
+                                          filterBy="name"
+                                          [formControl]="row.get('productId')"
+                                          optionLabel="name"
+                                          optionValue="id"
+                                          placeholder="Select a Product"
+                                          [disabled]="true"
+                                        ></p-dropdown>
+                                      </td>
+                                      <td style="padding-left: 5px">
+                                        <p-dropdown
+                                          [options]="this.types"
+                                          [formControl]="row.get('itemType')"
+                                          optionLabel="label"
+                                          optionValue="value"
+                                          filter="true"
+                                          filterBy="label"
+                                          placeholder="Select type"
+                                          [disabled]="true"
+                                        ></p-dropdown>
+                                      </td>
+                                      <td style="padding-left: 5px">
+                                        <input
+                                          class="form-control"
+                                          [formControl]="row.get('quantity')"
+                                          min="1"
+                                          placeholder="Enter Quantity"
+                                          type="number"
+                                          disabled
+                                          />
+                                        </td>
+                                        <td style="text-align: center">
+                                          <a
+                                            id="deleteAtt"
+                                            class="curson_pointer"
+                                            (click)="deleteConfirmonReqInventoryProdMapping(index, row.get('id').value)"
+                                            >
+                                             <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                                          </a>
+                                        </td>
+                                      </tr>
+                                    }
+                                  </tbody>
+                                </table>
+                                <div class="pagination_Dropdown">
+                                  <pagination-controls
+                                    (pageChange)="reqInventoryProductpageChangedData($event)"
+                                    directionLinks="true"
+                                    id="reqInventoryProductMappingData"
+                                    maxSize="10"
+                                    nextLabel=""
+                                    previousLabel=""
+                                  ></pagination-controls>
+                                </div>
+                              </div>
+                            </fieldset>
+                          </form>
+                        </div>
+                        <div class="modal-footer" style="display: flex; justify-content: flex-end">
+                          <div class="addUpdateBtn">
+                            <button type="button" class="btn btn-primary btn-sm" (click)="saveInventoryRequest()">
+                              Save
+                            </button>
+                          </div>
+                          <div class="addUpdateBtn" style="margin-left: 1.5rem">
+                            <button
+                              type="button"
+                              class="btn btn-danger btn-sm"
+                              (click)="closeRequestInventoryModal()"
+                              data-dismiss="modal"
+                              >
+                              Close
+                            </button>
+                          </div>
+                        </div>
+                      </p-dialog>
+                      <p-dialog
+                        header="Forward to Inventory Request"
+                        [(visible)]="inventoryReturnModal"
+                        [style]="{ width: '75%' }"
+                        [modal]="true"
+                        [responsive]="true"
+                        [draggable]="false"
+                        [closable]="true"
+                        (onHide)="closeRequestInventoryModal()"
+                        >
+                        <div class="modal-body">
+                          <form [formGroup]="inventoryReturntFrom">
+                            <fieldset style="margin-top: 0">
+                              <legend>Basic Details</legend>
+                              <div class="boxWhite">
+                                <div class="row">
+                                  <div class="col-lg-3 col-md-3 col-sm-4 col-xs-12">
+                                    <div class="form-group">
+                                      <label class="inputLabel">Request Inventory Name *</label>
+                                      <input
+                                        class="form-control"
+                                        id=""
+                                        formControlName="requestInventoryName"
+                                        name=""
+                                        placeholder=""
+                                        type="text"
+                                        [value]=""
+                                        placeholder="Select a on Behalf Of"
+                                        [readonly]="true"
+                                        />
+                                      
+                                    </div>
+                                  </div>
+                                  <div class="col-lg-3 col-md-3 col-sm-4 col-xs-12">
+                                    <div class="form-group">
+                                      <label class="inputLabel">On Behalf Of *</label>
+                                      <input
+                                        class="form-control"
+                                        id=""
+                                        formControlName="onBehalfOf"
+                                        name=""
+                                        placeholder=""
+                                        type="text"
+                                        [value]=""
+                                        placeholder="Select a on Behalf Of"
+                                        [readonly]="true"
+                                        />
+                                       
+                                    </div>
+                                  </div>
+                                  <div class="col-lg-3 col-md-3 col-sm-4 col-xs-12">
+                                    <div class="form-group">
+                                      <label class="inputLabel">Requester *</label>
+                                      <input
+                                        class="form-control"
+                                        id=""
+                                        name=""
+                                        formControlName="requestNameId"
+                                        placeholder=""
+                                        type="text"
+                                        [value]=""
+                                        placeholder="Select a Requester"
+                                        [readonly]="true"
+                                        />
+                                       
+                                    </div>
+                                  </div>
+                                  <div class="col-lg-3 col-md-3 col-sm-4 col-xs-12">
+                                    <div class="form-group">
+                                      <label class="inputLabel">Request To *</label>
+                                      <p-dropdown
+                                        [options]="wareHouseData"
+                                        filter="true"
+                                        filterBy="name"
+                                        formControlName="requestToWarehouseId"
+                                        optionLabel="name"
+                                        optionValue="id"
+                                        placeholder="Select a Request To"
+                                      ></p-dropdown>
+                                      @if (submitted && inventoryReturntFrom.controls.requestToWarehouseId.errors) {
+                                        <div
+                                          class="errorWrap text-danger"
+                                          >
+                                          @if (
+                                            submitted &&
+                                            inventoryReturntFrom.controls.requestToWarehouseId.errors.required
+                                            ) {
+                                            <div
+                                              class="error text-danger"
+                                              >
+                                              Request To is required.
+                                            </div>
+                                          }
+                                        </div>
+                                      }
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="row">
+                                  <div class="col-lg-3 col-md-3 col-sm-4 col-xs-12">
+                                    <div class="form-group">
+                                      <label class="inputLabel">Reason *</label>
+                                      <input
+                  [ngClass]="{
+                    'is-invalid': submitted && inventoryReturntFrom.controls.reason.errors
+                  }"
+                                        class="form-control"
+                                        formControlName="reason"
+                                        placeholder="Enter Reason"
+                                        type="text"
+                                        [readonly]="true"
+                                        />
+                                        
+                                    </div>
+                                  </div>
+                                  <div class="col-lg-3 col-md-3 col-sm-4 col-xs-12">
+                                    <div class="form-group">
+                                      <label class="inputLabel">Remark *</label>
+                                      <input
+                  [ngClass]="{
+                    'is-invalid': submitted && inventoryReturntFrom.controls.remarks.errors
+                  }"
+                                        class="form-control"
+                                        formControlName="remarks"
+                                        placeholder="Enter Remark"
+                                        type="text"
+                                        />
+                                        @if (submitted && inventoryReturntFrom.controls.remarks.errors) {
+                                          <div
+                                            class="errorWrap text-danger"
+                                            >
+                                            @if (submitted && inventoryReturntFrom.controls.remarks.errors.required) {
+                                              <div
+                                                class="error text-danger"
+                                                >
+                                                Remark is required.
+                                              </div>
+                                            }
+                                          </div>
+                                        }
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </fieldset>
+                            </form>
+                          </div>
+                          <div class="modal-footer" style="display: flex; justify-content: flex-end">
+                            <div class="addUpdateBtn">
+                              <button type="button" class="btn btn-primary btn-sm" (click)="saveForwardRequest()">
+                                Save
+                              </button>
+                            </div>
+                            <div class="addUpdateBtn" style="margin-left: 1.5rem">
+                              <button
+                                type="button"
+                                class="btn btn-danger btn-sm"
+                                (click)="closeRequestInventoryModal()"
+                                data-dismiss="modal"
+                                >
+                                Close
+                              </button>
+                            </div>
+                          </div>
+                        </p-dialog>
+
+                        <!- inventory Fulfilment ->
+                        <p-dialog
+                          header="Inventory Fulfilment"
+                          [(visible)]="viewInventoryFulfillmentModal"
+                          [style]="{ width: '75%' }"
+                          [modal]="true"
+                          [responsive]="true"
+                          [draggable]="false"
+                          [closable]="true"
+                          (onHide)="closefulfillInventoryModal()"
+                          >
+                          <div class="modal-body">
+                            <div class="col-md-12">
+                              <div id="updateOutwards" class="panel-collapse collapse in">
+                                <div class="panel-body">
+                                  <div>
+                                    <form [formGroup]="this.outwardFormGroup">
+                                      <fieldset style="margin-top: 0px">
+                                        <legend>Basic Details</legend>
+                                        <div class="boxWhite">
+                                          <div class="row">
+                                            <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                              <div class="form-group">
+                                                <label class="inputLabel">Request Inventory Name</label>
+                                                <input
+                                                  class="form-control"
+                                                  [readOnly]="this.editMode"
+                                                  formControlName="requestInventoryName"
+                                                  disabled
+                                                  />
+                                                </div>
+                                              </div>
+                                            </div>
+                                            <div class="row">
+                                              <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                                <label class="inputLabel">Source Type *</label>
+                                                <p-dropdown
+                                                  [options]="sourceType"
+                                                  optionValue="label"
+                                                  optionLabel="label"
+                                                  filter="true"
+                                                  filterBy="label"
+                                                  placeholder="Select Source Type"
+                                                  formControlName="sourceType"
+                                                  [disabled]="true"
+                        [ngClass]="{
+                          'is-invalid': submitted && outwardFormGroup.controls.sourceType.errors
+                        }"
+                        (onChange)="
+                          this.getSources(this.outwardFormGroup.controls.sourceType.value)
+                        "
+                                                ></p-dropdown>
+                                                @if (submitted && outwardFormGroup.controls.sourceType.errors) {
+                                                  <div
+                                                    class="errorWrap text-danger"
+                                                    >
+                                                    <div class="error text-danger">Source Type is required.</div>
+                                                  </div>
+                                                }
+                                                <br />
+                                              </div>
+                                              @if (!isSourceAStaffOrCustomer && !sourceTypeAsStaffFlag) {
+                                                <div
+                                                  class="col-lg-4 col-md-4 col-sm-6 col-xs-12"
+                                                  >
+                                                  <div class="form-group">
+                                                    <label class="inputLabel"> Select Source *</label>
+                                                  
+                                                  <input
+                                                    class="form-control"
+                                                    [readOnly]="this.editMode"
+                                                    formControlName="source"
+                                                    disabled
+                                                    />
+                                                   
+                                                    @if (submitted && this.outwardFormGroup.controls.source.errors) {
+                                                      <div
+                                                        class="errorWrap text-danger"
+                                                        >
+                                                        @if (
+                                                          submitted && this.outwardFormGroup.controls.source.errors.required
+                                                          ) {
+                                                          <div
+                                                            class="errorWrap text-danger"
+                                                            >
+                                                            Source is required.
+                                                          </div>
+                                                        }
+                                                      </div>
+                                                    }
+                                                  </div>
+                                                </div>
+                                              }
+                                              
+                                          </div>
+                                       
+                                        <div class="row">
+                                          <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                            <label class="inputLabel">Destination Type *</label>
+                                            <p-dropdown
+                                              [options]="destinationType"
+                                              optionValue="label"
+                                              optionLabel="label"
+                                              filter="true"
+                                              filterBy="label"
+                                              placeholder="Select Destination Type"
+                                              formControlName="destinationType"
+                        [ngClass]="{
+                          'is-invalid':
+                            submitted && outwardFormGroup.controls.destinationType.errors
+                        }"
+                        (onChange)="
+                          this.getDestinations(this.outwardFormGroup.controls.destinationType.value)
+                        "
+                                            ></p-dropdown>
+                                            @if (submitted && outwardFormGroup.controls.destinationType.errors) {
+                                              <div
+                                                class="errorWrap text-danger"
+                                                >
+                                                <div class="error text-danger">Destination Type is required.</div>
+                                              </div>
+                                            }
+                                            <br />
+                                          </div>
+                                          <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                            <label class="inputLabel">Select Destination *</label>
+                                            @if (!isDestAStaffOrCustomer) {
+                                              <p-dropdown
+                                                [options]="destinations"
+                                                formControlName="destination"
+                                                optionLabel="name"
+                                                [disabled]="this.editMode"
+                                                optionValue="id"
+                                                filter="true"
+                                                filterBy="name"
+                                                placeholder="Select Destination"
+                                              ></p-dropdown>
+                                            }
+
+                                            @if (isDestAStaffOrCustomer) {
+                                              <p-dropdown
+                                                [options]="destinations"
+                                                formControlName="destination"
+                                                [disabled]="this.editMode"
+                                                optionLabel="username"
+                                                optionValue="id"
+                                                filter="true"
+                                                filterBy="username"
+                                                placeholder="Select Destination"
+                                              ></p-dropdown>
+                                            }
+                                            @if (submitted && this.outwardFormGroup.controls.destination.errors) {
+                                              <div
+                                                class="errorWrap text-danger"
+                                                >
+                                                @if (
+                                                  submitted && this.outwardFormGroup.controls.destination.errors.required
+                                                  ) {
+                                                  <div
+                                                    class="error text-danger"
+                                                    >
+                                                    Please select destination.
+                                                  </div>
+                                                }
+                                              </div>
+                                            }
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </fieldset>
+                                    <fieldset>
+                                      <legend>Product Details</legend>
+                                      <div class="boxWhite">
+                                        <div class="row">
+                                          <div class="col-lg-12 col-md-12">
+                                            <table class="table">
+                                              <thead>
+                                                <tr>
+                                                  <th class="widthCheckboxColom">
+                                                    <div class="centerCheckbox">
+                                                      <p-checkbox
+                                                        name="allChecked"
+                                                        formControlName="ispaymentChecked"
+                                                        binary="true"
+                                                        (onChange)="allSelectBatch($event)"
+                                                        class="p-field-checkbox"
+                                                        [disabled]="openRequestFlag"
+                                                        [ngClass]="{ 'disabled-checkbox': openRequestFlag }"
+                                                      ></p-checkbox>
+                                                    </div>
+                                                  </th>
+
+                                                  <th>Product Category</th>
+                                                  <th>Product Name</th>
+
+                                                  <th>Available Qty</th>
+
+                                                  <th>Fulfilment Qty*</th>
+                                                  <th>Request Status</th>
+                                                </tr>
+                                              </thead>
+                                              <tbody>
+                                                <ng-container formArrayName="products">
+                                                  @for (
+                                                    productGroup of products.controls
+                                                    | paginate
+                                                    : {
+                                                    id: 'fulFilReqInventory',
+                                                    itemsPerPage: myRequestFulfilInventorydataitemsPerPage,
+                                                    currentPage: currentPagefulfilReqInventoryProMapping,
+                                                    totalItems: totalItemsInventoryReqFulfilment
+                                                    }; track
+                                                    productGroup; let i = $index) {
+                                                    <tr [formGroup]="productGroup">
+                                                      <td>
+                                                        <div class="centerCheckbox">
+                                                          <p-checkbox
+                                                            class="p-field-checkbox"
+                                                            formControlName="isSinglepaymentChecked"
+                                                            binary="true"
+                                                            (onChange)="addbatchChecked(i, $event)"
+                                      [disabled]="
+                                        productGroup.get('requestStatus').value !== 'Open' ||
+                                        productGroup.get('quantity').value >
+                                          productGroup.get('availableQty').value ||
+                                        productGroup.get('quantity').value == null ||
+                                        productGroup.get('quantity').value == 0
+                                      "
+                                      [ngClass]="{
+                                        'disabled-checkbox':
+                                          productGroup.get('requestStatus').value !== 'Open' ||
+                                          productGroup.get('quantity').value >
+                                            productGroup.get('availableQty').value ||
+                                          productGroup.get('quantity').value == null ||
+                                          productGroup.get('quantity').value == 0
+                                      }"
+                                                          ></p-checkbox>
+                                                        </div>
+                                                      </td>
+                                                      <td>
+                                                        {{ productGroup.get("productCategoryName").value }}
+                                                      </td>
+                                                      <td>
+                                                        {{ productGroup.get("productName").value }}
+                                                      </td>
+                                                      <td>
+                                                        <p style="width: 50%; text-align: center">
+                                                          {{ productGroup.get("availableQty").value }}
+                                                        </p>
+                                                      </td>
+                                                      <td>
+                                                        <input
+                                                          type="number"
+                                                          formControlName="quantity"
+                                                          style="width: 70%; text-align: center"
+                                                          [readonly]="productGroup.get('requestStatus').value !== 'Open'"
+                                    [ngClass]="{
+                                      'is-invalid':
+                                        productGroup.get('quantity').value == null ||
+                                        productGroup.get('quantity').value == 0
+                                    }"
+                                                          />
+                                                          @if (
+                                                            productGroup.get('quantity').value == null ||
+                                                            productGroup.get('quantity').value == 0
+                                                            ) {
+                                                            <div
+                                                              class="errorWrap text-danger"
+                                                              >
+                                                              @if (
+                                                                productGroup.get('quantity').value == null ||
+                                                                productGroup.get('quantity').value == 0
+                                                                ) {
+                                                                <div
+                                                                  class="error text-danger"
+                                                                  >
+                                                                  please fill the quantity other than 0
+                                                                </div>
+                                                              }
+                                                            </div>
+                                                          }
+                                                        </td>
+                                                        <td>
+                                                          @if (productGroup.get('requestStatus').value == 'Open') {
+                                                            <span
+                                                              class="badge badge-info"
+                                                              >{{ productGroup.get("requestStatus").value }}</span
+                                                              >
+                                                          }
+                                                          @if (productGroup.get('requestStatus').value == 'Close') {
+                                                            <span
+                                                              class="badge badge-success"
+                                                              >{{ productGroup.get("requestStatus").value }}</span
+                                                              >
+                                                            }
+                                                            @if (productGroup.get('requestStatus').value == 'Rejected') {
+                                                              <span
+                                                                class="badge badge-danger"
+                                                                >{{ productGroup.get("requestStatus").value }}</span
+                                                                >
+                                                              }
+                                                              @if (
+                                                                productGroup.get('requestStatus').value == 'Partial_Open'
+                                                                ) {
+                                                                <span
+                                                                  class="badge badge-info"
+                                                                  >{{ productGroup.get("requestStatus").value }}</span
+                                                                  >
+                                                                }
+                                                                @if (productGroup.get('requestStatus').value == null) {
+                                                                  <span
+                                                                    class="badge badge-primary"
+                                                                    >Pending</span
+                                                                    >
+                                                                  }
+                                                                </td>
+                                                               
+                                                            </tr>
+                                                          }
+                                                        </ng-container>
+                                                      </tbody>
+                                                    </table>
+                                                  </div>
+                                                </div>
+                                                <div class="pagination_Dropdown">
+                                                  <pagination-controls
+                                                    (pageChange)="viewfulfilReqInventoryProductpageChangedData($event)"
+                                                    directionLinks="true"
+                                                    id="fulFilReqInventory"
+                                                    maxSize="10"
+                                                    nextLabel=""
+                                                    previousLabel=""
+                                                  ></pagination-controls>
+                                                  <div id="itemPerPageDropdown">
+                                                    <p-dropdown
+                                                      [options]="pageLimitOptions"
+                                                      optionLabel="value"
+                                                      optionValue="value"
+                                                      (onChange)="TotalItemPerPageMyReqInvFulfil($event)"
+                                                    ></p-dropdown>
+                                                  </div>
+                                                  <div class="addUpdateBtn" style="margin-left: 30%">
+                                                    <button
+                                                      type="submit"
+                                                      class="btn btn-primary"
+                                                      id="submit"
+                                                      (click)="submit()"
+                                                      [disabled]="!outwardFormGroup.valid"
+                                                      >
+                                                      <i class="fa fa-check-circle"></i>
+                                                      {{ editMode ? "Update" : "Add" }} Outward
+                                                    </button>
+                                                    <br />
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            </fieldset>
+                                            <br />
+                                          </form>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div class="modal-footer" style="display: flex; justify-content: flex-end">
+                                  <div class="addUpdateBtn" style="margin-left: 1.5rem">
+                                    <button
+                                      type="button"
+                                      class="btn btn-danger btn-sm"
+                                      (click)="closefulfillInventoryModal()"
+                                      data-dismiss="modal"
+                                      >
+                                      Close
+                                    </button>
+                                  </div>
+                                </div>
+                              </p-dialog>
+
+                              <p-dialog
+                                header="Inventory Request"
+                                [(visible)]="viewInventoryRequestModal"
+                                [style]="{ width: '75%' }"
+                                [modal]="true"
+                                [responsive]="true"
+                                [draggable]="false"
+                                [closable]="true"
+                                (onHide)="closeRequestInventoryModal()"
+                                >
+                                <div class="modal-body">
+                                  <fieldset style="margin-top: 0">
+                                    <legend>Basic Details</legend>
+                                    <div class="boxWhite">
+                                      <div class="row">
+                                        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 dataGroup">
+                                          <label class="datalbl">Request id :</label>
+                                          <span>{{ viewReqInventoryData?.requestInventoryName }}</span>
+                                        </div>
+                                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                                          <label class="datalbl">Status :</label>
+                                          @if (viewReqInventoryData?.status == 'Pending') {
+                                            <span class="badge badge-primary">{{
+                                              viewReqInventoryData?.status
+                                            }}</span>
+                                          }
+                                          @if (viewReqInventoryData?.status == 'Rejected') {
+                                            <span class="badge badge-danger">{{
+                                              viewReqInventoryData?.status
+                                            }}</span>
+                                          }
+                                          @if (viewReqInventoryData?.status == 'Approve') {
+                                            <span class="badge badge-success">{{
+                                              viewReqInventoryData?.status
+                                            }}</span>
+                                          }
+                                        </div>
+                                        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 dataGroup">
+                                          <label class="datalbl">Reason :</label>
+                                          <span>{{ viewReqInventoryData?.reason }}</span>
+                                        </div>
+                                      </div>
+                                      <div class="row">
+                                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup m-0">
+                                          <label class="datalbl">On behalf of :</label>
+                                          <span>{{ viewReqInventoryData?.onBehalfOf }}</span>
+                                        </div>
+                                        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 dataGroup m-0">
+                                          <label class="datalbl">Requester :</label>
+                                          <span>{{ viewReqInventoryData?.requesterName }}</span>
+                                        </div>
+                                        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 dataGroup m-0">
+                                          <label class="datalbl"> Request To :</label>
+                                          <span>{{ viewReqInventoryData?.requestToName }}</span>
+                                        </div>
+                                        <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 dataGroup m-0">
+                                          <label class="datalbl"> Remark :</label>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </fieldset>
+                                  <fieldset>
+                                    <legend>Product Details</legend>
+                                    <div class="boxWhite">
+                                      <table class="table" style="margin-top: 10px">
+                                        <thead>
+                                          <tr>
+                                            <th>Product Category</th>
+                                            <th>Product</th>
+                                            <th>Item Type</th>
+                                            <th>Quantity</th>
+                                            <th>Request Status</th>
+                                          
+                                          </tr>
+                                        </thead>
+                                        <tbody>
+                                          @for (
+                                            product of viewReqInventoryData?.requestInvenotryProductMappings
+                                            | paginate
+                                            : {
+                                            id: 'viewReqInventoryProductMappingData',
+                                            itemsPerPage: viewReqInventoryProMappingItemsPerPage,
+                                            currentPage: currentPageViewReqInventoryProMapping,
+                                            totalItems: viewReqInventoryProMappingTotalRecords
+                                            }; track
+                                            product; let index = $index) {
+                                            <tr
+                                              >
+                                              <td style="padding-left: 5px">{{ product.productCategoryName }}</td>
+                                              <td style="padding-left: 5px">{{ product.productName }}</td>
+                                             
+                                              <td style="padding-left: 5px">{{ product.itemType }}</td>
+                                              <td style="padding-left: 5px">{{ product.quantity }}</td>
+                                              <td>
+                                                @if (product.requestStatus == 'Open') {
+                                                  <span class="badge badge-info">{{
+                                                    product.requestStatus
+                                                  }}</span>
+                                                }
+                                                @if (product.requestStatus == 'Close') {
+                                                  <span class="badge badge-success">{{
+                                                    product.requestStatus
+                                                  }}</span>
+                                                }
+                                                @if (product.requestStatus == 'Partial_Open') {
+                                                  <span class="badge badge-info">{{
+                                                    product.requestStatus
+                                                  }}</span>
+                                                }
+                                                @if (product.requestStatus == 'Rejected') {
+                                                  <span class="badge badge-danger">{{
+                                                    product.requestStatus
+                                                  }}</span>
+                                                }
+                                                @if (product.requestStatus == null) {
+                                                  <span class="badge badge-primary"
+                                                    >Pending</span
+                                                    >
+                                                  }
+                                                </td>
+                                               
+                                            </tr>
+                                          }
+                                        </tbody>
+                                       
+                                    </table>
+                                    <div class="pagination_Dropdown">
+                                      <pagination-controls
+                                        (pageChange)="viewReqInventoryProductpageChangedData($event)"
+                                        directionLinks="true"
+                                        id="viewReqInventoryProductMappingData"
+                                        maxSize="10"
+                                        nextLabel=""
+                                        previousLabel=""
+                                      ></pagination-controls>
+                                      <div>
+                                        @if (this.ifForwardCase) {
+                                          <button
+                                            style="margin-left: 35rem"
+                                            title="Fulfilment Inventory"
+                                            type="button"
+                                            data-toggle="collapse"
+                                            class="btn btn-primary"
+                                            (click)="dataforwardToOutwardScreen()"
+                                            >
+                                            Click To FulFill
+                                          </button>
+                                        }
+                                      </div>
+                                    </div>
+                                  </div>
+                                </fieldset>
+                              </div>
+                              <div class="modal-footer" style="display: flex; justify-content: flex-end">
+                                <div class="addUpdateBtn" style="margin-left: 1.5rem">
+                                  <button
+                                    type="button"
+                                    class="btn btn-danger btn-sm"
+                                    (click)="closeRequestInventoryModal()"
+                                    data-dismiss="modal"
+                                    >
+                                    Close
+                                  </button>
+                                </div>
+                              </div>
+                            </p-dialog>
+                            <!- Request Approve Remark ->
+                            <p-dialog
+                              header="Change Approval Status"
+                              [(visible)]="approveChangeStatusModal"
+                              [style]="{ width: '40%' }"
+                              [modal]="true"
+                              [responsive]="true"
+                              [draggable]="false"
+                              [closable]="true"
+                              (onHide)="closeApproveInventoryModal()"
+                              >
+                              <div class="modal-body">
+                                <form [formGroup]="approveRequestRemarkForm">
+                                  <div class="row">
+                                    <div class="col-lg-2 col-md-3 col-sm-4 col-xs-12">
+                                      <label class="inputLabel">Remark*:</label>
+                                    </div>
+                                    <div class="col-lg-10 col-md-9 col-sm-8 col-xs-12">
+                                      <textarea
+                                        class="form-control"
+                                        formControlName="requestRemark"
+                                        name="requestRemark"
+                                      ></textarea>
+                                      @if (
+                                        approveRequestSubmitted && approveRequestRemarkForm.controls.requestRemark.errors
+                                        ) {
+                                        <div
+                                          class="errorWrap text-danger"
+                                          >
+                                          @if (
+                                            approveRequestSubmitted &&
+                                            approveRequestRemarkForm.controls.requestRemark.errors.required
+                                            ) {
+                                            <div
+                                              class="error text-danger"
+                                              >
+                                              Remark is required.
+                                            </div>
+                                          }
+                                        </div>
+                                      }
+                                    </div>
+                                  </div>
+                                </form>
+                              </div>
+                              <div class="modal-footer">
+                                <button (click)="approveRequest()" class="btn btn-primary" id="submit" type="submit">
+                                  <i class="fa fa-check-circle"></i>
+                                  Approve
+                                </button>
+                                <button
+                                  class="btn btn-default"
+                                  (click)="closeApproveInventoryModal()"
+                                  data-dismiss="modal"
+                                  type="button"
+                                  >
+                                  Close
+                                </button>
+                              </div>
+                            </p-dialog>
+                            <!- Reject Request Remark ->
+                            <p-dialog
+                              header="Change Approval Status"
+                              [(visible)]="rejectChangeStatusModal"
+                              [style]="{ width: '40%' }"
+                              [modal]="true"
+                              [responsive]="true"
+                              [draggable]="false"
+                              [closable]="true"
+                              (onHide)="closeRejectInventoryModal()"
+                              >
+                              <div class="modal-body">
+                                <form [formGroup]="rejectRequestRemarkForm">
+                                  <div class="row">
+                                    <div class="col-lg-2 col-md-3 col-sm-4 col-xs-12">
+                                      <label class="inputLabel">Remark*:</label>
+                                    </div>
+                                    <div class="col-lg-10 col-md-9 col-sm-8 col-xs-12">
+                                      <textarea
+                                        class="form-control"
+                                        formControlName="requestRemark"
+                                        name="requestRemark"
+                                      ></textarea>
+                                      @if (rejectRequestSubmitted && rejectRequestRemarkForm.controls.requestRemark.errors) {
+                                        <div
+                                          class="errorWrap text-danger"
+                                          >
+                                          @if (
+                                            rejectRequestSubmitted &&
+                                            rejectRequestRemarkForm.controls.requestRemark.errors.required
+                                            ) {
+                                            <div
+                                              class="error text-danger"
+                                              >
+                                              Remark is required.
+                                            </div>
+                                          }
+                                        </div>
+                                      }
+                                    </div>
+                                  </div>
+                                </form>
+                              </div>
+                              <div class="modal-footer">
+                                <button (click)="rejectRequest()" class="btn btn-primary" id="submit" type="submit">
+                                  <i class="fa fa-check-circle"></i>
+                                  Reject
+                                </button>
+                                <button
+                                  class="btn btn-default"
+                                  (click)="closeRejectInventoryModal()"
+                                  data-dismiss="modal"
+                                  type="button"
+                                  >
+                                  Close
+                                </button>
+                              </div>
+                            </p-dialog> -->

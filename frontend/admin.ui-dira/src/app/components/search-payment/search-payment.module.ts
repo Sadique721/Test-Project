@@ -1,0 +1,66 @@
+import { NgModule } from "@angular/core";
+import { CommonModule } from "@angular/common";
+import { RouterModule } from "@angular/router";
+import { SharedModule } from "src/app/shared/shared.module";
+import { SearchPaymentComponent } from "./search-payment.component";
+import { DialogModule } from "primeng/dialog";
+
+
+import { MatTableModule } from "@angular/material/table";
+import { MatPaginatorModule } from "@angular/material/paginator";
+import { MatSortModule } from "@angular/material/sort";
+import { MatCardModule } from "@angular/material/card";
+import { MatButtonModule } from "@angular/material/button";
+import { MatIconModule } from "@angular/material/icon";
+import { MatTabsModule } from "@angular/material/tabs";
+import { MatTooltipModule } from "@angular/material/tooltip";
+import { MatCardContent } from "@angular/material/card";
+import { MatCheckboxModule } from "@angular/material/checkbox";
+
+import { MatPaginator } from "@angular/material/paginator";
+import { MatCheckbox } from "@angular/material/checkbox";
+import { MatDatepickerModule } from "@angular/material/datepicker";
+import { MatNativeDateModule, provideNativeDateAdapter } from "@angular/material/core";
+import { MatTimepickerModule } from "@angular/material/timepicker";
+import {
+    MatDialog,
+    MatDialogActions,
+    MatDialogClose,
+    MatDialogContent,
+    MatDialogModule,
+    MatDialogTitle
+} from "@angular/material/dialog";
+import { MatInputModule } from '@angular/material/input';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatStepperModule } from '@angular/material/stepper';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatExpansionModule } from "@angular/material/expansion";
+
+const routes = [{ path: "", component: SearchPaymentComponent }];
+
+@NgModule({
+    declarations: [SearchPaymentComponent],
+    imports: [CommonModule, RouterModule.forChild(routes), SharedModule, DialogModule,
+        MatPaginator, MatRadioModule, MatChipsModule,
+        MatCardModule,
+        MatCheckbox,
+        MatCardContent,
+        MatDatepickerModule,
+        MatDialogTitle,
+        MatDialogContent,
+        MatDialogActions,
+        MatDialogClose,
+        MatExpansionModule,
+        MatButtonModule,
+        MatTableModule,
+        MatTimepickerModule,
+        MatPaginatorModule,
+        MatSortModule,
+        MatIconModule,
+        MatTabsModule,
+        MatTooltipModule,
+        MatDialogModule, MatNativeDateModule,
+        MatCheckboxModule, MatStepperModule, MatInputModule, MatFormFieldModule],
+})
+export class SearchPaymentModule { }

@@ -1,0 +1,409 @@
+<div class="row header-row p-0 m-0">
+  <mat-card class="cardWithShadow w-100">
+    <mat-card-content class="mat-card-content-border">
+      <div class="row">
+        <!-- Search Type Dropdown -->
+        <div class="col-lg-3 col-md-3 p-0 m-0">
+          <mat-form-field
+            appearance="outline"
+            class="w-100 hide-hint mr-10 header-input"
+            style="padding-left: 16px"
+          >
+            <mat-select
+              class="input-p-5"
+              [(ngModel)]="searchType"
+              (selectionChange)="getSearchType($event)"
+              placeholder="Select Search Type"
+            >
+              <mat-option *ngFor="let item of searchTypeList" [value]="item.value">
+                {{ item.label }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- From Date -->
+        <div class="col-lg-3 col-md-3 p-0 m-0" *ngIf="isDateRangeShow">
+          <mat-form-field
+            appearance="outline"
+            class="w-100 hide-hint mr-10 header-input"
+            style="padding-left: 8px"
+          >
+            <input
+              matInput
+              class="input-p-5"
+              [matDatepicker]="fromDatePicker"
+              placeholder="From Date"
+              [(ngModel)]="searchFormDate"
+              (keydown.enter)="searchDBR()"
+            />
+            <mat-datepicker-toggle matSuffix [for]="fromDatePicker"></mat-datepicker-toggle>
+            <mat-datepicker #fromDatePicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+
+        <!-- To Date -->
+        <div class="col-lg-3 col-md-3 p-0 m-0" *ngIf="isDateRangeShow">
+          <mat-form-field
+            appearance="outline"
+            class="w-100 hide-hint mr-10 header-input"
+            style="padding-left: 8px"
+          >
+            <input
+              matInput
+              class="input-p-5"
+              [matDatepicker]="toDatePicker"
+              [(ngModel)]="searchEndDate"
+              [min]="searchFormDate"
+              (keydown.enter)="searchDBR()"
+              placeholder="To Date"
+            />
+            <mat-datepicker-toggle matSuffix [for]="toDatePicker"></mat-datepicker-toggle>
+            <mat-datepicker #toDatePicker></mat-datepicker>
+          </mat-form-field>
+        </div>
+
+        <!-- Start Month -->
+        <div class="col-lg-3 col-md-3 p-0 m-0" *ngIf="isMonthShow">
+          <mat-form-field
+            appearance="outline"
+            class="w-100 hide-hint mr-10 header-input"
+            style="padding-left: 8px"
+          >
+            <input
+              matInput
+              class="input-p-5"
+              placeholder="Select Start Month"
+              [matDatepicker]="startMonthPicker"
+              [(ngModel)]="searchStartMonth"
+              (keydown.enter)="searchDBR()"
+            />
+            <mat-datepicker-toggle matSuffix [for]="startMonthPicker"></mat-datepicker-toggle>
+            <mat-datepicker
+              #startMonthPicker
+              startView="multi-year"
+              (monthSelected)="searchStartMonth = $event; startMonthPicker.close()"
+              panelClass="month-picker"
+            >
+            </mat-datepicker>
+          </mat-form-field>
+        </div>
+
+        <!-- End Month -->
+        <div class="col-lg-3 col-md-3 p-0 m-0" *ngIf="isMonthShow">
+          <mat-form-field
+            appearance="outline"
+            class="w-100 hide-hint mr-10 header-input"
+            style="padding-left: 8px"
+          >
+            <input
+              matInput
+              class="input-p-5"
+              [matDatepicker]="endMonthPicker"
+              [(ngModel)]="searchEndMonth"
+              [min]="searchStartMonth"
+              (keydown.enter)="searchDBR()"
+              placeholder="Select End Month"
+            />
+            <mat-datepicker-toggle matSuffix [for]="endMonthPicker"></mat-datepicker-toggle>
+            <mat-datepicker
+              #endMonthPicker
+              startView="multi-year"
+              (monthSelected)="searchEndMonth = $event; endMonthPicker.close()"
+              panelClass="month-picker"
+            >
+            </mat-datepicker>
+          </mat-form-field>
+        </div>
+        <div class="col-lg-3 col-md-3 p-0 m-0 d-flex">
+          <button
+            mat-button
+            mat-flat-button
+            color="primary"
+           class="button-normal m-r-10"
+            (click)="searchDBR()"
+            style="margin-left: 8px"
+          >
+            Search
+          </button>
+          <button
+            
+            mat-stroked-button
+            matButton="outlined"
+           class="button-normal "
+            (click)="searchClearDBR()"
+          >
+            Clear
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<div class="container-fluid contain-flud">
+  <div class="row">
+    <div class="col-md-12">
+      <mat-card class="cardWithShadow">
+        <mat-card-content class="mat-card-content-border">
+          <div class="country-table-list">
+            <div *ngIf="dbrListData.length > 0; else noData">
+              <div class="example-container mat-elevation-z8" tabindex="0">
+                <table
+                  mat-table
+                  [dataSource]="
+                    dbrListData.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize)
+                  "
+                >
+                  <!-- Date Column -->
+                  <ng-container matColumnDef="startdate" *ngIf="gridDateDisplay">
+                    <th mat-header-cell *matHeaderCellDef class="table-header-title">Date</th>
+                    <td mat-cell *matCellDef="let dbr">{{ dbr.startdate | date:'dd-MM-yyyy' }}</td>
+                  </ng-container>
+
+                  <!-- Month Column -->
+                  <ng-container matColumnDef="month" *ngIf="gridMonthDisplay">
+                    <th mat-header-cell *matHeaderCellDef class="table-header-title">Month</th>
+                    <td mat-cell *matCellDef="let dbr">{{ dbr.month }}</td>
+                  </ng-container>
+
+                  <!-- Prepaid Revenue -->
+                  <ng-container matColumnDef="pendingamt">
+                    <th mat-header-cell *matHeaderCellDef class="table-header-title">
+                      Prepaid Revenue
+                    </th>
+                    <td mat-cell *matCellDef="let dbr">{{ dbr.pendingamt | number: "1.2-2" }}</td>
+                  </ng-container>
+
+                  <!-- Revenue -->
+                  <ng-container matColumnDef="dbr">
+                    <th mat-header-cell *matHeaderCellDef class="table-header-title">Revenue</th>
+                    <td mat-cell *matCellDef="let dbr">{{ dbr.dbr | number: "1.2-2" }}</td>
+                  </ng-container>
+
+                  <!-- Header & Row -->
+                  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+                </table>
+              </div>
+              <!-- Paginator -->
+
+              <mat-paginator
+                [length]="dbrListData.length"
+                [pageSize]="pageSize"
+                [pageIndex]="pageIndex"
+                [pageSizeOptions]="[5,10,20,50,100]"
+                showFirstLastButtons
+                (page)="pageIndex = $event.pageIndex; pageSize = $event.pageSize"
+              >
+              </mat-paginator>
+            </div>
+
+            <!-- No Data Case -->
+            <ng-template #noData>
+              <div class="p-3">Revenue data not found</div>
+            </ng-template>
+          </div></mat-card-content
+        >
+      </mat-card>
+    </div>
+  </div>
+</div>
+
+<!-- <div class="row">
+  <div class="col-md-12">
+    <div class="panel top">
+      <div class="panel-heading">
+        <h3 class="panel-title">Revenue Report</h3>
+        <div class="right">
+          <button
+            type="button"
+            class="btn-toggle-collapse"
+            data-toggle="collapse"
+            data-target="#searchDbr"
+            aria-expanded="false"
+            aria-controls="searchtax"
+          >
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+
+      <div id="searchDbr" class="panel-collapse collapse in">
+        <div class="panel-body">
+          <div class="row">
+            <div class="col-lg-3 col-md-3">
+              <p-dropdown
+                [options]="searchTypeList"
+                optionValue="value"
+                optionLabel="label"
+                filter="true"
+                filterBy="label"
+                placeholder="Select Search Type"
+                [(ngModel)]="searchType"
+                (onChange)="getSearchType($event)"
+              >
+              </p-dropdown>
+            </div>
+            @if (isDateRangeShow) {
+              <div class="col-lg-3 col-md-3 marginTopSearchinput">
+                <input
+                  type="date"
+                  [(ngModel)]="searchFormDate"
+                  placeholder="From Date"
+                  class="form-control"
+                  (keydown.enter)="searchDBR()"
+                />
+              </div>
+            }
+            @if (isDateRangeShow) {
+              <div class="col-lg-3 col-md-3 marginTopSearchinput">
+                <input
+                  type="date"
+                  [(ngModel)]="searchEndDate"
+                  placeholder="To Date"
+                  class="form-control"
+                  [min]="searchFormDate"
+                  (keydown.enter)="searchDBR()"
+                />
+              </div>
+            }
+            @if (isMonthShow) {
+              <div class="col-lg-3 col-md-3">
+                
+                <p-calendar
+                  placeholder="Select Start Month"
+                  view="month"
+                  dateFormat="MM, yy"
+                  [readonlyInput]="true"
+                  [showIcon]="true"
+                  [(ngModel)]="searchStartMonth"
+                  (keydown.enter)="searchDBR()"
+                ></p-calendar>
+              </div>
+            }
+
+            @if (isMonthShow) {
+              <div class="col-lg-3 col-md-3">
+                
+                <p-calendar
+                  placeholder="Select End Month"
+                  view="month"
+                  dateFormat="MM, yy"
+                  [readonlyInput]="true"
+                  [showIcon]="true"
+                  [(ngModel)]="searchEndMonth"
+                  (keydown.enter)="searchDBR()"
+                ></p-calendar>
+              </div>
+            }
+
+            <div class="col-lg-3 col-md-4 marginTopSearchBtn">
+              <button type="button" class="btn btn-primary" id="searchbtn" (click)="searchDBR()">
+                <i class="fa fa-search"></i>
+                Search
+              </button>
+              <button
+                type="reset"
+                class="btn btn-default"
+                id="searchbtn"
+                (click)="searchClearDBR()"
+              >
+                 <img src="assets/img/DashboardIcons/Refresh.svg" />
+                Clear
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> -->
+<!-- 
+<div class="row">
+  <div class="col-md-12">
+    <div class="panel">
+      <div class="panel-heading">
+        <h3 class="panel-title">{{ titleText }}</h3>
+        <div class="right">
+          <button
+            type="button"
+            class="btn-toggle-collapse"
+            data-toggle="collapse"
+            data-target="#listDBR"
+            aria-expanded="false"
+            aria-controls="listDBR"
+          >
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+
+      <div id="listDBR" class="panel-collapse collapse in">
+        <div class="panel-body table-responsive">
+          @if (dbrListData.length > 0) {
+            <table class="table">
+              <thead>
+                <tr>
+                  @if (gridDateDisplay) {
+                    <th>Date</th>
+                  }
+                  @if (gridMonthDisplay) {
+                    <th>Month</th>
+                  }
+                  <th>Prepaid Revenue</th>
+                  <th>Revenue</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (
+                  dbr of dbrListData
+                    | paginate
+                      : {
+                          id: "dbrListData",
+                          itemsPerPage: DBRListdataitemsPerPage,
+                          currentPage: currentPageDBRListdata,
+                          totalItems: DBRListdatatotalRecords
+                        };
+                  track dbr;
+                  let i = $index
+                ) {
+                  <tr>
+                    @if (gridDateDisplay) {
+                      <td>
+                        {{ dbr.startdate }}
+                      </td>
+                    }
+                    @if (gridMonthDisplay) {
+                      <td>
+                        {{ dbr.month }}
+                      </td>
+                    }
+                    <td>
+                      {{ dbr.pendingamt | number: "1.2-2" }}
+                    </td>
+                    <td>{{ dbr.dbr | number: "1.2-2" }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+          @if (dbrListData.length > 0) {
+            <pagination-controls
+              id="dbrListData"
+              maxSize="10"
+              directionLinks="true"
+              previousLabel=""
+              nextLabel=""
+              (pageChange)="pageChangedDbrList($event)"
+            >
+            </pagination-controls>
+          }
+          @if (dbrListData.length <= 0) {
+            <div>Revenue data not found</div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div> -->

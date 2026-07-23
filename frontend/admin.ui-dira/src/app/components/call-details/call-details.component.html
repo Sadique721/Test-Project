@@ -1,0 +1,350 @@
+<!-- Page Header -->
+<div class="row">
+    <div class="col-md-12">
+        <mat-card class="cardWithShadow">
+            <mat-card-header>
+                @if (!isCustCAF) {
+                <img src="assets/img/DashboardIcons/Back Arrow.svg" alt="arrow back" class="m-r-10"
+                    (click)="customerDetailOpen()">
+                }
+                @if (isCustCAF) {
+                <img src="assets/img/DashboardIcons/Back Arrow.svg" alt="arrow back" class="m-r-10"
+                    (click)="backButton.emit()">
+                }
+                <div style="font-size:x-large; align-items: center; font-weight: 500; align-content: center;">
+                    {{ callDetailData.title }} {{ callDetailData.firstname }} {{ callDetailData.lastname }} - Call
+                    Details
+                </div>
+                <span style="flex: 1 1 auto;"></span>
+                 <img src="../../../../assets/img/DashboardIcons/Clear.svg" alt="refresh" class="cursor-pointer"
+                (click)="searchCallDetails(phoneNumber)">
+            </mat-card-header>
+            <mat-card-content class="mat-card-content-border">
+                <div class="card flex justify-content-center">
+                    <!-- Customer Info Section -->
+                    <!-- @if (callDetailData) {
+                    <div class="row" style="padding: 20px; background: #f8f9fa; margin: 15px; border-radius: 8px;">
+                        <div class="col-md-4">
+                            <div style="margin-bottom: 10px;">
+                                <strong>Customer Name:</strong>
+                                {{ callDetailData.title }} {{ callDetailData.firstname }} {{ callDetailData.lastname }}
+                            </div>
+                            <div style="margin-bottom: 10px;">
+                                <strong>Mobile:</strong> {{ callDetailData.mobile }}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div style="margin-bottom: 10px;">
+                                <strong>Email:</strong> {{ callDetailData.email || '-' }}
+                            </div>
+                            <div style="margin-bottom: 10px;">
+                                <strong>Customer Type:</strong> {{ custType }}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div style="margin-bottom: 10px;">
+                                <strong>Address:</strong> {{ presentFullAddress || '-' }}
+                            </div>
+                            @if (presentAdressDATA) {
+                            <div style="margin-bottom: 10px;">
+                                <strong>Area:</strong> {{ presentAdressDATA.name || '-' }}
+                            </div>
+                            }
+                        </div>
+                    </div>
+                    } -->
+
+                    <!-- Search Section -->
+                    <!-- <div class="row" style="padding: 15px 20px;">
+                        <div class="col-md-6">
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-label>Search by Phone Number</mat-label>
+                                <input matInput [(ngModel)]="selectedPhoneNumber" placeholder="Enter phone number"
+                                    (keydown.enter)="searchCallDetails(selectedPhoneNumber)">
+                                <mat-icon matSuffix>phone</mat-icon>
+                            </mat-form-field>
+                        </div>
+                        <div class="col-md-6" style="padding-top: 8px;">
+                            <button mat-flat-button color="primary" class="button-normal m-r-10"
+                                (click)="searchCallDetails(selectedPhoneNumber)" [disabled]="!selectedPhoneNumber">
+                                <mat-icon>search</mat-icon>
+                                Search Call Logs
+                            </button>
+                            <button mat-stroked-button class="button-normal"
+                                (click)="selectedPhoneNumber = phoneNumber; searchCallDetails(phoneNumber)">
+                                <mat-icon>refresh</mat-icon>
+                                Reset
+                            </button>
+                        </div>
+                    </div> -->
+
+                    <!-- Call Details Table -->
+                    <div class="table-container" style="width: 100%; overflow-x: auto; padding: 0 20px;">
+                        <table mat-table [dataSource]="callDetailsListData" class="w-100 mat-elevation-z2">
+
+                            <!-- S.No Column -->
+                            <ng-container matColumnDef="sno">
+                                <th mat-header-cell *matHeaderCellDef class="table-header-title">S.No</th>
+                                <td mat-cell *matCellDef="let element; let i = index" class="f-s-14">
+                                    {{ (currentPagecallDetails - 1) * callDetailsitemsPerPage + i + 1 }}
+                                </td>
+                            </ng-container>
+
+                            <!-- Unique ID Column -->
+                            <ng-container matColumnDef="uniqueId">
+                                <th mat-header-cell *matHeaderCellDef class="table-header-title">Unique ID</th>
+                                <td mat-cell *matCellDef="let element" class="f-s-14">
+                                    {{ element.uniqueId || '-' }}
+                                </td>
+                            </ng-container>
+
+                            <!-- Source Column -->
+                            <ng-container matColumnDef="source">
+                                <th mat-header-cell *matHeaderCellDef class="table-header-title">Source</th>
+                                <td mat-cell *matCellDef="let element" class="f-s-14">
+                                    {{ element.source || '-' }}
+                                </td>
+                            </ng-container>
+
+                            <!-- Destination Column -->
+                            <ng-container matColumnDef="destination">
+                                <th mat-header-cell *matHeaderCellDef class="table-header-title">Destination</th>
+                                <td mat-cell *matCellDef="let element" class="f-s-14">
+                                    {{ element.destination || '-' }}
+                                </td>
+                            </ng-container>
+
+                            <!-- Context Column -->
+                            <ng-container matColumnDef="context">
+                                <th mat-header-cell *matHeaderCellDef class="table-header-title">Context</th>
+                                <td mat-cell *matCellDef="let element" class="f-s-14">
+                                    {{ element.context || '-' }}
+                                </td>
+                            </ng-container>
+
+                            <!-- Duration Column -->
+                            <ng-container matColumnDef="duration">
+                                <th mat-header-cell *matHeaderCellDef class="table-header-title">Duration (sec)</th>
+                                <td mat-cell *matCellDef="let element" class="f-s-14">
+                                    {{ element.duration || 0 }}
+                                </td>
+                            </ng-container>
+
+                            <!-- Bill Sec Column -->
+                            <ng-container matColumnDef="billsec">
+                                <th mat-header-cell *matHeaderCellDef class="table-header-title">Bill Sec</th>
+                                <td mat-cell *matCellDef="let element" class="f-s-14">
+                                    {{ element.billsec || 0 }}
+                                </td>
+                            </ng-container>
+
+                            <!-- Disposition Column -->
+                            <ng-container matColumnDef="disposition">
+                                <th mat-header-cell *matHeaderCellDef class="table-header-title">Disposition</th>
+                                <td mat-cell *matCellDef="let element" class="f-s-14">
+                                    <span class="badge" [ngClass]="{
+                      'badge-success': element.disposition === 'ANSWERED',
+                      'badge-danger': element.disposition === 'NO ANSWER' || element.disposition === 'FAILED',
+                      'badge-warning': element.disposition === 'BUSY',
+                      'badge-secondary': element.disposition !== 'ANSWERED' && element.disposition !== 'NO ANSWER' && element.disposition !== 'FAILED' && element.disposition !== 'BUSY'
+                    }">
+                                        {{ element.disposition || '-' }}
+                                    </span>
+                                </td>
+                            </ng-container>
+
+                            <!-- Call Date Column -->
+                            <ng-container matColumnDef="calldate">
+                                <th mat-header-cell *matHeaderCellDef class="table-header-title">Call Date</th>
+                                <td mat-cell *matCellDef="let element" class="f-s-14">
+                                    {{ element.calldate | date: 'dd-MM-yyyy HH:mm:ss' }}
+                                </td>
+                            </ng-container>
+
+                            <!-- Action Column -->
+                            <ng-container matColumnDef="action">
+                                <th mat-header-cell *matHeaderCellDef class="table-header-title">Action</th>
+                                <td mat-cell *matCellDef="let element" class="f-s-14">
+                                    <button mat-icon-button color="primary" (click)="openViewModal(element)"
+                                        matTooltip="View Details">
+                                        <mat-icon>visibility</mat-icon>
+                                    </button>
+                                </td>
+                            </ng-container>
+
+                            <!-- Table Rows -->
+                            <tr mat-header-row *matHeaderRowDef="displayedColumns" class="table-header-bg"></tr>
+                            <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="table-content-row"></tr>
+                        </table>
+
+                        <!-- No Data Message -->
+                        @if (!callDetailsListData || callDetailsListData.length === 0) {
+                        <div style="text-align: center; padding: 40px;">
+                            <p style="margin-top: 10px; color: #666;">No call log details available</p>
+                            @if (selectedPhoneNumber) {
+                            <p style="font-size: 14px; color: #999;">Try searching with a different phone number</p>
+                            }
+                        </div>
+                        }
+                    </div>
+
+                    <!-- Pagination -->
+                    <mat-paginator *ngIf="callDetailstotalRecords" [length]="callDetailstotalRecords"
+                        [pageSize]="callDetailsitemsPerPage" [pageSizeOptions]="callDetailsitemsPerPage"
+                        [pageIndex]="currentPagecallDetails - 1" showFirstLastButtons
+                        (page)="pageChangedcallDetailsList($event.pageIndex + 1)">
+                    </mat-paginator>
+
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+</div>
+
+<!-- View Details Modal -->
+<ng-template #viewDetailsDialog>
+    <div class="dialog-container" style="min-width: 600px;">
+        <div class="dialog-header">
+            Call Log Details
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="closeViewModal()">
+                    <img src="assets/img/DashboardIcons/Reject.svg" alt="close" />
+                </a>
+            </span>
+        </div>
+
+        <div mat-dialog-content>
+            @if (selectedRow) {
+            <div class="col-md-12">
+                <mat-card-content>
+                    <div class="row">
+                        <div class="col-md-6" style="margin-bottom: 15px;">
+                            <label class="inputLabel">Unique ID</label>
+                            <div class="detail-value">{{ selectedRow.uniqueId || '-' }}</div>
+                        </div>
+                        <div class="col-md-6" style="margin-bottom: 15px;">
+                            <label class="inputLabel">Account Code</label>
+                            <div class="detail-value">{{ selectedRow.accountcode || '-' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6" style="margin-bottom: 15px;">
+                            <label class="inputLabel">Source</label>
+                            <div class="detail-value">{{ selectedRow.source || '-' }}</div>
+                        </div>
+                        <div class="col-md-6" style="margin-bottom: 15px;">
+                            <label class="inputLabel">Destination</label>
+                            <div class="detail-value">{{ selectedRow.destination || '-' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6" style="margin-bottom: 15px;">
+                            <label class="inputLabel">Destination Context</label>
+                            <div class="detail-value">{{ selectedRow.dcontext || '-' }}</div>
+                        </div>
+                        <div class="col-md-6" style="margin-bottom: 15px;">
+                            <label class="inputLabel">Caller ID</label>
+                            <div class="detail-value">{{ selectedRow.clid || '-' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6" style="margin-bottom: 15px;">
+                            <label class="inputLabel">Channel</label>
+                            <div class="detail-value">{{ selectedRow.channel || '-' }}</div>
+                        </div>
+                        <div class="col-md-6" style="margin-bottom: 15px;">
+                            <label class="inputLabel">Destination Channel</label>
+                            <div class="detail-value">{{ selectedRow.dstchannel || '-' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6" style="margin-bottom: 15px;">
+                            <label class="inputLabel">Last Application</label>
+                            <div class="detail-value">{{ selectedRow.lastapp || '-' }}</div>
+                        </div>
+                        <div class="col-md-6" style="margin-bottom: 15px;">
+                            <label class="inputLabel">Last Data</label>
+                            <div class="detail-value">{{ selectedRow.lastdata || '-' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6" style="margin-bottom: 15px;">
+                            <label class="inputLabel">Call Date</label>
+                            <div class="detail-value">{{ selectedRow.calldate | date: 'dd-MM-yyyy HH:mm:ss' }}</div>
+                        </div>
+                        <div class="col-md-6" style="margin-bottom: 15px;">
+                            <label class="inputLabel">Answer Time</label>
+                            <div class="detail-value">
+                                {{ selectedRow.answertime ? (selectedRow.answertime | date: 'dd-MM-yyyy HH:mm:ss') : '-'
+                                }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6" style="margin-bottom: 15px;">
+                            <label class="inputLabel">End Time</label>
+                            <div class="detail-value">
+                                {{ selectedRow.endtime ? (selectedRow.endtime | date: 'dd-MM-yyyy HH:mm:ss') : '-' }}
+                            </div>
+                        </div>
+                        <div class="col-md-6" style="margin-bottom: 15px;">
+                            <label class="inputLabel">Duration (seconds)</label>
+                            <div class="detail-value">{{ selectedRow.duration || 0 }}</div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6" style="margin-bottom: 15px;">
+                            <label class="inputLabel">Bill Seconds</label>
+                            <div class="detail-value">{{ selectedRow.billsec || 0 }}</div>
+                        </div>
+                        <div class="col-md-6" style="margin-bottom: 15px;">
+                            <label class="inputLabel">Disposition</label>
+                            <div class="detail-value">
+                                <span class="badge" [ngClass]="{
+                          'badge-success': selectedRow.disposition === 'ANSWERED',
+                          'badge-danger': selectedRow.disposition === 'NO ANSWER' || selectedRow.disposition === 'FAILED',
+                          'badge-warning': selectedRow.disposition === 'BUSY',
+                          'badge-secondary': selectedRow.disposition !== 'ANSWERED' && selectedRow.disposition !== 'NO ANSWER' && selectedRow.disposition !== 'FAILED' && selectedRow.disposition !== 'BUSY'
+                        }">
+                                    {{ selectedRow.disposition || '-' }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6" style="margin-bottom: 15px;">
+                            <label class="inputLabel">AMA Flags</label>
+                            <div class="detail-value">{{ selectedRow.amaflags || '-' }}</div>
+                        </div>
+                        <div class="col-md-6" style="margin-bottom: 15px;">
+                            <label class="inputLabel">User Field</label>
+                            <div class="detail-value">{{ selectedRow.userfield || '-' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12" style="margin-bottom: 15px;">
+                            <label class="inputLabel">Recording File</label>
+                            <div class="detail-value">{{ selectedRow.recordingfile || '-' }}</div>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </div>
+            }
+        </div>
+
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+            <button mat-stroked-button type="button" class="button-normal" (click)="closeViewModal()">
+                Close
+            </button>
+        </div>
+    </div>
+</ng-template>

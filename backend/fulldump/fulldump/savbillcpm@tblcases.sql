@@ -1,0 +1,84 @@
+-- MySQLShell dump 2.0.1  Distrib Ver 8.0.32 for Linux on x86_64 - for MySQL 8.0.32 (MySQL Community Server (GPL)), for Linux (x86_64)
+--
+-- Host: localhost    Database: savbillcpm    Table: tblcases
+-- ------------------------------------------------------
+-- Server version	8.0.32
+
+--
+-- Table structure for table `tblcases`
+--
+
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE IF NOT EXISTS `tblcases` (
+  `case_id` bigint NOT NULL AUTO_INCREMENT,
+  `case_title` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `case_type` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `case_number` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `case_for` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `case_origin` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `case_status` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `priority` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `case_for_id` bigint DEFAULT NULL,
+  `case_for_partner` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `case_for_zone` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `next_followup_date` date DEFAULT NULL,
+  `next_followup_time` time DEFAULT NULL,
+  `case_started_on` datetime DEFAULT NULL,
+  `first_assigned_on` datetime DEFAULT NULL,
+  `is_delete` tinyint(1) NOT NULL DEFAULT '0',
+  `CREATEDATE` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `LASTMODIFIEDDATE` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `CREATEDBYSTAFFID` bigint NOT NULL,
+  `LASTMODIFIEDBYSTAFFID` bigint NOT NULL,
+  `current_assignee_id` bigint DEFAULT NULL,
+  `final_resolved_by_id` bigint DEFAULT NULL,
+  `final_closed_by_id` bigint DEFAULT NULL,
+  `final_resolution_id` bigint DEFAULT NULL,
+  `final_resolution_date` timestamp NULL DEFAULT NULL,
+  `final_closed_date` timestamp NULL DEFAULT NULL,
+  `first_remark` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `partnerid` bigint DEFAULT NULL,
+  `createbyname` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `updatebyname` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `MVNOID` bigint DEFAULT NULL,
+  `rating` bigint DEFAULT NULL,
+  `customer_feedback` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `ticket_reason_category_id` bigint DEFAULT NULL,
+  `reason_sub_category_id` bigint DEFAULT NULL,
+  `group_reason_id` bigint DEFAULT NULL,
+  `tat_mapping_id` bigint DEFAULT NULL,
+  `BUID` bigint DEFAULT NULL,
+  `root_cause_reason_id` bigint DEFAULT NULL,
+  `source` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `sub_source` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `team_hir_mapping_id` bigint DEFAULT NULL,
+  `department` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `cust_additional_mobile_number` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `cust_additional_email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `parent_ticket_id` bigint DEFAULT NULL,
+  `helper_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `lcoid` bigint DEFAULT NULL,
+  `case_order` bigint DEFAULT '0',
+  `ticket_sla_time` bigint DEFAULT NULL,
+  `ticket_sla_unit` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `call_status` bit(1) DEFAULT NULL,
+  `is_closed` bit(1) DEFAULT NULL,
+  `deacivate_reason` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `serial_number` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`case_id`),
+  UNIQUE KEY `cases_case_id_unq` (`case_id`),
+  KEY `tblcases_ticket_reason_category_id_fk` (`ticket_reason_category_id`),
+  KEY `tblcases_reason_sub_category_id_fk` (`reason_sub_category_id`),
+  KEY `tblcases_group_reason_id_fk` (`group_reason_id`),
+  KEY `tblcases_tat_mapping_id_fk` (`tat_mapping_id`),
+  KEY `tblcases_ibfk_1` (`MVNOID`),
+  KEY `businessunit_case_fk` (`BUID`),
+  CONSTRAINT `businessunit_case_fk` FOREIGN KEY (`BUID`) REFERENCES `tblmbusinessunit` (`businessunitid`),
+  CONSTRAINT `tblcases_group_reason_id_fk` FOREIGN KEY (`group_reason_id`) REFERENCES `tbltticketsubcategorygroupreasonmapping` (`id`),
+  CONSTRAINT `tblcases_ibfk_1` FOREIGN KEY (`MVNOID`) REFERENCES `tblmmvno` (`MVNOID`),
+  CONSTRAINT `tblcases_reason_sub_category_id_fk` FOREIGN KEY (`reason_sub_category_id`) REFERENCES `tblmticketreasonsubcategory` (`id`),
+  CONSTRAINT `tblcases_tat_mapping_id_fk` FOREIGN KEY (`tat_mapping_id`) REFERENCES `tbltticketreasoncategorytatmapping` (`mapping_id`),
+  CONSTRAINT `tblcases_ticket_reason_category_id_fk` FOREIGN KEY (`ticket_reason_category_id`) REFERENCES `tblmticketreasoncategory` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;

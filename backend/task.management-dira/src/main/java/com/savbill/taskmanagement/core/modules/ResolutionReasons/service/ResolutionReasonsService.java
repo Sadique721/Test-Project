@@ -1,0 +1,405 @@
+package com.savbill.taskmanagement.core.modules.ResolutionReasons.service;
+
+
+import com.savbill.taskmanagement.core.constants.ClientServiceConstant;
+import com.savbill.taskmanagement.core.constants.SearchConstants;
+import com.savbill.taskmanagement.core.dto.GenericDataDTO;
+import com.savbill.taskmanagement.core.dto.GenericSearchModel;
+import com.savbill.taskmanagement.core.exceptions.CustomValidationException;
+import com.savbill.taskmanagement.core.mapper.CycleAvoidingMappingContext;
+import com.savbill.taskmanagement.core.modules.ClientServ.service.ClientServiceSrv;
+import com.savbill.taskmanagement.core.modules.ResolutionReasons.domain.QResolutionReasons;
+import com.savbill.taskmanagement.core.modules.ResolutionReasons.domain.ResolutionReasons;
+import com.savbill.taskmanagement.core.modules.ResolutionReasons.mapper.ResolutionReasonsMapper;
+import com.savbill.taskmanagement.core.modules.ResolutionReasons.model.ResolutionReasonsDTO;
+import com.savbill.taskmanagement.core.modules.ResolutionReasons.repository.ResolutionReasonsRepository;
+import com.savbill.taskmanagement.core.modules.ResolutionReasons.repository.RootcaseResolutionMappingRepo;
+import com.savbill.taskmanagement.core.modules.staffuser.repository.StaffUserRepository;
+import com.savbill.taskmanagement.core.modules.tasks.domain.*;
+import com.savbill.taskmanagement.core.modules.tasks.domain.Case;
+import com.savbill.taskmanagement.core.modules.tasks.domain.ResoSubCategoryMapping;
+import com.savbill.taskmanagement.core.modules.tasks.domain.ResoultionFileMapping;
+import com.savbill.taskmanagement.core.modules.tasks.repository.CaseRepository;
+import com.savbill.taskmanagement.core.modules.tasks.repository.ResoSubCategoryMappingRepo;
+import com.savbill.taskmanagement.core.modules.tasks.repository.ResoultionFileMappingRepocitory;
+import com.savbill.taskmanagement.core.modules.utils.CommonConstants;
+import com.savbill.taskmanagement.core.service.ExBaseAbstractService;
+import com.savbill.taskmanagement.core.utillity.fileUtillity.FileUtility;
+import com.savbill.taskmanagement.core.utillity.log.ApplicationLogger;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.log.Logger;
+import com.itextpdf.text.log.LoggerFactory;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import org.apache.commons.collections4.IterableUtils;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+
+@Service
+public class ResolutionReasonsService extends ExBaseAbstractService<ResolutionReasonsDTO, ResolutionReasons,Long> {
+
+    public ResolutionReasonsService(ResolutionReasonsRepository repository, ResolutionReasonsMapper mapper) {
+        super(repository, mapper);
+    }
+    @Autowired
+    private ResolutionReasonsRepository resolutionReasonsRepository;
+    @Autowired
+    private ResoSubCategoryMappingRepo resoSubCategoryMappingRepo;
+
+    @Autowired
+    CaseRepository caseRepository;
+    @Autowired
+    ResolutionReasonsMapper resolutionReasonsMapper;
+
+    @Autowired
+    RootcaseResolutionMappingRepo rootcaseResolutionMappingRepo;
+
+    @Autowired
+    FileUtility fileUtility;
+    @Autowired
+    ResoultionFileMappingRepocitory mappingRepocitory;
+    @Autowired
+    private ClientServiceSrv clientService;
+    @Autowired
+    StaffUserRepository staffUserRepository;
+    private static final Logger logger= LoggerFactory.getLogger(ResolutionReasonsService.class);
+    @Override
+    public String getModuleNameForLog() {
+        return "[ResolutionReasons Service]";
+    }
+
+    @Override
+    public void excelGenerate(Workbook workbook) throws Exception {
+        Sheet sheet = workbook.createSheet("ResolutionReasons");
+        createExcel(workbook, sheet, ResolutionReasonsDTO.class, null);
+    }
+
+    @Override
+    public void pdfGenerate(Document doc) throws Exception {
+        createPDF(doc, ResolutionReasonsDTO.class, null);
+    }
+
+
+
+    @Override
+    public boolean duplicateVerifyAtSave(String name) throws Exception {
+        boolean flag = false;
+        if (name != null) {
+        	name = name.trim();
+            Integer count;
+            if(getMvnoIdFromCurrentStaff() == 1) count = resolutionReasonsRepository.duplicateVerifyAtSave(name);
+            else {
+                if(getBUIdsFromCurrentStaff().size() == 0)
+                    count = resolutionReasonsRepository.duplicateVerifyAtSave(name, Arrays.asList(getMvnoIdFromCurrentStaff(), 1));
+                else
+                    count = resolutionReasonsRepository.duplicateVerifyAtSave(name , getMvnoIdFromCurrentStaff() , getBUIdsFromCurrentStaff());
+            }
+            if (count == 0) {
+                flag = true;
+            }
+        }
+        return flag;
+    }
+
+
+    public boolean duplicateVerifyAtEdit(String name, Long id) throws Exception {
+        boolean flag = false;
+        if (name != null) {
+        	name = name.trim();
+            Integer count;
+            if(getMvnoIdFromCurrentStaff() == 1) count = resolutionReasonsRepository.duplicateVerifyAtSave(name);
+            else {
+                if(getBUIdsFromCurrentStaff().size() == 0)
+                    count = resolutionReasonsRepository.duplicateVerifyAtSave(name, Arrays.asList(getMvnoIdFromCurrentStaff(), 1));
+                else
+                    count = resolutionReasonsRepository.duplicateVerifyAtSave(name , getMvnoIdFromCurrentStaff() , getBUIdsFromCurrentStaff());
+            }
+            if (count >= 1) {
+                Integer countEdit;
+                if(getMvnoIdFromCurrentStaff() == 1) countEdit = resolutionReasonsRepository.duplicateVerifyAtEdit(name, id);
+                else {
+                    if(getBUIdsFromCurrentStaff().size() == 0)
+                        countEdit = resolutionReasonsRepository.duplicateVerifyAtEdit(name, id, Arrays.asList(getMvnoIdFromCurrentStaff(), 1));
+                    else
+                        countEdit = resolutionReasonsRepository.duplicateVerifyAtEdit(name, id, getMvnoIdFromCurrentStaff(), getBUIdsFromCurrentStaff());
+                }
+                if (countEdit == 1) {
+                    flag = true;
+                }
+            } else {
+                flag = true;
+            }
+        }
+        return flag;
+    }
+
+    @Override
+    public GenericDataDTO getListByPageAndSizeAndSortByAndOrderBy(Integer page, Integer size, String sortBy, Integer sortOrder, List<GenericSearchModel> filterList) {
+        GenericDataDTO genericDataDTO = new GenericDataDTO();
+        QResolutionReasons qResolutionReasons=QResolutionReasons.resolutionReasons;
+        BooleanExpression expression=qResolutionReasons.isNotNull().and(qResolutionReasons.isDeleted.eq(false));
+        if(getLoggedInUser().getLco())
+            expression=expression.and(qResolutionReasons.lcoId.eq(getLoggedInUser().getPartnerId()));
+        else
+            expression=expression.and(qResolutionReasons.lcoId.isNull());
+
+        Page<ResolutionReasons> paginationList = null;
+        PageRequest pageRequest = generatePageRequest(page, size, sortBy, sortOrder);
+        if(getMvnoIdFromCurrentStaff() == 1)
+            paginationList = resolutionReasonsRepository.findAll(expression,pageRequest);
+        else {
+            if (null == filterList || 0 == filterList.size())
+                if (getBUIdsFromCurrentStaff() == null || getBUIdsFromCurrentStaff().size() == 0) {
+                    expression=expression.and(qResolutionReasons.mvnoId.in(1,getMvnoIdFromCurrentStaff()));
+                    paginationList = resolutionReasonsRepository.findAll(expression,pageRequest);
+                }
+                else {
+                    expression=expression.and(qResolutionReasons.mvnoId.in(getMvnoIdFromCurrentStaff()));
+                    expression=expression.and(qResolutionReasons.buId.in(getBUIdsFromCurrentStaff()));
+                    paginationList = resolutionReasonsRepository.findAll(expression,pageRequest);
+                }
+        }
+
+
+        if (null != paginationList && 0 < paginationList.getContent().size()) {
+            makeGenericResponse(genericDataDTO, paginationList);
+        }
+        return genericDataDTO;
+    }
+
+    public List<ResolutionReasons> findByStatus()
+    {
+        List<ResolutionReasons> resolutionReasonsList = new ArrayList<>();
+        if(getMvnoIdFromCurrentStaff() == 1)
+            resolutionReasonsList = resolutionReasonsRepository.findAllByStatus();
+        else
+            if(getBUIdsFromCurrentStaff() == null || getBUIdsFromCurrentStaff().size() == 0)
+                resolutionReasonsList =  resolutionReasonsRepository.findAllByStatus(Arrays.asList(1, getMvnoIdFromCurrentStaff()));
+            else
+                resolutionReasonsList = resolutionReasonsRepository.findAllByStatus(getMvnoIdFromCurrentStaff(), getBUIdsFromCurrentStaff());
+
+        return resolutionReasonsList;
+    }
+
+    public GenericDataDTO search(List<GenericSearchModel> filterList, Integer page, Integer pageSize, String sortBy, Integer sortOrder) {
+        String SUBMODULE = getModuleNameForLog() + " [search()] ";
+        try {
+            PageRequest pageRequest = generatePageRequest(page, pageSize, "createdate", sortOrder);
+
+            QResolutionReasons qResolutionReasons = QResolutionReasons.resolutionReasons;
+
+            BooleanExpression booleanExpression = qResolutionReasons.isNotNull().and(qResolutionReasons.isDeleted.eq(false));
+
+            if(getLoggedInUser().getLco())
+                booleanExpression=booleanExpression.and(qResolutionReasons.lcoId.eq(getLoggedInUser().getPartnerId()));
+            else
+                booleanExpression=booleanExpression.and(qResolutionReasons.lcoId.isNull());
+
+            GenericDataDTO genericDataDTO = new GenericDataDTO();
+            if(getMvnoIdFromCurrentStaff()!=1){
+                booleanExpression = booleanExpression.and(qResolutionReasons.mvnoId.in(1,getMvnoIdFromCurrentStaff()));
+            }
+            if (getBUIdsFromCurrentStaff().size() != 0)
+                booleanExpression = booleanExpression.and(qResolutionReasons.mvnoId.eq(1).or(qResolutionReasons.mvnoId.eq(getMvnoIdFromCurrentStaff()).and(qResolutionReasons.buId.in(getBUIdsFromCurrentStaff()))));
+            for (GenericSearchModel searchModel : filterList) {
+                if (searchModel.getFilterColumn().trim().equalsIgnoreCase(SearchConstants.ANY)) {
+                    booleanExpression = booleanExpression.and(qResolutionReasons.name.contains(searchModel.getFilterValue()));
+                }
+            }
+            Page<ResolutionReasons> resolutionReasonsPage = resolutionReasonsRepository.findAll(booleanExpression, pageRequest);
+            genericDataDTO.setDataList(resolutionReasonsPage.getContent());
+            genericDataDTO.setResponseCode(HttpStatus.OK.value());
+            genericDataDTO.setResponseMessage(HttpStatus.OK.getReasonPhrase());
+            genericDataDTO.setTotalRecords(resolutionReasonsPage.getTotalElements());
+            genericDataDTO.setPageRecords(resolutionReasonsPage.getNumberOfElements());
+            genericDataDTO.setCurrentPageNumber(resolutionReasonsPage.getNumber() + 1);
+            genericDataDTO.setTotalPages(resolutionReasonsPage.getTotalPages());
+            return genericDataDTO;
+
+        } catch (Exception ex) {
+            ApplicationLogger.logger.error(SUBMODULE + ex.getMessage(), ex);
+        }
+        return null;
+    }
+    public List<ResolutionReasons> findByResoReasons(Long id) {
+        try{
+            QResoSubCategoryMapping qResoSubCategoryMapping = QResoSubCategoryMapping.resoSubCategoryMapping;
+            BooleanExpression exp=qResoSubCategoryMapping.isNotNull().and(qResoSubCategoryMapping.caseCategoryId.eq(id.intValue()));
+            List<ResoSubCategoryMapping> resoSubCategoryMappingList= (List<ResoSubCategoryMapping>) resoSubCategoryMappingRepo.findAll(exp);
+           List<Long> number=new ArrayList<>();
+            if (resoSubCategoryMappingList.size()>0){
+                for (ResoSubCategoryMapping ids:resoSubCategoryMappingList){
+                    Long num = ids.getResId();
+                    number.add(num);
+                }
+            }
+            QResolutionReasons qResolutionReasons = QResolutionReasons.resolutionReasons;
+            BooleanExpression exp1 = qResolutionReasons.isNotNull().and(qResolutionReasons.isDeleted.eq(false).and(qResolutionReasons.id.in(number)));
+            exp1=exp1.and(qResolutionReasons.status.equalsIgnoreCase(CommonConstants.ACTIVE_STATUS));
+            List<ResolutionReasons> resolutionReasonsList = (List<ResolutionReasons>) resolutionReasonsRepository.findAll(exp1);
+            List<ResolutionReasons> resolutionReasons = new ArrayList<>();
+            if(resolutionReasonsList.size()>0){
+                for(ResolutionReasons reasons : resolutionReasonsList){
+                    ResolutionReasons reasons1 = reasons;
+                    resolutionReasons.add(reasons1);
+                }
+            }
+                return resolutionReasons;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean isReasonAlreadyInUse(Long id) {
+        List<ResoSubCategoryMapping> resoSubCategoryMappingList = new ArrayList<>();
+        resoSubCategoryMappingList = resoSubCategoryMappingRepo.findAllByResId(id);
+        List<Case> caseList = new ArrayList<>();
+        for(ResoSubCategoryMapping resoSubCategoryMapping : resoSubCategoryMappingList){
+            caseList = caseRepository.findAllByRootCauseReasonId(id);
+        }
+        if (caseList.size() > 0) {
+            return false;
+        }
+        return true;
+    }
+    @Override
+    public void deleteEntity( ResolutionReasonsDTO entityDTO){
+        ResolutionReasons reasons=resolutionReasonsMapper.dtoToDomain(entityDTO,new CycleAvoidingMappingContext());
+        resolutionReasonsRepository.delete(reasons);
+        if(entityDTO.getRootCauseResolutionMappingList().size()>0){
+            rootcaseResolutionMappingRepo.deleteInBatch(entityDTO.getRootCauseResolutionMappingList());
+        }
+    }
+
+
+    public GenericDataDTO getresolutionResonList() {
+        GenericDataDTO genericDataDTO = new GenericDataDTO();
+        QResolutionReasons qResolutionReasons=QResolutionReasons.resolutionReasons;
+        BooleanExpression expression=qResolutionReasons.isNotNull().and(qResolutionReasons.isDeleted.eq(false));
+        if(getLoggedInUser().getLco())
+            expression=expression.and(qResolutionReasons.lcoId.eq(getLoggedInUser().getPartnerId()));
+        else
+            expression=expression.and(qResolutionReasons.lcoId.isNull());
+
+        if(getMvnoIdFromCurrentStaff() == 1){
+            expression=expression.and(qResolutionReasons.mvnoId.eq(1));
+        }else{
+            expression=expression.and(qResolutionReasons.mvnoId.in(1,getMvnoIdFromCurrentStaff()));
+        }   if(getBUIdsFromCurrentStaff().size()>0) {
+            expression=expression.and(qResolutionReasons.buId.eq(getBUIdsFromCurrentStaff().get(0)));
+        }
+
+        genericDataDTO.setDataList(IterableUtils.toList(resolutionReasonsRepository.findAll(expression)));
+        return genericDataDTO;
+    }
+
+    public GenericDataDTO uploadDoccuments(ResolutionReasons dtoData, List<MultipartFile> fileList, Authentication authentication, HttpServletRequest req) {
+        GenericDataDTO genericDataDTO=new GenericDataDTO();
+        try{
+            List<ResoultionFileMapping> mappings = new ArrayList<>();
+            for (MultipartFile file : fileList) {
+                ResoultionFileMapping mapping = new ResoultionFileMapping();
+                mapping.setFilename(file.getOriginalFilename());
+                mapping.setResolution(dtoData);
+                String PATH = clientService.getClientSrvByName(ClientServiceConstant.TASK_PATH).get(0).getValue();
+                String subfolderName=PATH+ File.separator+dtoData.getName()+ File.separator.trim();
+                MultipartFile file1 = fileUtility.getFileFromArrayForTicket(file);
+                if (file1 != null) {
+                    mapping.setUniquename(fileUtility.saveFileToServerForTicket(file1, subfolderName));
+                }
+                mappings.add(mapping);
+            }
+            genericDataDTO.setDataList(mappingRepocitory.saveAll(mappings));
+        }catch (Exception e){
+            e.getMessage();
+        }
+        return genericDataDTO;
+    }
+
+    public Resource downloadDocument(Long mappingId, String uniqueName) throws Exception {
+        QResoultionFileMapping qresoultionFileMapping = QResoultionFileMapping.resoultionFileMapping;
+        BooleanExpression booleanExpression = qresoultionFileMapping.isNotNull()
+                .and(qresoultionFileMapping.id.eq(mappingId))
+                .and(qresoultionFileMapping.resolution.isDeleted.eq(false));
+
+        Optional<ResoultionFileMapping> resoultionFileMapping = mappingRepocitory.findOne(booleanExpression);
+
+        String PATH = clientService.getClientSrvByName(ClientServiceConstant.TASK_PATH).get(0).getValue();
+
+        if (!resoultionFileMapping.isPresent()) {
+            String errorMessage = "Invalid filename or unique name is null.";
+            ApplicationLogger.logger.error(errorMessage);
+            throw new CustomValidationException(400, errorMessage, null);
+        }
+
+        try {
+            String subfolderName = resoultionFileMapping.get().getResolution().getName();
+            Path filePath = Paths.get(PATH, subfolderName, uniqueName).normalize();
+
+            Resource resource = new UrlResource(filePath.toUri());
+
+            if (!resource.exists() || !resource.isReadable()) {
+                throw new CustomValidationException(404, "File not found or unreadable", null);
+            }
+
+            return resource;
+        } catch (Exception ex) {
+            String errorMessage = "Error while retrieving the  file: " + ex.getMessage();
+            ApplicationLogger.logger.error(errorMessage, ex);
+            throw new CustomValidationException(500, errorMessage, ex);
+        }
+    }
+    public void deleteDocument(Long mappingId) throws Exception {
+        QResoultionFileMapping qresoultionFileMapping = QResoultionFileMapping.resoultionFileMapping;
+        BooleanExpression booleanExpression = qresoultionFileMapping.isNotNull().and(qresoultionFileMapping.id.eq(mappingId)).and(qresoultionFileMapping.resolution.isDeleted.eq(false));
+        Optional<ResoultionFileMapping> resoultionFileMapping = mappingRepocitory.findOne(booleanExpression);
+        if (resoultionFileMapping.isPresent()) {
+            mappingRepocitory.delete(resoultionFileMapping.get());
+        } else {
+            logger.info("No mapping found for mappingId={}"+ mappingId);
+        }
+    }
+
+    public List<Map<String, String>> dataToExport(Long resolutionId) {
+        List<ResoultionFileMapping> resoultionFileMappingList= mappingRepocitory.findByResolutionId(resolutionId);
+        List<Map<String, String>> dataToExport = new ArrayList<>();
+        Map<String, String> map = new HashMap<>();
+        resoultionFileMappingList.forEach(resoultionFileMapping -> {
+            map.put("Ticket ID", String.valueOf(resoultionFileMapping.getCaseId()));
+            map.put("Technician",  staffUserRepository.findStaffFullNameById(resoultionFileMapping.getStaffId().intValue()) );
+            map.put("Timestamp",  String.valueOf(resoultionFileMapping.getResolutionTime()) );
+            map.put("Latitude",  resoultionFileMapping.getLatitiude() );
+            map.put("Longitude",  resoultionFileMapping.getLongitude());
+            dataToExport.add(map);
+        });
+        return dataToExport;
+    }
+
+    public void createDir(ResolutionReasonsDTO entityDTO) {
+        String PATH = clientService.getClientSrvByName(ClientServiceConstant.TICKET_PATH).get(0).getValue();
+        String subfolderName=PATH+ File.separator+entityDTO.getName()+ File.separator.trim();
+        File directory = new File(subfolderName);
+        directory.mkdir();
+    }
+
+    public List<ResoultionFileMapping> getFileList(Long resolutionMappingId) {
+        QResoultionFileMapping qresoultionFileMapping = QResoultionFileMapping.resoultionFileMapping;
+        BooleanExpression booleanExpression = qresoultionFileMapping.isNotNull().and(qresoultionFileMapping.resolution.id.eq(resolutionMappingId)).and(qresoultionFileMapping.resolution.isDeleted.eq(false));
+        return  IterableUtils.toList(mappingRepocitory.findAll(booleanExpression));
+    }
+}
+

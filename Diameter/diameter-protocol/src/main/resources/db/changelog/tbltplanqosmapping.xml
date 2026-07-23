@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="create-tbltplanqosmapping-001" author="initial-change">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="tbltplanqosmapping"/>
+            </not>
+        </preConditions>
+
+        <!-- Create Table -->
+        <createTable tableName="tbltplanqosmapping">
+
+            <column name="id" type="BIGINT" >
+                <constraints primaryKey="true"
+                             primaryKeyName="tbltplanqosmapping_field_unq"
+                             nullable="false"/>
+            </column>
+
+            <column name="planid" type="BIGINT"/>
+            <column name="qosid" type="BIGINT"/>
+
+            <column name="from_percentage" type="DOUBLE"/>
+            <column name="to_percentage" type="DOUBLE"/>
+
+            <column name="isdelete" type="TINYINT(1)" defaultValueNumeric="0"/>
+
+        </createTable>
+
+
+        <!-- Unique Constraint (id) -->
+        <addUniqueConstraint
+                tableName="tbltplanqosmapping"
+                columnNames="id"
+                constraintName="tbltplanqosmapping_field_unq"/>
+
+
+        <!-- Index for planid -->
+        <createIndex
+                tableName="tbltplanqosmapping"
+                indexName="fk_planid_tbltplanqosmapping">
+            <column name="planid"/>
+        </createIndex>
+
+
+        <!-- Index for qosid -->
+        <createIndex
+                tableName="tbltplanqosmapping"
+                indexName="fk_qosid_tbltplanqosmapping">
+            <column name="qosid"/>
+        </createIndex>
+
+
+        <!-- Foreign Key: planid -->
+        <addForeignKeyConstraint
+                baseTableName="tbltplanqosmapping"
+                baseColumnNames="planid"
+                constraintName="fk_planid_tbltplanqosmapping"
+                referencedTableName="tblmpostpaidplan"
+                referencedColumnNames="POSTPAIDPLANID"/>
+
+
+        <!-- Foreign Key: qosid -->
+        <addForeignKeyConstraint
+                baseTableName="tbltplanqosmapping"
+                baseColumnNames="qosid"
+                constraintName="fk_qosid_tbltplanqosmapping"
+                referencedTableName="tbl_qos_policy"
+                referencedColumnNames="id"/>
+
+    </changeSet>
+
+</databaseChangeLog>

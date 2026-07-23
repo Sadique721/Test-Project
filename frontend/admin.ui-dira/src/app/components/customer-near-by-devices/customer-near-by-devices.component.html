@@ -1,0 +1,98 @@
+
+    <div class="dialog-header dialog-title">
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <mat-icon style="font-size: 24px; width: 24px; height: 24px;">location_on</mat-icon>
+            <span>Near Location</span>
+        </div>
+        <span>
+            <button mat-icon-button mat-dialog-close color="primary">
+                <img src="assets/img/DashboardIcons/Reject.svg" alt="Close">
+            </button>
+        </span>
+    </div>
+
+    <mat-dialog-content class="mat-typography">
+        <div class="info-alert-container">
+            <mat-icon>info</mat-icon>
+            <small>Click on a device name to bind the network device to this location.</small>
+        </div>
+
+        <div class="table-controls">
+            <h6 class="m-0 font-weight-600">
+                Nearby Devices ({{ nearDeviceLocationtotalRecords || 0 }})
+            </h6>
+            <mat-form-field appearance="outline" class="compact-select">
+                <mat-label>Items Per Page</mat-label>
+                <mat-select [(value)]="nearDeviceLocationItemPerPage" (selectionChange)="onNearDevicePageSizeChange($event)">
+                    <mat-option [value]="5">5</mat-option>
+                    <mat-option [value]="10">10</mat-option>
+                    <mat-option [value]="20">20</mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+
+        <div class="table-responsive">
+            <table mat-table [dataSource]="paginatedNearDeviceData" class="w-100">
+                
+                <ng-container matColumnDef="name">
+                    <th mat-header-cell *matHeaderCellDef>Name</th>
+                    <td mat-cell *matCellDef="let device">
+                        <span (click)="bindNetworkDevice(device.networkDeviceId)" class="clickable-link">
+                            {{ device.name }}
+                        </span>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="latitude">
+                    <th mat-header-cell *matHeaderCellDef>Latitude</th>
+                    <td mat-cell *matCellDef="let device">{{ device.latitude }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="longitude">
+                    <th mat-header-cell *matHeaderCellDef>Longitude</th>
+                    <td mat-cell *matCellDef="let device">{{ device.longitude }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="distance">
+                    <th mat-header-cell *matHeaderCellDef>Distance</th>
+                    <td mat-cell *matCellDef="let device">
+                        <span class="status-badge-green">{{ device.distance }} km</span>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="address">
+                    <th mat-header-cell *matHeaderCellDef>Address</th>
+                    <td mat-cell *matCellDef="let device">
+                        <div class="text-truncate" style="max-width: 250px;" [matTooltip]="device.address">
+                            {{ device.address }}
+                        </div>
+                    </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="['name', 'latitude', 'longitude', 'distance', 'address']"></tr>
+                <tr mat-row *matRowDef="let row; columns: ['name', 'latitude', 'longitude', 'distance', 'address'];"></tr>
+
+                <tr class="mat-row" *matNoDataRow>
+                    <td class="mat-cell text-center" colspan="5" style="padding: 30px;">
+                        <mat-icon color="disabled">location_off</mat-icon>
+                        <p class="text-muted">No nearby devices found</p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="pagination-footer">
+            <pagination-controls 
+                (pageChange)="pageChangedNearDeviceList($event)"
+                id="nearDevicepageData" 
+                directionLinks="true" 
+                maxSize="5">
+            </pagination-controls>
+        </div>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+        <button mat-stroked-button mat-dialog-close class="button-normal">
+         Close
+        </button>
+    </mat-dialog-actions>

@@ -1,0 +1,46 @@
+package com.savbill.taskmanagement.core.modules.Region.model;
+
+
+import com.savbill.taskmanagement.core.data.Auditable;
+import com.savbill.taskmanagement.core.dto.IBaseDto;
+import lombok.Data;
+
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import java.util.List;
+
+@Data
+public class RegionDTO extends Auditable implements IBaseDto {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String rname;
+
+    private String status;
+
+    private List<Long> branchid;
+
+    private Boolean isDeleted = false;
+
+    private Integer mvnoId;
+
+
+    @Override
+    public Long getIdentityKey() {
+        return  id;
+    }
+
+    @Override
+    public Integer getMvnoId() {
+        // TODO Auto-generated method stub
+        return mvnoId;
+    }
+
+    @Override
+    public Long getBuId() {
+        return null;
+    }
+}

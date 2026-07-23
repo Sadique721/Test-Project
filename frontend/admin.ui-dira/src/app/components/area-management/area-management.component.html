@@ -1,0 +1,627 @@
+<div class="row header-row">
+    <mat-card class="cardWithShadow w-100">
+        <mat-card-content class="mat-card-content-border">
+            <div class="row">
+                <div class="col-sm-9 d-flex">
+                    <mat-form-field appearance="outline" style="margin-left: 16px" class="w-100 hide-hint mr-10">
+                        <input class="input-p-5" matInput [(ngModel)]="searchAreaName"
+                            placeholder="Global Search Filter" (keydown.enter)="searchArea()" />
+                        <mat-icon matSuffix class="search-header-search-icon">
+                            <i class="pi pi-search icon-size"></i>
+                        </mat-icon>
+                    </mat-form-field>
+
+                    <button class="button-normal m-r-10" mat-button mat-flat-button color="primary"
+                        (click)="searchArea()">
+                        Search
+                    </button>
+
+                    <button class="button-normal" mat-stroked-button matButton="outlined" (click)="clearSearchArea()">
+                        Clear
+                    </button>
+                </div>
+
+                <div class="col-sm-3 search-div">
+                    <button mat-button mat-flat-button color="primary" (click)="openAddEditDialog()"
+                        class="button-normal m-r-10">
+                        Add {{areaTitle}}
+                    </button>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+
+<div class="container-fluid contain-flud">
+    <div class="row">
+        <div class="col-md-12">
+            <mat-card class="cardWithShadow">
+                <mat-card-content class="mat-card-content-border">
+                    <div class="country-table-list">
+                        <div class="country-table-list">
+                            <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8 w-100">
+                                <ng-container matColumnDef="id">
+                                    <!-- Header cell -->
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">ID</th>
+
+                                    <!-- Data cell -->
+                                    <td mat-cell *matCellDef="let area">
+                                        {{ area.id }}
+                                    </td>
+                                </ng-container>
+                                <ng-container matColumnDef="Name">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Name
+                                    </th>
+                                    <td mat-cell *matCellDef="let area" class="f-s-14">
+                                        <span class="HoverEffect" data-backdrop="static" data-keyboard="false"
+                                            title="{{ areaTitle }} Details">{{ area.name }}</span>
+                                    </td>
+                                </ng-container>
+                                <ng-container matColumnDef="Pincode">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        {{ pincodeTitle }}
+                                    </th>
+                                    <td mat-cell *matCellDef="let area" class="f-s-14">
+                                        {{ area.code }}
+                                    </td>
+                                </ng-container>
+                                <ng-container matColumnDef="OLT">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        {{ cityTitle }}
+                                    </th>
+                                    <td mat-cell *matCellDef="let area" class="f-s-14">
+                                        {{ area.cityName }}
+                                    </td>
+                                </ng-container>
+                                <ng-container matColumnDef="Sub-County">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        {{ stateTitle }}
+                                    </th>
+                                    <td mat-cell *matCellDef="let area" class="f-s-14">
+                                        {{ area.stateName }}
+                                    </td>
+                                </ng-container>
+                                <ng-container matColumnDef="Status">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Status
+                                    </th>
+
+                                    <td mat-cell *matCellDef="let area" class="f-s-14">
+                                        <span class="status-badge" [ngClass]="{
+                        'status-success': area.status === 'Active',
+                        'status-danger': area.status === 'Inactive'
+                      }">
+                                            {{ area.status }}
+                                        </span>
+                                    </td>
+                                </ng-container>
+                                <ng-container matColumnDef="Action">
+                                    @if (editAccess || deleteAccess) {
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">Action</th>
+                                    }
+
+                                    <td mat-cell *matCellDef="let area">
+                                        <a mat-icon-button matTooltip="view" href="javascript:void(0)"
+                                            (click)="openAreaDetailsDialog(area)">
+                                            <img src="assets/img/DashboardIcons/eye-svgrepo-com (1) 1.svg">
+                                        </a>
+                                        @if (editAccess) {
+                                        <a mat-icon-button href="javascript:void(0)" (click)="editArea(area.id)"
+                                            matTooltip="Update">
+                                            <img src="assets/img/DashboardIcons/Edit.svg">
+                                        </a>
+                                        }
+
+                                        @if (deleteAccess) {
+                                        <a mat-icon-button href="javascript:void(0)" (click)="deleteConfirmonArea(area)"
+                                            matTooltip="Delete">
+                                            <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                        </a>
+                                        }
+                                    </td>
+                                </ng-container>
+                                <tr mat-header-row class="table-header-bg"
+                                    *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+                                <tr mat-row class="table-content-row" *matRowDef="let row; columns: displayedColumns">
+                                </tr>
+                            </table>
+                            <div class="d-flex justify-content-end">
+                                <mat-paginator [length]="areaListdatatotalRecords" [pageSize]="areaListdataitemsPerPage"
+                                    style="display: flex" [pageSizeOptions]="[5,10,20,50,100]" showFirstLastButtons
+                                    (page)="pageChangedAreaList($event)">
+                                </mat-paginator>
+                            </div>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+
+        <!-- <ng-template #deleteDialog>
+        <h2 mat-dialog-title>Confirm Delete</h2>
+        <mat-dialog-content>
+        Are you sure you want to delete this Area?
+        </mat-dialog-content>
+        <mat-dialog-actions align="end">
+        <button mat-button (click)="onCancelDelete()">Cancel</button>
+        <button mat-raised-button color="warn" (click)="onConfirmDelete()">Delete</button>
+        </mat-dialog-actions>
+    </ng-template> -->
+    </div>
+</div>
+
+<!-- <div class="col-md-6 right">
+  <mat-card class="cardWithShadow">
+    <mat-card-header class="mat-card-header">
+      <mat-card-title>
+        <h5 class="heading-title">{{ isAreaEdit ? "Update" : "Create" }} {{ areaTitle }}</h5>
+      </mat-card-title>
+    </mat-card-header>
+
+    <div id="createDataArea" class="panel-collapse collapse in">
+      <ng-container *ngIf="!createAccess && !isAreaEdit">
+        <mat-card-content class="matcard-content">
+          <div class="panel-body table-responsive">
+            Sorry you have not privilege to create operation!
+          </div>
+        </mat-card-content>
+      </ng-container>
+
+      <ng-container *ngIf="createAccess || (isAreaEdit && editAccess)">
+        <mat-card-content class="matcard-content">
+          <div class="panel-body">
+            <form [formGroup]="areaFormGroup">
+              <div class="col-sm-12">
+                <mat-label for="areaName" class="inputLabel">{{ areaTitle }} Name*</mat-label>
+                <mat-form-field appearance="outline" class="w-100">
+                  <input
+                    id="areaName"
+                    matInput
+                    placeholder="Enter {{ areaTitle }} Name"
+                    formControlName="name"
+                    [ngClass]="{
+                      'is-invalid': submitted && areaFormGroup.controls.name.errors
+                    }"
+                    class="country-input"
+                    maxlength="250"
+                  />
+
+                  <mat-error
+                    *ngIf="
+                      (submitted || areaFormGroup.controls['name'].touched) &&
+                      areaFormGroup.controls['name'].errors as errors
+                    "
+                  >
+                    <span *ngIf="errors['required']">{{ areaTitle }} Name is required.</span>
+                    <span *ngIf="errors['cannotContainSpace']">White space are not allowed.</span>
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="col-sm-12">
+                <mat-label for="pincodeSelect" class="inputLabel"> {{ pincodeTitle }}* </mat-label>
+
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-select
+                    id="pincodeSelect"
+                    class="country-select"
+                    placeholder="Select a {{ pincodeTitle }}"
+                    formControlName="pincodeId"
+                    (selectionChange)="getSelPincode($event)"
+                    [ngClass]="{
+                      'is-invalid': submitted && areaFormGroup.controls.pincodeId.errors
+                    }"
+                  >
+                    <mat-option *ngFor="let option of pincodeListData" [value]="option.pincodeid">
+                      {{ option.pincode }}
+                    </mat-option>
+                  </mat-select>
+
+                  <mat-error *ngIf="submitted && areaFormGroup.controls.pincodeId.errors as errors">
+                    <div *ngIf="errors.required">{{ pincodeTitle }} is required.</div>
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="col-sm-12">
+                <label for="citySelect" class="inputLabel">{{ cityTitle }}*</label>
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-select
+                    id="citySelect"
+                    class="country-select"
+                    placeholder="Select a {{ cityTitle }}"
+                    formControlName="cityId"
+                    [disabled]="areaInputview"
+                    [ngClass]="{
+                      'is-invalid': submitted && areaFormGroup.controls.cityId.errors
+                    }"
+                  >
+                    <mat-option *ngFor="let city of cityListData" [value]="city.id">
+                      {{ city.name }}
+                    </mat-option>
+                  </mat-select>
+
+                  <mat-error
+                    *ngIf="
+                      (submitted || areaFormGroup.controls['cityId'].touched) &&
+                      areaFormGroup.controls['cityId'].errors as errors
+                    "
+                  >
+                    <span *ngIf="errors['required']"> {{ cityTitle }} is required. </span>
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="col-sm-12">
+                <mat-label for="stateSelect" class="inputLabel">{{ stateTitle }}*</mat-label>
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-select
+                    id="stateSelect"
+                    class="country-select"
+                    placeholder="Select a {{ stateTitle }}"
+                    formControlName="stateId"
+                    [disabled]="areaInputview"
+                    [ngClass]="{
+                      'is-invalid': submitted && areaFormGroup.controls.stateId.errors
+                    }"
+                  >
+                    <mat-option *ngFor="let state of stateListData" [value]="state.id">
+                      {{ state.name }}
+                    </mat-option>
+                  </mat-select>
+
+                  <mat-error
+                    *ngIf="
+                      (submitted || areaFormGroup.controls['stateId'].touched) &&
+                      areaFormGroup.controls['stateId'].errors as errors
+                    "
+                  >
+                    <span *ngIf="errors['required']"> {{ stateTitle }} is required. </span>
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="col-sm-12">
+                <mat-label for="countrySelect" class="inputLabel">{{ countryTitle }}*</mat-label>
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-select
+                    id="countrySelect"
+                    class="country-select"
+                    placeholder="Select a {{ countryTitle }}"
+                    formControlName="countryId"
+                    [disabled]="areaInputview"
+                    [ngClass]="{
+                      'is-invalid': submitted && areaFormGroup.controls.countryId.errors
+                    }"
+                  >
+                    <mat-option *ngFor="let country of countryListData" [value]="country.id">
+                      {{ country.name }}
+                    </mat-option>
+                  </mat-select>
+
+                  <mat-error
+                    *ngIf="
+                      (submitted || areaFormGroup.controls['countryId'].touched) &&
+                      areaFormGroup.controls['countryId'].errors as errors
+                    "
+                  >
+                    <span *ngIf="errors['required']"> {{ countryTitle }} is required. </span>
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="col-sm-12">
+                <mat-label for="statusSelect" class="inputLabel">{{ areaTitle }}*</mat-label>
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-select
+                    id="statusSelect"
+                    class="country-input"
+                    placeholder="Select {{ areaTitle }} Status"
+                    formControlName="status"
+                    [ngClass]="{
+                      'is-invalid': submitted && areaFormGroup.controls.status.errors
+                    }"
+                  >
+                    <mat-option *ngFor="let option of statusOptions" [value]="option.label">
+                      {{ option.label }}
+                    </mat-option>
+                  </mat-select>
+
+                  <mat-error *ngIf="submitted && areaFormGroup.controls.status.errors?.required">
+                    {{ areaTitle }} Status is required.
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <ng-container *ngIf="!isAreaEdit">
+                <div class="col-md-12 addarea-div">
+                  <button
+                    mat-button
+                    mat-flat-button
+                    color="primary"
+                    class="addarea-btn w-100"
+                    type="submit"
+                    (click)="addEditArea('')"
+                  >
+                    Add {{ areaTitle }}
+                  </button>
+                </div>
+              </ng-container>
+
+              <ng-container *ngIf="isAreaEdit">
+                <div class="col-md-12 addarea-div">
+                  <button
+                    mat-button
+                    mat-flat-button
+                    color="accent"
+                    class="addarea-btn w-100"
+                    type="submit"
+                    (click)="addEditArea(viewAreaListData.id)"
+                  >
+                    Update {{ areaTitle }}
+                  </button>
+                </div>
+              </ng-container>
+            </form>
+          </div>
+        </mat-card-content>
+      </ng-container>
+    </div>
+  </mat-card>
+</div> -->
+
+<ng-template #areaFormDialog let-dialogRef="dialogRef">
+    <div class="dialog-container">
+        <!-- Header -->
+        <div class="dialog-header">
+            <span>{{ isAreaEdit ? "Update" : "Create" }} {{ areaTitle }}</span>
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <form class="card-form mb-3" [formGroup]="areaFormGroup">
+            <!-- Content -->
+            <div mat-dialog-content>
+
+                <div class="col-md-12">
+                    <!-- No access case -->
+                    <ng-container *ngIf="!createAccess && !isAreaEdit">
+                        <mat-card-content class="matcard-content">
+                            <div class="panel-body table-responsive">
+                                Sorry you have not privilege to create operation!
+                            </div>
+                        </mat-card-content>
+                    </ng-container>
+
+                    <!-- Form case -->
+                    <ng-container *ngIf="createAccess || (isAreaEdit && editAccess)">
+                        <mat-card-content class="matcardContent">
+
+                            <div class="row g-3">
+                                <!-- Area Name -->
+                                <div class="col-md-6 mb-4">
+                                    <label for="areaName" class="inputLabel">{{ areaTitle }} Name *</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <input id="areaName" matInput placeholder="Enter {{ areaTitle }} Name"
+                                            formControlName="name"
+                                            [ngClass]="{ 'is-invalid': submitted && areaFormGroup.controls.name.errors }"
+                                            class="input-p-5" maxlength="250" />
+                                        <mat-error *ngIf="
+                        (submitted || areaFormGroup.controls['name'].touched) &&
+                        areaFormGroup.controls['name'].errors as errors
+                      ">
+                                            <span *ngIf="errors['required']">{{ areaTitle }} Name is required.</span>
+                                            <span *ngIf="errors['cannotContainSpace']">White space are not
+                                                allowed.</span>
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Pincode -->
+                                <div class="col-md-6 mb-4">
+                                    <label for="pincodeSelect" class="inputLabel">{{ pincodeTitle }} *</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select id="pincodeSelect" class="input-p-5"
+                                            placeholder="Select a {{ pincodeTitle }}" formControlName="pincodeId"
+                                            (selectionChange)="onPincodeSelectionChange($event)"
+                                            [disabled]="shouldDisablePincodeField()" [ngClass]="{
+                                                'is-invalid': submitted && areaFormGroup.controls.pincodeId.errors
+                                            }">
+                                            <mat-option *ngFor="let option of pincodeListData"
+                                                [value]="option.pincodeid">
+                                                {{ option.pincode }}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error
+                                            *ngIf="submitted && areaFormGroup.controls.pincodeId.errors as errors">
+                                            <span *ngIf="errors.required">{{ pincodeTitle }} is required.</span>
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- City -->
+                                <div class="col-md-6 mb-4">
+                                    <label for="citySelect" class="inputLabel">{{ cityTitle }} *</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select id="citySelect" class="input-p-5"
+                                            placeholder="Select a {{ cityTitle }}" formControlName="cityId"
+                                            [disabled]="shouldDisableLocationFields()" [ngClass]="{
+                        'is-invalid': submitted && areaFormGroup.controls.cityId.errors
+                      }">
+                                            <mat-option *ngFor="let city of cityListData" [value]="city.id">
+                                                {{ city.name }}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error *ngIf="
+                        (submitted || areaFormGroup.controls['cityId'].touched) &&
+                        areaFormGroup.controls['cityId'].errors as errors
+                      ">
+                                            <span *ngIf="errors['required']">{{ cityTitle }} is required.</span>
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- State -->
+                                <div class="col-md-6 mb-4">
+                                    <label for="stateSelect" class="inputLabel">{{ stateTitle }} *</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select id="stateSelect" class="input-p-5"
+                                            placeholder="Select a {{ stateTitle }}" formControlName="stateId"
+                                            [disabled]="shouldDisableLocationFields()" [ngClass]="{
+                        'is-invalid': submitted && areaFormGroup.controls.stateId.errors
+                      }">
+                                            <mat-option *ngFor="let state of stateListData" [value]="state.id">
+                                                {{ state.name }}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error *ngIf="
+                        (submitted || areaFormGroup.controls['stateId'].touched) &&
+                        areaFormGroup.controls['stateId'].errors as errors
+                      ">
+                                            <span *ngIf="errors['required']">{{ stateTitle }} is required.</span>
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Country -->
+                                <div class="col-md-6 mb-4">
+                                    <label for="countrySelect" class="inputLabel">{{ countryTitle }} *</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select id="countrySelect" class="input-p-5"
+                                            placeholder="Select a {{ countryTitle }}" formControlName="countryId"
+                                            [disabled]="shouldDisableLocationFields()" [ngClass]="{
+                        'is-invalid': submitted && areaFormGroup.controls.countryId.errors
+                      }">
+                                            <mat-option *ngFor="let country of countryListData" [value]="country.id">
+                                                {{ country.name }}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error *ngIf="
+                        (submitted || areaFormGroup.controls['countryId'].touched) &&
+                        areaFormGroup.controls['countryId'].errors as errors
+                      ">
+                                            <span *ngIf="errors['required']">{{ countryTitle }} is required.</span>
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Status -->
+                                <div class="col-md-6 mb-4">
+                                    <label for="statusSelect" class="inputLabel">Select {{ areaTitle }} Status *</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select id="statusSelect" class="input-p-5"
+                                            placeholder="Select {{ areaTitle }} Status" formControlName="status"
+                                            [ngClass]="{
+                        'is-invalid': submitted && areaFormGroup.controls.status.errors
+                      }">
+                                            <mat-option *ngFor="let option of statusOptions" [value]="option.label">
+                                                {{ option.label }}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error *ngIf="submitted && areaFormGroup.controls.status.errors?.required">
+                                            {{ areaTitle }} Status is required.
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+
+                            <!-- Buttons -->
+
+                        </mat-card-content>
+                    </ng-container>
+                </div>
+            </div>
+            <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+                <button mat-button mat-flat-button color="{{ isAreaEdit ? 'accent' : 'primary' }}" class="button-normal"
+                    type="submit" (click)="addEditArea(isAreaEdit ? viewAreaListData.id : '')">
+                    {{ isAreaEdit ? "Update" : "Create" }} {{ areaTitle }}
+                </button>
+                <button mat-stroked-button matButton="outlined" type="button" color="primary" class="button-normal"
+                    (click)="dialogRef.close()">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+</ng-template>
+
+<ng-template #areaDetailsDialog let-dialogRef="dialogRef">
+    <div class="dialog-container">
+        <!-- Header -->
+        <div class="dialog-header">
+            {{ areaparticularData.name }} {{ areaTitle }}
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <div mat-dialog-content>
+            <div class="col-md-12">
+                <!-- Basic Details Card -->
+                <mat-card class="cardWithShadow">
+                    <div class="dialog-header">Basic Details</div>
+                    <mat-card-content>
+                        <div class="row">
+                            <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                                <div class="field">
+                                    <span class="label-text">Name</span>
+                                    <span class="colon">:</span>
+                                    <span class="m-l-10">{{ areaparticularData.name }}</span>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                                <div class="field">
+                                    <span class="label-text">{{ cityTitle }}</span>
+                                    <span class="colon">:</span>
+                                    <span class="m-l-10">{{ areaparticularData.cityName }}</span>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                                <div class="field">
+                                    <span class="label-text">{{ stateTitle }}</span>
+                                    <span class="colon">:</span>
+                                    <span class="m-l-10">{{ areaparticularData.stateName }}</span>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                                <div class="field">
+                                    <span class="label-text">{{ countryTitle }}</span>
+                                    <span class="colon">:</span>
+                                    <span class="m-l-10">{{ areaparticularData.countryName }}</span>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                                <div class="field">
+                                    <span class="label-text">{{ pincodeTitle }}</span>
+                                    <span class="colon">:</span>
+                                    <span class="m-l-10">{{ areaparticularData.code }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+            <button mat-stroked-button type="button" color="primary" class="button-normal"
+                (click)="dialogRef.close()">Close</button>
+        </div>
+    </div>
+</ng-template>

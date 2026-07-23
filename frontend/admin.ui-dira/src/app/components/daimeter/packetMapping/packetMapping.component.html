@@ -1,0 +1,527 @@
+<div class="row header-row p-0 m-0">
+    <mat-card class="cardWithShadow w-100">
+        <mat-card-content class="mat-card-content-border">
+            <div class="row">
+                <div class="col-lg-3 col-sm-3 p-0 m-0">
+                    <mat-form-field appearance="outline" class="w-100 hide-hint mr-10 header-input"
+                        style="padding-left: 16px">
+                        <input class="input-p-5" matInput [(ngModel)]="searchkey" placeholder="Enter Request Type"
+                            (keydown.enter)="getsearch()" />
+                        <mat-icon matSuffix class="search-header-search-icon">
+                            <i class="pi pi-search icon-size"></i>
+                        </mat-icon>
+                    </mat-form-field>
+                </div>
+                <div class="col-lg-3 col-sm-3 p-0 m-0">
+                    <mat-form-field appearance="outline" class="w-100 hide-hint mr-10 header-input"
+                        style="padding-left: 16px">
+                        <input class="input-p-5" matInput [(ngModel)]="searchkey1" placeholder="Enter Response Type"
+                            (keydown.enter)="getsearch()" />
+                        <mat-icon matSuffix class="search-header-search-icon">
+                            <i class="pi pi-search icon-size"></i>
+                        </mat-icon>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-lg-3 col-sm-3">
+                    <div class="d-flex" style="margin-left: -2%">
+                        <button class="button-normal mr-10" mat-button mat-flat-button color="primary"
+                            (click)="getsearch()">
+                            Search
+                        </button>
+
+                        <button mat-stroked-button matButton="outlined" class="button-normal " (click)="listViewData()">
+                            Clear
+                        </button>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-sm-3 search-div">
+                    <div class="d-flex justify-content-end">
+                        <button mat-button mat-flat-button color="primary" (click)="createData()"
+                            class="button-normal mr-10" style="width: auto">
+                            Add Packet Mapping
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+<div class="container-fluid contain-flud">
+
+    <div class="row">
+        <div class="col-md-12">
+            <mat-card class="cardWithShadow">
+                <mat-card-content class="mat-card-content-border">
+                    <div class="country-table-list">
+                        <div class="example-container mat-elevation-z8" tabindex="0">
+                            <table mat-table [dataSource]="dataSource" class="mat-elevation-z8" style="width: 100%;">
+
+                                <!-- Request Type Column -->
+                                <ng-container matColumnDef="requestType">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef> Request Type </th>
+                                    <td mat-cell *matCellDef="let element"> {{element.requestType}} </td>
+                                </ng-container>
+
+                                <!-- Response Type Column -->
+                                <ng-container matColumnDef="responseType">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef> Response Type
+                                    </th>
+                                    <td mat-cell *matCellDef="let element"> {{element.responseType}} </td>
+                                </ng-container>
+
+                                <!-- Application Column -->
+                                <ng-container matColumnDef="application">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef> Application </th>
+                                    <td mat-cell *matCellDef="let element"> {{element.application}} </td>
+                                </ng-container>
+
+                                <!-- Vendor ID Column -->
+                                <ng-container matColumnDef="vendorId">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef> Vendor ID </th>
+                                    <td mat-cell *matCellDef="let element"> {{element.vendorId}} </td>
+                                </ng-container>
+
+                                <!-- Enabled Column -->
+                                <ng-container matColumnDef="enabled">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef> Status </th>
+                                    <td mat-cell *matCellDef="let element">
+                                        <span class="badge" [ngClass]="getBadgeClass(element.enabled)">
+                                            {{getBadgeText(element.enabled)}}
+                                        </span>
+                                    </td>
+                                </ng-container>
+                                <ng-container matColumnDef="action">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef> Action </th>
+                                    <td mat-cell *matCellDef="let element"> <a mat-icon-button matTooltip="view"
+                                            href="javascript:void(0)" (click)="AllDetails(element)">
+                                            <img src="assets/img/DashboardIcons/eye-svgrepo-com (1) 1.svg">
+                                        </a>
+                                        <a mat-icon-button matTooltip="edit" href="javascript:void(0)"
+                                            *ngIf="editAccess" (click)="edit(element)">
+                                            <img src="assets/img/DashboardIcons/Edit.svg">
+                                        </a>
+                                        <a mat-icon-button matTooltip="delete" href="javascript:void(0)"
+                                            *ngIf="deleteAccess" (click)="delete(element)">
+                                            <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                        </a>
+                                    </td>
+                                </ng-container>
+
+                                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                            </table>
+                        </div>
+                        <mat-paginator [length]="totalRecords" [pageSize]="itemsPerPage" [pageSizeOptions]="[5, 10, 20]"
+                            (page)="pageChangedTrcList($event)" showFirstLastButtons>
+                        </mat-paginator>
+
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </div>
+</div>
+<ng-template #addEditDialog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <!-- Header -->
+        <div class="dialog-header dialog-title">
+            {{ isPacketEdit ? "Update" : "Create" }} Packet Mapping
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <form [formGroup]="packetForm">
+            <div mat-dialog-content>
+                <div class="row header-row p-0 m-0">
+                    <mat-card class="cardWithShadow w-100">
+                        <mat-card-content class="mat-card-content-border">
+                            <ng-container *ngIf="!createAccess && !isPacketEdit">
+                                <mat-card-content class="matcard-content">
+                                    <div class="panel-body table-responsive">
+                                        Sorry you have not privilege to create operation!
+                                    </div>
+                                </mat-card-content>
+                            </ng-container>
+
+                            @if (createAccess || (isPacketEdit && editAccess)) {
+                            <!-- Basic Information -->
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label class="inputLabel">Request Type *</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <input matInput formControlName="requestType"
+                                            placeholder="Enter Request Type" />
+                                        <mat-error
+                                            *ngIf="packetForm.get('requestType')?.errors?.['required'] && packetForm.get('requestType')?.touched">
+                                            Request Type is required
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="inputLabel">Response Type *</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <input matInput formControlName="responseType"
+                                            placeholder="Enter Response Type" />
+                                        <mat-error
+                                            *ngIf="packetForm.get('responseType')?.errors?.['required'] && packetForm.get('responseType')?.touched">
+                                            Response Type is required
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="inputLabel">Application *</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select formControlName="application">
+                                            <mat-option *ngFor="let app of applicationOptions" [value]="app">
+                                                {{app}}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error
+                                            *ngIf="packetForm.get('application')?.errors?.['required'] && packetForm.get('application')?.touched">
+                                            Application is required
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="inputLabel">Vendor ID *</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select formControlName="vendorId" placeholder="Select Attribute Vendor">
+                                            <mat-option [value]="null">None</mat-option>
+                                            <mat-option *ngFor="let v of dropdownService.vendorData" [value]="v.id">
+                                                {{ v.name }}({{ v.vendor_id }})
+                                            </mat-option>
+                                        </mat-select>
+
+                                        <mat-error
+                                            *ngIf="packetForm.get('vendorId')?.errors?.['required'] && packetForm.get('vendorId')?.touched">
+                                            Vendor ID is required
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="inputLabel">Enabled</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select formControlName="enabled">
+                                            <mat-option [value]="true">Enabled</mat-option>
+                                            <mat-option [value]="false">Disabled</mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="inputLabel">Description *</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <textarea matInput formControlName="description" placeholder="Enter Description"
+                                            rows="3"></textarea>
+                                        <mat-error
+                                            *ngIf="packetForm.get('description')?.errors?.['required'] && packetForm.get('description')?.touched">
+                                            Description is required
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+
+                            <!-- Details Section with Table UI -->
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h5 class="mb-0">Packet Details</h5>
+                                        <button type="button" mat-raised-button color="primary" (click)="addDetail()"
+                                            class="add-detail-btn">
+                                            <mat-icon>add</mat-icon>
+                                            Add Detail
+                                        </button>
+                                    </div>
+
+                                    <div class="table-responsive tableAddEditScrollHeight example-container">
+                                        <table mat-table [dataSource]="detailsTableDataSource" class="w-100">
+
+
+
+                                            <!-- Sequence Column -->
+                                            <ng-container matColumnDef="sequence">
+                                                <th mat-header-cell *matHeaderCellDef class="table-header-title">
+                                                    Sequence *</th>
+                                                <td mat-cell *matCellDef="let element; let i = index"
+                                                    [formGroup]="getDetailFormGroup(i)">
+                                                    <mat-form-field appearance="outline" class="table-form-field">
+                                                        <input matInput type="number" formControlName="sequence"
+                                                            placeholder="Seq" min="1" />
+                                                        <mat-error
+                                                            *ngIf="getDetailFormGroup(i).get('sequence')?.errors?.['required']">
+                                                            Required
+                                                        </mat-error>
+                                                    </mat-form-field>
+                                                </td>
+                                            </ng-container>
+
+                                            <!-- Request AVP Column -->
+                                            <ng-container matColumnDef="requestAvp">
+                                                <th mat-header-cell *matHeaderCellDef class="table-header-title">Request
+                                                    AVP</th>
+                                                <td mat-cell *matCellDef="let element; let i = index"
+                                                    [formGroup]="getDetailFormGroup(i)">
+                                                    <mat-form-field appearance="outline" class="table-form-field">
+                                                        <input matInput formControlName="requestAvp"
+                                                            placeholder="Request AVP" />
+                                                    </mat-form-field>
+                                                </td>
+                                            </ng-container>
+
+                                            <!-- Response AVP Column -->
+                                            <ng-container matColumnDef="responseAvp">
+                                                <th mat-header-cell *matHeaderCellDef class="table-header-title">
+                                                    Response AVP</th>
+                                                <td mat-cell *matCellDef="let element; let i = index"
+                                                    [formGroup]="getDetailFormGroup(i)">
+                                                    <mat-form-field appearance="outline" class="table-form-field">
+                                                        <input matInput formControlName="responseAvp"
+                                                            placeholder="Response AVP" />
+                                                    </mat-form-field>
+                                                </td>
+                                            </ng-container>
+
+                                            <!-- Value Expression Column -->
+                                            <ng-container matColumnDef="valueExpression">
+                                                <th mat-header-cell *matHeaderCellDef class="table-header-title">Value
+                                                    Expression *</th>
+                                                <td mat-cell *matCellDef="let element; let i = index"
+                                                    [formGroup]="getDetailFormGroup(i)">
+                                                    <mat-form-field appearance="outline" class="table-form-field">
+                                                        <input matInput formControlName="valueExpression"
+                                                            placeholder="Value Expression" />
+                                                        <mat-error
+                                                            *ngIf="getDetailFormGroup(i).get('valueExpression')?.errors?.['required']">
+                                                            Required
+                                                        </mat-error>
+                                                    </mat-form-field>
+                                                </td>
+                                            </ng-container>
+
+                                            <!-- Value Type Column -->
+                                            <ng-container matColumnDef="valueType">
+                                                <th mat-header-cell *matHeaderCellDef class="table-header-title">Value
+                                                    Type *</th>
+                                                <td mat-cell *matCellDef="let element; let i = index"
+                                                    [formGroup]="getDetailFormGroup(i)">
+                                                    <mat-form-field appearance="outline" class="table-form-field">
+                                                        <mat-select formControlName="valueType">
+                                                            <mat-option *ngFor="let type of valueTypeOptions"
+                                                                [value]="type">
+                                                                {{type}}
+                                                            </mat-option>
+                                                        </mat-select>
+                                                        <mat-error
+                                                            *ngIf="getDetailFormGroup(i).get('valueType')?.errors?.['required']">
+                                                            Required
+                                                        </mat-error>
+                                                    </mat-form-field>
+                                                </td>
+                                            </ng-container>
+
+                                            <!-- Mandatory Column -->
+                                            <ng-container matColumnDef="mandatory">
+                                                <th mat-header-cell *matHeaderCellDef class="table-header-title">
+                                                    Mandatory</th>
+                                                <td mat-cell *matCellDef="let element; let i = index"
+                                                    [formGroup]="getDetailFormGroup(i)">
+                                                    <mat-form-field appearance="outline" class="table-form-field">
+                                                        <mat-select formControlName="mandatory">
+                                                            <mat-option [value]="true">Yes</mat-option>
+                                                            <mat-option [value]="false">No</mat-option>
+                                                        </mat-select>
+                                                    </mat-form-field>
+                                                </td>
+                                            </ng-container>
+
+                                            <!-- Actions Column -->
+                                            <ng-container matColumnDef="actions">
+                                                <th mat-header-cell *matHeaderCellDef class="table-header-title">Actions
+                                                </th>
+                                                <td mat-cell *matCellDef="let element; let i = index">
+                                                    <button type="button" mat-icon-button color="warn"
+                                                        (click)="removeDetail(i)" [disabled]="detailsArray.length === 1"
+                                                        matTooltip="Remove Detail">
+                                                        <mat-icon>delete</mat-icon>
+                                                    </button>
+                                                </td>
+                                            </ng-container>
+
+                                            <tr mat-header-row *matHeaderRowDef="detailsDisplayedColumns"></tr>
+                                            <tr mat-row *matRowDef="let row; columns: detailsDisplayedColumns;"></tr>
+                                        </table>
+
+                                        <!-- No Details Message -->
+                                        <div *ngIf="detailsArray.length === 0" class="no-details-message">
+                                            <mat-icon>info</mat-icon>
+                                            <span>No packet details added. Click "Add Detail" to create your first
+                                                detail.</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            }
+                        </mat-card-content>
+                    </mat-card>
+                </div>
+            </div>
+            <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+                <button mat-button mat-flat-button color="primary" class="button-normal" type="submit"
+                    (click)="onSubmit(dialogRef)" [disabled]="packetForm.invalid">
+                    {{ isPacketEdit ? "Update" : "Create" }} Packet Mapping
+                </button>
+                <button mat-stroked-button matButton="outlined" type="button" color="primary" class="button-normal"
+                    (click)="dialogRef.close()">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+</ng-template>
+
+
+
+<ng-template #detailsDialog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <!-- Header -->
+        <div class="dialog-header dialog-title">
+            {{ viewTrcData?.requestType }} Packet Mapping Details
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <div mat-dialog-content>
+            <!-- Basic Information -->
+            <mat-card class="mb-3">
+                <mat-card-header>
+                    <mat-card-title>Basic Information</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="row mt-4">
+                        <div class="col-lg-4 col-md-4 col-sm-6 dataGroup" *ngFor="let field of packetDetailFields">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">{{ field.label }}</span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">
+                                    <ng-container *ngIf="field.key === 'enabled'">
+                                        <span class="badge" [ngClass]="getBadgeClass(viewTrcData?.[field.key])">
+                                            {{getBadgeText(viewTrcData?.[field.key])}}
+                                        </span>
+                                    </ng-container>
+                                    <ng-container *ngIf="field.key !== 'enabled'">
+                                        {{ viewTrcData?.[field.key] || '—' }}
+                                    </ng-container>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+
+            <!-- Details Information -->
+            <mat-card *ngIf="viewTrcData?.details && viewTrcData.details.length > 0">
+                <mat-card-header>
+                    <mat-card-title>Packet Details ({{viewTrcData.details.length}})</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="details-view-table-container">
+                        <table mat-table [dataSource]="viewTrcData.details" class="details-view-table mat-elevation-z2">
+
+                            <!-- Sequence Column -->
+                            <ng-container matColumnDef="sequence">
+                                <th mat-header-cell *matHeaderCellDef class="table-header-title">Sequence</th>
+                                <td mat-cell *matCellDef="let detail">
+                                    <span class="sequence-badge">{{detail.sequence}}</span>
+                                </td>
+                            </ng-container>
+
+                            <!-- Request AVP Column -->
+                            <ng-container matColumnDef="requestAvp">
+                                <th mat-header-cell *matHeaderCellDef class="table-header-title">Request AVP</th>
+                                <td mat-cell *matCellDef="let detail">{{detail.requestAvp || '—'}}</td>
+                            </ng-container>
+
+                            <!-- Response AVP Column -->
+                            <ng-container matColumnDef="responseAvp">
+                                <th mat-header-cell *matHeaderCellDef class="table-header-title">Response AVP</th>
+                                <td mat-cell *matCellDef="let detail">{{detail.responseAvp || '—'}}</td>
+                            </ng-container>
+
+                            <!-- Value Expression Column -->
+                            <ng-container matColumnDef="valueExpression">
+                                <th mat-header-cell *matHeaderCellDef class="table-header-title">Value Expression</th>
+                                <td mat-cell *matCellDef="let detail">
+                                    <span class="value-expression" [title]="detail.valueExpression">
+                                        {{detail.valueExpression}}
+                                    </span>
+                                </td>
+                            </ng-container>
+
+                            <!-- Value Type Column -->
+                            <ng-container matColumnDef="valueType">
+                                <th mat-header-cell *matHeaderCellDef class="table-header-title">Value Type</th>
+                                <td mat-cell *matCellDef="let detail">
+                                    <span class="type-badge" [ngClass]="'type-' + detail.valueType?.toLowerCase()">
+                                        {{detail.valueType}}
+                                    </span>
+                                </td>
+                            </ng-container>
+
+                            <!-- Mandatory Column -->
+                            <ng-container matColumnDef="mandatory">
+                                <th mat-header-cell *matHeaderCellDef class="table-header-title">Mandatory</th>
+                                <td mat-cell *matCellDef="let detail">
+                                    <span class="badge"
+                                        [ngClass]="detail.mandatory ? 'badge-success' : 'badge-secondary'">
+                                        {{detail.mandatory ? 'Yes' : 'No'}}
+                                    </span>
+                                </td>
+                            </ng-container>
+
+                            <tr mat-header-row *matHeaderRowDef="detailsViewDisplayedColumns"></tr>
+                            <tr mat-row *matRowDef="let row; columns: detailsViewDisplayedColumns;"></tr>
+                        </table>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </div>
+</ng-template>
+<ng-template #confirmDialog let-data>
+    <div class="dialog-container">
+        <div class="dialog-header dialog-header-titleFont">
+            {{ data.title || "Delete Confirmation" }}
+            <span class="w-h-18">
+                <a mat-icon-button href="javascript:void(0)" mat-dialog-close="false">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+            <p class="dialog-description">{{ data.description }}</p>
+
+            <div mat-dialog-actions class="p-0">
+                <button mat-flat-button type="button" class="primary" [mat-dialog-close]="true">
+                    {{ data.yesLabel || "Confirm" }}
+                </button>
+                <button mat-stroked-button matButton="outlined" color="primary" mat-dialog-close="false">
+                    {{ data.noLabel || "Cancel" }}
+                </button>
+            </div>
+        </div>
+    </div>
+</ng-template>

@@ -1,0 +1,2312 @@
+<!-- --------------------------------------header start--------- -->
+<div class="row header-row">
+    <mat-card class="cardWithShadow w-100">
+        <mat-card-content class="mat-card-content-border">
+            <div class="row">
+                <div class="col-sm-9 d-flex">
+                    <mat-form-field appearance="outline" style="margin-left: 16px;"
+                        class="w-100 hide-hint mr-10 header-input">
+                        <input class="input-p-5" [(ngModel)]="searchExternalItem" matInput
+                            placeholder='Search External Item Number' (keydown.enter)="searchExternalItemData()" />
+                        <mat-icon matSuffix class="search-header-search-icon">
+                            <i class="pi pi-search icon-size"></i>
+                        </mat-icon>
+                    </mat-form-field>
+
+                    <button mat-button mat-flat-button color="primary" class="button-normal m-r-10"
+                        (click)="searchExternalItemData()">Search </button>
+                    <button mat-stroked-button matButton="outlined" class="button-normal"
+                        (click)="clearSearchExternalItem()">Clear
+                    </button>
+                </div>
+
+                <div class="col-sm-3 search-div">
+                    <button mat-button mat-flat-button color="primary" (click)="addEditExternalItemDialog()"
+                        class="button-normal m-r-10">
+                        Add</button>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+<!-- --------------------------------------header end--------- -->
+<!-- --------------------------------------list start--------- -->
+<div class="container-fluid contain-flud">
+    <div class="row">
+        <div class="col-md-12 m-0 p-0">
+            <div class="col-md-12">
+                <mat-card class="cardWithShadow">
+
+
+                    <mat-card-content>
+                        <div class="table-responsive">
+                            <table mat-table [dataSource]="externalItemListData" class="mat-elevation-z8 w-100">
+
+
+                                <ng-container matColumnDef="externalItemNumber">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">External Item
+                                        Number</th>
+                                    <td mat-cell *matCellDef="let externalItem">
+                                        {{ externalItem.externalItemGroupNumber }}
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="productName">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">Product Name</th>
+                                    <td mat-cell *matCellDef="let externalItem">{{ externalItem.productId.name }}</td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="type">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">Type</th>
+                                    <td mat-cell *matCellDef="let externalItem">{{ externalItem.ownershipType }}</td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="qty">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">Qty.</th>
+                                    <td mat-cell *matCellDef="let externalItem">{{ externalItem.qty }}</td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="availableQty">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">Available Qty.</th>
+                                    <td mat-cell *matCellDef="let externalItem">{{ externalItem.unusedQty }}</td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="inTransitQty">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">InTransit Qty.</th>
+                                    <td mat-cell *matCellDef="let externalItem">{{ externalItem.inTransitQty }}</td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="status">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">Status</th>
+                                    <td mat-cell *matCellDef="let externalItem">
+                                        @if (externalItem.status === 'ACTIVE') {
+                                        <span class="status-badge" [ngClass]="{
+          'status-success': externalItem.status === 'ACTIVE',
+          'status-danger': externalItem.status === 'INACTIVE'
+        }">
+                                            Active
+                                        </span>
+                                        }
+                                        @if (externalItem.status === 'INACTIVE') {
+                                        <span class="status-badge" [ngClass]="{
+          'status-success': externalItem.status === 'ACTIVE',
+          'status-danger': externalItem.status === 'INACTIVE'
+        }">
+                                            Inactive
+                                        </span>
+                                        }
+                                    </td>
+                                </ng-container>
+
+
+                                <ng-container matColumnDef="approvalStatus">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">Approval Status
+                                    </th>
+                                    <td mat-cell *matCellDef="let externalItem">
+                                        @if (!externalItem.approvalStatus) {
+                                        <span>-</span>
+                                        }
+                                        @if (externalItem.approvalStatus === 'Pending') {
+                                        <span class="badge-primary">Pending</span>
+                                        }
+                                        @if (externalItem.approvalStatus === 'Approve') {
+                                        <span class="badge-success">Approve</span>
+                                        }
+                                        @if (externalItem.approvalStatus === 'Rejected') {
+                                        <span class="badge-danger">Rejected</span>
+                                        }
+                                    </td>
+                                </ng-container>
+
+                                @if (deleteAccess || editAccess || addMacAddressAccess || showMacAddressAccess ||
+                                createAccess) {
+                                <ng-container matColumnDef="action">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">Action</th>
+                                    <td mat-cell *matCellDef="let externalItem" class="btnAction">
+                                        <a mat-icon-button href="javascript:void(0)" matTooltip="View Document"
+                                            matTooltipPosition="above"
+                                            (click)="getExternalItemDetails(externalItem.id)">
+                                            <img src="assets/img/DashboardIcons/eye-svgrepo-com (1) 1.svg">
+                                        </a>
+
+                                        @if (editAccess) {
+                                        <span matTooltip="Edit" matTooltipPosition="above" class="tooltip-wrapper">
+                                            <a mat-icon-button href="javascript:void(0)"
+                                                [disabled]="externalItem.approvalStatus !== 'Pending'"
+                                                (click)="editCountry(country.id)"
+                                                (click)="editExternalItem(externalItem.id)">
+                                                <img src="assets/img/DashboardIcons/Edit.svg">
+                                            </a></span>
+                                        }
+
+                                        @if (deleteAccess) {
+                                        <span matTooltip="Delete" matTooltipPosition="above" class="tooltip-wrapper">
+                                            <a mat-icon-button href="javascript:void(0)"
+                                                [disabled]="externalItem.approvalStatus !== 'Pending' || externalItem.outwardId"
+                                                (click)="deleteConfirmExternalItem(externalItem)">
+                                                <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                            </a>
+                                        </span>
+                                        }
+
+                                        @if (addMacAddressAccess || createAccess) {
+                                        <span matTooltip="Add Mac Address" matTooltipPosition="above"
+                                            class="tooltip-wrapper">
+                                            <button mat-icon-button color="accent" [disabled]="
+                                (externalItem.approvalStatus == 'Pending' && externalItem.status == 'INACTIVE') ||
+                                externalItem.approvalStatus == 'Approve' ||
+                                externalItem.approvalStatus == 'Rejected'
+                              " (click)="addMAC(externalItem.id)" matTooltip="Add MAC Address">
+
+                                                <img src="assets/img/DashboardIcons/Add MAC.svg">
+
+                                            </button></span>
+                                        }
+
+                                        @if (showMacAddressAccess && !externalItem.approvalStatus !== 'Pending') {
+
+                                        <span matTooltip="Show Mac Address" matTooltipPosition="above"
+                                            class="tooltip-wrapper"> <button mat-icon-button
+                                                (click)="showMac(externalItem.id)">
+                                                <img src="assets/img/DashboardIcons/Status.svg">
+
+
+                                            </button>
+                                        </span>
+                                        }
+
+                                        @if (createAccess) {
+                                        <span matTooltip="Approve" matTooltipPosition="above" class="tooltip-wrapper">
+                                            <button mat-icon-button color="primary" title="Approve" [disabled]="
+                                (externalItem.approvalStatus === 'Pending' && externalItem.status === 'INACTIVE') ||
+                                externalItem.inTransitQty !== externalItem.totalMacSerial ||
+                                externalItem.createdById !== loggedInStaffId ||
+                                (externalItem.approvalStatus !== 'Pending' && externalItem.status === 'ACTIVE')
+                              " (click)="approveChangeStatus(externalItem.id)">
+                                                <img src="assets/img/DashboardIcons/Assign.svg">
+                                            </button></span>
+
+                                        <span matTooltip="Rejected" matTooltipPosition="above" class="tooltip-wrapper">
+                                            <button mat-icon-button color="warn" title="Reject" [disabled]="
+                                (externalItem.approvalStatus === 'Pending' && externalItem.status === 'INACTIVE') ||
+                                externalItem.inTransitQty !== externalItem.totalMacSerial ||
+                                externalItem.createdById !== loggedInStaffId ||
+                                (externalItem.approvalStatus !== 'Pending' && externalItem.status === 'ACTIVE')
+                              " (click)="rejectChangeStatus(externalItem.id)">
+                                                <img src="assets/img/DashboardIcons/Reject.svg" />
+
+                                            </button>
+                                        </span>
+                                        }
+                                    </td>
+                                </ng-container>
+                                }
+
+                                <tr mat-header-row *matHeaderRowDef="getDisplayedPlanDetailsColumns()"></tr>
+                                <tr mat-row *matRowDef="let row; columns: getDisplayedPlanDetailsColumns();"></tr>
+                            </table>
+                            <!-- <mat-paginator [length]="productListdatatotalRecords"
+                           [pageSize]="productListdataitemsPerPage"
+                           [pageSizeOptions]="pageLimitOptions.map(o => o.value)"
+                           (page)="pageChangedProductList($event)">
+            </mat-paginator> -->
+                            <mat-paginator [length]="productListdatatotalRecords"
+                                [pageSize]="productListdataitemsPerPage" [pageSizeOptions]="pageSizeOptionsValues"
+                                (page)="pageChangedProductList($event)">
+                            </mat-paginator>
+                        </div>
+
+
+                    </mat-card-content>
+                </mat-card>
+            </div>
+
+        </div>
+    </div>
+</div>
+<!-- --------------------------------------list end--------- -->
+<!-- -------------------create start---------------------- -->
+<!-- Create Button -->
+
+<!-- External Item Dialog -->
+<ng-template #externalItemDialog>
+    <div class="dialog-container">
+        <div class="dialog-header">
+            {{ editMode ? "Update" : "Create" }} External Item
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="onCancel()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <div mat-dialog-content>
+            <mat-card-content class="matcardContent">
+                <form class="card-form mb-3" [formGroup]="externalItemManagementFormGroup">
+                    <!-- <fieldset> -->
+                    <!-- <legend>Basic Details</legend> -->
+                    @if (!createAccess && !editAccess) {
+                    <mat-card-content class="matcard-content">
+                        <div class="panel-body table-responsive">
+                            Sorry you have not privilege to create operation!
+                        </div>
+                    </mat-card-content>
+                    }
+                    @if (createAccess || editAccess) {
+                    <div class="row">
+                        <!-- Product -->
+                        <div class="col-md-4 mb-4">
+                            <label class="inputLabel">Product*</label>
+                            <mat-form-field appearance="outline" class="w-100 mb-3">
+                                <mat-select placeholder="Select Product" class="input-p-5" formControlName="productId"
+                                    (selectionChange)="getUnit($event)">
+                                    <mat-option *ngFor="let p of products" [value]="p.id">{{ p.name }}</mat-option>
+                                </mat-select>
+                                <mat-error
+                                    *ngIf="submitted && externalItemManagementFormGroup.controls.productId.errors?.required">
+                                    Product is required.
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Service Area -->
+                        <div class="col-md-4 mb-4">
+                            <label class="inputLabel">Service Area*</label>
+                            <mat-form-field appearance="outline" class="w-100 mb-3">
+                                <mat-select placeholder="Select Service Area" class="input-p-5"
+                                    formControlName="serviceAreaId" (selectionChange)="getOwnerType()">
+                                    <mat-option *ngFor="let sa of serviceAreaList" [value]="sa.id">{{ sa.name
+                                        }}</mat-option>
+                                </mat-select>
+                                <mat-error
+                                    *ngIf="submitted && externalItemManagementFormGroup.controls.serviceAreaId.errors?.required">
+                                    Service Area is required.
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+
+
+                        <!-- Quantity -->
+                        <div class="col-md-4 mb-4">
+                            <label class="inputLabel">Quantity in {{ unit }} *</label>
+                            <mat-form-field appearance="outline" class="w-100 mb-3">
+                                <input placeholder="Enter Quantity" class="input-p-5" matInput type="number"
+                                    formControlName="inTransitQty" (keypress)="quantityInValidation($event)" />
+                                <mat-error
+                                    *ngIf="submitted && externalItemManagementFormGroup.controls.inTransitQty.errors?.required">
+                                    Quantity is required.
+                                </mat-error>
+                                <mat-error
+                                    *ngIf="submitted && externalItemManagementFormGroup.controls.inTransitQty.errors?.pattern">
+                                    Only numeric values are allowed.
+                                </mat-error>
+                                <mat-error
+                                    *ngIf="submitted && externalItemManagementFormGroup.controls.inTransitQty.errors?.min">
+                                    Please enter more than 0 quantity.
+                                </mat-error>
+                            </mat-form-field>
+
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Ownership Type -->
+                        <div class="col-lg-4 col-md-4 mb-4">
+                            <label class="inputLabel">Ownership Type*</label>
+                            <mat-form-field appearance="outline" class="w-100 mb-3">
+                                <mat-select placeholder="Select Ownership Type " class="input-p-5"
+                                    formControlName="ownershipType"
+                                    (selectionChange)="getDestinations(externalItemManagementFormGroup.controls.ownershipType.value)">
+                                    <mat-option *ngFor="let ot of ownershipType" [value]="ot.value">{{ ot.label
+                                        }}</mat-option>
+                                </mat-select>
+                                <mat-error
+                                    *ngIf="submitted && externalItemManagementFormGroup.controls.ownershipType.errors?.required">
+                                    Ownership Type is required.
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Owner -->
+                        <!-- <ng-container *ngIf="getOwnerFlag && !ownerShow">
+                 <div class="col-md-4 mb-4" >
+                 <label class="inputLabel">Owner*</label>
+                 <div style="display: flex;">
+          <mat-form-field appearance="outline" class="w-100 mb-3">
+            <mat-select placeholder="Select Owner" class="input-p-5" formControlName="ownerId" [disabled]="editMode">
+              <mat-option *ngFor="let o of ownerSelectList" [value]="o.id">{{ o.name }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <button class="custom-add-button" mat-stroked-button color="primary" (click)="modalOpenSelectOwner('Partner Owned')" type="button">
+             Add
+          </button>
+          </div>
+        </div>
+        </ng-container> -->
+
+                        @if (getOwnerFlag && !ownerShow) {
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                            <!-- <div class="form-group"> -->
+                            <label class="inputLabel">Owner*</label>
+
+                            <!-- If NOT Staff/Customer -->
+                            @if (!isDestAStaffOrCustomer) {
+                            <div class="d-flex">
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select class="input-p-5" formControlName="ownerId"
+                                        [disabled]="true || editMode" placeholder="Select Owner">
+                                        @for (data of ownerSelectList; track data.id) {
+                                        <mat-option [value]="data.id">{{ data.name }}</mat-option>
+                                        }
+                                    </mat-select>
+                                </mat-form-field>
+                                <button class="custom-add-button" mat-button mat-flat-button color="primary"
+                                    (click)="modalOpenSelectOwner('Partner Owned')" type="button">
+                                    Add
+                                </button>
+                            </div>
+                            }
+
+                            <!-- If Staff/Customer -->
+                            @if (isDestAStaffOrCustomer) {
+                            <div class="d-flex">
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select class="input-p-5" formControlName="ownerId"
+                                        [disabled]="true || editMode" placeholder="Select Owner">
+                                        @for (data of ownerSelectList; track data.id) {
+                                        <mat-option [value]="data.id">{{ data.name }}</mat-option>
+                                        }
+                                    </mat-select>
+                                </mat-form-field>
+                                <button class="custom-add-button" mat-button mat-flat-button color="primary"
+                                    (click)="modalOpenSelectOwner('Customer Owned')" type="button">
+                                    Add
+                                </button>
+                            </div>
+                            }
+
+                            <!-- Validation Errors -->
+                            @if (submitted && externalItemManagementFormGroup.controls['ownerId']?.errors) {
+                            <div class="errorWrap text-danger">
+                                @if (externalItemManagementFormGroup.controls['ownerId']?.errors?.['required']) {
+                                <div class="error text-danger">Owner is required.</div>
+                                }
+                            </div>
+                            }
+                            <!-- // </div> -->
+                        </div>
+                        }
+                        <ng-container *ngIf="ownerShow">
+                            <div class="col-md-4 mb-4">
+                                <label class="inputLabel">Owner*</label>
+                                <div style="display: flex;">
+                                    <mat-form-field appearance="outline" class="w-100 mb-3">
+                                        <mat-select placeholder="Select Owner" class="input-p-5"
+                                            formControlName="ownerId" [disabled]="editMode">
+                                            <mat-option *ngFor="let o of ownerSelectList" [value]="o.id">{{ o.name
+                                                }}</mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                    <!-- <button class="custom-add-button" mat-stroked-button color="primary" (click)="modalOpenSelectOwner('Partner Owned')" type="button">
+             Add
+          </button> -->
+                                </div>
+                            </div>
+                        </ng-container>
+
+
+
+                        <!-- Status -->
+                        <div class="col-md-4 mb-4">
+                            <label class="inputLabel">Status*</label>
+                            <mat-form-field appearance="outline" class="w-100 mb-3">
+                                <mat-select placeholder="Select Status" class="input-p-5" formControlName="status">
+                                    <mat-option *ngFor="let st of status" [value]="st.value">{{ st.label }}</mat-option>
+                                </mat-select>
+                                <mat-error
+                                    *ngIf="submitted && externalItemManagementFormGroup.controls.status.errors?.required">
+                                    External Item status is required.
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                    }
+
+                </form>
+            </mat-card-content>
+
+        </div>
+
+        <mat-dialog-actions align="end">
+            <button mat-flat-button color="primary" (click)="submit()"
+                [disabled]="!externalItemManagementFormGroup.valid">
+                {{ editMode ? "Update" : "Add" }} External Item
+            </button>
+            <button mat-stroked-button (click)="dialogRef.close()">Cancel</button>
+        </mat-dialog-actions>
+    </div>
+</ng-template>
+
+<!-- -------------------create end----------- -->
+<!-- -------------------create owner pop----------- -->
+
+<ng-template #partnerOwnerDialog let-dialogRef="dialogRef">
+    <div class="dialog-container">
+        <div class="dialog-header">
+            Select Partner <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+
+        <div mat-dialog-content>
+            <!-- Search Section -->
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label class="inputLabel">Select Partner</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <input class="input-p-5" placeholder="Enter Search Detail" matInput
+                            [(ngModel)]="searchPartnerValue" (keydown.enter)="searchPartner()" />
+
+                    </mat-form-field>
+
+                </div>
+                <div class="col-md-6 d-flex align-items-center gap-3" style="margin-top: 19px;">
+                    <button mat-button mat-flat-button color="primary" class="button-normal m-r-10"
+                        (click)="searchPartner()" [disabled]="!searchPartnerValue">
+
+                        Search
+                    </button>
+                    <button mat-stroked-button matButton="outlined" class="button-normal"
+                        (click)="clearSearchPartner()">
+
+                        Clear
+                    </button>
+                </div>
+            </div>
+
+
+            <!-- Partner List -->
+            <h5 class="customer-header">Select Partner</h5>
+            <table mat-table [dataSource]="partnerListData" class="mat-elevation-z2 w-100">
+                <!-- Radio Select -->
+                <ng-container matColumnDef="select">
+                    <th mat-header-cell *matHeaderCellDef style="width: 5rem"></th>
+                    <td mat-cell *matCellDef="let partner">
+                        <!-- <mat-radio-group [(ngModel)]="selectedPartner">
+            <mat-radio-button [value]="partner"></mat-radio-button>
+          </mat-radio-group> -->
+                        <mat-checkbox [checked]="selectedPartner.includes(partner)"
+                            (change)="onPartnerSelect($event, partner)"></mat-checkbox>
+                    </td>
+                </ng-container>
+
+                <!-- Name -->
+                <ng-container matColumnDef="name">
+                    <th mat-header-cell *matHeaderCellDef class="table-header-title">Name</th>
+                    <td mat-cell *matCellDef="let partner">{{ partner.name }}</td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="['select', 'name']"></tr>
+                <tr mat-row *matRowDef="let row; columns: ['select', 'name']"></tr>
+            </table>
+
+            <!-- Paginator -->
+            <mat-paginator [length]="partnerListdatatotalRecords" [pageSize]="partnerListdataitemsPerPage"
+                [pageIndex]="newFirst / partnerListdataitemsPerPage" (page)="paginatePartner($event)">
+            </mat-paginator>
+
+            <!-- </mat-dialog-content> -->
+        </div>
+
+        <mat-dialog-actions align="end">
+            <button mat-button mat-flat-button color="primary" class="button-normal mr-10"
+                (click)="saveSelOwner('Partner Owned')" [disabled]="this.selectedPartner.length == 0">
+
+                Save
+            </button>
+            <button mat-stroked-button matButton="outlined" type="button" color="primary" class="button-normal"
+                (click)="dialogRef.close()">
+                Close
+            </button>
+        </mat-dialog-actions>
+    </div>
+</ng-template>
+<!-- -------------------create owner pop end----------- -->
+
+<!-- -------------------create customer pop start----------- -->
+
+<ng-template #customerOwnerDialog let-dialogRef="dialogRef">
+    <div class="dialog-container">
+        <!-- Header -->
+        <div class="dialog-header">
+            Select Customer
+            <span>
+                <!-- <a mat-icon-button href="javascript:void(0)" (click)="modalCloseOwner('Customer Owned')"> -->
+                <a mat-icon-button href="javascript:void(0)" (click)="dialogRef.close()">
+
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+
+                </a>
+            </span>
+        </div>
+
+        <!-- Body -->
+        <div mat-dialog-content>
+            <!-- Search Section -->
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label class="inputLabel">Select Search Option</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-select class="input-p-5" [(ngModel)]="searchParentCustOption"
+                            (selectionChange)="selParentSearchOption($event)" placeholder="Select a Search Option">
+                            @for (option of searchOptionSelect; track option.value) {
+                            <mat-option [value]="option.value">{{ option.label }}</mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
+                @if (parentFieldEnable && searchParentCustOption !== 'UserName' && searchParentCustOption !== 'Name') {
+                <div class="col-md-4">
+                    <label class="inputLabel">Search Value</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <input class="input-p-5" matInput [(ngModel)]="searchParentCustValue"
+                            placeholder="Enter Search Detail" (keydown.enter)="searchParentCustomer()" />
+                    </mat-form-field>
+                </div>
+                }
+
+                @if (parentFieldEnable) {
+                <div class="col-md-4 custom d-flex gap-8">
+                    <button mat-flat-button color="primary" class="button-normal m-r-10"
+                        (click)="searchParentCustomer()" [disabled]="!searchParentCustValue">
+                        Search
+                    </button>
+                    <button mat-stroked-button color="primary" class="button-normal"
+                        (click)="clearSearchParentCustomer()">
+
+                        Clear
+                    </button>
+                </div>
+                }
+            </div>
+
+            <!-- Customer List -->
+            <h5 class="customer-header">Select Customer</h5>
+            <table mat-table [dataSource]="customerListData" class="mat-elevation-z2 w-100">
+                <!-- Radio Select -->
+                <ng-container matColumnDef="select">
+                    <th mat-header-cell *matHeaderCellDef style="width: 5rem"></th>
+                    <td mat-cell *matCellDef="let customer">
+                        <!-- <mat-radio-group [(ngModel)]="selectedCustomer">
+              <mat-radio-button [value]="customer"></mat-radio-button>
+            </mat-radio-group> -->
+                        <mat-checkbox [checked]="selectedCustomer.includes(customer)"
+                            (change)="onCustomerSelect($event, customer)"></mat-checkbox>
+                    </td>
+                </ng-container>
+
+                <!-- Full Name -->
+                <ng-container matColumnDef="fullName">
+                    <th mat-header-cell *matHeaderCellDef class="table-header-title">Name</th>
+                    <td mat-cell *matCellDef="let customer">{{ customer.fullName }}</td>
+                </ng-container>
+
+                <!-- Username -->
+                <ng-container matColumnDef="username">
+                    <th mat-header-cell *matHeaderCellDef class="table-header-title">UserName</th>
+                    <td mat-cell *matCellDef="let customer">{{ customer.username }}</td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="['select', 'fullName', 'username']"></tr>
+                <tr mat-row *matRowDef="let row; columns: ['select', 'fullName', 'username']"></tr>
+            </table>
+
+            <!-- Paginator -->
+            <mat-paginator [length]="customerListdatatotalRecords" [pageSize]="customerListdataitemsPerPage"
+                [pageIndex]="newFirst / customerListdataitemsPerPage" (page)="paginateCustomer($event)">
+            </mat-paginator>
+        </div>
+
+        <!-- Footer -->
+        <mat-dialog-actions align="end">
+            <button class="button-normal mr-10" mat-button mat-flat-button color="primary"
+                (click)="saveSelOwner('Customer Owned'); dialogRef.close()"
+                [disabled]="this.selectedCustomer.length == 0">
+
+                Save
+            </button>
+            <button mat-stroked-button matButton="outlined" class="button-normal" color="primary"
+                (click)="dialogRef.close()">
+                Close
+            </button>
+        </mat-dialog-actions>
+    </div>
+</ng-template>
+
+<!-- -------------------create customer pop end----------- -->
+<!-- -------------------Make dialog pop start----------- -->
+
+<ng-template #macDialog>
+    <div class="dialog-container">
+        <div class="dialog-header">
+            External Item MAC Mapping
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="macDialogRef.close()">
+                    <mat-icon>close</mat-icon>
+                </a>
+            </span>
+        </div>
+
+        <div mat-dialog-content>
+            <table mat-table [dataSource]="externalItemMacList" class="mat-elevation-z2 w-100">
+
+                @if (hasMac) {
+                <ng-container matColumnDef="macAddress">
+                    <th mat-header-cell *matHeaderCellDef class="table-header-title">MAC Address</th>
+                    <td mat-cell *matCellDef="let element">
+                        {{ element.macAddress }}
+                    </td>
+                </ng-container>
+                }
+
+                @if (hasSerial) {
+                <ng-container matColumnDef="serialNumber">
+                    <th mat-header-cell *matHeaderCellDef class="table-header-title">Serial Number</th>
+                    <td mat-cell *matCellDef="let element">
+                        {{ element.serialNumber }}
+                    </td>
+                </ng-container>
+                }
+                <tr mat-header-row *matHeaderRowDef="macDisplayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: macDisplayedColumns"></tr>
+            </table>
+        </div>
+
+        <mat-dialog-actions align="end">
+            <button mat-stroked-button color="warn" (click)="onclosed(); macDialogRef.close()">
+                Close
+            </button>
+        </mat-dialog-actions>
+    </div>
+</ng-template>
+<!-- -------------------Make dialog pop end----------- -->
+
+<!-- -------------------External Details dialog pop start----------- -->
+<ng-template #externalItemDetailDialog>
+    <div class="dialog-container">
+        <div class="dialog-header">
+            External Item Details
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="externalItemDetailDialogRef.close()">
+
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+            @if (viewExternalItemData) {
+            <div class="row p-15 m-t-8">
+                <!-- Name -->
+                <div class="col-md-6 field-row detail-row">
+                    <span class="field-label f-s-15 f-w-700 label">Product Name</span>
+                    <span class="field-label f-s-15 f-w-700 colon">:</span>
+                    <span class="field-value value m-l-10">{{ viewExternalItemData.productId.name }}</span>
+                </div>
+                <div class="col-md-6 field-row detail-row">
+                    <span class="field-label f-s-15 f-w-700 label">Service Area</span>
+                    <span class="field-label f-s-15 f-w-700 colon">:</span>
+                    <span class="field-value value m-l-10">{{ viewExternalItemData.serviceAreaId.name }}</span>
+                </div>
+                <div class="col-md-6 field-row detail-row">
+                    <span class="field-label f-s-15 f-w-700 label">Quantity</span>
+                    <span class="field-label f-s-15 f-w-700 colon">:</span>
+                    <span class="field-value value m-l-10">{{ viewExternalItemData.qty }}</span>
+                </div>
+                <div class="col-md-6 field-row detail-row">
+                    <span class="field-label f-s-15 f-w-700 label">Transit Quantity</span>
+                    <span class="field-label f-s-15 f-w-700 colon">:</span>
+                    <span class="field-value value m-l-10">{{ viewExternalItemData.inTransitQty }}</span>
+                </div>
+                <div class="col-md-6 field-row detail-row">
+                    <span class="field-label f-s-15 f-w-700 label">Ownership Type</span>
+                    <span class="field-label f-s-15 f-w-700 colon">:</span>
+                    <span class="field-value value m-l-10">{{ viewExternalItemData.ownershipType }}</span>
+                </div>
+
+                <div class="col-md-6 field-row detail-row">
+                    <span class="field-label f-s-15 f-w-700 label">Owner Name</span>
+                    <span class="field-label f-s-15 f-w-700 colon">:</span>
+                    <span class="field-value value m-l-10">{{ viewExternalItemData.ownerName }}</span>
+                </div>
+
+                <div class="col-md-6 field-row detail-row">
+                    <span class="field-label f-s-15 f-w-700 label">Status</span>
+                    <span class="field-label f-s-15 f-w-700 colon">:</span>
+                    <span class="field-value value m-l-10">{{ viewExternalItemData.status }}</span>
+                </div>
+            </div>
+            }
+        </div>
+        <mat-dialog-actions align="end">
+            <button mat-stroked-button color="warn" (click)="externalItemDetailDialogRef.close()">Close</button>
+        </mat-dialog-actions>
+    </div>
+</ng-template>
+<!-- -------------------External Details dialog pop end----------- -->
+
+<!-- -------------------add mac dialog pop start----------- -->
+
+<ng-template #addmacDialog>
+    <div class="dialog-container">
+        <div class="dialog-header">
+            External Item MAC Mapping
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="macDialogRef.close(); clearMacMapping()">
+
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+
+                </a>
+            </span>
+        </div>
+
+        <div mat-dialog-content [formGroup]="macForm" style="max-height:400px; overflow:auto;">
+
+            <table mat-table [dataSource]="externalItemMacList" style="width:100%">
+
+                <!-- MAC input header -->
+                @if (hasMac) {
+                <ng-container matColumnDef="macInput">
+                    <th mat-header-cell *matHeaderCellDef style="border-bottom: none !important;">
+                        <mat-form-field appearance="outline" class="w-100 hide-hint mr-10" style="margin-bottom: 20px;">
+                            <input class="input-p-5" matInput placeholder="Please enter MAC Address"
+                                formControlName="macAddress" />
+                        </mat-form-field>
+                    </th>
+                    <td mat-cell *matCellDef="let element"></td>
+                </ng-container>
+                }
+
+                <!-- Serial input header -->
+                @if (hasSerial) {
+                <ng-container matColumnDef="serialInput">
+                    <th mat-header-cell *matHeaderCellDef class="no-bottom-border">
+                        <mat-form-field appearance="outline" class="w-100 hide-hint mr-10" style="margin-bottom: 20px;">
+                            <input class="input-p-5" matInput placeholder="Please enter Serial Number"
+                                formControlName="serialNumber" style="width:100%">
+                        </mat-form-field>
+                    </th>
+                    <td mat-cell *matCellDef="let element"></td>
+                </ng-container>
+                }
+
+                <!-- Add button header -->
+                <ng-container matColumnDef="addButton">
+                    <th mat-header-cell *matHeaderCellDef class="no-bottom-border d-flex mt-3">
+                        <button mat-button mat-flat-button color="primary" (click)="onAddAttribute()"
+                            style="padding:4px 8px">
+                            Add
+                        </button>
+                    </th>
+                    <td mat-cell *matCellDef="let element"></td>
+                </ng-container>
+
+                <!-- MAC Address column -->
+                @if (hasMac) {
+                <ng-container matColumnDef="macAddress">
+                    <th mat-header-cell *matHeaderCellDef class="no-bottom-border w-45">MAC Address</th>
+                    <td mat-cell *matCellDef="let element">
+                        <mat-form-field appearance="outline" class="w-100 hide-hint mr-10">
+                            <input class="input-p-5 w-100" matInput [value]="element.macAddress" disabled>
+                        </mat-form-field>
+                    </td>
+                </ng-container>
+                }
+
+                <!-- Serial Number column -->
+                @if (hasSerial) {
+                <ng-container matColumnDef="serialNumber">
+                    <th mat-header-cell *matHeaderCellDef class="no-bottom-border w-45">Serial Number</th>
+                    <td mat-cell *matCellDef="let element">
+                        <mat-form-field appearance="outline" class="w-100 hide-hint mr-10">
+
+                            <input class="input-p-5" matInput [value]="element.serialNumber" disabled
+                                style="width:100%">
+                        </mat-form-field>
+                    </td>
+                </ng-container>
+                }
+
+                <!-- Delete button column -->
+                <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef style="width:10%"></th>
+                    <td mat-cell *matCellDef="let element">
+                        <button mat-icon-button color="warn" (click)="deleteMACMapping(element.itemId)">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </td>
+                </ng-container>
+
+                <!-- Header row 1: Input row -->
+                <tr mat-header-row *matHeaderRowDef="headerInputColumns"></tr>
+                <!-- Header row 2: Labels row -->
+                <tr mat-header-row *matHeaderRowDef="headerColumns"></tr>
+                <!-- Data rows -->
+                <tr mat-row *matRowDef="let row; columns: AddDisplayedColumns"></tr>
+
+            </table>
+        </div>
+
+        <mat-dialog-actions align="end">
+            <button mat-stroked-button color="warn" (click)="macDialogRef.close(); clearMacMapping()">Close</button>
+        </mat-dialog-actions>
+    </div>
+</ng-template>
+
+<!-- -------------------add mac dialog pop end----------- -->
+<!-- -------------------approval dialog pop start----------- -->
+
+<ng-template #approveStatusDialog>
+    <div class="dialog-container">
+        <div class="dialog-header">
+            Change Approval Status
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="macDialogRef.close(); clearMacMapping()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <!-- <mat-dialog-content> -->
+        <div mat-dialog-content>
+            <form [formGroup]="assignExternalItemForm">
+                <div class="dataGroup">
+                    <label class="input-p-5">Remark*:</label>
+                </div>
+
+                <mat-form-field appearance="outline" class="w-100 mt-4">
+                    <textarea class="input-p-5" matInput rows="4" placeholder="Enter remark"
+                        formControlName="remark"></textarea>
+                </mat-form-field>
+
+                @if (assignExternalItemSubmitted && assignExternalItemForm.get('remark')?.errors) {
+                <div class="errorWrap text-danger">
+                    @if (assignExternalItemForm.get('remark')?.hasError('required')) {
+                    <div class="error text-danger">Remark is required.</div>
+                    }
+                </div>
+                }
+            </form>
+            <!-- </mat-dialog-content> -->
+        </div>
+
+        <mat-dialog-actions align="end">
+            <button mat-button mat-flat-button color="primary" class="button-normal"
+                (click)="approveExternalItemGroup()">
+                Approve
+            </button>
+
+            <button mat-stroked-button matButton="outlined" type="button" color="primary" class="button-normal"
+                (click)="closeStatusModal()">
+                Close
+            </button>
+        </mat-dialog-actions>
+    </div>
+</ng-template>
+
+<!-- -------------------approval dialog pop end----------- -->
+<!-- -------------------rejected dialog pop start----------- -->
+<ng-template #rejectStatusDialog>
+    <div class="dialog-container">
+        <div class="dialog-header">
+            Change Approval Status
+            <span>
+                <!-- <a mat-icon-button href="javascript:void(0)" (click)="macDialogRef.close(); clearMacMapping()"> -->
+                <a mat-icon-button href="javascript:void(0)" (click)="closeStatusModal1()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <!-- <mat-dialog-content> -->
+        <div mat-dialog-content>
+            <form [formGroup]="assignExternalItemForm">
+                <div class="dataGroup">
+                    <label class="input-p-5">Remark*:</label>
+                </div>
+
+                <mat-form-field appearance="outline" class="w-100 mt-4">
+                    <textarea class="input-p-5" matInput rows="4" placeholder="Enter remark"
+                        formControlName="remark"></textarea>
+                </mat-form-field>
+
+                @if (assignExternalItemSubmitted && assignExternalItemForm.get('remark')?.errors) {
+                <div class="errorWrap text-danger">
+                    @if (assignExternalItemForm.get('remark')?.hasError('required')) {
+                    <div class="error text-danger">Remark is required.</div>
+                    }
+                </div>
+                }
+            </form>
+            <!-- </mat-dialog-content> -->
+        </div>
+
+        <mat-dialog-actions align="end">
+            <button mat-button mat-flat-button color="primary" class="button-normal"
+                (click)="rejectExternalItemGroup()">
+                Reject
+            </button>
+
+            <button mat-stroked-button matButton="outlined" type="button" color="primary" class="button-normal"
+                (click)="closeStatusModal1()">
+                Close
+            </button>
+        </mat-dialog-actions>
+    </div>
+</ng-template>
+
+<!-- -------------------rejected dialog pop end----------- -->
+<!-- <div class="row">
+  <div class="col-md-12">
+    <div class="panel top">
+      <div class="panel-heading">
+        <h3 class="panel-title">External Item Management</h3>
+        <div class="right">
+          <button
+            type="button"
+            class="btn-toggle-collapse"
+            data-toggle="collapse"
+            data-target="#searchExternalItem"
+            aria-expanded="false"
+            aria-controls="searchExternalItem"
+            >
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+      <div id="searchExternalItem" class="panel-collapse collapse in">
+        <div class="panel-body">
+          <div class="row">
+            <div class="col-lg-3 col-md-3">
+              <input
+                id="taxName"
+                type="text"
+                [(ngModel)]="searchExternalItem"
+                class="form-control"
+                placeholder="External Item Number"
+                (keydown.enter)="searchExternalItemData()"
+                />
+              </div>
+              <div class="col-lg-3 col-md-4 marginTopSearchBtn">
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  id="externalsearchbtn"
+                  (click)="searchExternalItemData()"
+                  >
+                  <i class="fa fa-search"></i>
+                  Search
+                </button>
+                <button
+                  type="reset"
+                  class="btn btn-default"
+                  id="externalclearbtn"
+                  (click)="clearSearchExternalItem()"
+                  >
+                   <img src="assets/img/DashboardIcons/Refresh.svg" />
+                  Clear
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="panel-body no-padding panel-udata">
+            @if (createAccess) {
+              <div class="pcol col-md-6">
+                <div class="dbox">
+                  <a (click)="createWareHouse()" class="curson_pointer">
+                    <img src="../../../assets/img/i01.png" style="width: 32px" />
+                    <h5>Create External Item</h5>
+                    
+                  </a>
+                </div>
+              </div>
+            }
+            <div class="pcol col-md-6">
+              <div class="dbox">
+                <a (click)="this.clearSearchExternalItem()" class="curson_pointer">
+                  <img src="../../../assets/img/i01.png" style="width: 32px" />
+                  <h5>Search External Item</h5>
+               
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div> -->
+<div class="row">
+    <!-- @if (this.listView) {
+      <div class="col-md-12">
+        <div class="panel">
+          <div class="panel-heading">
+            <h3 class="panel-title">External Items</h3>
+            <div class="right">
+              <button
+                type="button"
+                class="btn-toggle-collapse"
+                data-toggle="collapse"
+                data-target="#listExternalItems"
+                aria-expanded="false"
+                aria-controls="listExternalItems"
+                >
+                <i class="fa fa-minus-circle"></i>
+              </button>
+            </div>
+          </div>
+          <div id="listExternalItems" class="panel-collapse collapse in">
+            <div class="panel-body table-responsive">
+              <div>
+                <div class="row">
+                  <div class="col-lg-12 col-md-12">
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th>External Item Number</th>
+                          <th>Product Name</th>
+                          <th>Type</th>
+                          <th>Qty.</th>
+                          <th>Available Qty.</th>
+                          <th>InTransit Qty.</th>
+                          <th>Status</th>
+                          <th>Approval Status</th>
+                          @if (
+                            deleteAccess ||
+                            editAccess ||
+                            addMacAddressAccess ||
+                            showMacAddressAccess ||
+                            createAccess
+                            ) {
+                            <th
+                              >
+                              Action
+                            </th>
+                          }
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (
+                          externalItem of this.externalItemListData
+                          | paginate
+                          : {
+                          id: 'externalItemListData',
+                          itemsPerPage: productListdataitemsPerPage,
+                          currentPage: currentPageProductListdata,
+                          totalItems: productListdatatotalRecords
+                          }; track
+                          externalItem; let i = $index) {
+                          <tr
+                            >
+                            <td
+                              class="curson_pointer"
+                              (click)="getExternalItemDetails(externalItem.id)"
+                              style="color: #f7941e"
+                              >
+                              {{ externalItem.externalItemGroupNumber }}
+                            </td>
+                            <td>{{ externalItem.productId.name }}</td>
+                            <td>{{ externalItem.ownershipType }}</td>
+                            <td>{{ externalItem.qty }}</td>
+                            <td>{{ externalItem.unusedQty }}</td>
+                            <td>{{ externalItem.inTransitQty }}</td>
+                            @if (externalItem.status == 'ACTIVE') {
+                              <td>
+                                <span class="badge badge-success">Active</span>
+                              </td>
+                            }
+                            @if (externalItem.status == 'INACTIVE') {
+                              <td>
+                                <span class="badge badge-danger">Inactive</span>
+                              </td>
+                            }
+                            @if (externalItem.approvalStatus == null) {
+                              <td>
+                                <span>-</span>
+                              </td>
+                            }
+                            @if (externalItem.approvalStatus == 'Pending') {
+                              <td>
+                                <span class="badge badge-primary">Pending</span>
+                              </td>
+                            }
+                            @if (externalItem.approvalStatus == 'Approve') {
+                              <td>
+                                <span class="badge badge-success">Approve</span>
+                              </td>
+                            }
+                            @if (externalItem.approvalStatus == 'Rejected') {
+                              <td>
+                                <span class="badge badge-danger">Rejected</span>
+                              </td>
+                            }
+                            @if (
+                              deleteAccess ||
+                              editAccess ||
+                              addMacAddressAccess ||
+                              showMacAddressAccess ||
+                              createAccess
+                              ) {
+                              <td
+                                class="btnAction"
+                                >
+                                @if (editAccess) {
+                                  <button
+                                    class="approve-btn"
+                                    id="edit-button"
+                                    [disabled]="externalItem.approvalStatus != 'Pending'"
+                                    type="button"
+                                    href="javascript:void(0)"
+                                    (click)="editExternalItem(externalItem.id)"
+                                    >
+                                  <img src="assets/img/DashboardIcons/Edit.svg" >
+                                  </button>
+                                }
+                                @if (deleteAccess) {
+                                  <button
+                                    id="delete-button"
+                                    class="approve-btn"
+                                    href="javascript:void(0)"
+                          [disabled]="
+                            externalItem.approvalStatus != 'Pending' ||
+                            externalItem.outwardId != null
+                          "
+                                    (click)="deleteConfirmExternalItem(externalItem.id)"
+                                    >
+                                     <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                                  </button>
+                                }
+                                @if (addMacAddressAccess || createAccess) {
+                                  <button
+                                    data-target="#MACAssignModal"
+                                    data-title="Add MAC address"
+                                    title="Add MAC address"
+                                    data-toggle="modal"
+                                    data-backdrop="static"
+                                    data-keyboard="false"
+                                    (click)="addMAC(externalItem.id)"
+                          [disabled]="
+                            (externalItem.approvalStatus == 'Pending' &&
+                              externalItem.status == 'INACTIVE') ||
+                            externalItem.approvalStatus == 'Approve' ||
+                            externalItem.approvalStatus == 'Rejected'
+                          "
+                                    class="approve-btn"
+                                    >
+                                    <img src="assets/img/icons-02.png" />
+                                  </button>
+                                }
+                                @if (showMacAddressAccess && !externalItem.approvalStatus != 'Pending') {
+                                  <a
+                                    data-target="#MACShowModal"
+                                    data-title="Add MAC address"
+                                    title="Show MAC address"
+                                    data-toggle="modal"
+                                    data-backdrop="static"
+                                    data-keyboard="false"
+                                    (click)="showMac(externalItem.id)"
+                                    class="curson_pointer"
+                                    >
+                                    <img src="assets/img/E_Status_Y.png" />
+                                  </a>
+                                }
+                                @if (createAccess) {
+                                  <button
+                                    type="button"
+                          style="
+                            border: none;
+                            background: transparent;
+                            padding: 0;
+                            margin-right: 3px;
+                          "
+                                    title="Approve"
+                          [disabled]="
+                            (externalItem.approvalStatus == 'Pending' &&
+                              externalItem.status == 'INACTIVE') ||
+                            externalItem.inTransitQty != externalItem.totalMacSerial ||
+                            externalItem.createdById != loggedInStaffId ||
+                            (externalItem.approvalStatus != 'Pending' &&
+                              externalItem.status == 'ACTIVE')
+                          "
+                                    class="approve-btn"
+                                    (click)="approveChangeStatus(externalItem.id)"
+                                    >
+                                   <img src="assets/img/DashboardIcons/Assign.svg">
+                                  </button>
+                                }
+                                @if (createAccess) {
+                                  <button
+                                    type="button"
+                          style="
+                            border: none;
+                            background: transparent;
+                            padding: 0;
+                            margin-right: 3px;
+                          "
+                                    title="Rejected"
+                          [disabled]="
+                            (externalItem.approvalStatus == 'Pending' &&
+                              externalItem.status == 'INACTIVE') ||
+                            externalItem.inTransitQty != externalItem.totalMacSerial ||
+                            externalItem.createdById != loggedInStaffId ||
+                            (externalItem.approvalStatus != 'Pending' &&
+                              externalItem.status == 'ACTIVE')
+                          "
+                                    class="approve-btn"
+                                    (click)="rejectChangeStatus(externalItem.id)"
+                                    >
+                                     <img src="assets/img/DashboardIcons/Reject.svg">
+                                  </button>
+                                }
+                              </td>
+                            }
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                    <div class="pagination_Dropdown">
+                      <pagination-controls
+                        id="externalItemListData"
+                        [maxSize]="10"
+                        [directionLinks]="true"
+                        previousLabel=""
+                        nextLabel=""
+                        (pageChange)="pageChangedProductList((currentPageProductListdata = $event))"
+                      ></pagination-controls>
+                      <div id="itemPerPageDropdown">
+                        <p-dropdown
+                          [(ngModel)]="productListdataitemsPerPage"
+                          [options]="pageLimitOptions"
+                          optionLabel="value"
+                          optionValue="value"
+                          (onChange)="TotalItemPerPage($event)"
+                        ></p-dropdown>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }   -->
+    <!-- @if (this.createView) {
+      <div class="col-md-12">
+        <div class="panel">
+          <div class="panel-heading">
+            <h3 class="panel-title">{{ this.editMode ? "Update" : "Create" }} External Item</h3>
+            <div class="right">
+              <button
+                type="button"
+                class="btn-toggle-collapse"
+                data-toggle="collapse"
+                data-target="#createExternalItem"
+                aria-expanded="false"
+                aria-controls="createExternalItem"
+                >
+                <i class="fa fa-minus-circle"></i>
+              </button>
+            </div>
+          </div>
+          <div id="createExternalItem" class="panel-collapse collapse in">
+            <div class="panel-body">
+              <form [formGroup]="externalItemManagementFormGroup">
+                <fieldset style="margin-top: 0px">
+                  <legend>Basic Details</legend>
+                  <div class="boxWhite">
+                    <div class="row">
+                      <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                        <div class="form-group">
+                          <label>Product*</label>
+                          <p-dropdown
+                            [options]="this.products"
+                            formControlName="productId"
+                            optionLabel="name"
+                            optionValue="id"
+                            filter="true"
+                            filterBy="name"
+                            [disabled]="this.editMode"
+                            placeholder="Select Product"
+                            (onChange)="getUnit($event)"
+                            >
+                          </p-dropdown>
+                          @if (
+                            submitted && externalItemManagementFormGroup.controls.productId.errors
+                            ) {
+                            <div
+                              class="errorWrap text-danger"
+                              >
+                              @if (
+                                submitted &&
+                                externalItemManagementFormGroup.controls.productId.errors.required
+                                ) {
+                                <div
+                                  class="error text-danger"
+                                  >
+                                  Product is required.
+                                </div>
+                              }
+                            </div>
+                          }
+                        </div>
+                      </div>
+                      <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                        <div class="form-group">
+                          <label>Service Area*</label>
+                          <p-dropdown
+                            [options]="serviceAreaList"
+                            formControlName="serviceAreaId"
+                            optionLabel="name"
+                            optionValue="id"
+                            filter="true"
+                            filterBy="name"
+                            [disabled]="this.editMode"
+                            placeholder="Select Service Area"
+                            (onChange)="getOwnerType()"
+                          ></p-dropdown>
+                          @if (
+                            submitted && externalItemManagementFormGroup.controls.serviceAreaId.errors
+                            ) {
+                            <div
+                              class="errorWrap text-danger"
+                              >
+                              @if (
+                                submitted &&
+                                externalItemManagementFormGroup.controls.serviceAreaId.errors.required
+                                ) {
+                                <div
+                                  class="error text-danger"
+                                  >
+                                  Service Area is required.
+                                </div>
+                              }
+                            </div>
+                          }
+                        </div>
+                      </div>
+                      <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                        <div class="form-group">
+                          <label>Quantity in {{ this.unit }} *</label>
+                          @if (this.editMode) {
+                            <label>
+                              &nbsp; (Total added Mac Quantity :- {{ this.totalMacSerial }})
+                            </label>
+                          }
+                          <input
+                            type="number"
+                            (keypress)="quantityInValidation($event)"
+                            class="form-control"
+                            placeholder="Enter Quantity"
+                            formControlName="inTransitQty"
+                        [ngClass]="{
+                          'is-invalid':
+                            submitted && externalItemManagementFormGroup.controls.qty.errors
+                        }"
+                            />
+                            @if (this.editMode && this.showQtyError) {
+                              <div class="error text-danger">
+                                Quantity must be greater than used quantity.
+                              </div>
+                            }
+                            @if (this.editMode && this.showIntransitQtyError) {
+                              <div
+                                class="error text-danger"
+                                >
+                                Quantity must be greater than total added Mac Serial.
+                              </div>
+                            }
+                            @if (
+                              submitted && externalItemManagementFormGroup.controls.inTransitQty.errors
+                              ) {
+                              <div
+                                class="errorWrap text-danger"
+                                >
+                                @if (
+                                  submitted &&
+                                  externalItemManagementFormGroup.controls.inTransitQty.errors.required
+                                  ) {
+                                  <div
+                                    class="error text-danger"
+                                    >
+                                    Quantity is required.
+                                  </div>
+                                }
+                                @if (
+                                  submitted &&
+                                  externalItemManagementFormGroup.controls.inTransitQty.errors.pattern
+                                  ) {
+                                  <div
+                                    class="error text-danger"
+                                    >
+                                    Only Numeric value are allowed.
+                                  </div>
+                                }
+                                @if (
+                                  submitted &&
+                                  externalItemManagementFormGroup.controls.inTransitQty.errors.min
+                                  ) {
+                                  <div
+                                    class="error text-danger"
+                                    >
+                                    Please enter more than 0 quantity.
+                                  </div>
+                                }
+                              </div>
+                            }
+                          </div>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                          <div class="form-group">
+                            <label>Ownership Type*</label>
+                            <p-dropdown
+                              [options]="this.ownershipType"
+                              formControlName="ownershipType"
+                              optionLabel="label"
+                              optionValue="value"
+                              filter="true"
+                              filterBy="label"
+                              [disabled]="this.editMode"
+                              placeholder="Select Ownership type"
+                        (onChange)="
+                          this.getDestinations(
+                            this.externalItemManagementFormGroup.controls.ownershipType.value
+                          )
+                        "
+                            ></p-dropdown>
+                            @if (
+                              submitted && externalItemManagementFormGroup.controls.ownershipType.errors
+                              ) {
+                              <div
+                                class="errorWrap text-danger"
+                                >
+                                @if (
+                                  submitted &&
+                                  externalItemManagementFormGroup.controls.ownershipType.errors.required
+                                  ) {
+                                  <div
+                                    class="error text-danger"
+                                    >
+                                    Ownership Type is required.
+                                  </div>
+                                }
+                              </div>
+                            }
+                          </div>
+                        </div>
+                        @if (getOwnerFlag && !ownerShow) {
+                          <div
+                            class="col-lg-4 col-md-4 col-sm-6 col-xs-12"
+                            >
+                            <div class="form-group">
+                              <label>Owner*</label>
+                            
+                            <div>
+                              @if (!isDestAStaffOrCustomer) {
+                                <p-dropdown
+                                  [options]="ownerSelectList"
+                                  formControlName="ownerId"
+                                  optionLabel="name"
+                                  optionValue="id"
+                                  filter="true"
+                                  filterBy="name"
+                                  [disabled]="true || this.editMode"
+                                  placeholder="Select Owner"
+                                  [showClear]="true"
+                                  styleClass="disableDropdown"
+                                  >
+                                  <ng-template let-data pTemplate="item">
+                                    <div class="item-drop1">
+                                      <span class="item-value1"> {{ data.name }} </span>
+                                    </div>
+                                  </ng-template>
+                                </p-dropdown>
+                              }
+                              @if (!isDestAStaffOrCustomer) {
+                                <button
+                                  type="button"
+                                  (click)="modalOpenSelectOwner('Partner Owned')"
+                                  class="btn btn-primary"
+                                  id="selectownerbtn"
+                          style="
+                            border-radius: 5px;
+                            padding: 5px 10px;
+                            line-height: 1.5;
+                            margin-left: 10px;
+                          "
+                                  >
+                                  <i class="fa fa-plus-square"></i>
+                                </button>
+                              }
+                            
+                          </div>
+                          <div>
+                            @if (isDestAStaffOrCustomer) {
+                              <p-dropdown
+                                [options]="ownerSelectList"
+                                formControlName="ownerId"
+                                optionLabel="name"
+                                optionValue="id"
+                                filter="true"
+                                filterBy="name"
+                                [disabled]="true || this.editMode"
+                                placeholder="Select Owner"
+                                [showClear]="true"
+                                styleClass="disableDropdown"
+                                >
+                                <ng-template let-data pTemplate="item">
+                                  <div class="item-drop1">
+                                    <span class="item-value1"> {{ data.name }} </span>
+                                  </div>
+                                </ng-template>
+                              </p-dropdown>
+                            }
+                            @if (isDestAStaffOrCustomer) {
+                              <button
+                                type="button"
+                                (click)="modalOpenSelectOwner('Customer Owned')"
+                                class="btn btn-primary"
+                          style="
+                            border-radius: 5px;
+                            padding: 5px 10px;
+                            line-height: 1.5;
+                            margin-left: 10px;
+                          "
+                                >
+                                <i class="fa fa-plus-square"></i>
+                              </button>
+                            }
+                            
+                        </div>
+                     
+                      @if (submitted && externalItemManagementFormGroup.controls.ownerId.errors) {
+                        <div
+                          class="errorWrap text-danger"
+                          >
+                          @if (
+                            submitted &&
+                            externalItemManagementFormGroup.controls.ownerId.errors.required
+                            ) {
+                            <div
+                              class="error text-danger"
+                              >
+                              Owner is required.
+                            </div>
+                          }
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+                @if (ownerShow) {
+                  <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                    <div class="form-group">
+                      <label>Owner</label>
+                      <div>
+                        <p-dropdown
+                          [options]="ownerSelectList"
+                          formControlName="ownerId"
+                          optionLabel="name"
+                          optionValue="id"
+                          filter="true"
+                          filterBy="name"
+                          [disabled]="true || this.editMode"
+                          placeholder="Select Owner"
+                          [showClear]="true"
+                          styleClass="disableDropdown"
+                          >
+                          <ng-template let-data pTemplate="item">
+                            <div class="item-drop1">
+                              <span class="item-value1"> {{ data.name }} </span>
+                            </div>
+                          </ng-template>
+                          >
+                        </p-dropdown>
+                      </div>
+                    </div>
+                  </div>
+                }
+                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                  <div class="form-group">
+                    <label>Status*</label>
+                    <p-dropdown
+                      [options]="status"
+                      formControlName="status"
+                      optionLabel="label"
+                      optionValue="value"
+                      filter="true"
+                      filterBy="label"
+                      placeholder="Select status"
+                    ></p-dropdown>
+                    @if (submitted && externalItemManagementFormGroup.controls.status.errors) {
+                      <div
+                        class="errorWrap text-danger"
+                        >
+                        @if (
+                          submitted &&
+                          externalItemManagementFormGroup.controls.status.errors.required
+                          ) {
+                          <div
+                            class="error text-danger"
+                            >
+                            External Item status is required.
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+          <br />
+        <div class="addUpdateBtn">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            id="submit"
+            (click)="submit()"
+            [disabled]="!externalItemManagementFormGroup.valid"
+            >
+            <i class="fa fa-check-circle"></i>
+            {{ editMode ? "Update" : "Add" }} External Item
+          </button>
+          <br />
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+</div>
+} -->
+
+    <!-- @if (this.addMACaddress) {
+  <div>
+    <p-dialog
+      header="External Item MAC Mapping"
+      [(visible)]="MACAssignModal"
+      [style]="{ width: '60%' }"
+      [modal]="true"
+      [responsive]="true"
+      [draggable]="false"
+      [closable]="true"
+      (onHide)="clearMacMapping()"
+      >
+      <div class="modal-body" [formGroup]="macForm">
+        <p-table
+          #dt1
+          [value]="this.externalItemMacList"
+          responsiveLayout="scroll"
+          [scrollable]="true"
+          scrollHeight="300px"
+          >
+          <ng-template pTemplate="header">
+            <tr>
+              @if (this.hasMac) {
+                <th style="width: 45%">
+                  <input
+                    pInputText
+                    type="text"
+                    placeholder="Pleas enter MAC Address"
+                    class="p-column-filter form-control"
+                    formControlName="macAddress"
+                    />
+                  </th>
+                }
+                @if (this.hasSerial) {
+                  <th style="width: 45%">
+                    <input
+                      pInputText
+                      type="text"
+                      placeholder="Pleas enter serial Number"
+                      class="p-column-filter form-control"
+                      formControlName="serialNumber"
+                      />
+                    </th>
+                  }
+                  <th style="width: 10%">
+                    <button
+                      id="addAtt"
+                      style="object-fit: cover; padding: 5px 8px"
+                      class="btn btn-primary"
+                      (click)="onAddAttribute()"
+                      >
+                      <i class="fa fa-plus-square" aria-hidden="true"></i>
+                      Add
+                    </button>
+                  </th>
+                </tr>
+                <tr>
+                  @if (this.hasMac) {
+                    <th style="width: 45%">MAC Address</th>
+                  }
+                  @if (this.hasSerial) {
+                    <th style="width: 45%">Serial Number</th>
+                  }
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-product let-rowIndex="rowIndex">
+                <tr>
+                  @if (this.hasMac) {
+                    <td style="width: 45%">
+                      <input
+                        type="text"
+                        name="mac"
+                        class="form-control"
+                        [value]="product.macAddress"
+                        disabled
+                        />
+                      </td>
+                    }
+                    @if (this.hasSerial) {
+                      <td style="width: 45%">
+                        <input
+                          type="text"
+                          name="mac"
+                          class="form-control"
+                          [value]="product.serialNumber"
+                          disabled
+                          />
+                        </td>
+                      }
+                      <td style="width: 10%">
+                        <a id="deleteMAC" (click)="deleteMACMapping(product.itemId)">
+                           <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                        </a>
+                      </td>
+                    </tr>
+                  </ng-template>
+                </p-table>
+              </div>
+              <div class="modal-footer">
+                <div class="addUpdateBtn">
+                 
+                <button
+                  type="button"
+                  class="btn btn-danger btn-sm"
+                  data-dismiss="modal"
+                  (click)="clearMacMapping()"
+                  >
+                  Close
+                </button>
+              </div>
+            </div>
+          </p-dialog>
+        </div>
+      } -->
+    <!-- <p-dialog
+        header="Change Approval Status"
+        [(visible)]="approveChangeStatusModal"
+        [style]="{ width: '40%' }"
+        [modal]="true"
+        [responsive]="true"
+        [draggable]="false"
+        [closable]="true"
+        (onHide)="closeStatusModal()"
+        >
+        <div class="modal-body">
+          <form [formGroup]="assignExternalItemForm">
+            <div>
+              <div class="dataGroup">
+                <label class="datalbl">Remark*:</label>
+              </div>
+            </div>
+            <div class="row" style="margin-top: 1rem">
+              <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <textarea class="form-control" formControlName="remark" name="remark"></textarea>
+                @if (assignExternalItemSubmitted && assignExternalItemForm.controls.remark.errors) {
+                  <div
+                    class="errorWrap text-danger"
+                    >
+                    @if (
+                      assignExternalItemSubmitted &&
+                      assignExternalItemForm.controls.remark.errors.required
+                      ) {
+                      <div
+                        class="error text-danger"
+                        >
+                        Remark is required.
+                      </div>
+                    }
+                  </div>
+                }
+                <br />
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button
+            (click)="approveExternalItemGroup()"
+            class="btn btn-primary"
+            id="submit"
+            type="submit"
+            >
+            <i class="fa fa-check-circle"></i>
+            Approve
+          </button>
+          <button
+            class="btn btn-default"
+            (click)="closeStatusModal()"
+            data-dismiss="modal"
+            type="button"
+            >
+            Close
+          </button>
+        </div>
+      </p-dialog> -->
+    <!-- <p-dialog
+        header="Change Approval Status"
+        [(visible)]="rejectChangeStatusModal"
+        [style]="{ width: '40%' }"
+        [modal]="true"
+        [responsive]="true"
+        [draggable]="false"
+        [closable]="true"
+        (onHIde)="closeStatusModal()"
+        >
+        <div class="modal-body">
+          <form [formGroup]="assignExternalItemForm">
+            <div>
+              <div class="dataGroup">
+                <label class="datalbl">Remark*:</label>
+              </div>
+            </div>
+            <div class="row" style="margin-top: 1rem">
+              <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <textarea class="form-control" formControlName="remark" name="remark"></textarea>
+                @if (assignExternalItemSubmitted && assignExternalItemForm.controls.remark.errors) {
+                  <div
+                    class="errorWrap text-danger"
+                    >
+                    @if (
+                      assignExternalItemSubmitted &&
+                      assignExternalItemForm.controls.remark.errors.required
+                      ) {
+                      <div
+                        class="error text-danger"
+                        >
+                        Remark is required.
+                      </div>
+                    }
+                  </div>
+                }
+                <br />
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button (click)="rejectExternalItemGroup()" class="btn btn-primary" id="submit" type="submit">
+            <i class="fa fa-check-circle"></i>
+            Reject
+          </button>
+          <button
+            class="btn btn-default"
+            (click)="closeStatusModal()"
+            data-dismiss="modal"
+            type="button"
+            >
+            Close
+          </button>
+        </div>
+      </p-dialog> -->
+    <!-- @if (this.addMACaddress) {
+        <div>
+          <p-dialog
+            header="External Item MAC Mapping"
+            [(visible)]="MACShowModal"
+            [style]="{ width: '60%' }"
+            [modal]="true"
+            [responsive]="true"
+            [draggable]="false"
+            [closable]="true"
+            (onHide)="onclosed()"
+            >
+            <div class="modal-body" [formGroup]="macForm">
+              <p-table
+                #dt1
+                [value]="this.externalItemMacList"
+                responsiveLayout="scroll"
+                [scrollable]="true"
+                scrollHeight="300px"
+                >
+                <ng-template pTemplate="header">
+                  <tr>
+                    @if (this.hasMac) {
+                      <th style="width: 45%">MAC Address</th>
+                    }
+                    @if (this.hasSerial) {
+                      <th style="width: 45%">Serial Number</th>
+                    }
+                  </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-product let-rowIndex="rowIndex">
+                  <tr>
+                    @if (this.hasMac) {
+                      <td style="width: 45%">
+                        <input
+                          type="text"
+                          name="mac"
+                          class="form-control"
+                          [value]="product.macAddress"
+                          disabled
+                          />
+                        </td>
+                      }
+                      @if (this.hasSerial) {
+                        <td style="width: 45%">
+                          <input
+                            type="text"
+                            name="mac"
+                            class="form-control"
+                            [value]="product.serialNumber"
+                            disabled
+                            />
+                          </td>
+                        }
+                      
+                    </tr>
+                  </ng-template>
+                </p-table>
+              </div>
+              <div class="modal-footer">
+                <div class="addUpdateBtn">
+                 
+                <button
+                  type="button"
+                  class="btn btn-danger btn-sm"
+                  data-dismiss="modal"
+                  (click)="onclosed()"
+                  >
+                  Close
+                </button>
+              </div>
+            </div>
+          </p-dialog>
+        </div>
+      } -->
+    <!-- @if (detailView) {
+        <div class="row">
+          <div class="col-md-12 col-sm-12">
+            <div class="panel">
+              <div class="panel-heading">
+                <div class="displayflex">
+                  <button
+                    type="button"
+                    class="btn btn-secondary backbtn"
+                    data-toggle="tooltip"
+                    data-placement="bottom"
+                    title="Go to Tax Details"
+                    (click)="externalItemList()"
+                    >
+                    <i
+                      class="fa fa-arrow-circle-left"
+                      style="color: #f7941e !important; font-size: 28px"
+                    ></i>
+                  </button>
+                  <h3 class="panel-title">
+                    {{ viewExternalItemData.externalItemGroupNumber }} External Item
+                  </h3>
+                </div>
+                <div class="right">
+                  <button
+                    type="button"
+                    class="btn-toggle-collapse"
+                    data-toggle="collapse"
+                    data-target="#externalItemDetail"
+                    aria-expanded="false"
+                    aria-controls="taxalldea"
+                    >
+                    <i class="fa fa-minus-circle"></i>
+                  </button>
+                </div>
+              </div>
+              <div id="externalItemDetail" class="panel-collapse collapse in">
+                <div class="panel-body table-responsive">
+                  <fieldset style="margin-top: 0rem; margin-bottom: 2rem">
+                    <legend>Basic Details</legend>
+                    <div class="boxWhite">
+                      <div class="row">
+                        <div class="col-lg-4 col-md-4 dataGroup">
+                          <label class="datalbl">Product Name :</label>
+                          <span>{{ viewExternalItemData.productId.name }}</span>
+                        </div>
+                        <div class="col-lg-4 col-md-4 dataGroup">
+                          <label class="datalbl"> Service Area :</label>
+                          <span>{{ viewExternalItemData.serviceAreaId.name }}</span>
+                        </div>
+                        <div class="col-lg-4 col-md-4 dataGroup">
+                          <label class="datalbl">Quantity :</label>
+                          <span>{{ viewExternalItemData.qty }}</span>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-lg-4 col-md-4 dataGroup">
+                          <label class="datalbl">Transit Quantity :</label>
+                          <span>{{ viewExternalItemData.inTransitQty }}</span>
+                        </div>
+                        <div class="col-lg-4 col-md-4 dataGroup">
+                          <label class="datalbl">Ownership Type :</label>
+                          <span>{{ viewExternalItemData.ownershipType }}</span>
+                        </div>
+                        <div class="col-lg-4 col-md-4 dataGroup">
+                          <label class="datalbl">Owner Name :</label>
+                          <span>{{ viewExternalItemData.ownerName }}</span>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-lg-4 col-md-4 dataGroup">
+                          <label class="datalbl">Status :</label>
+                          <span>{{ viewExternalItemData.status }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </fieldset>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      } -->
+
+    <!-- <div class="modal fade" id="selectPartnerOwner" role="dialog" data-backdrop="static">
+        <div class="modal-dialog" style="width: 80%">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3 class="panel-title">Select Partner</h3>
+            </div>
+            <div class="modal-body">
+              <h5 style="margin-top: 15px">Select Partner</h5>
+              <div class="row">
+                <div class="col-lg-3 col-md-3 m-b-10">
+                  <input
+                    [(ngModel)]="searchPartnerValue"
+                    class="form-control"
+                    id="name"
+                    placeholder="Enter Search Detail"
+                    type="text"
+                    (keydown.enter)="searchPartner()"
+                    />
+                  </div>
+                  <div class="col-lg-6 col-md-6 col-sm-12">
+                    <button
+                      (click)="searchPartner()"
+                      class="btn btn-primary"
+                      id="partnersearchbtn"
+                      type="button"
+                      [disabled]="!searchPartnerValue"
+                      >
+                      <i class="fa fa-search"></i>
+                      Search
+                    </button>
+                    <button
+                      (click)="clearSearchPartner()"
+                      class="btn btn-default"
+                      id="partnerclearbtn"
+                      type="reset"
+                      >
+                       <img src="assets/img/DashboardIcons/Refresh.svg" />
+                      Clear
+                    </button>
+                  </div>
+                </div>
+                <h5 style="margin-top: 15px">Select Partner</h5>
+                <p-table
+                  #dt
+                  [(selection)]="selectedPartner"
+                  [value]="partnerListData"
+                  responsiveLayout="scroll"
+                  >
+                  <ng-template pTemplate="header">
+                    <tr>
+                      <th style="width: 5rem"></th>
+                      <th>Name</th>
+                    </tr>
+                  </ng-template>
+                  <ng-template let-selectOwner let-rowIndex="rowIndex" pTemplate="body">
+                    <tr>
+                      <td>
+                        <p-tableRadioButton [value]="selectOwner"></p-tableRadioButton>
+                      </td>
+                      <td>
+                        {{ selectOwner.name }}
+                      </td>
+                    </tr>
+                  </ng-template>
+                  <ng-template pTemplate="summary">
+                    <p-paginator
+                      (onPageChange)="paginatePartner($event)"
+                      [first]="newFirst"
+                      [rows]="partnerListdataitemsPerPage"
+                      [totalRecords]="partnerListdatatotalRecords"
+                    ></p-paginator>
+                  </ng-template>
+                </p-table>
+              </div>
+              <div class="modal-footer">
+                <div class="addUpdateBtn">
+                  <button
+                    (click)="saveSelOwner('Partner Owned')"
+                    class="btn btn-primary"
+                    style="object-fit: cover; padding: 5px 8px"
+                    id="partnersavebtn"
+                    [disabled]="this.selectedPartner.length == 0"
+                    >
+                   
+                    Save
+                  </button>
+                  <button
+                    (click)="modalCloseOwner('Partner Owned')"
+                    class="btn btn-danger btn-sm"
+                    type="button"
+                    id="partnerclosebtn"
+                    >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div> -->
+
+    <!-- <div class="modal fade" id="selectCustomerOwner" role="dialog" data-backdrop="static">
+        <div class="modal-dialog" style="width: 80%">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3 class="panel-title">Select Customer</h3>
+            </div>
+            <div class="modal-body">
+              <h5 style="margin-top: 15px">Select Customer</h5>
+              <div class="row">
+                <div class="col-lg-3 col-md-3 m-b-10">
+                  <p-dropdown
+                    (onChange)="selParentSearchOption($event)"
+                    [(ngModel)]="searchParentCustOption"
+                    [options]="searchOptionSelect"
+                    [filter]="true"
+                    filterBy="label"
+                    optionLabel="label"
+                    optionValue="value"
+                    placeholder="Select a Search Option"
+                  ></p-dropdown>
+                </div>
+                @if (
+                  parentFieldEnable &&
+                  searchParentCustOption != 'UserName' &&
+                  searchParentCustOption !== 'Name'
+                  ) {
+                  <div
+                    class="col-lg-3 col-md-3 m-b-10"
+                    >
+                    <input
+                      [(ngModel)]="searchParentCustValue"
+                      class="form-control"
+                      id="username"
+                      placeholder="Enter Search Detail"
+                      type="text"
+                      (keydown.enter)="searchParentCustomer()"
+                      />
+                    </div>
+                  }
+                  @if (parentFieldEnable) {
+                    <div class="col-lg-6 col-md-6 col-sm-12">
+                      <button
+                        (click)="searchParentCustomer()"
+                        class="btn btn-primary"
+                        id="customersearchbtn"
+                        type="button"
+                        [disabled]="!searchParentCustValue"
+                        >
+                        <i class="fa fa-search"></i>
+                        Search
+                      </button>
+                      <button
+                        (click)="clearSearchParentCustomer()"
+                        class="btn btn-default"
+                        id="customerclearbtn"
+                        type="reset"
+                        >
+                         <img src="assets/img/DashboardIcons/Refresh.svg" />
+                        Clear
+                      </button>
+                    </div>
+                  }
+                </div>
+                <h5 style="margin-top: 15px">Select Customer</h5>
+                <p-table
+                  #dt
+                  [(selection)]="selectedCustomer"
+                  [value]="customerListData"
+                  responsiveLayout="scroll"
+                  >
+                  <ng-template pTemplate="header">
+                    <tr>
+                      <th style="width: 5rem"></th>
+                      <th>Name</th>
+                      <th>UserName</th>
+                    </tr>
+                  </ng-template>
+                  <ng-template let-selectOwner let-rowIndex="rowIndex" pTemplate="body">
+                    <tr>
+                      <td>
+                        <p-tableRadioButton [value]="selectOwner"></p-tableRadioButton>
+                      </td>
+                      <td>
+                        {{ selectOwner.fullName }}
+                      </td>
+                      <td>
+                        {{ selectOwner.username }}
+                      </td>
+                    </tr>
+                  </ng-template>
+                  <ng-template pTemplate="summary">
+                    <p-paginator
+                      (onPageChange)="paginateCustomer($event)"
+                      [first]="newFirst"
+                      [rows]="customerListdataitemsPerPage"
+                      [totalRecords]="customerListdatatotalRecords"
+                    ></p-paginator>
+                  </ng-template>
+                </p-table>
+              </div>
+              <div class="modal-footer">
+                <div class="addUpdateBtn">
+                  <button
+                    (click)="saveSelOwner('Customer Owned')"
+                    class="btn btn-primary"
+                    style="object-fit: cover; padding: 5px 8px"
+                    [disabled]="this.selectedCustomer.length == 0"
+                    id="customersavebtn"
+                    >
+                    Save
+                  </button>
+                  <button
+                    (click)="modalCloseOwner('Customer Owned')"
+                    class="btn btn-danger btn-sm"
+                    type="button"
+                    id="customerclearbtn"
+                    >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div> -->

@@ -1,0 +1,257 @@
+<div class="dialog-container">
+  <div class="dialog-header">
+    {{ data.title }}
+    <span>
+      <a mat-icon-button href="javascript:void(0)" (click)="onCancel()">
+         <img src="assets/img/DashboardIcons/Reject.svg">
+      </a>
+    </span>
+  </div>
+
+  <div mat-dialog-content>
+    <div class="col-md-12">
+      <ng-container *ngIf="!createAccess && !isSubAreaEdit; else formContent">
+        <mat-card-content class="matcard-content">
+          <div class="panel-body table-responsive">
+            Sorry you have not privilege to create operation!
+          </div>
+        </mat-card-content>
+      </ng-container>
+
+      <ng-template #formContent>
+        <mat-card-content class="matcardContent">
+          <form class="card-form mb-3" [formGroup]="subAreaFormGroup">
+            <div class="row g-3">
+              <div class="col-md-4 mb-4">
+                <label for="subAreaName" class="inputLabel">{{ data?.subAreaTitle }} Name *</label>
+                <mat-form-field appearance="outline" class="w-100">
+                  <input
+                    id="subAreaName"
+                    class="input-p-5"
+                    matInput
+                    placeholder="Enter {{ data?.subAreaTitle }} Name"
+                    formControlName="name"
+                    maxlength="250"
+                    [ngClass]="{ 'is-invalid': submitted && subAreaFormGroup.controls.name.errors }"
+                  />
+                  <mat-error
+                    *ngIf="
+                      subAreaFormGroup.get('name')?.errors?.['required'] &&
+                      (submitted || subAreaFormGroup.get('name')?.touched)
+                    "
+                  >
+                    {{ data?.subAreaTitle }} Name is required.
+                  </mat-error>
+                  <mat-error
+                    *ngIf="
+                      submitted && subAreaFormGroup.get('name')?.hasError('cannotContainSpace')
+                    "
+                  >
+                    White space are not allowed.
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="col-md-4 mb-4">
+                <label for="statusSelect" class="inputLabel">Status *</label>
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-select
+                    id="statusSelect"
+                    class="input-p-5"
+                    [placeholder]="'Select a Status'"
+                    formControlName="status"
+                    [ngClass]="{
+                      'is-invalid': submitted && subAreaFormGroup.controls.status.errors
+                    }"
+                    maxlength="250"
+                  >
+                    <mat-option *ngFor="let option of statusOptions" [value]="option.label">
+                      {{ option.label }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error
+                    *ngIf="
+                      subAreaFormGroup.get('status')?.errors?.['required'] &&
+                      (submitted || subAreaFormGroup.get('status')?.touched)
+                    "
+                  >
+                    {{ title }} Status is required.
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="col-md-4 mb-4">
+                <label for="areaSelect" class="inputLabel">{{ areaTitle }} *</label>
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-select
+                    id="areaSelect"
+                    class="input-p-5"
+                    placeholder="Select an {{ areaTitle }}"
+                    formControlName="areaId"
+                    (selectionChange)="onAreaChange($event)"
+                    [ngClass]="{
+                      'is-invalid': submitted && subAreaFormGroup.controls.areaId.errors
+                    }"
+                  >
+                    <mat-option *ngFor="let area of areaListData" [value]="area.id">{{
+                      area.name
+                    }}</mat-option>
+                  </mat-select>
+                  <mat-error
+                    *ngIf="
+                      subAreaFormGroup.get('areaId')?.errors?.['required'] &&
+                      (submitted || subAreaFormGroup.get('areaId')?.touched)
+                    "
+                  >
+                    {{ areaTitle }} is required.
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="col-md-4 mb-4">
+                <label class="inputLabel">{{ pincodeTitle }} *</label>
+                <mat-form-field appearance="outline" class="w-100">
+                  <input class="input-p-5" placeholder="Enter {{pincodeTitle}} Name" matInput [value]="pincodeName" disabled />
+                </mat-form-field>
+              </div>
+
+              <div class="col-md-4 mb-4">
+                <label for="citySelect" class="inputLabel">{{ cityTitle }}*</label>
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-select
+                    id="citySelect"
+                    class="input-p-5"
+                    [placeholder]="'Select a ' + cityTitle"
+                    formControlName="cityId"
+                    [disabled]="isAreaSelected"
+                    [ngClass]="{
+                      'is-invalid': submitted && subAreaFormGroup.controls.cityId.errors
+                    }"
+                  >
+                    <mat-option *ngFor="let city of selectedCityList" [value]="city.id">{{
+                      city.name
+                    }}</mat-option>
+                  </mat-select>
+                  <mat-error
+                    *ngIf="
+                      subAreaFormGroup.get('cityId')?.errors?.['required'] &&
+                      (submitted || subAreaFormGroup.get('cityId')?.touched)
+                    "
+                  >
+                    {{ cityTitle }} is required.
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="col-md-4 mb-4">
+                <label for="stateSelect" class="inputLabel">{{ stateTitle }}*</label>
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-select
+                    id="stateSelect"
+                    class="input-p-5"
+                    [placeholder]="'Select a ' + stateTitle"
+                    formControlName="stateId"
+                    [disabled]="isAreaSelected"
+                    [ngClass]="{
+                      'is-invalid': submitted && subAreaFormGroup.controls.stateId.errors
+                    }"
+                  >
+                    <mat-option *ngFor="let state of selectedStateList" [value]="state.id">{{
+                      state.name
+                    }}</mat-option>
+                  </mat-select>
+                  <mat-error
+                    *ngIf="
+                      subAreaFormGroup.get('stateId')?.errors?.['required'] &&
+                      (submitted || subAreaFormGroup.get('stateId')?.touched)
+                    "
+                  >
+                    {{ stateTitle }} is required.
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="col-md-4 mb-4">
+                <label for="countrySelect" class="inputLabel">{{ countryTitle }}*</label>
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-select
+                    id="countrySelect"
+                    class="input-p-5"
+                    [placeholder]="'Select a ' + countryTitle"
+                    formControlName="countryId"
+                    [disabled]="isAreaSelected"
+                    [ngClass]="{
+                      'is-invalid': submitted && subAreaFormGroup.controls.countryId.errors
+                    }"
+                  >
+                    <mat-option *ngFor="let country of selectedCountryList" [value]="country.id">{{
+                      country.name
+                    }}</mat-option>
+                  </mat-select>
+                  <mat-error
+                    *ngIf="
+                      subAreaFormGroup.get('countryId')?.errors?.['required'] &&
+                      (submitted || subAreaFormGroup.get('countryId')?.touched)
+                    "
+                  >
+                    {{ countryTitle }} is required.
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <div class="col-md-4 mb-4">
+                <label for="fileInput" class="inputLabel">File</label>
+                <input
+                  id="fileInput"
+                  type="file"
+                  class="input-p-5"
+                  multiple
+                  (change)="onFileChange($event)"
+                  class="form-control"
+                  placeholder="Select Attachment"
+                  style="padding: 2px; width: 100%"
+                />
+                <div
+                  *ngFor="let file of selectedFilePreviewd; let i = index"
+                  class="file-preview mt-1 mb-2 d-flex justify-content-between align-items-center"
+                  style="font-size: 10px"
+                >
+                  {{ file?.name }}
+                  <button
+                    type="button"
+                    class="btn btn-link p-0"
+                    aria-label="Remove File"
+                    (click)="deletSelectedFile(file?.name)"
+                  >
+                    &times;
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </mat-card-content>
+      </ng-template>
+    </div>
+  </div>
+  <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+    <button
+      mat-flat-button
+      color="primary"
+      type="submit"
+      class="button-normal"
+      (click)="onSubmit()"
+    >
+      {{ data.title }}
+    </button>
+    <button
+      mat-stroked-button
+      matButton="outlined"
+      type="button"
+      color="primary"
+      class="button-normal"
+      (click)="onCancel()"
+    >
+      {{ data.noLabel || "Cancel" }}
+    </button>
+  </div>
+</div>

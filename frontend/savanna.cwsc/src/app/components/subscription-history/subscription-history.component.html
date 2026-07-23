@@ -1,0 +1,728 @@
+<mat-tab-group>
+  <!-- ---------------------- CURRENT PLAN TAB ---------------------- -->
+  <mat-tab label="Current Subscription">
+    <mat-card style="margin-top: 2rem">
+      <!-- <mat-card-header>
+        <mat-card-title>Current Subscription</mat-card-title>
+      </mat-card-header> -->
+      <mat-card-content>
+        <div class="tab-container">
+          <!-- Export Button -->
+          <!-- <button mat-icon-button (click)="exportCurrentPlanToExcel()" matTooltip="Export XLS">
+            <img
+              src="assets/img/DashboardIcons/xls-file-svgrepo-com 1.svg"
+              alt="pdf"
+              style="width: 25px; height: 25px; border-radius: 3px"
+            />
+          </button> -->
+
+          <!-- Material Table -->
+
+          <div class="example-container mat-elevation-z8" tabindex="0">
+            <table
+              mat-table
+              [dataSource]="
+                custCurrentPlanList.slice(
+                  currentPagecustomerCurrentPlanListdata * customerCurrentPlanListdataitemsPerPage,
+                  currentPagecustomerCurrentPlanListdata * customerCurrentPlanListdataitemsPerPage +
+                    customerCurrentPlanListdataitemsPerPage
+                )
+              "
+            >
+              <!-- Dynamic Columns -->
+              <ng-container *ngFor="let col of cols" [matColumnDef]="col.field">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 table-header-title">
+                  {{ col.header }}
+                </th>
+                <td
+                  mat-cell
+                  *matCellDef="let row"
+                  (click)="quotaPlanDetailsModel(row)"
+                  style="cursor: pointer"
+                >
+                  @if (
+                    col.field === "dbStartDate" ||
+                    col.field === "dbEndDate" ||
+                    col.field === "dbExpiryDate"
+                  ) {
+                    {{ row[col.field] | date: "dd-MM-yyyy hh:mm a" }}
+                  } @else if (col.field === "offerPrice") {
+                    {{ row[col.field] | currency: currency : "symbol" : "1.2-2" }}
+                  } @else {
+                    {{ row[col.field] }}
+                  }
+                </td>
+              </ng-container>
+
+              <!-- Header Row -->
+              <tr mat-header-row *matHeaderRowDef="displaycolom"></tr>
+
+              <!-- Data Rows -->
+              <tr mat-row *matRowDef="let row; columns: displaycolom"></tr>
+
+              <!-- No Data Message -->
+              <tr class="mat-row" *ngIf="custCurrentPlanList.length === 0">
+                <td
+                  class="mat-cell"
+                  [attr.colspan]="displaycolom.length"
+                  style="text-align: center; padding: 1rem"
+                >
+                  No Records found.
+                </td>
+              </tr>
+            </table>
+          </div>
+          @if (custCurrentPlanList.length > 0) {
+            <mat-paginator
+              [length]="custCurrentPlanList.length"
+              [pageSize]="customerCurrentPlanListdataitemsPerPage"
+              [pageIndex]="currentPagecustomerCurrentPlanListdata"
+              [pageSizeOptions]="[5, 10, 20]"
+              showFirstLastButtons
+              (page)="
+                currentPagecustomerCurrentPlanListdata = $event.pageIndex;
+                customerCurrentPlanListdataitemsPerPage = $event.pageSize
+              "
+            >
+            </mat-paginator>
+          }
+        </div>
+      </mat-card-content> </mat-card
+  ></mat-tab>
+
+  <!-- ---------------------- FUTURE PLAN TAB ---------------------- -->
+  <mat-tab label="Future Subscription">
+    <mat-card style="margin-top: 2rem">
+      <!-- <mat-card-header>
+        <mat-card-title>Future Subscription</mat-card-title>
+      </mat-card-header> -->
+      <mat-card-content>
+        <div class="tab-container">
+          <!-- <button mat-icon-button (click)="exportFuturePlanToExcel()" matTooltip="Export XLS">
+            <img
+              src="assets/img/DashboardIcons/xls-file-svgrepo-com 1.svg"
+              alt="pdf"
+              style="width: 25px; height: 25px; border-radius: 3px"
+            />
+          </button> -->
+
+          <div class="example-container mat-elevation-z8" tabindex="0">
+            <table
+              mat-table
+              [dataSource]="
+                custFuturePlanList.slice(
+                  currentPagecustomerCurrentPlanListdata * customerFuturePlanListdataitemsPerPage,
+                  currentPagecustomerCurrentPlanListdata * customerFuturePlanListdataitemsPerPage +
+                    customerFuturePlanListdataitemsPerPage
+                )
+              "
+            >
+              <!-- Dynamic Columns -->
+              <ng-container *ngFor="let col of cols" [matColumnDef]="col.field">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 table-header-title">
+                  {{ col.header }}
+                </th>
+                <td mat-cell *matCellDef="let row" (click)="quotaPlanDetailsModel(row)">
+                  @if (
+                    col.field === "dbStartDate" ||
+                    col.field === "dbEndDate" ||
+                    col.field === "dbExpiryDate"
+                  ) {
+                    {{ row[col.field] | date: "dd-MM-yyyy hh:mm a" }}
+                  } @else if (col.field === "offerPrice") {
+                    {{ row[col.field] | currency: currency : "symbol" : "1.2-2" }}
+                  } @else {
+                    {{ row[col.field] }}
+                  }
+                </td>
+              </ng-container>
+
+              <!-- Header Row -->
+              <tr mat-header-row *matHeaderRowDef="displaycolom"></tr>
+
+              <!-- Data Rows -->
+              <tr mat-row *matRowDef="let row; columns: displaycolom"></tr>
+
+              <!-- No Data Row -->
+              <tr class="mat-row" *ngIf="custFuturePlanList.length === 0">
+                <td
+                  class="mat-cell"
+                  [attr.colspan]="displaycolom.length"
+                  style="text-align: center"
+                >
+                  No Records found.
+                </td>
+              </tr>
+            </table>
+          </div>
+          @if (custFuturePlanList.length > 0) {
+            <mat-paginator
+              [length]="custFuturePlanList.length"
+              [pageSize]="customerFuturePlanListdataitemsPerPage"
+              [pageIndex]="currentPagecustomerCurrentPlanListdata"
+              [pageSizeOptions]="[5, 10, 20]"
+              showFirstLastButtons
+              (page)="
+                currentPagecustomerCurrentPlanListdata = $event.pageIndex;
+                customerFuturePlanListdataitemsPerPage = $event.pageSize
+              "
+            >
+            </mat-paginator>
+          }
+        </div>
+      </mat-card-content> </mat-card
+  ></mat-tab>
+
+  <!-- ---------------------- EXPIRED PLAN TAB ---------------------- -->
+  <mat-tab label="Previous Subscription">
+    <mat-card style="margin-top: 2rem">
+      <!-- <mat-card-header>
+        <mat-card-title>Previous Subscription</mat-card-title>
+      </mat-card-header> -->
+      <mat-card-content>
+        <div class="tab-container">
+          <!-- <button mat-icon-button (click)="exportExpirePlanToExcel()" matTooltip="Export XLS">
+            <img
+              src="assets/img/DashboardIcons/xls-file-svgrepo-com 1.svg"
+              alt="pdf"
+              style="width: 25px; height: 25px; border-radius: 3px"
+            />
+          </button> -->
+
+          <div class="example-container mat-elevation-z8" tabindex="0">
+            <table
+              mat-table
+              [dataSource]="
+                custExpiredPlanList.slice(
+                  currentPagecustomerExpiryPlanListdata * customerExpiryPlanListdataitemsPerPage,
+                  currentPagecustomerExpiryPlanListdata * customerExpiryPlanListdataitemsPerPage +
+                    customerExpiryPlanListdataitemsPerPage
+                )
+              "
+            >
+              <ng-container *ngFor="let col of cols" [matColumnDef]="col.field">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 table-header-title">
+                  {{ col.header }}
+                </th>
+                <td mat-cell *matCellDef="let row" (click)="quotaPlanDetailsModel(row)">
+                  @if (
+                    col.field === "dbStartDate" ||
+                    col.field === "dbEndDate" ||
+                    col.field === "dbExpiryDate"
+                  ) {
+                    {{ row[col.field] | date: "dd-MM-yyyy hh:mm a" }}
+                  } @else if (col.field === "offerPrice") {
+                    {{ row[col.field] | currency: currency : "symbol" : "1.2-2" }}
+                  } @else {
+                    {{ row[col.field] }}
+                  }
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displaycolom"></tr>
+              <tr mat-row *matRowDef="let row; columns: displaycolom"></tr>
+
+              <!-- No data row -->
+              <tr class="mat-row" *ngIf="custExpiredPlanList.length === 0">
+                <td
+                  class="mat-cell"
+                  [attr.colspan]="displaycolom.length"
+                  style="text-align: center"
+                >
+                  No Records found.
+                </td>
+              </tr>
+            </table>
+          </div>
+          @if (custExpiredPlanList.length > 0) {
+            <mat-paginator
+              [length]="custExpiredPlanList.length"
+              [pageSize]="customerExpiryPlanListdataitemsPerPage"
+              [pageIndex]="currentPagecustomerExpiryPlanListdata"
+              [pageSizeOptions]="[5, 10, 20]"
+              showFirstLastButtons
+              (page)="
+                currentPagecustomerExpiryPlanListdata = $event.pageIndex;
+                customerExpiryPlanListdataitemsPerPage = $event.pageSize
+              "
+            >
+            </mat-paginator>
+          }
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </mat-tab>
+</mat-tab-group>
+
+<ng-template #detailsQuotaDialog let-dialogRef="dialogRef">
+  <div class="container-fluid p-0">
+    <!-- Header -->
+    <div class="dialog-header dialog-title">
+      Quota Details
+      <span>
+        <a mat-icon-button (click)="dialogRef.close()">
+          <img src="assets/img/DashboardIcons/Reject.svg" />
+        </a>
+      </span>
+    </div>
+
+    <!-- Content -->
+    <div mat-dialog-content>
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>Customer Quota Details</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="table-responsive tableViewScrollHeight example-container">
+            <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+              <!-- Plan Name -->
+              <ng-container matColumnDef="planName">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600">Plan Name</th>
+                <td mat-cell *matCellDef="let q">{{ q?.planName }}</td>
+              </ng-container>
+
+              <!-- Quota Type -->
+              <ng-container matColumnDef="quotaType">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600">Quota Type</th>
+                <td mat-cell *matCellDef="let q">{{ q?.quotaType }}</td>
+              </ng-container>
+
+              <!-- Total Quota -->
+              <ng-container matColumnDef="totalQuota">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600">Total Quota</th>
+                <td mat-cell *matCellDef="let q">{{ q?.totalQuota }}</td>
+              </ng-container>
+
+              <!-- Used Quota -->
+              <ng-container matColumnDef="usedQuota">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600">Used Quota</th>
+                <td mat-cell *matCellDef="let q">{{ q?.usedQuota }}</td>
+              </ng-container>
+
+              <!-- Quota Unit -->
+              <ng-container matColumnDef="quotaUnit">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600">Quota Unit</th>
+                <td mat-cell *matCellDef="let q">{{ q?.quotaUnit }}</td>
+              </ng-container>
+
+              <!-- Time Total Quota -->
+              <ng-container matColumnDef="timeTotalQuota">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600">Time Total Quota</th>
+                <td mat-cell *matCellDef="let q">{{ q?.timeTotalQuota }}</td>
+              </ng-container>
+
+              <!-- Time Quota Used -->
+              <ng-container matColumnDef="timeQuotaUsed">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600">Time Quota Used</th>
+                <td mat-cell *matCellDef="let q">{{ q?.timeQuotaUsed }}</td>
+              </ng-container>
+
+              <!-- Time Quota Unit -->
+              <ng-container matColumnDef="timeQuotaUnit">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600">Time Quota Unit</th>
+                <td mat-cell *matCellDef="let q">{{ q?.timeQuotaUnit }}</td>
+              </ng-container>
+
+              <!-- Header Row -->
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+
+              <!-- Data Row -->
+              <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+              <!-- EMPTY ROW CHECK — FIXED -->
+              <tr *ngIf="dataSource?.data?.length === 0">
+                <td colspan="8" class="text-center p-3">No Records Found.</td>
+              </tr>
+            </table>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div class="dialog-action-adjust d-flex justify-content-end">
+      <button mat-stroked-button mat-dialog-close>Close</button>
+    </div>
+  </div>
+</ng-template>
+
+<!-- <p-confirmDialog [style]="{ width: '40vw' }" [baseZIndex]="10000"></p-confirmDialog>
+<div class="childComponent">
+  <ngx-spinner [fullScreen]="false" type="ball-clip-rotate-multiple" size="medium">
+    <p class="loading">Loading...</p>
+  </ngx-spinner>
+</div>
+<div class="row">
+  <div class="col-md-12">
+    <div class="panel top">
+      <div class="panel-heading">
+        <h3 class="panel-title">Subscription History Management</h3>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-12">
+    <div class="panel">
+      <div class="panel-heading">
+        <h3 class="panel-title">Current Subscription</h3>
+        <div class="right">
+          <button
+            aria-controls="currenPresCustPlan"
+            aria-expanded="false"
+            class="btn-toggle-collapse"
+            data-target="#currenPresCustPlan"
+            data-toggle="collapse"
+            type="button"
+          >
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="panel-collapse collapse in" id="currenPresCustPlan">
+        <div class="panel-body table-responsive">
+          <div class="row">
+            <div class="col-lg-12 col-md-12">
+              <p-table
+                #custCurrentPlanListData
+                [columns]="cols"
+                [value]="
+                  custCurrentPlanList
+                    | paginate
+                      : {
+                          id: 'custCurrentPlanListData',
+                          itemsPerPage: customerCurrentPlanListdataitemsPerPage,
+                          currentPage: currentPagecustomerCurrentPlanListdata,
+                          totalItems: customerCurrentPlanListdatatotalRecords
+                        }
+                "
+                [tableStyle]="{ 'min-width': '50rem' }"
+                [rowHover]="true"
+              >
+                <ng-template pTemplate="caption">
+                  <div class="flex">
+                    <button
+                      type="button"
+                      pButton
+                      pRipple
+                      class="xls-button"
+                      icon="pi pi-file-excel"
+                      (click)="exportCurrentPlanToExcel()"
+                      class="p-button-success mr-2"
+                      pTooltip="Export XLS"
+                      tooltipPosition="bottom"
+                    ></button>
+                  </div>
+                </ng-template>
+                <ng-template pTemplate="header" let-columns>
+                  <tr>
+                    <th *ngFor="let col of columns">
+                      {{ col.header }}
+                    </th>
+                  </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-rowData let-columns="columns">
+                  <tr [pSelectableRow]="rowData" (click)="quotaPlanDetailsModel(rowData)">
+                    <td *ngFor="let col of columns">
+                      {{ rowData[col.field] }}
+                    </td>
+                  </tr>
+                </ng-template>
+                <ng-template pTemplate="emptymessage">
+                  <tr>
+                    <td>No Records found.</td>
+                  </tr>
+                </ng-template>
+              </p-table>
+              <div class="pagination_Dropdown">
+                <pagination-controls
+                  (pageChange)="pageChangedcustomerCurrentPlanListData($event)"
+                  [directionLinks]="true"
+                  [maxSize]="10"
+                  id="custCurrentPlanListData"
+                  nextLabel=""
+                  previousLabel=""
+                ></pagination-controls>
+                <div id="itemPerPageDropdown">
+                  <p-dropdown
+                    (onChange)="TotalCurrentPlanItemPerPage($event)"
+                    [options]="pageLimitOptions"
+                    optionLabel="value"
+                    optionValue="value"
+                  ></p-dropdown>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-heading">
+        <div class="displayflex">
+          <h3 class="panel-title">Future Subscription</h3>
+        </div>
+        <div class="right">
+          <button
+            aria-controls="futurePlanCust"
+            aria-expanded="false"
+            class="btn-toggle-collapse"
+            data-target="#futurePlanCust"
+            data-toggle="collapse"
+            type="button"
+          >
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="panel-collapse collapse in" id="futurePlanCust">
+        <div class="panel-body table-responsive">
+          <div class="row">
+            <div class="col-lg-12 col-md-12">
+              <p-table
+                #custFuturePlanListData
+                [columns]="cols"
+                [value]="
+                  custFuturePlanList
+                    | paginate
+                      : {
+                          id: 'custFuturePlanListData',
+                          itemsPerPage: customerFuturePlanListdataitemsPerPage,
+                          currentPage: currentPagecustomerFuturePlanListdata,
+                          totalItems: customerFuturePlanListdatatotalRecords
+                        }
+                "
+                [tableStyle]="{ 'min-width': '50rem' }"
+                [rowHover]="true"
+              >
+                <ng-template pTemplate="caption">
+                  <div class="flex">
+                    <button
+                      type="button"
+                      pButton
+                      pRipple
+                      icon="pi pi-file-excel"
+                      (click)="exportFuturePlanToExcel()"
+                      class="p-button-success mr-2"
+                      pTooltip="Export XLS"
+                      tooltipPosition="bottom"
+                    ></button>
+                  </div>
+                </ng-template>
+                <ng-template pTemplate="header" let-columns>
+                  <tr>
+                    <th *ngFor="let col of columns">
+                      {{ col.header }}
+                    </th>
+                  </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-rowData let-columns="columns">
+                  <tr [pSelectableRow]="rowData" (click)="quotaPlanDetailsModel(rowData)">
+                    <td *ngFor="let col of columns">
+                      {{ rowData[col.field] }}
+                    </td>
+                  </tr>
+                </ng-template>
+                <ng-template pTemplate="emptymessage">
+                  <tr>
+                    <td>No Records found.</td>
+                  </tr>
+                </ng-template>
+              </p-table>
+              <div class="pagination_Dropdown">
+                <pagination-controls
+                  (pageChange)="pageChangedcustFuturePlanListData($event)"
+                  [directionLinks]="true"
+                  [maxSize]="10"
+                  id="custFuturePlanListData"
+                  nextLabel=""
+                  previousLabel=""
+                ></pagination-controls>
+                <div id="itemPerPageDropdown">
+                  <p-dropdown
+                    (onChange)="TotalFuturePlanItemPerPage($event)"
+                    [options]="pageLimitOptions"
+                    optionLabel="value"
+                    optionValue="value"
+                  ></p-dropdown>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-heading">
+        <div class="displayflex">
+          <h3 class="panel-title">Previous Subscription</h3>
+        </div>
+        <div class="right">
+          <button
+            aria-controls="ExpirePlanCust"
+            aria-expanded="false"
+            class="btn-toggle-collapse"
+            data-target="#ExpirePlanCust"
+            data-toggle="collapse"
+            type="button"
+          >
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="panel-collapse collapse in" id="ExpirePlanCust">
+        <div class="panel-body table-responsive">
+          <div class="row">
+            <div class="col-lg-12 col-md-12">
+              <p-table
+                #custExpiryPlanListData
+                [columns]="cols"
+                [value]="
+                  custExpiredPlanList
+                    | paginate
+                      : {
+                          id: 'custExpiryPlanListData',
+                          itemsPerPage: customerExpiryPlanListdataitemsPerPage,
+                          currentPage: currentPagecustomerExpiryPlanListdata,
+                          totalItems: customerExpiryPlanListdatatotalRecords
+                        }
+                "
+                [tableStyle]="{ 'min-width': '50rem' }"
+                [rowHover]="true"
+              >
+                <ng-template pTemplate="caption">
+                  <div class="flex">
+                    <button
+                      type="button"
+                      pButton
+                      pRipple
+                      icon="pi pi-file-excel"
+                      (click)="exportExpirePlanToExcel()"
+                      class="p-button-success mr-2"
+                      pTooltip="Export XLS"
+                      tooltipPosition="bottom"
+                    ></button>
+                  </div>
+                </ng-template>
+                <ng-template pTemplate="header" let-columns>
+                  <tr>
+                    <th *ngFor="let col of columns">
+                      {{ col.header }}
+                    </th>
+                  </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-rowData let-columns="columns">
+                  <tr [pSelectableRow]="rowData" (click)="quotaPlanDetailsModel(rowData)">
+                    <td *ngFor="let col of columns">
+                      {{ rowData[col.field] }}
+                    </td>
+                  </tr>
+                </ng-template>
+                <ng-template pTemplate="emptymessage">
+                  <tr>
+                    <td>No Records found.</td>
+                  </tr>
+                </ng-template>
+              </p-table>
+              <div class="pagination_Dropdown">
+                <pagination-controls
+                  (pageChange)="pageChangedcustomerExpiryPlanListData($event)"
+                  directionLinks="true"
+                  id="custExpiryPlanListData"
+                  maxSize="10"
+                  nextLabel=""
+                  previousLabel=""
+                ></pagination-controls>
+                <div id="itemPerPageDropdown">
+                  <p-dropdown
+                    (onChange)="TotalExpiredPlanItemPerPage($event)"
+                    [options]="pageLimitOptions"
+                    optionLabel="value"
+                    optionValue="value"
+                  ></p-dropdown>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> -->
+
+<!-- Plan Quota Model -->
+<!-- <p-dialog
+  header="Quota Details"
+  [(visible)]="visibleQuotaDetails"
+  [modal]="true"
+  [style]="{ width: '65%' }"
+  [responsive]="true"
+  [draggable]="false"
+  [closable]="false"
+>
+  <div class="modal-body">
+    <fieldset style="margin-top: 0rem; margin-bottom: 2rem">
+      <legend>Customer Quota Details</legend>
+      <div class="boxWhite">
+        <div class="row table-responsive">
+          <div class="col-lg-12 col-md-12">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Plan Name</th>
+                  <th>Quota Type</th>
+                  <th>Total Quota</th>
+                  <th>Used Quota</th>
+                  <th>Quota Unit</th>
+                  <th>Time Total Quota</th>
+                  <th>Time Quota Used</th>
+                  <th>Time Quota Unit</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  *ngFor="
+                    let quota of custQuotaList
+                      | paginate
+                        : {
+                            id: 'custQuotapageData',
+                            itemsPerPage: custQuotaListItemPerPage,
+                            currentPage: currentPagecustQuotaList,
+                            totalItems: custQuotaListtotalRecords
+                          };
+                    index as i
+                  "
+                >
+                  <td>{{ quota.planName }}</td>
+                  <td>{{ quota.quotaType }}</td>
+                  <td>{{ quota.totalQuota }}</td>
+                  <td>{{ quota.usedQuota }}</td>
+                  <td>{{ quota.quotaUnit }}</td>
+                  <td>{{ quota.timeTotalQuota }}</td>
+                  <td>{{ quota.timeQuotaUsed }}</td>
+                  <td>{{ quota.timeQuotaUnit }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <pagination-controls
+              (pageChange)="pageChangedCustQuotaList($event)"
+              directionLinks="true"
+              id="custQuotapageData"
+              maxSize="10"
+              nextLabel=""
+              previousLabel=""
+            ></pagination-controls>
+          </div>
+        </div>
+      </div>
+    </fieldset>
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-default" data-dismiss="modal" (click)="closeModel()">
+      Close
+    </button>
+  </div>
+</p-dialog> -->

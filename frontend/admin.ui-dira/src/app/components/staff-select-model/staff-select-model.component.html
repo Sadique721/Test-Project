@@ -1,0 +1,200 @@
+<ng-template #selectStaffDialog>
+    <div class="dialog-container" style="min-width: 80%;">
+        <div class="dialog-header">
+            Select Staff
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="modalCloseStaff()">
+                    <img src="assets/img/DashboardIcons/Reject.svg" alt="close" />
+                </a>
+            </span>
+        </div>
+
+        <div mat-dialog-content>
+            <div class="col-md-12">
+                <mat-card-content>
+                    <!-- Search Section -->
+                    <h5 style="font-weight: 600; margin-bottom: 15px;">Search Staff</h5>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <mat-form-field appearance="outline" class="w-100 hide-hint">
+                                <input matInput [(ngModel)]="searchDeatil" placeholder="Global Search Filter"
+                                    (keydown.enter)="searchStaffByName()" />
+                            </mat-form-field>
+                        </div>
+                        <div class="col-lg-6 col-md-6 col-sm-12">
+                            <button mat-flat-button color="primary" (click)="searchStaffByName()"
+                                [disabled]="!searchDeatil" class="button-normal m-r-10">
+                                
+                                Search
+                            </button>
+                            <button mat-stroked-button (click)="clearSearchForm()" class="button-normal">
+                                
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Staff List Table -->
+                    <h5 style="margin-top: 20px; font-weight: 600; margin-bottom: 15px;">Select Staff</h5>
+                    <div class="table-container">
+                        <table mat-table [dataSource]="staffData" class="w-100 mat-elevation-z2">
+                            <!-- Radio Selection Column -->
+                            <ng-container matColumnDef="select">
+                                <th mat-header-cell *matHeaderCellDef class="table-header-title" style="width: 50px;">
+                                </th>
+                                <td mat-cell *matCellDef="let staff" class="f-s-14">
+                                    <mat-radio-button [value]="staff" [checked]="selectedStaffCust?.id === staff.id"
+                                        (change)="selectedStaffCust = staff" color="primary">
+                                    </mat-radio-button>
+                                </td>
+                            </ng-container>
+
+                            <!-- Name Column -->
+                            <ng-container matColumnDef="name">
+                                <th mat-header-cell *matHeaderCellDef class="table-header-title">Name</th>
+                                <td mat-cell *matCellDef="let staff" class="f-s-14">
+                                    <strong>{{ staff.firstname }}</strong>
+                                </td>
+                            </ng-container>
+
+                            <!-- User Name Column -->
+                            <ng-container matColumnDef="username">
+                                <th mat-header-cell *matHeaderCellDef class="table-header-title">User Name</th>
+                                <td mat-cell *matCellDef="let staff" class="f-s-14">
+                                    {{ staff.username }}
+                                </td>
+                            </ng-container>
+
+                            <!-- Partner Name Column -->
+                            <ng-container matColumnDef="partnerName">
+                                <th mat-header-cell *matHeaderCellDef class="table-header-title">Partner Name</th>
+                                <td mat-cell *matCellDef="let staff" class="f-s-14">
+                                    {{ staff.partnerName }}
+                                </td>
+                            </ng-container>
+
+                            <tr mat-header-row *matHeaderRowDef="staffColumns" class="table-header-bg"></tr>
+                            <tr mat-row *matRowDef="let row; columns: staffColumns" class="table-content-row"></tr>
+                        </table>
+
+                        <!-- Pagination -->
+                        <mat-paginator *ngIf="staffData && staffData.length > 0"
+                            [length]="parentstaffListdatatotalRecords" [pageSize]="pageITEM"
+                            [pageSizeOptions]="[5,10,20,50,100]" (page)="paginateStaff($event)" showFirstLastButtons>
+                        </mat-paginator>
+                    </div>
+                </mat-card-content>
+            </div>
+        </div>
+
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+            <button mat-stroked-button type="button" class="button-normal m-r-10" (click)="modalCloseStaff()">
+                Close
+            </button>
+            <button mat-flat-button color="primary" type="button" class="button-normal" (click)="saveSelstaff()"
+                [disabled]="this.selectedStaffCust.length == 0">
+                Save
+            </button>
+        </div>
+    </div>
+</ng-template>
+<!-- <p-dialog
+  header="Select Staff"
+  [(visible)]="selectStaff"
+  [closable]="false"
+  [draggable]="false"
+  [style]="{ width: '80%' }"
+  [baseZIndex]="100"
+>
+  <div class="modal-body">
+    <h5>Search Staff</h5>
+    <div class="row">
+      <div class="col-md-3">
+        <input
+          id="searchStaffName"
+          type="text"
+          name="username"
+          class="form-control"
+          placeholder="Global Search Filter"
+          [(ngModel)]="searchDeatil"
+          (keydown.enter)="searchStaffByName()"
+        />
+      </div>
+      <div class="col-lg-6 col-md-6 col-sm-12">
+        <button
+          (click)="searchStaffByName()"
+          type="button"
+          class="btn btn-primary"
+          id="searchbtn"
+          [disabled]="!searchDeatil"
+        >
+          <i class="fa fa-search"></i>
+          Search
+        </button>
+        <button (click)="clearSearchForm()" type="reset" class="btn btn-default" id="searchbtn">
+           <img src="assets/img/DashboardIcons/Refresh.svg" />
+          Clear
+        </button>
+      </div>
+    </div>
+    <h5 style="margin-top: 15px">Select Staff</h5>
+    <p-table
+      #dt
+      [(selection)]="selectedStaffCust"
+      [value]="staffData"
+      [rows]="5"
+      [showCurrentPageReport]="true"
+      [rowsPerPageOptions]="[5, 10,  20, 50, 100]"
+      responsiveLayout="scroll"
+      [scrollable]="true"
+      [paginator]="false"
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+      (onPage)="paginate($event, dt)"
+      [(first)]="newFirst"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width: 50px"></th>
+          <th>Name</th>
+          <th>User Name</th>
+          <th>Partner Name</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-staffData let-rowIndex="rowIndex">
+        <tr>
+          <td style="width: 50px">
+            <p-tableRadioButton [value]="staffData"></p-tableRadioButton>
+          </td>
+          <td>
+            {{ staffData.firstname }}
+          </td>
+          <td>{{ staffData.username }}</td>
+          <td>{{ staffData.partnerName }}</td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="summary">
+        <p-paginator
+          (onPageChange)="paginateStaff($event)"
+          [first]="newFirst"
+          [totalRecords]="parentstaffListdatatotalRecords"
+          [rows]="5"
+          [rowsPerPageOptions]="[5, 10,  20, 50, 100]"
+        ></p-paginator>
+      </ng-template>
+    </p-table>
+  </div>
+  <div class="modal-footer">
+    <div class="addUpdateBtn">
+      <button
+        (click)="saveSelstaff()"
+        type="button"
+        class="btn btn-primary"
+        [disabled]="this.selectedStaffCust.length == 0"
+      >
+        <i class="fa fa-check-circle"></i>
+        Save
+      </button>
+      <button (click)="modalCloseStaff()" type="button" class="btn btn-danger">Close</button>
+    </div>
+  </div>
+</p-dialog> -->

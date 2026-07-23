@@ -1,0 +1,172 @@
+<div class="col-lg-12 col-md-12 p-0">
+  <mat-card class="h-100">
+    <div class="dialog-header">
+      Add Service Parameter
+      <span>
+        <a mat-icon-button href="javascript:void(0)" (click)="closeModal()">
+           <img src="assets/img/DashboardIcons/Reject.svg">
+        </a>
+      </span>
+    </div>
+  </mat-card>
+  <mat-dialog-content class="mat-dialog-content">
+    <div class="modal-body">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="boxWhite">
+            <form [formGroup]="addServiceParamForm">
+              <div class="heading-titles">
+                <div>Service Parameter</div>
+              </div>
+
+              <mat-table [dataSource]="inputDataSource" class="mat-elevation-0">
+                <ng-container matColumnDef="parameter">
+                  <mat-header-cell *matHeaderCellDef class="f-w-500 f-s-15"
+                    >Parameter</mat-header-cell
+                  >
+                  <mat-cell *matCellDef="let element">
+                    <mat-form-field appearance="outline" class="custom-input-width">
+                      <mat-select
+                        class="input-p-5"
+                        placeholder="Select a Parameter"
+                        formControlName="serviceParamId"
+                        (selectionChange)="onParamSelect($event)"
+                      >
+                        @for (option of parameterOptions; track option.id) {
+                          <mat-option [value]="option.id">{{ option.name }}</mat-option>
+                        }
+                      </mat-select>
+                    </mat-form-field>
+                  </mat-cell>
+                </ng-container>
+                <ng-container matColumnDef="Mandatory">
+                  <mat-header-cell *matHeaderCellDef class="tbl-label f-w-500 f-s-15"
+                    >Mandatory</mat-header-cell
+                  >
+                  <mat-cell *matCellDef="let element" class="custom-cell">
+                    <!-- <mat-cell *matCellDef="let element"
+                                        style="text-align: center;display: flex;justify-content: center;"> -->
+                    <mat-checkbox formControlName="isMandatory"></mat-checkbox>
+                  </mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="defaultValue">
+                  <mat-header-cell *matHeaderCellDef class="f-w-500 f-s-15">
+                    Default Value
+                    @if (defultUnitName) {
+                      <span>({{ defultUnitName }})</span>
+                    }
+                  </mat-header-cell>
+                  <mat-cell *matCellDef="let element">
+                    @if (isMultipleFields) {
+                      <mat-form-field appearance="outline" class="w-100">
+                        <input
+                          matInput
+                          class="input-p-5"
+                          placeholder="Enter a Value"
+                          formControlName="value"
+                          readonly
+                        />
+                      </mat-form-field>
+                    }
+                    @if (!isMultipleFields && !withEndpoint) {
+                      <mat-form-field appearance="outline" class="w-100">
+                        <input
+                          matInput
+                          class="input-p-5"
+                          placeholder="Enter a Value"
+                          formControlName="value"
+                        />
+                      </mat-form-field>
+                    }
+                    @if (!isMultipleFields && withEndpoint) {
+                      <mat-form-field appearance="outline" class="w-100">
+                        <mat-select
+                          class="input-p-5"
+                          placeholder="Enter a Value"
+                          formControlName="value"
+                        >
+                          @for (option of defaultParamValues; track option.displayName) {
+                            <mat-option [value]="option.displayName">{{ option.displayName ? option.displayName : 'No Value' }}</mat-option>
+                          }
+                        </mat-select>
+                      </mat-form-field>
+                    }
+                  </mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="action">
+                  <mat-header-cell *matHeaderCellDef></mat-header-cell>
+                  <mat-cell *matCellDef="let element">
+                    <button
+                      mat-stroked-button
+                      color="primary"
+                      (click)="addServiceParam()"
+                      class="btn-param"
+                    >
+                      <!-- <mat-icon>add</mat-icon> -->
+                      Add
+                    </button>
+                  </mat-cell>
+                </ng-container>
+
+                <mat-header-row *matHeaderRowDef="inputDisplayedColumns"></mat-header-row>
+                <mat-row *matRowDef="let row; columns: inputDisplayedColumns"></mat-row>
+              </mat-table>
+
+              <mat-table [dataSource]="dataSource" class="mat-elevation-2 tbl-aligment">
+                <ng-container matColumnDef="serviceParameter">
+                  <mat-header-cell *matHeaderCellDef>Service Parameter</mat-header-cell>
+                  <mat-cell *matCellDef="let element">{{ element.serviceParamName }}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="mandatory">
+                  <mat-header-cell *matHeaderCellDef>Mandatory</mat-header-cell>
+                  <mat-cell *matCellDef="let element">
+                    <mat-checkbox [checked]="element.isMandatory" disabled></mat-checkbox>
+                  </mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="value">
+                  <mat-header-cell *matHeaderCellDef>Value</mat-header-cell>
+                  <mat-cell *matCellDef="let element">{{ element.value }}</mat-cell>
+                </ng-container>
+
+                <ng-container matColumnDef="delete">
+                  <mat-header-cell *matHeaderCellDef>Delete</mat-header-cell>
+                  <mat-cell *matCellDef="let element; let i = index">
+                    <button
+                      mat-icon-button
+                      color="warn"
+                      (click)="
+                        deleteConfirmonServiceParameter(
+                          i,
+                          element.serviceParamId,
+                          element.serviceParamName
+                        )
+                      "
+                    >
+                      <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                    </button>
+                  </mat-cell>
+                </ng-container>
+
+                <mat-header-row *matHeaderRowDef="displayedColumnsforModal"></mat-header-row>
+                <mat-row *matRowDef="let row; columns: displayedColumnsforModal"></mat-row>
+              </mat-table>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end" class="dialog-actions-container">
+    <button mat-button mat-flat-button (click)="saveChanges()" class="custom-dialog-button">
+      Save
+    </button>
+    <button mat-stroked-button color="warn" (click)="closeModal()" class="custom-dialog-button">
+      Close
+    </button>
+  </mat-dialog-actions>
+</div>

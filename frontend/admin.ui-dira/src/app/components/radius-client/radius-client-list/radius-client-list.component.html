@@ -1,0 +1,522 @@
+<div class="row header-row p-0 m-0">
+  <mat-card class="cardWithShadow w-100">
+    <mat-card-content class="mat-card-content-border">
+      <form class="form-auth-small" [formGroup]="searchClientForm">
+        <div class="row">
+          <div class="col-lg-4 col-sm-4 p-0 m-0">
+            <mat-form-field
+              appearance="outline"
+              class="w-100 hide-hint mr-10 header-input"
+              style="padding-left: 16px"
+            >
+              <input
+                class="input-p-5"
+                matInput
+                formControlName="clientIpAddress"
+                (keydown.enter)="searchClientByIp()"
+                placeholder="Enter Client IP Address"
+              />
+              <mat-icon matSuffix class="search-header-search-icon">
+                <i class="pi pi-search icon-size"></i>
+              </mat-icon>
+            </mat-form-field>
+          </div>
+
+          <div class="col-lg-4 col-sm-5">
+            <div class="d-flex" style="margin-left: -2%">
+              <button
+                mat-button
+                mat-flat-button
+                color="primary"
+               class="button-normal mr-10"
+                (click)="searchClientByIp()"
+              >
+                Search
+              </button>
+
+              <button
+                mat-stroked-button
+                matButton="outlined"
+                class="button-normal"
+                (click)="clearSearchForm()"
+              >
+                Clear
+              </button>
+            </div>
+          </div>
+
+          <div class="col-lg-4 col-sm-3 search-div">
+            <div class="d-flex justify-content-end">
+              <button
+                mat-button
+                mat-flat-button
+                color="primary"
+                [routerLink]="['/home/radiusclient/create']"
+                class="button-normal mr-10"
+                style="width: auto"
+              >
+                Add Radius Client
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>
+<div class="container-fluid contain-flud">
+  <div class="row">
+    <div class="col-md-12">
+      <mat-card class="cardWithShadow">
+        <mat-card-content class="mat-card-content-border">
+          <div class="country-table-list">
+            <div class="example-container mat-elevation-z8" tabindex="0">
+              <table
+                mat-table
+                [dataSource]="
+                  clientDataList.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize)
+                "
+              >
+                <!-- Client IP Column -->
+
+                <ng-container matColumnDef="id">
+                  <th mat-header-cell class="table-header-title" *matHeaderCellDef>ID</th>
+                  <td mat-cell *matCellDef="let client">{{ client.clientId }}</td>
+                </ng-container>
+                <ng-container matColumnDef="clientIpAddress">
+                  <th mat-header-cell class="table-header-title" *matHeaderCellDef>Client IP</th>
+                  <td mat-cell *matCellDef="let client">
+                    {{ client.clientIpAddress }}
+                  </td>
+                </ng-container>
+
+                <!-- Vendor Column -->
+                <ng-container matColumnDef="vendor">
+                  <th mat-header-cell class="table-header-title" *matHeaderCellDef>Vendor</th>
+                  <td mat-cell *matCellDef="let client">
+                    {{ client.vendor ? client.vendor : "-" }}
+                  </td>
+                </ng-container>
+
+                <!-- Shared Key Column -->
+                <ng-container matColumnDef="sharedKey">
+                  <th mat-header-cell class="table-header-title" *matHeaderCellDef>Shared Key</th>
+                  <td mat-cell *matCellDef="let client">{{ client.sharedKey }}</td>
+                </ng-container>
+
+                <!-- IP Type Column -->
+                <ng-container matColumnDef="ipType">
+                  <th mat-header-cell class="table-header-title" *matHeaderCellDef>IP Type</th>
+                  <td mat-cell *matCellDef="let client">{{ client.ipType }}</td>
+                </ng-container>
+
+                <!-- ISP Name Column -->
+                <ng-container matColumnDef="mvnoName">
+                  <th mat-header-cell class="table-header-title" *matHeaderCellDef>ISP Name</th>
+                  <td mat-cell *matCellDef="let client">{{ client.mvnoName }}</td>
+                </ng-container>
+
+                <!-- Action Column -->
+                <ng-container matColumnDef="actions" *ngIf="editAccess || deleteAccess">
+                  <th mat-header-cell class="table-header-title" *matHeaderCellDef>Action</th>
+                  <td mat-cell *matCellDef="let client; let i = index" class="action-btns">
+                    <a
+                      mat-icon-button matTooltip="view"
+                      href="javascript:void(0)"
+                      (click)="showClientDetail(client.clientId)"
+                    >
+                     <img src="assets/img/DashboardIcons/eye-svgrepo-com (1) 1.svg" >
+                    </a>
+                    <a
+                      mat-icon-button
+                      href="javascript:void(0)"
+                      *ngIf="editAccess"
+                      [routerLink]="['/home/radiusclient/edit/', client.clientId, client.mvnoId]"
+                      matTooltip="Edit"
+                    >
+                      <img src="assets/img/DashboardIcons/Edit.svg" >
+                    </a>
+                    <a
+                      mat-icon-button
+                      href="javascript:void(0)"
+                      *ngIf="deleteAccess"
+                      (click)="deleteConfirm(client.clientId, client.mvnoId, i)"
+                      matTooltip="Delete"
+                    >
+                      <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                    </a>
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+              </table>
+            </div>
+            <mat-paginator
+              [length]="clientDataList.length"
+              [pageSize]="pageSize"
+              [pageIndex]="pageIndex"
+              [pageSizeOptions]="[5,10,20,50,100]"
+              showFirstLastButtons
+              (page)="pageIndex = $event.pageIndex; pageSize = $event.pageSize"
+            >
+            </mat-paginator>
+            <!-- <mat-paginator
+              [length]="totalRecords"
+              [pageSize]="itemsPerPage"
+              [pageSizeOptions]="[5,10,20,50,100]"
+              (page)="pageChanged($event)"
+              showFirstLastButtons
+            >
+            </mat-paginator> -->
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>
+
+<ng-template #detailsDialog let-dialogRef="dialogRef">
+  <div class="container-fluid p-0">
+    <!-- Header -->
+    <div class="dialog-header dialog-title">
+      {{ client.clientIpAddress }} Detail
+      <span>
+        <a mat-icon-button (click)="dialogRef.close()">
+           <img src="assets/img/DashboardIcons/Reject.svg">
+        </a>
+      </span>
+    </div>
+
+    <!-- Content -->
+    <div mat-dialog-content>
+      <div class="row">
+        <div class="col-lg-12 col-md-12 dataGroup">
+          <div class="field">
+            <span class="label-text f-w-600 f-s-15">Client IP Address</span>
+            <span class="colon">:</span>
+            <span class="m-l-10">{{ client.clientIpAddress }}</span>
+          </div>
+        </div>
+        <div class="col-lg-12 col-md-12 dataGroup">
+          <div class="field">
+            <span class="label-text f-w-600 f-s-15">Shared Key</span>
+            <span class="colon">:</span>
+            <span class="m-l-10">{{ client.sharedKey }}</span>
+          </div>
+        </div>
+        <div class="col-lg-12 col-md-12 dataGroup">
+          <div class="field">
+            <span class="label-text f-w-600 f-s-15">TimeOut</span>
+            <span class="colon">:</span>
+            <span class="m-l-10">{{ client.timeOut }}</span>
+          </div>
+        </div>
+        <div class="col-lg-12 col-md-12 dataGroup">
+          <div class="field">
+            <span class="label-text f-w-600 f-s-15">IP Type</span>
+            <span class="colon">:</span>
+            <span class="m-l-10">{{ client.ipType }}</span>
+          </div>
+        </div>
+        <div class="col-lg-12 col-md-12 dataGroup">
+          <div class="field">
+            <span class="label-text f-w-600 f-s-15">Client Group Id</span>
+            <span class="colon">:</span>
+            <span class="m-l-10">{{ client.clientGroupId }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dialog-action-adjust d-flex justify-content-end">
+      <button mat-stroked-button mat-dialog-close>Close</button>
+    </div>
+  </div>
+</ng-template>
+<ng-template #confirmDialog let-data>
+  <div class="dialog-container">
+    <div class="dialog-header dialog-header-titleFont">
+      {{ data.title || "Delete Confirmation" }}
+      <span>
+        <a mat-icon-button href="javascript:void(0)" mat-dialog-close="false">
+           <img src="assets/img/DashboardIcons/Reject.svg">
+        </a>
+      </span>
+    </div>
+    <div mat-dialog-content>
+      <p class="dialog-description">{{ data.description }}</p>
+
+      <div mat-dialog-actions class="p-0">
+        <button mat-flat-button type="button" class="primary" [mat-dialog-close]="true">
+          {{ data.yesLabel || "Confirm" }}
+        </button>
+        <button mat-stroked-button matButton="outlined" color="primary" mat-dialog-close="false">
+          {{ data.noLabel || "Cancel" }}
+        </button>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+<!-- <div class="row">
+  <div class="col-md-12">
+    <div class="panel top">
+      <div class="panel-heading">
+        <h3 class="panel-title">Radius Client Management</h3>
+        <div class="right">
+          <button
+            type="button"
+            class="btn-toggle-collapse"
+            data-toggle="collapse"
+            data-target="#radiusClientSearchPanel"
+            aria-expanded="false"
+            aria-controls="radiusClientSearchPanel"
+          >
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+      <div id="radiusClientSearchPanel" class="panel-collapse collapse in">
+        <div class="panel-body">
+          <div class="searchForm">
+            <form class="form-auth-small" [formGroup]="searchClientForm">
+              <div class="row">
+                <div class="col-md-3" style="padding-right: 0%; text-align: right">
+                  <label style="padding: 5px">Client IP Address:</label>
+                </div>
+                <div class="col-md-5" style="padding-left: 0%">
+                  <input
+                    type="text"
+                    name="clientIp"
+                    class="form-control"
+                    placeholder="Enter Client IP Address"
+                    formControlName="clientIpAddress"
+                    (keydown.enter)="searchClientByIp()"
+                    [ngClass]="{
+                      'is-invalid':
+                        searchSubmitted && searchClientForm.controls.clientIpAddress.errors
+                    }"
+                  />
+                </div>
+                <div class="col-md-4" style="padding-left: 0%">
+                  <button
+                    type="submit"
+                    class="btn btn-primary"
+                    title="Search Radius Client"
+                    data-toggle="tooltip"
+                    (click)="searchClientByIp()"
+                  >
+                    <i class="fa fa-search"></i>
+                    Search
+                  </button>
+                  &nbsp;
+                  <button
+                    type="reset"
+                    class="btn btn-default"
+                    title="Clear"
+                    data-toggle="tooltip"
+                    (click)="clearSearchForm()"
+                  >
+                     <img src="assets/img/DashboardIcons/Refresh.svg" />
+                    Clear
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> -->
+<!-- 
+<div class="row">
+  <div class="col-md-12 col-sm-12">
+    <div class="panel">
+      <div class="panel-heading">
+        <h3 class="panel-title">Radius Clients</h3>
+        <div class="right">
+          <button
+            aria-controls="listPreCust"
+            aria-expanded="false"
+            class="btn-toggle-collapse"
+            data-target="#listPreCust"
+            data-toggle="collapse"
+            type="button"
+          >
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="panel-collapse collapse in" id="listPreCust">
+        <div class="panel-body table-responsive">
+          <div class="row">
+            <div class="col-lg-12 col-md-12">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Client IP</th>
+                    <th>Vendor</th>
+                    <th>Shared Key</th>
+                    <th>IP Type</th>
+                    <th>ISP Name</th>
+                    @if (editAccess || deleteAccess) {
+                      <th>Action</th>
+                    }
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (
+                    client of clientDataList
+                      | paginate
+                        : {
+                            id: "listing_groupdata",
+                            itemsPerPage: itemsPerPage,
+                            currentPage: currentPage,
+                            totalItems: totalRecords
+                          };
+                    track client;
+                    let i = $index
+                  ) {
+                    <tr>
+                      <td>
+                        <a
+                          (click)="showClientDetail(client.clientId)"
+                          title="Click To See Plan Detail"
+                          style="color: #f7941e"
+                          class="curson_pointer"
+                        >
+                          {{ client.clientIpAddress }}
+                        </a>
+                      </td>
+                      <td>
+                        {{
+                          client.vendor == null || client.vendor == "" || client.vendor == undefined
+                            ? "-"
+                            : client.vendor
+                        }}
+                      </td>
+                      <td>{{ client.sharedKey }}</td>
+                      <td>{{ client.ipType }}</td>
+                      <td>{{ client.mvnoName }}</td>
+                      @if (editAccess || deleteAccess) {
+                        <td class="btnAction">
+                          @if (editAccess) {
+                            <a
+                              type="button"
+                              data-title="Edit"
+                              data-toggle="tooltip"
+                              class="curson_pointer"
+                              [routerLink]="[
+                                '/home/radiusclient/edit/',
+                                client.clientId,
+                                client.mvnoId
+                              ]"
+                            >
+                            <img src="assets/img/DashboardIcons/Edit.svg" >
+                            </a>
+                          }
+                          @if (deleteAccess) {
+                            <a
+                              data-title="Delete"
+                              data-toggle="tooltip"
+                              class="curson_pointer"
+                              (click)="deleteConfirm(client.clientId, client.mvnoId, i)"
+                            >
+                               <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                            </a>
+                          }
+                        </td>
+                      }
+                    </tr>
+                  }
+                </tbody>
+              </table>
+              <div style="display: flex">
+                <pagination-controls
+                  id="listing_groupdata"
+                  [maxSize]="10"
+                  [directionLinks]="true"
+                  previousLabel=""
+                  nextLabel=""
+                  (pageChange)="pageChanged($event)"
+                ></pagination-controls>
+
+                <div id="itemPerPageDropdown">
+                  <p-dropdown
+                    [options]="pageLimitOptions"
+                    optionLabel="value"
+                    optionValue="value"
+                    (onChange)="TotalItemPerPage($event)"
+                  ></p-dropdown>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> -->
+
+<!-- <p-dialog
+  header="{{ client.clientIpAddress }} Detail"
+  [(visible)]="modalToggle"
+  [modal]="true"
+  [style]="{ width: '40vw' }"
+  [draggable]="false"
+  [resizable]="false"
+  [responsive]="true"
+  [closable]="true"
+  (onHide)="closeClientDetailsModel()"
+>
+  <div class="modal-body">
+    <div class="container-fluid">
+      <div class="row" id="viewDetail">
+        <div class="col-md-5">
+          <label for="name">Client IP Address :</label>
+        </div>
+        <div class="col-md-7">
+          <label for="nameValue">{{ client.clientIpAddress }}</label>
+        </div>
+      </div>
+      <div class="row" id="viewDetail">
+        <div class="col-md-5">
+          <label for="type">Shared Key :</label>
+        </div>
+        <div class="col-md-7">
+          <label for="typeValue">{{ client.sharedKey }}</label>
+        </div>
+      </div>
+      <div class="row" id="viewDetail">
+        <div class="col-md-5">
+          <label for="quota">TimeOut :</label>
+        </div>
+        <div class="col-md-7">
+          <label for="quotaValue">{{ client.timeOut }}</label>
+        </div>
+      </div>
+      <div class="row" id="viewDetail">
+        <div class="col-md-5">
+          <label for="uom">IP Type :</label>
+        </div>
+        <div class="col-md-7">
+          <label for="uomValue">{{ client.ipType }}</label>
+        </div>
+      </div>
+      <div class="row" id="viewDetail">
+        <div class="col-md-5">
+          <label for="uom">Client Group Id :</label>
+        </div>
+        <div class="col-md-7">
+          <label for="uomValue">{{ client.clientGroupId }}</label>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-default" (click)="closeClientDetailsModel()">Close</button>
+  </div>
+</p-dialog> -->

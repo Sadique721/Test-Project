@@ -1,0 +1,868 @@
+import 'package:savbill/webservices/base_response.dart';
+
+class ViewTaskDetailResponse extends BaseResponse {
+  TaskDetail? data;
+  dynamic dataList;
+  dynamic excelDataList;
+  int? totalRecords;
+  int? pageRecords;
+  int? currentPageNumber;
+  int? totalPages;
+
+  ViewTaskDetailResponse(
+      {
+        this.data,
+        this.dataList,
+        this.excelDataList,
+        this.totalRecords,
+        this.pageRecords,
+        this.currentPageNumber,
+        this.totalPages});
+
+  ViewTaskDetailResponse.fromJson(Map<String, dynamic> json) {
+    responseCode = json['responseCode'];
+    responseMessage = json['responseMessage'];
+    data = json['data'] != null ? new TaskDetail.fromJson(json['data']) : null;
+    dataList = json['dataList'];
+    excelDataList = json['excelDataList'];
+    totalRecords = json['totalRecords'];
+    pageRecords = json['pageRecords'];
+    currentPageNumber = json['currentPageNumber'];
+    totalPages = json['totalPages'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['responseCode'] = this.responseCode;
+    data['responseMessage'] = this.responseMessage;
+    if (this.data != null) {
+      data['data'] = this.data!.toJson();
+    }
+    data['dataList'] = this.dataList;
+    data['excelDataList'] = this.excelDataList;
+    data['totalRecords'] = this.totalRecords;
+    data['pageRecords'] = this.pageRecords;
+    data['currentPageNumber'] = this.currentPageNumber;
+    data['totalPages'] = this.totalPages;
+    return data;
+  }
+}
+
+class TaskDetail {
+  String? createdate;
+  String? updatedate;
+  String? createdByName;
+  String? lastModifiedByName;
+  int? createdById;
+  int? lastModifiedById;
+  int? caseId;
+  String? caseTitle;
+  String? caseType;
+  String? caseNumber;
+  String? caseFor;
+  String? caseOrigin;
+  String? caseStatus;
+  String? priority;
+  dynamic customersId;
+  String? caseForPartner;
+  dynamic caseForZone;
+  dynamic nextFollowupDate;
+  dynamic nextFollowupTime;
+  String? caseStartedOn;
+  String? caseStartedOnString;
+  String? firstAssignedOn;
+  String? firstAssignedOnString;
+  bool? isDelete;
+  int? currentAssigneeId;
+  dynamic finalResolutionId;
+  dynamic finalResolvedById;
+  dynamic finalClosedById;
+  dynamic finalResolutionDate;
+  dynamic finalClosedDate;
+  List<CaseUpdateList>? caseUpdateList;
+  String? firstRemark;
+  dynamic liveUserServiceAreaDetails;
+  dynamic oltName;
+  dynamic slotName;
+  dynamic portName;
+  dynamic serviceAreaName;
+  dynamic serviceAreaId;
+  dynamic mobile;
+  dynamic userName;
+  String? currentAssigneeName;
+  dynamic finalResolvedByName;
+  dynamic finalClosedByName;
+  dynamic finalResolutionName;
+  dynamic finalClosedByDateString;
+  dynamic finalResolutionDateString;
+  String? createDateString;
+  String? updateDateString;
+  int? partnerid;
+  dynamic partnerName;
+  int? mvnoId;
+  dynamic rating;
+  int? caseCategoryId;
+  int? caseSubCategoryId;
+  dynamic groupReasonId;
+  dynamic tatMappingId;
+  dynamic buId;
+  String? caseCategoryName;
+  String? caseSubCategoryName;
+  dynamic caseReason;
+  int? rootCauseReasonId;
+  dynamic subSource;
+  dynamic source;
+  dynamic teamHierarchyMappingId;
+  List<TicketAssignStaffMappings>? ticketAssignStaffMappings;
+  String? department;
+  dynamic email;
+  dynamic parentTicketId;
+  String? helperName;
+  dynamic lcoId;
+  dynamic messageId;
+  dynamic remark;
+  dynamic file;
+  int? caseOrder;
+  List<CaseDocDetails>? caseDocDetails;
+  dynamic createdFrom;
+  dynamic caseSlaTime;
+  dynamic caseSlaUnit;
+  dynamic parentId;
+  List<Null>? caseFeedbackRel;
+  dynamic callStatus;
+  dynamic isClosed;
+  dynamic deacivateReason;
+  String? serialNumber;
+  dynamic mvnoName;
+  int? teamId;
+  dynamic finalTaskCompletionRemark;
+  dynamic startDate;
+  dynamic endDate;
+  bool? isFromCalender;
+  dynamic teamName;
+  dynamic assigneeName;
+  dynamic customerName;
+  bool? isProcessed;
+  bool? selected = false;
+
+  TaskDetail(
+      {this.createdate,
+        this.updatedate,
+        this.createdByName,
+        this.lastModifiedByName,
+        this.createdById,
+        this.lastModifiedById,
+        this.caseId,
+        this.caseTitle,
+        this.caseType,
+        this.caseNumber,
+        this.caseFor,
+        this.caseOrigin,
+        this.caseStatus,
+        this.priority,
+        this.customersId,
+        this.caseForPartner,
+        this.caseForZone,
+        this.nextFollowupDate,
+        this.nextFollowupTime,
+        this.caseStartedOn,
+        this.caseStartedOnString,
+        this.firstAssignedOn,
+        this.firstAssignedOnString,
+        this.isDelete,
+        this.currentAssigneeId,
+        this.finalResolutionId,
+        this.finalResolvedById,
+        this.finalClosedById,
+        this.finalResolutionDate,
+        this.finalClosedDate,
+        this.caseUpdateList,
+        this.firstRemark,
+        this.liveUserServiceAreaDetails,
+        this.oltName,
+        this.slotName,
+        this.portName,
+        this.serviceAreaName,
+        this.serviceAreaId,
+        this.mobile,
+        this.userName,
+        this.currentAssigneeName,
+        this.finalResolvedByName,
+        this.finalClosedByName,
+        this.finalResolutionName,
+        this.finalClosedByDateString,
+        this.finalResolutionDateString,
+        this.createDateString,
+        this.updateDateString,
+        this.partnerid,
+        this.partnerName,
+        this.mvnoId,
+        this.rating,
+        this.caseCategoryId,
+        this.caseSubCategoryId,
+        this.groupReasonId,
+        this.tatMappingId,
+        this.buId,
+        this.caseCategoryName,
+        this.caseSubCategoryName,
+        this.caseReason,
+        this.rootCauseReasonId,
+        this.subSource,
+        this.source,
+        this.teamHierarchyMappingId,
+        this.ticketAssignStaffMappings,
+        this.department,
+        this.email,
+        this.parentTicketId,
+        this.helperName,
+        this.lcoId,
+        this.messageId,
+        this.remark,
+        this.file,
+        this.caseOrder,
+        this.caseDocDetails,
+        this.createdFrom,
+        this.caseSlaTime,
+        this.caseSlaUnit,
+        this.parentId,
+        this.caseFeedbackRel,
+        this.callStatus,
+        this.isClosed,
+        this.deacivateReason,
+        this.serialNumber,
+        this.mvnoName,
+        this.teamId,
+        this.finalTaskCompletionRemark,
+        this.startDate,
+        this.endDate,
+        this.isFromCalender,
+        this.teamName,
+        this.assigneeName,
+        this.customerName,
+        this.isProcessed,
+        this.selected,
+      });
+
+  TaskDetail.fromJson(Map<String, dynamic> json) {
+    createdate = json['createdate'];
+    updatedate = json['updatedate'];
+    createdByName = json['createdByName'];
+    lastModifiedByName = json['lastModifiedByName'];
+    createdById = json['createdById'];
+    lastModifiedById = json['lastModifiedById'];
+    caseId = json['caseId'];
+    caseTitle = json['caseTitle'];
+    caseType = json['caseType'];
+    caseNumber = json['caseNumber'];
+    caseFor = json['caseFor'];
+    caseOrigin = json['caseOrigin'];
+    caseStatus = json['caseStatus'];
+    priority = json['priority'];
+    customersId = json['customersId'];
+    caseForPartner = json['caseForPartner'];
+    caseForZone = json['caseForZone'];
+    nextFollowupDate = json['nextFollowupDate'];
+    nextFollowupTime = json['nextFollowupTime'];
+    caseStartedOn = json['caseStartedOn'];
+    caseStartedOnString = json['caseStartedOnString'];
+    firstAssignedOn = json['firstAssignedOn'];
+    firstAssignedOnString = json['firstAssignedOnString'];
+    isDelete = json['isDelete'];
+    currentAssigneeId = json['currentAssigneeId'];
+    finalResolutionId = json['finalResolutionId'];
+    finalResolvedById = json['finalResolvedById'];
+    finalClosedById = json['finalClosedById'];
+    finalResolutionDate = json['finalResolutionDate'];
+    finalClosedDate = json['finalClosedDate'];
+    if (json['caseUpdateList'] != null) {
+      caseUpdateList = <CaseUpdateList>[];
+      json['caseUpdateList'].forEach((v) {
+        caseUpdateList!.add(new CaseUpdateList.fromJson(v));
+      });
+    }
+    firstRemark = json['firstRemark'];
+    liveUserServiceAreaDetails = json['liveUserServiceAreaDetails'];
+    oltName = json['oltName'];
+    slotName = json['slotName'];
+    portName = json['portName'];
+    serviceAreaName = json['serviceAreaName'];
+    serviceAreaId = json['serviceAreaId'];
+    mobile = json['mobile'];
+    userName = json['userName'];
+    currentAssigneeName = json['currentAssigneeName'];
+    finalResolvedByName = json['finalResolvedByName'];
+    finalClosedByName = json['finalClosedByName'];
+    finalResolutionName = json['finalResolutionName'];
+    finalClosedByDateString = json['finalClosedByDateString'];
+    finalResolutionDateString = json['finalResolutionDateString'];
+    createDateString = json['createDateString'];
+    updateDateString = json['updateDateString'];
+    partnerid = json['partnerid'];
+    partnerName = json['partnerName'];
+    mvnoId = json['mvnoId'];
+    rating = json['rating'];
+    caseCategoryId = json['caseCategoryId'];
+    caseSubCategoryId = json['caseSubCategoryId'];
+    groupReasonId = json['groupReasonId'];
+    tatMappingId = json['tatMappingId'];
+    buId = json['buId'];
+    caseCategoryName = json['caseCategoryName'];
+    caseSubCategoryName = json['caseSubCategoryName'];
+    caseReason = json['caseReason'];
+    rootCauseReasonId = json['rootCauseReasonId'];
+    subSource = json['subSource'];
+    source = json['source'];
+    teamHierarchyMappingId = json['teamHierarchyMappingId'];
+    if (json['ticketAssignStaffMappings'] != null) {
+      ticketAssignStaffMappings = <TicketAssignStaffMappings>[];
+      json['ticketAssignStaffMappings'].forEach((v) {
+        ticketAssignStaffMappings!
+            .add(new TicketAssignStaffMappings.fromJson(v));
+      });
+    }
+    department = json['department'];
+    email = json['email'];
+    parentTicketId = json['parentTicketId'];
+    helperName = json['helperName'];
+    lcoId = json['lcoId'];
+    messageId = json['messageId'];
+    remark = json['remark'];
+    file = json['file'];
+    caseOrder = json['case_order'];
+    if (json['caseDocDetails'] != null) {
+      caseDocDetails = <CaseDocDetails>[];
+      json['caseDocDetails'].forEach((v) {
+        caseDocDetails!.add(new CaseDocDetails.fromJson(v));
+      });
+    }
+    createdFrom = json['createdFrom'];
+    caseSlaTime = json['caseSlaTime'];
+    caseSlaUnit = json['caseSlaUnit'];
+    parentId = json['parentId'];
+    callStatus = json['call_status'];
+    isClosed = json['is_closed'];
+    deacivateReason = json['deacivate_reason'];
+    serialNumber = json['serialNumber'];
+    mvnoName = json['mvnoName'];
+    teamId = json['teamId'];
+    finalTaskCompletionRemark = json['finalTaskCompletionRemark'];
+    startDate = json['startDate'];
+    endDate = json['endDate'];
+    isFromCalender = json['isFromCalender'];
+    teamName = json['teamName'];
+    assigneeName = json['assigneeName'];
+    customerName = json['customerName'];
+    isProcessed = json['is_processed'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['createdate'] = this.createdate;
+    data['updatedate'] = this.updatedate;
+    data['createdByName'] = this.createdByName;
+    data['lastModifiedByName'] = this.lastModifiedByName;
+    data['createdById'] = this.createdById;
+    data['lastModifiedById'] = this.lastModifiedById;
+    data['caseId'] = this.caseId;
+    data['caseTitle'] = this.caseTitle;
+    data['caseType'] = this.caseType;
+    data['caseNumber'] = this.caseNumber;
+    data['caseFor'] = this.caseFor;
+    data['caseOrigin'] = this.caseOrigin;
+    data['caseStatus'] = this.caseStatus;
+    data['priority'] = this.priority;
+    data['customersId'] = this.customersId;
+    data['caseForPartner'] = this.caseForPartner;
+    data['caseForZone'] = this.caseForZone;
+    data['nextFollowupDate'] = this.nextFollowupDate;
+    data['nextFollowupTime'] = this.nextFollowupTime;
+    data['caseStartedOn'] = this.caseStartedOn;
+    data['caseStartedOnString'] = this.caseStartedOnString;
+    data['firstAssignedOn'] = this.firstAssignedOn;
+    data['firstAssignedOnString'] = this.firstAssignedOnString;
+    data['isDelete'] = this.isDelete;
+    data['currentAssigneeId'] = this.currentAssigneeId;
+    data['finalResolutionId'] = this.finalResolutionId;
+    data['finalResolvedById'] = this.finalResolvedById;
+    data['finalClosedById'] = this.finalClosedById;
+    data['finalResolutionDate'] = this.finalResolutionDate;
+    data['finalClosedDate'] = this.finalClosedDate;
+    if (this.caseUpdateList != null) {
+      data['caseUpdateList'] =
+          this.caseUpdateList!.map((v) => v.toJson()).toList();
+    }
+    data['firstRemark'] = this.firstRemark;
+    data['liveUserServiceAreaDetails'] = this.liveUserServiceAreaDetails;
+    data['oltName'] = this.oltName;
+    data['slotName'] = this.slotName;
+    data['portName'] = this.portName;
+    data['serviceAreaName'] = this.serviceAreaName;
+    data['serviceAreaId'] = this.serviceAreaId;
+    data['mobile'] = this.mobile;
+    data['userName'] = this.userName;
+    data['currentAssigneeName'] = this.currentAssigneeName;
+    data['finalResolvedByName'] = this.finalResolvedByName;
+    data['finalClosedByName'] = this.finalClosedByName;
+    data['finalResolutionName'] = this.finalResolutionName;
+    data['finalClosedByDateString'] = this.finalClosedByDateString;
+    data['finalResolutionDateString'] = this.finalResolutionDateString;
+    data['createDateString'] = this.createDateString;
+    data['updateDateString'] = this.updateDateString;
+    data['partnerid'] = this.partnerid;
+    data['partnerName'] = this.partnerName;
+    data['mvnoId'] = this.mvnoId;
+    data['rating'] = this.rating;
+    data['caseCategoryId'] = this.caseCategoryId;
+    data['caseSubCategoryId'] = this.caseSubCategoryId;
+    data['groupReasonId'] = this.groupReasonId;
+    data['tatMappingId'] = this.tatMappingId;
+    data['buId'] = this.buId;
+    data['caseCategoryName'] = this.caseCategoryName;
+    data['caseSubCategoryName'] = this.caseSubCategoryName;
+    data['caseReason'] = this.caseReason;
+    data['rootCauseReasonId'] = this.rootCauseReasonId;
+    data['subSource'] = this.subSource;
+    data['source'] = this.source;
+    data['teamHierarchyMappingId'] = this.teamHierarchyMappingId;
+    if (this.ticketAssignStaffMappings != null) {
+      data['ticketAssignStaffMappings'] =
+          this.ticketAssignStaffMappings!.map((v) => v.toJson()).toList();
+    }
+    data['department'] = this.department;
+    data['email'] = this.email;
+    data['parentTicketId'] = this.parentTicketId;
+    data['helperName'] = this.helperName;
+    data['lcoId'] = this.lcoId;
+    data['messageId'] = this.messageId;
+    data['remark'] = this.remark;
+    data['file'] = this.file;
+    data['case_order'] = this.caseOrder;
+    if (this.caseDocDetails != null) {
+      data['caseDocDetails'] =
+          this.caseDocDetails!.map((v) => v.toJson()).toList();
+    }
+    data['createdFrom'] = this.createdFrom;
+    data['caseSlaTime'] = this.caseSlaTime;
+    data['caseSlaUnit'] = this.caseSlaUnit;
+    data['parentId'] = this.parentId;
+    data['call_status'] = this.callStatus;
+    data['is_closed'] = this.isClosed;
+    data['deacivate_reason'] = this.deacivateReason;
+    data['serialNumber'] = this.serialNumber;
+    data['mvnoName'] = this.mvnoName;
+    data['teamId'] = this.teamId;
+    data['finalTaskCompletionRemark'] = this.finalTaskCompletionRemark;
+    data['startDate'] = this.startDate;
+    data['endDate'] = this.endDate;
+    data['isFromCalender'] = this.isFromCalender;
+    data['teamName'] = this.teamName;
+    data['assigneeName'] = this.assigneeName;
+    data['customerName'] = this.customerName;
+    data['is_processed'] = this.isProcessed;
+    return data;
+  }
+}
+
+class CaseUpdateList {
+  String? createdate;
+  String? updatedate;
+  String? createdByName;
+  String? lastModifiedByName;
+  int? createdById;
+  int? lastModifiedById;
+  int? id;
+  int? ticketId;
+  dynamic status;
+  dynamic caseType;
+  dynamic assignee;
+  dynamic priority;
+  dynamic attachment;
+  dynamic filename;
+  dynamic finalResolutionId;
+  String? remarkType;
+  dynamic remark;
+  String? commentBy;
+  bool? isDeleted;
+  dynamic nextFollowupDate;
+  dynamic nextFollowupTime;
+  dynamic createby;
+  dynamic updateby;
+  String? createDateString;
+  dynamic ticketCreateDateString;
+  String? updateDateString;
+  List<UpdateDetails>? updateDetails;
+  dynamic mvnoId;
+  dynamic caseCategoryId;
+  dynamic caseSubCategoryId;
+  dynamic groupReasonId;
+  dynamic tatMappingId;
+  dynamic caseTitle;
+  dynamic rootCauseReasonId;
+  dynamic subSource;
+  dynamic source;
+  dynamic teamHierarchyMappingId;
+  dynamic helperName;
+  dynamic caseOrder;
+  dynamic caseSlaTime;
+  dynamic caseSlaUnit;
+  dynamic callStatus;
+  dynamic isClosed;
+  dynamic deacivateReason;
+  dynamic caseFeedbackRel;
+  dynamic serialNumber;
+  dynamic firstRemark;
+  dynamic teamId;
+  dynamic finalTaskCompletionRemark;
+  dynamic caseStatus;
+  dynamic startDate;
+  dynamic endDate;
+  dynamic buId;
+
+  CaseUpdateList(
+      {this.createdate,
+        this.updatedate,
+        this.createdByName,
+        this.lastModifiedByName,
+        this.createdById,
+        this.lastModifiedById,
+        this.id,
+        this.ticketId,
+        this.status,
+        this.caseType,
+        this.assignee,
+        this.priority,
+        this.attachment,
+        this.filename,
+        this.finalResolutionId,
+        this.remarkType,
+        this.remark,
+        this.commentBy,
+        this.isDeleted,
+        this.nextFollowupDate,
+        this.nextFollowupTime,
+        this.createby,
+        this.updateby,
+        this.createDateString,
+        this.ticketCreateDateString,
+        this.updateDateString,
+        this.updateDetails,
+        this.mvnoId,
+        this.caseCategoryId,
+        this.caseSubCategoryId,
+        this.groupReasonId,
+        this.tatMappingId,
+        this.caseTitle,
+        this.rootCauseReasonId,
+        this.subSource,
+        this.source,
+        this.teamHierarchyMappingId,
+        this.helperName,
+        this.caseOrder,
+        this.caseSlaTime,
+        this.caseSlaUnit,
+        this.callStatus,
+        this.isClosed,
+        this.deacivateReason,
+        this.caseFeedbackRel,
+        this.serialNumber,
+        this.firstRemark,
+        this.teamId,
+        this.finalTaskCompletionRemark,
+        this.caseStatus,
+        this.startDate,
+        this.endDate,
+        this.buId});
+
+  CaseUpdateList.fromJson(Map<String, dynamic> json) {
+    createdate = json['createdate'];
+    updatedate = json['updatedate'];
+    createdByName = json['createdByName'];
+    lastModifiedByName = json['lastModifiedByName'];
+    createdById = json['createdById'];
+    lastModifiedById = json['lastModifiedById'];
+    id = json['id'];
+    ticketId = json['ticketId'];
+    status = json['status'];
+    caseType = json['caseType'];
+    assignee = json['assignee'];
+    priority = json['priority'];
+    attachment = json['attachment'];
+    filename = json['filename'];
+    finalResolutionId = json['finalResolutionId'];
+    remarkType = json['remarkType'];
+    remark = json['remark'];
+    commentBy = json['commentBy'];
+    isDeleted = json['isDeleted'];
+    nextFollowupDate = json['nextFollowupDate'];
+    nextFollowupTime = json['nextFollowupTime'];
+    createby = json['createby'];
+    updateby = json['updateby'];
+    createDateString = json['createDateString'];
+    ticketCreateDateString = json['ticketCreateDateString'];
+    updateDateString = json['updateDateString'];
+    if (json['updateDetails'] != null) {
+      updateDetails = <UpdateDetails>[];
+      json['updateDetails'].forEach((v) {
+        updateDetails!.add(new UpdateDetails.fromJson(v));
+      });
+    }
+    mvnoId = json['mvnoId'];
+    caseCategoryId = json['caseCategoryId'];
+    caseSubCategoryId = json['caseSubCategoryId'];
+    groupReasonId = json['groupReasonId'];
+    tatMappingId = json['tatMappingId'];
+    caseTitle = json['caseTitle'];
+    rootCauseReasonId = json['rootCauseReasonId'];
+    subSource = json['subSource'];
+    source = json['source'];
+    teamHierarchyMappingId = json['teamHierarchyMappingId'];
+    helperName = json['helperName'];
+    caseOrder = json['case_order'];
+    caseSlaTime = json['caseSlaTime'];
+    caseSlaUnit = json['caseSlaUnit'];
+    callStatus = json['call_status'];
+    isClosed = json['is_closed'];
+    deacivateReason = json['deacivate_reason'];
+    caseFeedbackRel = json['caseFeedbackRel'];
+    serialNumber = json['serialNumber'];
+    firstRemark = json['firstRemark'];
+    teamId = json['teamId'];
+    finalTaskCompletionRemark = json['finalTaskCompletionRemark'];
+    caseStatus = json['caseStatus'];
+    startDate = json['startDate'];
+    endDate = json['endDate'];
+    buId = json['buId'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['createdate'] = this.createdate;
+    data['updatedate'] = this.updatedate;
+    data['createdByName'] = this.createdByName;
+    data['lastModifiedByName'] = this.lastModifiedByName;
+    data['createdById'] = this.createdById;
+    data['lastModifiedById'] = this.lastModifiedById;
+    data['id'] = this.id;
+    data['ticketId'] = this.ticketId;
+    data['status'] = this.status;
+    data['caseType'] = this.caseType;
+    data['assignee'] = this.assignee;
+    data['priority'] = this.priority;
+    data['attachment'] = this.attachment;
+    data['filename'] = this.filename;
+    data['finalResolutionId'] = this.finalResolutionId;
+    data['remarkType'] = this.remarkType;
+    data['remark'] = this.remark;
+    data['commentBy'] = this.commentBy;
+    data['isDeleted'] = this.isDeleted;
+    data['nextFollowupDate'] = this.nextFollowupDate;
+    data['nextFollowupTime'] = this.nextFollowupTime;
+    data['createby'] = this.createby;
+    data['updateby'] = this.updateby;
+    data['createDateString'] = this.createDateString;
+    data['ticketCreateDateString'] = this.ticketCreateDateString;
+    data['updateDateString'] = this.updateDateString;
+    if (this.updateDetails != null) {
+      data['updateDetails'] =
+          this.updateDetails!.map((v) => v.toJson()).toList();
+    }
+    data['mvnoId'] = this.mvnoId;
+    data['caseCategoryId'] = this.caseCategoryId;
+    data['caseSubCategoryId'] = this.caseSubCategoryId;
+    data['groupReasonId'] = this.groupReasonId;
+    data['tatMappingId'] = this.tatMappingId;
+    data['caseTitle'] = this.caseTitle;
+    data['rootCauseReasonId'] = this.rootCauseReasonId;
+    data['subSource'] = this.subSource;
+    data['source'] = this.source;
+    data['teamHierarchyMappingId'] = this.teamHierarchyMappingId;
+    data['helperName'] = this.helperName;
+    data['case_order'] = this.caseOrder;
+    data['caseSlaTime'] = this.caseSlaTime;
+    data['caseSlaUnit'] = this.caseSlaUnit;
+    data['call_status'] = this.callStatus;
+    data['is_closed'] = this.isClosed;
+    data['deacivate_reason'] = this.deacivateReason;
+    data['caseFeedbackRel'] = this.caseFeedbackRel;
+    data['serialNumber'] = this.serialNumber;
+    data['firstRemark'] = this.firstRemark;
+    data['teamId'] = this.teamId;
+    data['finalTaskCompletionRemark'] = this.finalTaskCompletionRemark;
+    data['caseStatus'] = this.caseStatus;
+    data['startDate'] = this.startDate;
+    data['endDate'] = this.endDate;
+    data['buId'] = this.buId;
+    return data;
+  }
+}
+
+class UpdateDetails {
+  int? id;
+  String? operation;
+  String? entitytype;
+  String? oldvalue;
+  String? newvalue;
+  dynamic attachment;
+  dynamic filename;
+  dynamic resolutionId;
+  String? remarktype;
+  bool? isDeleted;
+  dynamic mvnoId;
+  dynamic buId;
+
+  UpdateDetails(
+      {this.id,
+        this.operation,
+        this.entitytype,
+        this.oldvalue,
+        this.newvalue,
+        this.attachment,
+        this.filename,
+        this.resolutionId,
+        this.remarktype,
+        this.isDeleted,
+        this.mvnoId,
+        this.buId});
+
+  UpdateDetails.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    operation = json['operation'];
+    entitytype = json['entitytype'];
+    oldvalue = json['oldvalue'];
+    newvalue = json['newvalue'];
+    attachment = json['attachment'];
+    filename = json['filename'];
+    resolutionId = json['resolutionId'];
+    remarktype = json['remarktype'];
+    isDeleted = json['isDeleted'];
+    mvnoId = json['mvnoId'];
+    buId = json['buId'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['operation'] = this.operation;
+    data['entitytype'] = this.entitytype;
+    data['oldvalue'] = this.oldvalue;
+    data['newvalue'] = this.newvalue;
+    data['attachment'] = this.attachment;
+    data['filename'] = this.filename;
+    data['resolutionId'] = this.resolutionId;
+    data['remarktype'] = this.remarktype;
+    data['isDeleted'] = this.isDeleted;
+    data['mvnoId'] = this.mvnoId;
+    data['buId'] = this.buId;
+    return data;
+  }
+}
+
+class TicketAssignStaffMappings {
+  String? createdate;
+  String? updatedate;
+  String? createdByName;
+  String? lastModifiedByName;
+  int? createdById;
+  int? lastModifiedById;
+  int? id;
+  int? ticketId;
+  int? staffId;
+
+  TicketAssignStaffMappings(
+      {this.createdate,
+        this.updatedate,
+        this.createdByName,
+        this.lastModifiedByName,
+        this.createdById,
+        this.lastModifiedById,
+        this.id,
+        this.ticketId,
+        this.staffId});
+
+  TicketAssignStaffMappings.fromJson(Map<String, dynamic> json) {
+    createdate = json['createdate'];
+    updatedate = json['updatedate'];
+    createdByName = json['createdByName'];
+    lastModifiedByName = json['lastModifiedByName'];
+    createdById = json['createdById'];
+    lastModifiedById = json['lastModifiedById'];
+    id = json['id'];
+    ticketId = json['ticketId'];
+    staffId = json['staffId'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['createdate'] = this.createdate;
+    data['updatedate'] = this.updatedate;
+    data['createdByName'] = this.createdByName;
+    data['lastModifiedByName'] = this.lastModifiedByName;
+    data['createdById'] = this.createdById;
+    data['lastModifiedById'] = this.lastModifiedById;
+    data['id'] = this.id;
+    data['ticketId'] = this.ticketId;
+    data['staffId'] = this.staffId;
+    return data;
+  }
+}
+
+class CaseDocDetails {
+  String? createdate;
+  String? updatedate;
+  String? createdByName;
+  String? lastModifiedByName;
+  int? createdById;
+  int? lastModifiedById;
+  int? docId;
+  int? ticketId;
+  String? docStatus;
+  String? filename;
+  String? uniquename;
+  bool? isDelete;
+
+  CaseDocDetails(
+      {this.createdate,
+        this.updatedate,
+        this.createdByName,
+        this.lastModifiedByName,
+        this.createdById,
+        this.lastModifiedById,
+        this.docId,
+        this.ticketId,
+        this.docStatus,
+        this.filename,
+        this.uniquename,
+        this.isDelete});
+
+  CaseDocDetails.fromJson(Map<String, dynamic> json) {
+    createdate = json['createdate'];
+    updatedate = json['updatedate'];
+    createdByName = json['createdByName'];
+    lastModifiedByName = json['lastModifiedByName'];
+    createdById = json['createdById'];
+    lastModifiedById = json['lastModifiedById'];
+    docId = json['docId'];
+    ticketId = json['ticketId'];
+    docStatus = json['docStatus'];
+    filename = json['filename'];
+    uniquename = json['uniquename'];
+    isDelete = json['isDelete'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['createdate'] = this.createdate;
+    data['updatedate'] = this.updatedate;
+    data['createdByName'] = this.createdByName;
+    data['lastModifiedByName'] = this.lastModifiedByName;
+    data['createdById'] = this.createdById;
+    data['lastModifiedById'] = this.lastModifiedById;
+    data['docId'] = this.docId;
+    data['ticketId'] = this.ticketId;
+    data['docStatus'] = this.docStatus;
+    data['filename'] = this.filename;
+    data['uniquename'] = this.uniquename;
+    data['isDelete'] = this.isDelete;
+    return data;
+  }
+}

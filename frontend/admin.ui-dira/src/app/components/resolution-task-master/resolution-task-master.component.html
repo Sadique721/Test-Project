@@ -1,0 +1,1406 @@
+<div class="row header-row">
+    <mat-card class="cardWithShadow w-100">
+        <mat-card-content class="mat-card-content-border">
+            <div class="row">
+                <div class="col-sm-9 d-flex">
+                    <mat-form-field appearance="outline"  class="w-100 hide-hint mr-10 header-input">
+                        <input class="input-p-5" [(ngModel)]="searchRootCauseName" matInput
+                            placeholder="Enter Root Cause Name" (keydown.enter)="searchTrc()" />
+                        <mat-icon matSuffix class="search-header-search-icon">
+                            <i class="pi pi-search icon-size"></i>
+                        </mat-icon>
+                    </mat-form-field>
+
+                    <button mat-button mat-flat-button color="primary" class="button-normal mr-10"
+                        (click)="searchTrc()">Search </button>
+                    <button mat-stroked-button matButton="outlined" class="button-normal"
+                        (click)="clearSearchTrc()">Clear
+                    </button>
+                </div>
+
+                <div class="col-sm-3 search-div">
+                    <button mat-button mat-flat-button color="primary" (click)="openCreateDialog()"
+                       class="button-normal mr-10" style="width: auto;">
+                        Add Root Cause</button>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+<!-- ------------------header end--------------------------------------------------- -->
+<!-- ------------------list start--------------------------------------------------- -->
+<div class="container-fluid contain-flud">
+    <div class="row">
+        <div class="col-md-12">
+            <mat-card class="cardWithShadow">
+                <mat-card-content class="mat-card-content-border">
+                    <div class="table-container">
+                        <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8 w-100">
+                        <!-- <table mat-table [dataSource]="resolutionDataSource" matSort class="mat-elevation-z8 w-100"> -->
+
+                            <!-- Name Column -->
+                            <ng-container matColumnDef="name">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title" sticky>
+                                    Name
+                                </th>
+                                <td mat-cell *matCellDef="let resolution" class="f-s-14">
+                                    {{ resolution.name }}
+                                </td>
+                            </ng-container>
+
+                            <!-- Status Column -->
+                            <ng-container matColumnDef="status">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title" sticky>
+                                    Status
+                                </th>
+                                <td mat-cell *matCellDef="let resolution" class="f-s-14">
+                                    <span class="status-badge" [ngClass]="{
+                                        'status-success': resolution.status.toLowerCase() === 'active',
+                                        'status-danger': resolution.status.toLowerCase() === 'inactive'
+                                    }">
+                                        {{ resolution.status }}
+                                    </span>
+                                </td>
+                            </ng-container>
+
+                            <!-- Action Column -->
+                            <ng-container matColumnDef="action">
+                                <th mat-header-cell *matHeaderCellDef stickyEnd class="table-header-title">Action</th>
+                                <td mat-cell *matCellDef="let resolution">
+                                    <a mat-icon-button matTooltip="edit" href="javascript:void(0)" *ngIf="editAccess"
+                                       (click)="editResolution(resolution.id)">
+                                           <img src="assets/img/DashboardIcons/Edit.svg" >
+                                    </a>
+                                    <a mat-icon-button matTooltip="delete" href="javascript:void(0)" *ngIf="deleteAccess"
+                                       (click)="deleteConfirmonResolution(resolution)">
+                                            <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                                    </a>
+                                    <a mat-icon-button matTooltip="upload" href="javascript:void(0)"
+                                       (click)="uploadDocument(resolution)">
+                                         <img src="assets/img/DashboardIcons/Upload.svg" >
+                                    </a>
+                                    <a mat-icon-button matTooltip="download" href="javascript:void(0)"
+                                    (click)="downloadDocument(resolution)">
+                                     <img src="assets/img/DashboardIcons/Document Download.svg" >
+                                    </a>
+                                </td>
+                            </ng-container>
+
+                            <tr mat-header-row *matHeaderRowDef="getDisplayedPlanDetailsColumns(); sticky: true"></tr>
+                            <tr mat-row *matRowDef="let row; columns: getDisplayedPlanDetailsColumns()"></tr>
+                        </table>
+
+                        <mat-paginator [length]="resoluionMasterListdatatotalRecords"
+                                       [pageSize]="resoluionMasterListdataitemsPerPage"
+                                       [pageSizeOptions]="[5,10,20,50,100]"
+                                       showFirstLastButtons
+                                       (page)="pageChangedResolutionMasterList($event)">
+                        </mat-paginator>
+                    </div>
+
+                    <div *ngIf="resolutionMasterDataList?.length === 0" class="no-record-message">
+                        No Record Found.
+                    </div>
+
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </div>
+</div>
+  <!-- } -->
+<!-- ------------------list end--------------------------------------------------- -->
+<!-- ------------------create start--------------------------------------------------- -->
+ <ng-template #createDialogTemplate>
+  <div class="dialog-container">
+    <!-- Dialog Header -->
+    <div class="dialog-header">
+      {{ isResolutionEdit ? "Update" : "Create" }} Root Cause
+      <span>
+        <a mat-icon-button href="javascript:void(0)" (click)="onCancel()">
+           <img src="assets/img/DashboardIcons/Reject.svg">
+        </a>
+      </span>
+    </div>
+
+    <div mat-dialog-content>
+      <ng-container *ngIf="!createAccess && !isResolutionEdit">
+          <mat-card-content class="matcard-content">
+            <div class="panel-body table-responsive">
+              Sorry you have not privilege to create operation!
+            </div>
+          </mat-card-content>
+        </ng-container>
+        @if (createAccess || (isResolutionEdit && editAccess)) {
+      <form [formGroup]="resolutionMasterGroupForm">
+        <div class="row">
+            <div class="col-md-6">
+
+        <!-- Root Cause Name -->
+        <label class="inputLabel">Root Cause Name *</label>
+       <mat-form-field appearance="outline" class="w-100 mb-3">
+  <input 
+    class="input-p-5" 
+    matInput 
+    placeholder="Enter Resolution Name"
+    formControlName="name"
+    (change)="validateText()"
+    [ngClass]="{'is-invalid': submitted && resolutionMasterGroupForm.controls.name.errors}">
+  
+  @if (submitted && resolutionMasterGroupForm.controls.name.errors?.required) {
+    <mat-error>
+      Root Cause Name is required.
+    </mat-error>
+  }
+</mat-form-field>
+</div>
+
+  <div class="col-md-6">
+        <!-- Status -->
+        <label class="inputLabel">Status *</label>
+        <mat-form-field appearance="outline" class="w-100 mb-3">
+  <mat-select class="input-p-5" 
+              formControlName="status" 
+              placeholder="Select a Status"
+              [ngClass]="{'is-invalid': submitted && resolutionMasterGroupForm.controls.status.errors}">
+
+    @for (option of statusOptions; track option.val) {
+      <mat-option [value]="option.val">
+        {{ option.label }}
+      </mat-option>
+    }
+    
+  </mat-select>
+
+  @if (submitted && resolutionMasterGroupForm.controls.status.errors?.required) {
+    <mat-error>
+      Root Cause Status is required.
+    </mat-error>
+  }
+</mat-form-field>
+</div>
+</div>
+
+
+        <!-- Sub Category Management -->
+        <label class="inputLabel">Sub Category Management *</label>
+        <div [formGroup]="rootCauseSubReasonMappingForm" class="form-row ">
+         <mat-form-field appearance="outline" class="flex-field">
+  <mat-select class="input-p-5" 
+              placeholder="Select Sub Category Management" 
+              formControlName="caseCategoryId"
+              [ngClass]="{'is-invalid': rootCauseSubReasonMappingSubmitted &&
+                          rootCauseSubReasonMappingForm.controls.caseCategoryId.errors}">
+
+    @for (sc of ticketReasonSubCategoryListData; track sc.subCategoryId) {
+      <mat-option [value]="sc.subCategoryId">
+        {{ sc.subCategoryName }}
+      </mat-option>
+    }
+
+  </mat-select>
+
+  @if (rootCauseSubReasonMappingSubmitted && 
+       rootCauseSubReasonMappingForm.controls.caseCategoryId.errors?.required) {
+    <mat-error>
+      Sub Category Management is required.
+    </mat-error>
+  }
+</mat-form-field>
+
+
+          <button mat-flat-button color="primary" class="ml-2"
+                  (click)="onAddRootCauseSubReasonMappingField()">
+             Add
+          </button>
+        </div>
+
+        <!-- Sub Category Management Table -->
+        <table mat-table [dataSource]="SubCategoryManagementdataSource"
+               class="mat-elevation-z8 w-100 mb-3">
+          <ng-container matColumnDef="subCategory">
+            <th mat-header-cell *matHeaderCellDef class="text-center">Sub Category Management*</th>
+            <td mat-cell *matCellDef="let row">
+              <mat-form-field appearance="outline" class="w-100">
+                <mat-select [formControl]="row.get('caseCategoryId')">
+                  <mat-option *ngFor="let sc of ticketReasonSubCategoryListData" [value]="sc.subCategoryId">
+                    {{ sc.subCategoryName }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="delete">
+            <th mat-header-cell *matHeaderCellDef class="text-right col-20">Delete</th>
+            <td mat-cell *matCellDef="let row; let i = index" class="text-right">
+              <button mat-icon-button color="warn" (click)="onRemoveRootCauseSubReasonMapping(i)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="['subCategory', 'delete']"></tr>
+          <tr mat-row *matRowDef="let row; columns: ['subCategory', 'delete']; trackBy: trackByIndex"></tr>
+        </table>
+
+        <!-- Resolution -->
+        <label class="inputLabel">Resolution *</label>
+        <div [formGroup]="rootCauseReasonMappingForm" class="form-row">
+          <mat-form-field appearance="outline" class="inputLabel">
+            <input class="input-p-5" matInput placeholder="Enter Resolution" formControlName="rootCauseReason"
+                   [ngClass]="{'is-invalid': rootCauseReasonMappingSubmitted &&
+                              rootCauseReasonMappingForm.controls.rootCauseReason.errors}">
+                              @if (rootCauseReasonMappingSubmitted &&
+                rootCauseReasonMappingForm.controls.rootCauseReason.errors?.required) {
+            <mat-error>
+              Resolution is required.
+            </mat-error>
+        }
+          </mat-form-field>
+
+          <button mat-flat-button color="primary" class="ml-2"
+                  (click)="onAddRootCauseReasonMappingField()">
+            Add
+          </button>
+        </div>
+
+        <!-- Resolution Table -->
+        <table mat-table [dataSource]="ResolutiondataSource"
+               class="mat-elevation-z8 w-100 mb-3">
+          <ng-container matColumnDef="resolution">
+            <th mat-header-cell *matHeaderCellDef class="text-center">Resolution*</th>
+            <td mat-cell *matCellDef="let row">
+              <mat-form-field appearance="outline" class="w-100">
+                <input class="input-p-5" matInput [formControl]="row.get('rootCauseReason')" readonly />
+              </mat-form-field>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="delete">
+            <th mat-header-cell *matHeaderCellDef class="text-right col-20">Delete</th>
+            <td mat-cell *matCellDef="let row; let i = index" class="text-right">
+              <button mat-icon-button color="warn" (click)="onRemoveRootCauseReasonMapping(i)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="['resolution', 'delete']"></tr>
+          <tr mat-row *matRowDef="let row; columns: ['resolution', 'delete']"></tr>
+        </table>
+
+        <!-- Action Buttons -->
+        <!-- <div class="dialog-actions"> -->
+              <!-- <mat-dialog-actions align="end">
+
+
+            @if (!isResolutionEdit) {
+          <button type="submit" mat-flat-button color="primary"
+                  (click)="addEditResolutionMaster('')">
+            Add Root Cause
+          </button>
+        }
+        @if (isResolutionEdit) {
+          <button  type="submit" mat-flat-button color="primary"
+                  (click)="addEditResolutionMaster(viewResolutionData.id)">
+            Update Root Cause
+          </button>
+        }
+          <button mat-stroked-button type="button" (click)="onCancel()">Cancel</button> -->
+        <!-- </div> -->
+         <!-- </mat-dialog-actions> -->
+      </form>
+    }
+    </div>
+      <mat-dialog-actions align="end">
+            @if (!isResolutionEdit) {
+          <button type="submit" mat-flat-button color="primary"
+                  (click)="addEditResolutionMaster('')">
+            Add Root Cause
+          </button>
+        }
+        @if (isResolutionEdit) {
+          <button  type="submit" mat-flat-button color="primary"
+                  (click)="addEditResolutionMaster(viewResolutionData.id)">
+            Update Root Cause
+          </button>
+        }
+          <button mat-stroked-button type="button" (click)="onCancel()">Cancel</button>
+ </mat-dialog-actions>
+  </div>
+</ng-template>
+
+<!-- <ng-template #createDialogTemplate >
+    <div class="dialog-container" >
+        <div class="dialog-header">
+       {{ isResolutionEdit ? "Update" : "Create" }} Root Cause
+        <span>
+            <a mat-icon-button href="javascript:void(0)" (click)="onCancel()" >
+                 <img src="assets/img/DashboardIcons/Reject.svg">
+            </a>
+        </span>
+    </div>
+        <div mat-dialog-content>
+        <form [formGroup]="resolutionMasterGroupForm">
+            <label class="inputLabel">Root Cause Name *</label>
+          <mat-form-field appearance="outline" class="w-100 mb-3">
+            <input class="input-p-5" matInput placeholder="Enter Resolution Name"
+                   formControlName="name"
+                   (change)="validateText()"
+                   [ngClass]="{'is-invalid': submitted && resolutionMasterGroupForm.controls.name.errors}">
+            <mat-error *ngIf="submitted && resolutionMasterGroupForm.controls.name.errors?.required">
+              Root Cause Name is required.
+            </mat-error>
+          </mat-form-field>
+
+          <label class="inputLabel">Status *</label>
+          <mat-form-field appearance="outline" class="w-100 mb-3">
+            <mat-select class="input-p-5" formControlName="status" placeholder="Select a Status"
+                        [ngClass]="{'is-invalid': submitted && resolutionMasterGroupForm.controls.status.errors}">
+              <mat-option *ngFor="let option of statusOptions" [value]="option.val">
+                {{ option.label }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="submitted && resolutionMasterGroupForm.controls.status.errors?.required">
+              Root Cause Status is required.
+            </mat-error>
+          </mat-form-field>
+
+          <label class="mb-2 input-p-5">Sub Category Management *</label>
+          <div [formGroup]="rootCauseSubReasonMappingForm">
+            <div class="row mb-2">
+              <div class="col-md-6">
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-select placeholder="Select Sub Category Management" class="input-p-5" formControlName="caseCategoryId"
+                              [ngClass]="{
+                                'is-invalid': rootCauseSubReasonMappingSubmitted &&
+                                      rootCauseSubReasonMappingForm.controls.caseCategoryId.errors
+                              }">
+                    <mat-option *ngFor="let sc of ticketReasonSubCategoryListData" [value]="sc.subCategoryId">
+                      {{ sc.subCategoryName }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="rootCauseSubReasonMappingSubmitted &&
+                    rootCauseSubReasonMappingForm.controls.caseCategoryId.errors?.required">
+                    Sub Category Management is required.
+                  </mat-error>
+                </mat-form-field>
+              </div>
+              <div class="col-md-4 d-flex align-items-center">
+                <button mat-flat-button color="primary" (click)="onAddRootCauseSubReasonMappingField()">
+                  <mat-icon>add</mat-icon> Add
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <table mat-table [dataSource]="SubCategoryManagementdataSource" class="mat-elevation-z8 w-100 mb-3">
+            <ng-container matColumnDef="subCategory">
+              <th mat-header-cell *matHeaderCellDef style="text-align:center;">Sub Category Management*</th>
+              <td mat-cell *matCellDef="let row">
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-select [formControl]="row.get('caseCategoryId')" >
+                    <mat-option *ngFor="let sc of ticketReasonSubCategoryListData" [value]="sc.subCategoryId">
+                      {{ sc.subCategoryName }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="delete">
+              <th mat-header-cell *matHeaderCellDef style="text-align:right;width:20%;">Delete</th>
+              <td style="display: flex;justify-content: end;" mat-cell *matCellDef="let row; let i = index">
+              
+                <button mat-icon-button color="warn"
+        (click)="onRemoveRootCauseSubReasonMapping(i)">
+  <mat-icon>delete</mat-icon>
+</button>
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="['subCategory', 'delete']"></tr>
+             <tr mat-row *matRowDef="let row; columns: ['subCategory', 'delete']; trackBy: trackByIndex"></tr>
+
+          </table>
+
+          <label class="mb-2 input-p-5">Resolution *</label>
+          <div [formGroup]="rootCauseReasonMappingForm">
+            <div class="row mb-2">
+              <div class="col-md-6">
+                <mat-form-field appearance="outline" class="w-100">
+                  <input class="input-p-5" placeholder="Enter Resolution" matInput formControlName="rootCauseReason"
+                         [ngClass]="{'is-invalid': rootCauseReasonMappingSubmitted &&
+                                   rootCauseReasonMappingForm.controls.rootCauseReason.errors}">
+                  <mat-error *ngIf="rootCauseReasonMappingSubmitted &&
+                      rootCauseReasonMappingForm.controls.rootCauseReason.errors?.required">
+                    Resolution is required.
+                  </mat-error>
+                </mat-form-field>
+              </div>
+              <div class="col-md-4 d-flex align-items-center">
+                <button mat-flat-button color="primary" (click)="onAddRootCauseReasonMappingField()">
+                  <mat-icon>add</mat-icon> Add
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <table mat-table [dataSource]="ResolutiondataSource" class="mat-elevation-z8 w-100 mb-3">
+            <ng-container matColumnDef="resolution">
+              <th mat-header-cell *matHeaderCellDef style="text-align:center;">Resolution*</th>
+              <td mat-cell *matCellDef="let row">
+                <mat-form-field appearance="outline" class="w-100">
+                  <input matInput [formControl]="row.get('rootCauseReason')" [disabled]="true" />
+                </mat-form-field>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="delete">
+              <th mat-header-cell *matHeaderCellDef style="text-align:right;width:20%;">Delete</th>
+              <td mat-cell *matCellDef="let row; let i = index">
+              
+                <button mat-icon-button color="warn"
+                        (click)="onRemoveRootCauseReasonMapping(i)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="['resolution', 'delete']"></tr>
+            <tr mat-row *matRowDef="let row; columns: ['resolution', 'delete'];"></tr>
+          </table>
+
+
+          <div class="addUpdateBtn mt-4">
+            <button *ngIf="!isResolutionEdit"
+                    type="submit" mat-flat-button color="primary"
+                    (click)="addEditResolutionMaster('')">
+             
+              Add Root Cause
+            </button>
+            <button *ngIf="isResolutionEdit"
+                    type="submit" mat-flat-button color="primary"
+                    (click)="addEditResolutionMaster(viewResolutionData.id)">
+            
+              Update Root Cause
+            </button>
+             <button mat-stroked-button type="button" (click)="onCancel()">Cancel</button>
+          </div>
+        </form>
+      </div>
+</div>
+</ng-template> -->
+
+<!-- ------------------create end--------------------------------------------------- -->
+ <!-- ------------------download document start--------------------------------------------------- -->
+ <!-- Upload Document Dialog -->
+<!-- <ng-template #uploadDocumentDialog>
+  <div class="dialog-header">
+    Upload Document
+    <span>
+      <a mat-icon-button href="javascript:void(0)" (click)="onCancel()">
+         <img src="assets/img/DashboardIcons/Reject.svg">
+      </a>
+    </span>
+  </div>
+
+  <mat-dialog-content>
+    <form [formGroup]="uploadDocForm" class="w-100">
+      <input
+        type="file"
+        multiple
+        (change)="onFileChangeUpload($event)"
+        class="form-control"
+        style="padding: 2px; width: 100%"
+      />
+
+      @for (file of selectedFileUploadPreview; track file; let i = $index) {
+        <div class="file-preview">
+          {{ file?.name }}
+          <button
+            mat-icon-button
+            color="warn"
+            type="button"
+            (click)="deletUploadedFile(file?.name)"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      }
+
+      @if (submitted && uploadDocForm.controls.file?.errors) {
+        <div class="text-danger text-sm mt-2">
+          @if (uploadDocForm.controls.file.errors?.required) {
+            <div>File is required.</div>
+          }
+        </div>
+      }
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-flat-button color="primary" (click)="uploadDocuments()">
+      <mat-icon>cloud_upload</mat-icon> Upload
+    </button>
+    <button mat-stroked-button color="warn" (click)="closeUploadDocumentDialog()">
+      Close
+    </button>
+  </mat-dialog-actions>
+</ng-template> -->
+
+
+<ng-template #uploadDocumentDialog>
+   <div class="dialog-header">
+      Upload Document
+        <span>
+            <a mat-icon-button href="javascript:void(0)" (click)="closeUploadDocumentDialog()" >
+                 <img src="assets/img/DashboardIcons/Reject.svg">
+            </a>
+        </span>
+    </div>
+  <mat-dialog-content>
+    <form [formGroup]="uploadDocForm" class="w-100">
+  <input class="input-p-5"
+    type="file" 
+    multiple 
+    (change)="onFileChangeUpload($event)" 
+    
+     />
+
+      
+      @for (file of selectedFileUploadPreview; track file; let i = $index) {
+       <div class="file-preview">
+    {{ file?.name }}
+    <button mat-icon-button color="warn" (click)="deletUploadedFile(file?.name)">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+      }
+
+      @if (submitted && uploadDocForm.controls.file.errors) {
+        <div class="text-danger text-sm mt-2">
+          @if (uploadDocForm.controls.file.errors.required) {
+            <div>File is required.</div>
+          }
+        </div>
+      }
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-flat-button color="primary" (click)="uploadDocuments()">
+      Upload
+    </button>
+    <button mat-stroked-button color="warn" (click)="closeUploadDocumentDialog()">
+      Close
+    </button>
+  </mat-dialog-actions>
+</ng-template>
+
+<!-- ------------------download document end--------------------------------------------------- -->
+<!-- ------------------view document start--------------------------------------------------- -->
+ <ng-template #downloadDocumentDialog let-dialogRef="dialogRef">
+   <div class="dialog-header">
+      View Document
+        <span>
+            <a mat-icon-button href="javascript:void(0)" (click)="dialogRef.close()" >
+                 <img src="assets/img/DashboardIcons/Reject.svg">
+            </a>
+        </span>
+    </div>
+
+  <mat-dialog-content>
+    <div class="table-container">
+      <table mat-table [dataSource]="resolutionBaseFileData?.fileDetails" class="mat-elevation-z8 w-100">
+
+        <!-- File Name Column -->
+        <ng-container matColumnDef="filename">
+          <th mat-header-cell *matHeaderCellDef class="table-header-title">File Name</th>
+          <td mat-cell *matCellDef="let filedata">{{ filedata?.filename }}</td>
+        </ng-container>
+
+        <!-- Action Column -->
+        <ng-container matColumnDef="action">
+          <th mat-header-cell *matHeaderCellDef class="table-header-title">Action</th>
+          <td mat-cell *matCellDef="let filedata">
+            <button mat-mini-fab color="primary" class="bg-white" matTooltip="Download Document"
+                    (click)="downloadDoc(filedata.filename, filedata.id, filedata.uniqueName)">
+              <img src="assets/img/DashboardIcons/Document Download.svg"   />
+            </button>
+
+            <button mat-mini-fab color="primary" class="bg-white" matTooltip="View Document"
+                    (click)="showDocData(filedata.filename, filedata.id, filedata.uniqueName)">
+              <!-- <img src="assets/img/eye-icon.png" class="view-document-img" /> -->
+              <img src="assets/img/DashboardIcons/eye-svgrepo-com (1) 1.svg" >
+            </button>
+
+            <button mat-mini-fab color="warn" class="bg-white" matTooltip="Remove File" [disabled]="!filedata.filename"
+                    (click)="deleteResolveConfirm(filedata)">
+                    <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+              <!-- <img src="assets/img/ioc02.jpg" class="view-document-img" /> -->
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="['filename','action']"></tr>
+        <tr mat-row *matRowDef="let row; columns: ['filename','action']"></tr>
+      </table>
+
+      <!-- Paginator -->
+      <mat-paginator [length]="resolutionBaseFileData?.fileDetails?.length || 0"
+                     [pageSize]="5"
+                     [pageSizeOptions]="[5,10,20,50,100]"
+                     showFirstLastButtons>
+      </mat-paginator>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-stroked-button color="warn" class="button-normal" (click)="dialogRef.close()">Close</button>
+  </mat-dialog-actions>
+</ng-template>
+
+<!-- ------------------view document end--------------------------------------------------- -->
+<!-- ------------------download preview start--------------------------------------------------- -->
+ <!-- Document Preview Dialog -->
+<ng-template #documentPreviewDialog>
+   <div class="dialog-container">
+    <div class="dialog-header">
+      Document Preview
+        <span>
+            <a mat-icon-button href="javascript:void(0)" (click)="onCancel()" >
+                 <img src="assets/img/DashboardIcons/Reject.svg">
+            </a>
+        </span>
+    </div>
+
+  <mat-dialog-content class="dialog-body">
+    @switch (previewType) {
+      @case ('pdf') {
+        <iframe [src]="previewUrl" class="preview-frame"></iframe>
+      }
+      @case ('png') {
+        <img [src]="previewUrl" alt="Image" class="preview-img" />
+      }
+      @case ('jpg') {
+        <img [src]="previewUrl" alt="Image" class="preview-img" />
+      }
+      @case ('jpeg') {
+        <img [src]="previewUrl" alt="Image" class="preview-img" />
+      }
+      @case ('mp4') {
+        <video [src]="previewUrl" controls class="preview-video"></video>
+      }
+      @default {
+        <div class="unsupported">
+          <p>Unsupported file format for preview.</p>
+        </div>
+      }
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-stroked-button color="warn" class="button-normal" (click)="closeDocumentPreview()">
+      Close
+    </button>
+  </mat-dialog-actions>
+  </div>
+</ng-template>
+
+<!-- ------------------download preview end--------------------------------------------------- -->
+<!-- <div class="row">
+  <div class="col-md-12">
+    <div class="panel top">
+       <div class="panel-heading">
+        <h3 class="panel-title">Root Cause Master</h3>
+        <div class="right">
+          <button
+            type="button"
+            class="btn-toggle-collapse"
+            data-toggle="collapse"
+            data-target="#searchDataTicketReason"
+            >
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div> 
+       <div id="searchDataTicketReason" class="panel-collapse collapse in">
+        @if (listView) {
+          <div id="" class="panel-body">
+            <div class="row">
+              <div class="col-lg-3 col-md-3">
+                <input
+                  id="taxName"
+                  type="text"
+                  [(ngModel)]="searchRootCauseName"
+                  class="form-control"
+                  placeholder="Enter Root Cause Name"
+                  (keydown.enter)="searchTrc()"
+                  />
+                </div>
+                <div class="col-lg-3 col-md-4 marginTopSearchBtn">
+                  <button type="button" class="btn btn-primary" id="searchbtn" (click)="searchTrc()">
+                    <i class="fa fa-search"></i>
+                    Search
+                  </button>
+                  <button
+                    type="reset"
+                    class="btn btn-default"
+                    id="searchbtn"
+                    (click)="clearSearchTrc()"
+                    >
+                     <img src="assets/img/DashboardIcons/Refresh.svg" />
+                    Clear
+                  </button>
+                </div>
+              </div>
+            </div>
+          }
+        </div> 
+         <div class="panel-body no-padding panel-udata">
+          <div class="col-md-6 pcol">
+            <div class="dbox">
+              @if (createAccess) {
+                <a (click)="createTrc()" class="curson_pointer">
+                  <img src="../../../assets/img/i01.png" style="width: 32px" />
+                  <h5>Create Root Cause</h5>
+                </a>
+              }
+            </div>
+          </div>
+          <div class="col-md-6 pcol">
+            <div class="dbox">
+              <a (click)="searchViewTrc()" class="curson_pointer">
+                <img src="../../../assets/img/i01.png" style="width: 32px" />
+                <h5>Search Root Cause</h5>
+              </a>
+            </div>
+          </div>
+        </div> 
+      </div>
+    </div>
+  </div> -->
+   <!-- <div class="row"> -->
+     <!-- @if (this.listView) {
+      <div class="col-md-12">
+        <div class="panel">
+          <div class="panel-heading">
+            <h3 class="panel-title">Root Cause</h3>
+            <div class="right">
+              <button
+                type="button"
+                class="btn-toggle-collapse"
+                data-toggle="collapse"
+                data-target="#searchResolution"
+                aria-expanded="false"
+                aria-controls="searchResolution"
+                >
+                <i class="fa fa-minus-circle"></i>
+              </button>
+            </div>
+          </div>
+          <div id="searchResolution" class="panel-collapse collapse in">
+            <div class="panel-body table-responsive">
+              <div class="row">
+                <div class="col-lg-12 col-md-12">
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Status</th>
+                        @if (editAccess || deleteAccess) {
+                          <th>Action</th>
+                        }
+                      </tr>
+                    </thead>
+                    @if (resolutionMasterDataList?.length > 0) {
+                      <tbody>
+                        @for (
+                          resolution of resolutionMasterDataList
+                          | paginate
+                          : {
+                          id: 'resolutionMasterpageData',
+                          itemsPerPage: resoluionMasterListdataitemsPerPage,
+                          currentPage: currentPageResoluionMasterListdata,
+                          totalItems: resoluionMasterListdatatotalRecords
+                          }; track
+                          resolution; let i = $index) {
+                          <tr
+                            >
+                            <td>{{ resolution.name }}</td>
+                            @if (resolution.status == 'ACTIVE' || resolution.status == 'Active') {
+                              <td>
+                                <span class="badge badge-success">Active</span>
+                              </td>
+                            }
+                            @if (resolution.status == 'INACTIVE' || resolution.status == 'Inactive') {
+                              <td>
+                                <span class="badge badge-danger">Inactive</span>
+                              </td>
+                            }
+                            @if (editAccess || deleteAccess) {
+                              <td class="btnAction">
+                                @if (editAccess) {
+                                  <a
+                                    href="javascript:void(0)"
+                                    id="edit-button"
+                                    type="button"
+                                    title="Edit"
+                                    (click)="editResolution(resolution.id)"
+                                    >
+                                  <img src="assets/img/DashboardIcons/Edit.svg" >
+                                  </a>
+                                }
+                                @if (deleteAccess) {
+                                  <a
+                                    id="delete-button"
+                                    href="javascript:void(0)"
+                                    title="Delete"
+                                    (click)="deleteConfirmonResolution(resolution.id)"
+                                    >
+                                     <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                                  </a>
+                                }
+                                <a
+                                  id="upload-button"
+                                  (click)="uploadDocument(resolution)"
+                                  title="Upload Documents"
+                                  href="javascript:void(0)"
+                                  >
+                                  <img height="32" src="assets/img/up.jpg" width="32" />
+                                </a>
+                                <a
+                                  id="upload-button"
+                                  (click)="downloadDocument(resolution)"
+                                  title="Download Documents"
+                                  href="javascript:void(0)"
+                                  >
+                                  <img height="32" src="assets/img/pdf.png" width="32" />
+                                </a>
+                              </td>
+                            }
+                          </tr>
+                        }
+                      </tbody>
+                    }
+                    @if (resolutionMasterDataList?.length === 0) {
+                      <tr>
+                        <td colspan="5">No Record Found.</td>
+                      </tr>
+                    }
+                  </table>
+                  @if (resolutionMasterDataList?.length > 0) {
+                    <div class="pagination_Dropdown">
+                      <pagination-controls
+                        id="resolutionMasterpageData"
+                        maxSize="10"
+                        directionLinks="true"
+                        previousLabel=""
+                        nextLabel=""
+                        (pageChange)="pageChangedResolutionMasterList($event)"
+                      ></pagination-controls>
+                      <div id="itemPerPageDropdown">
+                        <p-dropdown
+                          [(ngModel)]="resoluionMasterListdataitemsPerPage"
+                          [options]="pageLimitOptions"
+                          optionLabel="value"
+                          optionValue="value"
+                          (onChange)="TotalItemPerPage($event)"
+                        ></p-dropdown>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }  -->
+     <!-- @if (this.createView) {
+      <div class="col-md-12">
+        <div class="panel">
+          <div class="panel-heading">
+            <h3 class="panel-title">{{ isResolutionEdit ? "Update" : "Create" }} Root Cause</h3>
+            <div class="right">
+              <button
+                type="button"
+                class="btn-toggle-collapse"
+                data-toggle="collapse"
+                data-target="#createResolu"
+                aria-expanded="false"
+                aria-controls="createResolu"
+                >
+                <i class="fa fa-minus-circle"></i>
+              </button>
+            </div>
+          </div>
+          <div id="createResolu" class="panel-collapse collapse in">
+            <div class="panel-body">
+              <form [formGroup]="resolutionMasterGroupForm">
+                <label>Root Cause Name*</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Enter Resolution Name"
+                  formControlName="name"
+                  (change)="validateText()"
+              [ngClass]="{
+                'is-invalid': submitted && resolutionMasterGroupForm.controls.name.errors
+              }"
+                  />
+                  @if (submitted && resolutionMasterGroupForm.controls.name.errors) {
+                    <div
+                      class="errorWrap text-danger"
+                      >
+                      @if (submitted && resolutionMasterGroupForm.controls.name.errors.required) {
+                        <div
+                          class="error text-danger"
+                          >
+                          Root Cause Name is required.
+                        </div>
+                      }
+                    </div>
+                  }
+                  <br />
+                  <label>Status*</label>
+                  <p-dropdown
+                    [options]="statusOptions"
+                    optionValue="val"
+                    optionLabel="label"
+                    filter="true"
+                    filterBy="label"
+                    placeholder="Select a Status"
+                    formControlName="status"
+              [ngClass]="{
+                'is-invalid': submitted && resolutionMasterGroupForm.controls.status.errors
+              }"
+                  ></p-dropdown>
+                  <div></div>
+                  @if (submitted && resolutionMasterGroupForm.controls.status.errors) {
+                    <div
+                      class="errorWrap text-danger"
+                      >
+                      @if (submitted && resolutionMasterGroupForm.controls.status.errors.required) {
+                        <div
+                          class="error text-danger"
+                          >
+                          Root Cause Status is required.
+                        </div>
+                      }
+                    </div>
+                  }
+                  <br />
+                  <label>Sub Category Management *</label>
+                  <div [formGroup]="rootCauseSubReasonMappingForm">
+                    <div class="row">
+                      <div class="col-lg-6 col-md-6 col-sm-8">
+                        <p-dropdown
+                          [options]="this.ticketReasonSubCategoryListData"
+                          optionValue="subCategoryId"
+                          optionLabel="subCategoryName"
+                          [filter]="true"
+                          filterBy="name"
+                          placeholder="Select a Sub Category Management"
+                          formControlName="caseCategoryId"
+                    [ngClass]="{
+                      'is-invalid':
+                        rootCauseSubReasonMappingSubmitted &&
+                        rootCauseSubReasonMappingForm.controls.caseCategoryId.errors
+                    }"
+                          >
+                        </p-dropdown>
+                      
+                  @if (
+                      rootCauseSubReasonMappingSubmitted &&
+                      rootCauseSubReasonMappingForm.controls.caseCategoryId.errors
+                    ) {
+<div
+                    class="errorWrap text-danger"
+                            >
+                            <div class="error text-danger">Sub Category Management is required.</div>
+                          </div>
+                        }
+                      </div>
+                      <div class="col-lg-3 col-md-4 col-sm-4">
+                        <button
+                          id="addAtt"
+                          style="object-fit: cover; padding: 5px 8px"
+                          class="btn btn-primary"
+                          (click)="onAddRootCauseSubReasonMappingField()"
+                          >
+                          <i class="fa fa-plus-square" aria-hidden="true"></i>
+                          Add
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <table class="table coa-table" style="margin-top: 10px">
+                    <thead>
+                      <tr>
+                        <th style="text-align: center">Sub Category Management*</th>
+                        <th style="text-align: right; width: 20%; padding: 8px">Delete</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (
+                        row of rootCauseSubReasonMapping.controls
+                        | paginate
+                        : {
+                        id: 'subReasonMappingData',
+                        itemsPerPage: subReasonMappingItemsPerPage,
+                        currentPage: currentPageSubReasonMapping,
+                        totalItems: subReasonMappingTotalRecords
+                        }; track
+                        row; let index = $index) {
+                        <tr
+                          >
+                          <td style="padding-left: 5px">
+                            <p-dropdown
+                              [options]="this.ticketReasonSubCategoryListData"
+                              optionValue="subCategoryId"
+                              optionLabel="subCategoryName"
+                              [formControl]="row.get('caseCategoryId')"
+                              disabled
+                              >
+                            </p-dropdown>
+                          </td>
+                          <td style="text-align: right">
+                            <a
+                              id="deleteAtt"
+                              class="curson_pointer"
+                              (click)="onRemoveRootCauseSubReasonMapping(index, row.get('caseCategoryId').value)"
+                              >
+                               <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                            </a>
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                  <div class="pagination_Dropdown">
+                    <pagination-controls
+                      (pageChange)="pageChangedSubReasonData($event)"
+                      directionLinks="true"
+                      id="subReasonMappingData"
+                      maxSize="10"
+                      nextLabel=""
+                      previousLabel=""
+                    ></pagination-controls>
+                    <div id="itemPerPageDropdown">
+                      <p-dropdown
+                        [options]="pageLimitOptions"
+                        optionLabel="value"
+                        optionValue="value"
+                        (onChange)="TotalItemPerPageSubReasonMappingTotalRecords($event)"
+                      ></p-dropdown>
+                    </div>
+                  </div>
+                  <br />
+                  <label>Resolution *</label>
+                  <div [formGroup]="rootCauseReasonMappingForm">
+                    <div class="row">
+                      <div class="col-lg-6 col-md-6 col-sm-8">
+                        <input
+                          class="form-control"
+                          type="text"
+                          placeholder="Enter Resolution"
+                          formControlName="rootCauseReason"
+                    [ngClass]="{
+                      'is-invalid':
+                        rootCauseReasonMappingSubmitted &&
+                        rootCauseReasonMappingForm.controls.rootCauseReason.errors
+                    }"
+                          />
+                          @if (
+                            rootCauseReasonMappingSubmitted &&
+                            rootCauseReasonMappingForm.controls.rootCauseReason.errors
+                            ) {
+                            <div
+                              class="errorWrap text-danger"
+                              >
+                              <div class="error text-danger">Resolution is required.</div>
+                            </div>
+                          }
+                        </div>
+                        <div class="col-lg-3 col-md-4 col-sm-4">
+                          <button
+                            id="addAtt"
+                            style="object-fit: cover; padding: 5px 8px"
+                            class="btn btn-primary"
+                            (click)="onAddRootCauseReasonMappingField()"
+                            >
+                            <i class="fa fa-plus-square" aria-hidden="true"></i>
+                            Add
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <table class="table coa-table" style="margin-top: 10px">
+                      <thead>
+                        <tr>
+                          <th style="text-align: center">Resolution*</th>
+                          <th style="text-align: right; width: 20%; padding: 8px">Delete</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (
+                          row of rootCauseReasonMapping.controls
+                          | paginate
+                          : {
+                          id: 'reasonMappingData',
+                          itemsPerPage: reasonMappingItemsPerPage,
+                          currentPage: currentPageReasonMapping,
+                          totalItems: reasonMappingTotalRecords
+                          }; track
+                          row; let index = $index) {
+                          <tr
+                            >
+                            <td style="padding-left: 5px">
+                              <input
+                                class="form-control"
+                                type="text"
+                                [formControl]="row.get('rootCauseReason')"
+                                disabled
+                                />
+                              </td>
+                              <td style="text-align: right">
+                                <a
+                                  id="deleteAtt"
+                                  class="curson_pointer"
+                                  (click)="onRemoveRootCauseReasonMapping(index, row.get('resolutionId').value)"
+                                  >
+                                   <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                                </a>
+                              </td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                      <div class="pagination_Dropdown">
+                        <pagination-controls
+                          (pageChange)="pageChangedData($event)"
+                          directionLinks="true"
+                          id="reasonMappingData"
+                          maxSize="10"
+                          nextLabel=""
+                          previousLabel=""
+                        ></pagination-controls>
+                        <div id="itemPerPageDropdown">
+                          <p-dropdown
+                            [options]="pageLimitOptions"
+                            optionLabel="value"
+                            optionValue="value"
+                            (onChange)="TotalItemPerPageReasonMappingTotalRecords($event)"
+                          ></p-dropdown>
+                        </div>
+                      </div>
+                      <br />
+                      <div class="addUpdateBtn">
+                        @if (!isResolutionEdit) {
+                          <button
+                            type="submit"
+                            class="btn btn-primary"
+                            id="submit"
+                            (click)="addEditResolutionMaster('')"
+                            >
+                            <i class="fa fa-check-circle"></i>
+                            Add Root Cause
+                          </button>
+                        }
+                        @if (isResolutionEdit) {
+                          <button
+                            type="submit"
+                            class="btn btn-primary"
+                            id="submit"
+                            (click)="addEditResolutionMaster(viewResolutionData.id)"
+                            >
+                            <i class="fa fa-check-circle"></i>
+                            Update Root Cause
+                          </button>
+                        }
+                        <br />
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }  -->
+        <!-- </div> -->
+
+        <!-- <p-dialog header="Upload Document" [(visible)]="uploadDocumentId" [style]="{ width: '40%' }" [modal]="true"
+          [responsive]="true" [draggable]="false" [closable]="false">
+          <div class="modal-body">
+            <div [formGroup]="uploadDocForm" class="row">
+              <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                <label>Select files to upload *</label>
+                <input (change)="onFileChangeUpload($event)" class="form-control" formControlName="file"
+                  id="txtSelectDocument" multiple="multiple" placeholder="Select Attachment"
+                  style="padding: 2px; width: 100%" type="file" />
+                  @for (file of selectedFileUploadPreview; track file; let i = $index) {
+                    <div>
+                    <div style="
+              padding-left: 10px;
+              padding-right: 10px;
+              padding-top: 4px;
+              padding-bottom: 4px;
+              font-size: 10px;
+            ">
+                        {{ file?.name }}
+                        <button type="button" class="close" (click)="deletUploadedFile(file?.name)">
+                          &times;
+                        </button>
+                      </div>
+                    </div>
+                  }
+                  @if (submitted && uploadDocForm.controls.file.errors) {
+                    <div class="errorWrap text-danger">
+                      @if (submitted && uploadDocForm.controls.file.errors.required) {
+                        <div class="error text-danger">
+                          File is required.
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button (click)="uploadDocuments()" class="btn btn-primary" id="submit" type="submit">
+                  <i class="fa fa-check-circle"></i>
+                  Upload
+                </button>
+                <button type="button" class="btn btn-danger btn-sm" (click)="closeUploadDocumentId()">
+                  Close
+                </button>
+              </div>
+            </div>
+
+          </p-dialog> -->
+          <!-- <p-dialog
+            header="View Document"
+            [(visible)]="downloadDocumentId"
+            [style]="{ width: '70%' }"
+            [modal]="true"
+            [responsive]="true"
+            [draggable]="false"
+            [closable]="false"
+            >
+            <div class="modal-body">
+              <p-table
+                [value]="resolutionBaseFileData?.fileDetails"
+                [paginator]="true"
+                [rows]="5"
+                [rowsPerPageOptions]="[5,10,20,50,100]"
+                responsiveLayout="scroll"
+                >
+                <ng-template pTemplate="header">
+                  <tr>
+                    <th>File Name</th>
+                    <th>Action</th>
+                  </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-filedata>
+                  <tr>
+                    <td>{{ filedata?.filename }}</td>
+                    <td>
+                      <button
+                        style="border-radius: 5px; padding: 5px 10px; line-height: 1.5; margin-left: 5px"
+                        id="download-button"
+                        title="Download Document"
+                        class="btn btn-primary"
+               (click)="
+                downloadDoc(filedata.filename, filedata.id, filedata.uniqueName)
+              "
+                        >
+                        <img style="width: 25px; height: 25px; border-radius: 3px" src="assets/img/pdf.png" />
+                      </button>
+                      <button
+                        style="border-radius: 5px; padding: 5px 10px; line-height: 1.5; margin-left: 5px"
+                        id="view-button"
+                        title="View Document"
+                        class="btn btn-primary"
+              (click)="
+                showDocData(
+                  filedata.filename,
+                  filedata.id,
+                  filedata.uniqueName
+                )
+              "
+
+                        >
+                        <img
+                          style="width: 25px; height: 25px; border-radius: 3px"
+                          src="assets/img/eye-icon.png"
+                          />
+                        </button>
+                        <button
+                          style="border-radius: 5px; padding: 3px 8px; line-height: 1.5; margin-left: 5px"
+                          class="btn btn-primary"
+                          [disabled]="!filedata.filename"
+                          title="Remove File"
+                          id="delete-button"
+                          (click)="deleteResolveConfirm(filedata)"
+                          >
+                           <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                        </button>
+                      </td>
+                    </tr>
+                  </ng-template>
+                </p-table>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-danger btn-sm" (click)="closeDownloadDocumentId()">
+                    Close
+                  </button>
+                </div>
+              </div>
+            </p-dialog> -->
+
+            <!-- <p-dialog
+              header="Document Preview"
+              [(visible)]="documentPreview"
+              [style]="{ width: '60%' }"
+              [modal]="true"
+              [responsive]="true"
+              [draggable]="false"
+              [closable]="true"
+              (onHide)="closeDocumentPreview()"
+              >
+              <div class="modal-body" style="height: 600px; text-align: center">
+                @switch (previewType) {
+                  @case ('pdf') {
+                    <iframe [src]="previewUrl" width="100%" height="100%"></iframe>
+                  }
+                  @case ('png') {
+                    <img
+                      [src]="previewUrl"
+                      alt="Image"
+                      style="max-width: 100%; max-height: 100%"
+                      />
+                  }
+                  @case ('jpg') {
+                    <img
+                      [src]="previewUrl"
+                      alt="Image"
+                      style="max-width: 100%; max-height: 100%"
+                      />
+                  }
+                  @case ('jpeg') {
+                    <img
+                      [src]="previewUrl"
+                      alt="Image"
+                      style="max-width: 100%; max-height: 100%"
+                      />
+                  }
+                  @case ('mp4') {
+                    <video [src]="previewUrl" controls width="100%" height="100%"></video>
+                  }
+                  @default {
+                    <div>
+                      <p>Unsupported file format for preview.</p>
+                    </div>
+                  }
+                }
+              </div>
+
+              <div class="modal-footer">
+                <button class="btn btn-default" (click)="closeDocumentPreview()" type="button">Close</button>
+              </div>
+            </p-dialog>  -->

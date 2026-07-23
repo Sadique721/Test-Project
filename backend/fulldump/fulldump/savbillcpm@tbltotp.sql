@@ -1,0 +1,25 @@
+-- MySQLShell dump 2.0.1  Distrib Ver 8.0.32 for Linux on x86_64 - for MySQL 8.0.32 (MySQL Community Server (GPL)), for Linux (x86_64)
+--
+-- Host: localhost    Database: savbillcpm    Table: tbltotp
+-- ------------------------------------------------------
+-- Server version	8.0.32
+
+--
+-- Table structure for table `tbltotp`
+--
+
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE IF NOT EXISTS `tbltotp` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `otp` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `mobile_email` varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `generated_time` timestamp NULL DEFAULT NULL,
+  `valid_till_time` timestamp NULL DEFAULT NULL,
+  `status` varchar(250) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `countrycode` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `mvnoid` bigint DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `tbltotp_field_unq` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=104 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;

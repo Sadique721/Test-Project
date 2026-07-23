@@ -1,0 +1,2486 @@
+<div class="row m-0">
+    <mat-card class="cardWithShadow w-100">
+        <mat-card-content class="mat-card-content-border">
+            <form class="form-auth-small" [formGroup]="searchForm">
+                <div class="row">
+                    <!-- Search Option Multi Select -->
+                    <div class="col-md-3" style="margin-bottom: 2%">
+
+                        <mat-form-field appearance="outline" class="w-100">
+                            <mat-select placeholder="Select a Search Option" [(value)]="searchOption"
+                                (selectionChange)="selSearchOption($event)" multiple>
+                                <mat-option *ngFor="let option of searchOptionSelect" [value]="option.value">
+                                    {{ option.label }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- From Date -->
+                    <div class="col-md-3" style="margin-bottom: 2%">
+                        <mat-form-field appearance="outline" class="w-100">
+
+                            <input matInput placeholder="Enter From Date" [matDatepicker]="fromPicker"
+                                formControlName="fromDate" (keydown.enter)="search()" />
+                            <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+                            <mat-datepicker #fromPicker></mat-datepicker>
+                            <mat-error *ngIf="searchSubmitted && searchForm.controls.fromDate.errors">
+                                From Date is required
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- To Date -->
+                    <div class="col-md-3" style="margin-bottom: 2%">
+                        <mat-form-field appearance="outline" class="w-100">
+
+                            <input matInput placeholder="Enter To Date" [matDatepicker]="toPicker"
+                                formControlName="toDate" (keydown.enter)="search()" />
+                            <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+                            <mat-datepicker #toPicker></mat-datepicker>
+                            <mat-error *ngIf="searchSubmitted && searchForm.controls.toDate.errors">
+                                To Date is required
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Dynamic Fields -->
+                    <div class="col-md-3" style="margin-bottom: 2%" *ngIf="searchOption?.includes('userName')">
+                        <mat-form-field appearance="outline" class="w-100">
+
+                            <input matInput placeholder="Enter Username" formControlName="userName"
+                                (keydown.enter)="search()" />
+                            <mat-error *ngIf="searchSubmitted && searchForm.controls.userName.errors">
+                                Username is required
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-md-3" style="margin-bottom: 2%" *ngIf="searchOption?.includes('framedIpAddress')">
+                        <mat-form-field appearance="outline" class="w-100">
+
+                            <input matInput placeholder="Enter Framed IP" formControlName="framedIpAddress"
+                                (keydown.enter)="search()" />
+                            <mat-error *ngIf="searchSubmitted && searchForm.controls.framedIpAddress.errors">
+                                Framed IP is required
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-md-3" style="margin-bottom: 2%" *ngIf="searchOption?.includes('nasIpAddress')">
+                        <mat-form-field appearance="outline" class="w-100">
+
+                            <input matInput placeholder="Enter NAS IP" formControlName="nasIpAddress"
+                                (keydown.enter)="search()" />
+                            <mat-error *ngIf="searchSubmitted && searchForm.controls.nasIpAddress.errors">
+                                NAS IP is required
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Repeat similar for all other conditional fields -->
+                    <div class="col-md-3" style="margin-bottom: 2%" *ngIf="searchOption?.includes('classAttribute')">
+                        <mat-form-field appearance="outline" class="w-100">
+
+                            <input matInput placeholder="Enter Class Attribute" formControlName="classAttribute"
+                                (keydown.enter)="search()" />
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-md-3" style="margin-bottom: 2%" *ngIf="searchOption?.includes('acctStatusType')">
+                        <mat-form-field appearance="outline" class="w-100">
+
+                            <input matInput placeholder="Enter Account Status Type" formControlName="acctStatusType"
+                                (keydown.enter)="search()" />
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-md-3" style="margin-bottom: 2%" *ngIf="searchOption?.includes('nasIdentifier')">
+                        <mat-form-field appearance="outline" class="w-100">
+
+                            <input matInput placeholder="Enter NAS Identifier" formControlName="nasIdentifier"
+                                (keydown.enter)="search()" />
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Framed Route -->
+                    @if (searchOption?.includes('framedRoute')) {
+                    <div class="col-md-3" style="margin-bottom: 2%">
+                        <mat-form-field appearance="outline" class="w-100">
+
+                            <input matInput placeholder="Enter Framed Route" formControlName="framedRoute"
+                                (keydown.enter)="search()" [ngClass]="{
+              'mat-form-field-invalid':
+                searchSubmitted && searchForm.controls.framedRoute.errors
+            }" />
+                            @if (searchSubmitted && searchForm.controls.framedRoute.errors) {
+                            <mat-error>Framed Route is required</mat-error>
+                            }
+                        </mat-form-field>
+                    </div>
+                    }
+
+                    <!-- Nas Port Type -->
+                    @if (searchOption?.includes('nasPortType')) {
+                    <div class="col-md-3" style="margin-bottom: 2%">
+                        <mat-form-field appearance="outline" class="w-100">
+
+                            <input matInput placeholder="Enter Nas Port Type" formControlName="nasPortType"
+                                (keydown.enter)="search()" [ngClass]="{
+              'mat-form-field-invalid':
+                searchSubmitted && searchForm.controls.nasPortType.errors
+            }" />
+                            @if (searchSubmitted && searchForm.controls.nasPortType.errors) {
+                            <mat-error>Nas Port Type is required</mat-error>
+                            }
+                        </mat-form-field>
+                    </div>
+                    }
+
+                    <!-- Nas Port Id -->
+                    @if (searchOption?.includes('nasPortId')) {
+                    <div class="col-md-3" style="margin-bottom: 2%">
+                        <mat-form-field appearance="outline" class="w-100">
+
+                            <input matInput placeholder="Enter Nas Port Id" formControlName="nasPortId"
+                                (keydown.enter)="search()" [ngClass]="{
+              'mat-form-field-invalid':
+                searchSubmitted && searchForm.controls.nasPortId.errors
+            }" />
+                            @if (searchSubmitted && searchForm.controls.nasPortId.errors) {
+                            <mat-error>Nas Port Id is required</mat-error>
+                            }
+                        </mat-form-field>
+                    </div>
+                    }
+
+                    <!-- Account Multi Session Id -->
+                    @if (searchOption?.includes('acctMultiSessionId')) {
+                    <div class="col-md-3" style="margin-bottom: 2%">
+                        <mat-form-field appearance="outline" class="w-100">
+
+                            <input matInput placeholder="Enter Account Multi SessionId"
+                                formControlName="acctMultiSessionId" (keydown.enter)="search()" [ngClass]="{
+              'mat-form-field-invalid':
+                searchSubmitted && searchForm.controls.acctMultiSessionId.errors
+            }" />
+                            @if (searchSubmitted && searchForm.controls.acctMultiSessionId.errors) {
+                            <mat-error>Account Multi SessionId is required</mat-error>
+                            }
+                        </mat-form-field>
+                    </div>
+                    }
+
+                    <!-- Framed IPv6 Address -->
+                    @if (searchOption?.includes('framedIpv6Address')) {
+                    <div class="col-md-3" style="margin-bottom: 2%">
+                        <mat-form-field appearance="outline" class="w-100">
+
+                            <input matInput placeholder="Enter Framed IPv6 Address" formControlName="framedIpv6Address"
+                                (keydown.enter)="search()" [ngClass]="{
+              'mat-form-field-invalid':
+                searchSubmitted && searchForm.controls.framedIpv6Address.errors
+            }" />
+                            @if (searchSubmitted && searchForm.controls.framedIpv6Address.errors) {
+                            <mat-error>Framed IPv6 Address is required</mat-error>
+                            }
+                        </mat-form-field>
+                    </div>
+                    }
+
+                    <!-- Account Session Id -->
+                    @if (searchOption?.includes('acctSessionId')) {
+                    <div class="col-md-3" style="margin-bottom: 2%">
+                        <mat-form-field appearance="outline" class="w-100">
+
+                            <input matInput placeholder="Enter Account Session" formControlName="acctSessionId"
+                                (keydown.enter)="search()" [ngClass]="{
+              'mat-form-field-invalid':
+                searchSubmitted && searchForm.controls.acctSessionId.errors
+            }" />
+                            @if (searchSubmitted && searchForm.controls.acctSessionId.errors) {
+                            <mat-error>Account Session is required</mat-error>
+                            }
+                        </mat-form-field>
+                    </div>
+                    }
+
+                    <!-- Source IP Address -->
+                    @if (searchOption?.includes('sourceIpAddress')) {
+                    <div class="col-md-3" style="margin-bottom: 2%">
+                        <mat-form-field appearance="outline" class="w-100">
+
+                            <input matInput placeholder="Enter Source IP Address" formControlName="sourceIpAddress"
+                                (keydown.enter)="search()" [ngClass]="{
+              'mat-form-field-invalid':
+                searchSubmitted && searchForm.controls.sourceIpAddress.errors
+            }" />
+                            @if (searchSubmitted && searchForm.controls.sourceIpAddress.errors) {
+                            <mat-error>Source IP Address is required</mat-error>
+                            }
+                        </mat-form-field>
+                    </div>
+                    }
+
+
+                    <!-- Buttons -->
+                    <div class="col-md-12 d-flex justify-content-center align-items-center" style="gap:8px">
+                        <button mat-button mat-flat-button color="primary" class="button-normal m-r-10"
+                            (click)="search()" matTooltip="Search User">
+                            Search
+                        </button>
+
+                        <button mat-stroked-button matButton="outlined" class="button-normal"
+                            (click)="clearSearchForm()" matTooltip="Clear">
+                            Clear
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+
+        </mat-card-content>
+    </mat-card>
+</div>
+
+<div class="row m-0">
+    <mat-card class="cardWithShadow w-100">
+        <mat-card-content class="mat-card-content-border">
+
+            <div>
+                <div>
+                    <app-simple-search #listing_groupdata [instanceData]="
+                                              rootInstanceData
+                                            " [cols]="cols" [function]="'live_user'" [selectedCols]="selectedCols"
+                        [backUpCalls]="cols" [value]="value" [hideTable]="hideTable" [exportColumns]="exportColumns"
+                        (getRootInstanceData)="getRootInstanceData($event)" (reloadTable)="search()"
+                        (viewDataa)="this.open($event)" (viewData)="getLiveUserDetail($event)"
+                        (showModalDetails)="openModal('custmerDetailModal', $event)" [showbtn]="true"
+                        [showCheckbox]="false" (disconnect)="this.disconnectConfirm($event)"
+                        (delete)="deleteConfirm($event)"></app-simple-search>
+                </div>
+
+                <!-- <app-simple-search #listing_groupdata [instanceData]="
+                              rootInstanceData" [cols]="cols" [selectedCols]="selectedCols" [function]="'live_user'"
+                    [backUpCalls]="cols" [value]="value" [hideTable]="hideTable" [exportColumns]="exportColumns"
+                    (getRootInstanceData)="getRootInstanceData($event)" (reloadTable)="search()"
+                    (viewData)="this.getLiveUserDetail($event)" (viewDataa)="this.open($event)"
+                    (showModalDetails)="openModal('custmerDetailModal', $event)" [showbtn]="true"
+                    [showCheckbox]="true"></app-simple-search> -->
+            </div>
+            @if (rootInstanceData && rootInstanceData?.length > 0) {
+            <mat-paginator [length]="totalRecords" [pageSize]="itemsPerPage" [pageSizeOptions]="[5, 10,  20, 50, 100]"
+                showFirstLastButtons (page)="pageChanged($event)"></mat-paginator>
+            }
+        </mat-card-content>
+    </mat-card>
+</div>
+
+<ng-template #displayShiftLocationDetailsDialog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <!-- Header -->
+        <div class="dialog-header dialog-title">
+            Add Concurrency
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <div mat-dialog-content>
+            <div [formGroup]="presentGroupForm">
+                <label class="inputLabel">Max Concurrent Session</label>
+                <br>
+                <mat-form-field appearance="outline" class="w-100">
+                    <input matInput type="number" formControlName="maxconcurrentsession" placeholder="Integers only" />
+                    @if (presentGroupForm.controls.maxconcurrentsession.invalid &&
+                    presentGroupForm.controls.maxconcurrentsession.touched) {
+                    <mat-error>Only integers are allowed</mat-error>
+                    }
+                </mat-form-field>
+            </div>
+        </div>
+        <div class="dialog-action-adjust d-flex justify-content-end" style="gap:8px">
+            <button mat-button mat-flat-button color="primary" class="button-normal m-r-10"
+                (click)="saveShiftLocation(dialogRef)" [disabled]="presentGroupForm.invalid">
+                Save
+            </button>
+            <button mat-stroked-button mat-dialog-close>Close</button>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #detailsDialog let-dialogRef="dialogRef">
+    <div class="dialog-container">
+        <div class="dialog-header">
+            Live User Detail
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+            <div class="row">
+                <div class="col-lg-4 col-md-4 dataGroup">
+                    <div class="field">
+                        <span class="label-text">Username </span>
+                        <span class="colon">:</span>
+                        <span class="m-l-10">{{ liveUserDetail.userName ||'-'}}</span>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-4 dataGroup">
+                    <div class="field">
+                        <span class="label-text">Password </span>
+                        <span class="colon">:</span>
+                        <span class="m-l-10">
+                            {{ liveUserDetail.userPassword ||'-'}}
+                        </span>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-4 dataGroup">
+                    <div class="field">
+                        <span class="label-text">Chap Password </span>
+                        <span class="colon">:</span>
+                        <span class="m-l-10">
+                            {{ liveUserDetail.chapPassword ||'-'}}
+                        </span>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-4 dataGroup">
+                    <div class="field">
+                        <span class="label-text">Nas IP Address </span>
+                        <span class="colon">:</span>
+                        <span class="m-l-10">{{ liveUserDetail.nasIpAddress ||'-'}}</span>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-4 dataGroup">
+                    <div class="field">
+                        <span class="label-text">Nas Port </span>
+                        <span class="colon">:</span>
+                        <span class="m-l-10">{{ liveUserDetail.nasPort ||'-'}}</span>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-4 dataGroup">
+                    <div class="field">
+                        <span class="label-text">Service Type </span>
+                        <span class="colon">:</span>
+                        <span class="m-l-10">
+                            {{ liveUserDetail.serviceType ||'-'}}
+                        </span>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Framed Protocol </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.framedProtocol ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Framed IP Address </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.framedIpAddress ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Framed IP Netmask </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.framedIpNetmask ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Framed Routing </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.framedRouting ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Filter Id </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">{{ liveUserDetail.filterId ||'-'}}</span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Framed Mtu </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">{{ liveUserDetail.framedMtu ||'-'}}</span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Framed Compression </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.framedCompression ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Login IP Host </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">{{ liveUserDetail.loginIpHost ||'-'}}</span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Login Service </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">{{ liveUserDetail.loginService ||'-'}}</span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Login Tcp Port </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">{{ liveUserDetail.loginTcpPort ||'-'}}</span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Reply Message </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">{{ liveUserDetail.replyMessage ||'-'}}</span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Callback Number </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.callbackNumber ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Callback Id </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">{{ liveUserDetail.callbackId ||'-'}}</span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Framed Route </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">{{ liveUserDetail.framedRoute ||'-'}}</span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Framed IPx Network </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.framedIpxNetwork ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">State </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">{{ liveUserDetail.state ||'-'}}</span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Acct Class </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">{{ liveUserDetail.acctClass ||'-'}}</span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Vendor Specific </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10 truncate-text" [matTooltip]="liveUserDetail.vendorSpecific">
+                            {{ liveUserDetail.vendorSpecific ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Session Timeout </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.sessionTimeout ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Idle Timeout </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">{{ liveUserDetail.idleTimeout ||'-'}}</span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Termination Action </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.terminationAction ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Called Station Id </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.calledStationId ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Calling Station Id </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.callingStationId ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Nas Identifier </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.nasIdentifier ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Idle Timeout </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">{{ liveUserDetail.idleTimeout ||'-'}}</span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Proxy State </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">{{ liveUserDetail.proxyState ||'-'}}</span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">LoginLat Service </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.loginLatService ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">LoginLat Node </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">{{ liveUserDetail.loginLatNode ||'-'}}</span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">LoginLat Group </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.loginLatGroup ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Framed Apple TalkLink </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.framedAppleTalkLink ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Idle Timeout </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">{{ liveUserDetail.idleTimeout ||'-'}}</span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Framed Apple TalkNetwork </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.framedAppleTalkNetwork ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Framed Apple TalkZone </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.framedAppleTalkZone ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Acct Status Type </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.acctStatusType ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Acct Delay Time </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.acctDelayTime ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Acct InputOctets </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.acctInputOctets ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Acct OutputOctets </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.acctOutputOctets ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Acct Session Id </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10 truncate-text" [matTooltip]="liveUserDetail.acctSessionId">
+                            {{ liveUserDetail.acctSessionId ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Acct Authentic </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.acctAuthentic ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Acct Session Time </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.acctSessionTime ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Acct Input Packets </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.acctInputPackets ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Acct Output Packets </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.acctOutputPackets ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Acct Terminate Cause </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.acctTerminateCause ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Acct Multi Session Id </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.acctMultiSessionId ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Acct Link Count </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.acctLinkCount ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Acct Input Gigawords </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.acctInputGigawords ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Acct Output Gigawords </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.acctOutputGigawords ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Event Timestamp </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.eventTimestamp ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Chap Challenge </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.chapChallenge ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Nas Port Type </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">{{ liveUserDetail.nasPortType ||'-'}}</span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Acct Session Time </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.acctSessionTime ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Port Limit </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">{{ liveUserDetail.portLimit ||'-'}}</span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Login LAT Port </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">{{ liveUserDetail.loginLATPort ||'-'}}</span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Acct Tunnel Connection </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.acctTunnelConnection ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Arap Password </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">{{ liveUserDetail.arapPassword ||'-'}}</span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Arap Features </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">{{ liveUserDetail.arapFeatures ||'-'}}</span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Arap Zone Access </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.arapZoneAccess ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Arap Security </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">{{ liveUserDetail.arapSecurity ||'-'}}</span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Arap Security Data </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.arapSecurityData ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Password Retry </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.passwordRetry ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Prompt </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">{{ liveUserDetail.prompt ||'-'}}</span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Connect Info </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">{{ liveUserDetail.connectInfo ||'-'}}</span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Configuration Token </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.configurationToken ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Eap Message </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">{{ liveUserDetail.eapMessage ||'-'}}</span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Message Authenticator </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.messageAuthenticator ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Arap Challenge Response </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.arapChallengeResponse ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Acct Interim Interval </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.acctInterimInterval ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Nas Port Id </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10 truncate-text" [matTooltip]="liveUserDetail.nasPortId">{{ liveUserDetail.nasPortId ||'-'}}</span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Framed Pool </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">{{ liveUserDetail.framedPool ||'-'}}</span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Nas IPv6 Address </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.nasIPv6Address ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Framed Interface Id </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.framedInterfaceId ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Framed IPv6 Prefix </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.framedIPv6Prefix ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Login IPv6 Host </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.loginIPv6Host ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Framed IPv6 Route </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.framedIPv6Route ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Framed IPv6 Pool </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.framedIPv6Pool ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Digest Response </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.digestResponse ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Digest Attributes </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.digestAttributes ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+
+
+                    <div class="field">
+                        <span class="label-text">Framed Ipv6 Address </span>
+                        <span class="colon">:</span>
+
+
+                        <span class="m-l-10">
+                            {{ liveUserDetail.framedipv6address ||'-'}}
+                        </span>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+        <div class="dialog-action-adjust d-flex justify-content-end">
+            <button mat-stroked-button mat-dialog-close class="button-normal">Close</button>
+        </div>
+    </div>
+</ng-template>
+
+
+<ng-template #confirmDialog let-data>
+    <div class="dialog-container">
+        <div class="dialog-header dialog-header-titleFont">
+            {{ data.title || "Delete Confirmation" }}
+            <span class="w-h-18">
+                <a mat-icon-button href="javascript:void(0)" mat-dialog-close="false">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+            <p class="dialog-description">{{ data.description }}</p>
+
+            <div mat-dialog-actions class="p-0">
+                <button mat-flat-button type="button" class="primary" [mat-dialog-close]="true">
+                    {{ data.yesLabel || "Confirm" }}
+                </button>
+                <button mat-stroked-button matButton="outlined" color="primary" mat-dialog-close="false">
+                    {{ data.noLabel || "Cancel" }}
+                </button>
+            </div>
+        </div>
+    </div>
+</ng-template>
+
+
+<!-- <div class="row">
+    <div class="col-md-12">
+        <div class="panel top">
+            <div class="panel-heading">
+                <h3 class="panel-title">Live User Management</h3>
+                <div class="right">
+                    <button type="button" class="btn-toggle-collapse" data-toggle="collapse"
+                        data-target="#liveUserSearchPanel" aria-expanded="false" aria-controls="liveUserSearchPanel">
+                        <i class="fa fa-minus-circle"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="liveUserSearchPanel" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    <div class="searchForm">
+                        <form class="form-auth-small" [formGroup]="searchForm">
+                            <div class="col-md-3" style="margin-bottom: 2%">
+                                <p-multiSelect id="roles" (onChange)="selSearchOption($event)"
+                                    [options]="searchOptionSelect" placeholder="Select a Search Option"
+                                    [(ngModel)]="searchOption" optionLabel="label" optionValue="value" filter="true"
+                                    filterBy="label" [ngModelOptions]="{ standalone: true }"></p-multiSelect>
+                            </div>
+                            <div class="col-md-3" style="margin-bottom: 2%">
+                                <p-calendar dateFormat="dd/mm/yy" [showIcon]="true" [showButtonBar]="true"
+                                    [hideOnDateTimeSelect]="true" placeholder="Enter From Date"
+                                    formControlName="fromDate" [style]="{ width: '100%' }" (keydown.enter)="search()"
+                                    [ngClass]="{
+                    'is-invalid': searchSubmitted && searchForm.controls.fromDate.errors
+                  }"></p-calendar>
+                            </div>
+                            <div class="col-md-3" style="margin-bottom: 2%">
+                                <p-calendar dateFormat="dd/mm/yy" [showIcon]="true" [showButtonBar]="true"
+                                    [hideOnDateTimeSelect]="true" placeholder="Enter To Date" formControlName="toDate"
+                                    [style]="{ width: '100%' }" (keydown.enter)="search()" [ngClass]="{
+                    'is-invalid': searchSubmitted && searchForm.controls.toDate.errors
+                  }"></p-calendar>
+                            </div>
+                            @if (searchOption?.includes('userName')) {
+                            <div class="col-md-3" style="margin-bottom: 2%">
+                                <input type="text" name="name" class="form-control" placeholder="Enter Username"
+                                    formControlName="userName" (keydown.enter)="search()" [ngClass]="{
+                    'is-invalid': searchSubmitted && searchForm.controls.userName.errors
+                  }" />
+                            </div>
+                            }
+                            @if (searchOption?.includes('framedIpAddress')) {
+                            <div class="col-md-3" style="margin-bottom: 2%">
+                                <input type="text" name="framedIpAddress" class="form-control"
+                                    placeholder="Enter Framed Ip" formControlName="framedIpAddress"
+                                    (keydown.enter)="search()" [ngClass]="{
+                    'is-invalid': searchSubmitted && searchForm.controls.framedIpAddress.errors
+                  }" />
+                            </div>
+                            }
+                            @if (searchOption?.includes('nasIpAddress')) {
+                            <div class="col-md-3" style="margin-bottom: 2%">
+                                <input type="text" name="name" class="form-control" placeholder="Enter Nas Ip"
+                                    formControlName="nasIpAddress" (keydown.enter)="search()" [ngClass]="{
+                    'is-invalid': searchSubmitted && searchForm.controls.nasIpAddress.errors
+                  }" />
+                            </div>
+                            }
+                            @if (searchOption?.includes('classAttribute')) {
+                            <div class="col-md-3" style="margin-bottom: 2%">
+                                <input type="text" name="name" class="form-control" placeholder="Enter Class Attribute"
+                                    formControlName="classAttribute" (keydown.enter)="search()" [ngClass]="{
+                    'is-invalid': searchSubmitted && searchForm.controls.classAttribute.errors
+                  }" />
+                            </div>
+                            }
+                            @if (searchOption?.includes('acctStatusType')) {
+                            <div class="col-md-3" style="margin-bottom: 2%">
+                                <input type="text" name="name" class="form-control"
+                                    placeholder="Enter Account Status Type" formControlName="acctStatusType"
+                                    (keydown.enter)="search()" [ngClass]="{
+                    'is-invalid': searchSubmitted && searchForm.controls.acctStatusType.errors
+                  }" />
+                            </div>
+                            }
+                            @if (searchOption?.includes('nasIdentifier')) {
+                            <div class="col-md-3" style="margin-bottom: 2%">
+                                <input type="text" name="name" class="form-control" placeholder="Enter Nas Identifier"
+                                    formControlName="nasIdentifier" (keydown.enter)="search()" [ngClass]="{
+                    'is-invalid': searchSubmitted && searchForm.controls.nasIdentifier.errors
+                  }" />
+                            </div>
+                            }
+                            @if (searchOption?.includes('framedRoute')) {
+                            <div class="col-md-3" style="margin-bottom: 2%">
+                                <input type="text" name="name" class="form-control" placeholder="Enter Framed Route"
+                                    formControlName="framedRoute" (keydown.enter)="search()" [ngClass]="{
+                    'is-invalid': searchSubmitted && searchForm.controls.framedRoute.errors
+                  }" />
+                            </div>
+                            }
+                            @if (searchOption?.includes('nasPortType')) {
+                            <div class="col-md-3" style="margin-bottom: 2%">
+                                <input type="text" name="name" class="form-control" placeholder="Enter Nas Port Type"
+                                    formControlName="nasPortType" (keydown.enter)="search()" [ngClass]="{
+                    'is-invalid': searchSubmitted && searchForm.controls.nasPortType.errors
+                  }" />
+                            </div>
+                            }
+                            @if (searchOption?.includes('nasPortId')) {
+                            <div class="col-md-3" style="margin-bottom: 2%">
+                                <input type="text" name="name" class="form-control" placeholder="Enter Nas Port Id"
+                                    formControlName="nasPortId" (keydown.enter)="search()" [ngClass]="{
+                    'is-invalid': searchSubmitted && searchForm.controls.nasPortId.errors
+                  }" />
+                            </div>
+                            }
+                            @if (searchOption?.includes('acctMultiSessionId')) {
+                            <div class="col-md-3" style="margin-bottom: 2%">
+                                <input type="text" name="name" class="form-control"
+                                    placeholder="Enter Account Multi SessionId" formControlName="acctMultiSessionId"
+                                    (keydown.enter)="search()" [ngClass]="{
+                    'is-invalid': searchSubmitted && searchForm.controls.acctMultiSessionId.errors
+                  }" />
+                            </div>
+                            }
+                            @if (searchOption?.includes('framedIpv6Address')) {
+                            <div class="col-md-3" style="margin-bottom: 2%">
+                                <input type="text" name="name" class="form-control"
+                                    placeholder="Enter Farmed IpV6 Address" formControlName="framedIpv6Address"
+                                    (keydown.enter)="search()" [ngClass]="{
+                    'is-invalid': searchSubmitted && searchForm.controls.framedIpv6Address.errors
+                  }" />
+                            </div>
+                            }
+                            @if (searchOption?.includes('acctSessionId')) {
+                            <div class="col-md-3" style="margin-bottom: 2%">
+                                <input type="text" name="name" class="form-control" placeholder="Enter Account Session"
+                                    formControlName="acctSessionId" (keydown.enter)="search()" [ngClass]="{
+                    'is-invalid': searchSubmitted && searchForm.controls.acctSessionId.errors
+                  }" />
+                            </div>
+                            }
+                            @if (searchOption?.includes('sourceIpAddress')) {
+                            <div class="col-md-3" style="margin-bottom: 2%">
+                                <input type="text" name="name" class="form-control"
+                                    placeholder="Enter Source Ip Address" formControlName="sourceIpAddress"
+                                    (keydown.enter)="search()" [ngClass]="{
+                    'is-invalid': searchSubmitted && searchForm.controls.sourceIpAddress.errors
+                  }" />
+                            </div>
+                            }
+                            <div class="col-md-12 searchbtn">
+                                <button type="submit" class="btn btn-primary" title="Search User" data-toggle="tooltip"
+                                    (click)="search()">
+                                    <i class="fa fa-search"></i>
+                                    Search
+                                </button>
+                                &nbsp;
+                                <button type="reset" class="btn btn-default" title="Clear" data-toggle="tooltip"
+                                    (click)="clearSearchForm()">
+                                    <img src="assets/img/DashboardIcons/Refresh.svg" />
+                                    Clear
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> -->
+<!-- <div class="row">
+    <div class="col-md-12">
+        <div class="panel">
+            <div class="panel-heading">
+                <div style="display: flex">
+                    <h3 class="panel-title" style="display: inline-block">Live Users</h3>
+
+                </div>
+                <div class="right">
+                    <button type="button" class="btn-toggle-collapse" data-toggle="collapse"
+                        data-target="#liveUserTabelPanel" aria-expanded="false" aria-controls="liveUserTabelPanel">
+                        <i class="fa fa-minus-circle"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="liveUserTabelPanel" class="panel-collapse collapse in">
+                <div class="panel-body table-responsive">
+                    <app-simple-search #listing_groupdata [instanceData]="
+              rootInstanceData
+                | paginate
+                  : {
+                      id: 'listing_liveuserdata',
+                      itemsPerPage: itemsPerPage,
+                      currentPage: currentPage,
+                      totalItems: totalRecords
+                    }
+            " [cols]="cols" [selectedCols]="selectedCols" [function]="'live_user'" [backUpCalls]="cols" [value]="value"
+                        [hideTable]="hideTable" [exportColumns]="exportColumns"
+                        (getRootInstanceData)="getRootInstanceData($event)" (reloadTable)="search()"
+                        (viewData)="this.getLiveUserDetail($event)" (viewDataa)="this.open($event)"
+                        (disconnect)="this.disconnectConfirm($event)" (delete)="this.deleteConfirm($event)"
+                        (showModalDetails)="openModal('custmerDetailModal', $event)" [showbtn]="true"
+                        [showCheckbox]="true"></app-simple-search>
+                    <br />
+                    <div class="row">
+                        <div class="col-md-12" style="display: flex">
+                            <pagination-controls id="listing_liveuserdata" [maxSize]="10" [directionLinks]="true"
+                                previousLabel="" nextLabel="" (pageChange)="pageChanged($event)"></pagination-controls>
+
+                            <div id="itemPerPageDropdown">
+                                <p-dropdown [options]="pageLimitOptions" optionLabel="value" optionValue="value"
+                                    (onChange)="TotalItemPerPage($event)"></p-dropdown>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> -->
+
+<!-- <p-dialog header="CDR Detail" [(visible)]="liveUserDetailModal" [style]="{ width: '35%' }" [modal]="true"
+    [responsive]="true" [draggable]="false" [closable]="true">
+    <div class="modal-body">
+        <div class="container-fluid">
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="type">Username :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="typeValue">{{ liveUserDetail.userName }}</label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="noOfVoucher">Password :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="noOfVoucherValue">
+                        {{ liveUserDetail.userPassword }}
+                    </label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-5">
+                    <label for="planName">Chap Password :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="planNameValue">
+                        {{ liveUserDetail.chapPassword }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="length">Nas IP Address :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="lengthValue">{{ liveUserDetail.nasIpAddress }}</label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="preValue">Nas Port :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="preValuevalue">{{ liveUserDetail.nasPort }}</label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="postValue">Service Type :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="postValueValue">
+                        {{ liveUserDetail.serviceType }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Framed Protocol :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.framedProtocol }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Framed IP Address :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.framedIpAddress }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Framed IP Netmask :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.framedIpNetmask }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Framed Routing :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.framedRouting }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Filter Id :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">{{ liveUserDetail.filterId }}</label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Framed Mtu :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">{{ liveUserDetail.framedMtu }}</label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Framed Compression :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.framedCompression }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Login IP Host :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">{{ liveUserDetail.loginIpHost }}</label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Login Service :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">{{ liveUserDetail.loginService }}</label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Login Tcp Port :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">{{ liveUserDetail.loginTcpPort }}</label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Reply Message :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">{{ liveUserDetail.replyMessage }}</label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Callback Number :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.callbackNumber }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Callback Id :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">{{ liveUserDetail.callbackId }}</label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Framed Route :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">{{ liveUserDetail.framedRoute }}</label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Framed IPx Network :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.framedIpxNetwork }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">State :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">{{ liveUserDetail.state }}</label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Acct Class :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">{{ liveUserDetail.acctClass }}</label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Vendor Specific :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.vendorSpecific }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Session Timeout :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.sessionTimeout }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Idle Timeout :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">{{ liveUserDetail.idleTimeout }}</label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Termination Action :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.terminationAction }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Called Station Id :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.calledStationId }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Calling Station Id :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.callingStationId }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Nas Identifier :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.nasIdentifier }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Idle Timeout :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">{{ liveUserDetail.idleTimeout }}</label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Proxy State :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">{{ liveUserDetail.proxyState }}</label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">LoginLat Service :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.loginLatService }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">LoginLat Node :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">{{ liveUserDetail.loginLatNode }}</label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">LoginLat Group :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.loginLatGroup }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Framed Apple TalkLink :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.framedAppleTalkLink }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Idle Timeout :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">{{ liveUserDetail.idleTimeout }}</label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Framed Apple TalkNetwork :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.framedAppleTalkNetwork }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Framed Apple TalkZone :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.framedAppleTalkZone }}
+                    </label>
+                </div>
+            </div>
+
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Acct Status Type :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.acctStatusType }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Acct Delay Time :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.acctDelayTime }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Acct InputOctets :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.acctInputOctets }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Acct OutputOctets :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.acctOutputOctets }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Acct Session Id :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.acctSessionId }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Acct Authentic :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.acctAuthentic }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Acct Session Time :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.acctSessionTime }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Acct Input Packets :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.acctInputPackets }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Acct Output Packets :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.acctOutputPackets }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Acct Terminate Cause :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.acctTerminateCause }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Acct Multi Session Id :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.acctMultiSessionId }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Acct Link Count :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.acctLinkCount }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Acct Input Gigawords :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.acctInputGigawords }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Acct Output Gigawords :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.acctOutputGigawords }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Event Timestamp :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.eventTimestamp }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Chap Challenge :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.chapChallenge }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Nas Port Type :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">{{ liveUserDetail.nasPortType }}</label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Acct Session Time :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.acctSessionTime }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Port Limit :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">{{ liveUserDetail.portLimit }}</label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Login LAT Port :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">{{ liveUserDetail.loginLATPort }}</label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Acct Tunnel Connection :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.acctTunnelConnection }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Arap Password :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">{{ liveUserDetail.arapPassword }}</label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Arap Features :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">{{ liveUserDetail.arapFeatures }}</label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Arap Zone Access :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.arapZoneAccess }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Arap Security :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">{{ liveUserDetail.arapSecurity }}</label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Arap Security Data :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.arapSecurityData }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Password Retry :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.passwordRetry }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Prompt :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">{{ liveUserDetail.prompt }}</label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Connect Info :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">{{ liveUserDetail.connectInfo }}</label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Configuration Token :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.configurationToken }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Eap Message :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">{{ liveUserDetail.eapMessage }}</label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Message Authenticator :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.messageAuthenticator }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Arap Challenge Response :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.arapChallengeResponse }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Acct Interim Interval :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.acctInterimInterval }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Nas Port Id :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">{{ liveUserDetail.nasPortId }}</label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Framed Pool :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">{{ liveUserDetail.framedPool }}</label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Nas IPv6 Address :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.nasIPv6Address }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Framed Interface Id :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.framedInterfaceId }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Framed IPv6 Prefix :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.framedIPv6Prefix }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Login IPv6 Host :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.loginIPv6Host }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Framed IPv6 Route :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.framedIPv6Route }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Framed IPv6 Pool :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.framedIPv6Pool }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Digest Response :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.digestResponse }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Digest Attributes :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.digestAttributes }}
+                    </label>
+                </div>
+            </div>
+            <div class="row" id="viewDetail">
+                <div class="col-md-5">
+                    <label for="status">Framed Ipv6 Address :</label>
+                </div>
+                <div class="col-md-7">
+                    <label for="statusValue">
+                        {{ liveUserDetail.framedipv6address }}
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+    </div>
+</p-dialog> -->
+
+<!-- <p-dialog header="Add Concurrency" [(visible)]="displayShiftLocationDetails" [style]="{ width: '50%' }" [modal]="true"
+    [responsive]="true" [draggable]="false" [closable]="true" (onHide)="closeShiftLocation()">
+    <div class="modal-body">
+        <div [formGroup]="presentGroupForm">
+            <fieldset>
+                <label>Add concurrency</label>
+                <input type="number" pInputText formControlName="maxconcurrentsession" pKeyFilter="int"
+                    placeholder="Integers" />
+            </fieldset>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <div class="addUpdateBtn">
+            <button (click)="saveShiftLocation()" class="btn btn-primary" data-title="Shift Location" type="button">
+                save
+            </button>
+            <button type="button" class="btn btn-default" (click)="closeShiftLocation()">Close</button>
+        </div>
+    </div>
+</p-dialog> -->
+
+<!-- @if (dialogId) {
+<app-customer-details (closeSelectStaff)="closeSelectStaff()" [custId]="custId"></app-customer-details>
+} -->

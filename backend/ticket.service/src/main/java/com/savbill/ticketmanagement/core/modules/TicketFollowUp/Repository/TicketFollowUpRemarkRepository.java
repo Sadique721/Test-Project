@@ -1,0 +1,16 @@
+package com.savbill.ticketmanagement.core.modules.TicketFollowUp.Repository;
+
+import com.savbill.ticketmanagement.core.modules.TicketFollowUp.Domain.TicketFollowUpRemark;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface TicketFollowUpRemarkRepository extends JpaRepository<TicketFollowUpRemark, Long> {
+
+    @Query(name = "select * from TBLTTICKETFOLLOWUPREMARK where ticket_follow_up_id=:ticketFollowUpId")
+    List<TicketFollowUpRemark> findByTicketFollowUpId(@Param("ticketFollowUpId") Long ticketFollowUpId);
+}

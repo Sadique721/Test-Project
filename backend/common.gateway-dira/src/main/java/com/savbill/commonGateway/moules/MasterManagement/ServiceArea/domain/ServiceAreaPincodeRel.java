@@ -1,0 +1,64 @@
+package com.savbill.commonGateway.moules.MasterManagement.ServiceArea.domain;
+
+
+import com.savbill.commonGateway.core.data.IBaseData;
+import com.savbill.commonGateway.moules.MasterManagement.City.domain.City;
+import com.savbill.commonGateway.moules.MasterManagement.Pincode.domain.Pincode;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+
+import javax.persistence.*;
+
+@Data
+@Entity
+@NoArgsConstructor
+@Table(name = "tbltserviceareapincoderel")
+public class ServiceAreaPincodeRel implements IBaseData<Long> {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", updatable = false, nullable = false)
+    private Long id;
+
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @ManyToOne(targetEntity = ServiceArea.class)
+    @JoinColumn(name = "serviceareaid", referencedColumnName = "service_area_id", updatable = true, insertable = true)
+    private ServiceArea serviceArea;
+
+    @ManyToOne(targetEntity = Pincode.class)
+    @JoinColumn(name = "pincodeid", referencedColumnName = "pincodeid", updatable = true, insertable = true)
+    private Pincode pincodeData;
+
+    @Column(name = "is_deleted", columnDefinition = "Boolean default false")
+    private Boolean isDeleted = false;
+
+    @ManyToOne(targetEntity = City.class)
+    @JoinColumn(name = "cityid", referencedColumnName = "CITYID", updatable = true, insertable = true)
+    private City cityData;
+
+    public ServiceAreaPincodeRel(ServiceArea serviceArea, Pincode pincode, Boolean isDeleted){
+        this.serviceArea = serviceArea;
+        this.pincodeData = pincode;
+        this.isDeleted = isDeleted;
+        this.cityData = getCityData();
+    }
+
+    @Override
+    public Long getPrimaryKey() { return id; }
+
+    @Override
+    public void setDeleteFlag(boolean deleteFlag) { this.isDeleted = deleteFlag; }
+
+    @Override
+    public boolean getDeleteFlag()  {
+        return isDeleted;
+    }
+
+    @Override
+    public void setBuId(Long buId) {
+
+    }
+}

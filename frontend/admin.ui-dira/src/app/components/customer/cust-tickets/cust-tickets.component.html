@@ -1,0 +1,3059 @@
+<div class="row p-0 m-0" style="margin-top: 1rem !important;">
+    <div class="col-md-12">
+        <mat-card class="cardWithShadow">
+            <mat-card-header>
+                <img src="assets/img/DashboardIcons/Back Arrow.svg" alt="arrow back" class="m-r-10"
+                    (click)="customerDetailOpen()">
+                <div
+                    style="font-size:x-large; align-items: center; font-weight: 500; align-content: center; width: auto;">
+                    {{ custData?.title }}
+                    {{ custData?.firstname }}
+                    {{ custData?.lastname }} Ticket List
+                </div>
+                @if (createTicketAccess) {
+                <button mat-flat-button color="primary" class="button-normal m-l-auto"
+                    [disabled]="custData.status === 'Terminate'" (click)="addTicket()" style="width: auto">
+                    Add Ticket
+                </button>
+                }
+            </mat-card-header>
+        </mat-card>
+    </div>
+</div>
+<div class="container-fluid contain-flud">
+    <div class="row p-0 m-0">
+        <div class="col-md-12">
+            <mat-card class="cardWithShadow">
+                <mat-card-content class="mat-card-content-border">
+                    <div class="country-table-list">
+                        <div class="example-container mat-elevation-z8" tabindex="0"
+                            *ngIf="custTicketList && custTicketList.length > 0">
+
+                            <table mat-table [dataSource]="custTicketList" class="mat-elevation-z2 full-width-table">
+
+                                <!-- Issue/Name Column -->
+                                <ng-container matColumnDef="caseTitle">
+                                    <th mat-header-cell *matHeaderCellDef>Name</th>
+                                    <td mat-cell *matCellDef="let ticket">
+                                        <a href="javascript:void(0)" (click)="openTicketDetailView(ticket.caseId)"
+                                            style="text-decoration: none;" class="text-primary">
+                                            {{ ticket.caseTitle }}
+                                        </a>
+                                    </td>
+                                </ng-container>
+
+
+                                <!-- Number -->
+                                <ng-container matColumnDef="caseNumber">
+                                    <th mat-header-cell *matHeaderCellDef> Number </th>
+                                    <td mat-cell *matCellDef="let ticket"> {{ ticket.caseNumber }} </td>
+                                </ng-container>
+
+                                <!-- Type -->
+                                <ng-container matColumnDef="caseType">
+                                    <th mat-header-cell *matHeaderCellDef> Type </th>
+                                    <td mat-cell *matCellDef="let ticket"> {{ ticket.caseType }} </td>
+                                </ng-container>
+
+                                <!-- Assignee -->
+                                <ng-container matColumnDef="assignee">
+                                    <th mat-header-cell *matHeaderCellDef> Assignee </th>
+                                    <td mat-cell *matCellDef="let ticket">
+
+                                        <a *ngIf="ticket.currentAssigneeId; else noAssignee"
+                                            (click)="openStaffDetailModal(ticket.currentAssigneeId)"
+                                            href="javascript:void(0)" class="text-primary "
+                                            style="text-decoration: none;">
+                                            {{ ticket.currentAssigneeName }}
+                                        </a>
+                                        <ng-template #noAssignee>{{ ticket.currentAssigneeName }}</ng-template>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Status -->
+                                <ng-container matColumnDef="caseStatus">
+                                    <th mat-header-cell *matHeaderCellDef> Status </th>
+                                    <td mat-cell *matCellDef="let ticket">
+                                        <span class="status-badge">
+                                            {{ ticket.caseStatus }}
+                                        </span>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Created Date -->
+                                <ng-container matColumnDef="createdate">
+                                    <th mat-header-cell *matHeaderCellDef> Created Date & Time </th>
+                                    <td mat-cell *matCellDef="let ticket"> {{ ticket.createdate }} </td>
+                                </ng-container>
+
+                                <!-- Problem Domain -->
+                                <ng-container matColumnDef="caseReasonCategory">
+                                    <th mat-header-cell *matHeaderCellDef> Problem Domain </th>
+                                    <td mat-cell *matCellDef="let ticket"> {{ ticket.caseReasonCategory }} </td>
+                                </ng-container>
+
+                                <!-- Sub Problem Domain -->
+                                <ng-container matColumnDef="caseReasonSubCategory">
+                                    <th mat-header-cell *matHeaderCellDef> Sub Problem Domain </th>
+                                    <td mat-cell *matCellDef="let ticket"> {{ ticket.caseReasonSubCategory }} </td>
+                                </ng-container>
+                                <ng-container matColumnDef="action">
+                                    <th mat-header-cell *matHeaderCellDef> Action </th>
+                                    <td mat-cell *matCellDef="let ticket">
+
+                                        <button mat-icon-button color="warn" *ngIf="slaCounterAccess" [disabled]="
+                                                                      ticket.caseStatus == 'Closed' ||
+                                                                      ticket.caseStatus == 'Raise and Close' ||
+                                                                      ticket.caseStatus == 'rejected' ||
+                                                                      ticket.caseStatus == 'Follow Up' ||
+                                                                      ticket.caseStatus == 'On Hold' ||
+                                                                      ticket.caseStatus == 'Pending' ||
+                                                                      ticket.caseStatus == 'Out of domain'
+                                                                    " (click)="SlaCounterModelOpen(ticket)"
+                                            matTooltip="SLA Counter">
+                                            <img src="assets/img/DashboardIcons/timer-svgrepo-com 1.svg">
+                                        </button>
+                                    </td>
+                                </ng-container>
+                                <!-- Header & Row Definitions -->
+                                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                            </table>
+
+
+                        </div><!-- Pagination -->
+                        <div *ngIf="custTicketList && custTicketList.length > 0">
+                            <mat-paginator [length]="totalRecords" [pageSize]="itemsPerPage"
+                                [pageSizeOptions]="[5,10,20,50,100]" (page)="pageChangedTicketConfig($event)"
+                                showFirstLastButtons>
+                            </mat-paginator>
+                        </div>
+                        <!-- No Records Found -->
+                        <div *ngIf="!custTicketList || custTicketList.length === 0" class="no-data">
+                            <p>No tickets available.</p>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </div>
+</div>
+
+
+
+
+<!-- ================= STAFF DETAILS DIALOG ================= -->
+<ng-template #staffDetailDialog>
+    <div class="dialog-container">
+        <div class="dialog-header">
+            Staff Details
+            <span>
+                <a mat-icon-button mat-dialog-close>
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+
+        <mat-dialog-content>
+            <mat-card>
+                <mat-card-header>
+                    <mat-card-title>Basic Details</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="row">
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Name </span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10 ellipsis-text" [matTooltip]="staffData.fullName"
+                                    matTooltipPosition="above">{{ staffData.fullName }}</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Email </span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10 ellipsis-text" [matTooltip]="staffData.email"
+                                    matTooltipPosition="above">{{ staffData.email }}</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Phone </span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">{{ staffData.phone }}</span>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Username </span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10 ellipsis-text" [matTooltip]="staffData.username"
+                                    matTooltipPosition="above">{{ staffData.username }}</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Role Name </span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10 ellipsis-text" [matTooltip]="staffData.roleName[0]"
+                                    matTooltipPosition="above">{{ staffData.roleName[0] }}</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Service Area </span>
+                                <span class="colon">:</span>
+                                <a href="javascript:void(0)" (click)="onClickServiceArea()" class="text-primary">
+                                    click here
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Parent Staff Name </span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10 ellipsis-text" [matTooltip]="staffData.parentstaffname"
+                                    matTooltipPosition="above">{{ staffData.parentstaffname }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+
+            <mat-card>
+                <mat-card-header>
+                    <mat-card-title>Team List</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="row">
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup"
+                            *ngFor="let data of staffData.teamNameList">
+                            <span class="m-l-10">{{ data }}</span>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </mat-dialog-content>
+
+        <div class="dialog-action-adjust d-flex justify-content-end">
+            <button mat-stroked-button mat-dialog-close>Close</button>
+        </div>
+    </div>
+</ng-template>
+
+<!-- ================= SERVICE AREA DIALOG ================= -->
+<ng-template #serviceAreaDialog>
+    <div class="dialog-container">
+        <div class="dialog-header">
+            Service Area
+            <span>
+                <a mat-icon-button mat-dialog-close>
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <mat-dialog-content>
+            <table>
+                @for (data of serviceAreaList; track data) {
+                <tr>
+                    {{
+                    data
+                    }}
+                </tr>
+                }
+            </table>
+        </mat-dialog-content>
+
+        <div class="dialog-action-adjust d-flex justify-content-end">
+            <button mat-stroked-button mat-dialog-close>Close</button>
+        </div>
+    </div>
+</ng-template>
+
+<!-- ================= CREATE TICKET DIALOG ================= -->
+<ng-template #createTicketDialog>
+    <h2 mat-dialog-title>Create Ticket</h2>
+
+    <mat-dialog-content>
+        <app-ticket-management #ticketManagementRef [ticketDialog]="true" [customerDetailsData]="custData"
+            (ticketList)="returnTicketArray($event)">
+        </app-ticket-management>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end" style="position: sticky; bottom: 0; background: #fff;">
+        <button mat-raised-button class="button-normal" color="primary" (click)="callTicketRef()">
+            Save
+        </button>
+        <button mat-raised-button class="button-normal" color="warn" mat-dialog-close>Close</button>
+    </mat-dialog-actions>
+</ng-template>
+<!-- Ticket Detail Modal (cust-tickets) -->
+<ng-template #detailsDialog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <!-- Header -->
+        <div class="dialog-header dialog-title">
+            Ticket Detail
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <div mat-dialog-content>
+            <mat-card>
+                <mat-card-header>
+                    <mat-card-title>Action Button</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 dataGroup m-0">
+                            <div class="btnAction">
+                                @if (
+                                assignAccess &&
+                                ticketDeatailData.caseStatus != "Closed" &&
+                                ticketDeatailData.caseStatus != "Raise and Close"
+                                ) {
+                                <button class="approve-btn" style="
+                                    border: none;
+                                    background: transparent;
+                                    padding: 0;
+                                    margin-right: 3px;
+                                  " (click)="
+                                    assignTicket(
+                                      ticketDeatailData.caseId,
+                                      ticketDeatailData.serviceAreaId,
+                                      ticketDeatailData.caseStatus
+                                    )
+                                  " [disabled]="
+                                    ticketDeatailData.caseStatus === 'Follow Up' ||
+                                    ticketDeatailData.caseStatus === 'rejected' ||
+                                    ticketDeatailData.caseStatus === 'Raise and Close'
+                                  " id="assign-button" matTooltip="Assign Ticket">
+                                    <img src="assets/img/DashboardIcons/send-svgrepo-com 1.svg"
+                                        style="width:25px;height:25px;" />
+                                </button>
+                                }
+                                <button mat-icon-button color="accent" [disabled]="
+                                                             ticketDeatailData.caseStatus == 'Closed' ||
+                ticketDeatailData.caseStatus == 'Raise and Close' ||
+                ticketDeatailData.caseStatus == 'rejected' ||
+                ticketDeatailData.caseStatus == 'Resolved' ||
+                ticketDeatailData.currentAssigneeId != null
+                                                            " (click)="pickModalOpen(ticketDeatailData)"
+                                    matTooltip="Pick">
+                                    <img src="assets/img/DashboardIcons/Pick-ticket-to-resolve.svg">
+                                </button>
+
+                                <button (click)="approveTicket(ticketDeatailData)" [disabled]="
+                                  ticketDeatailData.status === 'approved' ||
+                                  ticketDeatailData.caseStatus === 'rejected' ||
+                                  ticketDeatailData.status === 'Closed' ||
+                                  ticketDeatailData.caseStatus == 'Closed' ||
+                                  ticketDeatailData.status === 'Raise and Close' ||
+                                  ticketDeatailData.currentAssigneeId != this.currentLoginUserId
+                                " class="approve-btn"
+                                    style="border: none; background: transparent; padding: 0; margin-right: 3px"
+                                    matTooltip="Approve" type="button">
+                                    <img src="assets/img/DashboardIcons/Assign.svg">
+                                </button>
+                                <button (click)="rejectTicket(ticketDeatailData)" [disabled]="
+                                  ticketDeatailData.status === 'approved' ||
+                                  ticketDeatailData.caseStatus === 'rejected' ||
+                                  ticketDeatailData.status === 'Closed' ||
+                                  ticketDeatailData.caseStatus == 'Closed' ||
+                                  ticketDeatailData.caseStatus == 'Raise and Close' ||
+                                  ticketDeatailData.case_order == 1 ||
+                                  ticketDeatailData.currentAssigneeId != this.currentLoginUserId
+                                " class="approve-btn"
+                                    style="border: none; background: transparent; padding: 0; margin-right: 3px"
+                                    matTooltip="Reject" type="button">
+                                    <img src="assets/img/DashboardIcons/Reject.svg" style="width:25px;height:25px;">
+                                </button>
+                                @if (followUpAccess && ticketDeatailData.currentAssigneeId != null) {
+                                <button (click)="
+                                    followupTicketModalOpen(
+                                      ticketDeatailData.caseId,
+                                      ticketDeatailData.customersId,
+                                      ticketDeatailData.currentAssigneeId
+                                    )
+                                  " href="javascript:void(0)" matTooltip="Followup" data-toggle="modal"
+                                    data-target="#scheduleFollowup" class="approve-btn" style="
+                                    border: none;
+                                    background: transparent;
+                                    padding: 0;
+                                    margin-right: 3px;
+                                  " type="button" [disabled]="
+                                    ticketDeatailData.status === 'approved' ||
+                                    ticketDeatailData.caseStatus === 'rejected' ||
+                                    ticketDeatailData.status === 'Closed' ||
+                                    ticketDeatailData.caseStatus == 'Closed' ||
+                                    ticketDeatailData.caseStatus == 'Raise and Close'
+                                  ">
+                                    <img src="assets\img\DashboardIcons\Followup.svg" style="width:25px;height:25px;" />
+                                </button>
+                                }
+                                @if (
+                                (changeStatusAccess &&
+                                ticketDeatailData.currentAssigneeId == currentLoginUserId) ||
+                                (ticketDeatailData.caseStatus == "Resolved" &&
+                                ticketDeatailData.finalClosedById != "null")
+                                ) {
+                                <button (click)="changeStatusModalOpen(ticketDeatailData, 'pTicket')" [disabled]="
+                                    ticketDeatailData.caseStatus === 'rejected' ||
+                                    ticketDeatailData.status === 'Closed' ||
+                                    ticketDeatailData.caseStatus === 'Closed' ||
+                                    ticketDeatailData.caseStatus === 'Raise and Close' ||
+                                    (ticketDeatailData.finalResolvedById != null &&
+                                      ticketDeatailData.finalResolvedById != this.currentLoginUserId) ||
+                                    (ticketDeatailData.currentAssigneeId != null &&
+                                      ticketDeatailData.currentAssigneeId != this.currentLoginUserId)
+                                  " class="approve-btn" style="
+                                    border: none;
+                                    background: transparent;
+                                    padding: 0;
+                                    margin-right: 3px;
+                                  " matTooltip="Change Status">
+                                    <img style="width: 25px; height:25px; cursor:pointer"
+                                        src="assets/img/DashboardIcons/Status.svg">
+                                </button>
+                                }
+                                @if (changePriorityAccess) {
+                                <button class=" approve-btn" style="
+                                    border: none;
+                                    background: transparent;
+                                    padding: 0;
+                                    margin-right: 3px;
+                                  " type="button" (click)="opechangePriorityMadel(ticketDeatailData)"
+                                    matTooltip="Change Priority" [disabled]="
+                                    ticketDeatailData.currentAssigneeId == 'null' ||
+                                    ticketDeatailData.caseStatus == 'Closed' ||
+                                    ticketDeatailData.caseStatus == 'Raise and Close' ||
+                                    ticketDeatailData.caseStatus === 'Resolved' ||
+                                    ticketDeatailData.caseStatus === 'rejected' ||
+                                    !(
+                                      (ticketDeatailData.caseStatus === 'In Progress' &&
+                                        currentLoginUserId === assignStaffParentId) ||
+                                      ticketDeatailData.currentAssigneeId != this.currentLoginUserId
+                                    )
+                                  ">
+                                    <img src="assets/img/DashboardIcons/Ticket-change-priority.svg"
+                                        style="width:25px;height:25px;" />
+                                </button>
+                                }
+                                @if (linkTicketAccess) {
+                                <button (click)="openLinkTicketDialog(ticketDeatailData)" href="javascript:void(0)"
+                                    matTooltip="Link Ticket" class="approve-btn" style="
+                                    border: none;
+                                    background: transparent;
+                                    padding: 0;
+                                    margin-right: 3px;
+                                  " type="button" [disabled]="
+                                    ticketDeatailData.caseStatus == 'Closed' ||
+                                    ticketDeatailData.caseStatus == 'Raise and Close' ||
+                                    ticketDeatailData.caseStatus == 'rejected'
+                                  ">
+                                    <img src="assets/img/DashboardIcons/Link-ticket-to-other-ticket.svg"
+                                        style="width:25px;height:25px;" />
+                                </button>
+                                }
+                                @if (uploadDocAccess) {
+                                <button (click)="uploadDocument(ticketDeatailData)" data-placement="top"
+                                    data-toggle="tooltip" id="editbutton" matTooltip="Upload Documents" type="button"
+                                    href="javascript:void(0)" [disabled]="
+                                    ticketDeatailData.caseStatus == 'Closed' ||
+                                    ticketDeatailData.caseStatus === 'Raise and Close' ||
+                                    ticketDeatailData.caseStatus === 'rejected'
+                                  " class="approve-btn" style="
+                                    border: none;
+                                    background: transparent;
+                                    padding: 0;
+                                    margin-right: 3px;
+                                  ">
+                                    <img src="assets/img/DashboardIcons/Upload.svg" />
+                                </button>
+                                }
+                                @if (changePBDomainAccess) {
+                                <button [disabled]="
+                                    ticketDeatailData.caseStatus == 'Closed' ||
+                                    ticketDeatailData.teamHierarchyMappingId == null ||
+                                    ticketDeatailData.caseStatus === 'Raise and Close' ||
+                                    ticketDeatailData.caseStatus === 'rejected' ||
+                                    ticketDeatailData.caseStatus === 'Resolved' ||
+                                    (ticketDeatailData.caseStatus === 'In Progress' &&
+                                      currentLoginUserId !== assignStaffParentId)
+                                  " (click)="checkChangeProblemDomain(ticketDeatailData)" data-placement="top"
+                                    data-toggle="tooltip" id="changeproblemdomain" matTooltip="Change Problem Domain"
+                                    class="approve-btn" style="
+                                    border: none;
+                                    background: transparent;
+                                    padding: 0;
+                                    margin-right: 3px;
+                                  " type="button">
+                                    <img src="assets/img/DashboardIcons/Link-ticket-to-other-ticket.svg"
+                                        style="width:25px;height:25px;" />
+                                </button>
+                                }
+                                @if (etrAccess) {
+                                <button class="approve-btn" style="
+                                    border: none;
+                                    background: transparent;
+                                    padding: 0;
+                                    margin-right: 3px;
+                                  " matTooltip="ETR Ticket" type="button" (click)="openETRModal(ticketDeatailData)"
+                                    href="javascript:void(0)" [disabled]="
+                                    ticketDeatailData.caseStatus === 'approved' ||
+                                    ticketDeatailData.caseStatus === 'rejected' ||
+                                    ticketDeatailData.caseStatus === 'Closed' ||
+                                    ticketDeatailData.caseStatus === 'Raise and Close' ||
+                                    ticketDeatailData.currentAssigneeId != this.currentLoginUserId
+                                  ">
+
+                                    <img src="assets\img\DashboardIcons\ETR Ticket (3).svg" />
+                                </button>
+                                }
+                                @if (remarksAccess) {
+                                <button class="approve-btn" style="
+                                    border: none;
+                                    background: transparent;
+                                    padding: 0;
+                                    margin-right: 3px;
+                                  " matTooltip="Ticket Remark" type="button" (click)="
+                                    ticketRemarkModalOpen(
+                                      ticketDeatailData,
+                                      ticketDeatailData.caseId,
+                                      ticketDeatailData.customersId,
+                                      ticketDeatailData.currentAssigneeId
+                                    )
+                                  " href="javascript:void(0)" [disabled]="
+                                    ticketDeatailData.caseStatus == 'Open' ||
+                                    ticketDeatailData.caseStatus === 'approved' ||
+                                    ticketDeatailData.caseStatus === 'rejected' ||
+                                    ticketDeatailData.caseStatus === 'Closed' ||
+                                    ticketDeatailData.caseStatus === 'Raise and Close' ||
+                                    ticketDeatailData.currentAssigneeId == null
+                                  ">
+                                    <img src="assets\img\DashboardIcons\Remark.svg" style="width:25px;height:25px;" />
+                                </button>
+                                }
+                                <!-- Ticket Conversation Button-->
+                                @if (conversationAccess && ticketDeatailData.caseOrigin === "Email") {
+                                <button matTooltip="Ticket Conversation" type="button"
+                                    (click)="ticketConversationModalOpen(ticketDeatailData.caseId)"
+                                    href="javascript:void(0)" [disabled]="
+                                    ticketDeatailData.caseStatus == 'Open' ||
+                                    ticketDeatailData.caseStatus === 'approved' ||
+                                    ticketDeatailData.caseStatus === 'rejected' ||
+                                    ticketDeatailData.caseStatus === 'Closed' ||
+                                    ticketDeatailData.caseStatus === 'Raise and Close'
+                                  ">
+                                    <img src="assets/img/DashboardIcons/WorkFlow status Details.svg"
+                                        style="width:25px;height:25px;" />
+                                </button>
+                                }
+
+                                <button (click)="downloadResolveDocument(ticketDeatailData)" data-placement="top"
+                                    data-toggle="tooltip" id="editbutton" matTooltip="Download Documents" type="button"
+                                    href="javascript:void(0)" class="approve-btn"
+                                    style="border: none; background: transparent; padding: 0; margin-right: 3px">
+                                    <img src="assets/img/DashboardIcons/Document Download.svg"
+                                        style="width:25px;height:25px;" />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+            <mat-card>
+                <mat-card-header>
+                    <mat-card-title>Basic Details</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="row">
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Name </span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">{{ ticketDeatailData.caseTitle }}</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Number </span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">{{ ticketDeatailData.caseNumber }}</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Customer Name </span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">{{ custData?.title }}
+                                    {{ custData?.firstname }}
+                                    {{ custData?.lastname }}</span>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">User Name </span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">{{ custData?.title }}
+                                    {{ custData?.firstname }}
+                                    {{ custData?.lastname }}</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">service Area Name </span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">{{ ticketDeatailData.serviceAreaName }}</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Case Type </span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">{{ ticketDeatailData.caseType }}</span>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Priority </span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">{{ ticketDeatailData.priority }}</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Followup Date & Time</span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">{{
+                                    ticketDeatailData.nextFollowupDate != null
+                                    ? (ticketDeatailData.nextFollowupDate +
+                                    " " +
+                                    ticketDeatailData.nextFollowupTime | date: "dd-MM-yyyy hh:mm a")
+                                    : " "
+                                    }}</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Case Status </span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">{{ ticketDeatailData.caseStatus }}</span>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Problem Domain </span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">{{ ticketDeatailData.caseReasonCategory }}</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Sub Problem Domain </span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">{{ ticketDeatailData.caseReasonSubCategory }}</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Reason </span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">{{ ticketDeatailData.caseReason }}</span>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Create Date </span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">{{ ticketDeatailData.createdate }}</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Last Modified Date </span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">{{ ticketDeatailData.updatedate }}</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Helper Name </span>
+                                <span class="colon">:</span>
+                                @if (ticketDeatailData.helperName) {
+                                <span class="m-l-10">{{ ticketDeatailData.helperName }}</span>
+                                }
+                                @if (!ticketDeatailData.helperName) {
+                                <span>-</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Tat name </span>
+                                <span class="colon">:</span>
+                                @if (caseInfo?.name) {
+                                <span class="m-l-10">
+                                    <a (click)="openTATModel()" href="javascript:void(0)" class="text-primary">{{
+                                        caseInfo.name }} ,
+                                    </a></span>
+                                }
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Source </span>
+                                <span class="colon">:</span>
+                                @if (ticketDeatailData.source) {
+                                <span class="m-l-10">{{ ticketDeatailData.source }}</span>
+                                }
+                                @if (!ticketDeatailData.source) {
+                                <span>-</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Sub Source </span>
+                                <span class="colon">:</span>
+                                @if (ticketDeatailData.subSource) {
+                                <span class="m-l-10">{{ ticketDeatailData.subSource }}</span>
+                                }
+                                @if (!ticketDeatailData.subSource) {
+                                <span>-</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Serial Number </span>
+                                <span class="colon">:</span>
+                                @if (ticketDeatailData.serialNumber) {
+                                <span class="m-l-10">{{ ticketDeatailData.serialNumber }}</span>
+                                }
+                                @if (!ticketDeatailData.serialNumber) {
+                                <span>-</span>
+                                }
+                            </div>
+                        </div>
+                        @if (ticketDeatailData?.parentTicketId) {
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Parent Ticket Details </span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">
+                                    <a (click)="openParentTicketModel(ticketDeatailData?.parentTicketId)"
+                                        href="javascript:void(0)" class="text-primary">Click here
+                                    </a></span>
+                            </div>
+                        </div>
+                        }
+                        @if (ticketDeatailData?.parentTicketId) {
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Child Ticket Details </span>
+                                <span class="colon">:</span>
+                                <span>
+                                    <a (click)="openChildTicketModel(ticketDeatailData?.caseId)"
+                                        href="javascript:void(0)" class="text-primary">Click
+                                        here
+                                    </a></span>
+                            </div>
+                        </div>
+                        }
+                    </div>
+
+                </mat-card-content>
+            </mat-card>
+
+            <!-- Feedback Details Card -->
+            <mat-card class="mb-4">
+                <mat-card-header>
+                    <mat-card-title>Feedback Details *</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="table-responsive tableViewScrollHeight example-container">
+
+                        <!-- Technical Department Table -->
+                        <ng-container *ngIf="ticketDeatailData.department === 'Technical'">
+                            <table mat-table [dataSource]="feedbackDetails" class="mat-elevation-z2 full-width-table">
+
+                                <!-- Ticket Id -->
+                                <ng-container matColumnDef="ticketid">
+                                    <th mat-header-cell *matHeaderCellDef style="width:7%">Ticket Id</th>
+                                    <td mat-cell *matCellDef="let row">{{ row.ticketid }}</td>
+                                </ng-container>
+
+                                <!-- Create Date -->
+                                <ng-container matColumnDef="created_date">
+                                    <th mat-header-cell *matHeaderCellDef>Create Date</th>
+                                    <td mat-cell *matCellDef="let row">
+                                        {{ row.created_date | date: 'dd-MM-yyyy hh:mm a' }}</td>
+                                </ng-container>
+
+                                <!-- Problem Type -->
+                                <ng-container matColumnDef="problem_type">
+                                    <th mat-header-cell *matHeaderCellDef>Problem Type</th>
+                                    <td mat-cell *matCellDef="let row">{{ row.problem_type }}</td>
+                                </ng-container>
+
+                                <!-- Reason -->
+                                <ng-container matColumnDef="reason">
+                                    <th mat-header-cell *matHeaderCellDef style="width:18%">Reason</th>
+                                    <td mat-cell *matCellDef="let row">{{ row.reason }}</td>
+                                </ng-container>
+
+                                <!-- Behaviour Professionalism -->
+                                <ng-container matColumnDef="behaviour_professionalism">
+                                    <th mat-header-cell *matHeaderCellDef>Behaviour Professionalism</th>
+                                    <td mat-cell *matCellDef="let row">{{ row.behaviour_professionalism }}</td>
+                                </ng-container>
+
+                                <!-- Service Experience -->
+                                <ng-container matColumnDef="service_experience">
+                                    <th mat-header-cell *matHeaderCellDef>Service Experience</th>
+                                    <td mat-cell *matCellDef="let row">{{ row.service_experience }}</td>
+                                </ng-container>
+
+                                <!-- Rating -->
+                                <ng-container matColumnDef="overall_rating">
+                                    <th mat-header-cell *matHeaderCellDef style="text-align:center;">Rating</th>
+                                    <td mat-cell *matCellDef="let row" style="text-align:center;">
+                                        <mat-icon
+                                            *ngFor="let star of [].constructor(row.overall_rating)">star</mat-icon>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Remark -->
+                                <ng-container matColumnDef="general_remarks">
+                                    <th mat-header-cell *matHeaderCellDef>Remark</th>
+                                    <td mat-cell *matCellDef="let row">{{ row.general_remarks }}</td>
+                                </ng-container>
+
+                                <tr mat-header-row
+                                    *matHeaderRowDef="['ticketid','created_date','problem_type','reason','behaviour_professionalism','service_experience','overall_rating','general_remarks']">
+                                </tr>
+                                <tr mat-row
+                                    *matRowDef="let row; columns: ['ticketid','created_date','problem_type','reason','behaviour_professionalism','service_experience','overall_rating','general_remarks'];">
+                                </tr>
+                            </table>
+                        </ng-container>
+
+                        <!-- Sales Department Table -->
+                        <ng-container *ngIf="ticketDeatailData.department === 'Sales'">
+                            <div class="table-responsive tableViewScrollHeight example-container">
+                                <table mat-table [dataSource]="feedbackDetails"
+                                    class="mat-elevation-z2 full-width-table">
+
+                                    <ng-container matColumnDef="ticketid">
+                                        <th mat-header-cell *matHeaderCellDef style="width:7%">Ticket Id</th>
+                                        <td mat-cell *matCellDef="let row">{{ row.ticketid }}</td>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="created_date">
+                                        <th mat-header-cell *matHeaderCellDef>Create Date</th>
+                                        <td mat-cell *matCellDef="let row">
+                                            {{ row.created_date | date:'dd-MM-yyyy hh:mm a' }}</td>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="support_type">
+                                        <th mat-header-cell *matHeaderCellDef>Sales Support</th>
+                                        <td mat-cell *matCellDef="let row">{{ row.support_type }}</td>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="behaviour_professionalism">
+                                        <th mat-header-cell *matHeaderCellDef>Staff Behaviour</th>
+                                        <td mat-cell *matCellDef="let row">{{ row.behaviour_professionalism || '-'
+                                            }}</td>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="staff_behavior">
+                                        <th mat-header-cell *matHeaderCellDef>Behaviour</th>
+                                        <td mat-cell *matCellDef="let row">{{ row.staff_behavior }}</td>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="payment_mode">
+                                        <th mat-header-cell *matHeaderCellDef>Payment Mode</th>
+                                        <td mat-cell *matCellDef="let row">{{ row.payment_mode }}</td>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="current_bandwidth_feedback">
+                                        <th mat-header-cell *matHeaderCellDef>Bandwidth Feedback</th>
+                                        <td mat-cell *matCellDef="let row">{{ row.current_bandwidth_feedback }}</td>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="referal_information">
+                                        <th mat-header-cell *matHeaderCellDef>Referal Information</th>
+                                        <td mat-cell *matCellDef="let row">{{ row.referal_information }}</td>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="overall_rating">
+                                        <th mat-header-cell *matHeaderCellDef style="text-align:center; width:12%">
+                                            Rating</th>
+                                        <td mat-cell *matCellDef="let row" style="text-align:center;">
+                                            <mat-icon
+                                                *ngFor="let star of [].constructor(row.overall_rating)">star</mat-icon>
+                                        </td>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="general_remarks">
+                                        <th mat-header-cell *matHeaderCellDef>Remark</th>
+                                        <td mat-cell *matCellDef="let row">{{ row.general_remarks }}</td>
+                                    </ng-container>
+
+                                    <tr mat-header-row
+                                        *matHeaderRowDef="['ticketid','created_date','support_type','behaviour_professionalism','staff_behavior','payment_mode','current_bandwidth_feedback','referal_information','overall_rating','general_remarks']">
+                                    </tr>
+                                    <tr mat-row
+                                        *matRowDef="let row; columns: ['ticketid','created_date','support_type','behaviour_professionalism','staff_behavior','payment_mode','current_bandwidth_feedback','referal_information','overall_rating','general_remarks'];">
+                                    </tr>
+                                </table>
+                            </div>
+                        </ng-container>
+                    </div>
+
+                </mat-card-content>
+            </mat-card>
+
+            <mat-card class="mb-4">
+                <mat-card-header>
+                    <mat-card-title>Ticket History</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="table-responsive tableViewScrollHeight example-container">
+                        <table mat-table [dataSource]="ticketDeatailData?.caseUpdateList"
+                            class="mat-elevation-z2 full-width-table">
+
+                            <ng-container matColumnDef="createdByName">
+                                <th mat-header-cell *matHeaderCellDef>Create By</th>
+                                <td mat-cell *matCellDef="let row">{{ row.createdByName }}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="createdate">
+                                <th mat-header-cell *matHeaderCellDef>Create Date</th>
+                                <td mat-cell *matCellDef="let row">{{ row.createdate }}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="updatedate">
+                                <th mat-header-cell *matHeaderCellDef>Update Date</th>
+                                <td mat-cell *matCellDef="let row">{{ row.updatedate }}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="lastModifiedByName">
+                                <th mat-header-cell *matHeaderCellDef>Update By</th>
+                                <td mat-cell *matCellDef="let row">{{ row.lastModifiedByName }}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="actions">
+                                <th mat-header-cell *matHeaderCellDef>View Progress Details</th>
+                                <td mat-cell *matCellDef="let row">
+                                    <button mat-icon-button color="primary" (click)="viewProgressDetails(row)"
+                                        matTooltip="View Progress Details">
+                                        <img src="assets/img/DashboardIcons/Ticket-change-1.svg"
+                                            style="width:25px;height:25px;" />
+                                    </button>
+                                </td>
+                            </ng-container>
+
+                            <tr mat-header-row *matHeaderRowDef="displayhistory">
+                            </tr>
+                            <tr mat-row *matRowDef="let row; columns: displayhistory;">
+                            </tr>
+                        </table>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+            <mat-card class="mb-4">
+                <mat-card-header>
+                    <mat-card-title>Ticket Followup Details</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="table-responsive tableViewScrollHeight example-container">
+                        <table mat-table [dataSource]="cafFollowupList" class="mat-elevation-z2 full-width-table">
+
+                            <ng-container matColumnDef="caseNumber">
+                                <th mat-header-cell *matHeaderCellDef>Case Number</th>
+                                <td mat-cell *matCellDef="let row">{{ row.caseNumber }}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="followUpName">
+                                <th mat-header-cell *matHeaderCellDef>FollowUp Name</th>
+                                <td mat-cell *matCellDef="let row">{{ row.followUpName }}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="followUpDatetime">
+                                <th mat-header-cell *matHeaderCellDef>FollowUp Date & Time</th>
+                                <td mat-cell *matCellDef="let row">
+                                    {{ row.followUpDatetime | date: 'dd/MM/yyyy HH:mm:ss' }}
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="remarks">
+                                <th mat-header-cell *matHeaderCellDef>Remarks</th>
+                                <td mat-cell *matCellDef="let row">{{ row.remarks }}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="status">
+                                <th mat-header-cell *matHeaderCellDef>Status</th>
+                                <td mat-cell *matCellDef="let row">
+                                    <span [ngClass]="{
+              'badge badge-info': row.status?.toLowerCase() === 'closed',
+              'badge badge-danger': row.status?.toLowerCase() === 'pending',
+              'badge badge-info': row.status?.toLowerCase() === 'reschedule'
+            }">{{ row.status }}</span>
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="actions">
+                                <th mat-header-cell *matHeaderCellDef>Action</th>
+                                <td mat-cell *matCellDef="let row" class="btnAction">
+                                    <button mat-icon-button (click)="rescheduleFollowUp(row)"
+                                        [disabled]="row.status?.toLowerCase() === 'closed'"
+                                        matTooltip="Reschedule FollowUp">
+                                        <img src="assets/img/DashboardIcons/reschedule followup.svg">
+                                    </button>
+                                    <button mat-icon-button (click)="closeFollowUp(row)"
+                                        [disabled]="row.status?.toLowerCase() === 'closed'" matTooltip="Close FollowUp">
+                                        <img src="assets/img/reject.jpg" style="width:25px;height:25px;">
+                                    </button>
+                                    <button mat-icon-button (click)="remarkFollowUp(row)" matTooltip="Remark FollowUp">
+                                        <img src="assets/img/DashboardIcons/Ticket-change-1.svg"
+                                            style="width:25px;height:25px;">
+                                    </button>
+                                    <button mat-icon-button (click)="makeACall()" matTooltip="Call">
+                                        <img src="assets/img/phone-icon.png" style="width:25px;height:25px;">
+                                    </button>
+                                </td>
+                            </ng-container>
+
+                            <tr mat-header-row
+                                *matHeaderRowDef="['caseNumber','followUpName','followUpDatetime','remarks','status','actions']">
+                            </tr>
+                            <tr mat-row
+                                *matRowDef="let row; columns: ['caseNumber','followUpName','followUpDatetime','remarks','status','actions'];">
+                            </tr>
+                        </table>
+
+                        <!-- Pagination & Items per page -->
+                        <mat-paginator [length]="followupListTotalRecordsForUserAndTeam"
+                            [pageSize]="cafFollowupItemsPerPage" [pageSizeOptions]="[5,10,25,50]"
+                            (page)="pageChangedCafFollowup($event)">
+                        </mat-paginator>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+            <!-- Internal Remarks -->
+            <mat-card class="mb-4">
+                <mat-card-header>
+                    <mat-card-title>Internal Remarks</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="table-responsive tableViewScrollHeight example-container">
+                        <table mat-table [dataSource]="ticketRemarkListData" class="mat-elevation-z1 full-width-table">
+
+                            <ng-container matColumnDef="caseTitle">
+                                <th mat-header-cell *matHeaderCellDef>Ticket Name</th>
+                                <td mat-cell *matCellDef="let ticketRemark">{{ ticketRemark.caseTitle }}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="customersName">
+                                <th mat-header-cell *matHeaderCellDef>Customer Name</th>
+                                <td mat-cell *matCellDef="let ticketRemark">{{ ticketRemark.customersName }}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="staffUserName">
+                                <th mat-header-cell *matHeaderCellDef>Staff Name</th>
+                                <td mat-cell *matCellDef="let ticketRemark">{{ ticketRemark.staffUserName }}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="remarkDate">
+                                <th mat-header-cell *matHeaderCellDef>Remark Date</th>
+                                <td mat-cell *matCellDef="let ticketRemark">{{ ticketRemark?.remarkDate | date:
+                                    'dd-MM-yyyy hh:mm a' }}
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="remark">
+                                <th mat-header-cell *matHeaderCellDef>Remark</th>
+                                <td mat-cell *matCellDef="let ticketRemark">{{ ticketRemark.remark }}</td>
+                            </ng-container>
+
+                            <tr mat-header-row
+                                *matHeaderRowDef="['caseTitle','customersName','staffUserName','remarkDate','remark']">
+                            </tr>
+                            <tr mat-row
+                                *matRowDef="let row; columns: ['caseTitle','customersName','staffUserName','remarkDate','remark'];">
+                            </tr>
+                        </table>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+
+            <mat-card class="mb-4">
+                <mat-card-header>
+                    <mat-card-title>Ticket Workflow Audit</mat-card-title>
+                </mat-card-header>
+
+                <mat-card-content>
+                    <div class="mat-elevation-z2 table-responsive example-container">
+                        <table mat-table [dataSource]="workflowAuditData1" matSort class="full-width-table">
+
+                            <!-- Ticket Number Column -->
+                            <ng-container matColumnDef="ticketNumber">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> Ticket Number </th>
+                                <td mat-cell *matCellDef="let data">
+                                    <div *ngIf="data.entityName">{{ data.entityName }}</div>
+                                    <div *ngIf="data.planName">{{ data.planName }}</div>
+                                </td>
+                            </ng-container>
+
+                            <!-- Action Column -->
+                            <ng-container matColumnDef="action">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> Action </th>
+                                <td mat-cell *matCellDef="let data">{{ data.action }}</td>
+                            </ng-container>
+
+                            <!-- Staff Name Column -->
+                            <ng-container matColumnDef="staffName">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> Staff Name </th>
+                                <td mat-cell *matCellDef="let data" class="text-primary cursor-pointer"
+                                    (click)="openTeamDetailModel(data)">
+                                    {{ data.actionByName }}
+                                </td>
+                            </ng-container>
+
+                            <!-- Remark Column -->
+                            <ng-container matColumnDef="remark">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> Remark </th>
+                                <td mat-cell *matCellDef="let data">{{ data.remark }}</td>
+                            </ng-container>
+
+                            <!-- Action Date Column -->
+                            <ng-container matColumnDef="actionDateTime">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header> Action Date </th>
+                                <td mat-cell *matCellDef="let data">
+                                    {{ data.actionDateTime | date: 'dd-MM-yyyy hh:mm a' }}
+                                </td>
+                            </ng-container>
+
+                            <!-- Header & Row Definitions -->
+                            <tr mat-header-row *matHeaderRowDef="displayedworkflowColumns"></tr>
+                            <tr mat-row *matRowDef="let row; columns: displayedworkflowColumns;"></tr>
+                        </table>
+                    </div>
+
+                    <!-- Material Paginator -->
+                    <mat-paginator [length]="MastertotalRecords1" [pageSize]="MasteritemsPerPage1"
+                        [pageSizeOptions]="[5, 10,  20, 50, 100]" (page)="pageChangedMasterList($event)">
+                    </mat-paginator>
+                </mat-card-content>
+            </mat-card>
+
+            <!-- Ticket Attachments -->
+            <mat-card class="mb-4">
+                <mat-card-header>
+                    <mat-card-title>Ticket Attachments</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="table-responsive tableViewScrollHeight example-container">
+                        <table mat-table [dataSource]="ticketDeatailData?.caseDocDetails" class="full-width-table">
+
+                            <!-- File Name Column -->
+                            <ng-container matColumnDef="filename">
+                                <th mat-header-cell *matHeaderCellDef> File Name </th>
+                                <td mat-cell *matCellDef="let data">
+                                    <a (click)="attachementDownloadAccess ? downloadDoc(data.filename, data.docId, data.ticketId) : null"
+                                        href="javascript:void(0)"
+                                        [style.color]="attachementDownloadAccess ? 'blue' : 'gray'">
+                                        {{ data.filename }}
+                                    </a>
+                                </td>
+                            </ng-container>
+
+                            <!-- Status Column -->
+                            <ng-container matColumnDef="docStatus">
+                                <th mat-header-cell *matHeaderCellDef> Status </th>
+                                <td mat-cell *matCellDef="let data"> {{ data.docStatus }} </td>
+                            </ng-container>
+
+                            <!-- Uploaded By Column -->
+                            <ng-container matColumnDef="createdByName">
+                                <th mat-header-cell *matHeaderCellDef> Uploaded By </th>
+                                <td mat-cell *matCellDef="let data"> {{ data.createdByName }} </td>
+                            </ng-container>
+
+                            <!-- Action Date Column -->
+                            <ng-container matColumnDef="createdate">
+                                <th mat-header-cell *matHeaderCellDef> Action Date </th>
+                                <td mat-cell *matCellDef="let data"> {{ data.createdate | date: 'dd-MM-yyyy hh:mm a' }}
+                                </td>
+                            </ng-container>
+
+                            <!-- Action Column -->
+                            <ng-container matColumnDef="action">
+                                <th mat-header-cell *matHeaderCellDef> Action </th>
+                                <td mat-cell *matCellDef="let data">
+                                    @if (attachementAccess) {
+                                    <button mat-icon-button color="primary" (click)="showticketDocData(data)"
+                                        matTooltip="View">
+                                        <img src="assets/img/DashboardIcons/eye-svgrepo-com (1) 1.svg">
+                                    </button>
+                                    }
+                                </td>
+                            </ng-container>
+
+                            <!-- Header & Row Declarations -->
+                            <tr mat-header-row *matHeaderRowDef="displatattachment">
+                            </tr>
+                            <tr mat-row *matRowDef="let row; columns:displatattachment;">
+                            </tr>
+
+                        </table>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+
+            <!-- ETR Report -->
+            <mat-card class="mb-4">
+                <mat-card-header>
+                    <mat-card-title>ETR Report</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="d-flex align-items-center mb-3">
+                        <label>ETR Excel Sheet :</label>
+                        @if (etrExcelDownloadAccess) {
+                        <button mat-flat-button color="primary" matTooltip="Download ETR Excel Sheet"
+                            (click)="ticketETRXMLDownload()" [disabled]="ticketETRDetailData.length == 0" style="background: white;
+    color: orange;">
+                            <mat-icon>file_download</mat-icon>
+                        </button>
+                        }
+                    </div>
+                    <div class="table-responsive tableViewScrollHeight example-container">
+                        <table mat-table [dataSource]="ticketETRDetailData" class="full-width-table">
+
+                            <!-- Customer User Name -->
+                            <ng-container matColumnDef="custUserName">
+                                <th mat-header-cell *matHeaderCellDef> Customer User Name </th>
+                                <td mat-cell *matCellDef="let data"> {{ data.custUserName }} </td>
+                            </ng-container>
+
+                            <!-- Staff Person Name -->
+                            <ng-container matColumnDef="staffPersonName">
+                                <th mat-header-cell *matHeaderCellDef> Staff Person Name </th>
+                                <td mat-cell *matCellDef="let data"> {{ data.staffPersonName }} </td>
+                            </ng-container>
+
+                            <!-- Case Number -->
+                            <ng-container matColumnDef="caseNumber">
+                                <th mat-header-cell *matHeaderCellDef> Case Number </th>
+                                <td mat-cell *matCellDef="let data"> {{ data.caseNumber }} </td>
+                            </ng-container>
+
+                            <!-- Message Mode -->
+                            <ng-container matColumnDef="messageMode">
+                                <th mat-header-cell *matHeaderCellDef> Message Mode </th>
+                                <td mat-cell *matCellDef="let data"> {{ data.messageMode }} </td>
+                            </ng-container>
+
+                            <!-- Notification Mode -->
+                            <ng-container matColumnDef="notificationMode">
+                                <th mat-header-cell *matHeaderCellDef> Notification Mode </th>
+                                <td mat-cell *matCellDef="let data"> {{ data.notificationMode }} </td>
+                            </ng-container>
+
+                            <!-- Notification Time -->
+                            <ng-container matColumnDef="notificationSentTime">
+                                <th mat-header-cell *matHeaderCellDef> Notification Time </th>
+                                <td mat-cell *matCellDef="let data"> {{ data.notificationSentTime }} </td>
+                            </ng-container>
+
+                            <!-- Notification Date -->
+                            <ng-container matColumnDef="notificationSentDate">
+                                <th mat-header-cell *matHeaderCellDef> Notification Date </th>
+                                <td mat-cell *matCellDef="let data">
+                                    {{ data.notificationSentDate | date: 'dd-MM-yyyy' }}
+                                </td>
+                            </ng-container>
+
+                            <!-- Notification Status -->
+                            <ng-container matColumnDef="notificationStatus">
+                                <th mat-header-cell *matHeaderCellDef> Notification Status </th>
+                                <td mat-cell *matCellDef="let data"> {{ data.notificationStatus }} </td>
+                            </ng-container>
+
+                            <!-- Header & Row Declarations -->
+                            <tr mat-header-row *matHeaderRowDef="displayedETRColumns"></tr>
+                            <tr mat-row *matRowDef="let row; columns: displayedETRColumns;"></tr>
+                        </table>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+
+            <!-- TAT Report -->
+            <mat-card class="mb-4">
+                <mat-card-header>
+                    <mat-card-title>TAT Report</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="table-responsive tableViewScrollHeight example-container">
+                        <table mat-table [dataSource]="ticketTATDetailData" class="full-width-table">
+
+                            <!-- Tat Action -->
+                            <ng-container matColumnDef="tatAction">
+                                <th mat-header-cell *matHeaderCellDef> Tat Action </th>
+                                <td mat-cell *matCellDef="let data"> {{ data.tatAction }} </td>
+                            </ng-container>
+
+                            <!-- Tat Time -->
+                            <ng-container matColumnDef="tatTime">
+                                <th mat-header-cell *matHeaderCellDef> Tat Time </th>
+                                <td mat-cell *matCellDef="let data"> {{ data.tatTime }} {{ data.tatUnit }} </td>
+                            </ng-container>
+
+                            <!-- SLA Time -->
+                            <ng-container matColumnDef="slaTime">
+                                <th mat-header-cell *matHeaderCellDef> SLA Time </th>
+                                <td mat-cell *matCellDef="let data"> {{ data.slaTime }} {{ data.slaUnit }} </td>
+                            </ng-container>
+
+                            <!-- Tat Message -->
+                            <ng-container matColumnDef="tatMessage">
+                                <th mat-header-cell *matHeaderCellDef> Tat Message </th>
+                                <td mat-cell *matCellDef="let data">
+                                    @if (data.tatMessage) {
+                                    <a (click)="openTATMessageDataModal(data)" href="javascript:void(0)"
+                                        class="text-primary">
+                                        Show more
+                                    </a>
+                                    }
+                                    @if (!data.tatMessage) {
+                                    <span>-</span>
+                                    }
+                                </td>
+                            </ng-container>
+
+                            <!-- Case Level -->
+                            <ng-container matColumnDef="caseLevel">
+                                <th mat-header-cell *matHeaderCellDef> Case Level </th>
+                                <td mat-cell *matCellDef="let data"> {{ data.caseLevel }} </td>
+                            </ng-container>
+
+                            <!-- Notification For -->
+                            <ng-container matColumnDef="notificationFor">
+                                <th mat-header-cell *matHeaderCellDef> Notification For </th>
+                                <td mat-cell *matCellDef="let data"> {{ data.notificationFor }} </td>
+                            </ng-container>
+
+                            <!-- Is Tat Breached -->
+                            <ng-container matColumnDef="isTatBreached">
+                                <th mat-header-cell *matHeaderCellDef> Is Tat Breached </th>
+                                <td mat-cell *matCellDef="let data"> {{ data.isTatBreached }} </td>
+                            </ng-container>
+
+                            <!-- Message Mode -->
+                            <ng-container matColumnDef="messageMode">
+                                <th mat-header-cell *matHeaderCellDef> Message Mode </th>
+                                <td mat-cell *matCellDef="let data"> {{ data.messageMode }} </td>
+                            </ng-container>
+
+                            <!-- Message Status -->
+                            <ng-container matColumnDef="messageStatus">
+                                <th mat-header-cell *matHeaderCellDef> Message Status </th>
+                                <td mat-cell *matCellDef="let data"> {{ data.messageStatus }} </td>
+                            </ng-container>
+
+                            <!-- Header & Rows -->
+                            <tr mat-header-row *matHeaderRowDef="displayedTatColumns"></tr>
+                            <tr mat-row *matRowDef="let row; columns: displayedTatColumns;"></tr>
+
+                        </table>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+
+        </div>
+
+        <div class="dialog-action-adjust d-flex justify-content-end">
+            <button mat-stroked-button mat-dialog-close (click)="dialogRef.close()">Close</button>
+        </div>
+    </div>
+</ng-template>
+<ng-template #assignTicketDialog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <!-- Header -->
+        <div class="dialog-header dialog-title">
+            Assign Ticket
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <div mat-dialog-content>
+            <form [formGroup]="assignStaffTicketForm">
+                <label class="inputLabel">Staff *</label>
+                <mat-form-field appearance="outline" class="w-100 mt-2">
+                    <mat-select class="input-p-5" placeholder="Select a Staff" formControlName="staffId">
+                        <mat-option *ngFor="let staff of assignableStaffList" [value]="staff.id">
+                            {{ staff.fullNameWithTicketCount }}
+                        </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="staffsubmmitted && assignStaffTicketForm.controls.staffId.errors?.required">
+                        Staff is required.
+                    </mat-error>
+                </mat-form-field>
+                <br>
+                <label class="inputLabel">Remark *</label>
+                <mat-form-field appearance="outline" class="w-100 mt-2">
+                    <textarea matInput class="input-p-5" placeholder="Enter a Remark" rows="5"
+                        formControlName="remark"></textarea>
+                    <mat-error *ngIf="staffsubmmitted && assignStaffTicketForm.controls.remark.errors?.required">
+                        Remark is required.
+                    </mat-error>
+                </mat-form-field>
+            </form>
+        </div>
+
+        <!-- Footer -->
+        <div class="dialog-action-adjust d-flex justify-content-end" style="gap:8px">
+            <button mat-button mat-flat-button color="'primary'" class="addarea-btn" type="submit"
+                (click)="assignTicketSubmit(dialogRef)">Assign Staff</button><button mat-stroked-button
+                mat-dialog-close>Close</button>
+        </div>
+    </div>
+</ng-template>
+<ng-template #reassignTicketDialog let-dialogRef="dialogRef">
+    <div class="dialog-header dialog-title"> Reassign Ticket in Bulk<span>
+            <a mat-icon-button (click)="dialogRef.close()">
+                <img src="assets/img/DashboardIcons/Reject.svg">
+            </a>
+        </span>
+    </div>
+    <mat-dialog-content>
+        <form [formGroup]="reassignStaffTicketForm">
+            <div class="row">
+                <div class="col-12"><label class="inputLabel">Staff*</label>
+                    <mat-form-field appearance="outline" class="mat-form-field w-100">
+                        <mat-select class="input-p-5" placeholder="Select a Staff" formControlName="staffId">
+                            <mat-option *ngFor="let option of bulkData" [value]="option.id">{{ option.fullName
+                                }}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    <div *ngIf="staffsubmmitted && reassignStaffTicketForm.controls.staffId.errors" class="text-danger">
+                        Staff is required.
+                    </div>
+                </div>
+
+                <div class="col-12"><label class="inputLabel">Remark*</label>
+                    <mat-form-field appearance="outline" class="mat-form-field w-100">
+                        <textarea matInput class="input-p-5" placeholder="Enter a Remark" formControlName="remark"
+                            rows="3"></textarea>
+                    </mat-form-field>
+                    <div *ngIf="staffsubmmitted && reassignStaffTicketForm.controls.remark.errors" class="text-danger">
+                        Remark is required.
+                    </div>
+                </div>
+            </div>
+        </form>
+    </mat-dialog-content>
+    <div class="dialog-action-adjust d-flex justify-content-end" style="gap:8px">
+        <button mat-button mat-flat-button color="'primary'" class="addarea-btn" type="submit"
+            (click)="reassignTicketSubmit(dialogRef)">Reassign Staff</button><button mat-stroked-button
+            mat-dialog-close>Close</button>
+    </div>
+</ng-template>
+<ng-template #ticketApproveRejectDialog let-dialogRef="dialogRef">
+    <div class="dialog-header dialog-title"> {{ ifApproveTicket ? 'Approve Ticket' : 'Reject Ticket' }}<span>
+            <a mat-icon-button (click)="dialogRef.close()">
+                <img src="assets/img/DashboardIcons/Reject.svg">
+            </a>
+        </span>
+    </div>
+
+    <mat-dialog-content><label class="inputLabel">Remark</label>
+        <mat-form-field appearance="outline" class="mat-form-field w-100">
+            <textarea matInput class="input-p-5" placeholder="Enter a Remark" [(ngModel)]="approveRejectRemark"
+                placeholder="Remarks"></textarea>
+        </mat-form-field>
+    </mat-dialog-content>
+
+    <div class="dialog-action-adjust d-flex justify-content-end" style="gap:8px">
+        <button mat-button mat-flat-button color="'primary'" class="addarea-btn" type="submit" *ngIf="ifApproveTicket"
+            [disabled]="!approveRejectRemark" (click)="statusApporeved(dialogRef)">
+            <i class="fa fa-check-circle"></i> Save
+        </button>
+        <button mat-button mat-flat-button color="'primary'" class="addarea-btn" type="submit" *ngIf="!ifApproveTicket"
+            [disabled]="!approveRejectRemark" (click)="statusRejected(dialogRef)">
+            <i class="fa fa-check-circle"></i> Save
+        </button><button mat-stroked-button mat-dialog-close>Close</button>
+    </div>
+</ng-template>
+<ng-template #assignStaffDialog let-dialogRef="dialogRef">
+    <div class="dialog-header dialog-title"> Assign Staff<span>
+            <a mat-icon-button (click)="dialogRef.close()">
+                <img src="assets/img/DashboardIcons/Reject.svg">
+            </a>
+        </span>
+    </div>
+
+    <mat-dialog-content>
+        <div *ngIf="approved">
+            <mat-card>
+                <app-search-details [placeholder]="'Search Staff'" [searchValue]="searchStaffDeatil"
+                    (search)="searchStaffByName($event)" (clear)="clearSearchForm()">
+                </app-search-details>
+
+                <div *ngIf="approveCAF && approveCAF.length > 0">
+                    <h5>Select Staff</h5>
+                    <div class="example-container mat-elevation-z8" tabindex="0">
+                        <!-- <p>{{approveCAF | json}}</p> -->
+                        <table mat-table [dataSource]="approveCAF" class="mat-elevation-z2 w-100">
+                            <!-- Radio Column -->
+                            <ng-container matColumnDef="select">
+                                <th mat-header-cell *matHeaderCellDef></th>
+                                <td mat-cell *matCellDef="let element">
+                                    <mat-radio-group [(ngModel)]="selectStaff">
+                                        <mat-radio-button [value]="element.id"></mat-radio-button>
+                                    </mat-radio-group>
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="fullName">
+                                <th mat-header-cell *matHeaderCellDef>Name</th>
+                                <td mat-cell *matCellDef="let element">{{ element.fullName }}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="username">
+                                <th mat-header-cell *matHeaderCellDef>Username</th>
+                                <td mat-cell *matCellDef="let element">{{ element.username }}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="caseAssignCount">
+                                <th mat-header-cell *matHeaderCellDef>Unresolved Ticket Count</th>
+                                <td mat-cell *matCellDef="let element">{{ element.caseAssignCount }}</td>
+                            </ng-container>
+
+                            <tr mat-header-row *matHeaderRowDef="assignStaffDisplay">
+                            </tr>
+                            <tr mat-row *matRowDef="let row; columns: assignStaffDisplay">
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div *ngIf="approveCAF && approveCAF.length === 0">No records found.</div>
+            </mat-card>
+        </div>
+    </mat-dialog-content>
+
+    <div class="dialog-action-adjust d-flex justify-content-end" style="gap:8px">
+        <button mat-button mat-flat-button color="'primary'" class="addarea-btn" type="submit"
+            *ngIf="approved && !selectStaff" (click)="assignToAllStaffTicket(dialogRef)">
+            <i class="fa fa-check-circle"></i> Assign
+        </button>
+        <button mat-button mat-flat-button color="'primary'" class="addarea-btn" type="submit"
+            *ngIf="approved && selectStaff" (click)="assignToStaffTicket(true,dialogRef)">
+            <i class="fa fa-check-circle"></i> Assign
+        </button><button mat-stroked-button mat-dialog-close>Close</button>
+    </div>
+</ng-template>
+<ng-template #rejectStaffDialog let-dialogRef="dialogRef">
+    <div class="dialog-header dialog-title"> Select Staff<span>
+            <a mat-icon-button (click)="dialogRef.close()">
+                <img src="assets/img/DashboardIcons/Reject.svg">
+            </a>
+        </span>
+    </div>
+
+    <mat-dialog-content>
+        <div *ngIf="reject">
+            <mat-card>
+                <app-search-details [placeholder]="'Search Staff'" [searchValue]="searchStaffDeatil"
+                    (search)="searchStaffByNameReject($event)" (clear)="clearSearchFormReject()">
+                </app-search-details>
+
+                <div *ngIf="rejectCAF && rejectCAF.length > 0">
+                    <div class="example-container mat-elevation-z8" tabindex="0">
+                        <table mat-table [dataSource]="rejectCAF" class="mat-elevation-z2 w-100">
+                            <!-- Radio Column -->
+                            <ng-container matColumnDef="select">
+                                <th mat-header-cell *matHeaderCellDef></th>
+                                <td mat-cell *matCellDef="let element">
+                                    <mat-radio-group [(ngModel)]="selectStaffReject">
+                                        <mat-radio-button [value]="element.id"></mat-radio-button>
+                                    </mat-radio-group>
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="fullName">
+                                <th mat-header-cell *matHeaderCellDef>Name</th>
+                                <td mat-cell *matCellDef="let element">{{ element.fullName }}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="username">
+                                <th mat-header-cell *matHeaderCellDef>Username</th>
+                                <td mat-cell *matCellDef="let element">{{ element.username }}</td>
+                            </ng-container>
+
+                            <tr mat-header-row *matHeaderRowDef="selectStaffDisplay"></tr>
+                            <tr mat-row *matRowDef="let row; columns: selectStaffDisplay"></tr>
+                        </table>
+                    </div>
+                </div>
+
+                <div *ngIf="rejectCAF && rejectCAF.length === 0">No records found.</div>
+            </mat-card>
+        </div>
+    </mat-dialog-content>
+
+    <div class="dialog-action-adjust d-flex justify-content-end" style="gap:8px">
+        <button mat-button mat-flat-button color="'primary'" class="addarea-btn" type="submit"
+            *ngIf="reject && !selectStaffReject" (click)="assignToAllStaffTicket(dialogRef)">
+            <i class="fa fa-times-circle"></i> Assign
+        </button>
+        <button mat-button mat-flat-button color="'primary'" class="addarea-btn" type="submit"
+            *ngIf="reject && selectStaffReject" (click)="assignToStaffTicket(false,dialogRef)">
+            <i class="fa fa-times-circle"></i> Assign
+        </button><button mat-stroked-button mat-dialog-close>Close</button>
+    </div>
+</ng-template>
+<ng-template #confirmDialog>
+    <div class="dialog-container">
+        <div class="dialog-header dialog-header-titleFont">
+            Change Status
+            <span class="w-h-18">
+                <a mat-icon-button href="javascript:void(0)" (click)="onCancel()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+            <p class="dialog-description">Do you want to Change Status?</p>
+            <div mat-dialog-actions class="p-0">
+                <button mat-flat-button type="button" class="primary" (click)="onConfirm()">
+                    Confirm
+                </button>
+                <button mat-stroked-button matButton="outlined" color="primary" (click)="onCancel()">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</ng-template>
+<ng-template #changeStatusDialog let-dialogRef="dialogRef">
+    <div class="dialog-header dialog-title"> Change Status<span>
+            <a mat-icon-button (click)="dialogRef.close()">
+                <img src="assets/img/DashboardIcons/Reject.svg">
+            </a>
+        </span>
+    </div>
+
+    <mat-dialog-content>
+        <form [formGroup]="chnageStatusForm">
+            <div class="row">
+                <!-- Old Status -->
+                <div class="col-12" *ngIf="changeStatusSingleMultiple == 'pTicket'">
+                    <label class="inputLabel">Old Status</label>
+                    <mat-form-field appearance="outline" class="w-100 mt-2 disabled-class">
+                        <mat-select class="input-p-5" placeholder="Select a Old Status" formControlName="oldStatus"
+                            disabled>
+                            <mat-option *ngFor="let s of statusData" [value]="s.value">{{ s.text }}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
+                <!-- New Status -->
+                <div class="col-12"><label class="inputLabel">New Status *</label>
+                    <mat-form-field appearance="outline" class="w-100 mt-2">
+                        <mat-select class="input-p-5" placeholder="Select a New Status" (selectionChange)="
+                changeStatusSingleMultiple == 'pTicket'
+                  ? getResolutionReasonsChangeStatus($event.value)
+                  : getResolutionReasonsChangeStatusbulk($event.value)
+              " formControlName="newStatus">
+                            <mat-option *ngFor="let s of ChangestatusList" [value]="s.value">{{ s.text }}</mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="changeStausSubmitted && chnageStatusForm.controls.newStatus.errors?.required">
+                            Case Status is required.
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- Call Details -->
+                <div class="col-12" *ngIf="isCall">
+                    <label>Call Details:</label>
+                    <mat-radio-group formControlName="call_status">
+                        <mat-radio-button value="true"
+                            (change)="onCallDisconnected('true')">Connected</mat-radio-button>
+                        <mat-radio-button value="false"
+                            (change)="onCallDisconnected('false')">Disconnected</mat-radio-button>
+                    </mat-radio-group>
+                </div>
+
+                <!-- Call Disconnect Reason -->
+                <div class="col-12" *ngIf="isCallDisconnected"><label class="inputLabel">Select Reason</label>
+                    <mat-form-field appearance="outline" class="w-100 mt-2">
+                        <mat-select class="input-p-5" placeholder="Select a abcdf" formControlName="deacivate_reason"
+                            [(ngModel)]="searchOption">
+                            <mat-option *ngFor="let reason of reasonForCallDisconnect" [value]="reason">
+                                {{ reason }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
+                <!-- Ticket Closed -->
+                <div class="col-12" *ngIf="isticket">
+                    <label>Ticket Closed:</label>
+                    <mat-radio-group formControlName="is_closed">
+                        <mat-radio-button value="true">Yes</mat-radio-button>
+                        <mat-radio-button value="false">No</mat-radio-button>
+                    </mat-radio-group>
+                </div>
+
+                <!-- Root Cause & Resolution -->
+                <div class="col-12" *ngIf="chnageStatusForm.value.newStatus == 'Resolved'"><label
+                        class="inputLabel">Root
+                        Cause</label>
+                    <mat-form-field appearance="outline" class="w-100 mt-2">
+                        <mat-select class="input-p-5" placeholder="Select a Root
+                        Cause" formControlName="finalResolutionId"
+                            (selectionChange)="getResolutionRootCause($event.value)">
+                            <mat-option *ngFor="let item of resolutionReasonData" [value]="item.id">{{ item.name
+                                }}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                <div class="col-12" *ngIf="chnageStatusForm.value.newStatus == 'Resolved'">
+                    <label class="inputLabel">Resolution</label>
+                    <mat-form-field appearance="outline" class="w-100 mt-2">
+                        <mat-select class="input-p-5" placeholder="Select a Resolution"
+                            formControlName="rootCauseReasonId">
+                            <mat-option *ngFor="let item of rootCauseReasonData" [value]="item.id">{{
+                                item.rootCauseReason }}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
+                <!-- Followup Date & Time -->
+                <div class="col-12" *ngIf="chnageStatusForm.value.newStatus == 'Follow Up'"><label
+                        class="inputLabel">Followup Date
+                        *</label>
+                    <mat-form-field appearance="outline" class="w-100 mt-2">
+                        <input matInput class="input-p-5" placeholder="Enter a Followup Date" type="date"
+                            formControlName="nextFollowupDate" />
+                        <mat-error
+                            *ngIf="changeStausSubmitted && chnageStatusForm.controls.nextFollowupDate.errors?.required">
+                            Followup Date is required.
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="col-12" *ngIf="chnageStatusForm.value.newStatus == 'Follow Up'">
+                    <label class="inputLabel">Followup Time *</label>
+                    <mat-form-field appearance="outline" class="w-100 mt-2">
+                        <input matInput class="input-p-5" placeholder="Enter a Followup Time"
+                            formControlName="nextFollowupTime" />
+                        <mat-error
+                            *ngIf="changeStausSubmitted && chnageStatusForm.controls.nextFollowupTime.errors?.required">
+                            Followup Time is required.
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- Remark / Resolution Description -->
+                <div class="col-12 mt-2">
+                    <label class="inputLabel">{{ chnageStatusForm.controls.newStatus.value != 'Resolved' ? 'Remark' :
+                        'Resolution Description' }}</label>
+                    <mat-form-field appearance="outline" class="w-100 mt-2">
+
+                        <textarea matInput class="input-p-5" placeholder="Enter a Value" rows="5"
+                            formControlName="remark"></textarea>
+                        <mat-error *ngIf="changeStausSubmitted && chnageStatusForm.controls.remark.errors?.required">
+                            Remark is required.
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+        </form>
+    </mat-dialog-content>
+
+    <div class="dialog-action-adjust d-flex justify-content-end" style="gap:8px">
+        <button mat-button mat-flat-button color="'primary'" class="addarea-btn" type="submit"
+            (click)="changeStatusSingleMultiple == 'pTicket' ? changeStatusTicket(dialogRef) : changeSelectStatus(dialogRef)"
+            [disabled]="!chnageStatusForm.valid">
+            Submit
+        </button><button mat-stroked-button mat-dialog-close>Close</button>
+    </div>
+</ng-template>
+<ng-template #changePriorityDialog let-dialogRef="dialogRef">
+    <div class="dialog-header dialog-title"> Change Priority<span>
+            <a mat-icon-button (click)="dialogRef.close()">
+                <img src="assets/img/DashboardIcons/Reject.svg">
+            </a>
+        </span>
+    </div>
+
+    <mat-dialog-content>
+        <div style="margin: 1rem 0">Priority: {{ selcetTicketData.priority }}</div>
+        <label class="inputLabel">Priority</label>
+        <mat-form-field appearance="outline" class="w-100">
+            <mat-select class="input-p-5" placeholder="Select a Priority" [(ngModel)]="selectPriorityValue">
+                <mat-option *ngFor="let p of priorityTicketData" [value]="p.value">{{ p.text }}</mat-option>
+            </mat-select>
+        </mat-form-field>
+    </mat-dialog-content>
+
+    <div class="dialog-action-adjust d-flex justify-content-end" style="gap:8px">
+        <button mat-button mat-flat-button color="'primary'" class="addarea-btn" type="submit"
+            [disabled]="!selectPriorityValue" (click)="SavechangePriority(dialogRef)">
+            <i class="fa fa-check-circle"></i> Save
+        </button><button mat-stroked-button mat-dialog-close>Close</button>
+    </div>
+</ng-template>
+<ng-template #viewDocumentDialog let-dialogRef="dialogRef">
+    <div class="dialog-header dialog-title"> View Document<span>
+            <a mat-icon-button (click)="dialogRef.close()">
+                <img src="assets/img/DashboardIcons/Reject.svg">
+            </a>
+        </span>
+    </div>
+    <mat-dialog-content>
+        <mat-tab-group [(selectedIndex)]="activeTabViewIndex">
+            <mat-tab *ngFor="let tab of tabs" [label]="tab">
+                <ng-container *ngIf="hasFilesForTab(tab); else noFiles">
+                    <ng-container *ngFor="let section of ticketFileDocData">
+                        <ng-container *ngIf="section?.sectionName === tab">
+                            <ng-container *ngIf="tab === 'Optical Power Range'">
+                                <p>Optical Power Range: {{ section?.fileDetails[0]?.opticalRange }}</p>
+                            </ng-container>
+                            <ng-container *ngIf="tab !== 'Optical Power Range'">
+                                <div class="example-container mat-elevation-z8" tabindex="0">
+                                    <table mat-table [dataSource]="section?.fileDetails" class="mat-elevation-z8 w-100">
+                                        <ng-container matColumnDef="fileName">
+                                            <th mat-header-cell *matHeaderCellDef>File Name</th>
+                                            <td mat-cell *matCellDef="let file">{{ file.fileName }}</td>
+                                        </ng-container>
+                                        <ng-container matColumnDef="latitude">
+                                            <th mat-header-cell *matHeaderCellDef>Latitude</th>
+                                            <td mat-cell *matCellDef="let file">{{ file.latitude }}</td>
+                                        </ng-container>
+                                        <ng-container matColumnDef="longitude">
+                                            <th mat-header-cell *matHeaderCellDef>Longitude</th>
+                                            <td mat-cell *matCellDef="let file">{{ file.longitude }}</td>
+                                        </ng-container>
+                                        <ng-container matColumnDef="actions">
+                                            <th mat-header-cell *matHeaderCellDef>Action</th>
+                                            <td mat-cell *matCellDef="let file">
+                                                <button mat-icon-button color="primary"
+                                                    (click)="downloadResolveDoc(file.fileName, file, section?.sectionName)"
+                                                    matTooltip="Download">
+                                                    <img src="assets/img/DashboardIcons/Download.svg">
+
+                                                </button>
+                                                <button mat-icon-button color="primary"
+                                                    (click)="showticketResolveDocData(file.fileName, file, section?.sectionName)"
+                                                    matTooltip="View">
+                                                    <img src="assets/img/DashboardIcons/eye-svgrepo-com (1) 1.svg">
+                                                </button>
+                                                <button mat-icon-button color="warn"
+                                                    (click)="deleteResolveConfirm(file.fileName, file, section?.sectionName)"
+                                                    matTooltip="Remove">
+                                                    <img
+                                                        src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                                </button>
+                                            </td>
+                                        </ng-container>
+
+                                        <tr mat-header-row *matHeaderRowDef="displayFile">
+                                        </tr>
+                                        <tr mat-row *matRowDef="let row; columns: displayFile">
+                                        </tr>
+                                    </table>
+                                </div>
+                            </ng-container>
+                        </ng-container>
+                    </ng-container>
+                </ng-container>
+                <ng-template #noFiles>
+                    <p>No files available for this tab.</p>
+                </ng-template>
+            </mat-tab>
+        </mat-tab-group>
+    </mat-dialog-content>
+
+    <div class="dialog-action-adjust d-flex justify-content-end" style="gap:8px"><button mat-stroked-button
+            mat-dialog-close>Close</button>
+    </div>
+</ng-template>
+<ng-template #uploadDocumentRootDialog let-dialogRef="dialogRef">
+    <div class="dialog-header dialog-title"> Upload Document<span>
+            <a mat-icon-button (click)="dialogRef.close()">
+                <img src="assets/img/DashboardIcons/Reject.svg">
+            </a>
+        </span>
+    </div>
+    <mat-dialog-content>
+        <form [formGroup]="uploadRootForm" class="row g-3">
+            <!-- File Upload -->
+            <div class="col-12">
+                <label class="inputLabel">Select files to upload</label>
+                <input type="file" multiple class="form-control" (change)="onFileChangeUploadRoot($event)" />
+                <div *ngFor="let file of selectedFileUploadPreview; let i = index"
+                    class="d-flex justify-content-between align-items-center mt-2 p-1 bg-light">
+                    <span style="font-size: 12px">{{ file?.name }}</span>
+                    <button mat-icon-button color="warn" type="button" (click)="deletUploadedFileRoot(file?.name)">
+                        <mat-icon>close</mat-icon>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Latitude -->
+            <div class="col-12 col-md-4"><label class="inputLabel">Latitude</label>
+                <mat-form-field appearance="outline" class="mat-form-field w-100">
+                    <input matInput class="input-p-5" formControlName="latitude" placeholder="Enter Latitude" />
+                </mat-form-field>
+            </div>
+
+            <!-- Longitude -->
+            <div class="col-12 col-md-4"><label class="inputLabel">Longitude</label>
+                <mat-form-field appearance="outline" class="mat-form-field w-100">
+                    <input matInput class="input-p-5" formControlName="longitude" placeholder="Enter Longitude" />
+                </mat-form-field>
+            </div>
+
+            <!-- Get Current Location -->
+            <div class="col-12 col-md-4 d-flex align-items-center">
+                <span class="HoverEffect" (click)="mylocationRoot()" title="Get Current Location"
+                    style="border-bottom: 1px solid #f7941e; cursor: pointer">
+                    <img class="LocationIcon LocationIconMargin"
+                        src="assets/img/DashboardIcons/location-3-svgrepo-com 1.svg" />
+                </span>
+            </div>
+
+            <!-- Add Remark Checkbox -->
+            <div class="col-12 col-md-4">
+                <mat-checkbox formControlName="addRemarkChecked">Add Remark</mat-checkbox>
+            </div>
+
+            <!-- Conditional Remark Textarea -->
+            <div class="col-12 col-md-8" *ngIf="uploadRootForm.get('addRemarkChecked')?.value">
+                <label class="inputLabel">Remark</label>
+                <mat-form-field appearance="outline" class="mat-form-field w-100">
+                    <textarea matInput class="input-p-5" placeholder="Enter a Remark" rows="3"
+                        formControlName="uploadremark" placeholder="Enter your remark"></textarea>
+                </mat-form-field>
+            </div>
+        </form>
+    </mat-dialog-content>
+
+    <div class="dialog-action-adjust d-flex justify-content-end" style="gap:8px">
+        <button mat-stroked-button mat-dialog-close>Close</button>
+    </div>
+</ng-template>
+<ng-template #uploadResolveDocumentDialog let-dialogRef="dialogRef">
+    <div class="dialog-header dialog-title"> Upload Document<span>
+            <a mat-icon-button (click)="dialogRef.close()">
+                <img src="assets/img/DashboardIcons/Reject.svg">
+            </a>
+        </span>
+    </div>
+    <mat-dialog-content>
+        <mat-tab-group [(selectedIndex)]="activeTabIndex" (selectedIndexChange)="onTabChange($event)">
+            <mat-tab *ngFor="let tab of tabs; let tabIndex = index" [label]="tab">
+                <form [formGroup]="uploadResolveDocForm[tabIndex]" class="modal-body">
+                    <div class="row g-3 gy-3">
+                        <!-- Section Name -->
+                        <div class="col-12 col-md-3"><label class="inputLabel">Section Name</label>
+                            <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                <input matInput class="input-p-5" placeholder="Enter a Section Name"
+                                    formControlName="sectionName" [value]="tabs[tabIndex]" disabled />
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Latitude & Longitude -->
+                        <ng-container *ngIf="tabs[tabIndex] !== 'Optical Power Range'">
+                            <div class="col-12 col-md-3"><label class="inputLabel">Latitude</label>
+                                <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                    <input matInput class="input-p-5" placeholder="Enter a Latitude"
+                                        formControlName="latitude" />
+                                </mat-form-field>
+                            </div>
+                            <div class="col-12 col-md-3"><label class="inputLabel">Longitude</label>
+                                <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                    <input matInput class="input-p-5" placeholder="Enter a Longitude"
+                                        formControlName="longitude" />
+                                </mat-form-field>
+                            </div>
+                            <div class="col-12 col-md-3 d-flex align-items-center">
+                                <span class="HoverEffect" (click)="mylocation()" title="Get Current Location"
+                                    style="border-bottom: 1px solid #f7941e; cursor: pointer">
+                                    <img class="LocationIcon LocationIconMargin"
+                                        src="assets/img/DashboardIcons/location-3-svgrepo-com 1.svg" />
+                                </span>
+                            </div>
+                        </ng-container>
+
+                        <!-- Optical Power Range -->
+                        <ng-container *ngIf="tabs[tabIndex] === 'Optical Power Range'">
+                            <div class="col-12 col-md-3"><label class="inputLabel">Optical Power Range (In db) *</label>
+                                <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                    <mat-select class="input-p-5" placeholder="Select a Optical Power Range"
+                                        formControlName="opticalRange">
+                                        <mat-option *ngFor="let option of opticalRangeData" [value]="option.value">
+                                            {{ option.label }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+                        </ng-container>
+                    </div>
+
+                    <!-- File Upload Row -->
+                    <div class="row g-3 gy-3 mt-3" *ngIf="tabs[tabIndex] !== 'Optical Power Range'">
+                        <div class="col-12 col-md-6">
+                            <label>
+                                Select files to upload
+                                <span *ngIf="tabsMandatory[tabIndex]" class="text-danger">*</span>
+                            </label>
+                            <input type="file" multiple class="form-control"
+                                (change)="onFileResolveChangeUpload($event, tabIndex)" />
+                            <div *ngFor="let file of selectedResolveFileUploadPreview[tabIndex]; let i = index"
+                                class="mt-2 d-flex justify-content-between align-items-center bg-light p-2">
+                                <span style="font-size: 12px">{{ file?.name }}</span>
+                                <button type="button" mat-icon-button
+                                    (click)="deleteResolveUploadedFile(file?.name, tabIndex)">
+                                    <mat-icon>close</mat-icon>
+                                </button>
+                            </div>
+                            <div *ngIf="tabsMandatory[tabIndex] && resolvesubmitted && uploadResolveDocForm[tabIndex].controls.file.errors"
+                                class="text-danger">
+                                File is required.
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </mat-tab>
+        </mat-tab-group>
+    </mat-dialog-content>
+
+    <div class="dialog-action-adjust d-flex justify-content-end" style="gap:8px">
+        <button mat-raised-button color="primary" (click)="uploadResolveAllDocuments(dialogRef)">
+            <i class="fa fa-check-circle"></i> Upload All Documents
+        </button><button mat-stroked-button mat-dialog-close>Close</button>
+    </div>
+</ng-template>
+<ng-template #documentResolvePreviewDialog let-dialogRef="dialogRef">
+    <div class="dialog-header dialog-title"> Document Preview<span>
+            <a mat-icon-button (click)="dialogRef.close()">
+                <img src="assets/img/DashboardIcons/Reject.svg">
+            </a>
+        </span>
+    </div>
+    <mat-dialog-content>
+        <div style="height: 600px;">
+            <iframe [src]="resolvePreviewUrl" width="100%" height="100%" allowfullscreen></iframe>
+        </div>
+    </mat-dialog-content>
+    <div class="dialog-action-adjust d-flex justify-content-end" style="gap:8px"><button mat-stroked-button
+            mat-dialog-close>Close</button>
+    </div>
+</ng-template>
+<ng-template #feedbackFormDialog let-dialogRef="dialogRef">
+    <div class="dialog-header dialog-title">
+        {{ ticketDeatailData.department === 'Sales' ? 'Sales Feedback Form' : 'Technical Feedback Form' }}
+        <span>
+            <a mat-icon-button (click)="dialogRef.close()">
+                <img src="assets/img/DashboardIcons/Reject.svg">
+            </a>
+        </span>
+    </div>
+    <mat-dialog-content>
+        <form [formGroup]="feedbackForm">
+            <div class="row">
+
+                <!-- Example for Sales Dropdown -->
+                <div class="col-12" *ngIf="ticketDeatailData.department === 'Sales'"><label class="inputLabel">Sales
+                        Support
+                        Through</label>
+                    <mat-form-field appearance="outline" class="mat-form-field w-100">
+                        <mat-select class="input-p-5" placeholder="Select a Sales Support"
+                            formControlName="support_type">
+                            <mat-option *ngFor="let option of salesSupportData" [value]="option.value">
+                                {{ option.label }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
+                <!-- Staff Behaviour -->
+                <div class="col-12" *ngIf="ticketDeatailData.department === 'Sales'"><label class="inputLabel">Staff
+                        Behaviour
+                        Feedback</label>
+                    <mat-form-field appearance="outline" class="mat-form-field w-100">
+                        <mat-select class="input-p-5" placeholder="Select a Staff Behaviour Feedback"
+                            formControlName="staff_behavior"
+                            (selectionChange)="getStaffBehaviourFeedback($event.value)">
+                            <mat-option *ngFor="let option of staffBehaviourData" [value]="option">
+                                {{ option }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
+                <!-- Technical Feedback -->
+                <div class="col-12" *ngIf="ticketDeatailData.department === 'Technical'">
+                    <label class="inputLabel">Service Experience</label>
+                    <mat-form-field appearance="outline" class="mat-form-field w-100">
+                        <mat-select class="input-p-5" placeholder="Select a Service Experience"
+                            formControlName="service_experience" (selectionChange)="getServiceExperience($event.value)">
+                            <mat-option *ngFor="let option of staffBehaviourData" [value]="option">
+                                {{ option }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                <!-- Behaviour Professionalism -->
+                <div class="col-12" *ngIf="ticketDeatailData.department === 'Technical'">
+                    <label class="inputLabel">Behaviour Professionalism</label>
+                    <mat-form-field appearance="outline" class="mat-form-field w-100">
+                        <mat-select class="input-p-5" placeholder="Please enter Behaviour Professionalism"
+                            formControlName="behaviour_professionalism"
+                            (selectionChange)="getbehaviourPro($event.value)">
+                            <mat-option *ngFor="let option of staffBehaviourData" [value]="option">
+                                {{ option }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
+                <!-- Rating -->
+                <div class="col-12">
+                    <label>Rating:</label>
+
+                    <mat-slider min="1" max="5" step="1" tickInterval="1">
+                        <input matSliderThumb formControlName="overall_rating" />
+                    </mat-slider>
+
+                </div>
+
+                <!-- General Remark -->
+                <div class="col-12"><label class="inputLabel">General Remark</label>
+                    <mat-form-field appearance="outline" class="mat-form-field w-100">
+                        <textarea matInput class="input-p-5" placeholder="Enter a Remark"
+                            formControlName="general_remarks" rows="5"></textarea>
+                    </mat-form-field>
+                </div>
+
+            </div>
+        </form>
+    </mat-dialog-content>
+    <div class="dialog-action-adjust d-flex justify-content-end" style="gap:8px">
+        <button mat-button mat-flat-button color="'primary'" class="addarea-btn" type="submit"
+            (click)="saveFeedback(ticketDeatailData.caseId,dialogRef)" [disabled]="!feedbackForm.valid">
+            Submit
+        </button><button mat-stroked-button mat-dialog-close>Close</button>
+    </div>
+</ng-template>
+<ng-template #selectTicketDialog let-dialogRef="dialogRef">
+    <div class="dialog-header dialog-title"> Select Ticket<span>
+            <a mat-icon-button (click)="dialogRef.close()">
+                <img src="assets/img/DashboardIcons/Reject.svg">
+            </a>
+        </span>
+    </div>
+    <mat-dialog-content class="table-responsive">
+        <div class="example-container mat-elevation-z8" tabindex="0">
+            <table mat-table [dataSource]="ticketDataForLink" class="mat-elevation-z1 w-100">
+                <!-- Select Column -->
+                <ng-container matColumnDef="select">
+                    <th mat-header-cell *matHeaderCellDef>Select</th>
+                    <td mat-cell *matCellDef="let ticket">
+                        <mat-checkbox [(ngModel)]="ticket.isSingleTicketChecked"
+                            (change)="addTicketCheckedData(ticket.caseId, $event)">
+                        </mat-checkbox>
+                    </td>
+                </ng-container>
+
+                <!-- Name Column -->
+                <ng-container matColumnDef="name">
+                    <th mat-header-cell *matHeaderCellDef>Name</th>
+                    <td mat-cell *matCellDef="let ticket">
+                        <a (click)="openTicketDetailView(ticket.caseId)" class="text-primary" style=" cursor: pointer">
+                            {{ ticket.caseTitle }}
+                        </a>
+                    </td>
+                </ng-container>
+
+                <!-- Number Column -->
+                <ng-container matColumnDef="number">
+                    <th mat-header-cell *matHeaderCellDef>Number</th>
+                    <td mat-cell *matCellDef="let ticket">{{ ticket.caseNumber }}</td>
+                </ng-container>
+
+                <!-- Type Column -->
+                <ng-container matColumnDef="type">
+                    <th mat-header-cell *matHeaderCellDef>Type</th>
+                    <td mat-cell *matCellDef="let ticket">{{ ticket.caseType }}</td>
+                </ng-container>
+
+                <!-- Customer Column -->
+                <ng-container matColumnDef="customer">
+                    <th mat-header-cell *matHeaderCellDef>Customer</th>
+                    <td mat-cell *matCellDef="let ticket">
+                        <a (click)="openModal('custmerDetailModal', ticket.customersId)" class="text-primary"
+                            style=" cursor: pointer">
+                            {{ ticket.userName }}
+                        </a>
+                    </td>
+                </ng-container>
+
+                <!-- Assignee Column -->
+                <ng-container matColumnDef="assignee">
+                    <th mat-header-cell *matHeaderCellDef>Assignee</th>
+                    <td mat-cell *matCellDef="let ticket">
+                        <ng-container *ngIf="ticket.currentAssigneeId; else noAssignee">
+                            <a (click)="openStaffDetailModal(ticket.currentAssigneeId)" class="text-primary"
+                                style="cursor: pointer">
+                                {{ ticket.currentAssigneeName }}
+                            </a>
+                        </ng-container>
+                        <ng-template #noAssignee>
+                            {{ ticket.currentAssigneeName }}
+                        </ng-template>
+                    </td>
+                </ng-container>
+
+                <!-- Status Column -->
+                <ng-container matColumnDef="status">
+                    <th mat-header-cell *matHeaderCellDef>Status</th>
+                    <td mat-cell *matCellDef="let ticket">
+                        <span [ngClass]="{
+              'badge-success': ticket.caseStatus === 'Open' || ticket.caseStatus === 'In Progress' || ticket.caseStatus === 'Resolved' || ticket.caseStatus === 'Completed',
+              'badge-danger': ticket.caseStatus === 'Closed' || ticket.caseStatus === 'rejected',
+              'badge-info': ticket.caseStatus === 'Pending' || ticket.caseStatus === 'Re-open' || ticket.caseStatus === 'On Hold' || ticket.caseStatus === 'Out of domain' || ticket.caseStatus === 'Raise and Close' || ticket.caseStatus === 'Follow Up'
+            }" class="badge">
+                            {{ ticket.caseStatus }}
+                        </span>
+                    </td>
+                </ng-container>
+
+                <!-- Followup Column -->
+                <ng-container matColumnDef="followup">
+                    <th mat-header-cell *matHeaderCellDef>Followup Date & Time</th>
+                    <td mat-cell *matCellDef="let ticket">
+                        {{ ticket.nextFollowupDate }} {{ ticket.nextFollowupTime }}
+                    </td>
+                </ng-container>
+
+                <!-- Header and Row Declarations -->
+                <tr mat-header-row *matHeaderRowDef="selectticketConfigDisplay"></tr>
+                <tr mat-row *matRowDef="let row; columns: selectticketConfigDisplay"
+                    [ngClass]="row.caseStatus != 'Closed' && row.nextFollowupDate < currentDate ? 'red-bg' : ''"></tr>
+            </table>
+        </div>
+        <!-- Pagination -->
+        <mat-paginator [length]="ticketConfigtotalRecords" [pageSize]="linkTicketItemsPerPage"
+            [pageSizeOptions]="[5,10,20,50,100]" (page)="pageChangedLinkTicket($event)" showFirstLastButtons>
+        </mat-paginator>
+
+    </mat-dialog-content>
+
+    <div class="dialog-action-adjust d-flex justify-content-end" style="gap:8px">
+        <button mat-raised-button color="primary" (click)="linkTicket(dialogRef)">
+            Save
+        </button><button mat-stroked-button mat-dialog-close>Close</button>
+    </div>
+</ng-template>
+<ng-template #uploadDocumentDialog let-dialogRef="dialogRef">
+    <div class="dialog-header dialog-title"> Upload Document<span>
+            <a mat-icon-button (click)="dialogRef.close()">
+                <img src="assets/img/DashboardIcons/Reject.svg">
+            </a>
+        </span>
+    </div>
+
+    <mat-dialog-content [formGroup]="uploadDocForm"><label class="inputLabel">Select files to upload *</label>
+        <input type="file" multiple formControlName="file" (change)="onFileChangeUpload($event)" />
+        <div *ngFor="let file of selectedFileUploadPreview; let i = index" class="d-flex align-items-center">
+            <span style="font-size: 10px; margin-right: 5px;">{{ file?.name }}</span>
+            <button mat-icon-button color="warn" (click)="deletUploadedFile(file?.name)">
+                <mat-icon>close</mat-icon>
+            </button>
+        </div>
+
+        <div *ngIf="submitted && uploadDocForm.controls.file.errors" class="text-danger">
+            <small *ngIf="uploadDocForm.controls.file.errors.required">File is required.</small>
+        </div>
+    </mat-dialog-content>
+
+    <div class="dialog-action-adjust d-flex justify-content-end" style="gap:8px">
+        <button mat-button mat-flat-button color="'primary'" class="addarea-btn" type="submit"
+            (click)="uploadDocuments(dialogRef)">
+            <i class="fa fa-check-circle"></i> Upload
+        </button><button mat-stroked-button mat-dialog-close>Close</button>
+    </div>
+</ng-template>
+<ng-template #changeProblemDomainDialog let-dialogRef="dialogRef">
+    <div class="dialog-header dialog-title"> Change Problem Domain<span>
+            <a mat-icon-button (click)="dialogRef.close()">
+                <img src="assets/img/DashboardIcons/Reject.svg">
+            </a>
+        </span>
+    </div>
+
+    <mat-dialog-content><label class="inputLabel">Services *</label>
+        <mat-form-field appearance="outline" class="mat-form-field w-100">
+            <mat-select class="input-p-5" placeholder="Select a Services" [(ngModel)]="ticketServiceList" multiple
+                (selectionChange)="getAllTicketReasonCategory($event.value)">
+                <mat-option *ngFor="let service of customerServiceData" [value]="service.id">
+                    {{ service.serviceName }}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+        <label class="inputLabel">Problem Domain *</label>
+        <mat-form-field appearance="outline" class="mat-form-field w-100">
+            <mat-select class="input-p-5" placeholder="Select a Problem Domain" [(ngModel)]="problemDomain"
+                (selectionChange)="selReasonCategory($event)">
+                <mat-option *ngFor="let domain of filteredReasonCategoryList" [value]="domain.id">
+                    {{ domain.categoryName }}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+        <label class="inputLabel">Ticket Sub Problem Domain *</label>
+        <mat-form-field appearance="outline" class="mat-form-field w-100">
+            <mat-select class="input-p-5" placeholder="Select a Ticket Sub Problem Domain"
+                [(ngModel)]="subProblemDomain" (selectionChange)="selReasonSubCategory($event)">
+                <mat-option *ngFor="let sub of ticketReasonSubCategoryData" [value]="sub.id">
+                    {{ sub.subCategoryName }}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+        <label class="inputLabel">Remark*</label>
+        <mat-form-field appearance="outline" class="mat-form-field w-100">
+            <textarea matInput class="input-p-5" placeholder="Enter a Remark" [(ngModel)]="pickRemark"
+                name="remark"></textarea>
+        </mat-form-field>
+    </mat-dialog-content>
+
+    <div class="dialog-action-adjust d-flex justify-content-end" style="gap:8px">
+        <button mat-button mat-flat-button color="'primary'" class="addarea-btn" type="submit"
+            [disabled]="!subProblemDomain || !pickRemark" (click)="changeProblemDomain(dialogRef)">
+            <i class="fa fa-check-circle"></i> Change
+        </button><button mat-stroked-button mat-dialog-close>Close</button>
+    </div>
+</ng-template>
+<ng-template #ticketETRDialog let-dialogRef="dialogRef">
+    <div class="dialog-header dialog-title"> Ticket ETR<span>
+            <a mat-icon-button (click)="dialogRef.close()">
+                <img src="assets/img/DashboardIcons/Reject.svg">
+            </a>
+        </span>
+    </div>
+
+    <mat-dialog-content [formGroup]="ticketETRForm"><label class="inputLabel">Message Mode*</label>
+        <mat-form-field appearance="outline" class="mat-form-field w-100">
+            <mat-select class="input-p-5" placeholder="Select a Message Mode" formControlName="isTemplateDynamic"
+                (selectionChange)="selETRmessageMode($event)">
+                <mat-option *ngFor="let mode of messageModeETR" [value]="mode.value">{{ mode.label }}</mat-option>
+            </mat-select>
+            <mat-error *ngIf="submittedETR && ticketETRForm.controls.isTemplateDynamic.errors?.required">
+                Message Mode is required.
+            </mat-error>
+        </mat-form-field>
+        <label class="inputLabel">Date*</label>
+        <mat-form-field appearance="outline" class="mat-form-field w-100">
+            <input matInput class="input-p-5" placeholder="Enter a Date" [matDatepicker]="picker"
+                formControlName="notificationDate" [min]="currentDt">
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+            <mat-error *ngIf="submittedETR && ticketETRForm.controls.notificationDate.errors?.required">
+                Date is required.
+            </mat-error>
+        </mat-form-field>
+        <label class="inputLabel">Time*</label>
+        <mat-form-field appearance="outline" class="mat-form-field w-100">
+            <input matInput class="input-p-5" placeholder="Enter a Time" formControlName="notificationTime" type="time"
+                [min]="minTime">
+            <mat-error *ngIf="submittedETR && ticketETRForm.controls.notificationTime.errors?.required">
+                Time is required.
+            </mat-error>
+        </mat-form-field>
+        <label class="inputLabel">Message*</label>
+        <mat-form-field appearance="outline" class="mat-form-field w-100" *ngIf="ticketETRForm.value.isTemplateDynamic">
+
+            <textarea matInput class="input-p-5" placeholder="Enter a Message" formControlName="remark"></textarea>
+            <mat-error *ngIf="submittedETR && ticketETRForm.controls.remark.errors?.required">
+                Message is required.
+            </mat-error>
+        </mat-form-field>
+
+        <mat-checkbox formControlName="sms">SMS</mat-checkbox>
+        <mat-checkbox formControlName="email">Email</mat-checkbox>
+    </mat-dialog-content>
+
+    <div class="dialog-action-adjust d-flex justify-content-end" style="gap:8px">
+        <button mat-button mat-flat-button color="'primary'" class="addarea-btn" type="submit"
+            [disabled]="!ticketETRForm.value.sms && !ticketETRForm.value.email" (click)="ETRSaveData(dialogRef)">
+            <i class="fa fa-check-circle"></i> Save
+        </button>
+        <button mat-stroked-button mat-dialog-close>Close</button>
+    </div>
+</ng-template>
+<ng-template #followupTicketDialog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <div class="dialog-header dialog-title">
+            Ticket Remark
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+
+                </a>
+            </span>
+        </div>
+
+        <div mat-dialog-content>
+            <form [formGroup]="followupForm"><label class="inputLabel">Remark Type *</label>
+                <mat-form-field appearance="outline" class="w-100 ">
+                    <mat-select class="input-p-5" placeholder="Select a Remark Type" formControlName="remarkType">
+                        <mat-option *ngFor="let option of remarkTypeOption" [value]="option.value">
+                            {{ option.label }}
+                        </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="followupSubmmitted && followupForm.controls.remarkType.errors?.required">
+                        Please select any remark type.
+                    </mat-error>
+                </mat-form-field>
+                <label class="inputLabel">Remark *</label>
+                <mat-form-field appearance="outline" class="w-100 ">
+                    <textarea matInput class="input-p-5" placeholder="Enter a Remark" rows="5"
+                        formControlName="remark"></textarea>
+                    <mat-error *ngIf="followupSubmmitted && followupForm.controls.remark.errors?.required">
+                        Remark is required.
+                    </mat-error>
+                </mat-form-field>
+            </form>
+        </div>
+
+        <div class="dialog-action-adjust d-flex justify-content-end" style="gap:8px">
+            <button mat-button mat-flat-button color="'primary'" class="addarea-btn" type="submit"
+                (click)="followupTicket(dialogRef)">Submit</button>
+            <button mat-stroked-button mat-dialog-close>Close</button>
+        </div>
+    </div>
+</ng-template>
+<ng-template #conversationDialog let-dialogRef="dialogRef">
+    <div class="dialog-header dialog-title"> Ticket Conversations<span>
+            <a mat-icon-button (click)="dialogRef.close()">
+                <img src="assets/img/DashboardIcons/Reject.svg">
+            </a>
+        </span>
+    </div>
+    <mat-dialog-content>
+        <div class="conversation-container" style="max-height: 28vw; overflow: auto;">
+            <div *ngIf="conversationListData.length === 0">No Data Available</div>
+            <div *ngFor="let remarkData of conversationListData">
+                <div [ngClass]="remarkData.isFromCustomer ? 'msg-left' : 'msg-right'" class="msg">
+                    <div class="bubble" *ngIf="remarkData.remark">
+                        <span class="msg_name_send">{{ remarkData.isFromCustomer ? remarkData.customersName :
+                            remarkData.staffUserName }}</span>
+                        <div class="remark">{{ remarkData.remark }}</div>
+                        <span class="msg_time_send">{{ remarkData?.remarkDate | date: 'short' }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </mat-dialog-content>
+    <div class="dialog-action-adjust d-flex justify-content-end" style="gap:8px"><button mat-stroked-button
+            mat-dialog-close>Close</button>
+    </div>
+</ng-template>
+<ng-template #teamDetailsDialog let-dialogRef="dialogRef">
+    <div class="dialog-header dialog-title"> Team Details<span>
+            <a mat-icon-button (click)="dialogRef.close()">
+                <img src="assets/img/DashboardIcons/Reject.svg">
+            </a>
+        </span>
+    </div>
+
+    <mat-dialog-content>
+        <mat-card>
+            <mat-card-content>
+                <table class="border">
+                    <tr style="width: 100% !important">
+                        <td>
+                            @for (data of customerETRDetailData; track data) {
+                            <div>
+                                {{ data }}
+                            </div>
+                            }
+                        </td>
+                    </tr>
+                </table>
+
+            </mat-card-content>
+        </mat-card>
+
+    </mat-dialog-content>
+
+    <div class="dialog-action-adjust d-flex justify-content-end" style="gap:8px"><button mat-stroked-button
+            mat-dialog-close>Close</button>
+    </div>
+</ng-template>
+<ng-template #tatDetailsDialog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+
+        <!-- Header -->
+        <div class="dialog-header dialog-title">
+            Remarks Followup
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <div mat-dialog-content>
+
+            <!-- Basic Details -->
+            <mat-card class="mb-2">
+                <mat-card-header>
+                    <mat-card-title>Basic Details</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="row">
+                        <div class="col-lg-4 col-md-4 dataGroup">
+                            <label class="datalbl">Name :</label>
+                            <span>{{ viewTrcData.name }}</span>
+                        </div>
+                        <div class="col-lg-4 col-md-4 dataGroup">
+                            <label class="datalbl">Status :</label>
+                            <span *ngIf="viewTrcData.status === 'Active'" class="badge badge-success"> Active </span>
+                            <span *ngIf="viewTrcData.status !== 'Active'" class="badge badge-danger"> Inactive </span>
+                        </div>
+                        <div class="col-lg-4 col-md-4 dataGroup">
+                            <label class="datalbl">Response Time:</label>
+                            <span>{{ viewTrcData.rtime }} {{ viewTrcData.runit }}</span>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-lg-4 col-md-4 dataGroup">
+                            <label class="datalbl">SLA Time P1 :</label>
+                            <span>{{ viewTrcData.slaTimep1 }} {{ viewTrcData.sunitp1 }}</span>
+                        </div>
+                        <div class="col-lg-4 col-md-4 dataGroup">
+                            <label class="datalbl">SLA Time P2 :</label>
+                            <span>{{ viewTrcData.slaTimep2 }} {{ viewTrcData.sunitp2 }}</span>
+                        </div>
+                        <div class="col-lg-4 col-md-4 dataGroup">
+                            <label class="datalbl">SLA Time P3 :</label>
+                            <span>{{ viewTrcData.slaTime3 }} {{ viewTrcData.sunitp3 }}</span>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+
+            <!-- TAT Mapping Details -->
+            <mat-card *ngIf="viewTrcData.tatMatrixMappings.length > 0">
+                <mat-card-header>
+                    <mat-card-title>TAT Mapping Detail</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="example-container mat-elevation-z8" tabindex="0">
+                        <table mat-table [dataSource]="viewTrcData.tatMatrixMappings" class="mat-elevation-z1 w-100">
+
+                            <!-- Columns -->
+                            <ng-container matColumnDef="orderNo">
+                                <th mat-header-cell *matHeaderCellDef>Order</th>
+                                <td mat-cell *matCellDef="let element">{{ element.orderNo }}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="level">
+                                <th mat-header-cell *matHeaderCellDef>Level</th>
+                                <td mat-cell *matCellDef="let element">{{ element.level }}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="mtime1">
+                                <th mat-header-cell *matHeaderCellDef>TAT time for P1</th>
+                                <td mat-cell *matCellDef="let element">{{ element.mtime1 }}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="mtime2">
+                                <th mat-header-cell *matHeaderCellDef>TAT time for P2</th>
+                                <td mat-cell *matCellDef="let element">{{ element.mtime2 }}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="mtime3">
+                                <th mat-header-cell *matHeaderCellDef>TAT time for P3</th>
+                                <td mat-cell *matCellDef="let element">{{ element.mtime3 }}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="munit">
+                                <th mat-header-cell *matHeaderCellDef>Unit</th>
+                                <td mat-cell *matCellDef="let element">{{ element.munit }}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="action">
+                                <th mat-header-cell *matHeaderCellDef>Action</th>
+                                <td mat-cell *matCellDef="let element">{{ element.action }}</td>
+                            </ng-container>
+
+                            <!-- Header & Row -->
+                            <tr mat-header-row *matHeaderRowDef="displaytatDetails"></tr>
+                            <tr mat-row *matRowDef="let row; columns:displaytatDetails">
+                            </tr>
+                        </table>
+
+
+                    </div>
+                </mat-card-content>
+            </mat-card>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="dialog-action-adjust d-flex justify-content-end" style="gap:8px"><button mat-stroked-button
+                mat-dialog-close>Close</button>
+        </div>
+    </div>
+</ng-template>
+<ng-template #TATDetailsDialog let-dialogRef="dialogRef">
+    <div class="dialog-header dialog-title"> TAT Details<span>
+            <a mat-icon-button (click)="dialogRef.close()">
+                <img src="assets/img/DashboardIcons/Reject.svg">
+            </a>
+        </span>
+    </div>
+
+    <mat-dialog-content>
+        <div class="row">
+            <div class="col-md-12">
+                <span>Tat name : </span>
+                <ng-container *ngFor="let data of TATDetails">
+                    <a href="javascript:void(0)" class="text-primary" (click)="openRawDataModal(data)">
+                        {{ data.ticketTatMatrix.name }},
+                    </a>
+                </ng-container>
+            </div>
+        </div>
+    </mat-dialog-content>
+
+    <div class="dialog-action-adjust d-flex justify-content-end" style="gap:8px"><button mat-stroked-button
+            mat-dialog-close>Close</button>
+    </div>
+</ng-template>
+<ng-template #tatDetailDialog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+
+        <div class="dialog-header dialog-title">
+            TAT Details
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+
+                </a>
+            </span>
+        </div>
+
+        <div mat-dialog-content>
+            <!-- Basic Details -->
+            <mat-card class="mb-2">
+                <mat-card-header>
+                    <mat-card-title>Basic Details</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="row">
+                        <div class="col-lg-4 col-md-4">
+                            <label>Name :</label>
+                            <span>{{ TATcaseData.name }}</span>
+                        </div>
+                        <div class="col-lg-4 col-md-4">
+                            <label>Status :</label>
+                            <span *ngIf="TATcaseData.status === 'Active'" class="badge badge-success">Active</span>
+                            <span *ngIf="TATcaseData.status !== 'Active'" class="badge badge-danger">Inactive</span>
+                        </div>
+                        <div class="col-lg-4 col-md-4">
+                            <label>Response Time :</label>
+                            <span>{{ TATcaseData.rtime }} {{ TATcaseData.runit }}</span>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-lg-4 col-md-4">SLA Time P1: {{ TATcaseData.slaTimep1 }} {{ TATcaseData.sunitp1
+                            }}</div>
+                        <div class="col-lg-4 col-md-4">SLA Time P2: {{ TATcaseData.slaTimep2 }} {{ TATcaseData.sunitp2
+                            }}</div>
+                        <div class="col-lg-4 col-md-4">SLA Time P3: {{ TATcaseData.slaTime3 }} {{ TATcaseData.sunitp3 }}
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+
+            <!-- TAT Mapping Table -->
+            <mat-card *ngIf="TATcaseData.tatMatrixMappings.length > 0">
+                <mat-card-header>
+                    <mat-card-title>TAT Mapping Detail</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="example-container mat-elevation-z8" tabindex="0">
+                        <table mat-table [dataSource]="TATcaseData.tatMatrixMappings" class="mat-elevation-z1 w-100">
+
+                            <ng-container matColumnDef="orderNo">
+                                <th mat-header-cell *matHeaderCellDef>Order</th>
+                                <td mat-cell *matCellDef="let element">{{ element.orderNo }}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="level">
+                                <th mat-header-cell *matHeaderCellDef>Level</th>
+                                <td mat-cell *matCellDef="let element">{{ element.level }}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="mtime1">
+                                <th mat-header-cell *matHeaderCellDef>TAT time P1</th>
+                                <td mat-cell *matCellDef="let element">{{ element.mtime1 }}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="mtime2">
+                                <th mat-header-cell *matHeaderCellDef>TAT time P2</th>
+                                <td mat-cell *matCellDef="let element">{{ element.mtime2 }}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="mtime3">
+                                <th mat-header-cell *matHeaderCellDef>TAT time P3</th>
+                                <td mat-cell *matCellDef="let element">{{ element.mtime3 }}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="munit">
+                                <th mat-header-cell *matHeaderCellDef>Unit</th>
+                                <td mat-cell *matCellDef="let element">{{ element.munit }}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="action">
+                                <th mat-header-cell *matHeaderCellDef>Action</th>
+                                <td mat-cell *matCellDef="let element">{{ element.action }}</td>
+                            </ng-container>
+
+                            <tr mat-header-row *matHeaderRowDef="displaytatDetails">
+                            </tr>
+                            <tr mat-row *matRowDef="let row; columns:displaytatDetails">
+                            </tr>
+                        </table>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+
+        <div class="dialog-action-adjust d-flex justify-content-end" style="gap:8px"><button mat-stroked-button
+                mat-dialog-close>Close</button>
+        </div>
+    </div>
+</ng-template>
+<ng-template #documentPreviewDialog let-dialogRef="dialogRef">
+    <div class="dialog-header dialog-title"> Document Preview<span>
+            <a mat-icon-button (click)="dialogRef.close()">
+                <img src="assets/img/DashboardIcons/Reject.svg">
+            </a>
+        </span>
+    </div>
+
+    <mat-dialog-content style="height: 600px;">
+        <iframe [src]="previewUrl" width="100%" height="100%" allowfullscreen></iframe>
+    </mat-dialog-content>
+
+    <div class="dialog-action-adjust d-flex justify-content-end" style="gap:8px"><button mat-stroked-button
+            mat-dialog-close>Close</button>
+    </div>
+</ng-template>
+<ng-template #scheduleFollowupDialog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <!-- Header -->
+        <div class="dialog-header dialog-title">
+            Schedule a Followup
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg" />
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <div mat-dialog-content>
+            <form [formGroup]="followupScheduleForm"><label class="inputLabel">Follow Up Name *</label>
+                <mat-form-field appearance="outline" class="mat-form-field w-100">
+                    <input matInput class="input-p-5 disabled-class" formControlName="followUpName"
+                        placeholder="Enter the follow up name" disabled readonly />
+                    <mat-error
+                        *ngIf="ifCafFollowupSubmited && followupScheduleForm.get('followUpName')?.hasError('required')">
+                        Name is required.
+                    </mat-error>
+                </mat-form-field>
+                <label class="inputLabel">Follow Up Date *</label>
+                <mat-form-field appearance="outline" class="mat-form-field w-100">
+                    <input matInput class="input-p-5" [matDatepicker]="picker1" formControlName="followUpDatetime"
+                        placeholder="Select date & time" />
+                    <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
+                    <mat-datepicker #picker1 [startAt]="dateTime" touchUi></mat-datepicker>
+                    <mat-error
+                        *ngIf="ifCafFollowupSubmited && followupScheduleForm.get('followUpDatetime')?.hasError('required')">
+                        Date & Time is required.
+                    </mat-error>
+                </mat-form-field>
+                <label class="inputLabel">Follow Up Time *</label>
+                <mat-form-field appearance="outline" class="w-100">
+                    <input matInput [matTimepicker]="timepicker" formControlName="followUpTime"
+                        placeholder="Enter Time">
+                    <mat-timepicker #timepicker></mat-timepicker>
+                    <mat-timepicker-toggle [for]="timepicker" matSuffix></mat-timepicker-toggle>
+                    <mat-error
+                        *ngIf="ifCafFollowupSubmited && followupScheduleForm.get('followUpTime')?.hasError('required')">
+                        Time is required.
+                    </mat-error>
+                </mat-form-field>
+                <label class="inputLabel">Remarks *</label>
+                <mat-form-field appearance="outline" class="mat-form-field w-100">
+                    <textarea matInput class="input-p-5" formControlName="remarks"
+                        placeholder="Enter the Remarks"></textarea>
+                    <mat-error
+                        *ngIf="ifCafFollowupSubmited && followupScheduleForm.get('remarks')?.hasError('required')">
+                        Remarks is required.
+                    </mat-error>
+                </mat-form-field>
+            </form>
+        </div>
+
+        <!-- Footer -->
+        <div class="dialog-action-adjust d-flex justify-content-end" style="gap:8px">
+            <button mat-button mat-flat-button color="'primary'" class="addarea-btn" type="submit"
+                (click)="saveCafFollowup(dialogRef)" [disabled]="showQtyError">
+                <i class="fa fa-check-circle"></i> Schedule
+            </button><button mat-stroked-button mat-dialog-close>Close</button>
+        </div>
+    </div>
+</ng-template>
+<ng-template #reScheduleFollowupDialog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <div class="dialog-header dialog-title">
+            Re-Schedule a Followup
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg" />
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+            <form [formGroup]="reFollowupScheduleForm"><label class="inputLabel">Current Follow Up Close Remarks
+                    *</label>
+                <mat-form-field appearance="outline" class="mat-form-field w-100">
+                    <textarea matInput class="input-p-5" formControlName="remarksTemp"
+                        placeholder="Enter the Remarks"></textarea>
+                    <mat-error *ngIf="reFollowupFormsubmitted && reFollowupScheduleForm.controls.remarksTemp.errors">
+                        Remarks is required.
+                    </mat-error>
+                </mat-form-field>
+                <label class="inputLabel">Re-Schedule Follow Up Name *</label>
+                <mat-form-field appearance="outline" class="mat-form-field w-100">
+                    <input matInput class="input-p-5" formControlName="followUpName"
+                        placeholder="Enter the follow up name" disabled />
+                    <mat-error *ngIf="reFollowupFormsubmitted && reFollowupScheduleForm.controls.followUpName.errors">
+                        ReSchedule Name is required.
+                    </mat-error>
+                </mat-form-field>
+                <label class="inputLabel">Re-Schedule Follow Up Date & Time *</label>
+                <mat-form-field appearance="outline" class="mat-form-field w-100">
+                    <input matInput class="input-p-5" [matDatepicker]="picker2" formControlName="followUpDatetime"
+                        placeholder="Select date & time" />
+                    <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
+                    <mat-datepicker #picker2 [startAt]="dateTime" touchUi></mat-datepicker>
+                    <mat-error
+                        *ngIf="reFollowupFormsubmitted && reFollowupScheduleForm.controls.followUpDatetime.errors">
+                        Re-Schedule Date & Time is required.
+                    </mat-error>
+                </mat-form-field>
+                <label class="inputLabel">Re-Schedule Remarks</label>
+                <mat-form-field appearance="outline" class="mat-form-field w-100">
+                    <mat-select class="input-p-5" placeholder="Select a Re-Schedule Remarks" formControlName="remarks"
+                        placeholder="Select the specific remark">
+                        <mat-option *ngFor="let remark of rescheduleFollowupRemarks" [value]="remark">{{ remark
+                            }}</mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </form>
+        </div>
+
+        <div class="dialog-action-adjust d-flex justify-content-end" style="gap:8px">
+            <button mat-button mat-flat-button color="'primary'" class="addarea-btn" type="submit"
+                (click)="saveReFollowup(dialogRef)" [disabled]="showQtyError">
+                <i class="fa fa-check-circle"></i> Re-Schedule
+            </button><button mat-stroked-button mat-dialog-close>Close</button>
+        </div>
+    </div>
+</ng-template>
+<ng-template #pickTicketDialog let-dialogRef="dialogRef">
+    <div class="dialog-header dialog-title"> Pick Ticket<span>
+
+            <a mat-icon-button (click)="dialogRef.close()">
+                <img src="assets/img/DashboardIcons/Reject.svg">
+            </a>
+        </span>
+    </div>
+
+    <mat-dialog-content>
+        <label class="inputLabel">Remark*</label>
+        <mat-form-field appearance="outline" class="mat-form-field w-100">
+
+            <textarea matInput class="input-p-5" placeholder="Enter a Remark" [(ngModel)]="pickRemark"
+                name="remark"></textarea>
+        </mat-form-field>
+    </mat-dialog-content>
+
+    <div class="dialog-action-adjust d-flex justify-content-end" style="gap:8px">
+        <button mat-button mat-flat-button color="'primary'" class="addarea-btn" type="submit" [disabled]="!pickRemark"
+            (click)="pickstaff(dialogRef)">
+            <i class="fa fa-check-circle"></i> Pick
+        </button><button mat-stroked-button mat-dialog-close>Close</button>
+    </div>
+</ng-template>
+
+
+<ng-template #ticketProgressDialog let-dialogRef="dialogRef">
+    <div class="dialog-header dialog-title"> Ticket Progress Details<span>
+            <a mat-icon-button (click)="dialogRef.close()">
+                <img src="assets/img/DashboardIcons/Reject.svg">
+            </a>
+        </span>
+    </div>
+
+    <mat-dialog-content>
+        <div class="example-container mat-elevation-z8" tabindex="0">
+            <table mat-table [dataSource]="caseUpdateDetails" class="mat-elevation-z2 w-100" *ngIf="caseUpdateDetails">
+                <ng-container matColumnDef="entitytype">
+                    <th mat-header-cell *matHeaderCellDef>Entity Type</th>
+                    <td mat-cell *matCellDef="let element">{{ element.entitytype }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="operation">
+                    <th mat-header-cell *matHeaderCellDef>Operation</th>
+                    <td mat-cell *matCellDef="let element">{{ element.operation }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="oldvalue">
+                    <th mat-header-cell *matHeaderCellDef>Old Value</th>
+                    <td mat-cell *matCellDef="let element">{{ element.oldvalue }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="newvalue">
+                    <th mat-header-cell *matHeaderCellDef>New Value</th>
+                    <td mat-cell *matCellDef="let element">{{ element.newvalue }}</td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="ticketprogressDisplay"></tr>
+                <tr mat-row *matRowDef="let row; columns: ticketprogressDisplay"></tr>
+            </table>
+
+        </div>
+    </mat-dialog-content>
+
+    <div class="dialog-action-adjust d-flex justify-content-end" style="gap:8px"><button mat-stroked-button
+            mat-dialog-close>Close</button>
+    </div>
+</ng-template>
+
+<ng-template #closeFollowupDialog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <div class="dialog-header dialog-title">
+            Close Followup
+            <span>
+                <a mat-icon-button (click)="onCloseDialog(dialogRef)">
+                    <img src="assets/img/DashboardIcons/Reject.svg" />
+                </a>
+            </span>
+        </div>
+
+        <div mat-dialog-content>
+            <form [formGroup]="closeFollowupForm"><label class="inputLabel">Remarks *</label>
+                <mat-form-field appearance="outline" class="mat-form-field w-100">
+                    <textarea matInput class="input-p-5" formControlName="remarks"
+                        placeholder="Enter the Remarks"></textarea>
+                    <mat-error *ngIf="closeFollowupFormsubmitted && closeFollowupForm.controls.remarks.errors">
+                        Remarks is required.
+                    </mat-error>
+                </mat-form-field>
+            </form>
+        </div>
+
+        <div class="dialog-action-adjust d-flex justify-content-end" style="gap:8px">
+            <button mat-button mat-flat-button color="'primary'" class="addarea-btn" type="submit"
+                (click)="saveCloseFollowUp(dialogRef)" [disabled]="showQtyError">
+                Save
+            </button><button mat-stroked-button mat-dialog-close (click)="onCloseDialog(dialogRef)">Close</button>
+        </div>
+    </div>
+</ng-template>
+
+
+<ng-template #remarkFollowupDialog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <div class="dialog-header dialog-title">
+            Remarks Followup
+            <span>
+                <a mat-icon-button (click)="onCloseDialog(dialogRef)">
+                    <img src="assets/img/DashboardIcons/Reject.svg" />
+                </a>
+            </span>
+        </div>
+
+        <div mat-dialog-content>
+            <form [formGroup]="remarkFollowupForm"><label class="inputLabel">Remarks *</label>
+                <mat-form-field appearance="outline" class="mat-form-field w-100">
+                    <textarea matInput class="input-p-5" formControlName="remark"
+                        placeholder="Enter the remark"></textarea>
+                    <mat-error *ngIf="remarkFollowupFormsubmitted && remarkFollowupForm.controls.remark.errors">
+                        Remarks is required.
+                    </mat-error>
+                </mat-form-field>
+                <div class="text-center-btn mb-15">
+                    <button mat-button mat-flat-button color="'primary'" class="addarea-btn" type="submit"
+                        (click)="saveRemarkFollowUp(dialogRef)">
+                        Save
+                    </button>
+                </div>
+            </form>
+
+            <h3 class="panel-title">Remarks List</h3>
+            <hr />
+            <div class="example-container mat-elevation-z8" tabindex="0">
+                <table mat-table [dataSource]="followUpRemarkList" class="mat-elevation-z1 w-100">
+                    <ng-container matColumnDef="remark">
+                        <th mat-header-cell *matHeaderCellDef> Remarks </th>
+                        <td mat-cell *matCellDef="let element"> {{ element?.remark }} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="createdOn">
+                        <th mat-header-cell *matHeaderCellDef> Created On </th>
+                        <td mat-cell *matCellDef="let element"> {{ element?.createdOn | date: 'dd/MM/yyyy HH:mm:ss' }}
+                        </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="remarkDisplay"></tr>
+                    <tr mat-row *matRowDef="let row; columns: remarkDisplay"></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="dialog-action-adjust d-flex justify-content-end" style="gap:8px"><button mat-stroked-button
+                mat-dialog-close (click)="onCloseDialog(dialogRef)">Close</button>
+        </div>
+    </div>
+</ng-template>

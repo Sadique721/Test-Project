@@ -1,0 +1,83 @@
+<configuration>
+    <!-- Define a property using a value from application.properties -->
+    <springProperty name="LOG_HOME" source="logging.base.path"/>
+    <springProperty name="LOG_HISTORY_IN_HOURS" source="logging.base.max-history-in-hours"/>
+    <springProperty name="LOG_CONSOLE_LEVEL" source="logging.base.console-log-level"/>
+    <springProperty name="LOG_FILE_LEVEL" source="logging.base.file-log-level"/>
+    <springProperty name="LOG_FILE_ENABLED" source="logging.base.file.enabled"/>
+
+    <!-- File appender for user-defined logs -->
+    <appender name="USER_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_HOME}/current.log</file>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- Hourly rolling, folder structure: base_folder/year/month/day/hour -->
+            <fileNamePattern>${LOG_HOME}/%d{yyyy/MM/dd/HH}/logfile-%d{HH}.log.gz</fileNamePattern>
+
+            <!-- Keep 30 days' worth of logs -->
+            <!--            <maxHistory>${LOG_HISTORY_IN_HOURS}</maxHistory>-->
+        </rollingPolicy>
+
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>${LOG_FILE_LEVEL}</level>
+        </filter>
+
+        <encoder>
+            <pattern>{"level":"%p", "trace-id":"%X{traceId}", "span-id":"%X{spanId}", "timestamp":"%d{ISO8601}",
+                "module":"Notification", "thread":"%t", "sub-module":"%F", "line":"%L", "method":"%M",
+                "message":"%m"}%n
+            </pattern>
+        </encoder>
+    </appender>
+
+    <!-- Console appender for all logs -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>${LOG_CONSOLE_LEVEL}</level>
+        </filter>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %highlight(%-5level) [%X{traceId}] [%X{spanId}] %logger{36} [%M:%L] - %msg%n
+            </pattern>
+        </encoder>
+    </appender>
+
+    <!-- File appender for error logs -->
+    <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_HOME}/error.log</file>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_HOME}/%d{yyyy/MM/dd/HH}/error_log_file-%d{HH}.log.gz</fileNamePattern>
+            <maxHistory>${LOG_HISTORY_IN_HOURS}</maxHistory>
+        </rollingPolicy>
+
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+
+        <encoder>
+            <pattern>{"level":"%p", "trace-id":"%X{traceId}", "span-id":"%X{spanId}", "timestamp":"%d{ISO8601}",
+                "module":"Notification", "thread":"%t", "sub-module":"%F", "line":"%L", "method":"%M",
+                "message":"%m"}%n
+            </pattern>
+        </encoder>
+    </appender>
+
+    <!-- Logger for user-defined logs -->
+    <logger name="com.savbill.notification" level="debug" additivity="true">
+        <if condition='property("LOG_FILE_ENABLED").equals("true")'>
+            <then>
+                <appender-ref ref="USER_FILE"/>
+            </then>
+        </if>
+    </logger>
+
+    <logger name="com.savbill.notification" level="info" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <!-- Root logger for all logs -->
+    <root level="debug">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="ERROR_FILE"/>
+    </root>
+</configuration>

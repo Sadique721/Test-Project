@@ -1,0 +1,35 @@
+package com.savbill.commonGateway.rabbitmq.messages;
+
+
+import com.savbill.commonGateway.moules.MasterManagement.ServiceArea.model.ServiceAreaDTO;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class ServiceAreaIn {
+    private Long id;
+    private String name;
+    private String status;
+    private Boolean isDeleted = false;
+    private String latitude;
+    private String longitude;
+    private Long areaid;
+    private Integer mvnoId;
+    //private List<Integer> pincodes;
+    private Long cityid;
+        public ServiceAreaIn(ServiceAreaDTO serviceAreaDTO) {
+            this.id = serviceAreaDTO.getId();
+            this.name = serviceAreaDTO.getName();
+            this.status = serviceAreaDTO.getStatus();
+            this.isDeleted = serviceAreaDTO.getIsDeleted();
+            this.latitude = serviceAreaDTO.getLatitude();
+            this.longitude = serviceAreaDTO.getLongitude();
+            // this.areaid=serviceAreaDTO.getAreaId();
+            this.mvnoId = serviceAreaDTO.getMvnoId();
+            this.cityid = serviceAreaDTO.getCityid();
+
+        }
+}

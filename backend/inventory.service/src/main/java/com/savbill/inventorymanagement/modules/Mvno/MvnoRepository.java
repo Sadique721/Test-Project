@@ -1,0 +1,18 @@
+package com.savbill.inventorymanagement.modules.Mvno;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface MvnoRepository extends JpaRepository<Mvno, Integer>, QuerydslPredicateExecutor<Mvno> {
+
+    @Query("select t.username from Mvno t where t.id=:id")
+    String findMvnoNameById(Long id);
+
+    @Query(value = "CALL updates_mvnoid(:oldMvnoid, :newMvnoid)", nativeQuery = true)
+    void UpdateMvnoidISP(@Param("oldMvnoid") Integer oldMvnoid, @Param("newMvnoid") Integer newMvnoid);
+
+}

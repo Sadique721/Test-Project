@@ -1,0 +1,364 @@
+<!-- <div class="row">
+  <div class="col-md-12 col-sm-12">
+    <div class="panel">
+      <div class="panel-heading">
+        <div class="displayflex">
+          <button (click)="customerDetailOpen()" class="btn btn-secondary backbtn" data-placement="bottom"
+            data-toggle="tooltip" title="Go to Customer Details" type="button">
+            <i class="fa fa-arrow-circle-left" style="color: #f7941e !important; font-size: 28px"></i>
+          </button>
+          <h3 class="panel-title">
+            Search {{ custData.title }} {{ custData.firstname }} {{ custData.lastname }} CDRs
+            Session
+          </h3>
+        </div>
+        <div class="right">
+          <button aria-controls="myCDRSearchPreCust" aria-expanded="false" class="btn-toggle-collapse"
+            data-target="#myCDRSearchPreCust" data-toggle="collapse" type="button">
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="panel-collapse collapse in" id="myCDRSearchPreCust">
+        <div class="panel-body table-responsive">
+          <div class="searchForm">
+            <form [formGroup]="searchAcctCdrForm" class="form-auth-small">
+              <div class="row">
+                <div class="col-md-2" style="padding-left: 3%">
+                  <input class="form-control" formControlName="framedIpAddress" name="framedIpAddress"
+                    placeholder="Enter Framed IP" type="text" />
+                </div>
+                <div class="col-md-2" style="padding-left: 0%">
+                  <p-calendar [hideOnDateTimeSelect]="true" [showButtonBar]="true" [showIcon]="true"
+                    [style]="{ width: '100%' }" dateFormat="dd/mm/yy" formControlName="fromDate"
+                    placeholder="Enter From Date"></p-calendar>
+                </div>
+                <div class="col-md-2" style="padding-left: 0%">
+                  <p-calendar [hideOnDateTimeSelect]="true" [showButtonBar]="true" [showIcon]="true"
+                    [style]="{ width: '100%' }" dateFormat="dd/mm/yy" formControlName="toDate"
+                    placeholder="Enter To Date"></p-calendar>
+                </div>
+                <div class="col-md-2" style="padding-left: 0%">
+                  <select class="form-control" disabled name="customerid" style="width: 100%">
+                    <option>
+                      {{ custData.username }}
+                    </option>
+                  </select>
+                </div>
+              </div>
+              <div class="searchbtn">
+                <button (click)="searchGroupByNameCDR('')" class="btn btn-primary" title="Search CDRs" type="submit">
+                  <i class="fa fa-search"></i>
+                  Search
+                </button>
+                &nbsp;
+                <button (click)="clearSearchCDRForm()" class="btn btn-default" data-toggle="tooltip" title="Clear"
+                  type="reset">
+                  <img src="assets/img/DashboardIcons/Refresh.svg" />
+                  Clear
+                </button>
+                &nbsp;
+                @if (exportToExcelAccess) {
+                <a (click)="exportExcel()" class="curson_pointer" data-toggle="tooltip" title="Export to Excel">
+                  <img class="icon-ex" src="assets/img/icons-07.png" />
+                </a>
+                }
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-12 col-sm-12">
+    <div class="panel">
+      <div class="panel-heading">
+        <h3 class="panel-title">
+          {{ custData.title }}
+          {{ custData.firstname }}
+          {{ custData.lastname }} CDRs Details
+        </h3>
+        <div class="right">
+          <button aria-controls="cdrDetailsPreCust" aria-expanded="false" class="btn-toggle-collapse"
+            data-target="#cdrDetailsPreCust" data-toggle="collapse" type="button">
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="panel-collapse collapse in" id="cdrDetailsPreCust">
+        <div class="panel-body table-responsive">
+          <div class="row">
+            @if (groupDataCDR.length !== 0) {
+            <div class="col-lg-12 col-md-12">
+              <table class="table" id="cdr-table">
+                <thead>
+                  <tr>
+                    <th>Username</th>
+                    <th>NAS IP</th>
+                    <th>Frame IP</th>
+                    <th>Upload(MB)</th>
+                    <th>Download(MB)</th>
+                    <th>Session Time</th>
+                    <th>Created Date</th>
+                    <th>Modified Date</th>
+                   
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (
+                  group of groupDataCDR
+                  | paginate
+                  : {
+                  id: 'listing_groupdataCDR',
+                  itemsPerPage: itemsPerPageCDR,
+                  currentPage: currentPageCDR,
+                  totalItems: totalCDRRecords
+                  }; track
+                  group; let i = $index) {
+                  <tr>
+                    <td class="detailOnAnchorClick">
+                      <a (click)="getCdrDetail(group.cdrId, group.mvnoId)" data-target="#cdrDetailModal"
+                        data-toggle="modal" title="Click To See CDRs Detail">
+                        {{ group.userName }}
+                      </a>
+                    </td>
+                    <td>{{ group.nasIpAddress }}</td>
+                    <td>{{ group.framedIpAddress }}</td>
+                    <td>
+                      {{ group.acctInputOctets / 1024 / 1024 | number : "1.2-2" }}
+                    </td>
+                    <td>
+                      {{ group.acctOutputOctets / 1024 / 1024 | number : "1.2-2" }}
+                    </td>
+                    <td>{{ group.acctSessionTime }}</td>
+                    <td>
+                      {{
+                      group.createDate !== null
+                      ? (group.createDate | date : "dd-MM-yyyy HH:mm:ss")
+                      : ""
+                      }}
+                    </td>
+                    <td>
+                      {{
+                      group.lastModificationDate !== null
+                      ? (group.lastModificationDate | date : "dd-MM-yyyy HH:mm:ss")
+                      : ""
+                      }}
+                    </td>
+                  </tr>
+                  }
+                </tbody>
+              </table>
+              <br />
+              <div class="row">
+                <div class="col-md-12" style="display: flex">
+                  <pagination-controls (pageChange)="pageCDRChanged($event)" [directionLinks]="true" [maxSize]="10"
+                    id="listing_groupdataCDR" nextLabel="" previousLabel=""></pagination-controls>
+                  <div id="itemPerPageDropdown">
+                    <p-dropdown (onChange)="TotalItemPerCDRPage($event)" [options]="pageLimitOptions"
+                      optionLabel="value" optionValue="value"></p-dropdown>
+                  </div>
+                </div>
+              </div>
+            </div>
+            }
+            @if (groupDataCDR.length === 0) {
+            <div class="col-lg-12 col-md-12">
+              CDRs data not found
+            </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> -->
+
+<div class="row">
+    <div class="col-md-12">
+        <mat-card class="cardWithShadow">
+            <mat-card-header>
+                <img src="assets/img/DashboardIcons/Back Arrow.svg" alt="arrow back" class="m-r-10"
+                    (click)="customerDetailOpen()" />
+                <div style="font-size:x-large; align-items: center; font-weight: 500; align-content: center;">
+                    {{ custData.title }} {{ custData.firstname }} {{ custData.lastname }} CDRs Session
+                </div>
+            </mat-card-header>
+
+            <mat-card-content class="mat-card-content-border">
+                <form [formGroup]="searchAcctCdrForm" (keydown.enter)="onEnterSearch()">
+                    <div class="row m-l-10">
+                        <div class="col-sm-3">
+                            <label class="inputLabel">Framed IP</label>
+                            <mat-form-field appearance="outline" class="w-100 hide-hint">
+                                <input matInput formControlName="framedIpAddress" name="framedIpAddress"
+                                    placeholder="Enter Framed IP" />
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-sm-3">
+                            <label class="inputLabel">From Date</label>
+                            <mat-form-field appearance="outline" class="d-flex align-items-center w-100">
+                                <input matInput [matDatepicker]="fromPicker" placeholder="Enter From Date"
+                                    formControlName="fromDate" [max]="searchAcctCdrForm.get('toDate')?.value" />
+                                <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+                                <mat-datepicker #fromPicker></mat-datepicker>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-sm-3">
+                            <label class="inputLabel">To Date</label>
+                            <mat-form-field appearance="outline" class="d-flex align-items-center w-100">
+                                <input matInput [matDatepicker]="toPicker" placeholder="Enter To Date"
+                                    formControlName="toDate" [min]="searchAcctCdrForm.get('fromDate')?.value" />
+                                <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+                                <mat-datepicker #toPicker></mat-datepicker>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-sm-3">
+                            <label class="inputLabel">Username</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input matInput [value]="custData.username" disabled />
+                            </mat-form-field>
+                        </div>
+                    </div>
+                </form>
+
+
+                <div class="row m-l-10" style="margin-top: 24px;">
+                    <div class="col-sm-6 d-flex align-items-center">
+                        <button mat-flat-button color="primary" class="button-normal m-r-10"
+                            (click)="searchGroupByNameCDR('')" type="submit" title="Search CDRs">
+                            Search
+                        </button>
+                        <button mat-stroked-button class="button-normal m-r-10" (click)="clearSearchCDRForm()"
+                            type="reset" title="Clear">
+                            Clear
+                        </button>
+                        <ng-container *ngIf="exportToExcelAccess">
+                            <a (click)="exportExcel()" class="curson_pointer" matTooltip="Export to Excel">
+                               
+                                <img src="assets/img/icons-07.png" style="height: 40px; width: 40px;  margin-right: 10px; margin-top: 6px;" />
+                            </a>
+                        </ng-container>
+                    </div>
+                </div>
+
+            </mat-card-content>
+        </mat-card>
+    </div>
+</div>
+
+<div class="container-fluid contain-flud">
+    <div class="row">
+        <div class="col-md-12">
+            <mat-card class="cardWithShadow">
+                <mat-card-header>
+                    <div style="font-size:x-large; align-items: center; font-weight: 500; align-content: center;">
+                        {{ custData.title }} {{ custData.firstname }} {{ custData.lastname }} CDRs Details
+                    </div>
+                </mat-card-header>
+
+                <mat-card-content class="mat-card-content-border">
+                    <div class="table-container">
+                        <table mat-table [dataSource]="groupDataCDR" matSort class="mat-elevation-z8 w-100">
+
+                            <ng-container matColumnDef="userName">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title" sticky>
+                                    Username
+                                </th>
+                                <td mat-cell *matCellDef="let group" class="f-s-14 detailOnAnchorClick">
+                                    <a (click)="getCdrDetail(group.cdrId, group.mvnoId)"
+                                        matTooltip="Click To See CDRs Detail" style="cursor:pointer;">
+                                        {{ group.userName }}
+                                    </a>
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="nasIpAddress">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title" sticky>
+                                    NAS IP
+                                </th>
+                                <td mat-cell *matCellDef="let group" class="f-s-14">
+                                    {{ group.nasIpAddress }}
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="framedIpAddress">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title" sticky>
+                                    Frame IP
+                                </th>
+                                <td mat-cell *matCellDef="let group" class="f-s-14">
+                                    {{ group.framedIpAddress }}
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="uploadMB">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title" sticky>
+                                    Upload(MB)
+                                </th>
+                                <td mat-cell *matCellDef="let group" class="f-s-14">
+                                    {{ group.acctInputOctets / 1024 / 1024 | number: '1.2-2' }}
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="downloadMB">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title" sticky>
+                                    Download(MB)
+                                </th>
+                                <td mat-cell *matCellDef="let group" class="f-s-14">
+                                    {{ group.acctOutputOctets / 1024 / 1024 | number: '1.2-2' }}
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="sessionTime">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title" sticky>
+                                    Session Time
+                                </th>
+                                <td mat-cell *matCellDef="let group" class="f-s-14">
+                                    {{ group.acctSessionTime }}
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="createDate">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title" sticky>
+                                    Created Date
+                                </th>
+                                <td mat-cell *matCellDef="let group" class="f-s-14">
+                                    {{ group.createDate ? (group.createDate | date: 'dd-MM-yyyy HH:mm:ss') : '' }}
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="lastModificationDate">
+                                <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title" sticky>
+                                    Modified Date
+                                </th>
+                                <td mat-cell *matCellDef="let group" class="f-s-14">
+                                    {{ group.lastModificationDate ? (group.lastModificationDate | date: 'dd-MM-yyyy
+                                    HH:mm:ss') : '' }}
+                                </td>
+                            </ng-container>
+
+                            <tr mat-header-row *matHeaderRowDef="displayedColumnsCDR; sticky: true"
+                                class="table-header-bg"></tr>
+                            <tr mat-row *matRowDef="let row; columns: displayedColumnsCDR" class="table-content-row">
+                            </tr>
+                        </table>
+
+                        <mat-paginator [length]="totalCDRRecords" [pageSize]="itemsPerPageCDR"
+                            [pageSizeOptions]="[5,10,20,50,100]" showFirstLastButtons (page)="pageCDRChanged($event)">
+                        </mat-paginator>
+                        <ng-container *ngIf="groupDataCDR.length === 0">
+                            <div class="col-lg-12 col-md-12">
+                                CDRs data not found
+                            </div>
+                        </ng-container>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </div>
+</div>

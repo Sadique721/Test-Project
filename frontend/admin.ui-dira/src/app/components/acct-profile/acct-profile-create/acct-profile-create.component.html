@@ -1,0 +1,1129 @@
+
+
+
+<div class="dialog-container">
+  <div class="dialog-header">
+  {{ editMode ? 'Update Radius Profile' : 'Create Radius Profile' }}
+    <span>
+      <a mat-icon-button href="javascript:void(0)" (click)="onCancel()">
+         <img src="assets/img/DashboardIcons/Reject.svg">
+      </a>
+    </span>
+  </div>
+
+  <div mat-dialog-content style="overflow-y: auto; max-height: 70vh;">
+    <mat-card-content class="matcardContent">
+      <form [formGroup]="acctProfileForm" class="row g-3">
+
+        <!-- Radius Profile Name -->
+        <div class="col-md-3 mb-4">
+          <label class="inputLabel">Radius Profile Name*</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <input matInput placeholder="Enter Profile Name" formControlName="name" [readonly]="editMode" class="input-p-5">
+            <mat-error *ngIf="submitted && acctProfileForm.controls.name.errors?.required">
+              Please enter Profile Name.
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Request Type -->
+        <div class="col-md-3 mb-4">
+          <label class="inputLabel">Request Type*</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-select formControlName="requestType"  placeholder="Select Request Type"(selectionChange)="onChangeofRequestType($event.value)"class="input-p-5">
+              <mat-option *ngFor="let type of type" [value]="type.value">{{ type.text }}</mat-option>
+            </mat-select>
+            <mat-error *ngIf="submitted && acctProfileForm.controls.requestType.errors?.required">
+              Please select Request Type.
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Authentication Type -->
+        <div class="col-md-3 mb-4">
+          <label class="inputLabel">Authentication Type*</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-select formControlName="authenticationType"  placeholder="Select Authentication type"(selectionChange)="onAuthenticationTypeChange($event.value)" class="input-p-5">
+              <mat-option *ngFor="let auth of authenticationType" [value]="auth.value">{{ auth.displayName }}</mat-option>
+            </mat-select>
+            <mat-error *ngIf="submitted && acctProfileForm.controls.authenticationType.errors?.required">
+              Please select Authentication Type.
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Authentication Sub Type -->
+        <div class="col-md-3 mb-4" *ngIf="authenticationSubType.length > 0">
+          <label class="inputLabel">Authentication Sub Type</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-select formControlName="authenticationSubType" placeholder="Select Authentication Sub type" class="input-p-5">
+              <mat-option *ngFor="let sub of authenticationSubType" [value]="sub.value">{{ sub.displayName }}</mat-option>
+            </mat-select>
+            <mat-error *ngIf="submitted && acctProfileForm.controls.authenticationSubType.errors?.required">
+              Please select Authentication Sub Type.
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Authentication Mode -->
+        <div class="col-md-3 mb-4">
+          <label class="inputLabel">Authentication Mode</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-select formControlName="authenticationMode" placeholder="Select Authentication Mode" [disabled]="editMode" class="input-p-5">
+              <mat-option *ngFor="let mode of authenticationMode" [value]="mode.value">{{ mode.displayName }}</mat-option>
+            </mat-select>
+            <mat-error *ngIf="submitted && acctProfileForm.controls.authenticationMode.errors?.required">
+              Please select Authentication Mode.
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Identity Attribute -->
+        <div class="col-md-3 mb-4">
+          <label class="inputLabel">Identity Attribute*</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-select formControlName="customerUserNameAttribute" placeholder="Select Attribute" class="input-p-5">
+              <mat-option *ngFor="let attr of dictionaryAttributeData.dictionaryAttributeList" [value]="attr.name">{{ attr.name }}</mat-option>
+            </mat-select>
+            <mat-error *ngIf="submitted && acctProfileForm.controls.customerUserNameAttribute.errors?.required">
+              Please select Identity Attribute.
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Customer User Name Regex -->
+        <div class="col-md-3 mb-4">
+          <label class="inputLabel">Customer User Name Regex</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <input matInput placeholder="Enter Regex for User-Name" formControlName="usernameIdentityRegex" class="input-p-5">
+          </mat-form-field>
+        </div>
+
+        <!-- Status -->
+        <div class="col-md-3 mb-4">
+          <label class="inputLabel">Status*</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-select formControlName="status"   placeholder="Select Profile Status"class="input-p-5">
+              <mat-option *ngFor="let s of status" [value]="s.label">{{ s.label }}</mat-option>
+            </mat-select>
+            <mat-error *ngIf="submitted && acctProfileForm.controls.status.errors?.required">
+              Please select Status.
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Check Item -->
+        <div class="col-md-3 mb-4">
+          <label class="inputLabel">Check Item</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <input matInput placeholder="Enter Check Item" formControlName="checkItem" class="input-p-5">
+          </mat-form-field>
+        </div>
+
+        <!-- Account CDR Status -->
+        <div class="col-md-3 mb-4">
+          <label class="inputLabel">Account CDR Status*</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-select formControlName="accountCdrStatus"  placeholder="Select Account CDR Status"class="input-p-5">
+              <mat-option *ngFor="let s of status1" [value]="s.label">{{ s.label }}</mat-option>
+            </mat-select>
+            <mat-error *ngIf="submitted && acctProfileForm.controls.accountCdrStatus.errors?.required">
+              Please select Account CDR Status.
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Session Status -->
+        <div class="col-md-3 mb-4">
+          <label class="inputLabel">Session Status*</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-select formControlName="sessionStatus" placeholder="Select Session Status" class="input-p-5">
+              <mat-option *ngFor="let s of status1" [value]="s.label">{{ s.label }}</mat-option>
+            </mat-select>
+            <mat-error *ngIf="submitted && acctProfileForm.controls.sessionStatus.errors?.required">
+              Please select Session Status.
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Mapping Master -->
+        <div class="col-md-3 mb-4">
+          <label class="inputLabel">Mapping Master*</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-select formControlName="mappingMaster"   placeholder="Select Mapping Master" class="input-p-5">
+              <mat-option *ngFor="let m of filteredMappingList" [value]="m.name">{{ m.name }}</mat-option>
+            </mat-select>
+            <mat-error *ngIf="submitted && acctProfileForm.controls.mappingMaster.errors?.required">
+              Please select Mapping Master.
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Priority -->
+        <div class="col-md-3 mb-4">
+          <label class="inputLabel">Priority</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <input matInput type="number" placeholder="Enter Priority" formControlName="priority" class="input-p-5">
+          </mat-form-field>
+        </div>
+
+        <!-- Auth Audit -->
+        <div class="col-md-3 mb-4">
+          <label class="inputLabel">Auth Audit*</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-select formControlName="authAudit" placeholder="Select Auth Audit"class="input-p-5">
+              <mat-option *ngFor="let s of status1" [value]="s.label">{{ s.label }}</mat-option>
+            </mat-select>
+            <mat-error *ngIf="submitted && acctProfileForm.controls.authAudit.errors?.required">
+              Please select Authentication Audit status.
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Auto Provision MAC -->
+        <div class="col-md-3 mb-4">
+          <label class="inputLabel">Auto Provision MAC*</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-select formControlName="autoProvisionMac"  placeholder="Select Auto Provision MAC" class="input-p-5">
+              <mat-option *ngFor="let s of status1" [value]="s.label">{{ s.label }}</mat-option>
+            </mat-select>
+            <mat-error *ngIf="submitted && acctProfileForm.controls.autoProvisionMac.errors?.required">
+              Please select Auto Provision MAC.
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Proxy Server -->
+        <div class="col-md-3 mb-4">
+          <label class="inputLabel">Proxy Server</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-select formControlName="proxyServerName" [placeholder]="'Select Proxy Server'" class="input-p-5">
+              <mat-option *ngFor="let s of filteredProxyServerList" [value]="s.name">{{ s.name }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- Device Driver -->
+        <div class="col-md-3 mb-4">
+          <label class="inputLabel">Device Driver</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-select formControlName="deviceDriverName" placeholder="Select Device Driver"class="input-p-5">
+              <mat-option *ngFor="let d of deviceDriverList" [value]="d.value">{{ d.label }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- Truststore / Keystore Files -->
+  <!-- Select Truststore File -->
+ @if (authenticationSubType.length > 0) {
+                                  <div
+                                    class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-15" style="margin-top: 9px;"
+                                    >
+                                    <label>Select Truststore File</label>
+                                    <input
+                                      type="file"
+                                      id="txtSelectDocument"
+                                      class="form-control"
+                                      formControlName="trustStoreDoc"
+                                      placeholder="Select Document"
+                                      style="padding: 2px; width: 100%;margin-top: 20px;"
+                                      (change)="onFileChange($event, 'trustStoreDoc')"
+                                      accept=".jks"
+                                      />
+                                      @for (file of selectedTruststoreFilePreview; track file; let i = $index) {
+                                        <div>
+                                          <div
+                                            (click)="truststoreFileClick()"
+                      style="
+                        padding-left: 10px;
+                        padding-right: 10px;
+                        padding-top: 4px;
+                        padding-bottom: 4px;
+                        font-size: 10px;
+                        cursor: pointer;
+                      "
+                                            >
+                                            {{ file?.name }}
+                                            <button type="button" class="close" (click)="deletTruststoreFile(file?.name)">
+                                              &times;
+                                            </button>
+                                          </div>
+                                        </div>
+                                      }
+                                    </div>
+                                  }
+
+
+
+<!-- Truststore Password -->
+<div class="col-md-3 mb-4" *ngIf="authenticationSubType.length > 0">
+  <label class="inputLabel">Truststore Password</label>
+  <mat-form-field appearance="outline" class="w-100">
+    <input
+    
+     placeholder="Enter Password"
+      matInput
+      type="password"
+      formControlName="trustStorePassword"
+      class="input-p-5"
+      [readonly]="!acctProfileForm.get('trustStoreDoc').value && selectedTruststoreFilePreview.length == 0"
+    />
+  </mat-form-field>
+</div>
+
+<!-- Select Keystore File -->
+  @if (authenticationSubType.length > 0) {
+                                      <div
+                                        class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-15" style="margin-top: 9px;"
+                                        >
+                                        <label>Select Keystore File</label>
+                                        <input
+                                          type="file"
+                                          id="txtSelectDocument"
+                                          formControlName="keystoreDoc"
+                                          class="form-control"
+                                          placeholder="Select Document"
+                                          style="padding: 2px; width: 100%;margin-top: 20px;"
+                                          (change)="onFileChange($event, 'keystoreDoc')"
+                                          accept=".p12"
+                                          />
+                                          @for (file of selectedKeystoreFilePreview; track file; let i = $index) {
+                                            <div>
+                                              <div
+                                                (click)="keystoreFileClick()"
+                      style="
+                        padding-left: 10px;
+                        padding-right: 10px;
+                        padding-top: 4px;
+                        padding-bottom: 4px;
+                        font-size: 10px;
+                        cursor: pointer;
+                      "
+                                                >
+                                                {{ file?.name }}
+                                                <button type="button" class="close" (click)="deletKeystoreFile(file?.name)">
+                                                  &times;
+                                                </button>
+                                              </div>
+                                            </div>
+                                          }
+                                        </div>
+                                      }
+
+<!-- Keystore Password -->
+<div class="col-md-3 mb-4" *ngIf="authenticationSubType.length > 0">
+  <label class="inputLabel">Keystore Password</label>
+  <mat-form-field appearance="outline" class="w-100">
+    <input
+     placeholder="Enter Password"
+      matInput
+      type="password"
+      class="input-p-5"
+      formControlName="keystorePassword"
+      [readonly]="!acctProfileForm.get('keystoreDoc').value && selectedKeystoreFilePreview.length == 0"
+    />
+  </mat-form-field>
+</div>
+<!-- Password Check --> 
+ <div class="col-md-3 mb-4">
+     <label class="inputLabel">Password Check Required*</label> 
+     <mat-form-field appearance="outline" class="w-100">
+         <mat-select formControlName="passwordCheckRequired" placeholder="Select Password Check"class="input-p-5"> 
+            <mat-option *ngFor="let s of passwordCheckStatusList" [value]="s.value">{{ s.label }}
+
+            </mat-option> </mat-select>
+         <mat-error *ngIf="submitted && acctProfileForm.controls.passwordCheckRequired.errors?.required">
+      Please select Password Check.
+    </mat-error> </mat-form-field> </div>
+
+        <!-- Terminate Session -->
+        <div class="col-md-3 mb-4">
+          <label class="inputLabel">Terminate Session on MAC*</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-select formControlName="terminateSessionOnDuplicateMac" placeholder="Select Terminate Session Check" class="input-p-5">
+              <mat-option *ngFor="let s of passwordCheckStatusList" [value]="s.value">{{ s.label }}</mat-option>
+            </mat-select>
+             <mat-error *ngIf="submitted && acctProfileForm.controls.terminateSessionOnDuplicateMac.errors?.required">
+      Please select Terminate Session Check.
+    </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Live Session On Interim -->
+        <div class="col-md-3 mb-4">
+          <label class="inputLabel">Live Session On Interim*</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-select formControlName="addLiveSessionOnInterim" placeholder="Select Live Session On Interim"class="input-p-5">
+              <mat-option *ngFor="let s of liveSessionOnInterimList" [value]="s.value">{{ s.label }}</mat-option>
+            </mat-select>
+           
+          </mat-form-field>
+        </div>
+
+        <!-- Disconnect Session On Interim -->
+        <div class="col-md-3 mb-4">
+          <label class="inputLabel">Disconnect Session On Interim*</label>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-select formControlName="disconnectSessionOnInterim" placeholder="Select Live Session On Interim" class="input-p-5">
+              <mat-option *ngFor="let s of liveSessionOnInterimList" [value]="s.value">{{ s.label }}</mat-option>
+            </mat-select>
+             <mat-error *ngIf="submitted && acctProfileForm.controls.disconnectSessionOnInterim.errors?.required">
+      Please select Disconnect Session On Interim.
+    </mat-error>
+          </mat-form-field>
+        </div>
+
+      </form>
+    </mat-card-content>
+  </div>
+
+  <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+    <button mat-button mat-flat-button class="button-normal" color="primary" (click)="addAcctProfile()">
+      {{ editMode ? 'Update Profile' : 'Add Profile' }}
+    </button>
+    <button mat-stroked-button color="primary" class="button-normal" (click)="onCancel()">Cancel</button>
+  </div>
+</div>
+
+
+
+<!-- <div class="row">
+  <div class="col-md-12 col-sm-12">
+    <div class="panel">
+      <div class="panel-heading">
+        @if (!iscustomerEdit) {
+          <h3 class="panel-title">
+            {{ editMode ? "Update" : "Create" }} Radius Profile
+          </h3>
+        }
+        <div class="right">
+          <button
+            id="create"
+            aria-controls="createPreCust"
+            aria-expanded="false"
+            class="btn-toggle-collapse"
+            data-target="#createPreCust"
+            data-toggle="collapse"
+            type="button"
+            >
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="panel-collapse collapse in" id="createPreCust">
+        <div class="panel-body">
+          <form [formGroup]="acctProfileForm">
+            <!- Basic Details -->
+            
+                <!-- <div
+                class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-15"
+                *ngIf="userId == superAdminId"
+                >
+                <label>Mvno Name</label>
+                <p-dropdown
+                  (onChange)="getDetailsByMVNO($event.value)"
+                  [readonly]="editMode"
+                  [options]="mvnoData"
+                  placeholder="Select MVNO"
+                  optionLabel="name"
+                  optionValue="mvnoId"
+                  formControlName="mvnoName"
+                  [filter]="true"
+                  filterBy="name"
+                    [ngClass]="{
+                      'is-invalid': submitted && acctProfileForm.controls.status.errors
+                    }"
+                ></p-dropdown>
+                <div
+                  class="errorWrap text-danger"
+                  *ngIf="submitted && acctProfileForm.controls.mvnoName.errors"
+                  >
+                  <div
+                    class="error text-danger"
+                    *ngIf="submitted && acctProfileForm.controls.mvnoName.errors.required"
+                    >
+                    Please select MVNO.
+                  </div>
+                </div>
+              </div> ->
+              <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-15">
+                <label>Radius Profile Name*</label>
+                <input
+                  type="text"
+                  name="name"
+                  [readonly]="editMode"
+                  class="form-control"
+                  placeholder="Enter Profile Name"
+                  formControlName="name"
+                    [ngClass]="{
+                      'is-invalid': submitted && acctProfileForm.controls.name.errors
+                    }"
+                  />
+                  @if (submitted && acctProfileForm.controls.name.errors) {
+                    <div
+                      class="errorWrap text-danger"
+                      >
+                      @if (submitted && acctProfileForm.controls.name.errors.required) {
+                        <div
+                          class="error text-danger"
+                          >
+                          Please enter Profile Name .
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-15">
+                  <label>Request Type*</label>
+                  <p-dropdown
+                    [options]="type"
+                    placeholder="Select Request Type"
+                    optionLabel="text"
+                    optionValue="value"
+                    formControlName="requestType"
+                    [filter]="true"
+                    filterBy="label"
+                    (onChange)="onChangeofRequestType($event.value)"
+                    [ngClass]="{
+                      'is-invalid': submitted && acctProfileForm.controls.requestType.errors
+                    }"
+                  ></p-dropdown>
+                  @if (submitted && acctProfileForm.controls.requestType.errors) {
+                    <div
+                      class="errorWrap text-danger"
+                      >
+                      @if (submitted && acctProfileForm.controls.requestType.errors.required) {
+                        <div
+                          class="error text-danger"
+                          >
+                          Pleased select Request type.
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-15">
+                  <label>Authentication Type*</label>
+                  <p-dropdown
+                    [options]="authenticationType"
+                    placeholder="Select Authentication type"
+                    (onChange)="onAuthenticationTypeChange($event.value)"
+                    optionLabel="displayName"
+                    optionValue="value"
+                    formControlName="authenticationType"
+                    [filter]="true"
+                    filterBy="value"
+                    [ngClass]="{
+                      'is-invalid': submitted && acctProfileForm.controls.authenticationType.errors
+                    }"
+                  ></p-dropdown>
+                  @if (submitted && acctProfileForm.controls.authenticationType.errors) {
+                    <div
+                      class="errorWrap text-danger"
+                      >
+                      @if (
+                        submitted && acctProfileForm.controls.authenticationType.errors.required
+                        ) {
+                        <div
+                          class="error text-danger"
+                          >
+                          Please select Authentication type.
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+                @if (authenticationSubType.length > 0) {
+                  <div
+                    class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-15"
+                    >
+                    <label>Authentication Sub Type</label>
+                    <p-dropdown
+                      [options]="authenticationSubType"
+                      placeholder="Select Authentication Sub type"
+                      optionLabel="displayName"
+                      optionValue="value"
+                      formControlName="authenticationSubType"
+                      [filter]="true"
+                      filterBy="value"
+                    [ngClass]="{
+                      'is-invalid':
+                        submitted && acctProfileForm.controls.authenticationSubType.errors
+                    }"
+                    ></p-dropdown>
+                    @if (submitted && acctProfileForm.controls.authenticationSubType.errors) {
+                      <div
+                        class="errorWrap text-danger"
+                        >
+                        @if (
+                          submitted && acctProfileForm.controls.authenticationSubType.errors.required
+                          ) {
+                          <div
+                            class="error text-danger"
+                            >
+                            Please select authenticationSubType.
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+                }
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-15">
+                  <label>Authentication Mode</label>
+                  <p-dropdown
+                    [options]="authenticationMode"
+                    [disabled]="editMode"
+                    placeholder="Select Authentication Mode"
+                    optionLabel="displayName"
+                    optionValue="value"
+                    formControlName="authenticationMode"
+                    [filter]="true"
+                    filterBy="value"
+                    [ngClass]="{
+                      'is-invalid': submitted && acctProfileForm.controls.authenticationMode.errors
+                    }"
+                  ></p-dropdown>
+                  @if (submitted && acctProfileForm.controls.authenticationMode.errors) {
+                    <div
+                      class="errorWrap text-danger"
+                      >
+                      @if (
+                        submitted && acctProfileForm.controls.authenticationMode.errors.required
+                        ) {
+                        <div
+                          class="error text-danger"
+                          >
+                          Please select Authentication Mode.
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+
+                <!- Customer dynamic Attributes ->
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                  <label>Identity Attribute *</label>
+                  <p-dropdown
+                    appendTo="body"
+                    [options]="dictionaryAttributeData.dictionaryAttributeList"
+                    placeholder="Select Attribute"
+                    optionLabel="name"
+                    optionValue="name"
+                    [filter]="true"
+                    filterBy="name"
+                    formControlName="customerUserNameAttribute"
+                  ></p-dropdown>
+                  @if (submitted && acctProfileForm.controls.customerUserNameAttribute.errors) {
+                    <div
+                      class="errorWrap text-danger"
+                      >
+                      @if (
+                        submitted &&
+                        acctProfileForm.controls.customerUserNameAttribute.errors.required
+                        ) {
+                        <div
+                          class="error text-danger"
+                          >
+                          Please enter customer User-Name attribute.
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                  <label>Customer User Name Regex</label>
+                  <input
+                    id="usernameIdentityRegex"
+                    class="form-control"
+                    placeholder="Enter Regex for User-Name"
+                    formControlName="usernameIdentityRegex"
+                    />
+                  </div>
+                  <!- Customer dynamic Attributes ->
+                  <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-15">
+                    <label>Status*</label>
+                    <p-dropdown
+                      [options]="status"
+                      placeholder="Select Profile Status"
+                      optionLabel="label"
+                      optionValue="label"
+                      formControlName="status"
+                      [filter]="true"
+                      filterBy="label"
+                    [ngClass]="{
+                      'is-invalid': submitted && acctProfileForm.controls.status.errors
+                    }"
+                    ></p-dropdown>
+                    @if (submitted && acctProfileForm.controls.status.errors) {
+                      <div
+                        class="errorWrap text-danger"
+                        >
+                        @if (submitted && acctProfileForm.controls.status.errors.required) {
+                          <div
+                            class="error text-danger"
+                            >
+                            Please select status.
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+                  <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-15">
+                    <label>Check Item</label>
+                    <input
+                      type="text"
+                      name="checkItem"
+                      class="form-control"
+                      placeholder="Enter Check Item"
+                      formControlName="checkItem"
+                      />
+                    </div>
+                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-15">
+                      <label
+                        >Account CDR Status
+                        {{
+                        acctProfileForm.controls.accountCdrStatus.errors?.required ? "*" : ""
+                        }}</label
+                        >
+                        <p-dropdown
+                          [options]="status1"
+                          placeholder="Select Account CDR Status"
+                          optionLabel="label"
+                          optionValue="label"
+                          formControlName="accountCdrStatus"
+                          [filter]="true"
+                          filterBy="label"
+                    [ngClass]="{
+                      'is-invalid': submitted && acctProfileForm.controls.accountCdrStatus.errors
+                    }"
+                        ></p-dropdown>
+                        @if (submitted && acctProfileForm.controls.accountCdrStatus.errors) {
+                          <div
+                            class="errorWrap text-danger"
+                            >
+                            @if (submitted && acctProfileForm.controls.accountCdrStatus.errors.required) {
+                              <div
+                                class="error text-danger"
+                                >
+                                Please select Account CDR status.
+                              </div>
+                            }
+                          </div>
+                        }
+                      </div>
+                      <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-15">
+                        <label
+                          >Session Status
+                          {{ acctProfileForm.controls.sessionStatus.errors?.required ? "*" : "" }}</label
+                          >
+                          <p-dropdown
+                            [options]="status1"
+                            placeholder="Select Session Status"
+                            optionLabel="label"
+                            optionValue="label"
+                            [filter]="true"
+                            filterBy="label"
+                            formControlName="sessionStatus"
+                    [ngClass]="{
+                      'is-invalid': submitted && acctProfileForm.controls.sessionStatus.errors
+                    }"
+                          ></p-dropdown>
+                          @if (submitted && acctProfileForm.controls.sessionStatus.errors) {
+                            <div
+                              class="errorWrap text-danger"
+                              >
+                              @if (submitted && acctProfileForm.controls.sessionStatus.errors.required) {
+                                <div
+                                  class="error text-danger"
+                                  >
+                                  Please select session status.
+                                </div>
+                              }
+                            </div>
+                          }
+                        </div>
+                        <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-15">
+                          <label
+                            >Mapping Master
+                            {{ acctProfileForm.controls.mappingMaster.errors?.required ? "*" : "" }}</label
+                            >
+                            <p-dropdown
+                              [options]="filteredMappingList"
+                              placeholder="Select Mapping Master"
+                              optionLabel="name"
+                              optionValue="name"
+                              formControlName="mappingMaster"
+                              [filter]="true"
+                              filterBy="name"
+                            ></p-dropdown>
+                            @if (submitted && acctProfileForm.controls.mappingMaster.errors) {
+                              <div
+                                class="errorWrap text-danger"
+                                >
+                                @if (submitted && acctProfileForm.controls.mappingMaster.errors.required) {
+                                  <div
+                                    class="error text-danger"
+                                    >
+                                    Please select Mapping master.
+                                  </div>
+                                }
+                              </div>
+                            }
+                          </div>
+                          <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-15">
+                            <label>Priority</label>
+                            <input
+                              type="text"
+                              name="priority"
+                              class="form-control"
+                              placeholder="Enter Priority"
+                              formControlName="priority"
+                    [ngClass]="{
+                      'is-invalid': submitted && acctProfileForm.controls.priority.errors
+                    }"
+                              />
+                              @if (submitted && acctProfileForm.controls.priority.errors) {
+                                <div
+                                  class="errorWrap text-danger"
+                                ></div>
+                              }
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-15">
+                              <label
+                                >Auth Audit
+                                {{ acctProfileForm.controls.authAudit.errors?.required ? "*" : "" }}</label
+                                >
+                                <p-dropdown
+                                  [options]="status1"
+                                  placeholder="Select Auth Audit"
+                                  optionLabel="label"
+                                  optionValue="label"
+                                  formControlName="authAudit"
+                                  [filter]="true"
+                                  filterBy="label"
+                    [ngClass]="{
+                      'is-invalid': submitted && acctProfileForm.controls.authAudit.errors
+                    }"
+                                ></p-dropdown>
+                                @if (submitted && acctProfileForm.controls.authAudit.errors) {
+                                  <div
+                                    class="errorWrap text-danger"
+                                    >
+                                    @if (submitted && acctProfileForm.controls.authAudit.errors.required) {
+                                      <div
+                                        class="error text-danger"
+                                        >
+                                        Please select Authentication audit status.
+                                      </div>
+                                    }
+                                  </div>
+                                }
+                              </div>
+                              <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-15">
+                                <label
+                                  >Auto Provision MAC
+                                  {{
+                                  acctProfileForm.controls.autoProvisionMac.errors?.required ? "*" : ""
+                                  }}</label
+                                  >
+                                  <p-dropdown
+                                    [options]="status1"
+                                    placeholder="Select Auto Provision MAC"
+                                    optionLabel="label"
+                                    optionValue="label"
+                                    formControlName="autoProvisionMac"
+                                    [filter]="true"
+                                    filterBy="label"
+                    [ngClass]="{
+                      'is-invalid': submitted && acctProfileForm.controls.autoProvisionMac.errors
+                    }"
+                                  ></p-dropdown>
+                                  @if (submitted && acctProfileForm.controls.autoProvisionMac.errors) {
+                                    <div
+                                      class="errorWrap text-danger"
+                                      >
+                                      @if (submitted && acctProfileForm.controls.autoProvisionMac.errors.required) {
+                                        <div
+                                          class="error text-danger"
+                                          >
+                                          Please Select Auto Provision MAC.
+                                        </div>
+                                      }
+                                    </div>
+                                  }
+                                </div>
+                                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-15">
+                                  <label>Proxy Server</label>
+                                  <p-dropdown
+                                    [options]="filteredProxyServerList"
+                                    placeholder="Select Proxy Server"
+                                    optionLabel="name"
+                                    optionValue="name"
+                                    formControlName="proxyServerName"
+                                    [filter]="true"
+                                    filterBy="name"
+                                    [showClear]="true"
+                                  ></p-dropdown>
+                                  @if (submitted && acctProfileForm.controls.proxyServerName.errors) {
+                                    <div
+                                      class="errorWrap text-danger"
+                                      >
+                                      @if (submitted && acctProfileForm.controls.proxyServerName.errors.required) {
+                                        <div
+                                          class="error text-danger"
+                                          >
+                                          Please select Accounting profile.
+                                        </div>
+                                      }
+                                    </div>
+                                  }
+                                </div>
+                                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-15">
+                                  <label>Device Driver</label>
+                                  <p-dropdown
+                                    [options]="deviceDriverList"
+                                    placeholder="Select Device Driver"
+                                    optionLabel="label"
+                                    optionValue="value"
+                                    formControlName="deviceDriverName"
+                                    [filter]="true"
+                                    filterBy="name"
+                                    [showClear]="true"
+                                  ></p-dropdown>
+                                </div>
+                                @if (authenticationSubType.length > 0) {
+                                  <div
+                                    class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-15"
+                                    >
+                                    <label>Select Truststore File</label>
+                                    <input
+                                      type="file"
+                                      id="txtSelectDocument"
+                                      class="form-control"
+                                      formControlName="trustStoreDoc"
+                                      placeholder="Select Document"
+                                      style="padding: 2px; width: 100%"
+                                      (change)="onFileChange($event, 'trustStoreDoc')"
+                                      accept=".jks"
+                                      />
+                                      @for (file of selectedTruststoreFilePreview; track file; let i = $index) {
+                                        <div>
+                                          <div
+                                            (click)="truststoreFileClick()"
+                      style="
+                        padding-left: 10px;
+                        padding-right: 10px;
+                        padding-top: 4px;
+                        padding-bottom: 4px;
+                        font-size: 10px;
+                        cursor: pointer;
+                      "
+                                            >
+                                            {{ file?.name }}
+                                            <button type="button" class="close" (click)="deletTruststoreFile(file?.name)">
+                                              &times;
+                                            </button>
+                                          </div>
+                                        </div>
+                                      }
+                                    </div>
+                                  }
+                                  @if (authenticationSubType.length > 0) {
+                                    <div
+                                      class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-15"
+                                      >
+                                      <label>Truststore Password</label>
+                                      <input
+                                        id="password"
+                                        class="form-control"
+                                        type="password"
+                                        placeholder="Enter Password"
+                                        formControlName="trustStorePassword"
+                    [readonly]="
+                      !acctProfileForm.get('trustStoreDoc').value &&
+                      selectedTruststoreFilePreview.length == 0
+                    "
+                                        />
+                                      </div>
+                                    }
+                                    @if (authenticationSubType.length > 0) {
+                                      <div
+                                        class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-15"
+                                        >
+                                        <label>Select Keystore File</label>
+                                        <input
+                                          type="file"
+                                          id="txtSelectDocument"
+                                          formControlName="keystoreDoc"
+                                          class="form-control"
+                                          placeholder="Select Document"
+                                          style="padding: 2px; width: 100%"
+                                          (change)="onFileChange($event, 'keystoreDoc')"
+                                          accept=".p12"
+                                          />
+                                          @for (file of selectedKeystoreFilePreview; track file; let i = $index) {
+                                            <div>
+                                              <div
+                                                (click)="keystoreFileClick()"
+                      style="
+                        padding-left: 10px;
+                        padding-right: 10px;
+                        padding-top: 4px;
+                        padding-bottom: 4px;
+                        font-size: 10px;
+                        cursor: pointer;
+                      "
+                                                >
+                                                {{ file?.name }}
+                                                <button type="button" class="close" (click)="deletKeystoreFile(file?.name)">
+                                                  &times;
+                                                </button>
+                                              </div>
+                                            </div>
+                                          }
+                                        </div>
+                                      }
+                                      @if (authenticationSubType.length > 0) {
+                                        <div
+                                          class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-15"
+                                          >
+                                          <label>Keystore Password </label>
+                                          <input
+                                            id="password"
+                                            class="form-control"
+                                            type="password"
+                                            placeholder="Enter Password"
+                                            formControlName="keystorePassword"
+                    [readonly]="
+                      !acctProfileForm.get('keystoreDoc').value &&
+                      selectedKeystoreFilePreview.length == 0
+                    "
+                                            />
+                                          </div>
+                                        }
+                                        <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-15">
+                                          <label>Password Check Required*</label>
+                                          <p-dropdown
+                                            [options]="passwordCheckStatusList"
+                                            placeholder="Select Password Check"
+                                            optionLabel="label"
+                                            optionValue="value"
+                                            formControlName="passwordCheckRequired"
+                                          ></p-dropdown>
+                                          @if (submitted && acctProfileForm.controls.passwordCheckRequired.errors) {
+                                            <div
+                                              class="errorWrap text-danger"
+                                              >
+                                              @if (
+                                                submitted && acctProfileForm.controls.passwordCheckRequired.errors.required
+                                                ) {
+                                                <div
+                                                  class="error text-danger"
+                                                  >
+                                                  Please select password check required.
+                                                </div>
+                                              }
+                                            </div>
+                                          }
+                                        </div>
+                                        <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-15">
+                                          <label>Terminate Session on Mac*</label>
+                                          <p-dropdown
+                                            [options]="passwordCheckStatusList"
+                                            placeholder="Select Terminate Session Check"
+                                            optionLabel="label"
+                                            optionValue="value"
+                                            formControlName="terminateSessionOnDuplicateMac"
+                                          ></p-dropdown>
+                                          @if (
+                                            submitted && acctProfileForm.controls.terminateSessionOnDuplicateMac.errors
+                                            ) {
+                                            <div
+                                              class="errorWrap text-danger"
+                                              >
+                                              @if (
+                                                submitted &&
+                                                acctProfileForm.controls.terminateSessionOnDuplicateMac.errors.required
+                                                ) {
+                                                <div
+                                                  class="error text-danger"
+                                                  >
+                                                  Please select terminate session on mac.
+                                                </div>
+                                              }
+                                            </div>
+                                          }
+                                        </div>
+                                        <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-15">
+                                          <label>Live Session On Interim*</label>
+                                          <p-dropdown
+                                            [options]="liveSessionOnInterimList"
+                                            placeholder="Select Live Session On Interim"
+                                            optionLabel="label"
+                                            optionValue="value"
+                                            formControlName="addLiveSessionOnInterim"
+                                          ></p-dropdown>
+                                          @if (submitted && acctProfileForm.controls.addLiveSessionOnInterim.errors) {
+                                            <div
+                                              class="errorWrap text-danger"
+                                              >
+                                              @if (
+                                                submitted &&
+                                                acctProfileForm.controls.addLiveSessionOnInterim.errors.required
+                                                ) {
+                                                <div
+                                                  class="error text-danger"
+                                                  >
+                                                  Please select Live Session On Interim.
+                                                </div>
+                                              }
+                                            </div>
+                                          }
+                                        </div>
+                                        <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-15">
+                                          <label>Disconnect Session On Interim*</label>
+                                          <p-dropdown
+                                            [options]="liveSessionOnInterimList"
+                                            placeholder="Select Live Session On Interim"
+                                            optionLabel="label"
+                                            optionValue="value"
+                                            formControlName="disconnectSessionOnInterim"
+                                          ></p-dropdown>
+                                          @if (submitted && acctProfileForm.controls.disconnectSessionOnInterim.errors) {
+                                            <div
+                                              class="errorWrap text-danger"
+                                              >
+                                              @if (
+                                                submitted &&
+                                                acctProfileForm.controls.disconnectSessionOnInterim.errors.required
+                                                ) {
+                                                <div
+                                                  class="error text-danger"
+                                                  >
+                                                  Please select Disconnect Session On Interim.
+                                                </div>
+                                              }
+                                            </div>
+                                          }
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    <div class="addUpdateBtn" style="margin-top: 3.5rem">
+                                      <button
+                                        type="submit"
+                                        class="btn btn-primary"
+                                        title="Submit Radius Profile Details"
+                                        (click)="addAcctProfile()"
+                                        >
+                                        <i class="fa fa-check-circle"></i>
+                                        {{ editMode ? "Update Profile" : "Add Profile" }}
+                                      </button>
+                                    </div>
+                                  </form>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div> -->

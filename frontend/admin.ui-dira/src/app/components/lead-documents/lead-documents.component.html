@@ -1,0 +1,937 @@
+<div class="row header-row">
+    <mat-card class="cardWithShadow w-100">
+        <mat-card-content class="mat-card-content-border">
+            <div class="row">
+                <div class="col-sm-9 d-flex"></div>
+                <div class="col-sm-3 search-div">
+                    <button mat-button mat-flat-button color="primary" (click)="openleaddocumentDialog(false)"
+                        class="button-normal mr-10" style="width: auto">
+                        Add Lead Document
+                    </button>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+<div class="container-fluid contain-flud">
+    <div class="row">
+        <div class="col-md-12">
+            <mat-card class="cardWithShadow">
+                <mat-card-header class="align-items-center">
+                    <div class="displayflex align-items-center">
+                        <!-- Back Button -->
+                        <a mat-icon-button matTooltip="Go to Lead List" color="primary" (click)="listLead()"
+                            class="m-r-2">
+                            <img src="assets/img/DashboardIcons/Reject.svg" alt="Back" />
+                        </a>
+
+                        <!-- Title -->
+                        <mat-card-title class="font-900 m-r-2">Lead Management</mat-card-title>
+                    </div>
+                </mat-card-header>
+
+                <mat-card-content class="mat-card-content-border">
+                    <div class="discount-table-list">
+                        <div class="table-container">
+                            <table mat-table [dataSource]="custmerDocList" matSort class="mat-elevation-z8 w-100">
+
+                                <!-- Document Type -->
+                                <ng-container matColumnDef="docType">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header sticky
+                                        class="table-header-title" style="text-align: center;">
+                                        Documents Type
+                                    </th>
+                                    <td mat-cell *matCellDef="let doc" style="text-align: center;">
+                                        {{ doc.docType }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Document Sub Type -->
+                                <ng-container matColumnDef="docSubType">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header sticky
+                                        class="table-header-title" style="text-align: center;">
+                                        Documents Sub Type
+                                    </th>
+                                    <td mat-cell *matCellDef="let doc" style="text-align: center;">
+                                        {{ doc.docSubType }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Document Number -->
+                                <ng-container matColumnDef="documentNumber">
+                                    <th mat-header-cell *matHeaderCellDef sticky class="table-header-title"
+                                        style="text-align: center;">
+                                        Document Number
+                                    </th>
+                                    <td mat-cell *matCellDef="let doc" style="text-align: center;">
+                                        {{ doc.documentNumber || '-' }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Status -->
+                                <ng-container matColumnDef="docStatus">
+                                    <th mat-header-cell *matHeaderCellDef sticky class="table-header-title"
+                                        style="text-align: center;">
+                                        Status
+                                    </th>
+                                    <td mat-cell *matCellDef="let doc" style="text-align: center;">
+                                        <span class="status-badge" [ngClass]="{
+                        'status-success': doc.docStatus === 'Verified' || doc.docStatus === 'Active',
+                        'status-warning': doc.docStatus === 'Pending',
+                        'status-danger': doc.docStatus === 'Rejected'
+                      }">
+                                            {{ doc.docStatus }}
+                                        </span>
+                                    </td>
+                                </ng-container>
+
+                                <!-- File Name -->
+                                <ng-container matColumnDef="filename">
+                                    <th mat-header-cell *matHeaderCellDef sticky class="table-header-title text-center"
+                                        style="text-align: center;">
+                                        File Name
+                                    </th>
+                                    <td mat-cell *matCellDef="let doc" style="text-align: center;">
+                                        @if (doc.filename) {
+                                        <a href="javascript:void(0)" class="link-blue"
+                                            [ngClass]="{ 'disabled-link': !downloadDocAccess }"
+                                            (click)="downloadDoc(doc.filename, doc.docId, doc?.leadMaster?.id)">
+                                            {{ doc.filename }}
+                                        </a>
+                                        }
+                                        @else {
+                                        <span>-</span>
+                                        }
+                                    </td>
+                                </ng-container>
+
+                                <!-- Remark -->
+                                <ng-container matColumnDef="remark">
+                                    <th mat-header-cell *matHeaderCellDef sticky class="table-header-title"
+                                        style="text-align: center;">
+                                        Remark
+                                    </th>
+                                    <td mat-cell *matCellDef="let doc" style="text-align: center;">
+                                        {{ doc.remark || '-' }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Document Mode -->
+                                <ng-container matColumnDef="mode">
+                                    <th mat-header-cell *matHeaderCellDef sticky class="table-header-title"
+                                        style="text-align: center;">
+                                        Document Mode
+                                    </th>
+                                    <td mat-cell *matCellDef="let doc" style="text-align: center;">
+                                        {{ doc.mode }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Action -->
+                                <ng-container matColumnDef="action" *ngIf="editAccess || deleteAccess">
+                                    <th mat-header-cell *matHeaderCellDef stickyEnd class="table-header-title"
+                                        style="text-align: center;">
+                                        Action
+                                    </th>
+                                    <td mat-cell *matCellDef="let doc; let i = index" style="text-align: center;">
+                                        @if (editAccess) {
+                                        <a mat-icon-button matTooltip="Edit" href="javascript:void(0)"
+                                            (click)="editCustDocById(doc.docId, i)">
+                                            <img src="assets/img/DashboardIcons/Edit.svg" />
+                                        </a>
+                                        }
+
+                                        @if (deleteAccess) {
+                                        <a mat-icon-button matTooltip="Delete" href="javascript:void(0)"
+                                            (click)="deleteConfirm(doc)">
+                                            <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" />
+                                        </a>
+                                        }
+                                    </td>
+
+                                </ng-container>
+
+                                <!-- Header and Row -->
+                                <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+                                <tr mat-row class="table-content-row" *matRowDef="let row; columns: displayedColumns">
+                                </tr>
+
+                            </table>
+
+                            <!-- Paginator -->
+                        <mat-paginator [length]="totalRecords" [pageSize]="itemsPerPage" [pageSizeOptions]="[5,10,20,50,100]" showFirstLastButtons
+                            (page)="pageChangedDocList($event)">
+                        </mat-paginator>
+
+                        </div>
+                    </div>
+
+                    <!-- No Records Found -->
+                    <div *ngIf="!custmerDocList?.length" class="text-center mt-3">
+                        No Records Found
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </div>
+</div>
+
+<ng-template #leadDocumentDialog let-dialogRef="dialogRef">
+
+    <div class="dialog-container">
+        <!-- Header -->
+        <div class="dialog-header ">
+            {{ editMode ? 'Update Lead Document' : 'Create Lead Document' }}
+            <span>
+                <a mat-icon-button color="primary" (click)="onCancel()" class="m-r-2">
+                    <img src="assets/img/DashboardIcons/Reject.svg" alt="Back" />
+                </a>
+            </span>
+        </div>
+
+        <!-- Dialog Content -->
+        <div mat-dialog-content style="overflow-y: hidden;">
+            <mat-card-content class="matcardContent">
+                <form [formGroup]="insertLeadDocumentForm" class="row g-3 table-layout-fixed"
+                    style="padding: 0px 20px;">
+                    <!-- Verification Mode -->
+                    <div class="col-md-4 mb-3">
+                        <label for="mode" class="inputLabel">Verification Mode *</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <mat-select id="mode" placeholder="Select Verification Mode" formControlName="mode"
+                                (selectionChange)="OnVerificationMode($event)" [disabled]="editMode" class="input-p-5">
+                                <mat-option *ngFor="let item of VerificationModeValue" [value]="item.value">
+                                    {{ item.value }}
+                                </mat-option>
+                            </mat-select>
+                            <mat-error *ngIf="submitted && insertLeadDocumentForm.controls.mode.errors">
+                                Verification Mode is required.
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Document Type -->
+                    <div class="col-md-4 mb-3">
+                        <label for="docType" class="inputLabel">Document Type *</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <mat-select id="docType" placeholder="Select Document Type" formControlName="docType"
+                                (selectionChange)="documentSubType($event)" class="input-p-5" [disabled]="editMode">
+                                <mat-option *ngFor="let item of docTypeForLeadList" [value]="item.value">
+                                    {{ item.text }}
+                                </mat-option>
+                            </mat-select>
+                            <mat-error *ngIf="submitted && insertLeadDocumentForm.controls.docType.errors">
+                                Document Type is required.
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Document Sub Type -->
+                    <div class="col-md-4 mb-3">
+                        <label for="docSubType" class="inputLabel">Document Sub Type *</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <mat-select id="docSubType" placeholder="Select Document Sub Type"
+                                formControlName="docSubType" class="input-p-5"
+                                (selectionChange)="OnDocumentType($event)">
+                                <mat-option *ngFor="let item of docSubTypeList" [value]="item.text">
+                                    {{ item.text }}
+                                </mat-option>
+                            </mat-select>
+
+                            <mat-error *ngIf="submitted && insertLeadDocumentForm.controls.docSubType.errors">
+                                Document Sub Type is required.
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Document Number (Conditional) -->
+                    <div class="col-md-4 mb-3" *ngIf="ifDocumentNumber && ifModeInput">
+                        <label for="documentNumber" class="inputLabel">{{ labelname }} *</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <input matInput id="documentNumber" type="text" placeholder="Enter {{ labelname }}"
+                                class="input-p-5" formControlName="documentNumber" />
+                            <mat-error *ngIf="submitted && insertLeadDocumentForm.controls.documentNumber.errors">
+                                {{ labelname }} is required.
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- File Upload -->
+                    @if (!ifModeInput) {
+                    <div class="col-md-4 ml-15">
+                        <label>Select Document *</label>
+                        <input type="file" id="txtSelectDocument" class="form-control" formControlName="file"
+                            placeholder="Select Document" (change)="onFileChange($event)" style="margin-top: 20px;" />
+                        @for (file of selectedFilePreview; track file; let i = $index) {
+                        <div>
+                            <div (click)="keystoreFileClick()" style="
+                                          padding-left: 10px;
+                                          padding-right: 10px;
+                                          padding-top: 4px;
+                                          padding-bottom: 4px;
+                                          font-size: 10px;
+                                          cursor: pointer;
+                                        ">
+                                {{ file?.name }}
+                            </div>
+                        </div>
+                        }
+                        @if (submitted && insertLeadDocumentForm.controls.file.errors) {
+                        <div class="errorWrap text-danger">
+                            @if (submitted && insertLeadDocumentForm.controls.file.errors.required) {
+                            <div class="error text-danger">
+                                Document is required.
+                            </div>
+                            }
+                        </div>
+                        }
+                    </div>
+                    }
+                    <!-- <div class="col-md-4 mb-3" *ngIf="!ifModeInput">
+                        <label class="inputLabel">Select Document *</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <input matInput type="file" id="txtSelectDocument" (change)="onFileChange($event)"
+                                style="padding: 4px;" />
+                        </mat-form-field>
+                        <span *ngIf="selectedFilePreview?.length > 0">
+                            {{ selectedFilePreview[0]?.name }}
+                        </span>
+                        <mat-error *ngIf="submitted && insertLeadDocumentForm.controls.file.errors">
+                            Document is required.
+                        </mat-error>
+                    </div> -->
+
+                    <!-- Start Date -->
+                    <div class="col-md-4 mb-3">
+                        <label for="startDate" class="inputLabel">Start Date *</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <input matInput [matDatepicker]="pickerStart" placeholder="Select Start Date"
+                                class="input-p-5" formControlName="startDate" (dateChange)="compareStartDates()" />
+                            <mat-datepicker-toggle matSuffix [for]="pickerStart"></mat-datepicker-toggle>
+                            <mat-datepicker #pickerStart></mat-datepicker>
+                            <mat-error *ngIf="submitted && insertLeadDocumentForm.controls.startDate.errors">
+                                Start Date is required.
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- End Date -->
+                    <div class="col-md-4 mb-3">
+                        <label for="endDate" class="inputLabel">End Date *</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <input matInput [matDatepicker]="pickerEnd" placeholder="Select End Date" class="input-p-5"
+                                formControlName="endDate" (dateChange)="compareEndDates()" />
+                            <mat-datepicker-toggle matSuffix [for]="pickerEnd"></mat-datepicker-toggle>
+                            <mat-datepicker #pickerEnd></mat-datepicker>
+                            <mat-error *ngIf="submitted && insertLeadDocumentForm.controls.endDate.errors">
+                                End Date is required.
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Document Status -->
+                    <div class="col-md-4 mb-3">
+                        <label for="docStatus" class="inputLabel">Document Status *</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <mat-select id="docStatus" placeholder="Select Document Status" class="input-p-5"
+                                formControlName="docStatus">
+                                <mat-option *ngFor="let item of documentStatusList" [value]="item.value">
+                                    {{ item.value }}
+                                </mat-option>
+                            </mat-select>
+                            <mat-error *ngIf="submitted && insertLeadDocumentForm.controls.docStatus.errors">
+                                Document Status is required.
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Remarks -->
+                    <div class="col-md-4 mb-3">
+                        <label for="remark" class="inputLabel">Remarks</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <textarea matInput id="remark" rows="2" placeholder="Enter Remarks" formControlName="remark"
+                                maxlength="100"></textarea>
+                        </mat-form-field>
+                    </div>
+                </form>
+            </mat-card-content>
+        </div>
+
+        <!-- Dialog Actions -->
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+            <button mat-flat-button color="primary" class="button-normal" (click)="addDocument()">
+                {{ editMode ? 'Update Lead Document' : 'Create Lead Document' }}
+            </button>
+
+            <button mat-stroked-button color="primary" class="button-normal" (click)="onCancel()">
+                Cancel
+            </button>
+        </div>
+    </div>
+</ng-template>
+
+
+
+
+
+
+<!-- <div class="childComponent">
+  <div class="row">
+    <div class="col-md-12">
+      <!- User Data ->
+      <div class="panel top">
+        <div class="panel-heading">
+          <h3 class="panel-title">Lead Document Management</h3>
+          <div class="right">
+            <button type="button" class="btn-toggle-collapse">
+              <i class="fa fa-minus-circle"></i>
+            </button>
+          </div>
+        </div>
+        <div class="panel-body no-padding panel-udata">
+          @if (createAccess) {
+            <div class="col-md-6 pcol">
+              <div class="dbox">
+                <a class="curson_pointer" (click)="openCustmerDocCreateMenu()">
+                  <img src="../../../assets/img/i01.png" style="width: 32px" />
+                  <h5>Create Lead Document</h5>
+                  <!- <p>Create Staff</p> ->
+                </a>
+              </div>
+            </div>
+          }
+          <div class="col-md-6 pcol">
+            <div class="dbox">
+              <a class="curson_pointer" (click)="openCustmerDocListMenu()">
+                <img src="../../../assets/img/i01.png" style="width: 32px" />
+                <h5>Lead Document List</h5>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!- END User Data ->
+    </div>
+  </div>
+  @if (isCustmerDocList) {
+    <div class="row">
+      <div class="col-md-12">
+        <!- Data Table ->
+        <div class="panel">
+          <div class="panel-heading">
+            <div class="displayflex">
+              <button
+                type="button"
+                class="btn btn-secondary backbtn"
+                data-toggle="tooltip"
+                data-placement="bottom"
+                title="Go to Lead List"
+                (click)="listLead()"
+                >
+                <i
+                  class="fa fa-arrow-circle-left"
+                  style="color: #f7941e !important; font-size: 28px"
+                ></i>
+              </button>
+              <h3 class="panel-title">Lead Management</h3>
+            </div>
+            <div class="right">
+              <button type="button" class="btn-toggle-collapse">
+                <i class="fa fa-minus-circle"></i>
+              </button>
+            </div>
+          </div>
+          <div class="panel-body table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Documents Type</th>
+                  <th>Documents Sub Type</th>
+                  <th>Document Number</th>
+                  <th>Status</th>
+                  <th>File Name</th>
+                  <th>Remark</th>
+                  <th>Document Mode</th>
+                  @if (editAccess || deleteAccess) {
+                    <th>Action</th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @for (
+                  custDocObj of custmerDocList
+                  | paginate
+                  : {
+                  id: 'listing_docListdata',
+                  itemsPerPage: itemsPerPage,
+                  currentPage: currentPage,
+                  totalItems: totalRecords
+                  }; track
+                  custDocObj; let i = $index) {
+                  <tr
+                    >
+                    <td>{{ custDocObj.docType }}</td>
+                    <td>{{ custDocObj.docSubType }}</td>
+                    <td>
+                      @if (custDocObj.documentNumber) {
+                        <span> {{ custDocObj.documentNumber }} </span>
+                      }
+                      @if (!custDocObj.documentNumber) {
+                        <span>-</span>
+                      }
+                    </td>
+                    <td>{{ custDocObj.docStatus }}</td>
+                    @if (custDocObj.filename) {
+                      <td>
+                        <a
+                          [ngClass]="{ 'disabled-link': !downloadDocAccess }"
+                          href="javascript:void(0)"
+                          style="color: blue"
+                    (click)="
+                      downloadDoc(custDocObj.filename, custDocObj.docId, custDocObj?.leadMaster?.id)
+                    "
+                          >
+                          <!- disabled="downloadDocumentAccess" ->
+                          {{ custDocObj.filename }}
+                        </a>
+                      </td>
+                    }
+                    @if (!custDocObj.filename) {
+                      <td>-</td>
+                    }
+                    <td>
+                      @if (custDocObj.remark) {
+                        <span>{{ custDocObj.remark }}</span>
+                      }
+                      @if (!custDocObj.remark) {
+                        <span>-</span>
+                      }
+                    </td>
+                    <td>{{ custDocObj.mode }}</td>
+                    @if (editAccess || deleteAccess) {
+                      <td class="btnAction">
+                        @if (editAccess) {
+                          <a
+                            class="curson_pointer"
+                            type="button"
+                            (click)="editCustDocById(custDocObj.docId, i)"
+                            >
+                          <img src="assets/img/DashboardIcons/Edit.svg" >
+                          </a>
+                        }
+                        @if (deleteAccess) {
+                          <a
+                            class="curson_pointer"
+                            (click)="deleteConfirm(custDocObj)"
+                            >
+                             <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                          </a>
+                        }
+                        <!- <button *ngIf="custDocObj.mode !== 'Online'" class="approve-btn curson_pointer" [disabled]="custDocObj.docStatus == 'verified'" (click)="approvedCustDoc(custDocObj)" title="Approve" ><img src="assets/img/DashboardIcons/Assign.svg"> </button> <button *ngIf="custDocObj.mode === 'Online'" class="approve-btn" title="Verify Document" (click)="verifyDocument(custDocObj)" [disabled]=" (custDocObj.docStatus == 'Verified' && custDocObj.mode === 'Online') || custDocObj.docStatus == 'verified' " > <img class="IconVerifyBtn" src="assets/img/verifyicon.svg" /> </button> ->
+                      </td>
+                    }
+                  </tr>
+                }
+              </tbody>
+            </table>
+            <br />
+            <div class="row">
+              @if (custmerDocList?.length === 0 || custmerDocList == undefined) {
+                <div
+                  style="text-align: center"
+                  class="col-lg-12 col-md-12"
+                  >
+                  No Records Found
+                </div>
+              }
+              <div class="col-md-12" style="display: flex">
+                <pagination-controls
+                  id="listing_docListdata"
+                  maxSize="10"
+                  directionLinks="true"
+                  previousLabel=""
+                  nextLabel=""
+                  (pageChange)="pageChangedDocList($event, 'listing_docListdata')"
+                  >
+                </pagination-controls>
+                <div id="itemPerPageDropdown">
+                  <p-dropdown
+                    [options]="pageLimitOptions"
+                    optionLabel="value"
+                    optionValue="value"
+                    (onChange)="TotalItemPerPage($event)"
+                  ></p-dropdown>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!- END Data Table ->
+      </div>
+    </div>
+  }
+  @if (isCustmerDocCreateOrEdit && createAccess) {
+    <div class="row">
+      <div class="col-md-12">
+        <!- Form Design ->
+        <div class="panel">
+          <div class="panel-heading">
+            <h3 class="panel-title">{{ editMode ? "Update" : "Create" }} Lead Document</h3>
+            <div class="right">
+              <button type="button" class="btn-toggle-collapse">
+                <i class="fa fa-minus-circle"></i>
+              </button>
+            </div>
+          </div>
+          <form class="form-auth-small" [formGroup]="insertLeadDocumentForm">
+            <div class="panel-body">
+              <div class="form-group row">
+                <div class="col-md-4 ml-15">
+                  <label for="mode">Verification Mode *</label>
+                  <p-dropdown
+                    [options]="VerificationModeValue"
+                    optionValue="value"
+                    optionLabel="value"
+                    filter="true"
+                    filterBy="value"
+                    placeholder="Select a Verification Mode"
+                    formControlName="mode"
+                    [disabled]="editMode"
+                    (onChange)="OnVerificationMode($event)"
+                  [ngClass]="{
+                    'is-invalid': submitted && insertLeadDocumentForm.controls.mode.errors
+                  }"
+                  ></p-dropdown>
+                 
+                  @if (submitted && insertLeadDocumentForm.controls.mode.errors) {
+                    <div
+                      class="errorWrap text-danger"
+                      >
+                      <div class="error text-danger">Verification Mode is required.</div>
+                    </div>
+                  }
+                </div>
+                <div class="col-md-4 ml-15">
+                  <label for="docType">Document Type *</label>
+                    <p-dropdown
+                    [options]="docTypeForLeadList"
+                    optionValue="value"
+                    optionLabel="text"
+                    filter="true"
+                    filterBy="text"
+                    placeholder="Select a Document Type"
+                    formControlName="docType"
+                    [disabled]="editMode"
+                    (onChange)="documentSubType($event)"
+                  [ngClass]="{
+                    'is-invalid': submitted && insertLeadDocumentForm.controls.docType.errors
+                  }"
+                  ></p-dropdown>
+                  @if (submitted && insertLeadDocumentForm.controls.docType.errors) {
+                    <div
+                      class="errorWrap text-danger"
+                      >
+                      <div class="error text-danger">Document Type is required.</div>
+                    </div>
+                  }
+                </div>
+                <div class="col-md-4 ml-15">
+                  <label for="docSubType">Document Sub Type *</label>
+                  <p-dropdown
+                    [options]="docSubTypeList"
+                    optionValue="text"
+                    optionLabel="text"
+                    filter="true"
+                    filterBy="text"
+                    placeholder="Select a Document SubType"
+                    formControlName="docSubType"
+                    (onChange)="OnDocumentType($event)"
+                  [ngClass]="{
+                    'is-invalid': submitted && insertLeadDocumentForm.controls.docSubType.errors
+                  }"
+                    >
+                  </p-dropdown>
+                  @if (submitted && insertLeadDocumentForm.controls.docSubType.errors) {
+                    <div
+                      class="errorWrap text-danger"
+                      >
+                      <div class="error text-danger">Document Sub Type is required.</div>
+                    </div>
+                  }
+                </div>
+              </div>
+              <div class="row">
+                @if (ifDocumentNumber && ifModeInput) {
+                  <div class="col-md-4 ml-15">
+                    @if (labelname == 'GST Number') {
+                      <label for="docStatus">{{ labelname }} *</label>
+                    }
+                    @if (labelname !== 'GST Number') {
+                      <label for="docStatus"
+                        >{{ labelname }} Number *</label
+                        >
+                      }
+                      @if (labelname == 'Aadhar Card') {
+                        <div>
+                          <input
+                            id="documentNumber"
+                            type="text"
+                            class="form-control"
+                            placeholder="Enter Document No. "
+                            formControlName="documentNumber"
+                    [ngClass]="{
+                      'is-invalid':
+                        submitted && insertLeadDocumentForm.controls.documentNumber.errors
+                    }"
+                            />
+                            @if (submitted && insertLeadDocumentForm.controls.documentNumber.errors) {
+                              <div
+                                class="errorWrap text-danger"
+                                >
+                                @if (
+                                  submitted && insertLeadDocumentForm.controls.documentNumber.errors.minLength
+                                  ) {
+                                  <div
+                                    class="error text-danger"
+                                    >
+                                    Please correct Aadhar number required.
+                                  </div>
+                                }
+                              </div>
+                            }
+                          </div>
+                        }
+                        @if (labelname == 'PAN Card') {
+                          <div>
+                            <input
+                              id="documentNumber"
+                              type="text"
+                              class="form-control"
+                              placeholder="Enter Document No. "
+                              formControlName="documentNumber"
+                    [ngClass]="{
+                      'is-invalid':
+                        submitted && insertLeadDocumentForm.controls.documentNumber.errors
+                    }"
+                              />
+                              @if (submitted && insertLeadDocumentForm.controls.documentNumber.errors) {
+                                <div
+                                  class="errorWrap text-danger"
+                                  >
+                                  @if (
+                                    submitted && insertLeadDocumentForm.controls.documentNumber.errors.minLength
+                                    ) {
+                                    <div
+                                      class="error text-danger"
+                                      >
+                                      Please correct {{ KraTitle }} number required.
+                                    </div>
+                                  }
+                                </div>
+                              }
+                            </div>
+                          }
+                          @if (labelname == 'GST Number') {
+                            <div>
+                              <input
+                                id="documentNumber"
+                                type="text"
+                                class="form-control"
+                                placeholder="Enter Document No. "
+                                formControlName="documentNumber"
+                    [ngClass]="{
+                      'is-invalid':
+                        submitted && insertLeadDocumentForm.controls.documentNumber.errors
+                    }"
+                                />
+                                @if (submitted && insertLeadDocumentForm.controls.documentNumber.errors) {
+                                  <div
+                                    class="errorWrap text-danger"
+                                    >
+                                    @if (
+                                      submitted && insertLeadDocumentForm.controls.documentNumber.errors.minLength
+                                      ) {
+                                      <div
+                                        class="error text-danger"
+                                        >
+                                        Please correct GST number required.
+                                      </div>
+                                    }
+                                  </div>
+                                }
+                              </div>
+                            }
+                            @if (submitted && insertLeadDocumentForm.controls.documentNumber.errors) {
+                              <div
+                                class="errorWrap text-danger"
+                                >
+                                <div class="error text-danger">{{ labelname }} No is required.</div>
+                              </div>
+                            }
+                          </div>
+                        }
+                        @if (!ifModeInput) {
+                          <div class="col-md-4 ml-15">
+                            <label>Select Document *</label>
+                            <input
+                              type="file"
+                              id="txtSelectDocument"
+                              class="form-control"
+                              formControlName="file"
+                              placeholder="Select Document"
+                              (change)="onFileChange($event)"
+                              />
+                              @for (file of selectedFilePreview; track file; let i = $index) {
+                                <div>
+                                  <div
+                                    (click)="keystoreFileClick()"
+                    style="
+                      padding-left: 10px;
+                      padding-right: 10px;
+                      padding-top: 4px;
+                      padding-bottom: 4px;
+                      font-size: 10px;
+                      cursor: pointer;
+                    "
+                                    >
+                                    {{ file?.name }}
+                                  </div>
+                                </div>
+                              }
+                              @if (submitted && insertLeadDocumentForm.controls.file.errors) {
+                                <div
+                                  class="errorWrap text-danger"
+                                  >
+                                  @if (submitted && insertLeadDocumentForm.controls.file.errors.required) {
+                                    <div
+                                      class="error text-danger"
+                                      >
+                                      Document is required.
+                                    </div>
+                                  }
+                                </div>
+                              }
+                            </div>
+                          }
+                          <div class="col-md-4 ml-15">
+                            <label>Start Date</label>
+                            <input
+                              type="date"
+                              class="form-control"
+                              placeholder="Enter Start Date"
+                              formControlName="startDate"
+                              (ngModelChange)="compareStartDates()"
+                  [ngClass]="{
+                    'is-invalid': submitted && insertLeadDocumentForm.controls.startDate.errors
+                  }"
+                              [min]="minDate | date: 'dd-MM-yyyy'"
+                              [max]="maxDate | date: 'dd-MM-yyyy'"
+                              />
+                              @if (submitted && insertLeadDocumentForm.controls.startDate.errors) {
+                                <div
+                                  class="errorWrap text-danger"
+                                  >
+                                  @if (submitted && insertLeadDocumentForm.controls.startDate.errors.required) {
+                                    <div
+                                      class="error text-danger"
+                                      >
+                                      Start Date is required.
+                                    </div>
+                                  }
+                                </div>
+                              }
+                              @if (startDateError.isError) {
+                                <div class="error text-danger">
+                                  {{ startDateError.errorMessage }}
+                                </div>
+                              }
+                            </div>
+                            <div class="col-md-4 ml-15">
+                              <label>End Date</label>
+                              <input
+                                type="date"
+                                class="form-control"
+                                placeholder="Enter End Date"
+                                formControlName="endDate"
+                                (ngModelChange)="compareEndDates()"
+                  [ngClass]="{
+                    'is-invalid': submitted && insertLeadDocumentForm.controls.endDate.errors
+                  }"
+                                [min]="minDate | date: 'dd-MM-yyyy'"
+                                [max]="maxDate | date: 'dd-MM-yyyy'"
+                                />
+                                @if (submitted && insertLeadDocumentForm.controls.endDate.errors) {
+                                  <div
+                                    class="errorWrap text-danger"
+                                    >
+                                    @if (submitted && insertLeadDocumentForm.controls.endDate.errors.required) {
+                                      <div
+                                        class="error text-danger"
+                                        >
+                                        End Date is required.
+                                      </div>
+                                    }
+                                  </div>
+                                }
+                                @if (endDateError.isError) {
+                                  <div class="error text-danger">
+                                    {{ endDateError.errorMessage }}
+                                  </div>
+                                }
+                              </div>
+                            </div>
+                            <div class="row">
+                              <div class="col-md-4 ml-15">
+                                <label for="docStatus">Document Status *</label>
+                                @if (!isEnableStatus) {
+                                  <div>
+                                    <p-dropdown
+                                      [options]="documentStatusList"
+                                      optionLabel="value"
+                                      optionValue="value"
+                                      formControlName="docStatus"
+                                      filter="true"
+                                      filterBy="value"
+                                    ></p-dropdown>
+                                  </div>
+                                }
+                                @if (isEnableStatus) {
+                                  <div>
+                                    <p-dropdown
+                                      [options]="documentStatusList"
+                                      optionLabel="value"
+                                      optionValue="value"
+                                      formControlName="docStatus"
+                                      filter="true"
+                                      filterBy="value"
+                                    ></p-dropdown>
+                                  </div>
+                                }
+                              
+                            </div>
+                            <div class="col-md-4 ml-15">
+                              <label>Remarks</label>
+                              <textarea
+                                class="form-control"
+                                id="textarea"
+                                rows="3"
+                                placeholder="Enter Remarks"
+                                formControlName="remark"
+                              ></textarea>
+                            </div>
+                          </div>
+                          <div class="addUpdateBtn" style="margin-top: 1rem">
+                            <button type="submit" class="btn btn-primary" (click)="addDocument()">
+                              <i class="fa fa-check-circle"></i>
+                              {{ editMode ? "Update Document" : "Add Document" }}
+                            </button>
+                            <br />
+                          </div>
+                        </div>
+                      </form>
+                    </div>
+                    <!- END Form Design ->
+                  </div>
+                </div>
+              }
+            </div> -->

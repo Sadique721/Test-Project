@@ -1,0 +1,575 @@
+<ng-template #withdrawalDialog>
+    <div class="dialog-header">
+        <span class="dialog-title">Withdrawal Amount</span>
+        <button mat-icon-button mat-dialog-close class="close-button" (click)="closeSelectStafff()">
+            <img src="assets/img/DashboardIcons/Reject.svg">
+
+        </button>
+    </div>
+
+    <mat-dialog-content class="dialog-content">
+        <form class="form-container" [formGroup]="manageBalanceGroupForm">
+            <!-- Basic Information Section -->
+            <mat-card class="section-card mb-3">
+                <mat-card-header>
+                    <mat-card-title class="section-title">Basic Information</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="row">
+                        <div class="col-lg-6 col-md-6 mb-3">
+                            <label class="inputLabel">Operation Mode *</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-select formControlName="operation" [disabled]="true" class="input-p-5">
+                                    <mat-option *ngFor="let operation of BalanceOpertation" [value]="operation.value">
+                                        {{operation.label}}
+                                    </mat-option>
+                                </mat-select>
+                                <mat-error
+                                    *ngIf="submitted && manageBalanceGroupForm.controls.operation.errors?.required">
+                                    Please select Balance Operation.
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+
+                        @if (this.ifwithdrawalCommision) {
+                        <div class="col-lg-6 col-md-6 mb-3">
+                            <label class="inputLabel">Payment Mode *</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-select formControlName="mode" (selectionChange)="getOpetationMode($event)"
+                                    class="input-p-5" placeholder="Select a Mode">
+                                    <mat-option *ngFor="let mode of paymentmode" [value]="mode.label">
+                                        {{mode.label}}
+                                    </mat-option>
+                                </mat-select>
+                                <mat-error *ngIf="submitted && manageBalanceGroupForm.controls.mode.errors?.required">
+                                    Please select Balance Mode.
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                        }
+                    </div>
+                </mat-card-content>
+            </mat-card>
+
+            <!-- Withdrawal Amount Section -->
+            @if (this.ifwithdrawalCommision) {
+            <mat-card class="section-card mb-3">
+                <mat-card-header>
+                    <mat-card-title class="section-title">Withdrawal Amount</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="row">
+                        <div class="col-lg-4 col-md-4 mb-3">
+                            <label class="inputLabel">Wallet Amount</label>
+                            <mat-form-field appearance="outline" class="w-100 input-p-5">
+                                <input matInput formControlName="commission" placeholder="Enter Commission" readonly
+                                    class="input-p-5">
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-lg-4 col-md-4 mb-3">
+                            <label class="inputLabel">Withdrawal Amount *</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input matInput formControlName="withdrawalAmount" placeholder="Enter Withdrawal Amount"
+                                    class="input-p-5" (keyup)="onKeyWithdrawalAmount()">
+                                <mat-error
+                                    *ngIf="submitted && manageBalanceGroupForm.controls.withdrawalAmount.errors?.required">
+                                    Withdrawal Amount is required.
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-lg-4 col-md-4 mb-3">
+                            <label class="inputLabel">Remaining Wallet Amount</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input matInput formControlName="ReamainingCommision"
+                                    placeholder="Enter Remaining Commission" readonly class="input-p-5">
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <!-- Cash Mode Fields -->
+                    @if (ifWithdrawalCash) {
+                    <div class="row">
+                        <div class="col-lg-6 col-md-6 mb-3">
+                            <label class="inputLabel">Reference No *</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input matInput formControlName="referenceNo" placeholder="Enter Reference No"
+                                    class="input-p-5">
+                                <mat-error
+                                    *ngIf="submitted && manageBalanceGroupForm.controls.referenceNo.errors?.required">
+                                    Reference No is required.
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-lg-6 col-md-6 mb-3">
+                            <label class="inputLabel">Remark *</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <textarea matInput formControlName="remarks" placeholder="Enter Remarks"
+                                    rows="3"></textarea>
+                                <mat-error
+                                    *ngIf="submitted && manageBalanceGroupForm.controls.remarks.errors?.required">
+                                    Remark is required.
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                    }
+
+                    <!-- Online Mode Fields -->
+                    @if (ifWithdrawalOnlineMode) {
+                    <div class="row">
+                        <div class="col-lg-6 col-md-6 mb-3">
+                            <label class="inputLabel">Bank *</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-select formControlName="bank" class="input-p-5" placeholder="Select a Bank">
+                                    <mat-option *ngFor="let bank of bankDataList" [value]="bank.bankname">
+                                        {{bank.bankname}} ({{bank.accountnum}})
+                                    </mat-option>
+                                </mat-select>
+                                <mat-error *ngIf="submitted && manageBalanceGroupForm.controls.bank.errors?.required">
+                                    Bank is required.
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-lg-6 col-md-6 mb-3">
+                            <label class="inputLabel">Branch *</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input matInput formControlName="branch" placeholder="Enter Branch Name"
+                                    class="input-p-5">
+                                <mat-error *ngIf="submitted && manageBalanceGroupForm.controls.branch.errors?.required">
+                                    Branch Name is required.
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-6 col-md-6 mb-3">
+                            <label class="inputLabel">Payment Reference No *</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input matInput formControlName="referenceNo" placeholder="Enter Reference No"
+                                    class="input-p-5">
+                                <mat-error
+                                    *ngIf="submitted && manageBalanceGroupForm.controls.referenceNo.errors?.required">
+                                    Reference No is required.
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-lg-6 col-md-6 mb-3">
+                            <label class="inputLabel">Remark</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <textarea matInput formControlName="remarks" placeholder="Enter Remark"
+                                    rows="3"></textarea>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                    }
+                </mat-card-content>
+            </mat-card>
+            }
+        </form>
+
+        <!-- Remaining Payment Details Section -->
+        <mat-card class="section-card">
+            <mat-card-header>
+                <mat-card-title class="section-title">Remaining Payment Details</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <div class="table-wrapper">
+                    <mat-table [dataSource]="paginatedPaymentData" class="data-table">
+                        <ng-container matColumnDef="select">
+                            <mat-header-cell *matHeaderCellDef>
+                                <mat-checkbox (change)="checkUncheckAll()" [(ngModel)]="masterSelected">
+                                </mat-checkbox>
+                            </mat-header-cell>
+                            <mat-cell *matCellDef="let element">
+                                <mat-checkbox [(ngModel)]="element.isSelected" (change)="isAllSelected()">
+                                </mat-checkbox>
+                            </mat-cell>
+                        </ng-container>
+                        <ng-container matColumnDef="transactionref">
+                            <mat-header-cell *matHeaderCellDef class="table-header table-header-title">Transaction
+                                ID</mat-header-cell>
+                            <mat-cell *matCellDef="let element" class="table-cell">
+                                {{element.paymentreferenceno == null ? '-' : element.paymentreferenceno}}
+                            </mat-cell>
+                        </ng-container>
+                        <ng-container matColumnDef="referenceNo">
+                            <mat-header-cell *matHeaderCellDef class="table-header table-header-title">Reference
+                                No.</mat-header-cell>
+                            <mat-cell *matCellDef="let element" class="table-cell">
+                                {{element.referenceno}}
+                            </mat-cell>
+                        </ng-container>
+
+                        <ng-container matColumnDef="paymentMode">
+                            <mat-header-cell *matHeaderCellDef class="table-header table-header-title">Payment
+                                Mode</mat-header-cell>
+                            <mat-cell *matCellDef="let element" class="table-cell">
+                                {{element.paymode}}
+                            </mat-cell>
+                        </ng-container>
+
+                        <ng-container matColumnDef="remainingAmount">
+                            <mat-header-cell *matHeaderCellDef class="table-header table-header-title">Remaining
+                                Amount</mat-header-cell>
+                            <mat-cell *matCellDef="let element" class="table-cell">
+                                {{element.remainingAmount}}
+                            </mat-cell>
+                        </ng-container>
+
+                        <mat-header-row *matHeaderRowDef="paymentColumns" class="table-header-row"></mat-header-row>
+                        <mat-row *matRowDef="let row; columns: paymentColumns;" class="table-row"></mat-row>
+                    </mat-table>
+                </div>
+                <mat-paginator [length]="paymentListdatatotalRecords" [pageSize]="paymentListdataitemsPerPage"
+                    [pageSizeOptions]="[5, 10, 20, 50, 100]" (page)="pageChangedForPayments($event)" showFirstLastButtons>
+                </mat-paginator>
+            </mat-card-content>
+        </mat-card>
+    </mat-dialog-content>
+    <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+        <button mat-button mat-flat-button color="primary" class="button-normal" type="submit" (click)="submitBalance()"
+            [disabled]="!manageBalanceGroupForm.valid">
+            Withdrawal Amount
+        </button>
+        <button mat-stroked-button matButton="outlined" type="button" color="primary" class="button-normal"
+            (click)="closeSelectStafff()">
+            Cancel
+        </button>
+    </div>
+</ng-template>
+
+<!-- <p-dialog header="Withdrawal Amount" [(visible)]="displayDialogWithDraw" [style]="{ width: '65%' }" [modal]="true"
+    [responsive]="true" [draggable]="false" [closable]="false">
+    <div class="modal-body">
+        <div class="panel-body table-responsive">
+            <div class="row">
+                <form class="form-auth-small" [formGroup]="manageBalanceGroupForm">
+                    <fieldset style="margin-top: 0px">
+                        <legend>Basic Information</legend>
+                        <div class="boxWhite">
+                            <div class="row">
+                                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                    <label>Operation Mode *</label>
+                                    <p-dropdown [options]="BalanceOpertation" optionValue="value" optionLabel="label"
+                                        [filter]="true" filterBy="label" placeholder="Select a Balance Opertation"
+                                        formControlName="operation" [disabled]="true" [ngClass]="{
+                      'is-invalid': submitted && manageBalanceGroupForm.controls.operation.errors
+                    }"></p-dropdown>
+                                    @if (submitted && manageBalanceGroupForm.controls.operation.errors) {
+                                    <div class="errorWrap text-danger">
+                                        @if (submitted && manageBalanceGroupForm.controls.operation.errors.required) {
+                                        <div class="error text-danger">
+                                            Please select Balance Opertation.
+                                        </div>
+                                        }
+                                    </div>
+                                    }
+                                    <br />
+                                </div>
+                                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                    @if (this.ifwithdrawalCommision) {
+                                    <div>
+                                        <label>Payment Mode *</label>
+                                        <div>
+                                            <p-dropdown [options]="paymentmode" optionValue="label" optionLabel="label"
+                                                [filter]="true" filterBy="label" placeholder="Select a Mode"
+                                                formControlName="mode" (onChange)="getOpetationMode($event)" [ngClass]="{
+                          'is-invalid': submitted && manageBalanceGroupForm.controls.mode.errors
+                        }"></p-dropdown>
+                                        </div>
+                                        @if (submitted && manageBalanceGroupForm.controls.mode.errors) {
+                                        <div class="errorWrap text-danger">
+                                            @if (submitted && manageBalanceGroupForm.controls.mode.errors.required) {
+                                            <div class="error text-danger">
+                                                Please select Balance Mode.
+                                            </div>
+                                            }
+                                        </div>
+                                        }
+                                        <br />
+                                    </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    @if (this.ifwithdrawalCommision) {
+                    <div>
+                        <fieldset>
+                            <legend>Withdrawal Amount</legend>
+                            <div class="boxWhite">
+                                <div class="row">
+                                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                        <label>Withdrawal Amount*</label>
+                                        <input id="commission" type="text" class="form-control"
+                                            placeholder="Enter Commission" formControlName="commission" readonly />
+                                        <br />
+                                    </div>
+                                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                        <label>Withdrawal Amount *</label>
+                                        <input (keyup)="onKeyWithdrawalAmount()" id="withdrawalAmount" type="text"
+                                            class="form-control" placeholder="Enter Withdrawal Amount "
+                                            formControlName="withdrawalAmount" [ngClass]="{
+                        'is-invalid':
+                          submitted && manageBalanceGroupForm.controls.withdrawalAmount.errors
+                      }" />
+                                        @if (submitted && manageBalanceGroupForm.controls.withdrawalAmount.errors) {
+                                        <div class="errorWrap text-danger">
+                                            @if (
+                                            submitted &&
+                                            manageBalanceGroupForm.controls.withdrawalAmount.errors.required
+                                            ) {
+                                            <div class="error text-danger">
+                                                Withdrawal Amount is required.
+                                            </div>
+                                            }
+                                        </div>
+                                        }
+                                        <br />
+                                    </div>
+                                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                        <label>Remaining Wallet Amount *</label>
+                                        <input id="ReamainingCommision" type="text" class="form-control"
+                                            placeholder="Enter Reamaining Commision "
+                                            formControlName="ReamainingCommision" [ngClass]="{
+                        'is-invalid':
+                          submitted && manageBalanceGroupForm.controls.ReamainingCommision.errors
+                      }" readonly />
+                                        @if (
+                                        submitted && manageBalanceGroupForm.controls.ReamainingCommision.errors
+                                        ) {
+                                        <div class="errorWrap text-danger">
+                                            @if (
+                                            submitted &&
+                                            manageBalanceGroupForm.controls.ReamainingCommision.errors.required
+                                            ) {
+                                            <div class="error text-danger">
+                                                Reamaining Commision Amount is required.
+                                            </div>
+                                            }
+                                        </div>
+                                        }
+                                        <br />
+                                    </div>
+                                </div>
+                                @if (ifWithdrawalCash) {
+                                <div class="row">
+                                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                        <div>
+                                            <label>Reference No *</label>
+                                            <input id="referenceNo" type="text" class="form-control"
+                                                placeholder="Enter Reference No" formControlName="referenceNo"
+                                                [ngClass]="{
+                          'is-invalid':
+                            submitted && manageBalanceGroupForm.controls.referenceNo.errors
+                        }" />
+                                            @if (submitted && manageBalanceGroupForm.controls.referenceNo.errors) {
+                                            <div class="errorWrap text-danger">
+                                                @if (
+                                                submitted && manageBalanceGroupForm.controls.referenceNo.errors.required
+                                                ) {
+                                                <div class="error text-danger">
+                                                    Reference No is required.
+                                                </div>
+                                                }
+                                            </div>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                        <label>remark *</label>
+                                        <textarea id="remarks" type="text" class="form-control"
+                                            placeholder="Enter Remarks" formControlName="remarks" [ngClass]="{
+                        'is-invalid': submitted && manageBalanceGroupForm.controls.remarks.errors
+                      }"></textarea>
+                                        @if (submitted && manageBalanceGroupForm.controls.remarks.errors) {
+                                        <div class="errorWrap text-danger">
+                                            @if (submitted && manageBalanceGroupForm.controls.remarks.errors.required) {
+                                            <div class="error text-danger">
+                                                remark is required.
+                                            </div>
+                                            }
+                                        </div>
+                                        }
+                                        <br />
+                                    </div>
+                                </div>
+                                }
+                                @if (ifWithdrawalOnlineMode) {
+                                <div class="row">
+
+                                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                        <div>
+                                            <label>Bank *</label>
+                                            <p-dropdown [options]="bankDataList" optionValue="bankname"
+                                                optionLabel="bankname" [filter]="true" filterBy="bankname"
+                                                placeholder="Select a Bank" formControlName="bank" [ngClass]="{
+                          'is-invalid': submitted && manageBalanceGroupForm.controls.bank.errors
+                        }">
+                                                <ng-template let-data pTemplate="item">
+                                                    <div class="item-drop1">
+                                                        <span class="item-value1">
+                                                            {{ data.bankname }} ( {{ data.accountnum }} )
+                                                        </span>
+                                                    </div>
+                                                </ng-template>
+                                            </p-dropdown>
+                                            @if (submitted && manageBalanceGroupForm.controls.bank.errors) {
+                                            <div class="errorWrap text-danger">
+                                                @if (submitted && manageBalanceGroupForm.controls.bank.errors.required)
+                                                {
+                                                <div class="error text-danger">
+                                                    Bank No is required.
+                                                </div>
+                                                }
+                                            </div>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                        <label>Branch *</label>
+                                        <input id="branch" type="text" class="form-control"
+                                            placeholder="Enter Branch Name" formControlName="branch" [ngClass]="{
+                        'is-invalid': submitted && manageBalanceGroupForm.controls.branch.errors
+                      }" />
+                                        @if (submitted && manageBalanceGroupForm.controls.branch.errors) {
+                                        <div class="errorWrap text-danger">
+                                            @if (submitted && manageBalanceGroupForm.controls.branch.errors.required) {
+                                            <div class="error text-danger">
+                                                Branch Name is required.
+                                            </div>
+                                            }
+                                        </div>
+                                        }
+                                        <br />
+                                    </div>
+                                </div>
+                                }
+                                @if (ifWithdrawalOnlineMode) {
+                                <div class="row">
+                                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                        <div>
+                                            <label>Payment Reference No *</label>
+                                            <input id="referenceNo" type="text" class="form-control"
+                                                placeholder="Enter Reference No" formControlName="referenceNo"
+                                                [ngClass]="{
+                          'is-invalid':
+                            submitted && manageBalanceGroupForm.controls.referenceNo.errors
+                        }" />
+                                            @if (submitted && manageBalanceGroupForm.controls.referenceNo.errors) {
+                                            <div class="errorWrap text-danger">
+                                                @if (
+                                                submitted && manageBalanceGroupForm.controls.referenceNo.errors.required
+                                                ) {
+                                                <div class="error text-danger">
+                                                    Reference No is required.
+                                                </div>
+                                                }
+                                            </div>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                        <label>remark</label>
+                                        <textarea id="remark" type="text" class="form-control"
+                                            placeholder="Enter Remark" formControlName="remarks" [ngClass]="{
+                        'is-invalid': submitted && manageBalanceGroupForm.controls.remarks.errors
+                      }"></textarea>
+                                        @if (submitted && manageBalanceGroupForm.controls.remarks.errors) {
+                                        <div class="errorWrap text-danger">
+                                            @if (submitted && manageBalanceGroupForm.controls.remarks.errors.required) {
+                                            <div class="error text-danger">
+                                                remark is required.
+                                            </div>
+                                            }
+                                        </div>
+                                        }
+                                        <br />
+                                    </div>
+                                </div>
+                                }
+                            </div>
+                        </fieldset>
+                    </div>
+                    }
+                </form>
+                <fieldset>
+                    <legend>Remaining Payment Details</legend>
+                    <div class="boxWhite">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="row">
+                                    <div class="col-lg-12 col-md-12">
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>
+                                                        <input (change)="checkUncheckAll()"
+                                                            [(ngModel)]="this.masterSelected" name="master-checkbox"
+                                                            type="checkbox" />
+                                                    </th>
+                                                    <th>Reference No.</th>
+                                                    <th>Payment Mode</th>
+                                                    <th>Remaining Amount</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @for (
+                                                data of paymentListData
+                                                | paginate
+                                                : {
+                                                id: 'partnerPaymentpageData',
+                                                itemsPerPage: paymentListdataitemsPerPage,
+                                                currentPage: currentPagePaymentListdata,
+                                                totalItems: paymentListdatatotalRecords
+                                                }; track
+                                                data; let i = $index) {
+                                                <tr>
+                                                    <td>
+                                                        <input (change)="isAllSelected()" [(ngModel)]="data.isSelected"
+                                                            name="master-checkbox" type="checkbox" />
+                                                    </td>
+                                                    <td>{{ data.creditdocumentno }}</td>
+                                                    <td>{{ data.paymode }}</td>
+                                                    <td>{{ data.remainingAmount }}</td>
+                                                </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                        <div style="display: flex">
+                                            <pagination-controls (pageChange)="pageChangedForPayments($event)"
+                                                [directionLinks]="true" id="partnerPaymentpageData" [maxSize]="10"
+                                                nextLabel="" previousLabel=""></pagination-controls>
+                                            <div id="itemPerPageDropdown">
+                                                <p-dropdown (onChange)="totalItemPerPageForPayments($event)"
+                                                    [options]="pageLimitOptions" optionLabel="value"
+                                                    optionValue="value"></p-dropdown>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="submit" class="btn btn-primary" (click)="submitBalance()"
+            [disabled]="!manageBalanceGroupForm.valid" id="submit">
+            <i class="fa fa-check-circle"></i>
+            Withdrawal Amount
+        </button>
+        <button type="button" class="btn btn-default" data-dismiss="modal" (click)="closeSelectStafff()">
+            Close
+        </button>
+    </div>
+</p-dialog> -->

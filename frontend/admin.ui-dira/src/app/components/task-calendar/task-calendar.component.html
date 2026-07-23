@@ -1,0 +1,674 @@
+<mat-card class="cardWithShadow">
+    <mat-card-content>
+        <div class="d-flex align-items-center">
+            <mat-card-title class="m-b-10 f-s-24">Technician Diary Management</mat-card-title>
+            <div class="m-l-auto">
+                @if (createAccess) {
+                <button mat-flat-button color="primary" (click)="openEventDialog()">
+                    New Event
+                </button>
+                }
+            </div>
+        </div>
+        <form [formGroup]="searchFormGroup">
+            <div class="nav-dropdown-search-section m-t-20">
+                <!-- Team Dropdown -->
+                <div class="mb-4">
+                    <mat-form-field appearance="outline" class="nav-dropdown-style">
+                        <mat-select formControlName="teamId" placeholder="Seleect a Team"
+                            (selectionChange)="onSelectTeam($event.value)">
+                            <mat-option *ngFor="let team of teamListFromStaffData" [value]="team.id">
+                                {{ team.name }}
+                            </mat-option>
+                            <mat-option *ngIf="!teamListFromStaffData || teamListFromStaffData.length === 0">
+                                No data
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                <!-- Staff Dropdown -->
+                <div class="mb-4">
+                    <mat-form-field appearance="outline" class="nav-dropdown-style">
+                        <mat-select placeholder="Select a Staff" formControlName="currentAssigneeId">
+                            <mat-option *ngFor="let staff of staffDataList" [value]="staff.id">
+                                {{ staff.displayName }}
+                            </mat-option>
+                            <mat-option *ngIf="!staffDataList || staffDataList.length === 0">
+                                No data
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
+
+                <!-- Status Dropdown -->
+                <div class="mb-4">
+                    <mat-form-field appearance="outline" class="nav-dropdown-style">
+                        <mat-select placeholder="Select a Status" formControlName="caseStatus">
+                            <mat-option *ngFor="let item of createStatusList" [value]="item.value">
+                                {{ item.text }}
+                            </mat-option>
+                            <mat-option *ngIf="!createStatusList || createStatusList.length === 0">
+                                No data
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+
+                <!-- Search & Clear Buttons -->
+                <div class="nav-search-clear-buttons" style="margin-bottom: 19px;">
+                    <button mat-button mat-flat-button color="primary" [disabled]="searchFormGroup?.invalid"
+                        (click)="onSearch(searchFormGroup?.value)" class="button-normal mr-10">
+                        Search
+                    </button>
+
+                    <button mat-stroked-button color="warn" (click)="onClear()">
+                        Clear
+                    </button>
+                </div>
+
+            </div>
+        </form>
+
+    </mat-card-content>
+</mat-card>
+
+<mat-card class="cardWithShadow overflow-hidden">
+    <mat-toolbar class="bg-primary text-white no-shadow">
+        <mat-toolbar-row>
+            <div class="d-flex align-items-center w-100">
+                <h1 *ngIf="loginUserName" class="text-white f-w-600 m-r-10">
+                    Hi {{ loginUserName }}.
+                </h1>
+                <span>{{
+                    viewDate() | calendarDate : view() + "ViewTitle" : "en"
+                    }}</span>
+                <div class="m-l-auto d-flex align-items-center">
+                    <button mat-button class="text-white" (click)="setView('month')"
+                        [class.active]="view() === 'month'">
+                        Month
+                    </button>
+                    <button mat-button class="text-white" (click)="setView('week')" [class.active]="view() === 'week'">
+                        Week
+                    </button>
+                    <button mat-button class="text-white" (click)="setView('day')" [class.active]="view() === 'day'">
+                        Day
+                    </button>
+                    <button mat-icon-button class="text-white" (click)="setView('month')"
+                        [class.active]="view() === 'month'">
+                        <mat-icon>view_module</mat-icon>
+                    </button>
+                    <button mat-icon-button class="text-white" (click)="setView('week')"
+                        [class.active]="view() === 'week'">
+                        <mat-icon>view_week</mat-icon>
+                    </button>
+                    <button mat-icon-button class="text-white" (click)="setView('day')"
+                        [class.active]="view() === 'day'">
+                        <mat-icon>view_day</mat-icon>
+                    </button>
+
+                    <button mat-icon-button class="text-white" mwlCalendarPreviousView (click)="goToPreviousMonth()">
+                        <mat-icon>chevron_left</mat-icon>
+                    </button>
+                    <button mat-icon-button mwlCalendarToday class="text-white" (click)="goToToday()">
+                        <mat-icon>today</mat-icon>
+                    </button>
+                    <button mat-icon-button mwlCalendarNextView class="text-white" (click)="goToNextMonth()">
+                        <mat-icon>chevron_right</mat-icon>
+                    </button>
+                </div>
+            </div>
+        </mat-toolbar-row>
+    </mat-toolbar>
+    <mat-card-content>
+        <div [ngSwitch]="view()">
+            <!-- month view -->
+            <mwl-calendar-month-view *ngSwitchCase="'month'" [viewDate]="viewDate()" [events]="events()"
+                [refresh]="refresh" [activeDayIsOpen]="activeDayIsOpen()" (dayClicked)="dayClicked($event.day)"
+                (eventClicked)="handleEvent('Clicked', $event.event)" (eventTimesChanged)="eventTimesChanged($event)">
+            </mwl-calendar-month-view>
+
+            <!-- week view -->
+            <mwl-calendar-week-view *ngSwitchCase="'week'" [viewDate]="viewDate()" [events]="events()"
+                [refresh]="refresh" (eventClicked)="handleEvent('Clicked', $event.event)"
+                (eventTimesChanged)="eventTimesChanged($event)">
+            </mwl-calendar-week-view>
+
+            <!-- day view -->
+            <mwl-calendar-day-view *ngSwitchCase="'day'" [viewDate]="viewDate()" [events]="events()" [refresh]="refresh"
+                (eventClicked)="handleEvent('Clicked', $event.event)" (eventTimesChanged)="eventTimesChanged($event)">
+            </mwl-calendar-day-view>
+        </div>
+    </mat-card-content>
+</mat-card>
+
+
+<ng-template #createNewEventDialog>
+    <div class="dialog-container">
+        <div class="dialog-header">
+            Create Event
+            <span>
+                <a mat-icon-button (click)="cancelEvent()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+            <div class="col-md-12">
+                <form class="card-form mb-3" [formGroup]="evntFormGroup">
+                    <!-- event title -->
+                    <div class="row g-3 p-5">
+                        <div class="col-md-12 mb-4">
+                            <label for="countryname" class="inputLabel">Event Title*</label>
+                            <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                <input id="countryname" type="text" class="input-p-5" matInput
+                                    placeholder="Enter event title" formControlName="caseTitle">
+                            </mat-form-field>
+                            @if (submitted && evntFormGroup.controls.caseTitle.errors) {
+                            <div class="errorWrap text-danger">
+                                @if (submitted && evntFormGroup.controls.caseTitle.errors.required) {
+                                <div class="error text-danger">
+                                    Title is required.
+                                </div>
+                                }
+                            </div>
+                            }
+                        </div>
+                        <!-- team dropdown -->
+                        <div class="col-md-6 mb-4">
+                            <label for="countryname" class="inputLabel">Team*</label>
+                            <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                <mat-select class="input-p-5" formControlName="teamId" placeholder="Select a Team"
+                                    (selectionChange)="onSelectTeam($event)">
+                                    <mat-option *ngFor="let unit of teamListData" [value]="unit.id">
+                                        {{ unit.name }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            @if (submitted && evntFormGroup.controls.teamId.errors) {
+                            <div class="errorWrap text-danger">
+                                @if (submitted && evntFormGroup.controls.teamId.errors.required) {
+                                <div class="error text-danger">
+                                    Team is required.
+                                </div>
+                                }
+                            </div>
+                            }
+                        </div>
+                        <!-- staff dropdown  -->
+                        <div class="col-md-6 mb-4">
+                            <label for="countryname" class="inputLabel">Staff*</label>
+                            <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                <mat-select class="input-p-5" formControlName="currentAssigneeId"
+                                    placeholder="Select a Staff" (selectionChange)="onSelectStaff($event)">
+                                    <mat-option *ngFor="let unit of staffDataList" [value]="unit.id">
+                                        {{ unit.firstname }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            @if (submitted && evntFormGroup.controls.currentAssigneeId.errors) {
+                            <div class="errorWrap text-danger">
+                                @if (submitted && evntFormGroup.controls.currentAssigneeId.errors.required) {
+                                <div class="error text-danger">
+                                    Staff is required.
+                                </div>
+                                }
+                            </div>
+                            }
+                        </div>
+                        <!-- type dropdown  -->
+                        <div class="col-md-4 mb-4">
+                            <label for="countryname" class="inputLabel">Type*</label>
+                            <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                <input id="countryname" type="text" class="input-p-5" matInput
+                                    formControlName="caseType" [disabled]="true">
+                            </mat-form-field>
+                            @if (submitted && evntFormGroup.controls.caseType.errors) {
+                            <div class="errorWrap text-danger">
+                                @if (submitted && evntFormGroup.controls.caseType.errors.required) {
+                                <div class="error text-danger">
+                                    Type is required.
+                                </div>
+                                }
+                            </div>
+                            }
+                        </div>
+
+                        <!-- status dropdown  -->
+                        <div class="col-md-4 mb-4">
+                            <label for="countryname" class="inputLabel">Status*</label>
+                            <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                <mat-select class="input-p-5" formControlName="caseStatus" placeholder="Select a Status"
+                                    (selectionChange)="getResolutionReasons($event.value)">
+                                    <mat-option *ngFor="let unit of createStatusList" [value]="unit.value">
+                                        {{ unit.text }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            @if (submitted && evntFormGroup.controls.caseStatus.errors) {
+                            <div class="errorWrap text-danger">
+                                @if (submitted && evntFormGroup.controls.caseStatus.errors.required) {
+                                <div class="error text-danger">
+                                    Status is required.
+                                </div>
+                                }
+                            </div>
+                            }
+                        </div>
+
+                        <!-- Priority dropdown -->
+                        <div class="col-md-4 mb-4">
+                            <label for="countryname" class="inputLabel">Priority*</label>
+                            <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                <mat-select class="input-p-5" formControlName="priority" placeholder="Select a Priority"
+                                    (selectionChange)="getResolutionReasons($event.value)">
+                                    <mat-option *ngFor="let unit of priorityTicketData" [value]="unit.value">
+                                        {{ unit.text }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            @if (submitted && evntFormGroup.controls.priority.errors) {
+                            <div class="errorWrap text-danger">
+                                @if (submitted && evntFormGroup.controls.priority.errors.required) {
+                                <div class="error text-danger">
+                                    Priority is required.
+                                </div>
+                                }
+                            </div>
+                            }
+                        </div>
+
+                        <!-- customer dropdown -->
+                        <div class="col-md-12 mb-4">
+                            <label for="countryname" class="inputLabel">Customer*</label>
+                            <div class="d-flex align-items-center">
+                                <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                    <mat-select class="input-p-5" formControlName="customersId"
+                                        placeholder="Select a Customer" [disabled]="true"
+                                        (selectionChange)="getResolutionReasons($event.value)">
+                                        <mat-option *ngFor="let data of parentCustList" [value]="data.id">
+                                            <div class="item-drop1">
+                                                <span class="item-value1">
+                                                    {{ data.title }} {{ data.name }}
+                                                </span>
+                                            </div>
+
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                                <button style="margin-bottom: 21px;margin-left: 15px;" mat-flat-button color="primary"
+                                    (click)="modalOpenParentCustomer()">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                                <button style="margin-bottom: 21px;margin-left: 15px;" mat-flat-button color="primary"
+                                    (click)="showSavedCustomerDetails()"
+                                    [disabled]="!evntFormGroup.controls.customersId.value">
+                                    <i class="fa fa-eye"></i>
+                                </button>
+                            </div>
+                            @if (submitted && evntFormGroup.controls.customersId.errors) {
+                            <div class="errorWrap text-danger">
+                                @if (submitted && evntFormGroup.controls.customersId.errors.required) {
+                                <div class="error text-danger">
+                                    Customer is required.
+                                </div>
+                                }
+                            </div>
+                            }
+                        </div>
+
+                        <!-- Event Duration -->
+                        <div class="col-md-12 mb-4">
+                            <label for="countryname" class="inputLabel">Event Duration*</label>
+                            <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                <mat-select class="input-p-5" formControlName="eventDuration"
+                                    placeholder="Select a Duration" (selectionChange)="onDurationChange($event.value)">
+                                    <mat-option *ngFor="let unit of eventDurationOptions" [value]="unit.value">
+                                        {{ unit.label }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            @if (submitted && evntFormGroup.controls.eventDuration.errors) {
+                            <div class="errorWrap text-danger">
+                                @if (submitted && evntFormGroup.controls.eventDuration.errors.required) {
+                                <div class="error text-danger">
+                                    Event Duration is required.
+                                </div>
+                                }
+                            </div>
+                            }
+                        </div>
+
+                        <!-- show event date -->
+                        @if (showEventDate) {
+                        <div class="col-md-6 mb-3">
+                            <label class="inputLabel">Event Date *</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input matInput [matDatepicker]="assignDatePicker" formControlName="eventDate"
+                                    placeholder="Select Event date">
+                                <mat-datepicker-toggle matSuffix [for]="assignDatePicker"></mat-datepicker-toggle>
+                                <mat-datepicker #assignDatePicker></mat-datepicker>
+                            </mat-form-field>
+                            @if (submitted && evntFormGroup.controls.eventDate.errors) {
+                            <div class="errorWrap text-danger">
+                                @if (submitted && evntFormGroup.controls.eventDate.errors.required) {
+                                <div class="error text-danger">
+                                    Event Date is required.
+                                </div>
+                                }
+                            </div>
+                            }
+                        </div>
+                        }
+
+                        <!-- Start Date -->
+                        @if (showStartDate) {
+                        <div class="col-md-6 mb-3">
+                            <label class="inputLabel">Start Date*</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input matInput [matDatepicker]="assignDatePicker" formControlName="startDate"
+                                    placeholder="Select Start Date & Time">
+                                <mat-datepicker-toggle matSuffix [for]="assignDatePicker"></mat-datepicker-toggle>
+                                <mat-datepicker #assignDatePicker></mat-datepicker>
+                            </mat-form-field>
+                            @if (submitted && evntFormGroup.controls.startDate.errors) {
+                            <div class="errorWrap text-danger">
+                                @if (submitted && evntFormGroup.controls.startDate.errors.required) {
+                                <div class="error text-danger">
+                                    Start Date is required.
+                                </div>
+                                }
+                            </div>
+                            }
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="inputLabel">Start Time*</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input matInput [matTimepicker]="timepicker" formControlName="startTime"
+                                    placeholder="Enter Time" readonly>
+                                <mat-timepicker #timepicker></mat-timepicker>
+                                <mat-timepicker-toggle [for]="timepicker" matSuffix></mat-timepicker-toggle>
+                            </mat-form-field>
+                        </div>
+                        }
+
+                        <!-- End Date -->
+                        @if (showStartDate) {
+                        <div class="col-md-6 mb-3">
+                            <label class="inputLabel">End Date & Time*</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input matInput [matDatepicker]="assignDatePicker" formControlName="endDate"
+                                    placeholder="Select End Date & Time">
+                                <mat-datepicker-toggle matSuffix [for]="assignDatePicker"></mat-datepicker-toggle>
+                                <mat-datepicker #assignDatePicker></mat-datepicker>
+                            </mat-form-field>
+
+                            @if (submitted && evntFormGroup.controls.endDate.errors) {
+                            <div class="errorWrap text-danger">
+                                @if (submitted && evntFormGroup.controls.endDate.errors.required) {
+                                <div class="error text-danger">
+                                    End Date is required.
+                                </div>
+                                }
+                            </div>
+                            }
+                            @if (evntFormGroup.get('endDate')?.hasError('invalidDate')) {
+                            <div class="error text-danger">
+                                End date must be at least 1 hour after the start date.
+                            </div>
+                            }
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="inputLabel">End Time*</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input matInput [matTimepicker]="timepicker" formControlName="endTime"
+                                    placeholder="Enter Time" readonly>
+                                <mat-timepicker #timepicker></mat-timepicker>
+                                <mat-timepicker-toggle [for]="timepicker" matSuffix></mat-timepicker-toggle>
+                            </mat-form-field>
+                        </div>
+                        }
+
+                        <!-- Remark -->
+                        <div class="col-md-12 mb-4">
+                            <label for="countryname" class="inputLabel">Remark*</label>
+                            <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                <textarea id="countryname" type="text" placeholder="Enter remark" class="input-p-5"
+                                    matInput formControlName="firstRemark" [disabled]="true"></textarea>
+                            </mat-form-field>
+                            @if (submitted && evntFormGroup.controls.firstRemark.errors) {
+                            <div class="errorWrap text-danger">
+                                @if (submitted && evntFormGroup.controls.firstRemark.errors.required) {
+                                <div class="error text-danger">
+                                    Remark is required.
+                                </div>
+                                }
+                            </div>
+                            }
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+            <div class="button-normal m-r-10">
+                <button mat-button mat-flat-button color="primary" (click)="checkAvailablity()" class="button-normal"
+                    type="submit">
+                    Save
+                </button>
+            </div>
+            <div class="button-normal">
+                <button mat-stroked-button matButton="outlined" type="button" color="primary"
+                    class="button-normal w-100" (click)="cancelEvent()">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #selectCustomerDialog>
+    <div class="dialog-container">
+        <div class="dialog-header">
+            Select Customer
+            <span>
+                <a mat-icon-button (click)="modalCloseParentCustomer()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <div class="row header-row" style="height:90px">
+            <mat-card-content class="mat-card-content-border">
+                <label class="inputLabel mb-2 d-block">Search Customer</label>
+                <div class="d-flex align-items-center gap-3 flex-wrap">
+                    <!-- Search Option -->
+                    <mat-form-field appearance="outline" class="flex-item m-r-15">
+                        <mat-select [(ngModel)]="searchParentCustOption" placeholder="Select a Search Option"
+                            (selectionChange)="selParentSearchOption($event)">
+                            <mat-option *ngFor="let unit of searchOptionSelect1" [value]="unit.value">
+                                {{ unit.label }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <!-- Text Input -->
+                    @if (
+                    parentFieldEnable &&
+                    searchParentCustOption != 'status' &&
+                    searchParentCustOption !== 'serviceareaName' &&
+                    searchParentCustOption !== 'plan'
+                    ) {
+                    <mat-form-field appearance="outline" class="flex-item m-l-15">
+                        <input matInput [(ngModel)]="searchParentCustValue" placeholder="Enter Search Detail"
+                            (keydown.enter)="searchParentCustomer()">
+                    </mat-form-field>
+                    }
+
+                    <!-- Status Dropdown -->
+                    @if (searchParentCustOption === 'status') {
+                    <mat-form-field appearance="outline" class="flex-item m-r-15">
+                        <mat-select [(ngModel)]="searchParentCustValue" placeholder="Select Status">
+                            <mat-option *ngFor="let unit of commondropdownService.CustomerStatusValue"
+                                [value]="unit.value">
+                                {{ unit.text }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    }
+
+                    <!-- Service Area Dropdown -->
+                    @if (searchParentCustOption === 'serviceareaName') {
+                    <mat-form-field appearance="outline" class="flex-item m-r-15">
+                        <mat-select [(ngModel)]="searchParentCustValue" placeholder="Select Servicearea">
+                            <mat-option *ngFor="let unit of commondropdownService.serviceAreaList" [value]="unit.id">
+                                {{ unit.name }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    }
+
+                    <!-- Plan Dropdown -->
+                    @if (searchParentCustOption === 'plan') {
+                    <mat-form-field appearance="outline" class="flex-item m-r-15">
+                        <mat-select [(ngModel)]="searchParentCustValue" placeholder="Select Plan">
+                            <mat-option *ngFor="let unit of commondropdownService.postpaidplanData" [value]="unit.id">
+                                {{ unit.name }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                    }
+
+                    <!-- Buttons -->
+                    @if (parentFieldEnable) {
+                    <button mat-flat-button color="primary" class="m-l-10" style="margin-bottom: 18px;"
+                        (click)="searchParentCustomer()">
+                        Search
+                    </button>
+
+                    <button mat-stroked-button color="primary" class="m-l-10" (click)="clearSearchParentCustomer()"
+                        style="margin-bottom: 18px;">
+                        Clear
+                    </button>
+                    }
+
+                </div>
+
+            </mat-card-content>
+        </div>
+        <div mat-dialog-content>
+            <div class="table-title">Select Customer</div>
+            <table mat-table [dataSource]="customerList" class="mat-elevation-z8 w-100">
+                <!-- Radio Button Column -->
+                <ng-container matColumnDef="select">
+                    <th mat-header-cell *matHeaderCellDef></th>
+                    <td mat-cell *matCellDef="let prepaidParentCustomer">
+                        <mat-radio-button [disabled]="prepaidParentCustomer.status === 'Terminate'"
+                            [value]="prepaidParentCustomer" (change)="checkSelectCust($event)">
+                        </mat-radio-button>
+                    </td>
+                </ng-container>
+                <!-- Name Column -->
+                <ng-container matColumnDef="name">
+                    <th mat-header-cell *matHeaderCellDef>Name</th>
+                    <td mat-cell *matCellDef="let prepaidParentCustomer">
+                        {{ prepaidParentCustomer.name }}
+                    </td>
+                </ng-container>
+
+                <!-- User Name Column -->
+                <ng-container matColumnDef="username">
+                    <th mat-header-cell *matHeaderCellDef>User Name</th>
+                    <td mat-cell *matCellDef="let prepaidParentCustomer">
+                        {{ prepaidParentCustomer.username }}
+                    </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="['select', 'name', 'username']"></tr>
+                <tr mat-row *matRowDef="let row; columns: ['select', 'name', 'username']"></tr>
+            </table>
+            <mat-paginator [length]="parentCustomerListdatatotalRecords" [pageSize]="parentCustomerListdataitemsPerPage"
+                [pageSizeOptions]="[5,10,20,50,100]" (page)="paginate($event)" aria-label="Select page"
+                showFirstLastButtons>
+            </mat-paginator>
+        </div>
+
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+            <div class="button-normal m-r-10">
+                <button mat-button mat-flat-button color="primary" (click)="saveSelCustomer(true)" class="button-normal"
+                    type="submit">
+                    Save
+                </button>
+            </div>
+            <div class="button-normal">
+                <button mat-stroked-button matButton="outlined" type="button" color="primary"
+                    class="button-normal w-100" (click)="modalCloseParentCustomer()">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #customerDetailDialog>
+    <div class="container-fluid p-0">
+        <!-- HEADER -->
+        <div class="dialog-header dialog-title">
+            <a mat-icon-button (click)="closeCustomerDetailsModel()">
+                <i class="pi pi-arrow-left f-s-15"></i>
+            </a>
+            <span style="margin-left: -65%;"> Customer Details </span>
+            <span>
+                <a mat-icon-button (click)="closeCustomerDetailsModel()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <!-- CONTENT -->
+        <mat-dialog-content>
+            <div class="row p-15 m-t-10">
+
+                <div class="col-md-12 field-row detail-row">
+                    <span class="field-label f-s-15 f-w-700 label"> User Name</span>
+                    <span class="field-label f-s-15 f-w-700 colon" style="margin-left: 29px;">:</span>
+                    <span class="field-value value m-l-10">{{ savedCustomerDetails.username }}</span>
+                </div>
+
+                <div class="col-md-12 field-row detail-row">
+                    <span class="field-label f-s-15 f-w-700 label"> Name</span>
+                    <span class="field-label f-s-15 f-w-700 colon" style="margin-left: 29px;">:</span>
+                    <span class="field-value value m-l-10">{{ savedCustomerDetails.name }}</span>
+                </div>
+
+                <div class="col-md-12 field-row detail-row">
+                    <span class="field-label f-s-15 f-w-700 label"> Mobile</span>
+                    <span class="field-label f-s-15 f-w-700 colon" style="margin-left: 29px;">:</span>
+                    <span class="field-value value m-l-10">{{ savedCustomerDetails.mobile }}</span>
+                </div>
+
+                <div class="col-md-12 field-row detail-row">
+                    <span class="field-label f-s-15 f-w-700 label"> Address Type</span>
+                    <span class="field-label f-s-15 f-w-700 colon" style="margin-left: 29px;">:</span>
+                    <span class="field-value value m-l-10">{{ savedCustomerDetails.selectedCustAddressType }}</span>
+                </div>
+
+                <div class="col-md-12 field-row detail-row">
+                    <span class="field-label f-s-15 f-w-700 label"> Plan Name</span>
+                    <span class="field-label f-s-15 f-w-700 colon" style="margin-left: 29px;">:</span>
+                    <span class="field-value value m-l-10">{{ savedCustomerDetails.planName }}</span>
+                </div>
+
+                <div class="col-md-12 field-row detail-row">
+                    <span class="field-label f-s-15 f-w-700 label"> Customer Address</span>
+                    <span class="field-label f-s-15 f-w-700 colon">:</span>
+                    <span class="field-value value m-l-10">{{ savedCustomerDetails.customerAddress }}</span>
+                </div>
+            </div>
+        </mat-dialog-content>
+        <mat-dialog-actions align="end">
+            <button mat-stroked-button color="warn" (click)="closeCustomerDetailsModel()">Close</button>
+        </mat-dialog-actions>
+    </div>
+</ng-template>

@@ -1,0 +1,1847 @@
+<div class="childComponent">
+
+  <div class="row">
+    <div class="col-md-12">
+      <div class="panel top">
+        <div class="panel-heading">
+          <h3 class="panel-title">My Account</h3>
+        </div>
+
+        <div id="CutomerManagement" class="panel-collapse collapse in">
+          <div class="panel-body no-padding panel-udata">
+            <div class="col-md-4 pcol menu-bottom-border">
+              <div
+                class="dbox"
+                [ngClass]="{
+                  activeSubMenu: isCustomerDetailOpen
+                }"
+              >
+                <a class="detailOnAnchorClick" (click)="getCustomerData()">
+                  <img src="../../../assets/img/i01.png" style="width: 32px" />
+                  <h5>Customer Details</h5>
+                </a>
+              </div>
+            </div>
+            <div
+              *ngIf="
+                loginService.hasPermission(
+                  customerLedgerDetailData.custtype == 'Prepaid'
+                    ? PRE_CUST_CONSTANTS.PRE_CUST_CHANGE_PASSWORD
+                    : POST_CUST_CONSTANTS.POST_CUST_CHANGE_PASSWORD
+                )
+              "
+              class="col-md-4 pcol menu-bottom-border"
+            >
+              <div class="dbox">
+                <a
+                  class="detailOnAnchorClick"
+                  data-target="#changePasswordModal"
+                  data-toggle="modal"
+                  data-backdrop="static"
+                  data-keyboard="false"
+                >
+                  <img src="../../../assets/img/i01.png" style="width: 32px" />
+                  <h5>Change Password</h5>
+                </a>
+              </div>
+            </div>
+            <div
+              *ngIf="
+                loginService.hasPermission(
+                  customerLedgerDetailData.custtype == 'Prepaid'
+                    ? PRE_CUST_CONSTANTS.PRE_CUST_LEDGER
+                    : POST_CUST_CONSTANTS.POST_CUST_LEDGER
+                )
+              "
+              class="col-md-4 pcol menu-bottom-border"
+            >
+              <div
+                class="dbox"
+                [ngClass]="customerLedgerDetailData.status == 'Active' ? '' : 'disabledCustSubmenu'"
+              >
+                <a
+                  class="detailOnAnchorClick"
+                  href="javascript:void(0)"
+                  (click)="
+                    customerLedgerDetailData.status == 'Active'
+                      ? getCustomersLedger(this.customerLedgerDetailData.id, '')
+                      : $event.stopPropagation()
+                  "
+                >
+                  <img src="../../../assets/img/i01.png" style="width: 32px" />
+                  <h5>Ledger</h5>
+                </a>
+              </div>
+            </div>
+            <div
+              *ngIf="
+                loginService.hasPermission(
+                  customerLedgerDetailData.custtype == 'Prepaid'
+                    ? PRE_CUST_CONSTANTS.PRE_CUST_PAYMENT
+                    : POST_CUST_CONSTANTS.POST_CUST_PAYMENT
+                )
+              "
+              class="col-md-4 pcol menu-bottom-border"
+            >
+              <div class="dbox" [ngClass]="{ activeSubMenu: isPaymentOpen }">
+                <a
+                  class="detailOnAnchorClick"
+                  (click)="
+                    customerLedgerDetailData.parentCustomerId == null ||
+                    customerLedgerDetailData.invoiceType == 'Independent'
+                      ? getCustPayment(this.customerLedgerDetailData.id)
+                      : $event.stopPropagation()
+                  "
+                >
+                  <img src="../../../assets/img/i01.png" style="width: 32px" />
+                  <h5>Payment</h5>
+                </a>
+              </div>
+            </div>
+            <div
+              *ngIf="
+                loginService.hasPermission(
+                  customerLedgerDetailData.custtype == 'Prepaid'
+                    ? PRE_CUST_CONSTANTS.PRE_CUST_INVOICES
+                    : POST_CUST_CONSTANTS.POST_CUST_INVOICES
+                )
+              "
+              class="col-md-4 pcol menu-bottom-border"
+            >
+              <div class="dbox" [ngClass]="{ activeSubMenu: isInvoiceOpen }">
+                <a
+                  class="detailOnAnchorClick"
+                  (click)="getCustInvoice(this.customerLedgerDetailData.id)"
+                >
+                  <img src="../../../assets/img/i01.png" style="width: 32px" />
+                  <h5>Invoice</h5>
+                </a>
+              </div>
+            </div>
+            <div
+              *ngIf="
+                loginService.hasPermission(
+                  customerLedgerDetailData.custtype == 'Prepaid'
+                    ? PRE_CUST_CONSTANTS.PRE_CUST_CHANGE_PLAN
+                    : POST_CUST_CONSTANTS.POST_CUST_CHANGE_PLAN
+                )
+              "
+              class="col-md-4 pcol menu-bottom-border"
+              [ngClass]="customerLedgerDetailData.status == 'Active' ? '' : 'disabledCustSubmenu'"
+            >
+              <div class="dbox" [ngClass]="{ activeSubMenu: isRenewPlanOpen }">
+                <a
+                  class="detailOnAnchorClick"
+                  (click)="
+                    customerLedgerDetailData.status == 'Active'
+                      ? renewPlan(this.customerLedgerDetailData)
+                      : $event.stopPropagation()
+                  "
+                >
+                  <img src="../../../assets/img/i01.png" style="width: 32px" />
+                  <h5>Buy Plan / Use Voucher</h5>
+                </a>
+              </div>
+            </div>
+            <div
+              *ngIf="
+                loginService.hasPermission(
+                  customerLedgerDetailData.custtype == 'Prepaid'
+                    ? PRE_CUST_CONSTANTS.PRE_CUST_WALLET
+                    : POST_CUST_CONSTANTS.POST_CUST_WALLET
+                )
+              "
+              class="col-md-4 pcol menu-bottom-border"
+            >
+              <div
+                [ngClass]="customerLedgerDetailData.status == 'Active' ? '' : 'disabledCustSubmenu'"
+              >
+                <div class="dbox" [ngClass]="{ activeSubMenu: ifWalletMenu }">
+                  <a
+                    class="detailOnAnchorClick"
+                    (click)="
+                      customerLedgerDetailData.status == 'Active'
+                        ? addWalletIncustomer(this.customerLedgerDetailData.id)
+                        : $event.stopPropagation()
+                    "
+                  >
+                    <img src="../../../assets/img/i01.png" style="width: 32px" />
+                    <h5>Wallet</h5>
+                  </a>
+                </div>
+              </div>
+            </div>
+            <div
+              *ngIf="
+                loginService.hasPermission(
+                  customerLedgerDetailData.custtype == 'Prepaid'
+                    ? PRE_CUST_CONSTANTS.PRE_CUST_INVENTORY
+                    : POST_CUST_CONSTANTS.POST_CUST_INVENTORY
+                ) && statusCheckService.isActiveInventoryService
+              "
+              class="col-md-4 pcol menu-bottom-border"
+            >
+              <div class="dbox" [ngClass]="{ activeSubMenu: isInventoryOpen }">
+                <a
+                  class="detailOnAnchorClick"
+                  (click)="getInventoryDetails(this.customerLedgerDetailData.id)"
+                >
+                  <img src="../../../assets/img/i01.png" style="width: 32px" />
+                  <h5>Inventory</h5>
+                </a>
+              </div>
+            </div>
+            <div
+              *ngIf="loginService.hasPermission(PRE_CUST_CONSTANTS.PRE_CUST_RATING)"
+              class="col-md-4 pcol menu-bottom-border"
+            >
+              <div class="dbox" [ngClass]="{ activeSubMenu: isRatingMenu }">
+                <a
+                  class="detailOnAnchorClick"
+                  (click)="getRatingDetails(this.customerLedgerDetailData.id)"
+                >
+                  <img src="../../../assets/img/i01.png" style="width: 32px" />
+                  <h5>Rating</h5>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row" *ngIf="isCustomerDetailOpen">
+    <div class="col-md-12 col-sm-12">
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">
+            {{ customerLedgerDetailData.title }} {{ customerLedgerDetailData.firstname + " " +
+            customerLedgerDetailData.lastname }} Details
+          </h3>
+          <div class="right">
+            <button
+              type="button"
+              class="btn-toggle-collapse"
+              data-toggle="collapse"
+              data-target="#CustomerData"
+              aria-expanded="false"
+              aria-controls="CustomerData"
+            >
+              <i class="fa fa-minus-circle"></i>
+            </button>
+          </div>
+        </div>
+        <div id="CustomerData" class="panel-collapse collapse in">
+          <div class="panel-body table-responsive">
+            <p-tabView [(activeIndex)]="activeIndex" styleClass="x-tab-view">
+              <p-tabPanel class="header" header="Basic Details">
+                <div class="row">
+                  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <p-card>
+                      <div class="row">
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                          <label class="datalabel">Name :</label>
+                          <span *ngIf="!isEditing">
+                            {{ createcustomerData?.title }} {{ createcustomerData?.firstname }} {{
+                            createcustomerData?.lastname }}
+                          </span>
+                          <a
+                            *ngIf="isEditing"
+                            (click)="nameModelOpen()"
+                            href="javascript:void(0)"
+                            style="color: #f7b206"
+                          >
+                            {{ createcustomerData?.title }} {{ createcustomerData?.firstname }} {{
+                            createcustomerData?.lastname }}
+                          </a>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                          <label class="datalabel">Business Name :</label>
+                          <span *ngIf="!isEditing">{{ createcustomerData?.contactperson }}</span>
+                          <input
+                            *ngIf="isEditing"
+                            [(ngModel)]="createcustomerData.contactperson"
+                            class="form-control-edit"
+                          />
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                          <label class="datalabel">Business Email :</label>
+                          <span *ngIf="!isEditing">{{ createcustomerData?.altemail }}</span>
+                          <input
+                            *ngIf="isEditing"
+                            [(ngModel)]="createcustomerData.altemail"
+                            class="form-control-edit"
+                          />
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                          <label class="datalabel">Primary Mobile Number :</label>
+                          <span *ngIf="!isEditing">
+                            <span *ngIf="createcustomerData?.countryCode">
+                              ( {{ createcustomerData?.countryCode }} )&nbsp;
+                            </span>
+                            {{ createcustomerData?.mobile }}
+                          </span>
+                          <input
+                            *ngIf="isEditing"
+                            [(ngModel)]="createcustomerData.mobile"
+                            class="form-control-edit"
+                          />
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                          <label class="datalabel">Secondary Mobile Number :</label>
+                          <span *ngIf="createcustomerData?.altmobile && !isEditing">
+                            <span *ngIf="createcustomerData?.countryCode">
+                              ( {{ createcustomerData?.countryCode }} )&nbsp;
+                            </span>
+                            {{ createcustomerData?.altmobile }}
+                          </span>
+                          <input
+                            *ngIf="isEditing"
+                            [(ngModel)]="createcustomerData.altmobile"
+                            class="form-control-edit"
+                          />
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                          <label class="datalabel">Email :</label>
+                          <span *ngIf="!isEditing">{{ createcustomerData?.email }}</span>
+                          <input
+                            *ngIf="isEditing"
+                            [(ngModel)]="createcustomerData.email"
+                            class="form-control-edit"
+                          />
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                          <label class="datalabel">Date of Birth :</label>
+                          <span *ngIf="!isEditing"
+                            >{{ customerLedgerDetailData?.birthDate | date: "dd-MM-yyyy" }}</span
+                          >
+                          <input
+                            *ngIf="isEditing"
+                            id="startdate"
+                            [(ngModel)]="birthDate"
+                            class="form-control-edit"
+                            placeholder="DD/MM/YYYY"
+                            type="date"
+                          />
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                          <label class="datalabel">Act No. :</label>
+                          <span>{{ customerLedgerDetailData?.acctno }}</span>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                          <label class="datalabel">Username :</label>
+                          <span>{{ customerLedgerDetailData?.username }}</span>
+                        </div>
+
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                          <label class="datalabel">Status :</label>
+                          <span
+                            >{{ customerLedgerDetailData?.status == "Ingrace" ||
+                            customerLedgerDetailData?.status == "INGRACE" ? "InGrace" :
+                            customerLedgerDetailData?.status }}</span
+                          >
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                          <label class="datalabel">Customer Type :</label>
+                          <span>{{ customerLedgerDetailData?.custtype }}</span>
+                        </div>
+
+                        <div
+                          *ngIf="customerLedgerDetailData?.billday"
+                          class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup"
+                        >
+                          <label class="datalabel">Bill Day :</label>
+                          <span>{{ customerLedgerDetailData?.billday }}</span>
+                        </div>
+                        <div
+                          *ngIf="customerLedgerDetailData?.planMappingList"
+                          class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup"
+                        >
+                          <label class="datalabel">Next bill date :</label>
+                          <span>
+                            {{ customerLedgerDetailData.planMappingList[
+                            customerLedgerDetailData.planMappingList.length - 1 ]?.endDate | date:
+                            "dd-MM-yyyy" }}
+                          </span>
+                        </div>
+                        <div
+                          *ngIf="customerLedgerDetailData?.parentCustomerName"
+                          class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup"
+                        >
+                          <label class="datalabel">Parent Customer :</label>
+                          <span>{{ customerLedgerDetailData?.parentCustomerName }}</span>
+                        </div>
+                        <div
+                          *ngIf="customerLedgerDetailData?.invoiceType"
+                          class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup"
+                        >
+                          <label class="datalabel">Invoice Type :</label>
+                          <span>{{ customerLedgerDetailData?.invoiceType }}</span>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                          <label class="datalabel">First Activation Date :</label>
+                          <span
+                            >{{ customerLedgerDetailData?.firstActivationDate | date: "dd-MM-yyyy
+                            hh:mm a" }}</span
+                          >
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                          <label class="datalabel">Telephone :</label>
+                          <span *ngIf="customerLedgerDetailData?.phone">
+                            {{ customerLedgerDetailData?.phone }}
+                          </span>
+                          <span *ngIf="!customerLedgerDetailData?.phone">-</span>
+                        </div>
+                        <div
+                          class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup"
+                          *ngIf="customerLedgerDetailData?.fax"
+                        >
+                          <label class="datalabel">FAX Number :</label>
+                          <span *ngIf="customerLedgerDetailData?.pan">
+                            {{ customerLedgerDetailData?.fax }}
+                          </span>
+                          <span *ngIf="!customerLedgerDetailData?.fax">-</span>
+                        </div>
+
+                        <div
+                          class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup"
+                          *ngIf="customerLedgerDetailData?.customerbillingid"
+                        >
+                          <label class="datalabel">Bill to Name :</label>
+                          <span *ngIf="customerBill">
+                            {{ customerLedgerDetailData.customerbillingid }}
+                          </span>
+                          <span *ngIf="!customerBill">-</span>
+                        </div>
+                        <div
+                          class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup"
+                          *ngIf="customerLedgerDetailData?.pan"
+                        >
+                          <label class="datalabel">PAN Number :</label>
+                          <span *ngIf="customerLedgerDetailData?.pan">
+                            {{ customerLedgerDetailData?.pan }}
+                          </span>
+                          <span *ngIf="!customerLedgerDetailData?.pan">-</span>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                          <label class="datalabel">Activated By :</label>
+                          {{ customerLedgerDetailData?.activationByName }}
+                          <span *ngIf="!customerLedgerDetailData?.activationByName">-</span>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                          <label class="datalbl">Unit No :</label>
+                          <span>{{ customerLedgerDetailData?.blockNo }}</span>
+                          <span *ngIf="!customerLedgerDetailData?.blockNo">-</span>
+                        </div>
+
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                          <label class="datalabel">Customer Category :</label>
+                          <span>{{ customerLedgerDetailData?.dunningCategory }}</span>
+                          <span *ngIf="!customerLedgerDetailData?.dunningCategory">-</span>
+                        </div>
+
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                          <label class="datalabel">Dunning Enable :</label>
+                          <span>{{ customerLedgerDetailData?.isDunningEnable }}</span>
+                          <span></span>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                          <label class="datalabel">Automatic notification :</label>
+                          <span>{{ customerLedgerDetailData?.isNotificationEnable }}</span>
+                          <span></span>
+                        </div>
+                      </div>
+                    </p-card>
+                  </div>
+                </div>
+              </p-tabPanel>
+              <p-tabPanel header="Address Details">
+                <div class="row">
+                  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <p-card>
+                      <div class="row">
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                          <label class="datalabel">Address :</label>
+                          <span
+                            >{{ customerLedgerDetailData.addressList?.length > 0 ?
+                            customerLedgerDetailData.addressList[0].landmark : "-" }}</span
+                          >
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                          <label class="datalabel">Service Area Name :</label>
+                          <span>{{ customerLedgerDetailData?.serviceareaName }}</span>
+                          <span *ngIf="!customerLedgerDetailData?.serviceareaid">-</span>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                          <label class="datalabel">Branch Name / Partner :</label>
+                          <span>{{ customerLedgerDetailData?.branchName }}</span>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                          <label class="datalabel">Region :</label>
+                          <span>{{ customerLedgerDetailData?.regionName }}</span>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                          <label class="datalabel">Business Verticals :</label>
+                          <span>{{ customerLedgerDetailData?.buVerticals }}</span>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                          <label class="datalabel">{{ getDemographicLabel("Pincode") }} :</label>
+                          <span *ngIf="presentAdressDATA != null">
+                            {{ presentAdressDATA.code }}
+                          </span>
+                          <span *ngIf="presentAdressDATA == null">-</span>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                          <label class="datalabel">{{ getDemographicLabel("Area") }} :</label>
+                          <span *ngIf="presentAdressDATA != null">
+                            {{ presentAdressDATA.name }}
+                          </span>
+                          <span *ngIf="presentAdressDATA == null">-</span>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                          <label class="datalabel">{{ getDemographicLabel("City") }} :</label>
+                          <span *ngIf="presentAdressDATA != null">
+                            {{ presentAdressDATA.cityName }}
+                          </span>
+                          <span *ngIf="presentAdressDATA == null">-</span>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                          <label class="datalabel">{{ getDemographicLabel("State") }} :</label>
+                          <span *ngIf="presentAdressDATA != null">
+                            {{ presentAdressDATA.stateName }}
+                          </span>
+                          <span *ngIf="presentAdressDATA == null">-</span>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                          <label class="datalbl">Sub Area :</label>
+                          {{ presentAdressDATA?.subarea || "-" }}
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                          <label class="datalbl">Building Name :</label>
+                          {{ presentAdressDATA?.buildingName || "-" }}
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                          <label class="datalbl">Building Number :</label>
+                          {{ presentAdressDATA?.buildingNumber || "-" }}
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                          <label class="datalabel">Valley Type :</label>
+                          <span>{{ customerLedgerDetailData?.valleyType }}</span>
+                          <span *ngIf="!customerLedgerDetailData?.valleyType">-</span>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                          <label class="datalabel">Latitude :</label>
+                          <span *ngIf="customerLedgerDetailData?.latitude">
+                            {{ customerLedgerDetailData?.latitude }}
+                          </span>
+                          <span *ngIf="!customerLedgerDetailData?.latitude">-</span>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                          <label class="datalabel">Longitude :</label>
+                          <span *ngIf="customerLedgerDetailData?.longitude">
+                            {{ customerLedgerDetailData?.longitude }}
+                          </span>
+                          <span *ngIf="!customerLedgerDetailData?.longitude">-</span>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                          <label class="datalabel">Landmark :</label>
+                          <span>{{ customerAddress?.landmark }}</span>
+                        </div>
+                      </div>
+                    </p-card>
+                  </div>
+                </div>
+              </p-tabPanel>
+            </p-tabView>
+            <div class="bottom" *ngIf="activeIndex == 0">
+              <button
+                pButton
+                pRipple
+                style="margin: 3px"
+                label="Edit"
+                *ngIf="!isEditing"
+                icon="pi pi-pencil"
+                (click)="editCustomer()"
+              ></button>
+              <button
+                pButton
+                pRipple
+                style="margin: 3px"
+                label="Save"
+                icon="pi pi-check"
+                *ngIf="isEditing"
+                (click)="saveCustomer()"
+              ></button>
+              <button
+                pButton
+                pRipple
+                style="margin: 3px"
+                label="Cancel"
+                *ngIf="isEditing"
+                (click)="stopEditing()"
+                icon="pi pi-times"
+              ></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row" *ngIf="isCustomerLedgerOpen">
+    <div class="col-md-12 col-sm-12">
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">
+            Search {{ customerLedgerDetailData.title }} {{ customerLedgerDetailData.firstname + " "
+            + customerLedgerDetailData.lastname }} Ledger
+          </h3>
+          <div class="right">
+            <button
+              type="button"
+              class="btn-toggle-collapse"
+              data-toggle="collapse"
+              data-target="#CustomerLedgerDetail"
+              aria-expanded="false"
+              aria-controls="CustomerLedgerDetail"
+            >
+              <i class="fa fa-minus-circle"></i>
+            </button>
+          </div>
+        </div>
+        <div id="CustomerLedgerDetail" class="panel-collapse collapse in">
+          <div class="panel-body table-responsive">
+            <form name="custLedgerForm" [formGroup]="custLedgerForm">
+              <div class="row">
+                <div class="col-lg-3 col-md-3">
+                  <input
+                    type="date"
+                    formControlName="startDateCustLedger"
+                    class="form-control"
+                    placeholder="From Ledger Date"
+                    [ngClass]="{
+                      'is-invalid':
+                        custLedgerSubmitted && custLedgerForm.controls.startDateCustLedger.errors
+                    }"
+                  />
+                  <div
+                    class="errorWrap text-danger"
+                    *ngIf="
+                      custLedgerSubmitted && custLedgerForm.controls.startDateCustLedger.errors
+                    "
+                  >
+                    <div
+                      class="error text-danger"
+                      *ngIf="
+                        custLedgerSubmitted &&
+                        custLedgerForm.controls.startDateCustLedger.errors.required
+                      "
+                    >
+                      From Date is required.
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-3 col-md-3 top1rem">
+                  <input
+                    type="date"
+                    formControlName="endDateCustLedger"
+                    class="form-control"
+                    placeholder="To Ledger Date"
+                    [ngClass]="{
+                      'is-invalid':
+                        custLedgerSubmitted && custLedgerForm.controls.endDateCustLedger.errors
+                    }"
+                  />
+                  <div
+                    class="errorWrap text-danger"
+                    *ngIf="custLedgerSubmitted && custLedgerForm.controls.endDateCustLedger.errors"
+                  >
+                    <div
+                      class="error text-danger"
+                      *ngIf="
+                        custLedgerSubmitted &&
+                        custLedgerForm.controls.endDateCustLedger.errors.required
+                      "
+                    >
+                      To Date is required.
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-6 col-md-6 top1rem">
+                  <button
+                    type="button"
+                    class="btn btn-primary"
+                    id="searchbtnID"
+                    (click)="searchCustomerLedger()"
+                  >
+                    <i class="fa fa-search"></i>
+                    Search
+                  </button>
+                  <button
+                    type="reset"
+                    class="btn btn-default clear280btn"
+                    id="searchbtn"
+                    (click)="clearSearchCustomerLedger()"
+                  >
+                    <i class="fa fa-refresh"></i>
+                    Clear
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-12 col-sm-12">
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">
+            {{ customerLedgerDetailData.title }} {{ customerLedgerDetailData.firstname + " " +
+            customerLedgerDetailData.lastname }} Ledger Details
+          </h3>
+          <div class="right">
+            <button
+              type="button"
+              class="btn-toggle-collapse"
+              data-toggle="collapse"
+              data-target="#CustomerLedgerdata"
+              aria-expanded="false"
+              aria-controls="CustomerLedgerdata"
+            >
+              <i class="fa fa-minus-circle"></i>
+            </button>
+          </div>
+        </div>
+        <div id="CustomerLedgerdata" class="panel-collapse collapse in">
+          <div class="panel-body table-responsive">
+            <div class="row">
+              <div class="col-lg-3 col-md-3 dataGroup">
+                <label class="datalbl">Name :</label>
+                <span>{{ customerLedgerData.custname }}</span>
+              </div>
+              <!-- <div class="col-lg-3 col-md-3 dataGroup">
+                <label class="datalbl">Plan :</label>
+                <span>{{ customerLedgerData.plan }}</span>
+              </div> -->
+              <div class="col-lg-3 col-md-3 dataGroup">
+                <label class="datalbl">Status :</label>
+                <span *ngIf="customerLedgerData.status == 'Active'" class="badge badge-success">
+                  {{ customerLedgerData.status }}
+                </span>
+                <span *ngIf="customerLedgerData.status == 'NewActivation'" class="badge badge-info">
+                  {{ customerLedgerData.status }}
+                </span>
+              </div>
+              <div class="col-lg-3 col-md-3 dataGroup">
+                <label class="datalbl">Username :</label>
+                <span>{{ customerLedgerData.username }}</span>
+              </div>
+            </div>
+            <div class="displayView">
+              <div class="row" style="margin-top: 2rem">
+                <div class="col-lg-12 col-md-12">
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>Create Date</th>
+                        <th>Ref No</th>
+                        <th>Category</th>
+                        <th>Type</th>
+                        <th>Amount</th>
+                        <th>Bal Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr
+                        *ngFor="
+                          let data of customerLedgerListData
+                            | paginate
+                              : {
+                                  id: 'customerLedgerpageData',
+                                  itemsPerPage: custLedgerItemPerPage,
+                                  currentPage: currentPagecustLedgerList,
+                                  totalItems: custLedgertotalRecords
+                                };
+                          index as i
+                        "
+                      >
+                        <td>{{ data.create_DATE }}</td>
+                        <td>{{ data.refNo }}</td>
+                        <td>{{ data.transcategory }}</td>
+                        <td>{{ data.transtype }}</td>
+                        <td>{{ data.amount }}</td>
+                        <td>{{ data.balAmount }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div class="pagination_Dropdown">
+                    <pagination-controls
+                      id="customerLedgerpageData"
+                      maxSize="10"
+                      directionLinks="true"
+                      previousLabel=""
+                      nextLabel=""
+                      (pageChange)="pageChangedcustledgerList($event)"
+                    ></pagination-controls>
+                    <div id="itemPerPageDropdown">
+                      <p-dropdown
+                        [options]="pageLimitOptions"
+                        optionLabel="value"
+                        optionValue="value"
+                        (onChange)="TotalLedgerItemPerPage($event)"
+                      ></p-dropdown>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div
+              class="mobileViewBlock"
+              *ngIf="customerLedgerListData?.length !== 0"
+              style="margin-top: 2rem"
+            >
+              <p-accordion
+                *ngFor="
+                  let data of customerLedgerListData
+                    | paginate
+                      : {
+                          id: 'customerLedgerpageData',
+                          itemsPerPage: custLedgerItemPerPage,
+                          currentPage: currentPagecustLedgerList,
+                          totalItems: custLedgertotalRecords
+                        };
+                  index as i
+                "
+              >
+                <p-accordionTab
+                  header="Ref No : {{ data.refNo }}"
+                  [(selected)]="activeLedgerState[i]"
+                >
+                  <p>
+                    <span>
+                      <b>Create Date :</b>
+                      {{ data.create_DATE }}
+                    </span>
+                    <br />
+                    <span>
+                      <b>Ref No :</b>
+                      {{ data.refNo }}
+                    </span>
+                    <br />
+                    <span>
+                      <b>Category :</b>
+                      {{ data.transcategory }}
+                    </span>
+                    <br />
+                    <span>
+                      <b>Type :</b>
+                      {{ data.transtype }}
+                    </span>
+                    <br />
+                    <span>
+                      <b>Amount :</b>
+                      {{ data.amount }}
+                    </span>
+                    <br />
+                    <span>
+                      <b>Bal Amount :</b>
+                      {{ data.balAmount }}
+                    </span>
+                  </p>
+                </p-accordionTab>
+              </p-accordion>
+              <div style="margin-top: 2rem">
+                <div class="pagination_Dropdown">
+                  <pagination-controls
+                    id="customerLedgerpageData"
+                    maxSize="10"
+                    directionLinks="true"
+                    previousLabel=""
+                    nextLabel=""
+                    (pageChange)="pageChangedcustledgerList($event)"
+                  ></pagination-controls>
+                  <div id="itemPerPageDropdown">
+                    <p-dropdown
+                      [options]="pageLimitOptions"
+                      optionLabel="value"
+                      optionValue="value"
+                      (onChange)="TotalLedgerItemPerPage($event)"
+                    ></p-dropdown>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-lg-12 col-sm-12 dataGroup text-right">
+                <label class="datalbl">Opening Amount :</label>
+                <span> {{ customerOpeningAmount }} </span>
+              </div>
+              <div class="col-lg-12 col-sm-12 dataGroup text-right">
+                <label class="datalbl">Closing Balance :</label>
+                <span> {{ customerClosingAmount }} </span>
+              </div>
+              <div class="col-lg-12 col-sm-12 dataGroup text-right" style="margin-top: 2rem"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row" *ngIf="isPaymentOpen">
+    <div class="col-md-12 col-sm-12">
+      <div class="panel">
+        <div class="panel-heading">
+          <div class="displayflex">
+            <h3 class="panel-title">Payment Details</h3>
+          </div>
+          <div class="right">
+            <button
+              aria-controls="paymentDetails"
+              aria-expanded="false"
+              class="btn-toggle-collapse"
+              data-target="#paymentDetails"
+              data-toggle="collapse"
+              type="button"
+            >
+              <i class="fa fa-minus-circle"></i>
+            </button>
+          </div>
+        </div>
+        <div class="panel-collapse collapse in" id="paymentDetails">
+          <div class="panel-body table-responsive" *ngIf="customerPaymentData?.length !== 0">
+            <div class="row">
+              <div class="col-lg-12 col-md-12">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Payment By</th>
+                      <th>Reference No</th>
+                      <th>Paymode</th>
+                      <th>Amount</th>
+                      <th>Payment Date</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr
+                      *ngFor="
+                        let data of customerPaymentData
+                          | paginate
+                            : {
+                                id: 'customerPayListpageData',
+                                itemsPerPage: customerPaymentdataitemsPerPage,
+                                currentPage: currentPagecustomerPaymentdata,
+                                totalItems: customerPaymentdatatotalRecords
+                              };
+                        index as i
+                      "
+                    >
+                      <td>{{ data.paymentBy }}</td>
+                      <td>{{ data.referenceno }}</td>
+                      <td>{{ data.paymode }}</td>
+                      <td>
+                        {{ data.amount | number: "1.2-2" }}{{ " " }}<span
+                          >{{ currencySymbol }}</span
+                        >
+                      </td>
+                      <!-- <td>{{ data.status }}</td> -->
+                      <td>
+                        <span *ngIf="data.paymentdate">{{ data.paymentdate }}</span>
+                        <span *ngIf="!data.paymentdate">-</span>
+                      </td>
+                      <td *ngIf="data.status === 'Portal_Payment_Pending'">
+                        <span class="badge badge-info"> Portal Payment Pending </span>
+                      </td>
+                      <td *ngIf="data.status === 'Fully Adjusted'">
+                        <span class="badge badge-success"> {{ "verified" | titlecase }} </span>
+                      </td>
+                      <td *ngIf="data.status === 'advance'">
+                        <span class="badge badge-success"> {{ "verified" | titlecase }} </span>
+                      </td>
+                      <td *ngIf="data.status === 'approved'">
+                        <span class="badge badge-success"> {{ "verified" | titlecase }} </span>
+                      </td>
+                      <td
+                        *ngIf="data.status === 'pending' && data.nextTeamHierarchyMappingId == null"
+                      >
+                        <span class="badge badge-info"> {{ "Collected" | titlecase }} </span>
+                      </td>
+                      <td
+                        *ngIf="data.status === 'pending' && data.nextTeamHierarchyMappingId != null"
+                      >
+                        <span class="badge badge-info"> {{ "Submitted" | titlecase }} </span>
+                      </td>
+                      <td *ngIf="data.status === 'Partialy Adjusted'">
+                        <span class="badge badge-success"> {{ "verified" | titlecase }} </span>
+                      </td>
+                      <td *ngIf="data.status === 'rejected'">
+                        <span class="badge badge-danger"> {{ data.status | titlecase }} </span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <br />
+
+                <div class="pagination_Dropdown">
+                  <pagination-controls
+                    id="customerPayListpageData"
+                    maxSize="10"
+                    directionLinks="true"
+                    previousLabel=""
+                    nextLabel=""
+                    (pageChange)="pageChangedcustomerPaymentList($event)"
+                  ></pagination-controls>
+                  <div id="itemPerPageDropdown">
+                    <p-dropdown
+                      [options]="pageLimitOptions"
+                      optionLabel="value"
+                      optionValue="value"
+                      (onChange)="TotalPaymentItemPerPage($event)"
+                    ></p-dropdown>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="panel-body table-responsive" *ngIf="customerPaymentData?.length === 0">
+            Payment Details are not available.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row" *ngIf="isInvoiceOpen">
+    <div class="col-md-12 col-sm-12">
+      <div class="panel">
+        <div class="panel-heading">
+          <div class="displayflex">
+            <h3 class="panel-title">Search Invoice</h3>
+          </div>
+          <div class="right">
+            <button
+              aria-controls="currenPresCustPlan"
+              aria-expanded="false"
+              class="btn-toggle-collapse"
+              data-target="#currenPresCustPlan"
+              data-toggle="collapse"
+              type="button"
+            >
+              <i class="fa fa-minus-circle"></i>
+            </button>
+          </div>
+        </div>
+        <div class="panel-collapse collapse in" id="currenPresCustPlan">
+          <div class="panel-body table-responsive">
+            <div class="searchForm">
+              <form [formGroup]="searchInvoiceMasterFormGroup">
+                <div class="row">
+                  <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+                    <div class="form-group">
+                      <label>Document No</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        placeholder="Document No"
+                        formControlName="docnumber"
+                      />
+                    </div>
+                  </div>
+                  <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+                    <div class="form-group">
+                      <label>Customer Name</label>
+                      <select class="form-control" name="customerid" style="width: 100%" disabled>
+                        <option>
+                          {{ customerLedgerDetailData.firstname }} {{
+                          customerLedgerDetailData.lastname }}
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+                    <div class="form-group">
+                      <label>Bill From Date</label>
+                      <input
+                        type="date"
+                        class="form-control"
+                        placeholder="Enter Pay From Date"
+                        formControlName="billfromdate"
+                      />
+                    </div>
+                  </div>
+                  <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+                    <div class="form-group">
+                      <label>Bill To Date</label>
+                      <input
+                        type="date"
+                        class="form-control"
+                        placeholder="Enter Pay To Date"
+                        formControlName="billtodate"
+                      />
+                    </div>
+                  </div>
+                  <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+                    <div class="form-group">
+                      <label>Time Frame</label>
+                      <p-dropdown
+                        [options]="timeFrameOption"
+                        optionValue="value"
+                        optionLabel="label"
+                        filter="true"
+                        filterBy="id"
+                        placeholder="Select a time frame"
+                        formControlName="searchByTimeFrame"
+                      ></p-dropdown>
+                      <div></div>
+                    </div>
+                  </div>
+                  <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+                    <label style="display: block">&nbsp;</label>
+                    <button
+                      type="submit"
+                      class="btn btn-primary"
+                      (click)="searchinvoiceMaster('', '')"
+                    >
+                      <i class="fa fa-search"></i>
+                      Search Invoice
+                    </button>
+                    <button
+                      type="submit"
+                      class="btn btn-default"
+                      id="searchbtn"
+                      (click)="clearSearchinvoiceMaster()"
+                    >
+                      <i class="fa fa-refresh"></i>
+                      Clear
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-12 col-sm-12">
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">Invoice list</h3>
+          <div class="right">
+            <button
+              aria-controls="invoiceList"
+              aria-expanded="false"
+              class="btn-toggle-collapse"
+              data-target="#invoiceList"
+              data-toggle="collapse"
+              type="button"
+            >
+              <i class="fa fa-minus-circle"></i>
+            </button>
+          </div>
+        </div>
+        <div class="panel-collapse collapse in" id="invoiceList">
+          <div class="panel-body table-responsive">
+            <div class="row">
+              <div class="col-lg-12 col-md-12" *ngIf="customerInvoiceData.length !== 0">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Customer</th>
+                      <th>Document No.</th>
+                      <th>Total Amount</th>
+                      <th>Bill Run Status</th>
+                      <th>Bill Date</th>
+                      <th>Payment Status</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr
+                      *ngFor="
+                        let invoice of customerInvoiceData
+                          | paginate
+                            : {
+                                id: 'searchinvoiceMasterPageData',
+                                itemsPerPage: invoiceMasteritemsPerPage,
+                                currentPage: currentPageinvoiceMasterSlab,
+                                totalItems: invoiceMastertotalRecords
+                              };
+                        index as i
+                      "
+                    >
+                      <td>
+                        <div>{{ invoice.customerName }}</div>
+                      </td>
+                      <td>{{ invoice.docnumber }}</td>
+                      <td>
+                        {{ invoice.totalamount | number: "1.2-2" }}{{ " " }}<span
+                          >{{ currencySymbol }}</span
+                        >
+                      </td>
+                      <td>
+                        <div class="badge badge-success">{{ invoice.billrunstatus }}</div>
+                      </td>
+                      <td style="font-weight: 400">{{ invoice.billdate | date: "dd-MM-yyyy" }}</td>
+                      <td>
+                        <span
+                          class="badge bg-success"
+                          *ngIf="invoice.paymentStatus !== null && invoice.paymentStatus !== ''"
+                        >
+                          {{ invoice.paymentStatus }}
+                        </span>
+                        <span
+                          class="badge bg-warning"
+                          *ngIf="invoice.paymentStatus === null || invoice.paymentStatus === ''"
+                        >
+                          Pending
+                        </span>
+                      </td>
+                      <td class="btnAction" style="display: flex; align-items: center">
+                        <button
+                          [disabled]="invoice.docnumber == '' || invoice.docnumber === null"
+                          (click)="generatePDFInvoice(invoice.id, invoice.custid)"
+                          *ngIf="
+                            customerLedgerDetailData?.status !== 'Terminate' &&
+                            invoice.billrunstatus == 'Generated'
+                          "
+                          class="approve-btn"
+                          style="
+                            border: none;
+                            background: transparent;
+                            padding: 0;
+                            margin-right: 3px;
+                          "
+                          title="Generate"
+                          type="button"
+                        >
+                          <img src="assets/img/generate.jpg" style="width: 25px; height: 25px" />
+                        </button>
+                        <a
+                          id="edit-button"
+                          class="detailOnAnchorClick"
+                          href="javascript:void(0)"
+                          type="button"
+                          title="Download"
+                          *ngIf="invoice.billrunstatus == 'Exported'"
+                          (click)="downloadPDFINvoice(invoice.id, invoice.customerName)"
+                        >
+                          <img style="width: 25px; height: 25px" src="assets/img/pdf.png" />
+                        </a>
+                        <a
+                          id="edit-button"
+                          class="detailOnAnchorClick"
+                          href="javascript:void(0)"
+                          type="button"
+                          title="Email Invoice"
+                          *ngIf="invoice.billrunstatus == 'Exported'"
+                          (click)="sendemailinvoice(invoice.id)"
+                        >
+                          <img style="width: 25px; height: 25px" src="assets/img/icons-02.png" />
+                        </a>
+                        <a
+                          type="button"
+                          class="detailOnAnchorClick"
+                          href="javascript:void(0)"
+                          type="button"
+                          title="Invoice Payment"
+                          *ngIf="invoice.totalamount - invoice.adjustedAmount >= 1"
+                          (click)="openPaymentGatewaysforInvoicePayment(invoice)"
+                        >
+                          <img
+                            src="assets/img/19_Promise-to-Pay_Y.png"
+                            style="width: 25px; height: 25px"
+                          />
+                        </a>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <br />
+                <div class="pagination_Dropdown">
+                  <pagination-controls
+                    id="searchinvoiceMasterPageData"
+                    maxSize="10"
+                    directionLinks="true"
+                    previousLabel=""
+                    nextLabel=""
+                    (pageChange)="pageChangedinvoiceMasterList($event)"
+                  >
+                  </pagination-controls>
+                  <div id="itemPerPageDropdown">
+                    <p-dropdown
+                      [options]="pageLimitOptions"
+                      optionLabel="value"
+                      optionValue="value"
+                      (onChange)="TotalItemPerPageInvoice($event)"
+                    ></p-dropdown>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-12 col-md-12" *ngIf="customerInvoiceData.length === 0">
+                Invoice data not found
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row" *ngIf="isRenewPlanOpen">
+    <div class="right">
+      <app-cust-change_plan></app-cust-change_plan>
+    </div>
+  </div>
+
+  <div class="row" *ngIf="ifWalletMenu">
+    <div class="col-md-12 col-sm-12">
+      <div class="panel">
+        <div class="panel-heading">
+          <div class="displayflex">
+            <h3 class="panel-title">
+              {{ customerLedgerDetailData.title }} {{ customerLedgerDetailData.firstname + " " +
+              customerLedgerDetailData.lastname }} Wallet
+            </h3>
+          </div>
+          <div class="right">
+            <button
+              aria-controls="wallet"
+              aria-expanded="false"
+              class="btn-toggle-collapse"
+              data-target="#wallet"
+              data-toggle="collapse"
+              type="button"
+            >
+              <i class="fa fa-minus-circle"></i>
+            </button>
+          </div>
+        </div>
+        <div class="panel-collapse collapse in" id="wallet">
+          <div class="panel-body table-responsive" id="customerWallet">
+            <div class="card" style="display: flex; justify-content: center; text-align: center">
+              <p-card [style]="{ width: '360px' }">
+                <ng-template pTemplate="header">
+                  <h1>Wallet Balance</h1>
+                </ng-template>
+                <p-badge
+                  *ngIf="getWallatData.customerWalletDetails >= 0"
+                  [value]="getWallatData.customerWalletDetails | currency: currencySymbol"
+                  size="xlarge"
+                  severity="success"
+                >
+                </p-badge>
+                <p-badge
+                  *ngIf="getWallatData.customerWalletDetails < 0"
+                  [value]="getWallatData.customerWalletDetails | currency: currencySymbol"
+                  size="xlarge"
+                  severity="danger"
+                >
+                </p-badge>
+              </p-card>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rating Details -->
+  <div class="row" *ngIf="isRatingMenu">
+    <div class="col-md-12 col-sm-12">
+      <div class="panel">
+        <div class="panel-heading">
+          <div class="displayflex">
+            <h3 class="panel-title">
+              {{ customerLedgerDetailData.title }} {{ customerLedgerDetailData.firstname + " " +
+              customerLedgerDetailData.lastname }} Rating
+            </h3>
+          </div>
+          <div class="right">
+            <button
+              aria-controls="rating"
+              aria-expanded="false"
+              class="btn-toggle-collapse"
+              data-target="#rating"
+              data-toggle="collapse"
+              type="button"
+            >
+              <i class="fa fa-minus-circle"></i>
+            </button>
+          </div>
+        </div>
+        <div class="panel-collapse collapse in" id="rating">
+          <div class="panel-body table-responsive">
+            <form [formGroup]="ratingForm">
+              <div class="row">
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                  <label class="datalbl">Rating </label>
+                  <span>
+                    <p-rating
+                      formControlName="rating"
+                      [readonly]="!isEditRating && isRatingPresent"
+                      [cancel]="false"
+                    ></p-rating>
+                  </span>
+                  <div
+                    class="errorWrap text-danger"
+                    *ngIf="isRatingError && ratingForm.controls.rating.errors"
+                  >
+                    <div
+                      class="error text-danger"
+                      *ngIf="isRatingError && ratingForm.controls.rating.errors.required"
+                    >
+                      Rating is required.
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                  <label class="datalbl">Feedback</label>
+                  <textarea
+                    formControlName="feedback"
+                    class="form-control"
+                    [readonly]="!isEditRating && isRatingPresent"
+                    rows="3"
+                    name="remark"
+                    [ngClass]="{
+                    'is-invalid':
+                      ratingSubmmitted && ratingTicketForm.controls.customerFeedback.errors
+                  }"
+                  ></textarea>
+                </div>
+              </div>
+            </form>
+            <div class="row">
+              <div class="bottom" style="padding-top: 10px">
+                <button
+                  pButton
+                  pRipple
+                  style="margin: 3px"
+                  label="Update"
+                  icon="pi pi-check"
+                  *ngIf="isEditRating"
+                  (click)="updateRating()"
+                ></button>
+                <button
+                  pButton
+                  pRipple
+                  style="margin: 3px"
+                  label="Edit"
+                  *ngIf="!isEditRating && isRatingPresent"
+                  icon="pi pi-pencil"
+                  (click)="editRating()"
+                ></button>
+                <button
+                  pButton
+                  pRipple
+                  style="margin: 3px"
+                  label="Save"
+                  icon="pi pi-check"
+                  *ngIf="!isRatingPresent"
+                  (click)="saveRating()"
+                ></button>
+                <button
+                  pButton
+                  pRipple
+                  style="margin: 3px"
+                  label="Cancel"
+                  *ngIf="isEditRating"
+                  (click)="cancelEditRating()"
+                  icon="pi pi-times"
+                ></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Change Password Modal -->
+<div class="modal fade" id="changePasswordModal" role="dialog">
+  <div class="modal-dialog loginModal">
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="panel-title">Change Password</h3>
+      </div>
+      <div class="modal-body">
+        <form name="changePasswordForm" [formGroup]="changePasswordForm">
+          <div class="form-group">
+            <div><label for="username">Old Password :</label></div>
+            <input
+              type="password"
+              class="form-control"
+              id="password"
+              placeholder="Enter Old Password"
+              name="oldpassword"
+              formControlName="oldPassword"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="newpassword">New Password :</label>
+            <input
+              type="password"
+              class="form-control"
+              id="newpassword"
+              placeholder="Enter New Password"
+              name="newpassword"
+              formControlName="newPassword"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="newpassword">Confirm Password :</label>
+            <input
+              type="password"
+              class="form-control"
+              id="confirmpassword"
+              placeholder="Enter New Password"
+              name="Confirmpassword"
+              formControlName="confirmPassword"
+            />
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <div class="addUpdateBtn">
+          <button
+            type="submit"
+            class="btn btn-primary btn-sm marginTop280pxsize"
+            id="closeModal"
+            (click)="changePassword()"
+            [disabled]="!changePasswordForm.valid"
+          >
+            <i class="fa fa-check-circle"></i>
+            Save
+          </button>
+          <button
+            id="btn"
+            type="button"
+            class="btn btn-default btn-sm marginTop280pxsize"
+            (click)="clearChangePasswordForm()"
+          >
+            <i class="fa fa-refresh"></i>
+            Clear
+          </button>
+          <button
+            type="button"
+            class="btn btn-danger btn-sm marginTop280pxsize"
+            #closebutton
+            data-dismiss="modal"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p-dialog
+  header="Customer Name"
+  [(visible)]="isNameEdit"
+  [modal]="true"
+  [style]="{ width: '30vw' }"
+  [draggable]="false"
+  [resizable]="false"
+  [responsive]="true"
+  [closable]="false"
+>
+  <div class="modal-body-junk">
+    <div class="form-group">
+      <label>Title *</label>
+      <div style="display: flex">
+        <div style="width: 100%">
+          <p-dropdown
+            [options]="selectTitile"
+            [(ngModel)]="createcustomerData.title"
+            optionLabel="label"
+            optionValue="label"
+            placeholder="Select Title"
+          >
+          </p-dropdown>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>FirstName</label>
+      <div style="display: flex">
+        <div style="width: 100%">
+          <input
+            class="form-control"
+            id="firstName"
+            type="text"
+            [(ngModel)]="createcustomerData.firstname"
+          />
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>LastName </label>
+      <div style="display: flex">
+        <div style="width: 100%">
+          <input
+            class="form-control"
+            id="lastName"
+            type="text"
+            [(ngModel)]="createcustomerData.lastname"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <div class="addUpdateBtn">
+      <button class="btn btn-primary btnStyle" (click)="save()">Save</button>
+      <button class="btn btn-danger btnStyle" (click)="nameModelClose()">Cancel</button>
+    </div>
+  </div>
+</p-dialog>
+<p-dialog
+  header="Payment Gateway Method"
+  [(visible)]="displayInvoicePaymentDialog"
+  [modal]="true"
+  [style]="{ width: '50%' }"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <div class="card" style="text-align: center">
+    <div *ngFor="let config of savedConfig">
+      <p-card
+        [style]="{
+          margin: '25px',
+          'box-shadow': '0 4px 8px rgba(0, 0, 0, 0.3)'
+        }"
+      >
+        <div class="p-card-title" style="color: #f7b206; font-size: 20px">
+          {{ config.paymentConfigName }}
+        </div>
+        <div class="p-card-content" style="width: 100%">
+          <div>{{ config.paymentGatewayInfo?.substring(0, 50) }}</div>
+          <div style="white-space: normal">{{ config.paymentGatewayInfo?.substring(50) }}</div>
+        </div>
+        <div class="p-card-footer">
+          <button
+            class="btn btn-primary"
+            id="submit"
+            type="submit"
+            (click)="invoicePaymentpaymentGateway(config)"
+          >
+            Proceed
+          </button>
+        </div>
+      </p-card>
+    </div>
+  </div>
+</p-dialog>
+<!-- Payment Confirmation Model -->
+<p-dialog
+  header="Payment Confirmation"
+  [(visible)]="paymentConfirmationModal"
+  [modal]="true"
+  [breakpoints]="{ '1024px': '75vw', '767px': '90vw' }"
+  [style]="{ width: '50vw' }"
+  [draggable]="false"
+  (onHide)="hidepaymentConfirmDialog()"
+  [resizable]="false"
+>
+  <h5 class="modalHeadTxt">
+    Payment is in the approval flow one It is approved, you will get the confirmation message
+    through SMS
+  </h5>
+
+  <button
+    class="btn btn-success btnStyle"
+    [disabled]="exitBuy"
+    (click)="hidepaymentConfirmDialog()"
+  >
+    <i class="fa-solid fa-xmark"></i> Close<span *ngIf="exitBuy"> ({{ paymentstatusCount }}) </span>
+  </button>
+</p-dialog>
+
+<!-- Payment Success Model -->
+<p-dialog
+  header="Payment Success"
+  [(visible)]="paymentSucessModel"
+  [modal]="true"
+  [breakpoints]="{ '1024px': '75vw', '767px': '90vw' }"
+  [style]="{ width: '50vw' }"
+  [draggable]="false"
+  (onHide)="hidepaymentSucessDialog()"
+  [resizable]="false"
+>
+  <h5 class="modalHeadTxt plan-sucess-content">Plan purchased successfully</h5>
+
+  <button class="btn btn-success btnStyle plan-sucess-btn" (click)="hidepaymentSucessDialog()">
+    OK
+  </button>
+</p-dialog>
+<p-dialog
+  header="Wifi Config"
+  [(visible)]="wifiModel"
+  [style]="{ width: '70%' }"
+  [modal]="true"
+  [responsive]="true"
+  [draggable]="false"
+  [closable]="true"
+>
+  <div class="modal-body">
+    <form [formGroup]="wifiForm">
+      <div class="row">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+          <div class="form-group">
+            <label>SSID Username</label>
+            <input
+              type="text"
+              class="form-control"
+              formControlName="username"
+              placeholder="Enter User Name"
+              [readonly]="editWifi"
+            />
+            <div
+              *ngIf="wifiSubmitted && wifiForm.controls.username.errors"
+              class="errorWrap text-danger"
+            >
+              <div
+                *ngIf="wifiSubmitted && wifiForm.controls.username.errors.required"
+                class="error text-danger"
+              >
+                User Name is required.
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+          <div class="form-group">
+            <label>SSID Password</label>
+            <input
+              type="text"
+              class="form-control"
+              formControlName="password"
+              placeholder="Enter Password"
+              [readonly]="editWifi"
+            />
+            <div
+              *ngIf="wifiSubmitted && wifiForm.controls.password.errors"
+              class="errorWrap text-danger"
+            >
+              <div
+                *ngIf="wifiSubmitted && wifiForm.controls.password.errors.required"
+                class="error text-danger"
+              >
+                Password is required.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <div class="addUpdateBtn">
+      <button
+        (click)="editWifiModel()"
+        class="btn btn-success btn-sm"
+        type="button"
+        [disabled]="!editWifi"
+      >
+        Edit
+      </button>
+      <button
+        (click)="saveWifi()"
+        class="btn btn-primary"
+        style="object-fit: cover; padding: 5px 8px"
+      >
+        <i class="fa fa-check-circle"></i>
+        Save
+      </button>
+      <button (click)="closeWifiModal()" class="btn btn-danger btn-sm" type="button">Close</button>
+    </div>
+  </div>
+</p-dialog>
+
+<p-dialog
+  header="Mobile number"
+  [(visible)]="mpinModal"
+  [modal]="true"
+  [style]="{ width: '30%' }"
+  [draggable]="false"
+  (onHide)="hideMpinModal()"
+  [resizable]="false"
+>
+  <form [formGroup]="mpinForm">
+    <div class="form-group">
+      <label>Mobile number: <span class="reqSign">*</span></label>
+      <div style="display: flex">
+        <div style="width: 30%">
+          <p-dropdown
+            [filter]="true"
+            [options]="countries"
+            formControlName="countryCode"
+            id="countryCode"
+            optionLabel="dial_code"
+            optionValue="dial_code"
+            placeholder="+91"
+            appendTo="body"
+          ></p-dropdown>
+        </div>
+        <div style="width: 70%">
+          <input
+            (input)="onInputMobile($event)"
+            (keyup)="onKeymobilelength($event)"
+            type="number"
+            name="mobileNo"
+            id="mobileNo"
+            min="0"
+            formControlName="mobileNumber"
+            [ngClass]="{
+              'is-invalid': isMpinFormSubmitted && mpinForm.controls.mobileNumber.errors
+            }"
+            placeholder="Enter mobile number"
+          />
+        </div>
+      </div>
+      <div *ngIf="mobileError" class="errorWrap text-danger">
+        <div class="error text-danger">Mobile number should not start with 0.</div>
+      </div>
+      <div style="display: flex">
+        <div style="width: 30%"></div>
+        <div style="width: 70%">
+          <div
+            *ngIf="isMpinFormSubmitted && mpinForm.controls.mobileNumber.errors"
+            class="errorWrap text-danger"
+          >
+            <div *ngIf="mpinForm.controls.mobileNumber.errors.required">
+              Mobile Number is required.
+            </div>
+          </div>
+          <div *ngIf="inputMobile && mpinForm.value.mobileNumber" class="error text-danger">
+            {{ this.inputMobile }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+  <ng-template pTemplate="footer">
+    <div class="btnGroup text-center">
+      <button
+        class="btn btn-primary btnStyle"
+        (click)="invoicePaymentGateway(momoPayinvoice)"
+        style="margin-right: 10px"
+        [disabled]="inputMobile !== '' || mobileError"
+      >
+        Buy
+      </button>
+      <button class="btn btn-danger btnStyle" (click)="hideMpinModal()">Cancel</button>
+    </div>
+  </ng-template>
+</p-dialog>

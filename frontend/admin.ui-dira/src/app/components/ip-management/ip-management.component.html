@@ -1,0 +1,639 @@
+<!-- ip-managmentheader search part start -->
+<div class="row header-row">
+    <mat-card class="cardWithShadow w-100">
+        <mat-card-content class="mat-card-content-border">
+            <div class="row">
+                <div class="col-sm-9 d-flex">
+                    <mat-form-field appearance="outline" style="margin-left: 16px" class="w-100 hide-hint mr-10">
+                        <input class="input-p-5" matInput placeholder="Search {{ title }}" />
+                        <mat-icon matSuffix class="search-header-search-icon">
+                            <i class="pi pi-search icon-size"></i>
+                        </mat-icon>
+                    </mat-form-field>
+
+                    <button mat-button mat-flat-button color="primary" class="button-normal m-r-10">
+                        Search
+                    </button>
+                    <button mat-stroked-button matButton="outlined" class="button-normal">
+                        Clear
+                    </button>
+                </div>
+
+                <div class="col-sm-3 search-div">
+                    <button mat-button mat-flat-button color="primary" (click)="addEditIpDialogOpen()" class=" button-normal
+                        mr-10">
+                        Add {{ title }}
+                    </button>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+<!-- ip-managment header search part end -->
+
+<!-- body part start -->
+
+<div class="container-fluid contain-flud">
+    <div class="row">
+        <!-- ip-managment list table start -->
+        <div class="col-md-12">
+            <mat-card class="cardWithShadow">
+                <mat-card-content class="mat-card-content-border">
+                    <div class="country-table-list">
+                        <div class="table-container">
+                            <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8 w-100">
+                                <ng-container matColumnDef="id">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">ID</th>
+
+                                    <td mat-cell *matCellDef="let ip">
+                                        {{ ip.displayId }}
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="n-ip">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Network IP
+                                    </th>
+                                    <td mat-cell *matCellDef="let ip" class="f-s-14">{{ ip.networkIp }}</td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="b-ip">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Broadcast IP
+                                    </th>
+                                    <td mat-cell *matCellDef="let ip" class="f-s-14">{{ ip.broadcastIp }}</td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="p-type">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Pool Type
+                                    </th>
+                                    <td mat-cell *matCellDef="let ip" class="f-s-14">{{ ip.poolType }}</td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="n-mask">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Net Mask
+                                    </th>
+                                    <td mat-cell *matCellDef="let ip" class="f-s-14">{{ ip.netMask }}</td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="ip-range">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        IP Range
+                                    </th>
+                                    <td mat-cell *matCellDef="let ip" class="f-s-14">{{ ip.ipRange }}</td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="status">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Status
+                                    </th>
+                                    <td mat-cell *matCellDef="let ip" class="f-s-14">
+                                        <span class="status-badge" [ngClass]="{
+                        'status-success': ip.status === 'Active',
+                        'status-danger': ip.status === 'Inactive'
+                      }">
+                                            {{ ip.status }}
+                                        </span>
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="action">
+                                    @if (editAccess || deleteAccess) {
+                                    <th mat-header-cell *matHeaderCellDef stickyEnd class="table-header-title">
+                                        Action
+                                    </th>
+                                    }
+                                    @if (editAccess || deleteAccess) {
+                                    <td mat-cell *matCellDef="let ip">
+
+                                        <a mat-icon-button matTooltip="view" href="javascript:void(0)"
+                                            (click)="IpAllDetails(ip.poolId)">
+                                            <img src="assets/img/DashboardIcons/eye-svgrepo-com (1) 1.svg">
+                                        </a>
+                                        @if (editAccess) {
+                                        <a mat-icon-button matTooltip="edit" href="javascript:void(0)"
+                                            (click)="editIp(ip.poolId)">
+                                            <img src="assets/img/DashboardIcons/Edit.svg">
+                                        </a>
+                                        }
+
+                                        @if (deleteAccess) {
+                                        <a mat-icon-button matTooltip="delete" href="javascript:void(0)"
+                                            (click)="deleteConfirmonIp(ip)">
+                                            <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                        </a>
+                                        }
+
+                                    </td>
+                                    }
+                                </ng-container>
+
+                                <tr mat-header-row class="table-header-bg"
+                                    *matHeaderRowDef="['id','n-ip','b-ip','p-type','n-mask','ip-range','status','action']; sticky: true">
+                                </tr>
+                                <tr mat-row class="table-content-row"
+                                    *matRowDef="let row; columns: ['id','n-ip','b-ip','p-type','n-mask','ip-range','status','action']">
+                                </tr>
+                            </table>
+
+                            <mat-paginator [length]="ipListdatatotalRecords" [pageSize]="ipListdataitemsPerPage"
+                                [pageSizeOptions]="[5,10,20,50,100]" showFirstLastButtons (page)="TotalItemPerPage($event)">
+                            </mat-paginator>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+        <!-- ip-managment list table end -->
+    </div>
+</div>
+
+<!-- body part end -->
+
+<!-- create ip dialog start -->
+<ng-template #addEditIPDialog>
+    @if (createView) {
+    <div class="container-fluid p-0">
+        <div class="dialog-header dialog-title">
+            {{createUpdateName}} {{ title }}
+            <span>
+                <a mat-icon-button (click)="closeDialog()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <mat-dialog-content>
+            <form [formGroup]="ipForm" class="row p-15">
+                <div class="row m-l-15">
+
+                    <div class="col-sm-3">
+                        <label for="name" class="inputLabel">Network IP*</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <input matInput placeholder="Enter Network IP" class="input-p-5" formControlName="networkIp"
+                                [ngClass]="{
+                        'is-invalid': submitted && ipForm.controls.networkIp.errors
+                      }" />
+                        </mat-form-field>
+                        @if (submitted && ipForm.controls.networkIp.errors) {
+                        <div class="errorWrap text-danger">
+                            @if (submitted && ipForm.controls.networkIp.errors.required) {
+                            <div class="error text-danger">
+                                Network IP is required.
+                            </div>
+                            }
+                        </div>
+                        }
+                    </div>
+
+                    <div class="col-sm-3">
+                        <label for="name" class="inputLabel">Display Name*</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <input matInput placeholder="Enter Display Name" class="input-p-5"
+                                formControlName="displayName" [ngClass]="{
+                        'is-invalid': submitted && ipForm.controls.displayName.errors
+                      }" />
+                        </mat-form-field>
+                        @if (submitted && ipForm.controls.displayName.errors) {
+                        <div class="errorWrap text-danger">
+                            @if (submitted && ipForm.controls.displayName.errors.required) {
+                            <div class="error text-danger">
+                                Display Name is required.
+                            </div>
+                            }
+                        </div>
+                        }
+                    </div>
+
+                    <div class="col-sm-3">
+                        <label for="name" class="inputLabel">IP Range*</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <input matInput placeholder="Enter IP Range" class="input-p-5" formControlName="ipRange"
+                                [ngClass]="{
+                                            'is-invalid': submitted && ipForm.controls.ipRange.errors
+                                        }" />
+                        </mat-form-field>
+                        @if (submitted && ipForm.controls.ipRange.errors) {
+                        <div class="errorWrap text-danger">
+                            @if (submitted && ipForm.controls.ipRange.errors.required) {
+                            <div class="error text-danger">
+                                IP Range is required.
+                            </div>
+                            }
+                            @if (submitted && ipForm.controls.ipRange.errors.pattern) {
+                            <div class="error text-danger">
+                                Invalid IP Range format. Use format: xx.xx.xx.xx/xx (e.g., 192.168.1.0/24)
+                            </div>
+                            }
+                        </div>
+                        }
+                    </div>
+
+
+                    <div class="col-sm-3">
+                        <label for="name" class="inputLabel">Pool Name*</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <input matInput placeholder="Enter Pool Name" class="input-p-5" formControlName="poolName"
+                                [ngClass]="{
+                        'is-invalid': submitted && ipForm.controls.poolName.errors
+                      }" />
+                        </mat-form-field>
+                        @if (submitted && ipForm.controls.poolName.errors) {
+                        <div class="errorWrap text-danger">
+                            @if (submitted && ipForm.controls.poolName.errors.required) {
+                            <div class="error text-danger">
+                                Pool Name is required.
+                            </div>
+                            }
+                        </div>
+                        }
+                    </div>
+
+                    <div class="col-sm-3">
+                        <label for="name" class="inputLabel">Pool Category*</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <input matInput placeholder="Enter Pool Category" class="input-p-5"
+                                formControlName="poolCategory" [ngClass]="{
+                        'is-invalid': submitted && ipForm.controls.poolCategory.errors
+                      }" />
+                        </mat-form-field>
+                        @if (submitted && ipForm.controls.poolCategory.errors) {
+                        <div class="errorWrap text-danger">
+                            @if (submitted && ipForm.controls.poolCategory.errors.required) {
+                            <div class="error text-danger">
+                                Pool Category is required.
+                            </div>
+                            }
+                        </div>
+                        }
+                    </div>
+
+                    <div class="col-sm-3">
+                        <label for="statusSelect" class="inputLabel">Pool Type*</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <mat-select id="statusSelect" class="input-p-5" placeholder="Select a Pool Type"
+                                formControlName="poolType" [ngClass]="{
+                        'is-invalid': submitted && ipForm.controls.poolType.errors
+                      }">
+                                <mat-option *ngFor="let pt of PoolType" [value]="pt.label">
+                                    {{ pt.label }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        @if (submitted && ipForm.controls.poolType.errors) {
+                        <div class="errorWrap text-danger">
+                            @if (submitted && ipForm.controls.poolType.errors.required) {
+                            <div class="error text-danger">
+                                Pool Type is required.
+                            </div>
+                            }
+                        </div>
+                        }
+                    </div>
+
+                    <div class="col-sm-3">
+                        <label for="statusSelect" class="inputLabel">Default Pool Flag*</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <mat-select id="statusSelect" class="input-p-5" placeholder="Select a Default Pool Flag"
+                                formControlName="defaultPoolFlag" [ngClass]="{
+                        'is-invalid': submitted && ipForm.controls.defaultPoolFlag.errors
+                      }">
+                                <mat-option *ngFor="let pt of defaultPoolFlagValue" [value]="pt.value">
+                                    {{ pt.label }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        @if (submitted && ipForm.controls.defaultPoolFlag.errors) {
+                        <div class="errorWrap text-danger">
+                            @if (submitted && ipForm.controls.defaultPoolFlag.errors.required) {
+                            <div class="error text-danger">
+                                Default Pool Flag is required.
+                            </div>
+                            }
+                        </div>
+                        }
+                    </div>
+
+                    <div class="col-sm-3">
+                        <label for="statusSelect" class="inputLabel">Static IP Pool*</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <mat-select id="statusSelect" class="input-p-5" placeholder="Select a Static IP Pool"
+                                formControlName="isStaticIpPool" [ngClass]="{
+                        'is-invalid': submitted && ipForm.controls.isStaticIpPool.errors
+                      }">
+                                <mat-option *ngFor="let pt of IpPool" [value]="pt.value">
+                                    {{ pt.label }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        @if (submitted && ipForm.controls.isStaticIpPool.errors) {
+                        <div class="errorWrap text-danger">
+                            @if (submitted && ipForm.controls.isStaticIpPool.errors.required) {
+                            <div class="error text-danger">
+                                Static IP Pool is required.
+                            </div>
+                            }
+                        </div>
+                        }
+                    </div>
+
+                    <div class="col-sm-3">
+                        <label for="name" class="inputLabel">Broadcast IP*</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <input matInput placeholder="Enter Broadcast IP" class="input-p-5"
+                                formControlName="broadcastIp" [ngClass]="{
+                        'is-invalid': submitted && ipForm.controls.broadcastIp.errors
+                      }" />
+                        </mat-form-field>
+                        @if (submitted && ipForm.controls.broadcastIp.errors) {
+                        <div class="errorWrap text-danger">
+                            @if (submitted && ipForm.controls.broadcastIp.errors.required) {
+                            <div class="error text-danger">
+                                Broadcast IP is required.
+                            </div>
+                            }
+                        </div>
+                        }
+                    </div>
+
+                    <div class="col-sm-3">
+                        <label for="name" class="inputLabel">First Host*</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <input matInput placeholder="Enter First Host" class="input-p-5" formControlName="firstHost"
+                                [ngClass]="{
+                        'is-invalid': submitted && ipForm.controls.firstHost.errors
+                      }" />
+                        </mat-form-field>
+                        @if (submitted && ipForm.controls.firstHost.errors) {
+                        <div class="errorWrap text-danger">
+                            @if (submitted && ipForm.controls.firstHost.errors.required) {
+                            <div class="error text-danger">
+                                First Host is required.
+                            </div>
+                            }
+                        </div>
+                        }
+                    </div>
+
+                    <div class="col-sm-3">
+                        <label for="name" class="inputLabel">Last Host*</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <input matInput placeholder="Enter Last Host" class="input-p-5" formControlName="lastHost"
+                                [ngClass]="{
+                        'is-invalid': submitted && ipForm.controls.lastHost.errors
+                      }" />
+                        </mat-form-field>
+                        @if (submitted && ipForm.controls.lastHost.errors) {
+                        <div class="errorWrap text-danger">
+                            @if (submitted && ipForm.controls.lastHost.errors.required) {
+                            <div class="error text-danger">
+                                Last Host is required.
+                            </div>
+                            }
+                        </div>
+                        }
+                    </div>
+
+                    <div class="col-sm-3">
+                        <label for="name" class="inputLabel">Total Host*</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <input matInput placeholder="Enter Total Host" class="input-p-5" formControlName="totalHost"
+                                [ngClass]="{
+                        'is-invalid': submitted && ipForm.controls.totalHost.errors
+                      }" />
+                        </mat-form-field>
+                        @if (submitted && ipForm.controls.totalHost.errors) {
+                        <div class="errorWrap text-danger">
+                            @if (submitted && ipForm.controls.totalHost.errors.required) {
+                            <div class="error text-danger">
+                                Total Host is required.
+                            </div>
+                            }
+                        </div>
+                        }
+                    </div>
+
+                    <div class="col-sm-3">
+                        <label for="name" class="inputLabel">Net Mask*</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <input matInput placeholder="Enter  Net Mask" class="input-p-5" formControlName="totalHost"
+                                formControlName="netMask" [ngClass]="{
+                        'is-invalid': submitted && ipForm.controls.netMask.errors
+                      }" />
+                        </mat-form-field>
+                        @if (submitted && ipForm.controls.netMask.errors) {
+                        <div class="errorWrap text-danger">
+                            @if (submitted && ipForm.controls.netMask.errors.required) {
+                            <div class="error text-danger">
+                                Net Mask is required.
+                            </div>
+                            }
+                        </div>
+                        }
+                    </div>
+
+                    <div class="col-sm-3">
+                        <label for="statusSelect" class="inputLabel">Status*</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <mat-select id="statusSelect" class="input-p-5" placeholder="Select a Status"
+                                formControlName="status" [ngClass]="{
+                        'is-invalid': submitted && ipForm.controls.status.errors
+                      }">
+                                <mat-option *ngFor="let status of statusOptions" [value]="status.label">
+                                    {{ status.label }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                        @if (submitted && ipForm.controls.status.errors) {
+                        <div class="errorWrap text-danger">
+                            @if (submitted && ipForm.controls.status.errors.required) {
+                            <div class="error text-danger">
+                                Status is required.
+                            </div>
+                            }
+                        </div>
+                        }
+                    </div>
+
+                    <div class="col-sm-6">
+                        <label for="countryname" class="inputLabel">Remark*</label>
+                        <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                            <textarea matInput id="countryname" class="input-p-5" placeholder="Enter Remark"
+                                formControlName="remark" [ngClass]="{
+                                        'is-invalid': submitted && ipForm.controls.remark.errors
+                                        }">
+                                    </textarea>
+                        </mat-form-field>
+                        @if (submitted && ipForm.controls.remark.errors) {
+                        <div class="errorWrap text-danger">
+                            @if (submitted && ipForm.controls.remark.errors.required) {
+                            <div class="error text-danger">
+                                Remark is required.
+                            </div>
+                            }
+                        </div>
+                        }
+                    </div>
+
+                </div>
+
+
+            </form>
+        </mat-dialog-content>
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+            <div class="button-normal m-r-10">
+                @if (!isIpEdit) {
+                <button mat-button mat-flat-button color="primary" (click)="addEditIp('')" class="button-normal"
+                    type="submit">
+                    Add {{title}}
+                </button>
+                }
+                @if (isIpEdit) {
+                <button mat-button mat-flat-button color="primary" (click)="addEditIp(viewIpData.poolId)"
+                    class="button-normal" type="submit">
+                    Update {{title}}
+                </button>
+                }
+            </div>
+            <div class="button-normal">
+                <button mat-stroked-button matButton="outlined" type="button" color="primary"
+                    class="button-normal w-100" (click)="closeDialog()">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+    }
+</ng-template>
+<!-- create ip dialog end -->
+
+<!-- for view start -->
+
+<ng-template #viewIpDetailDialog>
+    <div class="container-fluid p-0">
+        <div class="dialog-header dialog-title">
+            View {{ title }}
+            <span>
+                <a mat-icon-button (click)="closeDialog()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <mat-dialog-content>
+            <!-- basic detail card start -->
+            <mat-card class="">
+                <mat-card-header>
+                    <mat-card-title class="font-900">Basic Detail</mat-card-title>
+                </mat-card-header>
+                <div class="row p-15 m-t-10">
+                    <!-- Name -->
+                    <div class="col-md-4 field-row detail-row">
+                        <span class="field-label f-s-15 f-w-700 label">IP</span>
+                        <span class="field-label f-s-15 f-w-700 colon">:</span>
+                        <span class="field-value value m-l-10">{{ viewIpData.networkIp }}</span>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="col-md-4 field-row detail-row">
+                        <span class="field-label f-s-15 f-w-700 label">Display Name</span>
+                        <span class="field-label f-s-15 f-w-700 colon">:</span>
+                        <span class="field-value value m-l-10">{{viewIpData.displayName }}</span>
+                    </div>
+
+                    <!-- Response Time -->
+                    <div class="col-md-4 field-row detail-row">
+                        <span class="field-label f-s-15 f-w-700 label">IP Range</span>
+                        <span class="field-label f-s-15 f-w-700 colon">:</span>
+                        <span class="field-value value">{{viewIpData.ipRange}}</span>
+                    </div>
+
+                    <div class="col-md-4 field-row detail-row">
+                        <span class="field-label f-s-15 f-w-700 label">Pool Name</span>
+                        <span class="field-label f-s-15 f-w-700 colon">:</span>
+                        <span class="field-value value ">{{viewIpData.poolName }}</span>
+                    </div>
+
+                    <div class="col-md-4 field-row detail-row">
+                        <span class="field-label f-s-15 f-w-700 label">Pool Category</span>
+                        <span class="field-label f-s-15 f-w-700 colon">:</span>
+                        <span class="field-value value">{{viewIpData.poolCategory }}</span>
+                    </div>
+
+                    <div class="col-md-4 field-row detail-row">
+                        <span class="field-label f-s-15 f-w-700 label">Pool Type</span>
+                        <span class="field-label f-s-15 f-w-700 colon">:</span>
+                        <span class="field-value value">{{viewIpData.poolType }}</span>
+                    </div>
+                    <div class="col-md-4 field-row detail-row">
+                        <span class="field-label f-s-15 f-w-700 label">Default Pool Flag</span>
+                        <span class="field-label f-s-15 f-w-700 colon" style="margin-left: -4px;">:</span>
+                        <span class="field-value value ">{{ viewIpData.defaultPoolFlag }}</span>
+                    </div>
+                    <div class="col-md-4 field-row detail-row">
+                        <span class="field-label f-s-15 f-w-700 label">Static IP Pool</span>
+                        <span class="field-label f-s-15 f-w-700 colon">:</span>
+                        <span class="field-value value ">{{ viewIpData.isStaticIpPool }}</span>
+                    </div>
+                    <div class="col-md-4 field-row detail-row">
+                        <span class="field-label f-s-15 f-w-700 label">Broadcast IP</span>
+                        <span class="field-label f-s-15 f-w-700 colon">:</span>
+                        <span class="field-value value ">{{ viewIpData.broadcastIp }}</span>
+                    </div>
+                    <div class="col-md-4 field-row detail-row">
+                        <span class="field-label f-s-15 f-w-700 label">First Host</span>
+                        <span class="field-label f-s-15 f-w-700 colon">:</span>
+                        <span class="field-value value">{{ viewIpData.firstHost }}</span>
+                    </div>
+                    <div class="col-md-4 field-row detail-row">
+                        <span class="field-label f-s-15 f-w-700 label">Last Host</span>
+                        <span class="field-label f-s-15 f-w-700 colon">:</span>
+                        <span class="field-value value ">{{ viewIpData.lastHost }}</span>
+                    </div>
+                    <div class="col-md-4 field-row detail-row">
+                        <span class="field-label f-s-15 f-w-700 label">Total Host</span>
+                        <span class="field-label f-s-15 f-w-700 colon">:</span>
+                        <span class="field-value value">{{ viewIpData.totalHost }}</span>
+                    </div>
+                    <div class="col-md-4 field-row detail-row">
+                        <span class="field-label f-s-15 f-w-700 label">Net Mask </span>
+                        <span class="field-label f-s-15 f-w-700 colon">:</span>
+                        <span class="field-value value ">{{ viewIpData.netMask }}</span>
+                    </div>
+                    <div class="col-md-4 field-row detail-row">
+                        <span class="field-label f-s-15 f-w-700 label">Status </span>
+                        <span class="field-label f-s-15 f-w-700 colon">:</span>
+
+                        <span class="field-value  status-badge w-auto" [ngClass]="{
+                                                'status-success': viewIpData.status === 'Active',
+                                                'status-danger': viewIpData.status === 'Inactive'
+                                              }">
+                            {{ viewIpData.status }}
+                        </span>
+                    </div>
+                    <div class="col-md-4 field-row detail-row">
+                        <span class="field-label f-s-15 f-w-700 label">Remark </span>
+                        <span class="field-label f-s-15 f-w-700 colon">:</span>
+                        <span class="field-value value">{{ viewIpData.remark }}</span>
+                    </div>
+
+                </div>
+            </mat-card>
+            <!-- basic detail card start -->
+        </mat-dialog-content>
+
+        <mat-dialog-actions align="end">
+            <button mat-stroked-button color="warn" (click)="closeDialog()">Close</button>
+        </mat-dialog-actions>
+    </div>
+</ng-template>
+
+<!-- for view end -->

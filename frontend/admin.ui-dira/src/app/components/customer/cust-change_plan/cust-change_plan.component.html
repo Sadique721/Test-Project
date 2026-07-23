@@ -1,0 +1,2023 @@
+<div class="container-fluid">
+    <!-- Customer Current Plans Section -->
+    <mat-card class="m-b-3">
+        <mat-card-header>
+            <div class="d-flex justify-content-between align-items-center w-100">
+                <div class="d-flex align-items-center">
+                    <button mat-icon-button (click)="customerDetailOpen()" matTooltip="Go to Customer Details">
+                        <mat-icon>arrow_back</mat-icon>
+                    </button>
+                    <mat-card-title class="ms-2">
+                        {{ custDetails.title }} {{ custDetails.firstname }}
+                        {{ custDetails.lastname }} Current Plan
+                    </mat-card-title>
+                </div>
+                <div>
+                    <button mat-icon-button (click)="refreshChangePlan()" matTooltip="Refresh">
+                        <img src="assets/img/DashboardIcons/Refresh.svg" />
+
+                    </button>
+                </div>
+            </div>
+        </mat-card-header>
+
+        <mat-card-content>
+            <div class="table-container">
+                <table mat-table [dataSource]="custServiceData" class="mat-elevation-z0">
+                    <!-- Service Name Column -->
+                    <ng-container matColumnDef="serviceName">
+                        <th mat-header-cell *matHeaderCellDef>Service Name</th>
+                        <td mat-cell *matCellDef="let plan">{{ plan.service }}</td>
+                    </ng-container>
+
+                    <!-- Serial No Column -->
+                    <ng-container matColumnDef="serialNo">
+                        <th mat-header-cell *matHeaderCellDef>Serial No</th>
+                        <td mat-cell *matCellDef="let plan">
+                            <span *ngIf="getSerialNumber(plan) !== ''" class="cursor-pointer text-primary"
+                                (click)="openPlanConnectionModal(plan)">
+                                {{ getSerialNumber(plan) }}
+                            </span>
+                            <span *ngIf="getSerialNumber(plan) === ''" class="cursor-pointer text-primary"
+                                (click)="openPlanConnectionModal(plan)">NA</span>
+                        </td>
+                    </ng-container>
+
+                    <!-- Plan Name Column -->
+                    <ng-container matColumnDef="planName">
+                        <th mat-header-cell *matHeaderCellDef>Plan Name</th>
+                        <td mat-cell *matCellDef="let plan">
+                            <span class="cursor-pointer text-primary"
+                                (click)="quotaPlanDetailsModel('quotaModalOpen', customerId, plan)">
+                                {{ plan.planName }}
+                            </span>
+                        </td>
+                    </ng-container>
+
+                    <!-- Plan Group Column -->
+                    <ng-container matColumnDef="planGroup">
+                        <th mat-header-cell *matHeaderCellDef>Plan Group</th>
+                        <td mat-cell *matCellDef="let plan">{{ plan.planGroupName }}</td>
+                    </ng-container>
+
+
+                    <!-- Validity Column -->
+                    <ng-container matColumnDef="validity">
+                        <th mat-header-cell *matHeaderCellDef>Validity</th>
+                        <td mat-cell *matCellDef="let plan">
+                            <span *ngIf="plan.validity">{{ plan.validity }}</span>
+                            <span *ngIf="!plan.validity">N/A</span>
+                        </td>
+                    </ng-container>
+
+                    <!-- Plan Status Column -->
+                    <ng-container matColumnDef="planStatus">
+                        <th mat-header-cell *matHeaderCellDef>Plan Status</th>
+                        <td mat-cell *matCellDef="let plan">
+                            <span class="status-badge"
+                                [ngClass]="getStatusClass(plan.planstage, plan.custServMappingStatus)">
+                                {{ getStatus(plan.planstage, plan.custServMappingStatus) }}
+                            </span>
+                        </td>
+
+                    </ng-container>
+
+                    <!-- Start Date Column -->
+                    <ng-container matColumnDef="startDate">
+                        <th mat-header-cell *matHeaderCellDef>Start Date</th>
+                        <td mat-cell *matCellDef="let plan">
+                            {{ plan.dbStartDate | date: 'dd-MM-yyyy hh:mm a' }}
+                        </td>
+                    </ng-container>
+
+                    <!-- Service Expiry Date Column -->
+                    <ng-container matColumnDef="serviceExpiryDate">
+                        <th mat-header-cell *matHeaderCellDef>Service Expiry Date</th>
+                        <td mat-cell *matCellDef="let plan">
+                            <span *ngIf="plan.dbEndDate">
+                                {{ plan.dbEndDate | date: 'dd-MM-yyyy hh:mm a' }}
+                            </span>
+                            <span *ngIf="!plan.dbEndDate">N/A</span>
+                        </td>
+                    </ng-container>
+
+                    <!-- Billing End Date Column -->
+                    <ng-container matColumnDef="billingEndDate">
+                        <th mat-header-cell *matHeaderCellDef>Billing End Date</th>
+                        <td mat-cell *matCellDef="let plan">
+                            <span *ngIf="plan.dbExpiryDate">
+                                {{ plan.dbExpiryDate | date: 'dd-MM-yyyy hh:mm a' }}
+                            </span>
+                            <span *ngIf="!plan.dbExpiryDate">N/A</span>
+                        </td>
+                    </ng-container>
+
+                    <!-- Remaining Days Column -->
+                    <ng-container matColumnDef="remainingDays">
+                        <th mat-header-cell *matHeaderCellDef>Remaining Days</th>
+                        <td mat-cell *matCellDef="let plan">
+                            <span *ngIf="plan.dbStartDate && plan.dbEndDate">
+                                <!-- {{
+                                this.findDurationFromStartDate(plan.dbStartDate, plan.dbEndDate)
+                                }} -->
+                                {{
+                                plan.remainingDays
+                                }}
+                            </span>
+                            <span *ngIf="!plan.dbStartDate || !plan.dbEndDate">N/A</span>
+                        </td>
+                    </ng-container>
+
+                    <!-- Promise To Pay Column -->
+                    <ng-container matColumnDef="promiseToPay">
+                        <th mat-header-cell *matHeaderCellDef>Promise To Pay Taken</th>
+                        <!-- <td mat-cell *matCellDef="let plan">
+                            <span *ngIf="plan.isTakenPromiseToPay">Yes</span>
+                            <span *ngIf="!plan.isTakenPromiseToPay">No</span>
+                        </td> -->
+                        <td mat-cell *matCellDef="let plan" class="f-s-14">
+                            <span class="status-badge" [ngClass]="{
+                                                  'status-success':
+                                                    plan.isTakenPromiseToPay,
+                           
+                                                  'status-info': !plan.isTakenPromiseToPay
+                                                }">
+                                {{ plan.isTakenPromiseToPay?"Yes":"No" }}
+                            </span>
+                        </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+                    <!-- No Data Row -->
+                    <tr class="mat-row" *matNoDataRow>
+                        <td class="mat-cell text-center" [attr.colspan]="displayedColumns.length">
+                            No current plans found
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <mat-paginator [length]="customerCurrentPlanListdatatotalRecords"
+                [pageSize]="customerCurrentPlanListdataitemsPerPage" [pageSizeOptions]="[5,10,20,50,100]"
+                (page)="onPageChange($event)" showFirstLastButtons>
+            </mat-paginator>
+        </mat-card-content>
+    </mat-card>
+
+    <!-- Change Plan Form Section -->
+    <mat-card class="m-b-3">
+        <mat-card-header>
+            <mat-card-title>Change Plan</mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content>
+            <form [formGroup]="changePlanNewForm">
+                <!-- Plan Type Selection -->
+                <div class="row m-b-3">
+                    <div class="col-md-4">
+                        <mat-label class="inputLabel">Change Plan Type</mat-label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <mat-select class="input-p-5" placeholder="Select Change Plan Type"
+                                [(ngModel)]="changePlanTypeSelection" [ngModelOptions]="{ standalone: true }"
+                                (selectionChange)="onChangePlanType($event)">
+                                <mat-option *ngFor="let type of changePlanType" [value]="type.value">
+                                    {{ type.text }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- <div class="col-md-4" *ngIf="changePlanTypeSelection">
+                        <mat-form-field appearance="outline" class="w-100">
+                            <mat-label>Change Plan Date</mat-label>
+                            <mat-select [(ngModel)]="ChangePLanDateSelection" [ngModelOptions]="{ standalone: true }">
+                                <mat-option *ngFor="let date of dateType" [value]="date.value">
+                                    {{ date.text }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div> -->
+                    <!-- Change Plan Type Dropdown with Search -->
+                    <div class="col-md-4 mb-3"
+                        *ngIf="changePlanTypeSelection === 'Changeplan' && isAllowDowngradeChangePlan">
+                        <mat-label class="inputLabel">Plan Type *</mat-label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <!-- <mat-icon matSuffix>search</mat-icon> -->
+                            <mat-select formControlName="planType" class="input-p-5" placeholder="Select Plan Type"
+                                (selectionChange)="onPlanTypeChange()">
+                                <mat-option *ngFor="let plan of planUpgradeDowngrade" [value]="plan.value">
+                                    {{ plan.text }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Bill Cycle -->
+                    <div class="col-md-4" *ngIf="changePlanTypeSelection === 'Changeplan'">
+                        <label class="inputLabel">Bill Cycle</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <mat-select placeholder="Select Bill Cycle" class="input-p-5" formControlName="billCycle"
+                                [ngModelOptions]="{ standalone: true }"
+                                [disabled]="changePlanTypeSelection === 'Addon'">
+                                <mat-option *ngFor="let billing of planBillingCycle" [value]="billing.value">
+                                    {{ billing.text }}
+                                </mat-option>
+                                <!-- <mat-option value="New">New Cycle</mat-option> -->
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                    <!-- Add Charge Section -->
+                    <div class="col-md-4" *ngIf="selectedPlanCategory">
+                        <mat-checkbox [(ngModel)]="isAddCharge" [ngModelOptions]="{ standalone: true }">
+                            Add Charge
+                        </mat-checkbox>
+                    </div>
+                    <div class="col-md-4" *ngIf="changePlanTypeSelection && selectedPlanCategory">
+                        <label class="d-block mb-2">Amount to Pay for Plan Change</label>
+                        <button mat-raised-button color="accent" (click)="modalOpenAmount()"
+                            [disabled]="isPlanSelected(custDetails.id)">
+                            <mat-icon>attach_money</mat-icon>
+                            View Amount
+                        </button>
+                    </div>
+                    <!--
+                                        <div class="col-md-4" *ngIf="selectedBillCycle === 'New'">
+                                            <mat-form-field appearance="outline" class="w-100">
+                                                <mat-label>New Cycle Start Date</mat-label>
+                                                <input matInput [matDatepicker]="newCyclePicker" [(ngModel)]="newCycleDate"
+                                                    [ngModelOptions]="{ standalone: true }" />
+                                                <mat-datepicker-toggle matSuffix [for]="newCyclePicker"></mat-datepicker-toggle>
+                                                <mat-datepicker #newCyclePicker></mat-datepicker>
+                                            </mat-form-field>
+                                        </div> -->
+                </div>
+
+
+
+
+
+                <!-- Parent Customer Plan Changes -->
+                <div *ngIf="changePlanTypeSelection && custServiceData.length > 0">
+
+
+                    <!-- Individual Plan Selection Table -->
+                    <div *ngIf="
+              selectedPlanCategory === 'individual' && custServiceData.length > 0
+            ">
+                        <table mat-table [dataSource]="custServiceData" class="mat-elevation-z1">
+                            <!-- Change Plan Checkbox Column -->
+                            <ng-container matColumnDef="changePlan">
+                                <th mat-header-cell *matHeaderCellDef></th>
+                                <td mat-cell *matCellDef="let plan; let i = index">
+                                    <mat-checkbox [(ngModel)]="plan.changeFlag" [ngModelOptions]="{ standalone: true }"
+                                        (change)="changePlanSelection($event, plan, i, false, -1)"></mat-checkbox>
+
+                                </td>
+                            </ng-container>
+                            <!-- Connection Column -->
+                            <ng-container matColumnDef="connection">
+                                <th mat-header-cell *matHeaderCellDef>Connection No</th>
+                                <td mat-cell *matCellDef="let plan">
+                                    {{ plan.connection_no }}
+                                </td>
+                            </ng-container>
+
+                            <!-- Service Column -->
+                            <ng-container matColumnDef="service">
+                                <th mat-header-cell *matHeaderCellDef>Service</th>
+                                <td mat-cell *matCellDef="let plan">{{ plan.service }}</td>
+                            </ng-container>
+
+                            <!-- Current Plan Column -->
+                            <ng-container matColumnDef="currentPlan">
+                                <th mat-header-cell *matHeaderCellDef>Current Plan</th>
+                                <td mat-cell *matCellDef="let plan">{{ plan.planName }}</td>
+                            </ng-container>
+
+
+
+                            <!-- New Plan Selection Column -->
+                            <ng-container matColumnDef="newPlan">
+                                <th mat-header-cell *matHeaderCellDef>Select New Plan</th>
+                                <td mat-cell *matCellDef="let plan; let i = index">
+                                    <mat-form-field appearance="outline" class="w-100"
+                                        style="position: relative;top: 8px;">
+                                        <mat-select placeholder="Select a New Plan" [disabled]="!plan.changeFlag"
+                                            [(ngModel)]="plan.newPlanSelection" [ngModelOptions]="{ standalone: true }"
+                                            (selectionChange)="
+                        selectNewPlan(i, $event, plan, custDetails.id, selectedPlanCategory)
+                      ">
+                                            <mat-option *ngFor="let newPlan of newPlanData[plan.connection_no]"
+                                                [value]="newPlan.id">
+                                                {{ newPlan.label }}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </td>
+                            </ng-container>
+
+                            <!-- View Details Column -->
+                            <ng-container matColumnDef="viewDetails">
+                                <th mat-header-cell *matHeaderCellDef>View Details</th>
+                                <td mat-cell *matCellDef="let plan">
+                                    <button mat-icon-button color="primary" *ngIf="plan.newPlanSelection" (click)="
+                      modalOpenDetails(
+                        plan.newPlanSelection,
+                        plan.connection_no,
+                        custDetails.id,
+                        selectedPlanCategory
+                      )
+                    " matTooltip="View Plan Details">
+                                        <mat-icon>visibility</mat-icon>
+                                    </button>
+                                </td>
+                            </ng-container>
+
+                            <tr mat-header-row *matHeaderRowDef="parentPlanColumns"></tr>
+                            <tr mat-row *matRowDef="let row; columns: parentPlanColumns"></tr>
+                        </table>
+                    </div>
+
+                    <!-- Plan Group Details -->
+                    <div *ngIf="selectedPlanCategory === 'groupPlan' && newPlanGroupId">
+                        <mat-card class="mt-3">
+                            <mat-card-content>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <h5>Plan Group Details</h5>
+                                        <div *ngFor="let mapping of planMappingListData">
+                                            <p>
+                                                <strong>Service:</strong> {{ mapping.service }} -
+                                                <strong>Plan:</strong> {{ mapping.plan.name }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </mat-card-content>
+                        </mat-card>
+                    </div>
+
+
+                </div>
+
+                <!-- Child Customers Section -->
+                <div *ngIf="
+            changePlanTypeSelection &&
+            childCustList.length > 0 &&
+            custServiceData.length > 0
+          " class="mt-4">
+                    <h4 class="m-b-3">Child Customers</h4>
+
+                    <div *ngFor="let child of childCustList; let childIdx = index" class="mb-4">
+                        <mat-card>
+                            <mat-card-header>
+                                <mat-card-title>
+                                    {{ child.title }} {{ child.firstname }} {{ child.lastname }}
+                                </mat-card-title>
+                            </mat-card-header>
+
+                            <mat-card-content>
+                                <!-- Child Plan Category Selection -->
+                                <div class="row m-b-3">
+                                    <div class="col-md-4">
+                                        <label class="inputLabel">Select Category</label>
+                                        <mat-form-field appearance="outline" class="w-100">
+                                            <mat-select class="input-p-5" [(ngModel)]="child.selectedPlanCategory"
+                                                [ngModelOptions]="{ standalone: true }"
+                                                (selectionChange)="selectPlanCategory($event, childIdx, child)"
+                                                [disabled]="
+                          child.serviceMappingData?.length == 1 &&
+                          changePlanTypeSelection !== 'Addon'
+                        ">
+                                                <mat-option *ngFor="let category of planDetailsCategory"
+                                                    [value]="category.value">
+                                                    {{ category.label }}
+                                                </mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+                                    </div>
+
+                                    <!-- Child Plan Group Selection -->
+                                    <div class="col-md-4" *ngIf="child.selectedPlanCategory === 'groupPlan'">
+                                        <label class="inputLabel">Select Plan Group</label>
+                                        <mat-form-field appearance="outline" class="w-100">
+                                            <mat-select class="input-p-5" [(ngModel)]="child.newPlanGroupId"
+                                                [ngModelOptions]="{ standalone: true }"
+                                                (selectionChange)="selectPlanGroup($event, childIdx)">
+                                                <mat-option *ngFor="let group of planGroupData[child.id]"
+                                                    [value]="group.plan.id" [disabled]="group.inactive">
+                                                    {{ group.plan.name }}
+                                                </mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+                                    </div>
+                                </div>
+
+                                <!-- Child Individual Plans Table -->
+                                <div *ngIf="
+                    child.selectedPlanCategory === 'individual' &&
+                    child.serviceMappingData?.length > 0
+                  ">
+                                    <table mat-table [dataSource]="child.serviceMappingData" class="mat-elevation-z1">
+                                        <!-- Change Plan Checkbox Column -->
+                                        <ng-container matColumnDef="changePlan">
+                                            <th mat-header-cell *matHeaderCellDef></th>
+                                            <td mat-cell *matCellDef="let plan; let i = index">
+                                                <mat-checkbox [(ngModel)]="plan.changeFlag"
+                                                    [ngModelOptions]="{ standalone: true }"
+                                                    (change)="changePlanSelection($event, plan, i, true, childIdx)"></mat-checkbox>
+
+                                            </td>
+                                        </ng-container>
+                                        <!-- Connection Column -->
+                                        <ng-container matColumnDef="connection">
+                                            <th mat-header-cell *matHeaderCellDef>Connection No</th>
+                                            <td mat-cell *matCellDef="let plan">
+                                                {{ plan.connection_no }}
+                                            </td>
+                                        </ng-container>
+
+                                        <!-- Service Column -->
+                                        <ng-container matColumnDef="service">
+                                            <th mat-header-cell *matHeaderCellDef>Service</th>
+                                            <td mat-cell *matCellDef="let plan">{{ plan.service }}</td>
+                                        </ng-container>
+
+                                        <!-- Current Plan Column -->
+                                        <ng-container matColumnDef="currentPlan">
+                                            <th mat-header-cell *matHeaderCellDef>Current Plan</th>
+                                            <td mat-cell *matCellDef="let plan">{{ plan.planName }}</td>
+                                        </ng-container>
+
+
+
+                                        <!-- New Plan Selection Column -->
+                                        <ng-container matColumnDef="newPlan">
+                                            <th mat-header-cell *matHeaderCellDef>Select New Plan</th>
+                                            <td mat-cell *matCellDef="let plan; let i = index">
+                                                <mat-form-field appearance="outline" class="w-100"
+                                                    *ngIf="plan.changeFlag">
+                                                    <mat-select [(ngModel)]="plan.newPlanSelection"
+                                                        [ngModelOptions]="{ standalone: true }" (selectionChange)="
+                              selectNewPlan(i, $event, plan, child.id, child.selectedPlanCategory)
+                            ">
+                                                        <mat-option
+                                                            *ngFor="let newPlan of newPlanData[plan.connection_no]"
+                                                            [value]="newPlan.id">
+                                                            {{ newPlan.label }}
+                                                        </mat-option>
+                                                    </mat-select>
+                                                </mat-form-field>
+                                            </td>
+                                        </ng-container>
+
+                                        <!-- View Details Column -->
+                                        <ng-container matColumnDef="viewDetails">
+                                            <th mat-header-cell *matHeaderCellDef>View Details</th>
+                                            <td mat-cell *matCellDef="let plan">
+                                                <button mat-icon-button color="primary" *ngIf="plan.newPlanSelection"
+                                                    (click)="
+                            modalOpenDetails(
+                              plan.newPlanSelection,
+                              plan.connection_no,
+                              child.id,
+                              child.selectedPlanCategory
+                            )
+                          " matTooltip="View Plan Details">
+                                                    <mat-icon>visibility</mat-icon>
+                                                </button>
+                                            </td>
+                                        </ng-container>
+
+                                        <tr mat-header-row *matHeaderRowDef="childPlanColumns"></tr>
+                                        <tr mat-row *matRowDef="let row; columns: childPlanColumns"></tr>
+                                    </table>
+                                </div>
+
+                                <!-- Child Add Charge -->
+                                <div class="row mt-3" *ngIf="child.selectedPlanCategory">
+                                    <div class="col-md-12">
+                                        <mat-checkbox [(ngModel)]="child.isAddCharge"
+                                            [ngModelOptions]="{ standalone: true }">
+                                            Add Charge
+                                        </mat-checkbox>
+                                    </div>
+                                </div>
+                            </mat-card-content>
+                        </mat-card>
+                    </div>
+                </div>
+
+                <!-- Payment & Remarks Section -->
+                <mat-card class="mt-4" *ngIf="changePlanTypeSelection">
+                    <mat-card-header>
+                        <mat-card-title> Remarks</mat-card-title>
+                    </mat-card-header>
+
+                    <mat-card-content>
+                        <form [formGroup]="changePlanNewForm">
+                            <div class="row">
+                                <!-- Is Payment Received? (Radio Buttons) - FIXED -->
+                                <!-- <div class="col-md-4 mb-3">
+                                    <label class="d-block mb-2 fw-bold">Is Payment Received? *</label>
+                                    <mat-radio-group formControlName="isPaymentReceived"
+                                        (change)="paymentFlagToggle($event)">
+                                        <mat-radio-button [value]="true" class="me-3">Yes</mat-radio-button>
+                                        <mat-radio-button [value]="false">No</mat-radio-button>
+                                    </mat-radio-group>
+                                </div> -->
+
+                                <!-- Payment Owner - Only shown when = "true" -->
+                                <!-- <div class="col-md-4 mb-3" *ngIf="changePlanNewForm.get('isPaymentReceived')?.value">
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-label>Payment Owner <span *ngIf="paymentOwnerRequired">*</span></mat-label>
+                                        <input matInput [value]="getStaffDisplayName()" readonly />
+                                        <button mat-icon-button matSuffix (click)="modalOpenStaff()" type="button">
+                                            <mat-icon>search</mat-icon>
+                                        </button>
+                                        <mat-error
+                                            *ngIf="changePlanNewForm.get('paymentOwnerId')?.hasError('required')">
+                                            Payment Owner is required
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div> -->
+
+                                <!-- Billable Customer -->
+                                <!-- <div class="col-md-4 mb-3">
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-label>Billable Customer</mat-label>
+                                        <input matInput [value]="getBillableCustomerDisplayName()" readonly />
+                                        <button mat-icon-button matSuffix (click)="modalOpenParentCustomer('billable')"
+                                            type="button">
+                                            <mat-icon>search</mat-icon>
+                                        </button>
+                                    </mat-form-field>
+                                </div> -->
+
+                                <!-- Internal Remarks -->
+                                <div class="col-md-6 mb-3">
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-label>Internal Remarks *</mat-label>
+                                        <textarea matInput formControlName="remarks" rows="3"
+                                            placeholder="Enter internal remarks..."></textarea>
+                                        <mat-error *ngIf="changePlanNewForm.get('remarks')?.hasError('required')">
+                                            Remarks are required
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- External Remarks -->
+                                <div class="col-md-6 mb-3">
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-label>External Remarks</mat-label>
+                                        <textarea matInput formControlName="externalRemark" rows="3"
+                                            placeholder="Enter external remarks (optional)..."></textarea>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Trigger COA/DM Checkbox -->
+                                <div class="col-md-12 mb-3">
+                                    <mat-checkbox formControlName="isTriggerCoaDm">
+                                        Trigger COA/DM
+                                    </mat-checkbox>
+                                </div>
+                            </div>
+                        </form>
+                    </mat-card-content>
+                </mat-card>
+
+
+
+                <!-- Action Buttons -->
+                <div class="row mt-3" *ngIf="changePlanTypeSelection">
+                    <div class="col-md-12 d-flex justify-content-end">
+                        <button mat-button mat-flat-button color="primary" type="submit" class="m-r-10"
+                            (click)="changePlanGroupBulk()">
+                            {{ changePlanTypeSelection ? (changePlanTypeSelection == 'Changeplan' ? 'Change' :
+                            changePlanTypeSelection) :
+                            'Change' }} Plan
+                        </button>
+                        <button mat-button mat-stroked-button color="warn" type="button" class="m-r-10"
+                            (click)="resetFormType()" class="me-2">
+                            Reset
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </mat-card-content>
+    </mat-card>
+</div>
+
+<!-- Plan Details Dialog -->
+<ng-template #planDetailsDialog>
+    <h2 mat-dialog-title>Plan Details</h2>
+    <mat-dialog-content>
+        <div class="row" *ngIf="planDetails">
+            <div class="col-md-6 mb-2">
+                <strong>Plan Name:</strong> {{ planDetails.name }}
+            </div>
+            <div class="col-md-6 mb-2">
+                <strong>Plan Group:</strong> {{ planDetails.plangroup }}
+            </div>
+            <div class="col-md-6 mb-2">
+                <strong>Validity:</strong> {{ planDetails.validity }}
+                {{ planDetails.unitsOfValidity }}
+            </div>
+            <div class="col-md-6 mb-2" *ngIf="planDetails.category == 'Business Promotion'">
+                <strong>Price (incl. Tax):</strong> {{ planDetails.newOfferprice | number: "1.2-2" }}
+            </div>
+            <div class="col-md-6 mb-2" *ngIf="planDetails.category != 'Business Promotion'">
+                <strong>Price (incl. Tax):</strong> {{ planDetails.offerprice | number: "1.2-2" }}
+            </div>
+            <div class="col-md-12 mb-2">
+                <strong>Description:</strong> {{ planDetails.description || 'N/A' }}
+            </div>
+        </div>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+        <button mat-button mat-dialog-close>Close</button>
+
+    </mat-dialog-actions>
+</ng-template>
+
+<!-- Quota Details Dialog -->
+<ng-template #quotaDetailsDialog>
+    <h2 mat-dialog-title>Quota Details</h2>
+    <mat-dialog-content>
+        <div class="row" *ngIf="selPlanData">
+            <div class="col-md-6 mb-2">
+                <strong>Quota Type:</strong> {{ selPlanData.quotatype || 'N/A' }}
+            </div>
+            <div class="col-md-6 mb-2">
+                <strong>Quota Time:</strong> {{ selPlanData.quotatime || 'N/A' }}
+            </div>
+            <div class="col-md-6 mb-2">
+                <strong>Quota:</strong> {{ selPlanData.quota || 'N/A' }}
+                {{ selPlanData.quotaUnit || '' }}
+            </div>
+            <div class="col-md-6 mb-2">
+                <strong>Quota Unit Time:</strong>
+                {{ selPlanData.quotaunittime || 'N/A' }}
+            </div>
+        </div>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+        <button mat-raised-button color="primary" mat-dialog-close>Close</button>
+    </mat-dialog-actions>
+</ng-template>
+
+<!-- Add Charge Dialog -->
+<ng-template #addChargeDialog>
+    <h2 mat-dialog-title>Add Charge</h2>
+    <mat-dialog-content>
+        <form [formGroup]="chargeGroupForm">
+            <div class="row">
+                <!-- Charge Selection -->
+                <div class="col-md-6 m-b-3">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Select Charge</mat-label>
+                        <mat-select formControlName="chargeid" (selectionChange)="onSelectCharge($event)">
+                            <mat-option *ngFor="let charge of chargeData" [value]="charge.id">
+                                {{ charge.name }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="chargeGroupForm.get('chargeid')?.hasError('required')">
+                            Charge is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- Plan Selection -->
+                <div class="col-md-6 m-b-3">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Select Plan</mat-label>
+                        <mat-select formControlName="planid">
+                            <mat-option *ngFor="let plan of plansForCharge" [value]="plan.id">
+                                {{ plan.planName }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="chargeGroupForm.get('planid')?.hasError('required')">
+                            Plan is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- Charge Type -->
+                <div class="col-md-6 m-b-3">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Charge Type</mat-label>
+                        <mat-select formControlName="type">
+                            <mat-option *ngFor="let type of chargeType" [value]="type.label">
+                                {{ type.label }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="chargeGroupForm.get('type')?.hasError('required')">
+                            Charge Type is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- Actual Price -->
+                <div class="col-md-6 m-b-3">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Actual Price</mat-label>
+                        <input matInput type="number" formControlName="actualprice" readonly />
+                    </mat-form-field>
+                </div>
+
+                <!-- New Price -->
+                <div class="col-md-6 m-b-3">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>New Price</mat-label>
+                        <input matInput type="number" formControlName="price" (input)="calculateDiscount()" />
+                        <mat-error *ngIf="chargeGroupForm.get('price')?.hasError('required')">
+                            New Price is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- Discount -->
+                <div class="col-md-6 m-b-3">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Discount</mat-label>
+                        <input matInput type="number" formControlName="discount" readonly />
+                    </mat-form-field>
+                </div>
+
+                <!-- Validity -->
+                <div class="col-md-6 m-b-3">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Validity</mat-label>
+                        <input matInput type="number" formControlName="validity" />
+                        <mat-error *ngIf="chargeGroupForm.get('validity')?.hasError('required')">
+                            Validity is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- Units of Validity -->
+                <div class="col-md-6 m-b-3">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Units of Validity</mat-label>
+                        <mat-select formControlName="unitsOfValidity">
+                            <mat-option value="Days">Days</mat-option>
+                            <mat-option value="Months">Months</mat-option>
+                            <mat-option value="Years">Years</mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="chargeGroupForm.get('unitsOfValidity')?.hasError('required')">
+                            Units of Validity is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- Charge Date -->
+                <div class="col-md-6 m-b-3">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Charge Date</mat-label>
+                        <input matInput [matDatepicker]="chargeDatePicker" formControlName="charge_date" />
+                        <mat-datepicker-toggle matSuffix [for]="chargeDatePicker"></mat-datepicker-toggle>
+                        <mat-datepicker #chargeDatePicker></mat-datepicker>
+                        <mat-error *ngIf="chargeGroupForm.get('charge_date')?.hasError('required')">
+                            Charge Date is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- Static IP Address -->
+                <div class="col-md-6 m-b-3" *ngIf="showStaticIPField">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Static IP Address</mat-label>
+                        <input matInput formControlName="staticIPAdrress" />
+                    </mat-form-field>
+                </div>
+            </div>
+        </form>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+        <button mat-button mat-dialog-close>Cancel</button>
+        <button mat-raised-button color="primary" (click)="addCharge()" [disabled]="chargeGroupForm.invalid">
+            Add Charge
+        </button>
+    </mat-dialog-actions>
+</ng-template>
+
+<!-- Plan Details Dialog -->
+<ng-template #planDetailsDialog>
+    <h2 mat-dialog-title>Plan Details</h2>
+    <mat-dialog-content>
+        <div class="row" *ngIf="planDetails">
+            <div class="col-md-4 m-b-3">
+                <strong>Quota Type:</strong> {{ planDetails.quotatype }}
+            </div>
+            <div class="col-md-4 m-b-3">
+                <strong>Data Quota:</strong>
+                <span *ngIf="planDetails.quota">{{ planDetails.quota }}-{{ planDetails.quotaUnit }}</span>
+            </div>
+            <div class="col-md-4 m-b-3">
+                <strong>Quota Time:</strong> {{ planDetails.quotatime }}
+            </div>
+            <div class="col-md-4 m-b-3">
+                <strong>Download Speed:</strong> {{ planDetails.downloadSpeed }}
+            </div>
+            <div class="col-md-4 m-b-3">
+                <strong>Upload Speed:</strong> {{ planDetails.uploadSpeed }}
+            </div>
+            <div class="col-md-12 m-b-3">
+                <strong>Plan Name:</strong> {{ planDetails.name }}
+            </div>
+            <div class="col-md-12 m-b-3">
+                <strong>Description:</strong> {{ planDetails.description || 'N/A' }}
+            </div>
+        </div>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+        <button mat-button (click)="closePlanDetailsModal()">Close</button>
+    </mat-dialog-actions>
+</ng-template>
+
+<!-- Plan Due Amount Dialog -->
+<ng-template #amountDialog>
+
+    <div class="dialog-header dialog-title">
+        Plan Due Amount
+        <span>
+            <a mat-icon-button (click)="closeDisplayPlanAmountDetails()">
+                <img src="assets/img/DashboardIcons/Reject.svg">
+            </a>
+        </span>
+    </div>
+    <mat-dialog-content>
+        <div class="row">
+            <div class="col-md-12 m-b-3">
+                <strong>Amount:</strong>
+                {{ customerChangePlanDueAmount?.Amount | number: '1.2-2' }}
+            </div>
+        </div>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+        <button mat-raised-button color="warn" (click)="closeDisplayPlanAmountDetails()">
+            Close
+        </button>
+    </mat-dialog-actions>
+</ng-template>
+
+<!-- Add Charge Dialog -->
+<ng-template #addChargeDialog>
+    <h2 mat-dialog-title>Add Direct Charge</h2>
+    <mat-dialog-content>
+        <form [formGroup]="chargeGroupForm">
+            <div class="row">
+                <div class="col-md-6 m-b-3">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Select Charge</mat-label>
+                        <mat-select formControlName="chargeid" (selectionChange)="selectcharge($event)">
+                            <mat-option *ngFor="let charge of chargeData" [value]="charge.id">
+                                {{ charge.name }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                <div class="col-md-6 m-b-3">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Plan</mat-label>
+                        <mat-select formControlName="planid">
+                            <mat-option *ngFor="let plan of plansForAddCharge" [value]="plan.id">
+                                {{ plan.planName }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                <!-- Add all other form fields similarly -->
+            </div>
+        </form>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+        <button mat-button (click)="closeAddChargeModal()">Cancel</button>
+        <button mat-raised-button color="primary" (click)="addDirectCharge()">
+            Add Charge
+        </button>
+    </mat-dialog-actions>
+</ng-template>
+
+
+
+<!-- ======================================================================================== -->
+<!-- MODAL 2: Plan Details -->
+<!-- ======================================================================================== -->
+<ng-template #planDetailsDialog>
+    <h2 mat-dialog-title>Plan Details</h2>
+    <mat-dialog-content>
+        <div class="row" *ngIf="planDetails">
+            <!-- Row 1 -->
+            <div class="col-md-4 m-b-3">
+                <strong>Quota Type:</strong> {{ planDetails.quotatype }}
+            </div>
+            <div class="col-md-4 m-b-3">
+                <strong>Data Quota:</strong>
+                <span *ngIf="planDetails.quota">
+                    {{ planDetails.quota }}-{{ planDetails.quotaUnit }}
+                </span>
+                <span *ngIf="!planDetails.quota">-</span>
+            </div>
+            <div class="col-md-4 m-b-3">
+                <strong>Time Quota:</strong>
+                <span *ngIf="planDetails.quotatime">
+                    {{ planDetails.quotatime }}-{{ planDetails.quotaunittime }}
+                </span>
+                <span *ngIf="!planDetails.quotatime">-</span>
+            </div>
+
+            <!-- Row 2 -->
+            <div class="col-md-4 m-b-3">
+                <strong>Price (incl. Tax):</strong>
+                <span *ngIf="planDetails.category == 'Business Promotion'">
+                    {{ planDetails.newOfferprice | number: '1.2-2' }}
+                </span>
+                <span *ngIf="planDetails.category !== 'Business Promotion'">
+                    {{ planDetails.offerprice | number: '1.2-2' }}
+                </span>
+            </div>
+            <div class="col-md-4 m-b-3">
+                <strong>Discount (%):</strong> {{ planDiscount | number: '1.2-2' }}
+            </div>
+            <div class="col-md-4 m-b-3">
+                <strong>Validity:</strong>
+                <span *ngIf="planDetails.validity">
+                    {{ planDetails.validity }}-{{ planDetails.unitsOfValidity }}
+                </span>
+            </div>
+
+            <!-- Row 3 -->
+            <div class="col-md-4 m-b-3">
+                <strong>Download Speed:</strong>
+                <span *ngIf="planDetails.downloadSpeed">
+                    {{ planDetails.downloadSpeed }}-{{ planDetails.downloadSpeedUnit }}
+                </span>
+                <span *ngIf="!planDetails.downloadSpeed">-</span>
+            </div>
+            <div class="col-md-4 m-b-3">
+                <strong>Upload Speed:</strong>
+                <span *ngIf="planDetails.uploadSpeed">
+                    {{ planDetails.uploadSpeed }}-{{ planDetails.uploadSpeedUnit }}
+                </span>
+                <span *ngIf="!planDetails.uploadSpeed">-</span>
+            </div>
+            <div class="col-md-4 m-b-3">
+                <strong>Burst Limit:</strong>
+                <span *ngIf="planDetails.burst_limit">
+                    {{ planDetails.burst_limit }}-{{ planDetails.burst_limit_unit }}
+                </span>
+                <span *ngIf="!planDetails.burst_limit">-</span>
+            </div>
+
+            <!-- Row 4 -->
+            <div class="col-md-12 m-b-3">
+                <strong>Plan Name:</strong> {{ planDetails.name }}
+            </div>
+            <div class="col-md-12 m-b-3">
+                <strong>Description:</strong> {{ planDetails.description || '-' }}
+            </div>
+        </div>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+        <button mat-button (click)="closePlanDetailsModal()">Close</button>
+    </mat-dialog-actions>
+</ng-template>
+
+<!-- ======================================================================================== -->
+<!-- MODAL 3: Add Direct Charge -->
+<!-- ======================================================================================== -->
+<ng-template #addChargeDialog>
+    <h2 mat-dialog-title>Add Direct Charge</h2>
+    <mat-dialog-content class="dialog-large-content">
+        <form [formGroup]="chargeGroupForm">
+            <div class="row">
+                <!-- Charge Selection -->
+                <div class="col-md-4 m-b-3">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Select Charge *</mat-label>
+                        <mat-select formControlName="chargeid" (selectionChange)="selectcharge($event)">
+                            <mat-option *ngFor="let charge of commonDropDownService.chargeByTypeData"
+                                [value]="charge.id">
+                                {{ charge.name }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="chargesubmitted && chargeGroupForm.controls.chargeid.errors?.required">
+                            Charge is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- Actual Price -->
+                <div class="col-md-4 m-b-3">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Actual Price *</mat-label>
+                        <input matInput type="number" formControlName="actualprice" [readonly]="selectchargeValueShow"
+                            min="0" />
+                        <mat-error *ngIf="chargesubmitted && chargeGroupForm.controls.actualprice.errors?.required">
+                            Actual price is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- New Price -->
+                <div class="col-md-4 m-b-3">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>New Price *</mat-label>
+                        <input matInput type="number" formControlName="price" (input)="onPriceChange()" min="0" />
+                        <mat-error *ngIf="chargesubmitted && chargeGroupForm.controls.price.errors?.required">
+                            New price is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- Discount -->
+                <div class="col-md-4 m-b-3">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Discount (%)</mat-label>
+                        <input matInput type="number" formControlName="discount" readonly />
+                    </mat-form-field>
+                </div>
+
+                <!-- Charge Type -->
+                <div class="col-md-4 m-b-3">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Charge Type *</mat-label>
+                        <mat-select formControlName="type">
+                            <mat-option value="Recurring">Recurring</mat-option>
+                            <mat-option value="One Time">One Time</mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="chargesubmitted && chargeGroupForm.controls.type.errors?.required">
+                            Charge type is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- Plan Selection -->
+                <div class="col-md-4 m-b-3">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Plan *</mat-label>
+                        <mat-select formControlName="planid">
+                            <mat-option *ngFor="let plan of plansForAddCharge" [value]="plan.id">
+                                {{ plan.planName }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="chargesubmitted && chargeGroupForm.controls.planid.errors?.required">
+                            Plan is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- Validity -->
+                <div class="col-md-4 m-b-3">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Validity *</mat-label>
+                        <input matInput type="number" formControlName="validity" min="0" />
+                        <mat-error *ngIf="chargesubmitted && chargeGroupForm.controls.validity.errors?.required">
+                            Validity is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- Units of Validity -->
+                <div class="col-md-4 m-b-3">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Units of Validity *</mat-label>
+                        <mat-select formControlName="unitsOfValidity">
+                            <mat-option value="Days">Days</mat-option>
+                            <mat-option value="Months">Months</mat-option>
+                            <mat-option value="Years">Years</mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="chargesubmitted && chargeGroupForm.controls.unitsOfValidity.errors?.required">
+                            Units is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- Charge Date -->
+                <div class="col-md-4 m-b-3">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Charge Date *</mat-label>
+                        <input matInput [matDatepicker]="chargeDatePicker" formControlName="charge_date" />
+                        <mat-datepicker-toggle matSuffix [for]="chargeDatePicker"></mat-datepicker-toggle>
+                        <mat-datepicker #chargeDatePicker></mat-datepicker>
+                        <mat-error *ngIf="chargesubmitted && chargeGroupForm.controls.charge_date.errors?.required">
+                            Charge date is required
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- Static IP (if applicable) -->
+                <div class="col-md-4 m-b-3" *ngIf="isStaticIPCharge">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Static IP Address</mat-label>
+                        <input matInput formControlName="staticIPAdrress" />
+                    </mat-form-field>
+                </div>
+
+                <!-- Tax Exemption -->
+                <div class="col-md-12 m-b-3">
+                    <mat-checkbox formControlName="isTaxExemption">
+                        Tax Exemption
+                    </mat-checkbox>
+                </div>
+            </div>
+        </form>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+        <button mat-button (click)="closeAddChargeModal()">Cancel</button>
+        <button mat-raised-button color="primary" (click)="addDirectCharge()">
+            Add Charge
+        </button>
+    </mat-dialog-actions>
+</ng-template>
+
+<!-- ======================================================================================== -->
+<!-- MODAL 4: Added Charges List (View) -->
+<!-- ======================================================================================== -->
+<ng-template #chargeDetailsDialog>
+    <h2 mat-dialog-title>Added Charges</h2>
+    <mat-dialog-content class="dialog-large-content">
+        <table mat-table [dataSource]="addedChargeList" class="mat-elevation-z2">
+            <!-- Charge Name Column -->
+            <ng-container matColumnDef="chargeName">
+                <th mat-header-cell *matHeaderCellDef>Charge Name</th>
+                <td mat-cell *matCellDef="let row">{{ getChargeName(row.chargeid) }}</td>
+            </ng-container>
+
+            <!-- Charge Amount Column -->
+            <ng-container matColumnDef="chargeAmount">
+                <th mat-header-cell *matHeaderCellDef>Charge Amount</th>
+                <td mat-cell *matCellDef="let row">{{ row.actualprice }}</td>
+            </ng-container>
+
+            <!-- Charge Type Column -->
+            <ng-container matColumnDef="chargeType">
+                <th mat-header-cell *matHeaderCellDef>Charge Type</th>
+                <td mat-cell *matCellDef="let row">{{ row.type }}</td>
+            </ng-container>
+
+            <!-- Plan Name Column -->
+            <ng-container matColumnDef="planName">
+                <th mat-header-cell *matHeaderCellDef>Plan Name</th>
+                <td mat-cell *matCellDef="let row">{{ row.planName }}</td>
+            </ng-container>
+
+            <!-- Validity Column -->
+            <ng-container matColumnDef="validity">
+                <th mat-header-cell *matHeaderCellDef>Plan Validity</th>
+                <td mat-cell *matCellDef="let row">
+                    {{ row.validity + ' ' + row.unitsOfValidity }}
+                </td>
+            </ng-container>
+
+            <!-- New Price Column -->
+            <ng-container matColumnDef="newPrice">
+                <th mat-header-cell *matHeaderCellDef>New Price</th>
+                <td mat-cell *matCellDef="let row">{{ row.price }}</td>
+            </ng-container>
+
+            <!-- Discount Column -->
+            <ng-container matColumnDef="discount">
+                <th mat-header-cell *matHeaderCellDef>Discount (%)</th>
+                <td mat-cell *matCellDef="let row">{{ row.discount }}</td>
+            </ng-container>
+
+            <!-- Delete Column -->
+            <ng-container matColumnDef="delete">
+                <th mat-header-cell *matHeaderCellDef>Delete</th>
+                <td mat-cell *matCellDef="let row; let index = index">
+                    <button mat-icon-button color="warn" (click)="deleteAddedCharge(index)">
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="chargeListColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: chargeListColumns"></tr>
+        </table>
+
+        <!-- Pagination -->
+        <mat-paginator [length]="overChargeListtotalRecords" [pageSize]="overChargeListItemPerPage"
+            [pageSizeOptions]="[5, 10,  20, 50, 100]" showFirstLastButtons></mat-paginator>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+        <button mat-raised-button color="primary" (click)="closeChargeDetailsModal()">
+            Close
+        </button>
+    </mat-dialog-actions>
+</ng-template>
+
+<!-- ======================================================================================== -->
+<!-- PAYMENT RECORD MODAL - Material UI (Clean Design) -->
+<!-- ======================================================================================== -->
+<ng-template #recordPaymentDialog>
+    <!-- Clean Header -->
+    <h2 mat-dialog-title>Record Payment</h2>
+
+    <!-- Content -->
+    <mat-dialog-content>
+        <form [formGroup]="paymentFormGroup">
+            <div class="row" style="margin: 20px;">
+
+                <!-- Customer (Read-only) -->
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-3">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Customer *</mat-label>
+                        <input matInput disabled [value]="custDetails?.title + ' ' + custDetails?.custname" />
+                    </mat-form-field>
+                </div>
+
+                <!-- Invoice Multi-Select -->
+                <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 mb-3">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Invoice *</mat-label>
+                        <mat-select formControlName="invoiceId" multiple [disabled]="true"
+                            [ngClass]="{'is-invalid': submitted && paymentFormGroup.get('invoiceId')?.errors}">
+                            <mat-option *ngFor="let invoice of invoiceList" [value]="invoice.id">
+                                {{ invoice.docnumber }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="submitted && paymentFormGroup.get('invoiceId')?.hasError('required')">
+                            Invoice is required.
+                        </mat-error>
+                    </mat-form-field>
+                    <button mat-icon-button color="primary" (click)="modalOpenInvoice(customerId)" style="background: #fff;
+    position: absolute;
+    right: 15px;
+    top: 0px;">
+                        <mat-icon>add_box</mat-icon>
+                    </button>
+                </div>
+
+                <!-- Payment Mode -->
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-3">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Payment Mode *</mat-label>
+                        <mat-select formControlName="paymode" (selectionChange)="selPayModeRecord($event)"
+                            [ngClass]="{'is-invalid': submitted && paymentFormGroup.get('paymode')?.errors}">
+                            <mat-option *ngFor="let mode of paymentMode" [value]="mode.value">
+                                {{ mode.text }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="submitted && paymentFormGroup.get('paymode')?.hasError('required')">
+                            Pay Mode is required.
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- Source (Online) -->
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-3">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Source {{ onlineSourceData?.length > 0 ? '*' : '' }}</mat-label>
+                        <mat-select formControlName="onlinesource" [disabled]="!(onlineSourceData?.length > 0)"
+                            (selectionChange)="selPaySourceRecord($event)">
+                            <mat-option *ngFor="let source of onlineSourceData" [value]="source.value">
+                                {{ source.text }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="submitted && paymentFormGroup.get('onlinesource')?.hasError('required')">
+                            Source is required.
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- Amount -->
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-3">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Amount *</mat-label>
+                        <input matInput type="number" formControlName="amount" min="1" step="0.01"
+                            placeholder="Enter Amount" [readonly]="isShowInvoiceList" (keypress)="keypressId($event)"
+                            [ngClass]="{'is-invalid': submitted && paymentFormGroup.get('amount')?.errors}" />
+                        <mat-error *ngIf="submitted && paymentFormGroup.get('amount')?.hasError('required')">
+                            Amount is required.
+                        </mat-error>
+                        <mat-error *ngIf="submitted && paymentFormGroup.get('amount')?.hasError('min')">
+                            Amount must be greater than 0.
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- Cheque Number -->
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-3">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Cheque No. *</mat-label>
+                        <input matInput formControlName="chequeno" placeholder="Enter Cheque No." />
+                        <mat-error *ngIf="submitted && paymentFormGroup.get('chequeno')?.hasError('required')">
+                            Cheque No. is required.
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- Cheque Date -->
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-3">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>{{ chequeDateName }} *</mat-label>
+                        <input matInput [matDatepicker]="chequeDatePicker" formControlName="chequedate"
+                            [placeholder]="'Enter ' + chequeDateName" />
+                        <mat-datepicker-toggle matSuffix [for]="chequeDatePicker"></mat-datepicker-toggle>
+                        <mat-datepicker #chequeDatePicker></mat-datepicker>
+                        <mat-error *ngIf="submitted && paymentFormGroup.get('chequedate')?.hasError('required')">
+                            Date is required.
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- Source Bank -->
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-3">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Source Bank *</mat-label>
+                        <mat-select formControlName="bankManagement">
+                            <mat-option value="">Select Source Bank</mat-option>
+                            <mat-option *ngFor="let bank of bankDataList" [value]="bank.id">
+                                {{ bank.bankname }} - {{ bank.accountnum }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="submitted && paymentFormGroup.get('bankManagement')?.hasError('required')">
+                            Bank is required.
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- Destination Bank -->
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-3" *ngIf="destinationbank">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Destination Bank *</mat-label>
+                        <mat-select formControlName="destinationBank">
+                            <mat-option value="">Select Destination Bank</mat-option>
+                            <mat-option *ngFor="let bankDest of bankDestination" [value]="bankDest.id">
+                                {{ bankDest.bankname }} - {{ bankDest.accountnum }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="submitted && paymentFormGroup.get('destinationBank')?.hasError('required')">
+                            Destination Bank is required.
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- Branch -->
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-3">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Branch</mat-label>
+                        <input matInput formControlName="branch" placeholder="Enter Branch" />
+                    </mat-form-field>
+                </div>
+
+                <!-- Reference Number -->
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-3">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>
+                            Reference No.{{ paymentFormGroup.value.paymode?.toLowerCase() === 'online' ? ' *' : '' }}
+                        </mat-label>
+                        <input matInput formControlName="referenceno" placeholder="Enter Reference No." />
+                        <mat-error *ngIf="submitted && paymentFormGroup.get('referenceno')?.hasError('required')">
+                            Reference No. is required.
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <!-- Receipt Number -->
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-3">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Receipt No</mat-label>
+                        <input matInput formControlName="reciptNo" placeholder="Enter Receipt No." />
+                    </mat-form-field>
+                </div>
+
+                <!-- TDS Amount -->
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-3">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>TDS</mat-label>
+                        <input matInput type="number" step="0.01" formControlName="tdsAmount"
+                            placeholder="Enter TDS amount" [readonly]="isShowInvoiceList" />
+                    </mat-form-field>
+                </div>
+
+                <!-- ABBS Amount -->
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-3">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>ABBS</mat-label>
+                        <input matInput type="number" step="0.01" formControlName="abbsAmount"
+                            placeholder="Enter ABBS amount" [readonly]="isShowInvoiceList" />
+                    </mat-form-field>
+                </div>
+
+                <!-- Remark -->
+                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 mb-3">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Remark *</mat-label>
+                        <textarea matInput formControlName="remark" placeholder="Enter Remark" rows="3"></textarea>
+                        <mat-error *ngIf="submitted && paymentFormGroup.get('remark')?.hasError('required')">
+                            Remark is required.
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+            </div>
+        </form>
+
+        <!-- Invoice List Table -->
+        <div class="row" *ngIf="isShowInvoiceList && selectedInvoice.length > 0">
+            <div class="col-12">
+                <table mat-table [dataSource]="selectedInvoice" class="mat-elevation-z2 w-100">
+                    <ng-container matColumnDef="docnumber">
+                        <th mat-header-cell *matHeaderCellDef>Doc Number</th>
+                        <td mat-cell *matCellDef="let data">{{ data.docnumber }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="createdBy">
+                        <th mat-header-cell *matHeaderCellDef>Created BY</th>
+                        <td mat-cell *matCellDef="let data">-</td>
+                    </ng-container>
+                    <ng-container matColumnDef="taxAmount">
+                        <th mat-header-cell *matHeaderCellDef>Tax Amount</th>
+                        <td mat-cell *matCellDef="let data">-</td>
+                    </ng-container>
+                    <ng-container matColumnDef="totalInvoice">
+                        <th mat-header-cell *matHeaderCellDef>Total Invoice</th>
+                        <td mat-cell *matCellDef="let data">-</td>
+                    </ng-container>
+                    <ng-container matColumnDef="pendingAmount">
+                        <th mat-header-cell *matHeaderCellDef>Pending Amount</th>
+                        <td mat-cell *matCellDef="let data">-</td>
+                    </ng-container>
+                    <ng-container matColumnDef="refundableAmount">
+                        <th mat-header-cell *matHeaderCellDef>Refundable Amount</th>
+                        <td mat-cell *matCellDef="let data">-</td>
+                    </ng-container>
+                    <ng-container matColumnDef="amount">
+                        <th mat-header-cell *matHeaderCellDef>Amount</th>
+                        <td mat-cell *matCellDef="let data">{{ data.testamount | number: '1.2-2' }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="tds">
+                        <th mat-header-cell *matHeaderCellDef>TDS</th>
+                        <td mat-cell *matCellDef="let data">{{ data.tdsCheck }}</td>
+                    </ng-container>
+                    <ng-container matColumnDef="abbs">
+                        <th mat-header-cell *matHeaderCellDef>ABBS</th>
+                        <td mat-cell *matCellDef="let data">{{ data.abbsCheck }}</td>
+                    </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="invoiceTableColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: invoiceTableColumns"></tr>
+                </table>
+                <mat-paginator [pageSizeOptions]="[5,10,20,50,100]" [pageSize]="10"
+                    showFirstLastButtons></mat-paginator>
+            </div>
+        </div>
+
+    </mat-dialog-content>
+
+    <!-- Clean Footer -->
+    <mat-dialog-actions align="end">
+        <button mat-stroked-button color="warn" (click)="closePaymentForm()">
+            Close
+        </button>
+        <button mat-raised-button color="primary" (click)="addPayment('')" [disabled]="!paymentFormGroup.valid">
+            Add Payment
+        </button>
+    </mat-dialog-actions>
+</ng-template>
+
+<!-- ======================================================================================== -->
+<!-- MODAL 6: Select Invoice -->
+<!-- ======================================================================================== -->
+<ng-template #invoiceDialog>
+    <h2 mat-dialog-title>Select Invoice</h2>
+    <mat-dialog-content class="dialog-large-content">
+        <table mat-table [dataSource]="invoiceList" class="mat-elevation-z2">
+            <!-- Checkbox Column -->
+            <ng-container matColumnDef="select">
+                <th mat-header-cell *matHeaderCellDef>
+                    <mat-checkbox (change)="checkUncheckAllInvoice()" [(ngModel)]="masterSelected"></mat-checkbox>
+                </th>
+                <td mat-cell *matCellDef="let invoice">
+                    <mat-checkbox [(ngModel)]="invoice.isSelected" (change)="isAllSelectedInvoice()"></mat-checkbox>
+                </td>
+            </ng-container>
+
+            <!-- Doc Number Column -->
+            <ng-container matColumnDef="docNumber">
+                <th mat-header-cell *matHeaderCellDef>Doc Number</th>
+                <td mat-cell *matCellDef="let invoice">{{ invoice.docnumber }}</td>
+            </ng-container>
+
+            <!-- Created By Column -->
+            <ng-container matColumnDef="createdBy">
+                <th mat-header-cell *matHeaderCellDef>Created By</th>
+                <td mat-cell *matCellDef="let invoice">-</td>
+            </ng-container>
+
+            <!-- Tax Amount Column -->
+            <ng-container matColumnDef="taxAmount">
+                <th mat-header-cell *matHeaderCellDef>Tax Amount</th>
+                <td mat-cell *matCellDef="let invoice">-</td>
+            </ng-container>
+
+            <!-- Total Invoice Column -->
+            <ng-container matColumnDef="totalInvoice">
+                <th mat-header-cell *matHeaderCellDef>Total Invoice</th>
+                <td mat-cell *matCellDef="let invoice">-</td>
+            </ng-container>
+
+            <!-- Pending Amount Column -->
+            <ng-container matColumnDef="pendingAmount">
+                <th mat-header-cell *matHeaderCellDef>Pending Amount</th>
+                <td mat-cell *matCellDef="let invoice">-</td>
+            </ng-container>
+
+            <!-- Refundable Amount Column -->
+            <ng-container matColumnDef="refundableAmount">
+                <th mat-header-cell *matHeaderCellDef>Refundable Amount</th>
+                <td mat-cell *matCellDef="let invoice">-</td>
+            </ng-container>
+
+            <!-- Amount Input Column -->
+            <ng-container matColumnDef="amount">
+                <th mat-header-cell *matHeaderCellDef>Amount</th>
+                <td mat-cell *matCellDef="let invoice">
+                    <mat-form-field appearance="outline" class="small-field">
+                        <input matInput type="number" [(ngModel)]="invoice.testamount"
+                            (ngModelChange)="onSelectedInvoice($event, invoice, invoice.includeTds, invoice.includeAbbs)" />
+                    </mat-form-field>
+                </td>
+            </ng-container>
+
+            <!-- TDS Column -->
+            <ng-container matColumnDef="tds">
+                <th mat-header-cell *matHeaderCellDef>TDS</th>
+                <td mat-cell *matCellDef="let invoice">
+                    <div class="d-flex align-items-center">
+                        <mat-checkbox (change)="onChangeOFTDSTest($event, invoice)"
+                            [disabled]="!invoice.testamount"></mat-checkbox>
+                        <mat-form-field appearance="outline" class="small-field ms-2">
+                            <input matInput type="number" [(ngModel)]="invoice.tds" [disabled]="!invoice.testamount" />
+                        </mat-form-field>
+                    </div>
+                </td>
+            </ng-container>
+
+            <!-- ABBS Column -->
+            <ng-container matColumnDef="abbs">
+                <th mat-header-cell *matHeaderCellDef>ABBS</th>
+                <td mat-cell *matCellDef="let invoice">
+                    <div class="d-flex align-items-center">
+                        <mat-checkbox (change)="onChangeOFABBSTest($event, invoice)"
+                            [disabled]="!invoice.testamount"></mat-checkbox>
+                        <mat-form-field appearance="outline" class="small-field ms-2">
+                            <input matInput type="number" [(ngModel)]="invoice.abbs" [disabled]="!invoice.testamount" />
+                        </mat-form-field>
+                    </div>
+                </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="invoiceColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: invoiceColumns"></tr>
+        </table>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+        <button mat-button (click)="closeInvoiceModal()">Cancel</button>
+        <button mat-raised-button color="primary" (click)="modalCloseInvoiceList()">
+            Select Invoice
+        </button>
+    </mat-dialog-actions>
+</ng-template>
+
+
+<!-- ======================================================================================== -->
+<!-- MODAL: Plan Connection Details -->
+<!-- ======================================================================================== -->
+<ng-template #planConnectionDialog>
+    <!-- <h2 mat-dialog-title>Connection Details</h2> -->
+    <div class="dialog-header">
+        Connection Details
+        <span>
+            <a mat-icon-button href="javascript:void(0)" (click)="planConnectionDialogRef.close(); clearMacMapping()">
+                <img src="assets/img/DashboardIcons/Reject.svg">
+            </a>
+        </span>
+    </div>
+
+    <mat-dialog-content>
+        <div class="row" *ngIf="planForConnection">
+            <div class="col-lg-6 col-md-6 col-sm-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Service</span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">{{ planForConnection.service }}</span>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 col-md-6 col-sm-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Connection No</span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">{{ getSerialNumber(planForConnection) }}</span>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 col-md-6 col-sm-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Plan Name</span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">{{ planForConnection.planName }}</span>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 col-md-6 col-sm-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Plan Group</span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">{{ planForConnection.planGroupName }}</span>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 col-md-6 col-sm-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Status</span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">
+                                    <span class="status-badge" [ngClass]="getStatusClass(planForConnection.planstage, planForConnection.custServMappingStatus)">
+                                        {{ getStatus(planForConnection.planstage, planForConnection.custServMappingStatus) }}
+                                    </span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 col-md-6 col-sm-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Start Date</span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">{{ planForConnection.dbStartDate | date: 'dd-MM-yyyy hh:mm a' }}</span>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 col-md-6 col-sm-12 dataGroup" *ngIf="planForConnection.dbEndDate">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">End Date</span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">{{ planForConnection.dbEndDate | date: 'dd-MM-yyyy hh:mm a' }}</span>
+                            </div>
+                        </div>
+        </div>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+        <button mat-stroked-button color="primary" class="button-normal" (click)="closeDialog()">
+            Close
+        </button>
+    </mat-dialog-actions>
+</ng-template>
+
+<!-- ======================================================================================== -->
+<!-- MODAL: Quota/Plan Details -->
+<!-- ======================================================================================== -->
+<!-- ======================================================================================== -->
+<!-- MODAL: Customer Quota/Plan Details (Comprehensive) -->
+<!-- ======================================================================================== -->
+<ng-template #quotaPlanDialog>
+    <!-- <h2 mat-dialog-title>Plan Quota Details</h2> -->
+    <div class="dialog-header">
+        Plan Quota Details
+        <span>
+            <a mat-icon-button href="javascript:void(0)" (click)="quotaPlanDialogRef.close(); clearMacMapping()">
+                <img src="assets/img/DashboardIcons/Reject.svg">
+            </a>
+        </span>
+    </div>
+    <mat-dialog-content class="dialog-xlarge-content">
+        <div class="row" *ngIf="selPlanData">
+
+            <!-- Quota Information Section -->
+            <div class="col-12 m-b-3">
+                <h4 class="section-header">Quota Information</h4>
+                <!-- <mat-divider></mat-divider> -->
+            </div>
+
+            <div class="col-md-4 m-b-3">
+                <label class="inputLabel">Quota Type</label>
+                <mat-form-field appearance="outline" class="w-100">
+                    <input matInput [value]="selPlanData.quotaType || '-'" readonly class="input-p-5" />
+                </mat-form-field>
+            </div>
+
+            <div class="col-md-4 m-b-3">
+                <label class="inputLabel">Data Quota</label>
+                <mat-form-field appearance="outline" class="w-100">
+                    <input matInput class="input-p-5"
+                        [value]="selPlanData.quota ? (selPlanData.quota + ' ' + selPlanData.quotaUnit) : '-'"
+                        readonly />
+                </mat-form-field>
+            </div>
+
+            <div class="col-md-4 m-b-3">
+                <label class="inputLabel">Time Quota</label>
+                <mat-form-field appearance="outline" class="w-100">
+                    <input matInput class="input-p-5"
+                        [value]="selPlanData.quotatime ? (selPlanData.quotatime + ' ' + selPlanData.quotaunittime) : '-'"
+                        readonly />
+                </mat-form-field>
+            </div>
+
+            <!-- Speed Information Section -->
+            <div class="col-12 m-b-3 mt-3">
+                <h4 class="section-header">Speed Information</h4>
+                <!-- <mat-divider></mat-divider> -->
+            </div>
+
+            <div class="col-md-6 m-b-3">
+                <label class="inputLabel">Download Speed</label>
+                <mat-form-field appearance="outline" class="w-100">
+                    <input matInput class="input-p-5"
+                        [value]="selPlanData.downloadSpeed ? (selPlanData.downloadSpeed + ' ' + selPlanData.downloadSpeedUnit) : '-'"
+                        readonly />
+                </mat-form-field>
+            </div>
+
+            <div class="col-md-6 m-b-3">
+                <label class="inputLabel">Upload Speed</label>
+                <mat-form-field appearance="outline" class="w-100">
+                    <input matInput class="input-p-5"
+                        [value]="selPlanData.uploadSpeed ? (selPlanData.uploadSpeed + ' ' + selPlanData.uploadSpeedUnit) : '-'"
+                        readonly />
+                </mat-form-field>
+            </div>
+
+            <div class="col-md-6 m-b-3">
+                <label class="inputLabel">Burst Limit</label>
+                <mat-form-field appearance="outline" class="w-100">
+                    <input matInput class="input-p-5"
+                        [value]="selPlanData.burst_limit ? (selPlanData.burst_limit + ' ' + selPlanData.burst_limit_unit) : '-'"
+                        readonly />
+                </mat-form-field>
+            </div>
+
+            <!-- Pricing Information Section -->
+            <div class="col-12 m-b-3 mt-3">
+                <h4 class="section-header">Pricing & Validity</h4>
+                <!-- <mat-divider></mat-divider> -->
+            </div>
+
+            <div class="col-md-4 m-b-3">
+                <label class="inputLabel">Price (incl. Tax)</label>
+                <mat-form-field appearance="outline" class="w-100">
+                    <input matInput class="input-p-5"
+                        [value]="(selPlanData.category == 'Business Promotion' ? selPlanData.newOfferprice : selPlanData.offerprice) | number: '1.2-2'"
+                        readonly />
+                </mat-form-field>
+            </div>
+
+            <div class="col-md-4 m-b-3">
+                <label class="inputLabel">Tax Amount</label>
+                <mat-form-field appearance="outline" class="w-100">
+                    <input class="input-p-5" matInput [value]="selPlanData.taxamount | number: '1.2-2'" readonly />
+                </mat-form-field>
+            </div>
+
+            <div class="col-md-4 m-b-3">
+                <label class="inputLabel">Validity</label>
+                <mat-form-field appearance="outline" class="w-100">
+                    <input matInput class="input-p-5"
+                        [value]="selPlanData.validity ? (selPlanData.validity + ' ' + selPlanData.unitsOfValidity) : '-'"
+                        readonly />
+                </mat-form-field>
+            </div>
+
+            <!-- Plan Details Section -->
+            <div class="col-12 m-b-3 mt-3">
+                <h4 class="section-header">Plan Details</h4>
+                <!-- <mat-divider></mat-divider> -->
+            </div>
+
+            <div class="col-md-12 m-b-3">
+                <label class="inputLabel">Plan Name</label>
+                <mat-form-field appearance="outline" class="w-100">
+                    <input class="input-p-5" matInput [value]="selPlanData.planName" readonly />
+                </mat-form-field>
+            </div>
+
+            <div class="col-md-12 m-b-3">
+                <label class="inputLabel">Description</label>
+                <mat-form-field appearance="outline" class="w-100">
+                    <textarea matInput class="input-p-5" [value]="selPlanData.description || 'No description available'"
+                        rows="3" readonly></textarea>
+                </mat-form-field>
+            </div>
+
+            <!-- Dates Section (if available) -->
+            <div class="col-md-6 m-b-3" *ngIf="selPlanData.activationDate">
+                <label class="inputLabel">Activation Date</label>
+                <mat-form-field appearance="outline" class="w-100">
+                    <input class="input-p-5" matInput [value]="selPlanData.activationDate | date: 'dd-MM-yyyy hh:mm a'"
+                        readonly />
+                </mat-form-field>
+            </div>
+
+            <div class="col-md-6 m-b-3" *ngIf="selPlanData.expiryDate">
+                <label class="inputLabel">Expiry Date</label>
+                <mat-form-field appearance="outline" class="w-100">
+                    <input class="input-p-5" matInput [value]="selPlanData.expiryDate | date: 'dd-MM-yyyy hh:mm a'"
+                        readonly />
+                </mat-form-field>
+            </div>
+
+        </div>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+        <button mat-stroked-button color="primary" (click)="closeQuotaPlanModal()">
+            Close
+        </button>
+    </mat-dialog-actions>
+</ng-template>
+<!-- ======================================================================================== -->
+<!-- MODAL: Amount to Pay for Plan Change -->
+<!-- ======================================================================================== -->
+<ng-template #amountDialog>
+    <h2 mat-dialog-title>Plan Due Amount</h2>
+    <mat-dialog-content>
+        <div class="row" *ngIf="customerChangePlanDueAmount">
+            <div class="col-md-12 mb-3">
+                <mat-card class="amount-card">
+                    <mat-card-content>
+                        <div class="amount-display">
+                            <span class="amount-label">Amount to Pay:</span>
+                            <span class="amount-value">
+                                {{ customerChangePlanDueAmount?.Amount | currency: currency : 'symbol' : '1.2-2' }}
+                            </span>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+
+            <!-- Additional Details if available -->
+            <div class="col-md-6 mb-3" *ngIf="customerChangePlanDueAmount.PlanPrice">
+                <strong>Plan Price:</strong>
+                {{ customerChangePlanDueAmount.PlanPrice | currency: currency : 'symbol' : '1.2-2' }}
+            </div>
+            <div class="col-md-6 mb-3" *ngIf="customerChangePlanDueAmount.TaxAmount">
+                <strong>Tax Amount:</strong>
+                {{ customerChangePlanDueAmount.TaxAmount | currency: currency : 'symbol' : '1.2-2' }}
+            </div>
+            <div class="col-md-6 mb-3" *ngIf="customerChangePlanDueAmount.Discount">
+                <strong>Discount:</strong>
+                {{ customerChangePlanDueAmount.Discount | currency: currency : 'symbol' : '1.2-2' }}
+            </div>
+            <div class="col-md-6 mb-3" *ngIf="customerChangePlanDueAmount.RefundableAmount">
+                <strong>Refundable Amount:</strong>
+                {{ customerChangePlanDueAmount.RefundableAmount | currency: currency : 'symbol' : '1.2-2' }}
+            </div>
+        </div>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+        <button mat-stroked-button color="warn" (click)="closeDisplayPlanAmountDetails()">
+            Close
+        </button>
+    </mat-dialog-actions>
+</ng-template>
+<!-- ======================================================================================== -->
+<!-- MODAL: Staff/Payment Owner Selection -->
+<!-- ======================================================================================== -->
+<ng-template #selectStaffDialog>
+    <h2 mat-dialog-title>Select {{ staffSelectType }}</h2>
+    <mat-dialog-content class="dialog-large-content">
+        <!-- Search Field -->
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <label class="inputLabel">Search Staff</label>
+                <mat-form-field appearance="outline" class="w-100">
+                    <input class="input-p-5" matInput [(ngModel)]="searchStaffDeatil" (ngModelChange)="onSearchStaff()"
+                        placeholder="Search by name or username" />
+                    <mat-icon matSuffix>search</mat-icon>
+                </mat-form-field>
+            </div>
+        </div>
+
+        <!-- Staff Table -->
+        <table mat-table [dataSource]="staffListDatasource" class="mat-elevation-z2">
+            <!-- Select Radio Column -->
+            <ng-container matColumnDef="select">
+                <th mat-header-cell *matHeaderCellDef>Select</th>
+                <td mat-cell *matCellDef="let staff">
+                    <mat-radio-button [value]="staff" [checked]="selectedStaffCust?.id === staff.id"
+                        (change)="onStaffSelect(staff)"></mat-radio-button>
+                </td>
+            </ng-container>
+
+            <!-- Name Column -->
+            <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef>Name</th>
+                <td mat-cell *matCellDef="let staff">{{ staff.displayName }}</td>
+            </ng-container>
+
+            <!-- Username Column -->
+            <ng-container matColumnDef="username">
+                <th mat-header-cell *matHeaderCellDef>Username</th>
+                <td mat-cell *matCellDef="let staff">{{ staff.username }}</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="staffColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: staffColumns"></tr>
+        </table>
+
+        <!-- Pagination -->
+        <mat-paginator [length]="approvestaffListdatatotalRecords" [pageSize]="approveStaffListdataitemsPerPageForStaff"
+            [pageSizeOptions]="[5, 10,  20, 50, 100]" (page)="onStaffPageChange($event)"
+            showFirstLastButtons></mat-paginator>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+        <button mat-flat-button color="primary" (click)="confirmStaffSelection()" [disabled]="!selectedStaffCust">
+            Select
+        </button>
+        <button mat-stroked-button (click)="closeStaffModal()">Cancel</button>
+    </mat-dialog-actions>
+</ng-template>
+
+<!-- ======================================================================================== -->
+<!-- MODAL: Parent/Billable Customer Selection -->
+<!-- ======================================================================================== -->
+<ng-template #parentCustomerDialog>
+    <h2 mat-dialog-title>Select {{ customerSelectType }} Customer</h2>
+    <mat-dialog-content class="dialog-large-content">
+        <!-- Search Field -->
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Search Customer</mat-label>
+                    <input matInput [(ngModel)]="searchParentCustValue" (ngModelChange)="onSearchParentCustomer()"
+                        placeholder="Search by name, mobile, or account number" />
+                    <mat-icon matSuffix>search</mat-icon>
+                </mat-form-field>
+            </div>
+        </div>
+
+        <!-- Customer Table -->
+        <table mat-table [dataSource]="prepaidParentCustomerListDataSource" class="mat-elevation-z2">
+            <!-- Select Radio Column -->
+            <ng-container matColumnDef="select">
+                <th mat-header-cell *matHeaderCellDef>Select</th>
+                <td mat-cell *matCellDef="let customer">
+                    <mat-radio-button [value]="customer" [checked]="selectedParentCust?.id === customer.id"
+                        (change)="onCustomerSelect(customer)"></mat-radio-button>
+                </td>
+            </ng-container>
+
+            <!-- Name Column -->
+            <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef>Name</th>
+                <td mat-cell *matCellDef="let customer">
+                    {{ customer.title }} {{ customer.firstname }} {{ customer.lastname }}
+                </td>
+            </ng-container>
+
+            <!-- Mobile Column -->
+            <ng-container matColumnDef="mobile">
+                <th mat-header-cell *matHeaderCellDef>Mobile</th>
+                <td mat-cell *matCellDef="let customer">{{ customer.mobile }}</td>
+            </ng-container>
+
+            <!-- Account Number Column -->
+            <ng-container matColumnDef="acctno">
+                <th mat-header-cell *matHeaderCellDef>Account No</th>
+                <td mat-cell *matCellDef="let customer">{{ customer.acctno }}</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="customerColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: customerColumns"></tr>
+        </table>
+
+        <!-- Pagination -->
+        <mat-paginator [length]="parentCustomerListdatatotalRecords" [pageSize]="parentCustomerListdataitemsPerPage"
+            [pageSizeOptions]="[5, 10,  20, 50, 100]" (page)="onCustomerPageChange($event)"
+            showFirstLastButtons></mat-paginator>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+        <button mat-stroked-button (click)="closeParentCustomerModal()">Cancel</button>
+        <button mat-flat-button color="primary" (click)="confirmCustomerSelection()" [disabled]="!selectedParentCust">
+            Select
+        </button>
+    </mat-dialog-actions>
+</ng-template>
+<ng-template #amountCheckDialogModal>
+    <div class="dialog-container">
+        <div class="dialog-header">
+            Payment Confirmation
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="onCancelAmount()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+
+            <p>Please top up your wallet with
+                <b>{{commonDropDownService.generalCurrency?.value}} {{customerChangePlanDueAmount.Amount}}</b> to renew
+                your
+                plan
+            </p>
+        </div>
+    </div>
+    <div mat-dialog-actions class="dialog-action-adjust">
+        <button mat-flat-button color="primary" (click)="onConfirmAmount()">OK</button>
+        <button mat-stroked-button color="warn" (click)="onCancelAmount()">Cancel</button>
+    </div>
+</ng-template>

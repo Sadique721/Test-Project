@@ -1,0 +1,1317 @@
+<!--  -->
+<div class="row header-row">
+    <mat-card class="cardWithShadow w-100">
+        <mat-card-content class="mat-card-content-border">
+            <div class="row">
+                <div class="col-sm-9 d-flex">
+                    <mat-form-field appearance="outline" class="w-100 hide-hint mr-10 header-input"
+                        style="padding-left: 16px;">
+                        <input class="input-p-5" matInput class="input-p-5" [(ngModel)]="searchName"
+                            placeholder="Search {{ title }}" (keydown.enter)="search()" />
+                        <mat-icon matSuffix class="search-header-search-icon">
+                            <i class="pi pi-search icon-size"></i>
+                        </mat-icon>
+                    </mat-form-field>
+
+                    <button mat-button mat-flat-button color="primary" class="button-normal m-r-10" (click)="search()">
+                        Search
+                    </button>
+
+                    <button mat-stroked-button matButton="outlined" class="button-normal" (click)="clearSearch()">
+                        Clear
+                    </button>
+                </div>
+
+                <div class="col-sm-3 search-div">
+                    <button mat-button mat-flat-button color="primary" class="button-normal m-r-10"
+                        (click)="createPlan()" style="width: fit-content">
+                        Add plan Bundle
+                    </button>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+
+<div class="container-fluid contain-flud">
+    <div class="row">
+        <div class="col-md-12">
+            <mat-card class="cardWithShadow">
+                <mat-card-content class="mat-card-content-border">
+                    <div class="country-table-list">
+                        <div class="example-container mat-elevation-z8" tabindex="0">
+                            <table mat-table [dataSource]="planBundleListData" class="mat-elevation-z2 w-100">
+                                <!-- ID Column -->
+                                <ng-container matColumnDef="planid">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef
+                                        class="table-header-title">
+                                        ID
+                                    </th>
+                                    <td mat-cell *matCellDef="let element">{{ element.id || "-" }}</td>
+                                </ng-container>
+
+                                <!-- Name Column -->
+                                <ng-container matColumnDef="name">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef>Name</th>
+                                    <td mat-cell *matCellDef="let element" class="f-s-14">
+                                        {{ element.bookname || "-" }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Create Date Column -->
+                                <ng-container matColumnDef="createdate">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef>Create Date</th>
+                                    <td mat-cell *matCellDef="let element" class="f-s-14">
+                                        {{ element.createdate || "-" }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Status Column -->
+                                <ng-container matColumnDef="status">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef>Status</th>
+                                    <td mat-cell *matCellDef="let element" class="f-s-14">
+                                        <span class="status-badge" [ngClass]="{
+                        'status-success': element.status === 'ACTIVE',
+                        'status-danger': element.status === 'INACTIVE'
+                      }">
+                                            {{ element.status }}
+                                        </span>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Action Column -->
+                                <ng-container matColumnDef="action">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef>Action</th>
+                                    <td mat-cell *matCellDef="let element">
+                                        <div class="d-flex">
+                                            <a mat-icon-button class="d-flex align-items-center justify-content-center"
+                                                (click)="PlanDetailListDetails(element)" matTooltip="View">
+                                                <img src="assets/img/DashboardIcons/eye-svgrepo-com (1) 1.svg">
+                                            </a>
+
+                                            <a *ngIf="editAccess" mat-icon-button href="javascript:void(0)"
+                                                class="d-flex align-items-center justify-content-center"
+                                                (click)="editplanBundle(element.id)" matTooltip="Edit">
+                                                <img src="assets/img/DashboardIcons/Edit.svg">
+                                            </a>
+
+                                            <a *ngIf="deleteAccess" mat-icon-button href="javascript:void(0)"
+                                                class="d-flex align-items-center justify-content-center"
+                                                (click)="deleteConfirmonplanBundle(element)" matTooltip="Delete">
+                                                <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                            </a>
+                                        </div>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Header & Row -->
+                                <tr mat-header-row *matHeaderRowDef="getDisplayedPlanDetailsColumns()"></tr>
+                                <tr mat-row *matRowDef="let row; columns: getDisplayedPlanDetailsColumns()"></tr>
+                            </table>
+                        </div>
+
+                        <mat-paginator #paginator [length]="totalRecords" [pageSize]="itemsPerPage"
+                            [pageSizeOptions]="[5,10,20,50,100]" (page)="pageChangedplanBundleList($event)"
+                            showFirstLastButtons>
+                        </mat-paginator>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </div>
+</div>
+
+<ng-template #AddEditDailog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <!-- Header -->
+        <div class="dialog-header dialog-title">
+            {{ isplanBundleEdit ? 'Update' : 'Create' }} Partner Plan Bundle
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+
+
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <div mat-dialog-content>
+            <div class="row header-row p-0 m-0">
+                <mat-card class="cardWithShadow w-100">
+                    <mat-card-content class="mat-card-content-border">
+                        <ng-container *ngIf="!createAccess && !isplanBundleEdit">
+                            <mat-card-content class="matcard-content">
+                                <div class="panel-body table-responsive">
+                                    Sorry you have not privilege to create operation!
+                                </div>
+                            </mat-card-content>
+                        </ng-container>
+                        @if (createAccess || (isplanBundleEdit && editAccess)) {
+                        <form class="card-form" [formGroup]="planBundleGroupForm">
+                            <mat-card class="inner-card">
+                                <mat-card-header>
+                                    <mat-card-title>Basic Details</mat-card-title>
+                                </mat-card-header>
+                                <mat-card-content>
+                                    <div class="row g-3">
+                                        <!-- Name -->
+                                        <div class="col-md-4">
+                                            <label for="bundleName" class="inputLabel">Name*</label>
+                                            <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                                <input id="bundleName" matInput class="input-p-5"
+                                                    formControlName="bookname" placeholder="Enter Name" maxlength="250"
+                                                    class="input-p-5" />
+
+                                                <mat-error *ngIf="
+                              submitted && planBundleGroupForm.controls.bookname.errors?.required
+                            ">
+                                                    Name is required.
+                                                </mat-error>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <!-- Plan Group -->
+                                        <div class="col-md-4" [formGroup]="planGroupFieldFromGroup">
+                                            <label class="inputLabel">Plan Group*</label>
+                                            <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                                <mat-select class="input-p-5" formControlName="planGroup"
+                                                    placeholder="Select Plan Group" [disableOptionCentering]="true">
+                                                    <mat-option *ngFor="let p of planGroupData" [value]="p.value">
+                                                        {{ p.text }}
+                                                    </mat-option>
+                                                </mat-select>
+                                                <mat-error *ngIf="
+                              submitted ||
+                              planGroupFieldFromGroup.controls.planGroup.errors?.required
+                            ">
+                                                    Plan Group is required.
+                                                </mat-error>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <!-- Plan Bundle Type -->
+                                        <div class="col-md-4" [formGroup]="planTypeDataFromgroup">
+                                            <label class="inputLabel">Plan Bundle Type*</label>
+                                            <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                                <mat-select class="input-p-5" formControlName="type"
+                                                    placeholder="Select Type">
+                                                    <mat-option *ngFor="let t of PlanBundleType" [value]="t.value">
+                                                        {{ t.label }}
+                                                    </mat-option>
+                                                </mat-select>
+                                                <mat-error *ngIf="
+                              submitted ||
+                              planGroupFieldFromGroup.controls.planGroup.errors?.required
+                            ">
+                                                    Plan Group is required.
+                                                </mat-error>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <!-- Status -->
+                                        <div class="col-md-4">
+                                            <label class="inputLabel">Status*</label>
+                                            <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                                <mat-select class="input-p-5" formControlName="status"
+                                                    placeholder="Select Status">
+                                                    <mat-option *ngFor="let s of statusOptions" [value]="s.val">
+                                                        {{ s.label }}
+                                                    </mat-option>
+                                                </mat-select>
+                                                <mat-error *ngIf="
+                              submitted || planBundleGroupForm.controls.status.errors?.required
+                            ">
+                                                    <span>Status is required.</span>
+                                                </mat-error>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <!-- AGR Percentage -->
+                                        <div class="col-md-4">
+                                            <label class="inputLabel">AGR Percentage*</label>
+                                            <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                                <input matInput class="input-p-5" type="number" min="0" max="100"
+                                                    formControlName="agrPercentage"
+                                                    placeholder="Enter AGR Percentage" />
+                                                <mat-error *ngIf="
+                              submitted &&
+                              planBundleGroupForm.controls.agrPercentage.errors?.required
+                            ">
+                                                    AGR Percentage is required.
+                                                </mat-error>
+
+                                                <!-- Min value error -->
+                                                <mat-error
+                                                    *ngIf="planBundleGroupForm.controls.agrPercentage.errors?.min">
+                                                    Minimum 0 Percentage allowed.
+                                                </mat-error>
+
+                                                <!-- Max value error -->
+                                                <mat-error
+                                                    *ngIf="planBundleGroupForm.controls.agrPercentage.errors?.max">
+                                                    Maximum 100 Percentage allowed.
+                                                </mat-error>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <!-- TDS Percentage -->
+                                        <div class="col-md-4">
+                                            <label class="inputLabel">TDS Percentage*</label>
+                                            <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                                <input matInput class="input-p-5" type="number" min="0" max="100"
+                                                    formControlName="tdsPercentage"
+                                                    placeholder="Enter TDS Percentage" />
+                                                <mat-error *ngIf="
+                              submitted &&
+                              planBundleGroupForm.controls.tdsPercentage.errors?.required
+                            ">
+                                                    TDS Percentage is required.
+                                                </mat-error>
+
+                                                <!-- Min value error -->
+                                                <mat-error
+                                                    *ngIf="planBundleGroupForm.controls.tdsPercentage.errors?.min">
+                                                    Minimum 0 Percentage allowed.
+                                                </mat-error>
+
+                                                <!-- Max value error -->
+                                                <mat-error
+                                                    *ngIf="planBundleGroupForm.controls.tdsPercentage.errors?.max">
+                                                    Maximum 100 Percentage allowed.
+                                                </mat-error>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <!-- Revenue Type -->
+                                        <div class="col-md-4">
+                                            <label class="inputLabel">Revenue Type*</label>
+                                            <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                                <mat-select class="input-p-5" formControlName="revenueType"
+                                                    placeholder="Select Revenue Type"
+                                                    [disabled]="isplanBundleEdit || isParentPartnerSelected"
+                                                    (selectionChange)="checkRevenueType($event)">
+                                                    <mat-option *ngFor="let r of revenueType" [value]="r">
+                                                        {{ r }}
+                                                    </mat-option>
+                                                </mat-select>
+                                                <mat-error *ngIf="
+                              submitted || planBundleGroupForm.controls.revenueType.errors?.required
+                            ">
+                                                    <span>Revenue Type is required.</span>
+                                                </mat-error>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <!-- Commission On -->
+                                        <div class="col-md-4">
+                                            <label class="inputLabel">Commission On*</label>
+                                            <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                                <mat-select class="input-p-5" formControlName="commission_on"
+                                                    placeholder="Select Commission On"
+                                                    (selectionChange)="onCommissionChange($event)">
+                                                    <mat-option *ngFor="let c of commisionData" [value]="c.label">
+                                                        {{ c.label }}
+                                                    </mat-option>
+                                                </mat-select>
+                                                <mat-error *ngIf="
+                              submitted ||
+                              planBundleGroupForm.controls.commission_on.errors?.required
+                            ">
+                                                    <span>Commission On is required.</span>
+                                                </mat-error>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <!-- Parent Partner -->
+                                        <div class="col-md-4">
+                                            <label class="inputLabel">Parent Partner</label>
+                                            <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                                <mat-select class="input-p-5" formControlName="partnerId"
+                                                    placeholder="Select Parent Partner">
+                                                    <mat-option *ngFor="let p of parenetpartnerList" [value]="p.id">
+                                                        {{ p.name }}
+                                                    </mat-option>
+                                                </mat-select>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <div class="col-md-12">
+                                            <label class="inputLabel">Description*</label>
+                                            <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                                <textarea matInput class="input-p-5" rows="3"
+                                                    formControlName="description"
+                                                    placeholder="Enter Description (max 200 characters)"></textarea>
+                                                <mat-error *ngIf="
+                              submitted && planBundleGroupForm.controls.description.errors?.required
+                            ">
+                                                    Description is required.
+                                                </mat-error>
+
+                                                <!-- Max length error -->
+                                                <mat-error
+                                                    *ngIf="planBundleGroupForm.controls.description.errors?.maxlength">
+                                                    Maximum 200 characters allowed.
+                                                </mat-error>
+                                            </mat-form-field>
+                                        </div>
+                                    </div>
+                                </mat-card-content>
+                            </mat-card>
+
+                            <mat-card *ngIf="
+                    planBundleGroupForm.value.commission_on === 'Service level' &&
+                    planBundleGroupForm.value.revenueType === 'Percentage'
+                  ">
+                                <mat-card-header>
+                                    <mat-card-title>Service Commission List</mat-card-title>
+                                </mat-card-header>
+                                <mat-card-content>
+                                    <div [formGroup]="serviceCommonFromGroup" class="">
+                                        <div class="table-responsive tableAddEditScrollHeight example-container">
+                                            <table mat-table class="w-100 slab-table" [dataSource]="dataSourceData">
+                                                <!-- Service Column -->
+                                                <ng-container matColumnDef="service">
+                                                    <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>
+                                                        Service
+                                                    </th>
+                                                    <td mat-cell *matCellDef="let row">
+                                                        <mat-form-field appearance="outline"
+                                                            class="mat-form-field w-100">
+                                                            <mat-select class="input-p-5" formControlName="serviceId"
+                                                                (selectionChange)="selectServiceId($event)"
+                                                                placeholder="Select a service">
+                                                                <mat-option *ngFor="let s of planserviceData"
+                                                                    [value]="s.id">{{
+                                                                    s.name
+                                                                    }}</mat-option>
+                                                            </mat-select>
+                                                            <mat-error *ngIf="
+                                    serviceCommisionSubmitted &&
+                                    serviceCommonFromGroup.controls.serviceId.errors?.required
+                                  ">
+                                                                Service required.
+                                                            </mat-error>
+                                                        </mat-form-field>
+                                                    </td>
+                                                </ng-container>
+
+                                                <!-- Revenue Share Column -->
+                                                <ng-container matColumnDef="revenueShare">
+                                                    <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>
+                                                        Revenue Share %
+                                                    </th>
+                                                    <td mat-cell *matCellDef="let row">
+                                                        <mat-form-field appearance="outline"
+                                                            class="mat-form-field w-100">
+                                                            <input matInput class="input-p-5" type="number"
+                                                                placeholder="Enter Revenue Share Percentage"
+                                                                formControlName="revenue_share_percentage"
+                                                                (keydown)="handleKeyDown($event)" min="0" max="100" />
+                                                            <mat-error *ngIf="
+                                    serviceCommisionSubmitted &&
+                                    serviceCommonFromGroup.controls.revenue_share_percentage.errors
+                                      ?.required
+                                  ">
+                                                                Revenue Share Percentage is required.
+                                                            </mat-error>
+                                                            <mat-error *ngIf="
+                                    serviceCommonFromGroup.controls.revenue_share_percentage.errors
+                                      ?.min
+                                  ">
+                                                                Minimum 0 Percentage allowed.
+                                                            </mat-error>
+                                                            <mat-error *ngIf="
+                                    serviceCommonFromGroup.controls.revenue_share_percentage.errors
+                                      ?.max
+                                  ">
+                                                                Maximum 100 Percentage allowed.
+                                                            </mat-error>
+                                                        </mat-form-field>
+                                                    </td>
+                                                </ng-container>
+
+                                                <!-- Royalty Column -->
+                                                <ng-container matColumnDef="royalty">
+                                                    <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>
+                                                        Royalty %
+                                                    </th>
+                                                    <td mat-cell *matCellDef="let row">
+                                                        <mat-form-field appearance="outline"
+                                                            class="mat-form-field w-100">
+                                                            <input matInput class="input-p-5" type="number"
+                                                                placeholder="Enter Royalty Percentage"
+                                                                formControlName="royaltyPercentage" min="0" max="100" />
+                                                            <mat-error *ngIf="
+                                    serviceCommisionSubmitted &&
+                                    serviceCommonFromGroup.controls.royaltyPercentage.errors
+                                      ?.required
+                                  ">
+                                                                Royalty Percentage is required.
+                                                            </mat-error>
+                                                            <mat-error *ngIf="
+                                    serviceCommonFromGroup.controls.royaltyPercentage.errors?.min
+                                  ">
+                                                                Minimum 0 Percentage allowed.
+                                                            </mat-error>
+                                                            <mat-error *ngIf="
+                                    serviceCommonFromGroup.controls.royaltyPercentage.errors?.max
+                                  ">
+                                                                Maximum 100 Percentage allowed.
+                                                            </mat-error>
+                                                        </mat-form-field>
+                                                    </td>
+                                                </ng-container>
+
+                                                <!-- Delete Column -->
+                                                <ng-container matColumnDef="delete">
+                                                    <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Action
+                                                    </th>
+                                                    <td mat-cell *matCellDef="let row; let i = index">
+                                                        <button mat-flat-button color="primary"
+                                                            class="button-normal clear-btn w-100"
+                                                            (click)="onAddServiceCommissionField()">
+                                                            Add
+                                                        </button>
+                                                    </td>
+                                                </ng-container>
+
+                                                <tr mat-header-row *matHeaderRowDef="servicecommissionDisply"></tr>
+                                                <tr mat-row *matRowDef="let row; columns: servicecommissionDisply"></tr>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <!-- Service Commission Table -->
+
+                                    <div class="table-responsive tableAddEditScrollHeight example-container">
+                                        <table mat-table class="w-100 slab-table" #serviceTable
+                                            [dataSource]="serviceCommonListFromArray.controls">
+                                            <!-- Service Column -->
+                                            <ng-container matColumnDef="service">
+                                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Service
+                                                </th>
+                                                <td mat-cell *matCellDef="let row">
+                                                    <mat-form-field appearance="outline" class="w-100">
+                                                        <mat-select [formControl]="row.get('serviceId')" disabled>
+                                                            <mat-option [value]="row.get('serviceId').value">
+                                                                {{ row.get('serviceName').value }}
+                                                            </mat-option>
+                                                        </mat-select>
+                                                    </mat-form-field>
+                                                </td>
+
+                                            </ng-container>
+
+                                            <!-- Revenue Share Column -->
+                                            <ng-container matColumnDef="revenueShare">
+                                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>
+                                                    Revenue Share %
+                                                </th>
+                                                <td mat-cell *matCellDef="let row">
+                                                    <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                                        <input matInput class="input-p-5"
+                                                            [formControl]="row.get('revenue_share_percentage')"
+                                                            type="number" disabled />
+                                                    </mat-form-field>
+                                                </td>
+                                            </ng-container>
+
+                                            <!-- Royalty Column -->
+                                            <ng-container matColumnDef="royalty">
+                                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>
+                                                    Royalty %
+                                                </th>
+                                                <td mat-cell *matCellDef="let row">
+                                                    <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                                        <input matInput class="input-p-5"
+                                                            [formControl]="row.get('royaltyPercentage')" type="number"
+                                                            disabled />
+                                                    </mat-form-field>
+                                                </td>
+                                            </ng-container>
+
+                                            <!-- Delete Column -->
+                                            <ng-container matColumnDef="delete">
+                                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Delete</th>
+                                                <td mat-cell *matCellDef="let row; let i = index">
+                                                    <a mat-icon-button href="javascript:void(0)"
+                                                        *ngIf="serviceCommonListFromArray.controls.length !== 1"
+                                                        (click)="deleteConfirmonServiceCommisiionField(i, row)">
+                                                        <img
+                                                            src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+
+                                                    </a>
+                                                </td>
+                                            </ng-container>
+
+                                            <tr mat-header-row *matHeaderRowDef="servicecommissionDisply"></tr>
+                                            <tr mat-row *matRowDef="let row; columns: servicecommissionDisply"></tr>
+                                        </table>
+                                    </div>
+                                </mat-card-content>
+                            </mat-card>
+                            <mat-card>
+                                <mat-card-header> <mat-card-title>Plan Details</mat-card-title></mat-card-header>
+                                <mat-card-content>
+                                    <form [formGroup]="planBundleGroupForm">
+                                        <div class="row">
+                                            <!-- All Plan Select Checkbox -->
+                                            <div class="col-lg-3 col-md-3 col-sm-3 col-12">
+                                                <mat-checkbox [checked]="
+                              planBundleGroupForm.value.isAllPlanSelected ||
+                              planBundleGroupForm.value.isAllPlanGroupSelected
+                            " (change)="selectAllPlanselctEvent($event)">
+                                                    All Plan Select
+                                                </mat-checkbox>
+                                            </div>
+
+                                            <!-- Plan Category Selection -->
+                                            <div class="col-lg-3 col-md-3 col-sm-6 col-12" *ngIf="!planSelection">
+                                                <mat-form-field appearance="outline" class="w-100">
+                                                    <mat-select class="input-p-5" formControlName="allSelection"
+                                                        [(ngModel)]="allSelection"
+                                                        (selectionChange)="allPlanSection($event)"
+                                                        placeholder="Select a Plan Category" multiple>
+                                                        <mat-option *ngFor="let plan of planDetailsCategory"
+                                                            [value]="plan.value">
+                                                            {{ plan.label }}
+                                                        </mat-option>
+                                                    </mat-select>
+                                                </mat-form-field>
+                                            </div>
+
+                                            <div class="col-lg-3 col-md-3 col-sm-6 col-12" *ngIf="planSelection">
+                                                <mat-form-field appearance="outline" class="w-100">
+                                                    <mat-select class="input-p-5" formControlName="planCategory"
+                                                        (selectionChange)="planCategoryChange($event, ddlPlanCategory)"
+                                                        placeholder="Select a Plan Category">
+                                                        <mat-option *ngFor="let plan of planDetailsCategory"
+                                                            [value]="plan.value">
+                                                            {{ plan.label }}
+                                                        </mat-option>
+                                                    </mat-select>
+                                                </mat-form-field>
+                                            </div>
+
+                                            <!-- Revenue Share Percentage -->
+                                            <div class="col-lg-3 col-md-3 col-sm-3 col-12" *ngIf="
+                            planSelection !== true &&
+                            planBundleGroupForm.value.commission_on === 'Plan level' &&
+                            planBundleGroupForm.value.revenueType === 'Percentage'
+                          ">
+                                                <mat-form-field appearance="outline" class="w-100">
+                                                    <input matInput class="input-p-5" type="number" min="0" max="100"
+                                                        placeholder="Enter Revenue Share Percentage"
+                                                        formControlName="revenueSharePercentage"
+                                                        (keydown)="handleKeyDown($event)" [disabled]="slabFlag" />
+                                                    <mat-error *ngIf="
+                                submitted &&
+                                planBundleGroupForm.controls.revenueSharePercentage.errors?.required
+                              ">
+                                                        Revenue Share Percentage is required.
+                                                    </mat-error>
+                                                    <mat-error *ngIf="
+                                submitted &&
+                                planBundleGroupForm.controls.revenueSharePercentage.errors?.min
+                              ">
+                                                        Minimum 0 Percentage allowed.
+                                                    </mat-error>
+                                                    <mat-error *ngIf="
+                                submitted &&
+                                planBundleGroupForm.controls.revenueSharePercentage.errors?.max
+                              ">
+                                                        Maximum 100 Percentage allowed.
+                                                    </mat-error>
+                                                </mat-form-field>
+                                            </div>
+                                        </div>
+
+                                        <!-- Plan Details List -->
+                                        <div *ngIf="planSelection === true" [formGroup]="PlanDetailListfromgroup"
+                                            class="plan-details">
+                                            <div class="row">
+                                                <!-- Plan / Plan Group Dropdown -->
+                                                <div class="col-lg-3 col-md-3 col-sm-3 col-12"
+                                                    formGroupName="postpaidPlan">
+                                                    <mat-form-field appearance="outline" class="w-100"
+                                                        *ngIf="planBundleGroupForm.value.planCategory === 'groupPlan'">
+                                                        <mat-select class="input-p-5" formControlName="id"
+                                                            (selectionChange)="planGroupSelect($event)"
+                                                            placeholder="Select a Plan Group">
+                                                            <mat-option *ngFor="let plan of planGroupdata"
+                                                                [value]="plan.planGroupId">
+                                                                {{ plan.planGroupName }}
+                                                                <span
+                                                                    *ngIf="plan.category === 'Business Promotion'">(Business
+                                                                    Promotion)</span>
+                                                            </mat-option>
+                                                        </mat-select></mat-form-field>
+                                                    <mat-form-field appearance="outline" class="w-100"
+                                                        *ngIf="planBundleGroupForm.value.planCategory === 'individual'">
+                                                        <mat-select class="input-p-5" formControlName="id"
+                                                            placeholder="Select a Plan Name"
+                                                            (selectionChange)="selectplandetails($event)">
+                                                            <mat-option *ngFor="let plan of planListData"
+                                                                [value]="plan.id">
+                                                                {{ plan.name }}
+                                                            </mat-option>
+                                                        </mat-select>
+                                                        <mat-error *ngIf="
+                                  planBundleSubmitted &&
+                                  PlanDetailListfromgroup.controls.postpaidPlan.controls.id.errors
+                                ">
+                                                            Plan Name required.
+                                                        </mat-error>
+                                                    </mat-form-field>
+                                                </div>
+
+                                                <!-- Offer Price -->
+                                                <div class="col-lg-3 col-md-3 col-sm-3 col-12">
+                                                    <mat-form-field appearance="outline" class="w-100">
+                                                        <input matInput class="input-p-5"
+                                                            placeholder="Enter Offer Price" formControlName="offerprice"
+                                                            [disabled]="planAmountshow" />
+                                                        <mat-error *ngIf="
+                                  planBundleSubmitted &&
+                                  PlanDetailListfromgroup.controls.offerprice.errors
+                                ">
+                                                            Offer Price is required.
+                                                        </mat-error>
+                                                    </mat-form-field>
+                                                </div>
+
+                                                <!-- Revenue Share -->
+                                                <div class="col-lg-3 col-md-3 col-sm-3 col-12" *ngIf="
+                              !slabFlag &&
+                              planBundleGroupForm.value.commission_on !== 'Service level'
+                            ">
+                                                    <mat-form-field appearance="outline" class="w-100">
+                                                        <input matInput class="input-p-5" type="number" min="0"
+                                                            max="100" placeholder="Enter Revenue Share Percentage"
+                                                            formControlName="revenueSharePercentage"
+                                                            (keydown)="handleKeyDown($event)" [ngClass]="{
+                                  'is-invalid':
+                                    planBundleSubmitted &&
+                                    PlanDetailListfromgroup.controls.revenueSharePercentage.errors
+                                }" />
+                                                        <mat-error *ngIf="
+                                  planBundleSubmitted &&
+                                  PlanDetailListfromgroup.controls.revenueSharePercentage.errors
+                                    ?.required
+                                ">
+                                                            Revenue Share Percentage is required.
+                                                        </mat-error>
+                                                        <mat-error *ngIf="
+                                  planBundleSubmitted &&
+                                  PlanDetailListfromgroup.controls.revenueSharePercentage.errors
+                                    ?.min
+                                ">
+                                                            Minimum 0 Percentage allowed.
+                                                        </mat-error>
+                                                        <mat-error *ngIf="
+                                  planBundleSubmitted &&
+                                  PlanDetailListfromgroup.controls.revenueSharePercentage.errors
+                                    ?.max
+                                ">
+                                                            Maximum 100 Percentage allowed.
+                                                        </mat-error>
+                                                    </mat-form-field>
+                                                </div>
+
+                                                <!-- Add Button -->
+                                                <div
+                                                    class="col-lg-1 col-md-1 col-sm-1 col-12 d-flex align-items-center">
+                                                    <button mat-flat-button color="primary"
+                                                        class="button-normal clear-btn w-100"
+                                                        style="margin-top: -11px; height: 50px"
+                                                        (click)="onAddChargeField()">
+                                                        Add
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div class="table-responsive tableAddEditScrollHeight example-container">
+                                                <table mat-table class="w-100 slab-table" #planTable
+                                                    [dataSource]="paricebookListFromArray.controls"
+                                                    class="mat-elevation-z2 w-100-table">
+                                                    <!-- Plan / Plan Group Column -->
+                                                    <ng-container matColumnDef="plan">
+                                                        <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>
+                                                            Plan / Plan Group
+                                                        </th>
+                                                        <td mat-cell *matCellDef="let row">
+                                                            <mat-form-field appearance="outline"
+                                                                class="mat-form-field w-100"
+                                                                *ngIf="row.get('postpaidPlan.id')">
+                                                                <mat-select class="input-p-5"
+                                                                    [formControl]="row.get('postpaidPlan.id')"
+                                                                    [disabled]="true">
+                                                                    <mat-option
+                                                                        *ngFor="let plan of commondropdownService.postpaidplanData"
+                                                                        [value]="plan.id">
+                                                                        {{ plan.name }}
+                                                                    </mat-option>
+                                                                </mat-select>
+                                                            </mat-form-field>
+                                                            <mat-form-field appearance="outline"
+                                                                class="mat-form-field w-100"
+                                                                *ngIf="row.get('planGroup.planGroupId')">
+                                                                <mat-select class="input-p-5"
+                                                                    [formControl]="row.get('planGroup.planGroupId')"
+                                                                    [disabled]="true">
+                                                                    <mat-option *ngFor="let plan of planGroupdata"
+                                                                        [value]="plan.planGroupId">
+                                                                        {{ plan.planGroupName }}
+                                                                    </mat-option>
+                                                                </mat-select>
+                                                            </mat-form-field>
+                                                        </td>
+                                                    </ng-container>
+
+                                                    <!-- Offer Price Column -->
+                                                    <ng-container matColumnDef="offerprice">
+                                                        <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>
+                                                            Offer Price
+                                                        </th>
+                                                        <td mat-cell *matCellDef="let row">
+                                                            <mat-form-field appearance="outline"
+                                                                class="mat-form-field w-100">
+                                                                <input matInput class="input-p-5"
+                                                                    [formControl]="row.get('offerprice')" readonly />
+                                                            </mat-form-field>
+                                                        </td>
+                                                    </ng-container>
+
+                                                    <!-- Revenue Share Column -->
+                                                    <ng-container matColumnDef="revenueShare">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+                                                            <ng-container
+                                                                *ngIf="!slabFlag && planBundleGroupForm.value.commission_on !== 'Service level'">
+                                                                Revenue Share Percentage
+                                                            </ng-container>
+                                                        </th>
+
+                                                        <td mat-cell *matCellDef="let row">
+                                                            <ng-container
+                                                                *ngIf="!slabFlag && planBundleGroupForm.value.commission_on !== 'Service level'">
+                                                                <mat-form-field appearance="outline"
+                                                                    class="mat-form-field w-100">
+                                                                    <input matInput type="number" min="0" max="100"
+                                                                        [formControl]="row.get('revenueSharePercentage')" />
+                                                                </mat-form-field>
+                                                            </ng-container>
+                                                        </td>
+                                                    </ng-container>
+
+                                                    <!-- Delete Column -->
+                                                    <ng-container matColumnDef="delete">
+                                                        <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>
+                                                            Delete
+                                                        </th>
+                                                        <td mat-cell *matCellDef="let row; let i = index">
+                                                            <a mat-icon-button href="javascript:void(0)"
+                                                                *ngIf="paricebookListFromArray.controls.length > 1"
+                                                                (click)="deleteConfirmonChargeField(i, row.get('id').value)">
+                                                                <img
+                                                                    src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+
+                                                            </a>
+                                                        </td>
+                                                    </ng-container>
+
+                                                    <tr mat-header-row *matHeaderRowDef="pricebookListDisplay"></tr>
+                                                    <tr mat-row *matRowDef="let row; columns: pricebookListDisplay">
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </mat-card-content>
+                            </mat-card>
+                            <div *ngIf="slabFlag && planBundleGroupForm.value.commission_on !== 'Service level'">
+                                <mat-card>
+                                    <mat-card-header>
+                                        <mat-card-title>Slab Mapping</mat-card-title></mat-card-header>
+                                    <mat-card-content>
+                                        <form [formGroup]="slabListListfromgroup">
+                                            <div class="table-responsive tableAddEditScrollHeight example-container">
+                                                <table mat-table class="w-100 slab-table" [dataSource]="dataSourceData">
+                                                    <!-- Range From Column -->
+                                                    <ng-container matColumnDef="fromRange">
+                                                        <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>
+                                                            Range From*
+                                                        </th>
+                                                        <td mat-cell *matCellDef="let row">
+                                                            <mat-form-field appearance="outline" class="w-100">
+                                                                <input matInput class="input-p-5" type="number" min="1"
+                                                                    placeholder="Enter Range From"
+                                                                    formControlName="fromRange" [ngClass]="{
+                                      'is-invalid':
+                                        slabSubmitted &&
+                                        slabListListfromgroup.controls.fromRange.errors
+                                    }" />
+                                                                <mat-error *ngIf="
+                                      slabSubmitted &&
+                                      slabListListfromgroup.controls.fromRange.errors?.required
+                                    ">
+                                                                    Range From is required.
+                                                                </mat-error>
+                                                            </mat-form-field>
+                                                        </td>
+                                                    </ng-container>
+
+                                                    <!-- Range UpTo Column -->
+                                                    <ng-container matColumnDef="toRange">
+                                                        <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>
+                                                            Range UpTo*
+                                                        </th>
+                                                        <td mat-cell *matCellDef="let row">
+                                                            <mat-form-field appearance="outline" class="w-100">
+                                                                <input matInput class="input-p-5" type="number" min="1"
+                                                                    placeholder="Enter Range UpTo"
+                                                                    formControlName="toRange" [ngClass]="{
+                                      'is-invalid':
+                                        slabSubmitted &&
+                                        slabListListfromgroup.controls.toRange.errors
+                                    }" />
+                                                                <mat-error *ngIf="
+                                      slabSubmitted &&
+                                      slabListListfromgroup.controls.toRange.errors?.required
+                                    ">
+                                                                    Range UpTo is required.
+                                                                </mat-error>
+                                                            </mat-form-field>
+                                                        </td>
+                                                    </ng-container>
+
+                                                    <!-- Commission Amount Column -->
+                                                    <ng-container matColumnDef="commissionAmount">
+                                                        <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>
+                                                            Commission Amount*
+                                                        </th>
+                                                        <td mat-cell *matCellDef="let row">
+                                                            <mat-form-field appearance="outline" class="w-100">
+                                                                <input matInput class="input-p-5" type="number" min="1"
+                                                                    placeholder="Enter Commission Amount"
+                                                                    formControlName="commissionAmount" [ngClass]="{
+                                      'is-invalid':
+                                        slabSubmitted &&
+                                        slabListListfromgroup.controls.commissionAmount.errors
+                                    }" />
+                                                                <mat-error *ngIf="
+                                      slabSubmitted &&
+                                      slabListListfromgroup.controls.commissionAmount.errors
+                                        ?.required
+                                    ">
+                                                                    Commission Amount is required.
+                                                                </mat-error>
+                                                            </mat-form-field>
+                                                        </td>
+                                                    </ng-container>
+
+                                                    <!-- Delete Column -->
+                                                    <ng-container matColumnDef="delete">
+                                                        <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>
+                                                            Action
+                                                        </th>
+                                                        <td mat-cell *matCellDef="let row; let i = index">
+                                                            <button mat-flat-button color="primary"
+                                                                class="button-normal clear-btn w-100"
+                                                                style="margin-top: -11px; height: 50px"
+                                                                (click)="onAddTaxTypeSlabField()">
+                                                                Add
+                                                            </button>
+                                                        </td>
+                                                    </ng-container>
+
+                                                    <tr mat-header-row *matHeaderRowDef="pariceSalbListDisplay"></tr>
+                                                    <tr mat-row *matRowDef="let row; columns: pariceSalbListDisplay">
+                                                    </tr>
+                                                </table>
+                                            </div>
+                                        </form>
+
+                                        <!-- Slab Table -->
+                                        <div class="table-responsive tableAddEditScrollHeight example-container">
+                                            <table mat-table #slabTable class="w-100 slab-table"
+                                                [dataSource]="paricebookSlabListFromArray.controls">
+                                                <!-- Range From Column -->
+                                                <ng-container matColumnDef="fromRange">
+                                                    <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>
+                                                        Range From*
+                                                    </th>
+                                                    <td mat-cell *matCellDef="let row">
+                                                        <mat-form-field appearance="outline" class="w-100">
+                                                            <input matInput class="input-p-5" type="number" min="1"
+                                                                placeholder="Enter Range From"
+                                                                [formControl]="row.get('fromRange')" />
+                                                            <mat-error
+                                                                *ngIf="submitted && row.get('fromRange').errors?.required">Range
+                                                                from is required.</mat-error>
+                                                            <mat-error
+                                                                *ngIf="submitted && row.get('fromRange').errors?.pattern">Only
+                                                                numeric value allowed.</mat-error>
+                                                        </mat-form-field>
+                                                    </td>
+                                                </ng-container>
+
+                                                <!-- Range UpTo Column -->
+                                                <ng-container matColumnDef="toRange">
+                                                    <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>
+                                                        Range UpTo*
+                                                    </th>
+                                                    <td mat-cell *matCellDef="let row">
+                                                        <mat-form-field appearance="outline" class="w-100">
+                                                            <input matInput class="input-p-5" type="number" min="1"
+                                                                placeholder="Enter Range UpTo"
+                                                                [formControl]="row.get('toRange')" />
+                                                            <mat-error
+                                                                *ngIf="submitted && row.get('toRange').errors?.required">Range
+                                                                upto is required.</mat-error>
+                                                            <mat-error
+                                                                *ngIf="submitted && row.get('toRange').errors?.pattern">Only
+                                                                numeric value allowed.</mat-error>
+                                                        </mat-form-field>
+                                                    </td>
+                                                </ng-container>
+
+                                                <!-- Commission Amount Column -->
+                                                <ng-container matColumnDef="commissionAmount">
+                                                    <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>
+                                                        Commission Amount*
+                                                    </th>
+                                                    <td mat-cell *matCellDef="let row">
+                                                        <mat-form-field appearance="outline" class="w-100">
+                                                            <input matInput class="input-p-5" type="number" min="1"
+                                                                placeholder="Enter Commission Amount"
+                                                                [formControl]="row.get('commissionAmount')" />
+                                                            <mat-error
+                                                                *ngIf="submitted && row.get('commissionAmount').errors?.required">Commission
+                                                                amount is required.</mat-error>
+                                                            <mat-error
+                                                                *ngIf="submitted && row.get('commissionAmount').errors?.pattern">Only
+                                                                numeric value allowed.</mat-error>
+                                                        </mat-form-field>
+                                                    </td>
+                                                </ng-container>
+
+                                                <!-- Delete Column -->
+                                                <ng-container matColumnDef="delete">
+                                                    <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Delete
+                                                    </th>
+                                                    <td mat-cell *matCellDef="let row; let i = index">
+                                                        <a mat-icon-button href="javascript:void(0)"
+                                                            *ngIf="paricebookSlabListFromArray.controls.length > 1"
+                                                            (click)="deleteConfirmonTaxTypeSlabField(i, row.get('id').value)">
+                                                            <img
+                                                                src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+
+                                                        </a>
+                                                    </td>
+                                                </ng-container>
+
+                                                <tr mat-header-row *matHeaderRowDef="pariceSalbListDisplay"></tr>
+                                                <tr mat-row *matRowDef="let row; columns: pariceSalbListDisplay"></tr>
+                                            </table>
+                                        </div>
+                                    </mat-card-content>
+                                </mat-card>
+                            </div>
+                        </form>
+                        }
+                    </mat-card-content>
+                </mat-card>
+            </div>
+        </div>
+
+        <div class="dialog-action-adjust d-flex justify-content-end" style="gap: 8px">
+            <button mat-button mat-flat-button color="'primary'" class="addarea-btn" type="submit"
+                *ngIf="!isplanBundleEdit" (click)="addEditplanBundle('', dialogRef)">
+                Create Partner plan Bundle
+            </button>
+            <button mat-button mat-flat-button color="'primary'" class="addarea-btn" type="submit"
+                *ngIf="isplanBundleEdit" (click)="addEditplanBundle(viewplanBundleListData.id, dialogRef)">
+                Update Partner plan Bundle
+            </button>
+            <button mat-stroked-button mat-dialog-close>Close</button>
+        </div>
+    </div>
+</ng-template>
+<!-- @if (createView) {
+ 
+} -->
+
+<ng-template #detailsDialog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <!-- Header -->
+        <div class="dialog-header dialog-title">
+            {{ planBundlelistDeatils.bookname }} Partner Plan Bundle
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <div mat-dialog-content>
+            <mat-card>
+                <mat-card-header>
+                    <mat-card-title>Basic Details</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="row">
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Name </span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">{{ planBundlelistDeatils?.bookname }}</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Plan Group </span>
+                                <span class="colon">:</span>
+                                <span *ngIf="planGrouptype" class="m-l-10">{{
+                                    planBundlelistDeatils?.planGroup
+                                    }}</span>
+                                <span *ngIf="!planGrouptype">-</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Plan Bundle Type </span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">{{ plantypeName }}</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">AGR Percentage </span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">{{ planBundlelistDeatils?.agrPercentage }}%</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">TDS Percentage </span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">{{ planBundlelistDeatils?.tdsPercentage }}%</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Revenue Type </span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">{{ planBundlelistDeatils?.revenueType }}</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Commission On</span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">{{ planBundlelistDeatils?.commission_on }}</span>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Status </span>
+                                <span class="colon">:</span>
+                                <span *ngIf="
+                    planBundlelistDeatils?.status == 'active' ||
+                    planBundlelistDeatils?.status == 'Active'  ||
+                    planBundlelistDeatils?.status == 'ACTIVE'
+                  ">
+                                    Active
+                                </span>
+                                <span *ngIf="
+                    planBundlelistDeatils?.status == 'inactive' ||
+                    planBundlelistDeatils?.status == 'Inactive' ||
+                    planBundlelistDeatils?.status == 'INACTIVE'
+                  ">
+                                    Inactive
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Description </span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">{{ planBundlelistDeatils?.description }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+            @if (
+            planBundlelistDeatils?.commission_on == "Service level" &&
+            planBundlelistDeatils?.revenueType == "Percentage"
+            ) {
+            <mat-card>
+                <mat-card-header>
+                    <mat-card-title>Service Commission List</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="table-responsive tableViewScrollHeight example-container">
+                        <table mat-table [dataSource]="planBundlelistDeatils?.serviceCommissionList"
+                            class="mat-elevation-z8">
+                            <!-- Service Column -->
+                            <ng-container matColumnDef="service">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Service</th>
+                                <td mat-cell *matCellDef="let row; ">
+                                    {{ serviListName }}
+                                </td>
+                            </ng-container>
+
+                            <!-- Revenue Share Percentage Column -->
+                            <ng-container matColumnDef="revenueShare">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>
+                                    Revenue Share Percentage
+                                </th>
+                                <td mat-cell *matCellDef="let row">{{ row.revenue_share_percentage }}%</td>
+                            </ng-container>
+
+                            <!-- Royalty Percentage Column -->
+                            <ng-container matColumnDef="royalty">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>
+                                    Royalty Percentage
+                                </th>
+                                <td mat-cell *matCellDef="let row">{{ row.royaltyPercentage }}%</td>
+                            </ng-container>
+
+                            <tr mat-header-row *matHeaderRowDef="serviceCommissionDisplayedColumns"></tr>
+                            <tr mat-row *matRowDef="let row; columns: serviceCommissionDisplayedColumns"></tr>
+                        </table>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+            }
+            <mat-card>
+                <mat-card-header>
+                    <mat-card-title>Plan Details</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <mat-checkbox [checked]="planBundlelistDeatils?.isAllPlanSelected" disabled>
+                                All Plan Select
+                            </mat-checkbox>
+                        </div>
+                        <div class="col-md-3">
+                            <mat-checkbox [checked]="planBundlelistDeatils?.isAllPlanGroupSelected" disabled>
+                                All Plan Group Select
+                            </mat-checkbox>
+                        </div>
+                        <div class="col-md-3" *ngIf="
+                planBundlelistDeatils?.isAllPlanSelected ||
+                planBundlelistDeatils?.isAllPlanGroupSelected
+              ">
+                            <label>Revenue Share Percentage:</label>
+                            <span>{{ planBundlelistDeatils?.revenueSharePercentage }}%</span>
+                        </div>
+                    </div>
+
+                    <!-- Plan Table -->
+                    <div *ngIf="
+              !(
+                planBundlelistDeatils?.isAllPlanSelected ||
+                planBundlelistDeatils?.isAllPlanGroupSelected
+              )
+            ">
+                        <div class="table-responsive tableViewScrollHeight example-container">
+                            <table mat-table [dataSource]="planBundlelistDeatils?.priceBookPlanDetailList"
+                                class="mat-elevation-z8">
+                                <!-- Plan Name Column -->
+                                <ng-container matColumnDef="plan">
+                                    <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Plan</th>
+                                    <td mat-cell *matCellDef="let row">
+                                        {{ row.postpaidPlan?.name || row.planGroup?.planGroupName }}
+                                    </td>
+                                </ng-container>Partner Plan Bundle
+
+                                <!-- Offer Price Column -->
+                                <ng-container matColumnDef="offerPrice">
+                                    <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Offer Price</th>
+                                    <td mat-cell *matCellDef="let row">{{ row.offerprice }}</td>
+                                </ng-container>
+
+                                <!-- Revenue Share Column -->
+                                <ng-container matColumnDef="revenueShare"
+                                    *ngIf="planBundlelistDeatils?.commission_on === 'Plan level'">
+                                    <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>
+                                        Revenue Share Percentage
+                                    </th>
+                                    <td mat-cell *matCellDef="let row">{{ row.revenueSharePercentage }}%</td>
+                                </ng-container>
+
+                                <tr mat-header-row *matHeaderRowDef="planDetailDisplayedColumns"></tr>
+                                <tr mat-row *matRowDef="let row; columns: planDetailDisplayedColumns"></tr>
+                            </table>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+
+            <mat-card *ngIf="planBundlelistDeatils?.priceBookSlabDetailsList.length > 0">
+                <mat-card-header>
+                    <mat-card-title>Slab Mapping</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="table-responsive tableViewScrollHeight example-container">
+                        <table mat-table [dataSource]="planBundlelistDeatils?.priceBookSlabDetailsList"
+                            class="mat-elevation-z8">
+                            <ng-container matColumnDef="fromRange">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Range From</th>
+                                <td mat-cell *matCellDef="let row">{{ row.fromRange }}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="toRange">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Range UpTo</th>
+                                <td mat-cell *matCellDef="let row">{{ row.toRange }}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="commissionAmount">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Commission Amount</th>
+                                <td mat-cell *matCellDef="let row">{{ row.commissionAmount }}</td>
+                            </ng-container>
+
+                            <tr mat-header-row *matHeaderRowDef="slabDisplayedColumns"></tr>
+                            <tr mat-row *matRowDef="let row; columns: slabDisplayedColumns"></tr>
+                        </table>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+
+        <div class="dialog-action-adjust d-flex justify-content-end">
+            <button mat-stroked-button mat-dialog-close>Close</button>
+        </div>
+    </div>
+</ng-template>
+<ng-template #confirmDialog let-data>
+    <div class="dialog-container">
+        <div class="dialog-header dialog-header-titleFont">
+            {{ data.title || "Delete Confirmation" }}
+            <span class="w-h-18">
+                <a mat-icon-button href="javascript:void(0)" mat-dialog-close="false">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+            <p class="dialog-description">{{ data.description }}</p>
+
+            <div mat-dialog-actions class="p-0">
+                <button mat-flat-button type="button" class="primary" [mat-dialog-close]="true">
+                    {{ data.yesLabel || "Confirm" }}
+                </button>
+                <button mat-stroked-button matButton="outlined" color="primary" mat-dialog-close="false">
+                    {{ data.noLabel || "Cancel" }}
+                </button>
+            </div>
+        </div>
+    </div>
+</ng-template>

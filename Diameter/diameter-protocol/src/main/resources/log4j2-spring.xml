@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+
+    <Properties>
+        <!-- Location info: %C{1.} class, %M method, %F file, %L line.
+             NOTE: location info requires includeLocation="true" on the Async appender,
+             otherwise %C/%M/%F/%L print as "?". -->
+        <Property name="LOG_PATTERN">
+            [ %d{dd-MMM-yyyy HH:mm:ss,SSS} ] [ %-5level ] [%t] %C{1.}.%M(%F:%L): %msg%n
+        </Property>
+        <Property name="LOG_DIR">logs</Property>
+        <Property name="APP_NAME">diameter-stack</Property>
+    </Properties>
+
+    <Appenders>
+
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+        </Console>
+
+        <RollingFile name="FileAppender"
+                     fileName="${LOG_DIR}/${APP_NAME}.log"
+                     filePattern="${LOG_DIR}/${APP_NAME}-%d{yyyy-MM-dd}-%i.log.gz"
+                     immediateFlush="false">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+
+        <!-- ERROR-only log -->
+        <RollingFile name="ErrorFile"
+                     fileName="${LOG_DIR}/${APP_NAME}-error.log"
+                     filePattern="${LOG_DIR}/${APP_NAME}-error-%d{yyyy-MM-dd}-%i.log.gz"
+                     immediateFlush="false">
+            <PatternLayout pattern="${LOG_PATTERN}"/>
+            <Filters>
+                <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Filters>
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="10 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="30"/>
+        </RollingFile>
+
+        <!-- Asynchronous wrapper around the file appenders.
+             includeLocation="true" is REQUIRED so %C/%M/%F/%L resolve correctly under async.
+             Console stays synchronous (developer/console use). -->
+        <Async name="AsyncFile" includeLocation="true" bufferSize="8192">
+            <AppenderRef ref="FileAppender"/>
+            <AppenderRef ref="ErrorFile"/>
+        </Async>
+
+    </Appenders>
+
+    <Loggers>
+
+        <Logger name="STACK" level="INFO" additivity="false">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="AsyncFile"/>
+        </Logger>
+
+        <Logger name="CORE" level="WARN" additivity="false">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="AsyncFile"/>
+        </Logger>
+
+        <Root level="INFO">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="AsyncFile"/>
+        </Root>
+
+    </Loggers>
+
+</Configuration>

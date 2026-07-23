@@ -1,0 +1,43 @@
+<mat-form-field appearance="outline" class="w-100 mat-form-field searchable-dropdown"
+    [ngClass]="{'mat-form-field-invalid': !isHideError && hasError, 'hide-hint': isHideError, 'header-input': idHeaderInput}">
+
+    <mat-select #selectRef [placeholder]="placeholder" [disabled]="disabled" [multiple]="multiple"
+        [formControl]="ngControl?.control" [errorStateMatcher]="customErrorStateMatcher"
+        (openedChange)="onOpenedChange($event)" (focus)="onFocus()" (blur)="onBlur()"
+        (selectionChange)="onSelectionChange($event)" (openedChange)="clearSearch()" class="input-p-5"
+        [ngClass]="{'mat-mdc-select-invalid': hasError}" panelClass="common-dropdown">
+
+        <mat-option class="search-option">
+            <mat-form-field appearance="outline" class="search-field w-100 hide-hint "
+                (click)="$event.stopPropagation()">
+                <mat-icon matPrefix class="search-icon p-5 m-0">search</mat-icon>
+                <input matInput [(ngModel)]="searchValue" [placeholder]="searchPlaceholder"
+                    (ngModelChange)="onSearchChange($event)" (click)="$event.stopPropagation()" autocomplete="off"
+                    [ngModelOptions]="{standalone: true}" (keydown)="$event.stopPropagation()">
+                <button *ngIf="searchValue" mat-icon-button matSuffix (click)="clearSearch(); $event.stopPropagation()"
+                    type="button">
+                    <mat-icon>close</mat-icon>
+                </button>
+            </mat-form-field>
+        </mat-option>
+
+        <mat-divider></mat-divider>
+
+        <ng-container *ngIf="filteredOptions.length > 0; else noResults">
+            <mat-option *ngFor="let option of filteredOptions" [value]="getOptionValue(option)">
+                {{ getOptionLabel(option) }}
+            </mat-option>
+        </ng-container>
+
+        <ng-template #noResults>
+            <mat-option disabled class="no-results">
+                {{ noEntriesFoundLabel }}
+            </mat-option>
+        </ng-template>
+    </mat-select>
+
+    <mat-error *ngIf="showError">
+        {{ errorText }}
+    </mat-error>
+
+</mat-form-field>

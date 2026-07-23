@@ -1,0 +1,543 @@
+<!-- proxy-server card header search part start -->
+<div class="row header-row">
+    <mat-card class="cardWithShadow w-100">
+        <mat-card-content class="mat-card-content-border">
+            <div class="row">
+                <div class="col-sm-9 d-flex">
+                    <mat-form-field appearance="outline" style="margin-left: 16px" class="w-100 hide-hint mr-10">
+                        <input class="input-p-5" [(ngModel)]="searchName" matInput placeholder="Search {{ title }} Name"
+                            (keydown.enter)="search()" [ngClass]="{
+                    'is-invalid': searchSubmitted && searchForm.controls.name.errors
+                  }" />
+                        <mat-icon matSuffix class="search-header-search-icon">
+                            <i class="pi pi-search icon-size"></i>
+                        </mat-icon>
+                    </mat-form-field>
+                    <button mat-button mat-flat-button color="primary" class="button-normal mr-10" (click)="search()">
+                        Search
+                    </button>
+                    <button mat-stroked-button matButton="outlined" class="button-normal" (click)="clearSearchForm()">
+                        Clear
+                    </button>
+                </div>
+                <div class="col-sm-3 search-div">
+                    <button mat-button mat-flat-button color="primary" (click)="createnewProxy()"
+                        class="button-normal m-r-10">
+                        Add {{ title }}
+                    </button>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+<!-- proxy-server card header search part end -->
+
+<!-- body part start -->
+<div class="container-fluid contain-flud">
+    <div class="row">
+        <!-- sub-country list table start -->
+        <div class="col-md-12">
+            <mat-card class="cardWithShadow">
+                <mat-card-content class="mat-card-content-border">
+                    <div class="country-table-list">
+                        <div class="table-container">
+                            <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8 w-100">
+                                <!-- Id Column -->
+                                <ng-container matColumnDef="id">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">ID</th>
+
+                                    <td mat-cell *matCellDef="let proxy">
+                                        {{ proxy.id }}
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="name">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Name
+                                    </th>
+                                    <td mat-cell *matCellDef="let proxy" class="f-s-14">
+                                        {{ proxy.name }}
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="ip">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        IP
+                                    </th>
+                                    <td mat-cell *matCellDef="let proxy" class="f-s-14">
+                                        {{ proxy.ip }}
+                                    </td>
+                                </ng-container>
+                                <ng-container matColumnDef="acc-p">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Acc Port
+                                    </th>
+                                    <td mat-cell *matCellDef="let proxy" class="f-s-14">
+                                        {{ proxy.acctport }}
+                                    </td>
+                                </ng-container>
+                                <ng-container matColumnDef="auth-p">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Auth Port
+                                    </th>
+                                    <td mat-cell *matCellDef="let proxy" class="f-s-14">
+                                        {{ proxy.authport }}
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="status">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Status
+                                    </th>
+                                    <td mat-cell *matCellDef="let proxy" class="f-s-14">
+                                        <mat-slide-toggle color="primary" [checked]="proxy.status === 'Active'"
+                                            [disabled]="!editAccess || !modalToggle"
+                                            (change)="modalToggle ? changeStatus(proxy.id, proxy.status, proxy.mvnoId, $event) : null">
+                                        </mat-slide-toggle>
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="c-on">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Created On
+                                    </th>
+                                    <td mat-cell *matCellDef="let proxy" class="f-s-14">
+                                        {{ proxy.createDate | date: "dd-MM-yyy HH:mm" }}
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="action">
+                                    @if (editAccess || deleteAccess) {
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">Action</th>
+                                    }
+
+                                    <td mat-cell *matCellDef="let proxy ; let i = index">
+                                        <a mat-icon-button matTooltip="view" href="javascript:void(0)"
+                                            (click)="showConfigDetail(proxy.id, proxy.mvnoId)">
+                                           <img src="assets/img/DashboardIcons/eye-svgrepo-com (1) 1.svg" >
+                                        </a>
+                                        @if (editAccess) {
+                                        <a mat-icon-button matTooltip="edit" href="javascript:void(0)" (click)="edit(proxy.id,i)">
+                                            <img src="assets/img/DashboardIcons/Edit.svg" >
+                                        </a>
+                                        }
+
+                                        @if (deleteAccess) {
+                                        <a mat-icon-button matTooltip="delete" href="javascript:void(0)"
+                                            (click)="deleteConfirm(proxy.id, proxy.mvnoId, i,proxy.name)">
+                                            <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                                        </a>
+                                        }
+                                    </td>
+                                </ng-container>
+
+                                <tr mat-header-row class="table-header-bg"
+                                    *matHeaderRowDef="getDisplayedPlanDetailsColumns(); sticky: true">
+                                </tr>
+                                <tr mat-row class="table-content-row"
+                                    *matRowDef="let row; columns: getDisplayedPlanDetailsColumns()">
+                                </tr>
+                            </table>
+
+                            <mat-paginator class="custome-paginator" stickyEnd [length]="totalRecords"
+                                [pageSize]="itemsPerPage" [pageSizeOptions]="[5,10,20,50,100]" showFirstLastButtons
+                                (page)="pageChanged($event)">
+                            </mat-paginator>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+        <!-- sub-country list table end -->
+    </div>
+</div>
+<!-- body part end -->
+
+
+<!-- add-edit proxy server dialog start -->
+<ng-template #addEditProxyConfigDialog>
+    
+    <div class="dialog-container">
+        <div class="dialog-header">
+            {{ editId ? "Update" : "Create" }} {{ title}}
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="closeDialog()">
+                     <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+            <div class="col-md-12"> 
+                <ng-container *ngIf="!createAccess && !editAccess">
+                            <mat-card-content class="matcard-content">
+                                <div class="panel-body table-responsive">
+                                    Sorry you have not privilege to create operation!
+                                </div>
+                            </mat-card-content>
+                        </ng-container>
+                @if (editAccess || createAccess) {
+                <mat-card-content class="matcardContent">
+                    <form class="card-form mb-3" [formGroup]="detailGroupForm">
+                        <!-- create basic detail card start -->
+                        <mat-card class="mb-4 basic-details">
+                            <mat-card-header>
+                                <mat-card-title class="font-900">Proxy Configuration Basic Parameters</mat-card-title>
+                            </mat-card-header>
+                            <mat-card-content>
+                                <div class="row g-3">
+                                    <div class="col-md-4 mb-4">
+                                        <label for="" class="inputLabel">Name*</label>
+                                        <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                            <input id="" type="text" class="input-p-5" matInput [readonly]="editId"
+                                                formControlName="name" placeholder="Enter Name" [ngClass]="{
+                          'is-invalid': submitted && detailGroupForm.controls.name.errors
+                        }">
+                                        </mat-form-field>
+                                        @if (submitted && f.name.errors) {
+                                        <div class="invalid-feedback text-danger" style="margin-top:-13px;">
+                                            @if (detailGroupForm.controls.name.errors.required) {
+                                            <div>
+                                                Please Enter Name.
+                                            </div>
+                                            }
+                                        </div>
+                                        }
+                                    </div>
+                                    <div class="col-md-4 mb-4">
+                                        <label for="" class="inputLabel">IP*</label>
+                                        <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                            <input id="" autocomplete="off" type="text" class="input-p-5" matInput
+                                                formControlName="ip" placeholder="Enter IP" [ngClass]="{
+                          'is-invalid': submitted && detailGroupForm.controls.ip.errors
+                        }">
+                                        </mat-form-field>
+                                        @if (submitted && detailGroupForm.controls.ip.errors) {
+                                        <div class="invalid-feedback text-danger" style="margin-top: -13px;">
+                                            @if (detailGroupForm.controls.ip.errors.required) {
+                                            <div>
+                                                Please Enter IP.
+                                            </div>
+                                            }
+                                        </div>
+                                        }
+                                        @if (
+                                        submitted &&
+                                        this.detailGroupForm.controls.ip.invalid &&
+                                        !detailGroupForm.controls.ip.errors.required
+                                        ) {
+                                        <div class="invalid-feedback text-danger">
+                                            <div>Please Enter Valid IP Address.</div>
+                                        </div>
+                                        }
+                                    </div>
+
+                                    <div class="col-md-4 mb-4">
+                                        <label for="" class="inputLabel">Secret Key*</label>
+                                        <mat-form-field class="mat-form-field w-100" appearance="outline">
+                                            <input id="secretkey" autocomplete="new-password" type="password"
+                                                class="input-p-5" matInput [type]="_passwordNewType"
+                                                placeholder="Enter new secret key" formControlName="secretkey"
+                                                [ngClass]="{'is-invalid': submitted && detailGroupForm.controls.secretkey.errors}">
+                                            <button mat-icon-button matSuffix type="button"
+                                                (click)="toggleNewPassword()"
+                                                [attr.aria-label]="'Toggle password visibility'">
+                                                <mat-icon>{{ _passwordNewType === 'password' ? 'visibility' :
+                                                    'visibility_off' }}</mat-icon>
+                                            </button>
+                                        </mat-form-field>
+                                        @if (submitted && detailGroupForm.controls.secretkey.errors) {
+                                        <div class="invalid-feedback text-danger" style="margin-top: -13px;">
+                                            @if (detailGroupForm.controls.secretkey.errors.required) {
+                                            <div>
+                                                Please Enter Secret.
+                                            </div>
+                                            }
+                                        </div>
+                                        }
+                                    </div>
+
+                                    <div class="col-md-4 mb-4">
+                                        <label for="" class="inputLabel">Status*</label>
+                                        <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                            <mat-select id="statusSelect" class="input-p-5" placeholder="Select Status"
+                                                formControlName="status" [ngClass]="{
+                            'is-invalid': submitted && detailGroupForm.controls.status.errors
+                          }">
+                                                <mat-option *ngFor="let s of status" [value]="s.label">
+                                                    {{ s.label }}
+                                                </mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+                                        @if (submitted && detailGroupForm.controls.status.errors) {
+                                        <div class="errorWrap text-danger" style="margin-top: -13px;">
+                                            @if (submitted && detailGroupForm.controls.status.errors.required) {
+                                            <div class="error text-danger">
+                                                Please Select Status.
+                                            </div>
+                                            }
+                                        </div>
+                                        }
+                                    </div>
+
+                                    <div class="col-md-4 mb-4">
+                                        <label for="" class="inputLabel">Override NAS IP*</label>
+                                        <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                            <mat-select id="statusSelect" class="input-p-5"
+                                                placeholder="Override NAS IP" formControlName="overrideNAS"
+                                                (selectionChange)="overrideNASEvent($event.value)">
+                                                <mat-option *ngFor="let s of override" [value]="s.value">
+                                                    {{ s.label }}
+                                                </mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+                                    </div>
+
+                                    <div class="col-md-4 mb-4">
+                                        <label for="" class="inputLabel">NAS IP*</label>
+                                        <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                            <input id="" type="text" class="input-p-5" matInput formControlName="nasip"
+                                                [ngClass]="{
+                          'is-invalid': submitted && detailGroupForm.controls.nasip.errors
+                        }" placeholder="Enter NAS IP">
+                                        </mat-form-field>
+                                        @if (submitted && detailGroupForm.controls.nasip.errors) {
+                                        <div class="invalid-feedback text-danger" style="margin-top: -13px;">
+                                            @if (detailGroupForm.controls.nasip.errors.required) {
+                                            <div>
+                                                Please Enter NAS IP.
+                                            </div>
+                                            }
+                                        </div>
+                                        }
+                                        @if (
+                                        submitted &&
+                                        this.detailGroupForm.controls.nasip.invalid &&
+                                        !detailGroupForm.controls.nasip.errors.required
+                                        ) {
+                                        <div class="invalid-feedback text-danger">
+                                            <div>Please Enter Valid NAS IP Address.</div>
+                                        </div>
+                                        }
+                                    </div>
+
+                                    <div class="col-md-4 mb-4">
+                                        <label for="" class="inputLabel">Timeout (In ms)*</label>
+                                        <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                            <input min="1" id="timeout" type="number" class="input-p-5" matInput
+                                                formControlName="timeout" placeholder="Enter Timeout" [ngClass]="{
+                              'is-invalid': submitted && detailGroupForm.controls.timeout.errors
+                            }">
+                                        </mat-form-field>
+                                        @if (submitted && detailGroupForm.controls.timeout.errors) {
+                                        <div class="errorWrap text-danger" style="margin-top: -13px;">
+                                            @if (submitted &&
+                                            detailGroupForm.controls.timeout.errors.required) {
+                                            <div class="error text-danger">
+                                                Timeout is required.
+                                            </div>
+                                            }
+                                        </div>
+                                        }
+                                    </div>
+                                </div>
+                            </mat-card-content>
+                        </mat-card>
+
+                        <!-- *************************** -->
+                        <mat-card class="mb-4 basic-details">
+                            <mat-card-header>
+                                <mat-card-title class="font-900">Port Parameters</mat-card-title>
+                            </mat-card-header>
+                            <mat-card-content>
+                                <div class="row g-3">
+
+                                    <div class="col-md-4 mb-4">
+                                        <label for="" class="inputLabel">Acc Port*</label>
+                                        <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                            <input id="" name="acctport" type="text" class="input-p-5" matInput
+                                                formControlName="acctport" [ngClass]="{
+                          'is-invalid': submitted && detailGroupForm.controls.acctport.errors
+                        }" placeholder="Enter Acc Port">
+                                        </mat-form-field>
+                                        @if (submitted && detailGroupForm.controls.acctport.errors) {
+                                        <div class="invalid-feedback text-danger" style="margin-top: -13px;">
+                                            @if (detailGroupForm.controls.acctport.errors.required) {
+                                            <div>
+                                                Please Enter Acc Port Number.
+                                            </div>
+                                            }
+                                            @if (detailGroupForm.controls.acctport.errors.pattern) {
+                                            <div>
+                                                Acct Port should be in numeric
+                                            </div>
+                                            }
+                                        </div>
+                                        }
+                                    </div>
+
+                                    <div class="col-md-4 mb-4">
+                                        <label for="" class="inputLabel">Auth Port*</label>
+                                        <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                            <input id="" name="authport" type="text" class="input-p-5" matInput
+                                                formControlName="authport" [ngClass]="{
+                          'is-invalid': submitted && detailGroupForm.controls.authport.errors
+                        }" placeholder="Enter Auth port">
+                                        </mat-form-field>
+                                        @if (submitted && detailGroupForm.controls.authport.errors) {
+                                        <div class="invalid-feedback text-danger" style="margin-top: -13px;">
+                                            @if (detailGroupForm.controls.authport.errors.required) {
+                                            <div>
+                                                Please Enter Authentication Port Number.
+                                            </div>
+                                            }
+                                            @if (detailGroupForm.controls.authport.errors.pattern) {
+                                            <div>
+                                                Auth Port should be in numeric
+                                            </div>
+                                            }
+                                        </div>
+                                        }
+                                    </div>
+
+                                    <div class="col-md-4 mb-4">
+                                        <label for="" class="inputLabel">Dynamic Auth Port*</label>
+                                        <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                            <input id="" name="dynaAuthPort" type="text" class="input-p-5" matInput
+                                                formControlName="dynaAuthPort" [ngClass]="{
+                          'is-invalid': submitted && detailGroupForm.controls.dynaAuthPort.errors
+                        }" placeholder="Enter Auth port">
+                                        </mat-form-field>
+                                        @if (submitted && detailGroupForm.controls.dynaAuthPort.errors) {
+                                        <div class="invalid-feedback text-danger" style="margin-top: -13px;">
+                                            @if (detailGroupForm.controls.dynaAuthPort.errors.required) {
+                                            <div>
+                                                Please Enter Dynamic Authentication Port Number.
+                                            </div>
+                                            }
+                                            @if (detailGroupForm.controls.dynaAuthPort.errors.pattern) {
+                                            <div>
+                                                Dynamic Auth Port should be in numeric
+                                            </div>
+                                            }
+                                        </div>
+                                        }
+                                    </div>
+
+                                </div>
+                            </mat-card-content>
+                        </mat-card>
+                    </form>
+                </mat-card-content>
+            }
+            </div>
+        </div>
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+            <div class="button-normal m-r-10">
+                <button mat-button mat-flat-button color="primary" (click)="addOrUpdate()" class="button-normal"
+                    type="submit">
+                    {{ editId ? "Update" : "Add" }} {{title}}
+                </button>
+            </div>
+            <div class="button-normal">
+                <button mat-stroked-button matButton="outlined" type="button" color="primary"
+                    class="button-normal w-100" (click)="closeDialog()">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+    
+</ng-template>
+<!-- add-edit proxy server dialog end -->
+
+
+<!-- view detail template start -->
+<ng-template #viewProxyServerDialog>
+    <div class="container-fluid p-0">
+        <div class="dialog-header dialog-title">
+            {{config.name}} Details
+            <span>
+                <a mat-icon-button (click)="closeDialog()">
+                     <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <mat-dialog-content>
+            <!-- basic detail card start -->
+            <mat-card class="">
+                <mat-card-header>
+                    <mat-card-title class="font-900">Basic Details</mat-card-title>
+                </mat-card-header>
+                <div class="row p-15 m-t-10">
+                    <!-- Name -->
+                    <div class="col-md-4 field-row detail-row">
+                        <span class="field-label f-s-15 f-w-700 label">Name</span>
+                        <span class="field-label f-s-15 f-w-700 colon" style="margin-left: 11px;">:</span>
+                        <span class="field-value value m-l-10">{{ config.name }}</span>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="col-md-4 field-row detail-row">
+                        <span class="field-label f-s-15 f-w-700 label">IP</span>
+                        <span class="field-label f-s-15 f-w-700 colon" style="margin-left: 11px;">:</span>
+                        <span class="field-value value m-l-10">{{config.ip }}</span>
+                    </div>
+
+                    <!-- Response Time -->
+                    <div class="col-md-4 field-row detail-row">
+                        <span class="field-label f-s-15 f-w-700 label">Auth Port</span>
+                        <span class="field-label f-s-15 f-w-700 colon">:</span>
+                        <span class="field-value value m-l-10">{{config.authport}}</span>
+                    </div>
+
+                    <div class="col-md-4 field-row detail-row">
+                        <span class="field-label f-s-15 f-w-700 label">Acct Port</span>
+                        <span class="field-label f-s-15 f-w-700 colon" style="margin-left: 11px;">:</span>
+                        <span class="field-value value m-l-10">{{ config.acctport }}</span>
+                    </div>
+
+                    <div class="col-md-4 field-row detail-row">
+                        <span class="field-label f-s-15 f-w-700 label">Override NAS IP</span>
+                        <span class="field-label f-s-15 f-w-700 colon">:</span>
+                        <span class="field-value value m-l-10">{{config.overrideNAS }}</span>
+                    </div>
+                    <div class="col-md-4 field-row detail-row">
+                        <span class="field-label f-s-15 f-w-700 label">NAS IP</span>
+                        <span class="field-label f-s-15 f-w-700 colon">:</span>
+                        <span class="field-value value m-l-10">{{config.nasip}}</span>
+                    </div>
+                    <div class="col-md-4 field-row detail-row">
+                        <span class="field-label f-s-15 f-w-700 label">Timeout (In ms)</span>
+                        <span class="field-label f-s-15 f-w-700 colon">:</span>
+                        <span class="field-value value m-l-10">{{config.timeout}}</span>
+                    </div>
+                    <div class="col-md-4 field-row detail-row">
+                        <span class="field-label f-s-15 f-w-700 label">Status</span>
+                        <span class="field-label f-s-15 f-w-700 colon" style="margin-left: 11px;">:</span>
+                        <span class="field-value value m-l-10">{{config.status}}</span>
+                    </div>
+
+                    <div class="col-md-4 field-row detail-row">
+                        <span class="field-label f-s-15 f-w-700 label">Dynamic Authentication Port</span>
+                        <span class="field-label f-s-15 f-w-700 colon">:</span>
+                        <span class="field-value value m-l-10">{{config.dynaAuthPort }}</span>
+                    </div>
+
+                </div>
+            </mat-card>
+            <!-- basic detail card start -->
+        </mat-dialog-content>
+
+        <mat-dialog-actions align="end">
+            <button mat-stroked-button color="warn" (click)="closeDialog()">Close</button>
+        </mat-dialog-actions>
+    </div>
+</ng-template>
+<!-- view detail template end  -->

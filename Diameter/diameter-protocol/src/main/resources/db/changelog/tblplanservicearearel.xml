@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="create-tblplanservicearearel-001" author="initial-change">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="tblplanservicearearel"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="tblplanservicearearel">
+
+            <column name="id" type="BIGINT" >
+                <constraints primaryKey="true"
+                             nullable="false"
+                             primaryKeyName="pk_tblplanservicearearel"/>
+            </column>
+
+            <column name="serviceareaid" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="planid" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="created_on"
+                    type="TIMESTAMP"
+                    defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="lastmodified_on"
+                    type="TIMESTAMP"
+                    defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+        </createTable>
+
+        <!-- Unique Constraint -->
+        <addUniqueConstraint
+                tableName="tblplanservicearearel"
+                columnNames="id"
+                constraintName="tblplanservicearearel_uniq"/>
+
+        <!-- Index on planid -->
+        <createIndex
+                indexName="tblplanservicearearel_test"
+                tableName="tblplanservicearearel">
+            <column name="planid"/>
+        </createIndex>
+
+        <!-- Index on serviceareaid -->
+        <createIndex
+                indexName="tblplanservicearearel_dfd"
+                tableName="tblplanservicearearel">
+            <column name="serviceareaid"/>
+        </createIndex>
+
+        <!-- FK to tblservicearea -->
+        <addForeignKeyConstraint
+                constraintName="tblplanservicearearel_dfd"
+                baseTableName="tblplanservicearearel"
+                baseColumnNames="serviceareaid"
+                referencedTableName="tblservicearea"
+                referencedColumnNames="service_area_id"
+                onDelete="RESTRICT"
+                onUpdate="RESTRICT"/>
+
+        <!-- FK to tblmpostpaidplan -->
+        <addForeignKeyConstraint
+                constraintName="tblplanservicearearel_test"
+                baseTableName="tblplanservicearearel"
+                baseColumnNames="planid"
+                referencedTableName="tblmpostpaidplan"
+                referencedColumnNames="POSTPAIDPLANID"
+                onDelete="RESTRICT"
+                onUpdate="RESTRICT"/>
+
+    </changeSet>
+
+</databaseChangeLog>

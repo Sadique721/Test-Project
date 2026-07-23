@@ -1,0 +1,942 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="ZSS0027042601" author="INTL049" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="tblm_pulse_management"/>
+            </not>
+        </preConditions>
+        <createTable tableName="tblm_pulse_management">
+            <column name="pulse_id" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="pulse_name" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="pulse_unit" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="pulse_value" type="DECIMAL(10,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rounding_mode" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rate_per_pulse" type="DECIMAL(10,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_by" type="VARCHAR(50)"/>
+            <column name="created_date" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+            <column name="modified_by" type="VARCHAR(50)"/>
+            <column name="modified_date" type="TIMESTAMP"
+                    defaultValueComputed="CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="ZSS0027042602" author="INTL049" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="tblm_rate_package"/>
+            </not>
+        </preConditions>
+        <createTable tableName="tblm_rate_package">
+            <column name="rate_package_id" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="pulse_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="package_name" type="VARCHAR(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="service_type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <!--            <column name="start_date" type="TIMESTAMP">-->
+            <!--                <constraints nullable="false"/>-->
+            <!--            </column>-->
+            <column name="is_deleted" type="tinyint(1)" defaultValue="0"/>
+            <!--            <column name="expiry_date" type="TIMESTAMP"/>-->
+            <column name="created_by" type="VARCHAR(50)"/>
+            <column name="created_date" type="TIMESTAMP"/>
+            <column name="modified_by" type="VARCHAR(50)"/>
+            <column name="modified_date" type="TIMESTAMP"/>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="tblm_rate_package"
+                baseColumnNames="pulse_id"
+                referencedTableName="tblm_pulse_management"
+                referencedColumnNames="pulse_id"
+                constraintName="fk_rate_package_pulse"
+                onDelete="RESTRICT"/>
+    </changeSet>
+
+    <changeSet id="ZSS0027042603" author="INTL049" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="tblm_rate_package_group"/>
+            </not>
+        </preConditions>
+        <createTable tableName="tblm_rate_package_group">
+            <column name="group_id" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="group_name" type="VARCHAR(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="description" type="TEXT"/>
+            <!--            <column name="effective_date" type="TIMESTAMP">-->
+            <!--                <constraints nullable="false"/>-->
+            <!--            </column>-->
+            <column name="is_deleted" type="tinyint(1)" defaultValue="0"/>
+            <!--            <column name="expiry_date" type="TIMESTAMP"/>-->
+            <column name="created_date" type="TIMESTAMP"/>
+            <column name="modified_date" type="TIMESTAMP"/>
+        </createTable>
+    </changeSet>
+
+    <!-- 4. Create Mapping Table -->
+    <changeSet id="ZSS0027042604" author="INTL049" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="tblt_rate_package_group_mapping"/>
+            </not>
+        </preConditions>
+        <createTable tableName="tblt_rate_package_group_mapping">
+            <column name="mapping_id" type="BIGINT">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="group_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rate_package_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="nas_ip" type="VARCHAR(45)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="effective_date" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expiry_date" type="TIMESTAMP"/>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="tblt_rate_package_group_mapping"
+                baseColumnNames="group_id"
+                constraintName="fk_mapping_group"
+                referencedTableName="tblm_rate_package_group"
+                referencedColumnNames="group_id"
+                onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint
+                baseTableName="tblt_rate_package_group_mapping"
+                baseColumnNames="rate_package_id"
+                constraintName="fk_mapping_package"
+                referencedTableName="tblm_rate_package"
+                referencedColumnNames="rate_package_id"
+                onDelete="CASCADE"/>
+    </changeSet>
+
+    <!-- 5. Add group reference to postpaid plan -->
+    <changeSet id="ZSS0027042605" author="INTL049" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="TBLMPOSTPAIDPLAN" columnName="package_group_id"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="TBLMPOSTPAIDPLAN">
+            <column name="package_group_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        <addForeignKeyConstraint
+                baseTableName="TBLMPOSTPAIDPLAN"
+                baseColumnNames="package_group_id"
+                referencedTableName="tblm_rate_package_group"
+                referencedColumnNames="group_id"
+                constraintName="fk_postpaid_group_id"/>
+    </changeSet>
+
+    <changeSet id="ZSS0027042606" author="INTL049" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="tblm_rate_package" columnName="rate"/>
+            <columnExists tableName="tblm_rate_package" columnName="unit"/>
+            <columnExists tableName="tblm_rate_package" columnName="rounding_mode"/>
+        </preConditions>
+
+        <dropColumn tableName="tblm_rate_package" columnName="rate"/>
+        <dropColumn tableName="tblm_rate_package" columnName="unit"/>
+        <dropColumn tableName="tblm_rate_package" columnName="rounding_mode"/>
+    </changeSet>
+
+    <changeSet id="ZSS0027042607" author="INTL049" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="tblm_rate_package" columnName="is_pulse_applied"/>
+            </not>
+        </preConditions>
+
+        <addColumn tableName="tblm_rate_package">
+            <column name="is_pulse_applied" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet id="ZSS0027042608" author="INTL049" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="tblm_pulse_management" columnName="is_deleted"/>
+            </not>
+        </preConditions>
+
+        <addColumn tableName="tblm_pulse_management">
+            <column name="is_deleted" type="tinyint(1)" defaultValue="0"/>
+        </addColumn>
+    </changeSet>
+
+
+    <changeSet id="ZSS0027042609" author="INTL049" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="tblt_rated_record"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="tblt_rated_record">
+            <column name="rated_record_id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="aaa_record_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="session_id" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="customer_id" type="INT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="username" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="nas_ip" type="VARCHAR(45)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="total_data_usage_bytes" type="DECIMAL(20,2)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="total_data_usage_mb" type="DECIMAL(20,2)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="total_data_usage_gb" type="DECIMAL(20,2)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="session_start_time" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="session_end_time" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="session_duration_seconds" type="BIGINT"/>
+
+            <column name="service_type" type="VARCHAR(50)"/>
+
+            <column name="postpaid_plan_id" type="INT"/>
+            <column name="postpaid_plan_name" type="VARCHAR(100)"/>
+            <column name="plan_group" type="VARCHAR(100)"/>
+            <column name="plan_type" type="VARCHAR(50)"/>
+
+            <column name="rate_package_id" type="BIGINT"/>
+            <column name="rate_package_name" type="VARCHAR(100)"/>
+            <column name="rate_package_group_id" type="BIGINT"/>
+            <column name="rate_package_group_name" type="VARCHAR(100)"/>
+            <column name="rate_per_unit" type="DECIMAL(10,4)"/>
+            <column name="rate_unit" type="VARCHAR(10)"/>
+            <column name="rounding_mode" type="VARCHAR(20)"/>
+
+            <!-- Charging Information -->
+            <column name="base_charge" type="DECIMAL(20,2)"/>
+            <column name="overage_charge" type="DECIMAL(20,2)"/>
+            <column name="total_charge" type="DECIMAL(20,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="tax_amount" type="DECIMAL(20,2)"/>
+            <column name="final_amount" type="DECIMAL(20,2)">
+                <constraints nullable="false"/>
+            </column>
+
+            <!-- Usage Information -->
+            <column name="included_quota_mb" type="DECIMAL(20,2)"/>
+            <column name="included_quota_gb" type="DECIMAL(20,2)"/>
+            <column name="overage_usage_mb" type="DECIMAL(20,2)"/>
+            <column name="overage_usage_gb" type="DECIMAL(20,2)"/>
+            <column name="usage_percentage" type="DECIMAL(20,2)"/>
+
+            <!-- Rating Status -->
+            <column name="rating_status" type="VARCHAR(20)" defaultValue="RATED">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rating_error_message" type="TEXT"/>
+            <column name="rating_date" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rated_by" type="VARCHAR(50)" defaultValue="RATING_ENGINE"/>
+            <column name="created_date" type="TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="modified_date" type="TIMESTAMP"/>
+        </createTable>
+    </changeSet>
+
+
+    <changeSet id="ZSS00270426010" author="INTL049" runOnChange="true">
+
+        <!-- Preconditions: Only run if columns exist in source and don't exist in target -->
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <columnExists tableName="tblm_pulse_management" columnName="rate_per_pulse"/>
+                <columnExists tableName="tblm_pulse_management" columnName="rounding_mode"/>
+                <not>
+                    <columnExists tableName="tblm_rate_package" columnName="rate_per_pulse"/>
+                </not>
+                <not>
+                    <columnExists tableName="tblm_rate_package" columnName="rounding_mode"/>
+                </not>
+            </and>
+        </preConditions>
+
+        <!-- Remove columns from tblm_pulse_management -->
+        <dropColumn tableName="tblm_pulse_management" columnName="rate_per_pulse"/>
+        <dropColumn tableName="tblm_pulse_management" columnName="rounding_mode"/>
+
+        <!-- Add columns to tblm_rate_package -->
+        <addColumn tableName="tblm_rate_package">
+            <column name="rate_per_pulse" type="DECIMAL(10,2)" defaultValueNumeric="0.00">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rounding_mode" type="VARCHAR(20)" defaultValue="">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+
+    </changeSet>
+
+    <changeSet id="ZSS00270426011" author="INTL049" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <!-- Only run if 'nas_ip' column exists -->
+            <columnExists tableName="tblt_rate_package_group_mapping" columnName="nas_ip"/>
+            <!-- Only run if 'nas_ip_pattern' column does NOT already exist -->
+            <not>
+                <columnExists tableName="tblt_rate_package_group_mapping" columnName="nas_ip_pattern"/>
+            </not>
+        </preConditions>
+
+        <!-- Rename the column -->
+        <renameColumn
+                tableName="tblt_rate_package_group_mapping"
+                oldColumnName="nas_ip"
+                newColumnName="nas_ip_pattern"
+                columnDataType="VARCHAR(100)"/>
+
+        <!-- Optional: Wrap existing IPs as exact regex pattern -->
+        <update tableName="tblt_rate_package_group_mapping">
+            <column name="nas_ip_pattern" valueComputed="'^' || nas_ip_pattern || '$'"/>
+        </update>
+    </changeSet>
+
+    <changeSet id="ZSS00270426012" author="INTL049" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="tblt_rate_package_group_mapping" columnName="nas_ip_pattern"/>
+            <not>
+                <columnExists tableName="tblt_rate_package_group_mapping" columnName="checked_item"/>
+            </not>
+        </preConditions>
+
+        <!-- Rename the column and increase length -->
+        <renameColumn
+                tableName="tblt_rate_package_group_mapping"
+                oldColumnName="nas_ip_pattern"
+                newColumnName="checked_item"
+                columnDataType="VARCHAR(255)"/>
+    </changeSet>
+
+    <changeSet id="ZSS00270426013" author="INTL049" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="tblm_zone"/>
+            </not>
+        </preConditions>
+        <createTable tableName="tblm_zone">
+            <column name="zone_id" type="BIGINT">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="zone_name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="prefix_pattern" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="zone_desc" type="VARCHAR(500)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="ZSS00270426014" author="INTL049" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="tblt_rate_package_group_mapping" columnName="zone_mapping_id"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="tblt_rate_package_group_mapping">
+            <column name="zone_mapping_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="ZSS00270426015" author="INTL049" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="tblm_rate_package" columnName="packageType"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="tblm_rate_package">
+            <column name="packageType" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+
+    <changeSet id="ZSS00270426020" author="INTL049" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="tblm_rate_package"/>
+            <not>
+                <columnExists tableName="tblm_rate_package" columnName="package_type"/>
+            </not>
+        </preConditions>
+
+        <addColumn tableName="tblm_rate_package">
+            <column name="package_type" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet id="ZSS00270426021" author="INTL049" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="tblm_zone" columnName="min_length" />
+                <columnExists tableName="tblm_zone" columnName="max_length" />
+            </not>
+        </preConditions>
+        <comment>Add min_length and max_length columns to tblm_zone for phone number validation</comment>
+
+        <!-- Add min_length column -->
+        <addColumn tableName="tblm_zone">
+            <column name="min_length" type="INT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+        <!-- Add max_length column -->
+        <addColumn tableName="tblm_zone">
+            <column name="max_length" type="INT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+        <rollback>
+            <dropColumn tableName="tblm_zone" columnName="min_length"/>
+            <dropColumn tableName="tblm_zone" columnName="max_length"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="ZSS00270426025" author="INTL049" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="tblm_zone"/>
+            <columnExists tableName="tblm_zone" columnName="zone_id"/>
+        </preConditions>
+        <comment>Remove auto-increment from zone_id column to allow manual ID management</comment>
+
+        <modifyDataType tableName="tblm_zone" columnName="zone_id" newDataType="BIGINT"/>
+
+        <rollback>
+            <sql>
+                ALTER TABLE tblm_zone MODIFY COLUMN zone_id BIGINT AUTO_INCREMENT;
+            </sql>
+        </rollback>
+    </changeSet>
+    <changeSet id="ZSS00270426028" author="INTL049" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="TBLMPOSTPAIDPLAN" columnName="voice_flag"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="TBLMPOSTPAIDPLAN">
+            <column name="voice_flag" type="BOOLEAN">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="ZSS00270426029" author="INTL049" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="TBLMPOSTPAIDPLAN" columnName="voice_quota"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="TBLMPOSTPAIDPLAN">
+            <column name="voice_quota" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="ZSS00270426030" author="INTL049" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="TBLMPOSTPAIDPLAN" columnName="voice_unit"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="TBLMPOSTPAIDPLAN">
+            <column name="voice_unit" type="VARCHAR(10)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="ZSS00270426031" author="INTL049" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="TBLMPOSTPAIDPLAN" columnName="voice_rate_package_group"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="TBLMPOSTPAIDPLAN">
+            <column name="voice_rate_package_group" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="ZSS00270426032" author="INTL049" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="TBLMPOSTPAIDPLAN" columnName="sms_flag"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="TBLMPOSTPAIDPLAN">
+            <column name="sms_flag" type="BOOLEAN">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="ZSS00270426033" author="INTL049" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="TBLMPOSTPAIDPLAN" columnName="sms_quota"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="TBLMPOSTPAIDPLAN">
+            <column name="sms_quota" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="ZSS00270426034" author="INTL049" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="TBLMPOSTPAIDPLAN" columnName="sms_unit"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="TBLMPOSTPAIDPLAN">
+            <column name="sms_unit" type="VARCHAR(10)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="ZSS00270426035" author="INTL049" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="TBLMPOSTPAIDPLAN" columnName="sms_rate_package_group"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="TBLMPOSTPAIDPLAN">
+            <column name="sms_rate_package_group" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="ZSS00270426036" author="INTL049" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="TBLCUSTPACKAGEREL" columnName="priority"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="TBLCUSTPACKAGEREL">
+            <column name="priority" type="INT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet id="ZSS00270426037" author="INTL049" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="tblm_rate_package" columnName="packageType"/>
+        </preConditions>
+        <dropColumn tableName="tblm_rate_package">
+            <column name="packageType" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+        </dropColumn>
+    </changeSet>
+    <!-- Changeset for RatePackageGroupMapping: Add package_type and pulse configuration fields -->
+    <changeSet id="ZSS00270426038" author="INTL049" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="tblt_rate_package_group_mapping"/>
+            <not>
+                <columnExists tableName="tblt_rate_package_group_mapping" columnName="package_type"/>
+            </not>
+        </preConditions>
+        <comment>
+            Add package_type column to distinguish between NON_MONETARY and MONETARY mappings.
+            Add pulse configuration fields (pulse_value, pulse_unit, rounding_mode) for NON_MONETARY mappings.
+            Make rate_package_id nullable since NON_MONETARY mappings don't need a rate package.
+        </comment>
+
+        <!-- Add package_type column -->
+        <addColumn tableName="tblt_rate_package_group_mapping">
+            <column name="package_type" type="VARCHAR(20)" defaultValue="MONETARY">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+
+        <!-- Add pulse configuration fields for NON_MONETARY -->
+        <addColumn tableName="tblt_rate_package_group_mapping">
+            <column name="pulse_value" type="INT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+        <addColumn tableName="tblt_rate_package_group_mapping">
+            <column name="pulse_unit" type="VARCHAR(20)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+        <addColumn tableName="tblt_rate_package_group_mapping">
+            <column name="rounding_mode" type="VARCHAR(20)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+        <!-- Make rate_package_id nullable for NON_MONETARY mappings -->
+        <dropNotNullConstraint tableName="tblt_rate_package_group_mapping"
+                               columnName="rate_package_id"
+                               columnDataType="BIGINT"/>
+
+        <!-- Add unique constraint: one mapping per zone per packageType -->
+        <addUniqueConstraint tableName="tblt_rate_package_group_mapping"
+                             columnNames="group_id, zone_mapping_id, package_type"
+                             constraintName="uk_zone_package_type"/>
+
+        <!-- Add index for fast lookups -->
+        <createIndex tableName="tblt_rate_package_group_mapping"
+                     indexName="idx_mapping_lookup">
+            <column name="group_id"/>
+            <column name="zone_mapping_id"/>
+            <column name="package_type"/>
+        </createIndex>
+
+        <!-- Add comments for documentation -->
+        <sql dbms="mysql">
+            ALTER TABLE tblt_rate_package_group_mapping
+                MODIFY COLUMN package_type VARCHAR(20) NOT NULL DEFAULT 'MONETARY'
+                COMMENT 'NON_MONETARY for free quota, MONETARY for charged calls',
+                MODIFY COLUMN pulse_value INT NULL
+                COMMENT 'For NON_MONETARY: pulse duration in seconds/minutes',
+                MODIFY COLUMN pulse_unit VARCHAR(20) NULL
+                COMMENT 'For NON_MONETARY: SECONDS, MINUTES, HOURS',
+                MODIFY COLUMN rounding_mode VARCHAR(20) NULL
+                COMMENT 'For NON_MONETARY: CEIL, FLOOR, ROUND',
+                MODIFY COLUMN rate_package_id BIGINT NULL
+                COMMENT 'For MONETARY: reference to rate package. NULL for NON_MONETARY';
+        </sql>
+
+        <rollback>
+            <dropIndex tableName="tblt_rate_package_group_mapping" indexName="idx_mapping_lookup"/>
+            <dropUniqueConstraint tableName="tblt_rate_package_group_mapping"
+                                  constraintName="uk_zone_package_type"/>
+            <addNotNullConstraint tableName="tblt_rate_package_group_mapping"
+                                  columnName="rate_package_id"
+                                  columnDataType="BIGINT"/>
+            <dropColumn tableName="tblt_rate_package_group_mapping" columnName="rounding_mode"/>
+            <dropColumn tableName="tblt_rate_package_group_mapping" columnName="pulse_unit"/>
+            <dropColumn tableName="tblt_rate_package_group_mapping" columnName="pulse_value"/>
+            <dropColumn tableName="tblt_rate_package_group_mapping" columnName="package_type"/>
+        </rollback>
+    </changeSet>
+    <changeSet id="ZSS00270426039" author="INTL049" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <foreignKeyConstraintExists foreignKeyName="fk_rate_package_pulse"/>
+        </preConditions>
+
+        <dropForeignKeyConstraint
+                baseTableName="tblm_rate_package"
+                constraintName="fk_rate_package_pulse"/>
+
+        <sql dbms="mysql">
+            ALTER TABLE `telco_ocs`.`tblm_pulse_management`
+                MODIFY pulse_id BIGINT NOT NULL AUTO_INCREMENT;
+        </sql>
+
+        <addForeignKeyConstraint
+                baseTableName="tblm_rate_package"
+                baseColumnNames="pulse_id"
+                referencedTableName="tblm_pulse_management"
+                referencedColumnNames="pulse_id"
+                constraintName="fk_rate_package_pulse"/>
+
+    </changeSet>
+
+    <changeSet id="ZSS00270426040" author="INTL049" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="tblm_rate_package"/>
+            <columnExists tableName="tblm_rate_package" columnName="rate_package_id"/>
+            <foreignKeyConstraintExists foreignKeyName="fk_mapping_package"/>
+        </preConditions>
+
+        <!-- Drop FK before modifying PK column -->
+        <dropForeignKeyConstraint
+                baseTableName="tblt_rate_package_group_mapping"
+                constraintName="fk_mapping_package"/>
+
+        <!-- Add AUTO_INCREMENT to rate_package_id -->
+        <sql dbms="mysql">
+            ALTER TABLE tblm_rate_package MODIFY rate_package_id BIGINT NOT NULL AUTO_INCREMENT;
+        </sql>
+
+        <!-- Re-add FK -->
+        <addForeignKeyConstraint
+                baseTableName="tblt_rate_package_group_mapping"
+                baseColumnNames="rate_package_id"
+                referencedTableName="tblm_rate_package"
+                referencedColumnNames="rate_package_id"
+                constraintName="fk_mapping_package"
+                onDelete="RESTRICT"/>
+
+        <rollback>
+            <dropForeignKeyConstraint
+                    baseTableName="tblt_rate_package_group_mapping"
+                    constraintName="fk_mapping_package"/>
+            <sql dbms="mysql">
+                ALTER TABLE tblm_rate_package MODIFY rate_package_id BIGINT NOT NULL;
+            </sql>
+            <addForeignKeyConstraint
+                    baseTableName="tblt_rate_package_group_mapping"
+                    baseColumnNames="rate_package_id"
+                    referencedTableName="tblm_rate_package"
+                    referencedColumnNames="rate_package_id"
+                    constraintName="fk_mapping_package"
+                    onDelete="RESTRICT"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="ZSS00270426041" author="INTL049" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <and>
+                <tableExists tableName="tblm_rate_package_group"/>
+                <columnExists tableName="tblm_rate_package_group" columnName="group_id"/>
+                <foreignKeyConstraintExists foreignKeyName="fk_mapping_group"/>
+                <foreignKeyConstraintExists foreignKeyName="fk_postpaid_group_id"/>
+            </and>
+        </preConditions>
+
+        <!-- Drop FKs referencing group_id before modifying PK column -->
+        <dropForeignKeyConstraint
+                baseTableName="tblt_rate_package_group_mapping"
+                constraintName="fk_mapping_group"/>
+        <dropForeignKeyConstraint
+                baseTableName="TBLMPOSTPAIDPLAN"
+                constraintName="fk_postpaid_group_id"/>
+
+        <sql dbms="mysql">
+            ALTER TABLE tblm_rate_package_group MODIFY group_id BIGINT NOT NULL AUTO_INCREMENT;
+        </sql>
+
+        <!-- Re-add FKs -->
+        <addForeignKeyConstraint
+                baseTableName="tblt_rate_package_group_mapping"
+                baseColumnNames="group_id"
+                referencedTableName="tblm_rate_package_group"
+                referencedColumnNames="group_id"
+                constraintName="fk_mapping_group"
+                onDelete="CASCADE"/>
+        <addForeignKeyConstraint
+                baseTableName="TBLMPOSTPAIDPLAN"
+                baseColumnNames="package_group_id"
+                referencedTableName="tblm_rate_package_group"
+                referencedColumnNames="group_id"
+                constraintName="fk_postpaid_group_id"/>
+
+        <rollback>
+            <dropForeignKeyConstraint
+                    baseTableName="tblt_rate_package_group_mapping"
+                    constraintName="fk_mapping_group"/>
+            <dropForeignKeyConstraint
+                    baseTableName="TBLMPOSTPAIDPLAN"
+                    constraintName="fk_postpaid_group_id"/>
+            <sql dbms="mysql">
+                ALTER TABLE tblm_rate_package_group MODIFY group_id BIGINT NOT NULL;
+            </sql>
+            <addForeignKeyConstraint
+                    baseTableName="tblt_rate_package_group_mapping"
+                    baseColumnNames="group_id"
+                    referencedTableName="tblm_rate_package_group"
+                    referencedColumnNames="group_id"
+                    constraintName="fk_mapping_group"
+                    onDelete="CASCADE"/>
+            <addForeignKeyConstraint
+                    baseTableName="TBLMPOSTPAIDPLAN"
+                    baseColumnNames="package_group_id"
+                    referencedTableName="tblm_rate_package_group"
+                    referencedColumnNames="group_id"
+                    constraintName="fk_postpaid_group_id"/>
+        </rollback>
+    </changeSet>
+
+    <changeSet id="ZSS00270426042" author="INTL049" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="tblt_rate_package_group_mapping"/>
+            <columnExists tableName="tblt_rate_package_group_mapping" columnName="mapping_id"/>
+        </preConditions>
+        <sql dbms="mysql">
+            ALTER TABLE tblt_rate_package_group_mapping
+                MODIFY mapping_id BIGINT NOT NULL AUTO_INCREMENT;
+        </sql>
+        <rollback>
+            <sql dbms="mysql">
+                ALTER TABLE tblt_rate_package_group_mapping
+                MODIFY mapping_id BIGINT NOT NULL;
+            </sql>
+        </rollback>
+    </changeSet>
+    <changeSet id="ZSS0001052601" author="INTL049" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="tblm_zone" columnName="is_deleted"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="tblm_zone">
+            <column name="is_deleted" type="BOOLEAN" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="ZSS00040526035" author="INTL049" runOnChange="true">
+        <preConditions onFail="MARK_RAN" onError="MARK_RAN">
+            <tableExists tableName="tblm_zone"/>
+            <not>
+                <columnExists tableName="tblm_zone" columnName="created_date"/>
+            </not>
+        </preConditions>
+
+        <addColumn tableName="tblm_zone">
+            <column name="created_date" type="TIMESTAMP"
+                    defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="true"/>
+            </column>
+            <column name="modified_date" type="TIMESTAMP"
+                    defaultValueComputed="CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet id="ZSS00040526036" author="INTL049" runOnChange="true">
+
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="TBLMPOSTPAIDPLAN" columnName="is_deleted"/>
+        </preConditions>
+
+        <dropColumn tableName="TBLMPOSTPAIDPLAN" columnName="is_deleted"/>
+
+    </changeSet>
+    <changeSet id="ZSS0005052601" author="INTL049">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="tblt_rate_package_group_mapping"/>
+            <not>
+                <columnExists tableName="tblt_rate_package_group_mapping" columnName="is_deleted"/>
+            </not>
+        </preConditions>
+        <comment>Add soft-delete flag to tblt_rate_package_group_mapping</comment>
+        <addColumn tableName="tblt_rate_package_group_mapping">
+            <column name="is_deleted" type="tinyint(1)" defaultValue="0">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+        <rollback>
+            <dropColumn tableName="tblt_rate_package_group_mapping" columnName="is_deleted"/>
+        </rollback>
+    </changeSet>
+
+
+    <changeSet id="ZSS00017052801" author="INTL049" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="TBLMPOSTPAIDPLAN" columnName="SMS_QUOTA"/>
+        </preConditions>
+        <dropColumn tableName="TBLMPOSTPAIDPLAN" columnName="SMS_QUOTA"/>
+    </changeSet>
+
+    <changeSet id="ZSS00017052802" author="INTL049" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="TBLMPOSTPAIDPLAN" columnName="SMS_UNIT"/>
+        </preConditions>
+        <dropColumn tableName="TBLMPOSTPAIDPLAN" columnName="SMS_UNIT"/>
+    </changeSet>
+
+    <changeSet id="ZSS00017052803" author="INTL049" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="TBLMPOSTPAIDPLAN" columnName="VOICE_QUOTA"/>
+        </preConditions>
+        <dropColumn tableName="TBLMPOSTPAIDPLAN" columnName="VOICE_QUOTA"/>
+    </changeSet>
+
+    <changeSet id="ZSS00017052804" author="INTL049" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="TBLMPOSTPAIDPLAN" columnName="VOICE_UNIT"/>
+        </preConditions>
+        <dropColumn tableName="TBLMPOSTPAIDPLAN" columnName="VOICE_UNIT"/>
+    </changeSet>
+
+
+    <changeSet id="ZSS00017052805" author="INTL049" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="TBLMPOSTPAIDPLAN" columnName="data_rate_package_group"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="TBLMPOSTPAIDPLAN">
+            <column name="data_rate_package_group" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>

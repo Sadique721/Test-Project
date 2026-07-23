@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="en" class="fullscreen-bg">
+  <head>
+    <title>Login | Savbill Dashboard</title>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
+    />
+    <!-- VENDOR CSS -->
+    <!-- <link rel="stylesheet" href="assets/vendor/bootstrap/css/bootstrap.min.css">
+      <link rel="stylesheet" href="assets/vendor/font-awesome/css/font-awesome.min.css">
+      <link rel="stylesheet" href="assets/vendor/linearicons/style.css"> -->
+    <!-- MAIN CSS -->
+    <!-- <link rel="stylesheet" href="assets/css/main.css"> -->
+
+    <!-- GOOGLE FONTS -->
+    <link
+      href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700"
+      rel="stylesheet"
+    />
+    <!-- ICONS -->
+    <link rel="apple-touch-icon" sizes="76x76" href="../assets/img/savbill_logo.jpg" />
+    <link rel="icon" type="image/png" sizes="96x96" href="../assets/img/savbill_logo.jpg" />
+  </head>
+
+  <body class="">
+ 
+    <!-- WRAPPER -->
+    <div class="blank-layout-container justify-content-center">
+      <div class="position-relative row w-100 h-100">
+        <div class="col-lg-7 col-xl-8 bg-gredient p-0">
+          <div class="p-24 h-100 d-flex align-items-center justify-content-center">
+            <!-- <div class="align-items-center justify-content-center img-height d-none d-lg-flex">
+              <div class="content text text-center">
+                <h1 class="heading">Lorem ipsum dolor sit consectetur.</h1>
+                <p>Adipiscing elit</p>
+              </div>
+            </div> -->
+          </div>
+        </div>
+        <div class="col-lg-5 col-xl-4 p-0 right-box-bg">
+          <div
+            class="p-32 d-flex align-items-start align-items-lg-center justify-content-center h-100"
+          >
+            <div class="row justify-content-center w-100 gap-20">
+              <div class="logo text-center d-flex align-items-center">
+                <img src="../../assets/img/loginlogo.jpg" alt="Savbill Logo" class="savbilllogo" />
+              </div>
+              <div class="col-lg-9 max-width-form">
+                <h4 class="f-w-700 f-s-24 m-0">Welcome to Savbill</h4>
+                <span class="text-color-black f-s-14 d-block f-s-14 m-t-8"
+                  >Login to your account</span
+                >
+
+                <form class="m-t-30" [formGroup]="createLoginForm">
+                  <!-- Username Field -->
+                  <mat-label class="text-color-black f-s-14 f-w-600 m-b-12 d-block"
+                    >Username</mat-label
+                  >
+                  <mat-form-field appearance="outline" class="w-100" color="primary">
+                    <input
+                      matInput
+                      type="text"
+                      name="username"
+                      class="input-p-5 text-color-black"
+                      id="signin-email"
+                      formControlName="username"
+                      placeholder="Username"
+                      [ngClass]="{
+                        'is-invalid': submitted && createLoginForm.controls.username.errors
+                      }"
+                    />
+                    @if (submitted && createLoginForm.controls.username.errors) {
+                      <mat-hint class="m-b-16 error-msg">
+                        @if (submitted && createLoginForm.controls.username.errors.required) {
+                          <div class="text-error">Username is required</div>
+                        }
+                      </mat-hint>
+                    }
+                  </mat-form-field>
+
+                  <!-- Password Field -->
+                  <mat-label class="text-color-black f-s-14 f-w-600 m-b-12 d-block"
+                    >Password</mat-label
+                  >
+                  <mat-form-field appearance="outline" class="w-100" color="primary">
+                    <input
+                      matInput
+                      [type]="_passwordType"
+                      name="password"
+                      id="signin-password"
+                      placeholder="Password"
+                      class="input-p-5 text-color-black"
+                      formControlName="password"
+                      (keypress)="onPasswordKeyPress($event)"
+                      [ngClass]="{
+                        'is-invalid':
+                          (createLoginForm.controls.password.touched || submitted) &&
+                          createLoginForm.controls.password.errors
+                      }"
+                    />
+                    <mat-icon
+                      matSuffix
+                      (click)="
+                        showPassword = !showPassword;
+                        _passwordType = showPassword ? 'text' : 'password'
+                      "
+                      style="cursor: pointer"
+                    >
+                      {{ showPassword ? "visibility_off" : "visibility" }}
+                    </mat-icon>
+                    @if (
+                      (createLoginForm.controls.password.touched || submitted) &&
+                      createLoginForm.controls.password.errors
+                    ) {
+                      <mat-hint class="m-b-16 error-msg">
+                        @if (createLoginForm.controls.password.errors.required) {
+                          <div class="text-error">Password is required</div>
+                        }
+                        @if (createLoginForm.controls.password.errors.noSpace) {
+                          <div class="text-error">Password cannot contain spaces</div>
+                        }
+                      </mat-hint>
+                    }
+                  </mat-form-field>
+
+                  <!-- OTP Input Field -->
+                  @if (showOtpInput) {
+                    <mat-label class="f-s-14 f-w-600 m-b-12 d-block">OTP</mat-label>
+                    <mat-form-field appearance="outline" class="w-100" color="primary">
+                      <input
+                        matInput
+                        type="text"
+                        name="otp"
+                        id="otp"
+                        formControlName="otp"
+                        placeholder="Enter OTP"
+                      />
+                      @if (otpSubmitted && createLoginForm.controls.otp.errors) {
+                        <mat-hint class="m-b-16 error-msg">
+                          @if (otpSubmitted && createLoginForm.controls.otp.errors.required) {
+                            <div class="text-error">OTP is required</div>
+                          }
+                        </mat-hint>
+                      }
+                    </mat-form-field>
+                  }
+
+                  <!-- Captcha -->
+                  <!-- @if (loginEnable) {
+                    <div class="m-b-16">
+                      <ngx-captcha [config]="captchaConfig"></ngx-captcha>
+                    </div>
+                  }
+                  @if (captchaError) {
+                    <div class="text-error m-b-16">{{ captchaError }}</div>
+                  }
+                  @if (captchaSuccess) {
+                    <div class="text-success m-b-16">{{ captchaSuccess }}</div>
+                  } -->
+
+                  <!-- Submit Buttons -->
+                  <div class="d-flex gap-2 m-t-24">
+                    @if (showOtpInput) {
+                      <button
+                        mat-stroked-button
+                        type="submit"
+                        class="flex-grow-1"
+                        (click)="resendotp()"
+                        [disabled]="resendOTP"
+                      >
+                        Resend OTP
+                        @if (resendOTP) {
+                          <span> ({{ otpCountDown }}) </span>
+                        }
+                      </button>
+                    }
+                    <button
+                      mat-flat-button
+                      color="primary"
+                      type="submit"
+                      class="flex-grow-1"
+                      (click)="showOtpInput ? verifyOtp() : checkLogin()"
+                    >
+                      {{ showOtpInput ? "Verify OTP" : "Login" }}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- END WRAPPER -->
+
+    <!-- reset Password -->
+    <ng-template #getotpModal>
+      <div class="dialog-container">
+        <div class="dialog-header">
+          RESET PASSWORD
+          <span>
+            <a mat-icon-button (click)="closeDialog()">
+              <img src="assets/img/DashboardIcons/Reject.svg" />
+            </a>
+          </span>
+        </div>
+        <div mat-dialog-content>
+          <form name="resetOTPTopupForm" [formGroup]="searchPartnerForm">
+            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Username</mat-label>
+            <mat-form-field appearance="outline" class="w-100" color="primary">
+              <input
+                matInput
+                type="text"
+                id="userName"
+                placeholder="Enter Username"
+                name="userName"
+                formControlName="userName"
+              />
+            </mat-form-field>
+          </form>
+        </div>
+        <div mat-dialog-actions>
+          <button
+            mat-flat-button
+            color="primary"
+            type="submit"
+            [disabled]="!searchPartnerForm.valid"
+            (click)="searchResellerByName()"
+            mat-dialog-close
+          >
+            <i class="fa fa-check-circle"></i>
+            GET OTP
+          </button>
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="searchPartnerForm.reset()"
+            mat-dialog-close
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </ng-template>
+
+    <!-- Change Password Modal -->
+    <ng-template #changePasswordModal>
+      <div class="dialog-container">
+        <div class="dialog-header">
+          RESET PASSWORD
+          <span>
+            <a mat-icon-button (click)="closeDialog()">
+              <img src="assets/img/DashboardIcons/Reject.svg" />
+            </a>
+          </span>
+        </div>
+
+        <div mat-dialog-content>
+          <div class="SuccessOTPBox">
+            <div class="sucessLabel">
+              <i class="fa fa-check" style="font-size: 19px; color: #2b7b2c"></i>
+              OTP sent successfully
+            </div>
+          </div>
+          <form name="changePasswordForm" [formGroup]="changePasswordForm">
+            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">OTP</mat-label>
+            <mat-form-field appearance="outline" class="w-100" color="primary">
+              <input
+                matInput
+                type="text"
+                id="otp"
+                name="otp"
+                placeholder="Enter OTP"
+                formControlName="otp"
+              />
+            </mat-form-field>
+
+            <div
+              style="
+                display: flex;
+                justify-content: flex-end;
+                align-items: center;
+                margin-bottom: 16px;
+              "
+            >
+              <div
+                class="resendOTPLabel"
+                (click)="getOtp()"
+                style="cursor: pointer; color: #f7941e"
+              >
+                Resend OTP
+              </div>
+            </div>
+
+            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">New Password</mat-label>
+            <mat-form-field appearance="outline" class="w-100" color="primary">
+              <input
+                matInput
+                [type]="_passwordNewType"
+                id="newPassword"
+                name="newPassword"
+                formControlName="newPassword"
+                placeholder="Enter New Password"
+              />
+              <mat-icon
+                matSuffix
+                (click)="
+                  showNewPassword = !showNewPassword;
+                  _passwordNewType = showNewPassword ? 'text' : 'password'
+                "
+                style="cursor: pointer"
+              >
+                {{ showNewPassword ? "visibility_off" : "visibility" }}
+              </mat-icon>
+            </mat-form-field>
+
+            <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Confirm New Password</mat-label>
+            <mat-form-field appearance="outline" class="w-100" color="primary">
+              <input
+                matInput
+                [type]="_passwordconfirmType"
+                id="confirmNewPassword"
+                placeholder="Enter Confirm Password"
+                name="confirmNewPassword"
+                formControlName="confirmNewPassword"
+              />
+              <mat-icon
+                matSuffix
+                (click)="
+                  showconfirmPassword = !showconfirmPassword;
+                  _passwordconfirmType = showconfirmPassword ? 'text' : 'password'
+                "
+                style="cursor: pointer"
+              >
+                {{ showconfirmPassword ? "visibility_off" : "visibility" }}
+              </mat-icon>
+            </mat-form-field>
+          </form>
+        </div>
+        <div mat-dialog-actions>
+          <button
+            mat-flat-button
+            color="primary"
+            type="submit"
+            [disabled]="!changePasswordForm.valid"
+            (click)="validateOTPChangePassword()"
+            mat-dialog-close
+          >
+            <i class="fa fa-check-circle"></i>
+            RESET PASSWORD
+          </button>
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="changePasswordForm.reset()"
+            mat-dialog-close
+          >
+            CLOSE
+          </button>
+        </div>
+      </div>
+    </ng-template>
+  </body>
+</html>

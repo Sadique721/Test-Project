@@ -1,0 +1,515 @@
+<div class="container-fluid change-plan-container">
+    <!-- <div class="page-header d-flex align-items-center justify-content-between mb-4">
+        <div class="d-flex align-items-center gap-3">
+            <button mat-icon-button (click)="customerDetailOpen()" matTooltip="Go to Customer Details" class="back-btn">
+                <mat-icon>arrow_back</mat-icon>
+            </button>
+            <h2 class="page-title mb-0">
+                {{ custData.title }}
+                {{ custData.firstname }} {{ custData.lastname }} IP Details
+                Plan
+            </h2>
+        </div>
+    </div>
+    <div style="display: flex;justify-content: end;margin-bottom: 14px">
+        <button mat-button mat-flat-button color="primary" (click)="addIp()" class="search-btn">
+            Add</button>
+    </div> -->
+
+    <!-- ------------table--------------- -->
+    <mat-card class="mb-4 current-plans-card">
+        <mat-card-header>
+            <!-- <mat-card-title>{{ custData.title }}
+                {{ custData.firstname }} {{ custData.lastname }} IP Details</mat-card-title> -->
+            <div class="page-header d-flex align-items-center justify-content-between mb-4">
+                <div class="d-flex align-items-center gap-3">
+                     <img src="assets/img/DashboardIcons/Back Arrow.svg" alt="arrow back" class="m-r-10"
+                        (click)="customerDetailOpen()">
+                    <span class="title-header">{{ custData.title }}
+                        {{ custData.firstname }} {{ custData.lastname }} IP Details Plan</span>
+                </div>
+            </div>
+        </mat-card-header>
+
+        <div style="display: flex;justify-content: start;margin-top: 10px;margin-left:5px">
+            <button mat-button mat-flat-button color="primary" (click)="addIp()" class="search-btn">
+                Add IP</button>
+        </div>
+
+        <mat-card-content>
+            <div class="table-container">
+                <table mat-table [dataSource]="ipListData" class="mat-elevation-z2 w-100">
+                    <!-- IP Address Column -->
+                    <ng-container matColumnDef="ipAddress">
+                        <th mat-header-cell *matHeaderCellDef class="table-header-title">IP Address</th>
+                        <td mat-cell *matCellDef="let data; let index = index">
+                            @if (displaymode || currentEditRecord?.id !== data?.id) {
+                            {{ data.ipAddress }}
+                            }
+                            @if (!displaymode && currentEditRecord?.id === data?.id) {
+                            <mat-form-field appearance="outline" class="w-100" style="margin-top: 10px;">
+                                <!-- <mat-label>IP Address</mat-label> -->
+                                <input class="input-p-5" matInput placeholder="Enter IP Address"
+                                    [(ngModel)]="data.ipAddress" />
+                            </mat-form-field>
+                            }
+                        </td>
+                    </ng-container>
+
+                    <!-- IP Type Column -->
+                    <ng-container matColumnDef="ipType">
+                        <th mat-header-cell *matHeaderCellDef class="table-header-title">IP Type</th>
+                        <td mat-cell *matCellDef="let data; let index = index">
+                            @if (displaymode || currentEditRecord?.id !== data?.id) {
+                            {{ data.ipType }}
+                            }
+                            @if (!displaymode && currentEditRecord?.id === data?.id) {
+                            <mat-form-field appearance="outline" class="w-100" style="margin-top: 10px;">
+                                <!-- <mat-label>IP Type</mat-label> -->
+                                <mat-select class="input-p-5" [(ngModel)]="data.ipType">
+                                    <mat-option value="Ipv4">IPv4</mat-option>
+                                    <mat-option value="Ipv6">IPv6</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            }
+                        </td>
+                    </ng-container>
+
+                    <!-- Service Column -->
+                    <ng-container matColumnDef="service">
+                        <th mat-header-cell *matHeaderCellDef class="table-header-title">Service</th>
+                        <td mat-cell *matCellDef="let data; let index = index">
+                            @if (displaymode || currentEditRecord?.id !== data?.id) {
+                            {{ data.service }}
+                            }
+                            @if (!displaymode && currentEditRecord?.id === data?.id) {
+                            <mat-form-field appearance="outline" class="w-100" style="margin-top: 10px;">
+                                <!-- <mat-label>Service</mat-label> -->
+                                <input class="input-p-5" matInput placeholder="Service" [disabled]="true"
+                                    [(ngModel)]="data.service" />
+                            </mat-form-field>
+                            }
+                        </td>
+                    </ng-container>
+
+                    <!-- Actions Column -->
+                    <ng-container matColumnDef="actions">
+                        <th mat-header-cell *matHeaderCellDef class="table-header-title">Actions</th>
+                        <td mat-cell *matCellDef="let data; let index = index" class="text-center">
+                            @if (displaymode) {
+                            <div class="d-flex align-items-center">
+                                <button mat-icon-button color="primary" matTooltip="Edit"
+                                    (click)="editIpById(data, index)">
+                                    <img src="assets/img/DashboardIcons/Edit.svg" />
+                                </button>
+                                <button mat-icon-button color="warn" matTooltip="Delete"
+                                    (click)="deleteConfirm(data,data.id)">
+                                    <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                </button>
+                            </div>
+                            }
+                            @if (!displaymode && editingIndex === index) {
+                            <div class="d-flex align-items-center justify-content-center gap-2">
+                                <button mat-icon-button color="primary" matTooltip="Save" (click)="saveChanges()">
+                                    <!-- <mat-icon>check_circle</mat-icon> -->
+
+                                    <i class="pi pi pi-check icon-size"></i>
+                                </button>
+                                <button mat-icon-button color="accent" matTooltip="Cancel" (click)="cancelChanges()">
+                                    <!-- <mat-icon>cancel</mat-icon> -->
+
+                                    <i class="pi pi-times icon-size"></i>
+                                </button>
+                            </div>
+                            }
+                        </td>
+                    </ng-container>
+
+                    <!-- Table Header and Rows -->
+                    <tr mat-header-row *matHeaderRowDef="['ipAddress', 'ipType', 'service', 'actions']"></tr>
+                    <tr mat-row *matRowDef="let row; columns: ['ipAddress', 'ipType', 'service', 'actions']"></tr>
+                </table>
+
+                <!-- Empty State -->
+                @if (!ipListData || ipListData.length === 0) {
+                <div class="empty-state py-5">
+
+                    <p class="text-muted text-center">No IP Records found.</p>
+                </div>
+                }
+
+                <!-- Paginator -->
+                @if(ipListData && ipListData.length > 0) {
+                <mat-paginator [length]="ipListTotalRecords" [pageSize]="ipListItemsPerPage"
+                    [pageSizeOptions]="[5, 10, 20, 50, 100]" (page)="pageChangedIpList($event)"
+                    showFirstLastButtons></mat-paginator>
+                }
+            </div>
+        </mat-card-content>
+    </mat-card>
+
+
+</div>
+<ng-template #addIpDialog let-dialogRef="dialogRef">
+    <div class="dialog-container">
+        <!-- Dialog Header -->
+        <div class="dialog-header">
+            IP Details
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="closeaddIp()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+
+
+            </span>
+        </div>
+
+        <!-- Dialog Content -->
+        <div mat-dialog-content>
+            <form [formGroup]="ipManagementGroup" class="w-100">
+                <div class="row">
+                    <!-- IP Type -->
+                    <div class="col-md-3">
+                        <mat-form-field appearance="outline" class="w-100">
+                            <!-- <mat-label>IP Type</mat-label> -->
+                            <mat-select class="input-p-5" placeholder="Select a type" formControlName="ipType"
+                                (selectionChange)="ipTypeChange($event, ddlIpType)" #ddlIpType>
+                                <mat-option value="Ipv4">IPv4</mat-option>
+                                <mat-option value="Ipv6">IPv6</mat-option>
+                            </mat-select>
+                            @if (ipSubmitted && ipManagementGroup.get('ipType')?.hasError('required')) {
+                            <mat-error>IP Type is required.</mat-error>
+                            }
+                        </mat-form-field>
+                    </div>
+
+                    <!-- IP Address -->
+                    <div class="col-md-3">
+                        <mat-form-field appearance="outline" class="w-100">
+                            <!-- <mat-label>IP Address</mat-label> -->
+                            <input class="input-p-5" matInput placeholder="Enter IP Address"
+                                formControlName="ipAddress" />
+                            @if (ipSubmitted && ipManagementGroup.get('ipAddress')?.hasError('required')) {
+                            <mat-error>IP Address is required.</mat-error>
+                            }
+                            @if (ipManagementGroup.get('ipAddress')?.hasError('pattern') &&
+                            ipManagementGroup.get('ipAddress')?.dirty) {
+                            <mat-error>IP Address is invalid.</mat-error>
+                            }
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Service -->
+                    <div class="col-md-3">
+                        <mat-form-field appearance="outline" class="w-100">
+                            <!-- <mat-label>Select Service</mat-label> -->
+                            <mat-select class="input-p-5" placeholder="Select Service" formControlName="custid"
+                                [ngClass]="{
+                  'is-invalid': ipSubmitted && ipManagementGroup.get('custid')?.errors
+                }">
+                                @for (option of dropdownOptions; track option) {
+                                <mat-option [value]="option.value">
+                                    {{ option.label }}
+                                </mat-option>
+                                }
+                            </mat-select>
+                            @if (ipSubmitted && ipManagementGroup.get('custid')?.hasError('required')) {
+                            <mat-error>Service is required.</mat-error>
+                            }
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Add Button -->
+                    <div class="col-md-3">
+                        <button mat-flat-button color="primary" class="button-normal" type="button"
+                            (click)="onAddIPList()">
+                            Add
+                        </button>
+                    </div>
+                </div>
+            </form>
+            <!-- [dataSource]="tableDataRefresh || policyDetailsArray.controls" -->
+            <!-- Table Section -->
+            <div class="table-container mt-3">
+                <table mat-table [dataSource]="ipMappingDataSource" class="mat-elevation-z2 w-100">
+                    <!-- IP Address -->
+                    <ng-container matColumnDef="ipAddress">
+                        <th mat-header-cell *matHeaderCellDef class="table-header-title">IP Address</th>
+                        <td mat-cell *matCellDef="let row" class="text-center">
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input class="input-p-5" matInput readonly [formControl]="row.get('ipAddress')" />
+                            </mat-form-field>
+                        </td>
+                    </ng-container>
+
+                    <!-- IP Type -->
+                    <ng-container matColumnDef="ipType">
+                        <th mat-header-cell *matHeaderCellDef class="table-header-title">IP Type</th>
+                        <td mat-cell *matCellDef="let row" class="text-center">
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input class="input-p-5" matInput readonly [formControl]="row.get('ipType')"
+                                    class="w-100" />
+                            </mat-form-field>
+                        </td>
+                    </ng-container>
+
+                    <!-- Service -->
+                    <ng-container matColumnDef="service">
+                        <th mat-header-cell *matHeaderCellDef class="table-header-title">Service</th>
+                        <td mat-cell *matCellDef="let row" class="text-center">
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input class="input-p-5" matInput readonly [formControl]="row.get('service')"
+                                    class="w-100" />
+                            </mat-form-field>
+                        </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="['ipAddress', 'ipType', 'service']"></tr>
+                    <tr mat-row *matRowDef="let row; columns: ['ipAddress', 'ipType', 'service']"></tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- Dialog Footer -->
+        <mat-dialog-actions align="end">
+            <button mat-flat-button color="primary" class="button-normal mr-10" type="button" (click)="saveIp()"
+                [disabled]="ipMapppingListFromArray.length === 0">
+                Save
+            </button>
+            <button mat-stroked-button color="primary" class="button-normal" type="button" (click)="closeaddIp()">
+                Close
+            </button>
+        </mat-dialog-actions>
+    </div>
+</ng-template>
+<!-- ----------------------------------------------------------- -->
+<!-- <div class="row">
+    <div class="col-md-12 col-sm-12">
+        <div class="panel">
+            <div class="panel-heading">
+                <div class="displayflex">
+                    <button (click)="customerDetailOpen()" class="btn btn-secondary backbtn" data-placement="bottom"
+                        data-toggle="tooltip" title="Go to Customer Details" type="button">
+                        <i class="fa fa-arrow-circle-left" style="color: #f7941e !important; font-size: 28px"></i>
+                    </button>
+                    <h3 class="panel-title">
+                        {{ custData.title }}
+                        {{ custData.firstname }} {{ custData.lastname }} IP Details--
+                    </h3>
+                </div>
+                <div class="right">
+                    <button aria-controls="custStatus" aria-expanded="false" class="btn-toggle-collapse"
+                        data-target="#custStatus" data-toggle="collapse" type="button">
+                        <i class="fa fa-minus-circle"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="panel-collapse collapse in" id="custStatuss">
+                <div class="panel-body table-responsive">
+                    <div style="margin: 20px">
+                        <div class="row" style="margin-bottom: 20px">
+                            <button type="submit" class="btn btn-primary" id="submit" (click)="addIp()">
+                                <i class="fa fa-check-circle"></i>
+                                Add IP
+                            </button>
+                        </div>
+                        <div class="table-responsive">
+                            <div class="row">
+                                <div class="col-lg-12 col-md-12">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Ip Address</th>
+                                                <th>Ip Type</th>
+                                                <th>Service</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @for (data of ipListData; track data; let index = $index) {
+                                            <tr>
+                                                <td>
+                                                    @if (displaymode || currentEditRecord?.id !== data?.id) {
+                                                    <div>
+                                                        {{ data.ipAddress }}
+                                                    </div>
+                                                    }
+                                                    @if (!displaymode && currentEditRecord?.id === data?.id) {
+                                                    <div>
+                                                        <input type="text" class="form-control"
+                                                            placeholder="Enter Ip Address"
+                                                            [(ngModel)]="data.ipAddress" />
+                                                    </div>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @if (displaymode || currentEditRecord?.id !== data?.id) {
+                                                    <div>
+                                                        {{ data.ipType }}
+                                                    </div>
+                                                    }
+                                                    @if (!displaymode && currentEditRecord?.id === data?.id) {
+                                                    <div>
+                                                        <p-dropdown [options]="[
+                                { label: 'Ipv4', value: 'Ipv4' },
+                                { label: 'Ipv6', value: 'Ipv6' }
+                              ]" placeholder="Select a type" [(ngModel)]="data.ipType"></p-dropdown>
+                                                    </div>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @if (displaymode || currentEditRecord?.id !== data?.id) {
+                                                    <div>
+                                                        {{ data.service }}
+                                                    </div>
+                                                    }
+                                                    @if (!displaymode && currentEditRecord?.id === data?.id) {
+                                                    <div>
+                                                        <input type="text" class="form-control"
+                                                            placeholder="Enter Ip Address" [(ngModel)]="data.service"
+                                                            readonly />
+                                                    </div>
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @if (displaymode) {
+                                                    <div style="display: flex; gap: 10px">
+                                                        <a type="button" data-title="Edit" data-toggle="tooltip"
+                                                            class="curson_pointer" (click)="editIpById(data, index)">
+                                                            <img src="assets/img/DashboardIcons/Edit.svg">
+                                                        </a>
+                                                        <a type="button" data-title="Delete" data-toggle="tooltip"
+                                                            class="curson_pointer" (click)="deleteConfirm(data.id)">
+                                                            <img
+                                                                src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                                        </a>
+                                                    </div>
+                                                    }
+                                                    @if (!displaymode && editingIndex === index) {
+                                                    <div style="display: flex; gap: 10px">
+                                                        <a type="button" data-title="Edit" data-toggle="tooltip"
+                                                            class="curson_pointer" (click)="saveChanges()">
+                                                            <img src="assets/img/DashboardIcons/Assign.svg">
+                                                        </a>
+                                                        <a type="button" data-title="Delete" data-toggle="tooltip"
+                                                            class="curson_pointer" (click)="cancelChanges()">
+                                                            <img src="assets/img/DashboardIcons/Reject.svg">
+                                                        </a>
+                                                    </div>
+                                                    }
+                                                </td>
+                                            </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                    <br />
+                                    <br />
+                                    <div class="pagination_Dropdown">
+                                        <pagination-controls (pageChange)="pageChangedMasterNotificationList($event)"
+                                            directionLinks="true" id="searchNotificationPageData" maxSize="10"
+                                            nextLabel="" previousLabel=""></pagination-controls>
+                                        <div id="itemPerPageDropdown">
+                                            <p-dropdown (onChange)="TotalItemPerPageNotificationHistory($event)"
+                                                [options]="pageLimitOptions" optionLabel="value"
+                                                optionValue="value"></p-dropdown>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> -->
+<!-- <p-dialog header="Ip details" [(visible)]="createIp" [style]="{ width: '60%' }" [modal]="true" [responsive]="true"
+    [draggable]="false" [closable]="true" (onHide)="closeaddIp()">
+    <div class="modal-body">
+        <div class="row" [formGroup]="ipManagementGroup">
+            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                <p-dropdown [options]="[
+            { label: 'Ipv4', value: 'Ipv4' },
+            { label: 'Ipv6', value: 'Ipv6' }
+          ]" #ddlIpType placeholder="Select a type" formControlName="ipType"
+                    (onChange)="ipTypeChange($event, ddlIpType)" [ngClass]="{
+            'is-invalid': ipSubmitted && ipManagementGroup.controls.ipType.errors
+          }"></p-dropdown>
+                @if (ipSubmitted && ipManagementGroup.controls.ipType.errors) {
+                <div class="errorWrap text-danger">
+                    <div class="error text-danger">Ip Type is required.</div>
+                </div>
+                }
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                <input type="text" class="form-control" placeholder="Enter Ip Address" formControlName="ipAddress"
+                    [ngClass]="{
+            'is-invalid': ipSubmitted && ipManagementGroup.controls.ipAddress.errors
+          }" />
+                @if (ipSubmitted && ipManagementGroup.controls.ipAddress.errors) {
+                <div class="errorWrap text-danger">
+                    @if (ipSubmitted && ipManagementGroup.controls.ipAddress.errors.required) {
+                    <div class="error text-danger">
+                        Ip Address is required.
+                    </div>
+                    }
+                </div>
+                }
+                @if (
+                ipManagementGroup.controls.ipAddress.errors &&
+                (ipManagementGroup.controls.ipAddress.touched ||
+                ipManagementGroup.controls.ipAddress.dirty)
+                ) {
+                <div class="errorWrap text-danger">
+                    <div class="error text-danger">Ip Address is invalid</div>
+                </div>
+                }
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                <p-dropdown [options]="dropdownOptions" placeholder="Select Service" optionLabel="label"
+                    optionValue="value" formControlName="custid" [ngClass]="{
+            'is-invalid': ipSubmitted && ipManagementGroup.controls.custid.errors
+          }"></p-dropdown>
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+                <button style="object-fit: cover; padding: 5px 8px" class="btn btn-primary" (click)="onAddIPList()">
+                    <i class="fa fa-plus-square" aria-hidden="true"></i>
+                    Add
+                </button>
+            </div>
+        </div>
+        <table class="table coa-table" style="margin-top: 10px">
+            <thead>
+                <tr>
+                    <th style="text-align: center; width: 10%">Ip Address</th>
+                    <th style="text-align: center; width: 10%">Ip Type</th>
+                    <th style="text-align: center; width: 10%; padding: 8px">Service</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (row of ipMapppingListFromArray.controls; track row; let index = $index) {
+                <tr>
+                    <td style="text-align: center">
+                        <input class="form-control" type="text" readonly [formControl]="row.get('ipAddress')" />
+                    </td>
+                    <td style="text-align: center">
+                        <input class="form-control" type="text" readonly [formControl]="row.get('ipType')" />
+                    </td>
+                    <td style="text-align: center">
+                        <input class="form-control" type="text" readonly [formControl]="row.get('service')" />
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="modal-footer">
+        <div class="addUpdateBtn">
+            <button (click)="saveIp()" class="btn btn-primary" data-title="Shift Location" type="button"
+                [disabled]="!ipMapppingListFromArray.length > 0">
+                Save
+            </button>
+            <button type="button" class="btn btn-default" (click)="closeaddIp()">Close</button>
+        </div>
+    </div>
+</p-dialog> -->

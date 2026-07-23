@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="true">
+    <property name="APP_LOG_ROOT" value="log"/>
+    <property name="LOG_PATTERN" value='{ "level":"%p","user":"%X{userName}", "trace-Id":"%X{traceId}","span-Id":"%X{spanId}", "type":"%X{type}", "timestamp":"%d{ISO8601}", "module":"Savbill-TaskManagement", "thread":"%t","sub-module":"%F", "line":"%L","message":"%m"}%n'/>
+    <property name="SIMPLE_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss} %-5level [%thread] %logger{36} - %msg%n"/>
+    <!-- Appender for General Logs -->
+    <appender name="savbilltaskmanagementlog" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${APP_LOG_ROOT}/savbill-taskmanagement.log</file>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>${LOG_PATTERN}</Pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${APP_LOG_ROOT}/archived/savbill-taskmanagement.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>500MB</maxFileSize>
+            <totalSizeCap>1GB</totalSizeCap>
+            <maxHistory>10</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <!-- Async Appender for General Logs -->
+    <appender name="savbilltaskmanagementlog-async" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="savbilltaskmanagementlog" />
+        <queueSize>500</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <includeCallerData>true</includeCallerData>
+    </appender>
+
+    <appender name="ConsoleDefault" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>${SIMPLE_PATTERN}</Pattern>
+        </encoder>
+    </appender>
+
+    <logger name="org.springframework" level="info" additivity="false">
+        <appender-ref ref="ConsoleDefault"/>
+    </logger>
+
+    <!--    console logs-->
+    <appender name="ConsoleJson" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>${LOG_PATTERN}</Pattern>
+        </encoder>
+    </appender>
+
+    <!-- Root Logger -->
+    <root level="ERROR">
+        <appender-ref ref="savbilltaskmanagementlog-async"/>
+        <appender-ref ref="ConsoleJson"/>
+    </root>
+</configuration>
+

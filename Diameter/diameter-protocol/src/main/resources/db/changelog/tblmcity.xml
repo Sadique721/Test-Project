@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="create-tblmcity-001" author="initial-change">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="tblmcity"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="tblmcity">
+
+            <column name="cityid" type="BIGINT">
+                <constraints primaryKey="true"
+                             nullable="false"
+                             primaryKeyName="pk_tblmcity"/>
+            </column>
+
+            <column name="NAME" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="STATEID" type="DECIMAL(20,0)"/>
+
+            <column name="status" type="VARCHAR(50)"/>
+
+            <column name="CREATEDATE"
+                    type="TIMESTAMP"
+                    defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="CREATEDBYSTAFFID" type="DECIMAL(20,0)"/>
+
+            <column name="LASTMODIFIEDBYSTAFFID" type="DECIMAL(20,0)"/>
+
+            <column name="LASTMODIFIEDDATE"
+                    type="TIMESTAMP"
+                    defaultValueComputed="CURRENT_TIMESTAMP"/>
+
+            <column name="countryid" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="is_delete"
+                    type="TINYINT(1)"
+                    defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="MVNOID" type="BIGINT"/>
+
+            <column name="createbyname" type="VARCHAR(100)"/>
+
+            <column name="updatebyname" type="VARCHAR(100)"/>
+
+        </createTable>
+
+
+        <!-- Unique constraint -->
+        <addUniqueConstraint
+                tableName="tblmcity"
+                columnNames="cityid"
+                constraintName="mcity_cityId_unq"/>
+
+
+        <!-- Index on MVNOID -->
+        <createIndex indexName="TBLMCITY_ibfk_1"
+                     tableName="tblmcity">
+            <column name="MVNOID"/>
+        </createIndex>
+
+
+        <!-- Composite Index (STATEID, is_delete) -->
+        <createIndex indexName="idx_city_stateid_deleted"
+                     tableName="tblmcity">
+            <column name="STATEID"/>
+            <column name="is_delete"/>
+        </createIndex>
+
+
+        <!-- FK to tblmmvno -->
+        <addForeignKeyConstraint
+                constraintName="TBLMCITY_ibfk_1"
+                baseTableName="tblmcity"
+                baseColumnNames="MVNOID"
+                referencedTableName="tblmmvno"
+                referencedColumnNames="MVNOID"
+                onDelete="RESTRICT"
+                onUpdate="RESTRICT"/>
+
+    </changeSet>
+
+</databaseChangeLog>

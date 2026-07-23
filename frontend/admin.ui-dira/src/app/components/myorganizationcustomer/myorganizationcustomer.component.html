@@ -1,0 +1,3208 @@
+<div *ngIf="!isCustomerDetailOpen">
+  <div class="container-fluid contain-flud w-100">
+    <div class="row">
+      <div class="col-md-12">
+        <ng-container *ngIf="listView">
+          <mat-card class="cardWithShadow">
+            <mat-card-content class="mat-card-content-border">
+              <div class="dialog-header" style="height: 70px;">
+                My Organization Customer
+              </div>
+              <div class="country-table-list" style="margin-top: 20px;">
+                <div class="table-container">
+                  <table mat-table [dataSource]="customerListData" matSort class="mat-elevation-z8 w-100">
+
+                    <!-- Name Column -->
+                    <ng-container matColumnDef="name">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title" sticky>
+                        Name
+                      </th>
+                      <td mat-cell *matCellDef="let data">
+                        <a href="javascript:void(0)" style="color: #f7941e" (click)="customerDetailOpen(data.id)">
+                          {{ data.name }}
+                        </a>
+                      </td>
+                    </ng-container>
+
+                    <!-- Username Column -->
+                    <ng-container matColumnDef="username">
+                      <th mat-header-cell *matHeaderCellDef class="table-header-title" sticky>
+                        Username
+                      </th>
+                      <td mat-cell *matCellDef="let data"> {{ data.username }} </td>
+                    </ng-container>
+
+                    <!-- Service Area Column -->
+                    <ng-container matColumnDef="serviceArea">
+                      <th mat-header-cell *matHeaderCellDef class="table-header-title" sticky>
+                        Service Area
+                      </th>
+                      <td mat-cell *matCellDef="let data"> {{ data.serviceArea }} </td>
+                    </ng-container>
+
+                    <!-- Mobile Number Column -->
+                    <ng-container matColumnDef="mobile">
+                      <th mat-header-cell *matHeaderCellDef class="table-header-title" sticky>
+                        Mobile Number
+                      </th>
+                      <td mat-cell *matCellDef="let data"> {{ data.mobile }} </td>
+                    </ng-container>
+
+                    <!-- Account No Column -->
+                    <ng-container matColumnDef="acctno">
+                      <th mat-header-cell *matHeaderCellDef class="table-header-title" sticky>
+                        Account No
+                      </th>
+                      <td mat-cell *matCellDef="let data"> {{ data.acctno }} </td>
+                    </ng-container>
+
+                    <!-- Connection Status Column -->
+                    <ng-container matColumnDef="connectionStatus">
+                      <th mat-header-cell *matHeaderCellDef class="table-header-title" sticky>
+                        Connection Status
+                      </th>
+                      <td mat-cell *matCellDef="let data" class="f-s-14">
+                        <span class="status-badge" [ngClass]="{
+    'status-success': data.connectionMode?.toLowerCase() === 'online',
+    'status-danger': data.connectionMode?.toLowerCase() === 'offline'
+  }">
+                          {{ data.connectionMode ? (data.connectionMode | titlecase) : '-' }}
+                        </span>
+                      </td>
+
+                    </ng-container>
+
+                    <!-- Header and Row definitions -->
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true" class="table-header-bg"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns" class="table-content-row"></tr>
+                  </table>
+                  <mat-paginator [length]="customerListdatatotalRecords" [pageSize]="customerListdataitemsPerPage"
+                    [pageSizeOptions]="[5,10,20,50,100]" showFirstLastButtons (page)="pageChangedcustomerList($event)">
+                  </mat-paginator>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-12">
+    <div class="">
+      <div *ngIf="isCustomerDetailOpen" class="panel-collapse collapse in">
+        <div class="panel-body no-padding">
+          <mat-tab-group mat-stretch-tabs="true" mat-align-tabs="start" (selectedTabChange)="onTabChange($event)">
+            <mat-tab label="Details">
+              <mat-card class="cardWithShadow w-100">
+                <mat-card-content class="mat-card-content-border">
+                  <div class="dialog-container">
+                    <div class="dialog-header">
+                      {{ customerLedgerDetailData.title }} {{ customerLedgerDetailData.custname }} Details
+                      <span>
+                        <a mat-icon-button href="javascript:void(0)" (click)="customerList()">
+                          <img src="assets/img/DashboardIcons/Reject.svg" alt="Close" />
+                        </a>
+                      </span>
+                    </div>
+                    <div mat-dialog-content>
+                      <div class="col-md-12">
+                        <mat-card class="cardWithShadow m-t-20">
+                          <div class="dialog-header">
+                            Basic Details
+                          </div>
+                          <mat-card-content>
+                            <div class="row">
+                              <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                                <div class="field">
+                                  <span class="label-text">Name</span>
+                                  <span class="colon">:</span>
+                                  <span class="m-l-10">{{ customerLedgerDetailData.title }} {{
+                                    customerLedgerDetailData.firstname
+                                    }}
+                                    {{
+                                    customerLedgerDetailData.lastname }}</span>
+                                </div>
+                              </div>
+
+                              <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                                <div class="field">
+                                  <span class="label-text">Contact Person</span>
+                                  <span class="colon">:</span>
+                                  <span class="m-l-10">{{ customerLedgerDetailData.contactperson }}</span>
+                                </div>
+                              </div>
+
+                              <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                                <div class="field">
+                                  <span class="label-text">CAF No.</span>
+                                  <span class="colon">:</span>
+                                  <span class="m-l-10">{{ customerLedgerDetailData.cafno }}</span>
+                                </div>
+                              </div>
+
+                              <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                                <div class="field">
+                                  <span class="label-text">Act No.</span>
+                                  <span class="colon">:</span>
+                                  <span class="m-l-10">{{ customerLedgerDetailData.acctno }}</span>
+                                </div>
+                              </div>
+
+                              <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                                <div class="field">
+                                  <span class="label-text">Username</span>
+                                  <span class="colon">:</span>
+                                  <span class="m-l-10">{{ customerLedgerDetailData.username }}</span>
+                                </div>
+                              </div>
+
+                              <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                                <div class="field">
+                                  <span class="label-text">Status</span>
+                                  <span class="colon">:</span>
+                                  <span class="m-l-10">{{ customerLedgerDetailData.status }}</span>
+                                </div>
+                              </div>
+
+                              <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                                <div class="field">
+                                  <span class="label-text">Customer Type</span>
+                                  <span class="colon">:</span>
+                                  <span class="m-l-10">{{ customerLedgerDetailData.custtype }}</span>
+                                </div>
+                              </div>
+
+                              <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                                <div class="field">
+                                  <span class="label-text">Calendar Type</span>
+                                  <span class="colon">:</span>
+                                  <span class="m-l-10">{{ customerLedgerDetailData.calendarType }}</span>
+                                </div>
+                              </div>
+
+                              <ng-container *ngIf="customerLedgerDetailData.parentCustomerName">
+                                <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                                  <div class="field">
+                                    <span class="label-text">Parent Customer</span>
+                                    <span class="colon">:</span>
+                                    <span class="m-l-10">{{ customerLedgerDetailData.parentCustomerName }}</span>
+                                  </div>
+                                </div>
+                              </ng-container>
+
+                              <ng-container *ngIf="customerLedgerDetailData.invoiceType">
+                                <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                                  <div class="field">
+                                    <span class="label-text">Invoice Type</span>
+                                    <span class="colon">:</span>
+                                    <span class="m-l-10">{{ customerLedgerDetailData.invoiceType }}</span>
+                                  </div>
+                                </div>
+                              </ng-container>
+
+                            </div>
+                          </mat-card-content>
+                        </mat-card>
+                        <!-- Present Address Details -->
+                        <mat-card class="cardWithShadow m-t-10">
+                          <div class="dialog-header">
+                            Present Address Details
+                          </div>
+                          <mat-card-content>
+                            <div class="row">
+                              <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                                <div class="field">
+                                  <span class="label-text">Address</span>
+                                  <span class="colon">:</span>
+                                  <span class="m-l-10">{{ custFullAddress }}</span>
+                                </div>
+                              </div>
+
+                              <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                                <div class="field">
+                                  <span class="label-text">{{ pincodeTitle }}</span>
+                                  <span class="colon">:</span>
+                                  <span class="m-l-10">{{ presentAdressDATA.code }}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div class="row">
+                              <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                                <div class="field">
+                                  <span class="label-text">{{ areaTitle }}</span>
+                                  <span class="colon">:</span>
+                                  <span class="m-l-10">{{ presentAdressDATA.name }}</span>
+                                </div>
+                              </div>
+
+                              <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                                <div class="field">
+                                  <span class="label-text">{{ cityTitle }}</span>
+                                  <span class="colon">:</span>
+                                  <span class="m-l-10">{{ presentAdressDATA.cityName }}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div class="row">
+                              <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                                <div class="field">
+                                  <span class="label-text">{{ stateTitle }}</span>
+                                  <span class="colon">:</span>
+                                  <span class="m-l-10">{{ presentAdressDATA.stateName }}</span>
+                                </div>
+                              </div>
+
+                              <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                                <div class="field">
+                                  <span class="label-text">{{ countryTitle }}</span>
+                                  <span class="colon">:</span>
+                                  <span class="m-l-10">{{ presentAdressDATA.countryName }}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </mat-card-content>
+                        </mat-card>
+                        <!-- Plan Details -->
+                        <mat-card class="cardWithShadow m-t-10">
+                          <div class="dialog-header">
+                            Plan Details
+                          </div>
+                          <mat-card-content>
+                            <div class="row">
+                              <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                                <div class="field">
+                                  <span class="label-text">Bill To</span>
+                                  <span class="colon">:</span>
+                                  <span class="m-l-10">
+                                    <ng-container *ngIf="customerBill; else noCustomerBill">{{ customerBill
+                                      }}</ng-container>
+                                    <ng-template #noCustomerBill>-</ng-template>
+                                  </span>
+                                </div>
+                              </div>
+                              <ng-container *ngIf="customerBill === 'ORGANIZATION'">
+                                <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                                  <div class="field">
+                                    <span class="label-text">Invoice To Org</span>
+                                    <span class="colon">:</span>
+                                    <span class="m-l-10">{{ custInvoiceToOrg }}</span>
+                                  </div>
+                                </div>
+                              </ng-container>
+                            </div>
+
+                            <div class="row" *ngIf="ifPlanGroup">
+                              <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                                <div class="field">
+                                  <span class="label-text">PlanGroup</span>
+                                  <span class="colon">:</span>
+                                  <span class="m-l-10">
+                                    <ng-container *ngIf="customerLedgerDetailData.plangroupid; else noPlanGroup">
+                                      <span title="Plan Details"
+                                        (click)="getCustPlanGroupDataopen('custPlanGroupDataModal', customerLedgerDetailData.id)"
+                                        class="curson_pointer" style="color: #f7941e !important">
+                                        {{ planGroupName }}
+                                      </span>
+                                    </ng-container>
+                                    <ng-template #noPlanGroup>-</ng-template>
+                                  </span>
+                                </div>
+                              </div>
+                              <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                                <div class="field">
+                                  <span class="label-text">Discount (%)</span>
+                                  <span class="colon">:</span>
+                                  <span class="m-l-10">
+                                    <ng-container *ngIf="customerLedgerDetailData.discount; else noDiscount">
+                                      {{ customerLedgerDetailData.discount }}
+                                    </ng-container>
+                                    <ng-template #noDiscount>-</ng-template>
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </mat-card-content>
+                        </mat-card>
+
+                      </div>
+                    </div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            </mat-tab>
+            <mat-tab *ngIf="isCustomerDetailSubMenu && invoiceAccess" label="Invoices">
+              <div class="f-s-14 p-16 rounded m-t-12">
+                <mat-card [class.activeSubMenu]="ifMyInvoice" (click)="openMyInvoice(customerLedgerDetailData.id)">
+                  <div class="row header-row" *ngIf="ifMyInvoice">
+                    <mat-card class="cardWithShadow w-100">
+                      <div class="dialog-header">
+                        Search {{ customerLedgerDetailData.title }} {{ customerLedgerDetailData.custname }}
+                        Invoice
+                        <span>
+                          <a mat-icon-button href="javascript:void(0)" (click)="customerList()">
+                            <img src="assets/img/DashboardIcons/Reject.svg" alt="Close" />
+                          </a>
+                        </span>
+                      </div>
+                      <mat-card-content class="mat-card-content-border">
+                        <div class="row g-3 p-3">
+
+                          <div class="col-md-4 col-sm-6 col-xs-12 mb-4">
+                            <label class="inputLabel">Document No</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                              <input matInput placeholder="Document No" formControlName="docnumber" class="input-p-5" />
+                            </mat-form-field>
+                          </div>
+
+                          <div class="col-md-4 col-sm-6 col-xs-12 mb-4">
+                            <label class="inputLabel">Customer Name</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                              <input matInput
+                                [value]="customerLedgerDetailData.title + ' ' + customerLedgerDetailData.custname"
+                                disabled class="input-p-5" />
+                            </mat-form-field>
+                          </div>
+
+                          <div class="col-md-4 col-sm-6 col-xs-12 mb-4">
+                            <label class="inputLabel">Bill From Date</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                              <input matInput [matDatepicker]="billFromDatePicker" placeholder="Enter Pay From Date"
+                                formControlName="billfromdate" class="input-p-5" />
+                              <mat-datepicker-toggle matSuffix [for]="billFromDatePicker"></mat-datepicker-toggle>
+                              <mat-datepicker #billFromDatePicker></mat-datepicker>
+                            </mat-form-field>
+                          </div>
+
+                          <div class="col-md-4 col-sm-6 col-xs-12 mb-4">
+                            <label class="inputLabel">Bill To Date</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                              <input matInput [matDatepicker]="billToDatePicker" placeholder="Enter Pay To Date"
+                                formControlName="billtodate" class="input-p-5" />
+                              <mat-datepicker-toggle matSuffix [for]="billToDatePicker"></mat-datepicker-toggle>
+                              <mat-datepicker #billToDatePicker></mat-datepicker>
+                            </mat-form-field>
+                          </div>
+
+
+                          <div class="col-md-4 col-sm-6 col-xs-12 mb-4">
+                            <label class="inputLabel">Staff Name</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                              <mat-select formControlName="staffId" placeholder="Select a Staff Name" class="input-p-5">
+                                <mat-option *ngFor="let staff of commondropdownService.activeStaffList"
+                                  [value]="staff.id">
+                                  {{ staff.username }}
+                                </mat-option>
+                              </mat-select>
+                            </mat-form-field>
+                          </div>
+
+                          <div class="col-md-4 col-sm-6 col-xs-12 mb-4">
+                            <label class="inputLabel">Branch</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                              <mat-select formControlName="branchId" placeholder="Select a Branch" class="input-p-5">
+                                <mat-option *ngFor="let branch of commondropdownService.activeBranchList"
+                                  [value]="branch.id">
+                                  {{ branch.name }}
+                                </mat-option>
+                              </mat-select>
+                            </mat-form-field>
+                          </div>
+
+                          <div class="col-md-4 col-sm-6 col-xs-12 mb-4">
+                            <label class="inputLabel">Business Unit</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                              <mat-select formControlName="businessunit" placeholder="Select a Business Unit"
+                                class="input-p-5">
+                                <mat-option *ngFor="let unit of commondropdownService.businessUnitList"
+                                  [value]="unit.id">
+                                  {{ unit.buname }}
+                                </mat-option>
+                              </mat-select>
+                            </mat-form-field>
+                          </div>
+
+                          <div class="col-md-4 col-sm-6 col-xs-12 mb-4">
+                            <label class="inputLabel">Plan Name</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                              <mat-select formControlName="planId" placeholder="Select a Plan Name" class="input-p-5">
+                                <mat-option *ngFor="let plan of commondropdownService.postpaidplanData"
+                                  [value]="plan.id">
+                                  {{ plan.name }}
+                                </mat-option>
+                              </mat-select>
+                            </mat-form-field>
+                          </div>
+
+                          <div class="col-md-4 col-sm-6 col-xs-12 mb-4">
+                            <label class="inputLabel">Service</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                              <mat-select formControlName="serviceId" placeholder="Select a Service" class="input-p-5">
+                                <mat-option *ngFor="let service of commondropdownService.planserviceData"
+                                  [value]="service.id">
+                                  {{ service.name }}
+                                </mat-option>
+                              </mat-select>
+                            </mat-form-field>
+                          </div>
+
+                          <div class="col-md-4 col-sm-6 col-xs-12 mb-4">
+                            <button mat-flat-button color="primary" class="button-normal m-r-10"
+                              (click)="searchInvoices()">
+                              Search Invoice
+                            </button>
+                            <button mat-stroked-button (click)="clearSearchinvoiceMaster()" class="button-normal"
+                              type="button"> Clear
+                            </button>
+                          </div>
+
+                        </div>
+                      </mat-card-content>
+                    </mat-card>
+
+                  </div>
+                  <div class="container-fluid contain-flud" *ngIf="ifMyInvoice">
+                    <div class="row">
+                      <div class="col-md-12">
+                        <mat-card class="cardWithShadow">
+                          <mat-card-content class="mat-card-content-border">
+                            <div class="country-table-list">
+                              <div class="table-container">
+                                <ng-container *ngIf="invoiceMasterListData.length === 0; else invoiceTable">
+                                  <div class="col-lg-12 col-md-12 p-3" style="font-size: larger; font-weight: 600;">
+                                    Invoice data not found
+                                  </div>
+                                </ng-container>
+                                <!-- Invoice Table -->
+                                <table mat-table [dataSource]="invoiceMasterListData" matSort
+                                  class="mat-elevation-z8 w-100" *ngIf="invoiceMasterListData.length > 0;">
+
+                                  <!-- Checkbox Column -->
+                                  <ng-container matColumnDef="select">
+                                    <th mat-header-cell *matHeaderCellDef class="widthCheckboxColom">
+                                      <mat-checkbox [(ngModel)]="allInvoiceChecked"
+                                        (change)="allSelectInvoice($event)"></mat-checkbox>
+                                    </th>
+                                    <td mat-cell *matCellDef="let invoice">
+                                      <mat-checkbox [(ngModel)]="invoice.isSingleInChecked"
+                                        (change)="addInvoiceChecked(invoice.id, $event)"></mat-checkbox>
+                                    </td>
+                                  </ng-container>
+
+                                  <!-- Customer Column -->
+                                  <ng-container matColumnDef="customerName">
+                                    <th mat-header-cell *matHeaderCellDef>Customer</th>
+                                    <td mat-cell *matCellDef="let invoice">{{ invoice.customerName }}</td>
+                                  </ng-container>
+
+                                  <!-- Customer Name Column -->
+                                  <ng-container matColumnDef="custRefName">
+                                    <th mat-header-cell *matHeaderCellDef>Customer Name</th>
+                                    <td mat-cell *matCellDef="let invoice">{{ invoice.custRefName }}</td>
+                                  </ng-container>
+
+                                  <!-- Document No. Column -->
+                                  <ng-container matColumnDef="docnumber">
+                                    <th mat-header-cell *matHeaderCellDef style="width:20%">Document No.</th>
+                                    <td mat-cell *matCellDef="let invoice">
+                                      <span class="cursor_pointer" style="color: #f7941e"
+                                        (click)="openInvoiceModal('InvoiceDetailModal', invoice)">
+                                        {{ invoice.docnumber }}
+                                      </span>
+                                    </td>
+                                  </ng-container>
+
+                                  <!-- Created By Column -->
+                                  <ng-container matColumnDef="createdByName">
+                                    <th mat-header-cell *matHeaderCellDef>Created By</th>
+                                    <td mat-cell *matCellDef="let invoice">{{ invoice.createdByName }}</td>
+                                  </ng-container>
+
+                                  <!-- Total Amount Column -->
+                                  <ng-container matColumnDef="totalamount">
+                                    <th mat-header-cell *matHeaderCellDef>Total Amount</th>
+                                    <td mat-cell *matCellDef="let invoice">{{ invoice.totalamount | number:'1.2-2' }}
+                                    </td>
+                                  </ng-container>
+
+                                  <!-- Adjusted Amount Column -->
+                                  <ng-container matColumnDef="adjustedAmount">
+                                    <th mat-header-cell *matHeaderCellDef>Adjusted Amount</th>
+                                    <td mat-cell *matCellDef="let invoice">
+                                      <ng-container
+                                        *ngIf="invoice.adjustedAmount && invoice.adjustedAmount > 0; else zeroAdjAmount">
+                                        <span class="cursor_pointer" style="color: #f7941e"
+                                          (click)="openInvoicePaymentModal('invoicePaymentDetailModal', invoice.id)">
+                                          {{ invoice.adjustedAmount | number:'1.2-2' }}
+                                        </span>
+                                      </ng-container>
+                                      <ng-template #zeroAdjAmount>0</ng-template>
+                                    </td>
+                                  </ng-container>
+
+                                  <!-- Bill Run Status Column -->
+                                  <ng-container matColumnDef="billrunstatus">
+                                    <th mat-header-cell *matHeaderCellDef>Bill Run Status</th>
+                                    <td mat-cell *matCellDef="let invoice">
+                                      <span class="badge badge-success">{{ invoice.billrunstatus }}</span>
+                                    </td>
+                                  </ng-container>
+
+                                  <!-- Bill Date Column -->
+                                  <ng-container matColumnDef="billdate">
+                                    <th mat-header-cell *matHeaderCellDef>Bill Date</th>
+                                    <td mat-cell *matCellDef="let invoice" style="font-weight: 400">
+                                      {{ invoice.billdate | date:'dd-MM-yyyy' }}
+                                    </td>
+                                  </ng-container>
+
+                                  <!-- Approval Status Column -->
+                                  <ng-container matColumnDef="status">
+                                    <th mat-header-cell *matHeaderCellDef>Approval Status</th>
+                                    <td mat-cell *matCellDef="let invoice">
+                                      <ng-container [ngSwitch]="invoice.status">
+                                        <span *ngSwitchCase="'pending'" class="badge bg-info">{{ invoice.status
+                                          }}</span>
+                                        <span *ngSwitchCase="'rejected'" class="badge bg-danger">{{ invoice.status
+                                          }}</span>
+                                        <span *ngSwitchCase="'approved'" class="badge bg-success">{{ invoice.status
+                                          }}</span>
+                                        <span *ngSwitchDefault>-</span>
+                                      </ng-container>
+                                    </td>
+                                  </ng-container>
+
+                                  <!-- Action Column -->
+                                  <ng-container matColumnDef="actions">
+                                    <th mat-header-cell *matHeaderCellDef stickyEnd>Action</th>
+                                    <td mat-cell *matCellDef="let invoice" class="btnAction">
+
+                                      <a *ngIf="invoice.billrunstatus === 'Exported'" href="javascript:void(0)"
+                                        title="Download" (click)="downloadPDFINvoice(invoice.id, invoice.customerName)">
+                                        <img width="25" height="25"
+                                          src="assets/img/DashboardIcons/Document Download.svg" />
+                                      </a>
+
+                                      <a *ngIf="invoice.billrunstatus === 'Generated'" href="javascript:void(0)"
+                                        title="Generate" (click)="generatePDFInvoice(invoice.id)">
+                                        <img width="25" height="25" src="assets/img/DashboardIcons/DTV.svg" />
+                                      </a>
+
+                                      <button mat-icon-button aria-label="Pick" [disabled]="
+                          invoice.nextStaff != null ||
+                          invoice.status === 'approved' ||
+                          invoice.status === 'rejected'
+                        " (click)="pickModalOpen(invoice)">
+                                        <img src="assets/img/DashboardIcons/Pick-ticket-to-resolve.svg" alt="Pick" />
+                                      </button>
+
+                                      <button mat-icon-button aria-label="Assign" [disabled]="
+                          invoice.nextStaff != staffID ||
+                          invoice.status === 'approved' ||
+                          invoice.status === 'rejected' ||
+                          invoice.billrunstatus === 'Cancelled'
+                        " (click)="approveRejectInvoice(invoice.id, true)">
+                                        <img width="25" height="25" src="assets/img/DashboardIcons/Assign.svg"
+                                          alt="Assign" />
+                                      </button>
+
+                                      <button mat-icon-button aria-label="Reject" [disabled]="
+                          invoice.nextStaff != staffID ||
+                          invoice.status === 'approved' ||
+                          invoice.status === 'rejected' ||
+                          invoice.billrunstatus === 'Cancelled'
+                        " (click)="approveRejectInvoice(invoice.id, false)">
+                                        <img width="25" height="25" src="assets/img/reject.jpg" alt="Reject" />
+                                      </button>
+
+                                      <button mat-icon-button aria-label="Workflow"
+                                        (click)="openAuditWorkflow(invoice.id, 'workFlowAuditModal')">
+                                        <img width="25" height="25"
+                                          src="assets/img/DashboardIcons/WorkFlow status Details.svg" alt="Workflow" />
+                                      </button>
+
+                                      <button mat-icon-button aria-label="Reassign" [disabled]="
+                          invoice.nextStaff != staffID ||
+                          invoice.status === 'approved' ||
+                          invoice.status === 'rejected'
+                        " (click)="StaffReasignList1(invoice)">
+                                        <img width="32" height="32" alt="Reassign"
+                                          src="assets/img/DashboardIcons/send-svgrepo-com 1.svg" />
+                                      </button>
+
+                                      <button mat-icon-button aria-label="Create Credit Note" [disabled]="
+                          invoice.status !== 'approved' || invoice.billrunstatus === 'Cancelled'
+                        " (click)="createCreditNote(invoice)">
+                                        <img width="32" height="32" alt="Create Credit Note"
+                                          src="../assets/img/23_Receipt-Management_Y.png" />
+                                      </button>
+
+                                    </td>
+                                  </ng-container>
+
+                                  <tr mat-header-row *matHeaderRowDef="invoiceDisplayedColumns" class="table-header-bg">
+                                  </tr>
+                                  <tr mat-row *matRowDef="let row; columns: invoiceDisplayedColumns"
+                                    class="table-content-row"></tr>
+                                </table>
+
+                                <mat-paginator [length]="invoiceMastertotalRecords"
+                                  [pageSize]="invoiceMasteritemsPerPage" [pageSizeOptions]="[5,10,20,50,100]"
+                                  showFirstLastButtons (page)="pageChangedinvoiceMasterList($event)">
+                                </mat-paginator>
+                                <ng-container *ngIf="ifModelIsShow">
+                                  <app-workflow-audit-details-modal [auditcustid]="auditcustid"
+                                    dialogId="custauditWorkflowModal" (closeParentCustt)="closeParentCustt()">
+                                  </app-workflow-audit-details-modal>
+                                </ng-container>
+                              </div>
+                            </div>
+                          </mat-card-content>
+                        </mat-card>
+                      </div>
+                    </div>
+                  </div>
+                </mat-card>
+              </div>
+            </mat-tab>
+            <mat-tab *ngIf="isCustomerDetailSubMenu && ledgerAccess" label="Ledger">
+              <div class="f-s-14 p-16 rounded m-t-12">
+                <mat-card [class.activeSubMenu]="isCustomerLedgerOpen"
+                  (click)="getCustomersLedger(customerLedgerDetailData.id, '')">
+                  <div class="row header-row" *ngIf="isCustomerLedgerOpen">
+                    <mat-card class="cardWithShadow w-100">
+                      <mat-card-content class="mat-card-content-border">
+                        <div class="dialog-header">
+                          Search {{ customerLedgerDetailData.title }} {{ customerLedgerDetailData.custname }} Ledger
+                          <span>
+                            <a mat-icon-button href="javascript:void(0)" (click)="customerList()">
+                              <img src="assets/img/DashboardIcons/Reject.svg" alt="Close" />
+                            </a>
+                          </span>
+                        </div>
+                        <form [formGroup]="custLedgerForm" class="w-100">
+                          <div class="row g-3 align-items-center mt-3">
+                            <div class="col-lg-3 col-md-4 m-t-16">
+                              <mat-form-field appearance="outline" class="w-100">
+                                <input matInput [matDatepicker]="startDatePicker" placeholder="Select To Date"
+                                  formControlName="startDateCustLedger"
+                                  [class.is-invalid]="custLedgerSubmitted && custLedgerForm.controls.startDateCustLedger.errors" />
+                                <mat-datepicker-toggle matSuffix [for]="startDatePicker"></mat-datepicker-toggle>
+                                <mat-datepicker #startDatePicker></mat-datepicker>
+                                <mat-error
+                                  *ngIf="custLedgerSubmitted && custLedgerForm.controls.startDateCustLedger.hasError('required')">
+                                  From Date is required.
+                                </mat-error>
+                              </mat-form-field>
+                            </div>
+                            <div class="col-lg-3 col-md-4 m-t-16">
+                              <mat-form-field appearance="outline" class="w-100">
+                                <input matInput [matDatepicker]="endDatePicker" placeholder="Select To Date"
+                                  formControlName="endDateCustLedger"
+                                  [class.is-invalid]="custLedgerSubmitted && custLedgerForm.controls.endDateCustLedger.errors" />
+                                <mat-datepicker-toggle matSuffix [for]="endDatePicker"></mat-datepicker-toggle>
+                                <mat-datepicker #endDatePicker></mat-datepicker>
+                                <mat-error
+                                  *ngIf="custLedgerSubmitted && custLedgerForm.controls.endDateCustLedger.hasError('required')">
+                                  To Date is required.
+                                </mat-error>
+                              </mat-form-field>
+                            </div>
+                            <div class="col-lg-3 col-md-4 d-flex align-items-center">
+                              <button mat-flat-button color="primary" (click)="searchCustomerLedger()"
+                                class="button-normal m-r-10" type="button">
+                                Search
+                              </button>
+                              <button mat-stroked-button (click)="clearSearchCustomerLedger()" class="button-normal"
+                                type="reset">
+                                Clear
+                              </button>
+                            </div>
+                          </div>
+                        </form>
+                      </mat-card-content>
+                    </mat-card>
+                  </div>
+                  <div class="container-fluid contain-flud">
+                    <div class="row">
+                      <div class="col-md-12" *ngIf="listView">
+                        <mat-card class="cardWithShadow">
+                          <div class="dialog-header">
+                            {{ customerLedgerDetailData.title }} {{ customerLedgerDetailData.custname }} Ledger
+                            Details
+                            <span>
+                              <a mat-icon-button href="javascript:void(0)" (click)="customerList()">
+                                <img src="assets/img/DashboardIcons/Reject.svg" alt="Close" />
+                              </a>
+                            </span>
+                          </div>
+                          <mat-card-content class="mat-card-content-border">
+                            <div class="row">
+                              <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                                <div class="field">
+                                  <span class="label-text">Name</span>
+                                  <span class="colon">:</span>
+                                  <span class="m-l-10">{{ customerLedgerData.custname }}</span>
+                                </div>
+                              </div>
+                              <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                                <div class="field">
+                                  <span class="label-text">Plan</span>
+                                  <span class="colon">:</span>
+                                  <span class="m-l-10">{{ customerLedgerData.plan }}</span>
+                                </div>
+                              </div>
+                              <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                                <div class="field">
+                                  <span class="label-text">Status</span>
+                                  <span class="colon">:</span>
+                                  <ng-container [ngSwitch]="customerLedgerData.status">
+                                    <span *ngSwitchCase="'Active'" class="badge badge-success m-l-10">
+                                      {{ customerLedgerData.status }}
+                                    </span>
+                                    <span *ngSwitchCase="'NewActivation'" class="badge badge-info m-l-10">
+                                      {{ customerLedgerData.status }}
+                                    </span>
+                                    <span *ngSwitchCase="'Inactive'" class="badge badge-info m-l-10">
+                                      {{ customerLedgerData.status }}
+                                    </span>
+                                    <span *ngSwitchDefault>-</span>
+                                  </ng-container>
+                                </div>
+                              </div>
+                              <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                                <div class="field">
+                                  <span class="label-text">Username</span>
+                                  <span class="colon">:</span>
+                                  <span class="m-l-10">{{ customerLedgerData.username }}</span>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="row">
+                              <div class="col-lg-12 col-md-12">
+                                <table mat-table [dataSource]="customerLedgerListData" class="mat-elevation-z8 w-100">
+
+                                  <ng-container matColumnDef="create_DATE">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">Create Date</th>
+                                    <td mat-cell *matCellDef="let data">{{ data.create_DATE }}</td>
+                                  </ng-container>
+
+                                  <ng-container matColumnDef="receiptNo">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">Receipt No.</th>
+                                    <td mat-cell *matCellDef="let data">{{ data.receiptNo }}</td>
+                                  </ng-container>
+
+                                  <ng-container matColumnDef="invoiceNo">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">Invoice No.</th>
+                                    <td mat-cell *matCellDef="let data">
+                                      <ng-container *ngFor="let invoice of data.invoiceNo">
+                                        <span>{{ invoice }} </span>
+                                      </ng-container>
+                                    </td>
+                                  </ng-container>
+
+                                  <ng-container matColumnDef="transcategory">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">Category</th>
+                                    <td mat-cell *matCellDef="let data">{{ data.transcategory }}</td>
+                                  </ng-container>
+
+                                  <ng-container matColumnDef="debit">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">Debit</th>
+                                    <td mat-cell *matCellDef="let data">
+                                      <ng-container *ngIf="data.transtype === 'DR'; else noDebit">
+                                        {{ data.amount }} {{ currency }}
+                                      </ng-container>
+                                      <ng-template #noDebit>-</ng-template>
+                                    </td>
+                                  </ng-container>
+
+                                  <ng-container matColumnDef="credit">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">Credit</th>
+                                    <td mat-cell *matCellDef="let data">
+                                      <ng-container *ngIf="data.transtype === 'CR'; else noCredit">
+                                        {{ data.amount }} {{ currency }}
+                                      </ng-container>
+                                      <ng-template #noCredit>-</ng-template>
+                                    </td>
+                                  </ng-container>
+
+                                  <ng-container matColumnDef="balAmount">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">Bal Amount</th>
+                                    <td mat-cell *matCellDef="let data">{{ data.balAmount }}{{ currency }}</td>
+                                  </ng-container>
+
+                                  <tr mat-header-row *matHeaderRowDef="ledgerDisplayedColumns" class="table-header-bg">
+                                  </tr>
+                                  <tr mat-row *matRowDef="let row; columns: ledgerDisplayedColumns"
+                                    class="table-content-row">
+                                  </tr>
+                                </table>
+
+                                <mat-paginator [length]="custLedgertotalRecords" [pageSize]="custLedgerItemPerPage"
+                                  [pageSizeOptions]="[5,10,20,50,100]" showFirstLastButtons
+                                  (page)="pageChangedcustledgerList($event)">
+                                </mat-paginator>
+                              </div>
+                            </div>
+
+                            <div class="row m-t-16">
+                              <div class="col-lg-6 col-md-6 dataGroup text-right">
+                                <div class="field">
+                                  <span class="label-text">Opening Amount</span>
+                                  <span class="colon">:</span>
+                                  <span class="m-l-10">{{ customerLedgerData.customerLedgerInfoPojo.openingAmount
+                                    }}</span>
+                                </div>
+                              </div>
+                              <div class="col-lg-6 col-md-6 dataGroup text-right">
+                                <div class="field">
+                                  <span class="label-text">Closing Balance</span>
+                                  <span class="colon">:</span>
+                                  <span class="m-l-10">{{ customerLedgerData.customerLedgerInfoPojo.closingBalance
+                                    }}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </mat-card-content>
+                        </mat-card>
+                      </div>
+                    </div>
+                  </div>
+                </mat-card>
+              </div>
+            </mat-tab>
+            <mat-tab *ngIf="isCustomerDetailSubMenu && walletAccess" label="Wallet">
+              <div class="f-s-14 p-16 rounded m-t-12">
+                <mat-card [class.activeSubMenu]="ifWalletMenu"
+                  (click)="addWalletIncustomer(customerLedgerDetailData.id)">
+                  <div class="container-fluid contain-flud" *ngIf="ifWalletMenu">
+                    <div class="row">
+                      <div class="col-md-12">
+                        <mat-card class="cardWithShadow">
+                          <mat-card-content class="mat-card-content-border">
+                            <div class="dialog-header">
+                              {{ customerLedgerDetailData.title }} {{ customerLedgerDetailData.custname }} Wallet
+                              <span>
+                                <a mat-icon-button href="javascript:void(0)" (click)="customerList()">
+                                  <img src="assets/img/DashboardIcons/Reject.svg" alt="Close" />
+                                </a>
+                              </span>
+                            </div>
+                            <div class="row m-t-20">
+                              <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                                <div class="field">
+                                  <span class="label-text">Wallet Balance</span>
+                                  <span class="colon">:</span>
+                                  <span class="m-l-10">{{ getWallatData.customerWalletDetails }}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </mat-card-content>
+                        </mat-card>
+                      </div>
+                    </div>
+                  </div>
+                </mat-card>
+              </div>
+            </mat-tab>
+          </mat-tab-group>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- <div class="row header-row">
+  <mat-card class="cardWithShadow w-100">
+    <mat-card-content class="mat-card-content-border">
+      <div class="d-flex justify-content-between align-items-center">
+        <h3 class="mat-title">My Organization Customer</h3>
+      </div>
+    </mat-card-content>
+      <div class="panel-body no-padding panel-udata d-flex flex-wrap">
+        <ng-container *ngIf="isCustomerDetailSubMenu && invoiceAccess">
+          <div class="pcol col-md-4 col-sm-6">
+            <mat-card [class.activeSubMenu]="ifMyInvoice" (click)="openMyInvoice(customerLedgerDetailData.id)"
+              class="dbox cursor-pointer">
+              <img src="../../../assets/img/i01.png" width="32" />
+              <h5>Invoices</h5>
+            </mat-card>
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="isCustomerDetailSubMenu && ledgerAccess">
+          <div class="pcol col-md-4 col-sm-6">
+            <mat-card [class.activeSubMenu]="isCustomerLedgerOpen"
+              (click)="getCustomersLedger(customerLedgerDetailData.id, '')" class="dbox cursor-pointer">
+              <img src="../../../assets/img/i01.png" width="32" />
+              <h5>Ledger</h5>
+            </mat-card>
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="isCustomerDetailSubMenu && walletAccess">
+          <div class="pcol col-md-4 col-sm-6">
+            <mat-card [class.activeSubMenu]="ifWalletMenu" (click)="addWalletIncustomer(customerLedgerDetailData.id)"
+              class="dbox cursor-pointer">
+              <img src="../../../assets/img/i01.png" width="32" />
+              <h5>Wallet</h5>
+            </mat-card>
+          </div>
+        </ng-container>
+      </div>
+  </mat-card>
+</div> -->
+
+
+<!-- <div class="row">
+  <div class="col-md-12">
+    <div class="panel top">
+      <div class="panel-heading">
+        <h3 class="panel-title">My Organization Customer</h3>
+        <div class="right">
+          <button type="button" class="btn-toggle-collapse" data-toggle="collapse" data-target="#searchPreCust"
+            aria-expanded="false" aria-controls="searchPreCust">
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+
+      <div id="searchPreCust" class="panel-collapse collapse in">
+        <div class="panel-body"> -->
+<!-- <div class="row">
+          <div class="col-lg-3 col-md-3 m-b-10">
+            <p-dropdown
+              [options]="searchOptionSelect"
+              optionValue="value"
+              optionLabel="label"
+              [filter]="true"
+              filterBy="label"
+              placeholder="Select a Search Option"
+              [(ngModel)]="searchOption"
+              (onChange)="selSearchOption($event)"
+            ></p-dropdown>
+          </div>
+          <div class="col-lg-3 col-md-3 m-b-10">
+            <input
+              id="username"
+              type="text"
+              class="form-control"
+              [(ngModel)]="searchDeatil"
+              placeholder="Enter Search Detail"
+              (keydown.enter)="searchcustomer()"
+              />
+            </div> -->
+<!-- <div class="col-lg-4 col-md-6 col-sm-12">
+            <button
+              type="button"
+              class="btn btn-primary"
+              id="searchbtn"
+              (click)="searchcustomer()"
+              [disabled]="!searchDeatil"
+              >
+              <i class="fa fa-search"></i>
+              Searchasa
+            </button>
+            <button
+              type="reset"
+              class="btn btn-default"
+              id="searchbtn"
+              (click)="clearSearchcustomer()"
+              >
+               <img src="assets/img/DashboardIcons/Refresh.svg" />
+              Clear
+            </button>
+          </div> -->
+<!-- </div> -->
+<!-- </div> -->
+<!-- <div
+      class="panel-body no-padding panel-udata"
+      *ngIf="isCustomerDetailSubMenu"
+      >
+      <div
+        class="pcol"
+        [ngClass]="isCustomerDetailSubMenu ? 'col-md-3' : 'col-md-6'"
+        *ngIf="isCustomerDetailSubMenu"
+        >
+        <div
+          >
+          <div
+            class="dbox"
+                  [ngClass]="{
+                    activeSubMenu: viewCustomerPaymentList
+                  }"
+            >
+            <a
+              class="curson_pointer"
+              (click)="openCustomersPaymentData( this.customerLedgerDetailData.id,'') "
+              >
+              <img src="../../../assets/img/i01.png" style="width: 32px;" />
+              <h5>Payment</h5>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div> -->
+<!-- <div class="panel-body no-padding panel-udata">
+          @if (isCustomerDetailSubMenu && invoiceAccess) {
+          <div class="pcol" [ngClass]="isCustomerDetailSubMenu ? 'col-md-4' : 'col-md-6'">
+            <div class="dbox" [ngClass]="{
+                activeSubMenu: ifMyInvoice
+              }">
+              <a class="curson_pointer" (click)="openMyInvoice(this.customerLedgerDetailData.id)">
+                <img src="../../../assets/img/i01.png" style="width: 32px" />
+                <h5>Invoices</h5>
+              </a>
+            </div>
+          </div>
+          }
+          @if (isCustomerDetailSubMenu && ledgerAccess) {
+          <div class="pcol" [ngClass]="isCustomerDetailSubMenu ? 'col-md-4' : 'col-md-6'">
+            <div class="dbox" [ngClass]="{
+                activeSubMenu: isCustomerLedgerOpen
+              }">
+              <a (click)="getCustomersLedger(this.customerLedgerDetailData.id, '')" class="curson_pointer"
+                href="javascript:void(0)">
+                <img src="../../../assets/img/i01.png" style="width: 32px" />
+                <h5>Ledger</h5> -->
+<!-- <p> Comes Here</p> -->
+<!-- </a>
+            </div>
+          </div>
+          }
+
+          @if (isCustomerDetailSubMenu && walletAccess) {
+          <div class="pcol" [ngClass]="isCustomerDetailSubMenu ? 'col-md-4' : 'col-md-6'">
+            <div>
+              <div class="dbox" [ngClass]="{ activeSubMenu: ifWalletMenu }">
+                <a class="detailOnAnchorClick" (click)="addWalletIncustomer(this.customerLedgerDetailData.id)">
+                  <img src="../../../assets/img/i01.png" style="width: 32px" />
+                  <h5>Wallet</h5>
+                </a>
+              </div>
+            </div>
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div> -->
+
+<!-- @if (listView) {
+<div class="row">
+  <div class="col-md-12 col-sm-12">
+    <div class="panel">
+      <div class="panel-heading">
+        <h3 class="panel-title">Customer List</h3>
+        <div class="right">
+          <button type="button" class="btn-toggle-collapse" data-toggle="collapse" data-target="#listPreCust"
+            aria-expanded="false" aria-controls="listPreCust">
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+      <div id="listPreCust" class="panel-collapse collapse in">
+        <div class="panel-body table-responsive">
+          <div class="row">
+            <div class="col-lg-12 col-md-12">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th width="17%">Name</th>
+                    <th width="10%">Username</th>
+                    <th width="13%">Service Area</th>
+                    <th width="10%">Mobile Number</th>
+                    <th width="18%">Account No</th>
+                    <th width="12%">Connection Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (
+                  data of customerListData
+                  | paginate
+                  : {
+                  id: 'customerListpageData',
+                  itemsPerPage: customerListdataitemsPerPage,
+                  currentPage: currentPagecustomerListdata,
+                  totalItems: customerListdatatotalRecords
+                  }; track
+                  data; let i = $index) {
+                  <tr>
+                    <td>
+                      <a href="javascript:void(0)" style="color: #f7941e" (click)="customerDetailOpen(data.id)">
+                        {{ data.name }}
+                      </a>
+                    </td>
+                    <td>{{ data.username }}</td>
+                    <td>{{ data.serviceArea }}</td>
+                    <td>{{ data.mobile }}</td>
+                    <td>{{ data.acctno }}</td>
+                    @if (data.connectionMode) {
+                    <td>
+                      @if (data.connectionMode == 'online' || data.connectionMode == 'Online') {
+                      <div>
+                        <span class="badge badge-success">
+                          {{ data.connectionMode }}
+                        </span>
+                      </div>
+                      }
+                      @if (data.connectionMode == 'Offline') {
+                      <div>
+                        <span class="badge offlineStatus">
+                          {{ data.connectionMode }}
+                        </span>
+                      </div>
+                      }
+                    </td>
+                    }
+                    @if (!data.connectionMode) {
+                    <td>-</td>
+                    }
+                  </tr>
+                  }
+                </tbody>
+              </table>
+              <div style="display: flex">
+                <pagination-controls id="customerListpageData" maxSize="10" directionLinks="true" previousLabel=""
+                  nextLabel="" (pageChange)="pageChangedcustomerList($event)"></pagination-controls>
+                <div id="itemPerPageDropdown">
+                  <p-dropdown [options]="pageLimitOptions" optionLabel="value" optionValue="value"
+                    (onChange)="TotalItemPerPage($event)"></p-dropdown>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+} -->
+
+<!-- <div class="col-md-12 col-sm-12">
+  <div class="panel">
+    <div class="panel-heading">
+      <h3 class="panel-title">
+        {{ customerLedgerDetailData.title }}
+        {{ customerLedgerDetailData.custname }} Ledger Details
+      </h3>
+      <div class="right">
+        <button type="button" class="btn-toggle-collapse" data-toggle="collapse" data-target="#ledgerdetailsCust"
+          aria-expanded="false" aria-controls="ledgerdetailsCust">
+          <i class="fa fa-minus-circle"></i>
+        </button>
+      </div>
+    </div>
+    <div id="ledgerdetailsCust" class="panel-collapse collapse in">
+      <div class="panel-body table-responsive">
+        <div class="row">
+          <div class="col-lg-3 col-md-3 dataGroup">
+            <label class="datalbl">Name :</label>
+            <span>{{ customerLedgerData.custname }}</span>
+          </div>
+          <div class="col-lg-3 col-md-3 dataGroup">
+            <label class="datalbl">Plan :</label>
+            <span>{{ customerLedgerData.plan }}</span>
+          </div>
+          <div class="col-lg-3 col-md-3 dataGroup">
+            <label class="datalbl">Status :</label>
+            @if (customerLedgerData.status == 'Active') {
+            <span class="badge badge-success">
+              {{ customerLedgerData.status }}
+            </span>
+            }
+            @if (customerLedgerData.status == 'NewActivation') {
+            <span class="badge badge-info">
+              {{ customerLedgerData.status }}
+            </span>
+            }
+            @if (customerLedgerData.status == 'Inactive') {
+            <span class="badge badge-info">
+              {{ customerLedgerData.status }}
+            </span>
+            }
+          </div>
+          <div class="col-lg-3 col-md-3 dataGroup">
+            <label class="datalbl">Username :</label>
+            <span>{{ customerLedgerData.username }}</span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-lg-12 col-md-12">
+            <table class="table myclass">
+              <thead>
+                <tr>
+                  <th class="myclass">Create Date</th>
+                  <th class="myclass">Receipt No.</th>
+                  <th class="myclass">Invoice No.</th>
+                  <th class="myclass">Category</th>
+                  <th class="myclass">Debit</th>
+                  <th class="myclass">Credit</th>
+                  <th class="myclass">Bal Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (
+                data of customerLedgerListData
+                | paginate
+                : {
+                id: 'customerLedgerpageData',
+                itemsPerPage: custLedgerItemPerPage,
+                currentPage: currentPagecustLedgerList,
+                totalItems: custLedgertotalRecords
+                }; track
+                data; let i = $index) {
+                <tr>
+                  <td class="myclass">{{ data.create_DATE }}</td>
+                  <td class="myclass">{{ data.receiptNo }}</td>
+                  <td class="myclass">
+                    @for (invoice of data.invoiceNo; track invoice) {
+                    <span>{{ invoice }} </span>
+                    }<br />
+                  </td>
+                  <td class="myclass">{{ data.transcategory }}</td>
+                  @if (data.transtype == 'DR') {
+                  <td class="myclass">
+                    {{ data.amount }} {{ this.currency }}
+                  </td>
+                  }
+                  <td class="myclass">-</td>
+                  @if (data.transtype == 'CR') {
+                  <td class="myclass">
+                    {{ data.amount }} {{ this.currency }}
+                  </td>
+                  }
+                  <td class="myclass">{{ data.balAmount }}{{ this.currency }}</td>
+                </tr>
+                }
+              </tbody>
+            </table>
+            <div class="pagination_Dropdown">
+              <pagination-controls id="customerLedgerpageData" maxSize="10" directionLinks="true" previousLabel=""
+                nextLabel="" (pageChange)="pageChangedcustledgerList($event)"></pagination-controls>
+              <div id="itemPerPageDropdown">
+                <p-dropdown [options]="pageLimitOptions" optionLabel="value" optionValue="value"
+                  (onChange)="TotalLedgerItemPerPage($event)"></p-dropdown>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-lg-12 col-sm-12 dataGroup text-right">
+            <label class="datalbl">Opening Amount :</label>
+            <span>
+              {{ customerLedgerData.customerLedgerInfoPojo.openingAmount }}
+            </span>
+          </div>
+          <div class="col-lg-12 col-sm-12 dataGroup text-right">
+            <label class="datalbl">Closing Balance :</label>
+            <span>
+              {{ customerLedgerData.customerLedgerInfoPojo.closingBalance }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+} -->
+
+<!-- @if (isCustomerDetailOpen) {
+<div class="row">
+  <div class="col-md-12 col-sm-12">
+    <div class="panel">
+      <div class="panel-heading">
+        <div class="displayflex">
+          <button type="button" class="btn btn-secondary backbtn" data-toggle="tooltip" data-placement="bottom"
+            title="Go to Customer List" (click)="listCustomer()">
+            <i class="fa fa-arrow-circle-left" style="color: #f7941e !important; font-size: 28px"></i>
+          </button>
+          <h3 class="panel-title">
+            {{ customerLedgerDetailData.title }}
+            {{ customerLedgerDetailData.custname }} Details
+          </h3>
+        </div>
+        <div class="right">
+          <button type="button" class="btn-toggle-collapse" data-toggle="collapse" data-target="#precustDetails"
+            aria-expanded="false" aria-controls="precustDetails">
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+      <div id="precustDetails" class="panel-collapse collapse in">
+        <div class="panel-body table-responsive">
+          <fieldset style="margin-top: 0rem; margin-bottom: 2rem">
+            <legend>Basic Details</legend>
+            <div class="boxWhite">
+              <div class="row">
+                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                  <label class="datalbl">Name :</label>
+                  <span>
+                    {{ customerLedgerDetailData.title }}
+                    {{ customerLedgerDetailData.firstname }}
+                    {{ customerLedgerDetailData.lastname }}
+                  </span>
+                </div>
+                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                  <label class="datalbl">Contact Person :</label>
+                  <span>{{ customerLedgerDetailData.contactperson }}</span>
+                </div>
+                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                  <label class="datalbl">CAF No. :</label>
+                  <span>{{ customerLedgerDetailData.cafno }}</span>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                  <label class="datalbl">Act No. :</label>
+                  <span>{{ customerLedgerDetailData.acctno }}</span>
+                </div>
+                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                  <label class="datalbl">Username :</label>
+                  <span>{{ customerLedgerDetailData.username }}</span>
+                </div>
+                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                  <label class="datalbl">Status :</label>
+                  <span>{{ customerLedgerDetailData.status }}</span>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup m-0">
+                  <label class="datalbl">Customer Type :</label>
+                  <span>{{ customerLedgerDetailData.custtype }}</span>
+                </div>
+                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup m-0">
+                  <label class="datalbl">Calendar Type :</label>
+                  <span>{{ customerLedgerDetailData.calendarType }}</span>
+                </div>
+                @if (customerLedgerDetailData.parentCustomerName) {
+                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup"
+                  [ngClass]="customerLedgerDetailData.parentCustomerName ? '' : 'm-0'">
+                  <label class="datalbl">Parent Customer :</label>
+                  <span>{{ customerLedgerDetailData.parentCustomerName }}</span>
+                </div>
+                }
+                @if (customerLedgerDetailData.invoiceType) {
+                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup m-0">
+                  <label class="datalbl">Invoice Type :</label>
+                  <span>{{ customerLedgerDetailData.invoiceType }}</span>
+                </div>
+                }
+              </div>
+            </div>
+          </fieldset> -->
+<!-- <fieldset style="margin-top: 0rem; margin-bottom: 2rem">
+                  <legend>KYC Details</legend>
+                  <div class="boxWhite">
+                    <div class="row">
+                      <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                        <label class="datalbl">GST :</label>
+                        <span *ngIf="customerLedgerDetailData.gst">
+                          {{ customerLedgerDetailData.gst }}
+                        </span>
+                        <span *ngIf="!customerLedgerDetailData.gst">-</span>
+                      </div>
+                      <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                        <label class="datalbl">PAN No. :</label>
+                        <span *ngIf="customerLedgerDetailData.pan">
+                          {{ customerLedgerDetailData.pan }}
+                        </span>
+                        <span *ngIf="!customerLedgerDetailData.pan">-</span>
+                      </div>
+                      <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                        <label class="datalbl">Aadhar No.:</label>
+                        <span *ngIf="customerLedgerDetailData.aadhar">
+                          {{ customerLedgerDetailData.aadhar }}
+                        </span>
+                        <span *ngIf="!customerLedgerDetailData.aadhar">-</span>
+                      </div>
+                      <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                        <label class="datalbl">Passport No.:</label>
+                        <span *ngIf="customerLedgerDetailData.passportNo">
+                          {{ customerLedgerDetailData.passportNo }}
+                        </span>
+                        <span *ngIf="!customerLedgerDetailData.passportNo">-</span>
+                      </div>
+                      <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                        <label class="datalbl">VAT :</label>
+                        <span *ngIf="customerLedgerDetailData.tinNo">
+                          {{ customerLedgerDetailData.tinNo }}
+                        </span>
+                        <span *ngIf="!customerLedgerDetailData.tinNo">-</span>
+                      </div>
+                    </div>
+                  </div>
+                </fieldset> -->
+<!-- <fieldset style="margin-top: 0rem; margin-bottom: 2rem">
+                <legend>Contact Details</legend>
+                <div class="boxWhite">
+                  <div class="row">
+                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup m-0">
+                      <label class="datalbl">Mobile :</label>
+                      <span>
+                        <span *ngIf="customerLedgerDetailData.countryCode">
+                          ( {{ customerLedgerDetailData.countryCode }} )&nbsp;
+                        </span>
+                        {{ customerLedgerDetailData.mobile }}
+                      </span>
+                    </div>
+                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup m-0">
+                      <label class="datalbl">Tel Phone :</label>
+                      <span *ngIf="customerLedgerDetailData.phone">
+                        {{ customerLedgerDetailData.phone }}
+                      </span>
+                      <span *ngIf="!customerLedgerDetailData.phone">-</span>
+                    </div>
+                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup m-0">
+                      <label class="datalbl">Email :</label>
+                      <span>{{ customerLedgerDetailData.email }}</span>
+                    </div>
+                  </div>
+                </div>
+              </fieldset> -->
+<!-- <fieldset style="margin-top: 0rem; margin-bottom: 2rem">
+              <legend>Subscriber Location Details</legend>
+              <div class="boxWhite">
+                <div class="row">
+                  <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup m-0">
+                    <label class="datalbl">Service Area:</label>
+                    <span *ngIf="customerLedgerDetailData.serviceareaid">
+                      {{ serviceAreaDATA }}
+                    </span>
+                    <span *ngIf="!customerLedgerDetailData.serviceareaid">-</span>
+                  </div>
+                  <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup m-0">
+                    <label class="datalbl">Latitude:</label>
+                    <span *ngIf="customerLedgerDetailData.latitude">
+                      {{ customerLedgerDetailData.latitude }}
+                    </span>
+                    <span *ngIf="!customerLedgerDetailData.latitude">-</span>
+                  </div>
+                  <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup m-0">
+                    <label class="datalbl">Longitude:</label>
+                    <span *ngIf="customerLedgerDetailData.longitude">
+                      {{ customerLedgerDetailData.longitude }}
+                    </span>
+                    <span *ngIf="!customerLedgerDetailData.longitude">-</span>
+                  </div>
+                  <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup m-0">
+                    <label class="datalbl">Service Type : </label>
+                    <span>{{customerLedgerDetailData.servicetype}}</span>
+                  </div>
+                </div>
+              </div>
+            </fieldset> -->
+<!-- <fieldset style="margin-top: 0rem; margin-bottom: 2rem">
+            <legend>Business Partner Details</legend>
+            <div class="boxWhite">
+              <div class="row">
+                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                  <label class="datalbl">Partner:</label>
+                  <span>{{ partnerDATA }}</span>
+                </div>
+                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                  <label class="datalbl">Sales Mark :</label>
+                  <span *ngIf="customerLedgerDetailData.salesremark">
+                    {{ customerLedgerDetailData.salesremark }}
+                  </span>
+                  <span *ngIf="!customerLedgerDetailData.salesremark">-</span>
+                </div>
+              </div>
+            </div>
+          </fieldset> -->
+<!-- <fieldset style="margin-top: 0rem; margin-bottom: 2rem">
+          <legend>Payment Details</legend>
+          <div class="boxWhite">
+            <div class="row">
+              <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                <label class="datalbl">Amount :</label>
+                <span *ngIf="customerLedgerDetailData.creditDocuments">
+                  {{ paymentDataamount }}
+                </span>
+                <span *ngIf="!customerLedgerDetailData.creditDocuments"> - </span>
+              </div>
+              <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup m-0">
+                <label class="datalbl">Reference No :</label>
+                <span *ngIf="customerLedgerDetailData.creditDocuments">
+                  {{ paymentDatareferenceno }}
+                </span>
+                <span *ngIf="!customerLedgerDetailData.creditDocuments"> - </span>
+              </div>
+              <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup m-0">
+                <label class="datalbl">Payment Date :</label>
+                <span *ngIf="customerLedgerDetailData.creditDocuments">
+                  {{ paymentDatapaymentdate }}
+                </span>
+                <span *ngIf="!customerLedgerDetailData.creditDocuments"> - </span>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup m-0">
+                <label class="datalbl">Payment mode :</label>
+                <span *ngIf="customerLedgerDetailData.creditDocuments">
+                  {{ paymentDatapaymentMode }}
+                </span>
+                <span *ngIf="!customerLedgerDetailData.creditDocuments"> - </span>
+              </div>
+            </div>
+          </div>
+        </fieldset> -->
+<!-- <fieldset style="margin-top: 0rem; margin-bottom: 2rem">
+            <legend>Present Address Details</legend>
+            <div class="boxWhite">
+              <div class="row">
+                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                  <label class="datalbl">Address:</label>
+                  <span>
+                    {{ custFullAddress }}
+                  </span>
+                </div>
+                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                  <label class="datalbl">{{ pincodeTitle }} :</label>
+                  <span>{{ presentAdressDATA.code }}</span>
+                </div>
+                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+                  <label class="datalbl">{{ areaTitle }} :</label>
+                  <span>{{ presentAdressDATA.name }}</span>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup m-0">
+                  <label class="datalbl">{{ cityTitle }} :</label>
+                  <span>{{ presentAdressDATA.cityName }}</span>
+                </div>
+                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup m-0">
+                  <label class="datalbl">{{ stateTitle }} :</label>
+                  <span>{{ presentAdressDATA.stateName }}</span>
+                </div>
+                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup m-0">
+                  <label class="datalbl">{{ countryTitle }} :</label>
+                  <span>{{ presentAdressDATA.countryName }}</span>
+                </div>
+              </div>
+            </div>
+          </fieldset> -->
+<!-- <fieldset style="margin-top: 0rem; margin-bottom: 2rem">
+        <legend>Payment Address Details</legend>
+        <div class="boxWhite">
+          <div class="row">
+            <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+              <label class="datalbl">Address:</label>
+              <span *ngIf="paymentAddressData.length">
+                {{ paymentAddressData[0].fullAddress }}
+              </span>
+              <span *ngIf="!paymentAddressData.length">-</span>
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+              <label class="datalbl">{{ pincodeTitle }} :</label>
+              <span *ngIf="paymentAddressData.length">
+                {{ paymentAdressDATA.code }}
+              </span>
+              <span *ngIf="!paymentAddressData.length">-</span>
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+              <label class="datalbl">{{ areaTitle }} :</label>
+              <span *ngIf="paymentAddressData.length">
+                {{ paymentAdressDATA.name }}
+              </span>
+              <span *ngIf="!paymentAddressData.length">-</span>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup m-0">
+              <label class="datalbl">{{ cityTitle }} :</label>
+              <span *ngIf="paymentAddressData.length">
+                {{ paymentAdressDATA.cityName }}
+              </span>
+              <span *ngIf="!paymentAddressData.length">-</span>
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup m-0">
+              <label class="datalbl">{{ stateTitle }} :</label>
+              <span *ngIf="paymentAddressData.length">
+                {{ paymentAdressDATA.stateName }}
+              </span>
+              <span *ngIf="!paymentAddressData.length">-</span>
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup m-0">
+              <label class="datalbl">{{ countryTitle }} :</label>
+              <span *ngIf="paymentAddressData.length">
+                {{ paymentAdressDATA.countryName }}
+              </span>
+              <span *ngIf="!paymentAddressData.length">-</span>
+            </div>
+          </div>
+        </div>
+      </fieldset> -->
+<!-- <fieldset style="margin-top: 0rem; margin-bottom: 2rem">
+      <legend>Permanent Address Details</legend>
+      <div class="boxWhite">
+        <div class="row">
+          <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+            <label class="datalbl">Address:</label>
+            <span *ngIf="permanentAddressData.length">
+              {{ permanentAddressData[0].fullAddress }}
+            </span>
+            <span *ngIf="!permanentAddressData.length">-</span>
+          </div>
+          <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+            <label class="datalbl">{{ pincodeTitle }} :</label>
+            <span *ngIf="permanentAddressData.length">
+              {{ permentAdressDATA.code }}
+            </span>
+            <span *ngIf="!permanentAddressData.length">-</span>
+          </div>
+          <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+            <label class="datalbl">{{ areaTitle }} :</label>
+            <span *ngIf="permanentAddressData.length">
+              {{ permentAdressDATA.name }}
+            </span>
+            <span *ngIf="!permanentAddressData.length">-</span>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup m-0">
+            <label class="datalbl">{{ cityTitle }} :</label>
+            <span *ngIf="permanentAddressData.length">
+              {{ permentAdressDATA.cityName }}
+            </span>
+            <span *ngIf="!permanentAddressData.length">-</span>
+          </div>
+          <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup m-0">
+            <label class="datalbl">{{ stateTitle }} :</label>
+            <span *ngIf="permanentAddressData.length">
+              {{ permentAdressDATA.stateName }}
+            </span>
+            <span *ngIf="!permanentAddressData.length">-</span>
+          </div>
+          <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup m-0">
+            <label class="datalbl">{{ countryTitle }} :</label>
+            <span *ngIf="permanentAddressData.length">
+              {{ permentAdressDATA.countryName }}
+            </span>
+            <span *ngIf="!permanentAddressData.length">-</span>
+          </div>
+        </div>
+      </div>
+    </fieldset> -->
+<!-- <fieldset style="margin-top: 0rem; margin-bottom: 2rem">
+            <legend>Plan Details</legend>
+            <div class="boxWhite">
+              <div class="row">
+                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup m-0">
+                  <label class="datalbl">Bill To:</label>
+                  @if (customerBill) {
+                  <span>
+                    {{ customerBill }}
+                  </span>
+                  }
+                  @if (!customerBill) {
+                  <span>-</span>
+                  } -->
+<!-- <input [value]="customerBill" class="form-control" readonly /> -->
+<!-- </div>
+                @if (this.customerBill == 'ORGANIZATION') {
+                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup m-0">
+                  <label class="datalbl">Invoice To Org:</label>
+                  <span>
+                    {{ custInvoiceToOrg }}
+                  </span> -->
+<!-- <input [value]="custInvoiceToOrg" class="form-control" readonly /> -->
+<!-- </div>
+                }
+                @if (ifPlanGroup) {
+                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup m-0">
+                  <label class="datalbl">PlanGroup:</label>
+                  @if (customerLedgerDetailData.plangroupid) {
+                  <span title="Plan Details" (click)="
+                      getCustPlanGroupDataopen(
+                        'custPlanGroupDataModal',
+                        customerLedgerDetailData.id
+                      )
+                    " class="curson_pointer" style="color: #f7941e !important">
+                    {{ planGroupName }}
+                  </span>
+                  }
+                  @if (!customerLedgerDetailData.plangroupid) {
+                  <span>-</span>
+                  }
+                </div>
+                }
+                @if (ifPlanGroup) {
+                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup m-0">
+                  <label class="datalbl">Discount (%):</label>
+                  @if (customerLedgerDetailData.discount) {
+                  <span>
+                    {{ customerLedgerDetailData.discount }}
+                  </span>
+                  }
+                  @if (!customerLedgerDetailData.discount) {
+                  <span>-</span>
+                  }
+                </div>
+                }
+              </div> -->
+<!-- <app-customerplan-group-details-modal dialogId="custPlanGroupDataModal"
+  [planGroupcustid]="planGroupcustid"></app-customerplan-group-details-modal> -->
+<ng-container *ngIf="ifIndividualPlan">
+  <div class="row table-responsive mt-3">
+    <div class="col-lg-12 col-md-12">
+      <table mat-table [dataSource]="customerLedgerDetailData.planMappingList" class="mat-elevation-z8 w-100">
+
+        <!-- Service Column -->
+        <ng-container matColumnDef="service">
+          <th mat-header-cell *matHeaderCellDef>Service</th>
+          <td mat-cell *matCellDef="let plan">{{ plan.service }}</td>
+        </ng-container>
+
+        <!-- Plan Column -->
+        <ng-container matColumnDef="planName">
+          <th mat-header-cell *matHeaderCellDef>Plan</th>
+          <td mat-cell *matCellDef="let plan">{{ plan.planName }}</td>
+        </ng-container>
+
+        <!-- Validity Column -->
+        <ng-container matColumnDef="validity">
+          <th mat-header-cell *matHeaderCellDef>Validity</th>
+          <td mat-cell *matCellDef="let plan; let i = index">
+            <ng-container *ngIf="dataPlan && dataPlan.length > i">
+              {{ dataPlan[i].validity }} {{ dataPlan[i].unitsOfValidity }}
+            </ng-container>
+          </td>
+        </ng-container>
+
+        <!-- Discount Column -->
+        <ng-container matColumnDef="discount">
+          <th mat-header-cell *matHeaderCellDef>Discount (%)</th>
+          <td mat-cell *matCellDef="let plan">
+            {{ plan.discount || 0 }}
+          </td>
+        </ng-container>
+
+        <!-- Offer Price Column (conditional header)-->
+        <ng-container matColumnDef="offerPrice">
+          <th mat-header-cell *matHeaderCellDef>
+            <span *ngIf="customerBill === 'ORGANIZATION'; else regularOffer">
+              Old offerPrice
+            </span>
+            <ng-template #regularOffer>Offer Price</ng-template>
+          </th>
+          <td mat-cell *matCellDef="let plan">{{ plan.offerPrice }}</td>
+        </ng-container>
+
+        <!-- New Offer Price Column - only for ORGANIZATION -->
+        <ng-container *ngIf="customerBill === 'ORGANIZATION'" matColumnDef="newAmount">
+          <th mat-header-cell *matHeaderCellDef>New offerPrice</th>
+          <td mat-cell *matCellDef="let plan">{{ plan.newAmount }}</td>
+        </ng-container>
+
+        <!-- Final Offer Price Column -->
+        <ng-container matColumnDef="finalAmount">
+          <th mat-header-cell *matHeaderCellDef>Final Offer Price</th>
+          <td mat-cell *matCellDef="let plan; let i = index">
+            <ng-container *ngIf="FinalAmountList && FinalAmountList.length > i">
+              {{ FinalAmountList[i] }}
+            </ng-container>
+          </td>
+        </ng-container>
+
+        <!-- Header and row definitions -->
+        <tr mat-header-row *matHeaderRowDef="displayedPlanColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedPlanColumns"></tr>
+
+      </table>
+
+      <!-- <mat-paginator [length]="custPlanDeatiltotalRecords" [pageSize]="custPlanDeatilItemPerPage"
+        [pageSizeOptions]="[5,10,20,50,100]" showFirstLastButtons (page)="pageChangedcustPlanDetailList($event)">
+      </mat-paginator> -->
+    </div>
+  </div>
+</ng-container>
+
+<!-- @if (ifIndividualPlan) {
+<div class="row table-responsive" style="margin-top: 1.5rem">
+  <div class="col-lg-12 col-md-12">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Service</th>
+          <th>Plan</th>
+          <th>Validity</th>
+          <th>Discount (%)</th>
+          <th>
+            @if (this.customerBill == 'ORGANIZATION') {
+            <span>Old offerPrice</span>
+            }
+            @if (this.customerBill !== 'ORGANIZATION') {
+            <span>Offer Price</span>
+            }
+          </th>
+          @if (this.customerBill == 'ORGANIZATION') {
+          <th>New offerPrice</th>
+          }
+          <th>Final Offer Price</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (
+        plan of customerLedgerDetailData.planMappingList
+        | paginate
+        : {
+        id: 'custPlanpageData',
+        itemsPerPage: custPlanDeatilItemPerPage,
+        currentPage: currentPagecustPlanDeatilList,
+        totalItems: custPlanDeatiltotalRecords
+        }; track
+        plan; let i = $index) {
+        <tr>
+          <td>{{ plan.service }}</td>
+          <td>
+            {{ plan.planName }}
+          </td>
+          <td>
+            @for (list of dataPlan; track list; let j = $index) {
+            <span>
+              @if (i === j) {
+              <span>
+                {{ list.validity }} {{ list.unitsOfValidity }}
+              </span>
+              }
+            </span>
+            }
+          </td>
+          <td>
+            @if (!plan.discount) {
+            <span>0</span>
+            }
+            @if (plan.discount) {
+            <span>{{ plan.discount }}</span>
+            }
+          </td>
+          <td>
+            {{ plan.offerPrice }}
+          </td>
+          @if (this.customerBill == 'ORGANIZATION') {
+          <td>
+            {{ plan.newAmount }}
+          </td>
+          }
+          <td>
+            @for (list of FinalAmountList; track list; let k = $index) {
+            <span>
+              @if (i === k) {
+              <span>{{ list }}</span>
+              }
+            </span>
+            }
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+    <pagination-controls id="custPlanpageData" maxSize="10" directionLinks="true" previousLabel="" nextLabel=""
+      (pageChange)="pageChangedcustPlanDetailList($event)"></pagination-controls>
+  </div>
+</div>
+}
+</div>
+</fieldset> -->
+<!-- <fieldset style="margin-top: 0rem; margin-bottom: 2rem">
+    <legend>Additional Service Details</legend>
+    <div class="boxWhite">
+      <div class="row">
+        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup m-0">
+          <label class="datalbl">Voice Service Type:</label>
+          <span *ngIf="customerLedgerDetailData.voicesrvtype">
+            {{ customerLedgerDetailData.voicesrvtype }}
+          </span>
+          <span *ngIf="!customerLedgerDetailData.voicesrvtype">-</span>
+        </div>
+        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup m-0">
+          <label class="datalbl">DID No :</label>
+          <span *ngIf="customerLedgerDetailData.didno">
+            {{ customerLedgerDetailData.didno }}
+          </span>
+          <span *ngIf="!customerLedgerDetailData.didno">-</span>
+        </div>
+      </div>
+    </div>
+  </fieldset> -->
+<!-- <fieldset style="margin-top: 0rem; margin-bottom: 2rem">
+  <legend>Charge Details</legend>
+  <div class="boxWhite">
+    <div class="row table-responsive">
+      <div class="col-lg-12 col-md-12">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Charge Name</th>
+              <th>Charge Amount</th>
+              <th>Charge Type</th>
+              <th>Billing Cycle</th>
+              <th>Plan Name</th>
+              <th>Validity</th>
+              <th>New Price</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+                        *ngFor="
+                          let charge of customerLedgerDetailData.indiChargeList
+                            | paginate
+                              : {
+                                  id: 'custChargepageData',
+                                  itemsPerPage: custChargeDeatilItemPerPage,
+                                  currentPage: currentPagecustChargeDeatilList,
+                                  totalItems: custChargeDeatiltotalRecords
+                                };
+                          index as i
+                        "
+              >
+              <td>{{ charge.chargetype }}</td>
+              <td>{{ charge.actualprice }}</td>
+              <td>{{ charge.type }}</td>
+              <td>
+                <span *ngIf="charge.billingCycle">
+                  {{ charge.billingCycle }}
+                </span>
+                <span *ngIf="!charge.billingCycle">0</span>
+              </td>
+              <td>
+                <span *ngFor="let list of dataChargePlan; index as j">
+                  <span *ngIf="i === j">{{ list.name }}</span>
+                </span>
+              </td>
+              <td>{{ charge.validity }} {{ charge.unitsOfValidity }}</td>
+              <td>{{ charge.price }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <pagination-controls
+          id="custChargepageData"
+          maxSize="10"
+          directionLinks="true"
+          previousLabel=""
+          nextLabel=""
+          (pageChange)="pageChangedcustChargeDetailList($event)"
+        ></pagination-controls>
+      </div>
+    </div>
+  </div>
+</fieldset> -->
+<!-- <fieldset style="margin-top: 0rem; margin-bottom: 2rem">
+<legend>Mac Mapping List</legend>
+<div class="boxWhite">
+  <div class="row table-responsive">
+    <div class="col-lg-12 col-md-12">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>MACAddress</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+                        *ngFor="
+                          let macAdd of customerLedgerDetailData.custMacMapppingList
+                            | paginate
+                              : {
+                                  id: 'macAddresspageData',
+                                  itemsPerPage: custMacAddItemPerPage,
+                                  currentPage: currentPagecustMacAddList,
+                                  totalItems: custMacAddtotalRecords
+                                };
+                          index as i
+                        "
+            >
+            <td>{{ macAdd.macAddress }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <pagination-controls
+        id="macAddresspageData"
+        [maxSize]="10"
+        [directionLinks]="true"
+        previousLabel=""
+        nextLabel=""
+        (pageChange)="pageChangedcustMacAddDetailList($event)"
+      ></pagination-controls>
+    </div>
+  </div>
+</div>
+</fieldset> -->
+<!-- <fieldset style="margin-top: 0rem; margin-bottom: 2rem">
+<legend>Customer Quota Details</legend>
+<div class="boxWhite">
+  <div class="row table-responsive">
+    <div class="col-lg-12 col-md-12">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Plan Name</th>
+            <th>Quota Type</th>
+            <th>Total Quota</th>
+            <th>Used Quota</th>
+            <th>Quota Unit</th>
+            <th>Time Total Quota</th>
+            <th>Time Quota Used</th>
+            <th>Time Quota Unit</th>
+            <th>Total Quota KB</th>
+            <th>Used Quota KB</th>
+            <th>Time Used Quota Sec</th>
+            <th>Time Total Quota Sec</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+                        *ngFor="
+                          let quota of custQuotaList
+                            | paginate
+                              : {
+                                  id: 'custQuotapageData',
+                                  itemsPerPage: custQuotaListItemPerPage,
+                                  currentPage: currentPagecustQuotaList,
+                                  totalItems: custQuotaListtotalRecords
+                                };
+                          index as i
+                        "
+            >
+            <td>{{ quota.planName }}</td>
+            <td>{{ quota.quotaType }}</td>
+            <td>{{ quota.totalQuota }}</td>
+            <td>{{ quota.usedQuota }}</td>
+            <td>{{ quota.quotaUnit }}</td>
+            <td>{{ quota.timeTotalQuota }}</td>
+            <td>{{ quota.timeQuotaUsed }}</td>
+            <td>{{ quota.timeQuotaUnit }}</td>
+            <td>{{ quota.totalQuotaKB}}</td>
+            <td>{{ quota.usedQuotaKB}}</td>
+            <td>{{ quota.timeUsedQuotaSec}}</td>
+            <td>{{ quota.timeTotalQuotaSec}}</td>
+          </tr>
+        </tbody>
+      </table>
+      <pagination-controls
+        id="custQuotapageData"
+        [maxSize]="10"
+        [directionLinks]="true"
+        previousLabel=""
+        nextLabel=""
+        (pageChange)="pageChangedCustQuotaList($event)"
+      ></pagination-controls>
+    </div>
+  </div>
+</div>
+</fieldset> -->
+<!-- </div>
+</div>
+</div>
+</div>
+</div>
+} -->
+
+<!-- @if (ifMyInvoice) {
+<div class="row">
+  <div class="col-md-12 col-sm-12">
+    <div class="panel">
+      <div class="panel-heading">
+        <div class="displayflex">
+          <button type="button" class="btn btn-secondary backbtn" data-toggle="tooltip" data-placement="bottom"
+            title="Go to Customer Details" (click)="customerDetailOpen(customerLedgerDetailData.id)">
+            <i class="fa fa-arrow-circle-left" style="color: #f7941e !important; font-size: 28px"></i>
+          </button>
+          <h3 class="panel-title">
+            Search {{ customerLedgerDetailData.title }}
+            {{ customerLedgerDetailData.custname }} Invoice
+          </h3>
+        </div>
+        <div class="right">
+          <button type="button" class="btn-toggle-collapse" data-toggle="collapse" data-target="#searchInvoiceCust"
+            aria-expanded="false" aria-controls="searchInvoiceCust">
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+      <div id="searchInvoiceCust" class="panel-collapse collapse in">
+        <div class="panel-body table-responsive">
+          <div class="searchForm">
+            <form [formGroup]="searchInvoiceMasterFormGroup">
+              <div class="row"> -->
+<!-- <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+                  <div class="form-group">
+                    <label>Bill Run</label>
+                    <select
+                      class="form-control"
+                      name="billrunid"
+                      formControlName="billrunid"
+                      style="width: 100%;"
+                      >
+                      <option value="">
+                        Select Bill Run ID
+                      </option>
+                      <option
+                        value="{{ bill.id }}"
+                        *ngFor="
+                          let bill of commondropdownService.billRunMasterList
+                        "
+                        >
+                        {{ bill.id }}
+                      </option>
+                    </select>
+                  </div>
+                </div> -->
+<!-- <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+                  <div class="form-group">
+                    <label>Document No</label>
+                    <input type="text" class="form-control" placeholder="Document No" formControlName="docnumber" />
+                  </div>
+                </div>
+                <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+                  <div class="form-group">
+                    <label>Customer Name</label>
+                    <select class="form-control" name="customerid" style="width: 100%" disabled>
+                      <option>
+                        {{ customerLedgerDetailData.title }}
+                        {{ customerLedgerDetailData.custname }}
+                      </option>
+                    </select>
+                  </div>
+                </div> -->
+<!-- <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                  <div class="form-group">
+                    <label>Customer Mobile</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      placeholder="Customer Mobile"
+                      formControlName="custMobile"
+                      />
+                    </div>
+                  </div> -->
+<!-- <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+                  <div class="form-group">
+                    <label>Bill From Date</label>
+                    <input type="date" class="form-control" placeholder="Enter Pay From Date"
+                      formControlName="billfromdate" />
+                  </div>
+                </div>
+                <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+                  <div class="form-group">
+                    <label>Bill To Date</label>
+                    <input type="date" class="form-control" placeholder="Enter Pay To Date"
+                      formControlName="billtodate" />
+                  </div>
+                </div>
+                <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+                  <div class="form-group">
+                    <label>Staff Name</label>
+                    <p-dropdown [options]="commondropdownService.activeStaffList" optionLabel="username"
+                      optionValue="id" filter="true" filterBy="username" placeholder="Select a Staff Name"
+                      formControlName="staffId"></p-dropdown>
+                  </div>
+                </div>
+                <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+                  <div class="form-group">
+                    <label>Branch</label>
+                    <p-dropdown [options]="commondropdownService.activeBranchList" optionValue="id" optionLabel="name"
+                      filter="true" filterBy="name" placeholder="Select a Branch"
+                      formControlName="branchId"></p-dropdown>
+                  </div>
+                </div>
+                <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+                  <div class="form-group">
+                    <label>Business Unit</label>
+                    <p-dropdown [options]="commondropdownService.businessUnitList" optionLabel="buname" optionValue="id"
+                      filter="true" filterBy="buname" placeholder="Select a Business Unit"
+                      formControlName="businessunit"></p-dropdown>
+                  </div>
+                </div>
+                <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+                  <div class="form-group">
+                    <label>Plan Name</label>
+                    <p-dropdown [options]="commondropdownService.postpaidplanData" optionLabel="name" optionValue="id"
+                      filter="true" filterBy="name" placeholder="Select a Plan Name"
+                      formControlName="planId"></p-dropdown>
+                  </div>
+                </div>
+                <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+                  <div class="form-group">
+                    <label>Service</label>
+                    <p-dropdown [options]="commondropdownService.planserviceData" optionLabel="name" optionValue="id"
+                      filter="true" filterBy="name" placeholder="Select a Service"
+                      formControlName="serviceId"></p-dropdown>
+                  </div>
+                </div>
+              </div>
+              <div class="addUpdateBtn">
+                <button type="submit" class="btn btn-primary" (click)="searchInvoices()">
+                  <i class="fa fa-search"></i>
+                  Search Invoice
+                </button>
+                <button type="submit" class="btn btn-default" id="searchbtn" (click)="clearSearchinvoiceMaster()">
+                  <img src="assets/img/DashboardIcons/Refresh.svg" />
+                  Clear
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div> -->
+<!-- <div class="col-md-12 col-sm-12">
+  <div class="panel">
+    <div class="panel-heading">
+      <h3 class="panel-title">
+        {{ customerLedgerDetailData.title }}
+        {{ customerLedgerDetailData.custname }} Invoice Details
+      </h3>
+      <div class="right">
+        <button type="button" class="btn-toggle-collapse" data-toggle="collapse" data-target="#invoiceCustomerDetails"
+          aria-expanded="false" aria-controls="invoiceCustomerDetails">
+          <i class="fa fa-minus-circle"></i>
+        </button>
+      </div>
+    </div>
+    @if (isInvoiceDetail) {
+    <app-invoice-detalis-model [invoiceID]="invoiceID" [custID]="custID" [sourceType]="'myOrganization'"
+      (closeInvoiceDetails)="closeInvoiceDetails()"></app-invoice-detalis-model>
+    }
+    <app-invoice-payment-details-modal dialogId="invoicePaymentDetailModal"
+      [invoiceId]="invoiceId"></app-invoice-payment-details-modal>
+    <div id="invoiceCustomerDetails" class="panel-collapse collapse in">
+      <div class="panel-body table-responsive">
+        <div class="row">
+          @if (invoiceMasterListData.length !== 0) {
+          <div class="col-lg-12 col-md-12">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th class="widthCheckboxColom">
+                    <div class="centerCheckbox">
+                      <p-checkbox name="allChecked" [(ngModel)]="allInvoiceChecked" [binary]="true"
+                        (onChange)="allSelectInvoice($event)"></p-checkbox>
+                    </div>
+                  </th>
+                  <th>Customer</th>
+                  <th>Customer Name</th>
+                  <th style="width: 20%">Document No.</th>
+                  <th>Created By</th>
+                  <th>Total Amount</th>
+                  <th>Adjusted Amount</th>
+                  <th>Bill Run Status</th>
+                  <th>Bill Date</th>
+                  <th>Approval Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (
+                invoice of invoiceMasterListData
+                | paginate
+                : {
+                id: 'searchinvoiceMasterPageData',
+                itemsPerPage: invoiceMasteritemsPerPage,
+                currentPage: currentPageinvoiceMasterSlab,
+                totalItems: invoiceMastertotalRecords
+                }; track
+                invoice; let i = $index) {
+                <tr>
+                  <td>
+                    <div class="centerCheckbox">
+                      <p-checkbox class="p-field-checkbox" [value]="invoice.isSingleInChecked" [inputId]="invoice.id"
+                        [(ngModel)]="invoice.isSingleInChecked" (onChange)="addInvoiceChecked(invoice.id, $event)"
+                        [binary]="true"></p-checkbox>
+                    </div>
+                  </td>
+                  <td>
+                    <div>
+                      {{ invoice.customerName }}
+                    </div>
+                  </td>
+                  <td>{{ invoice.custRefName }}</td>
+                  <td>
+                    <div class="curson_pointer" style="color: #f7941e"
+                      (click)="openInvoiceModal('InvoiceDetailModal', invoice)">
+                      {{ invoice.docnumber }}
+                    </div>
+                  </td>
+                  <td>{{ invoice.createdByName }}</td>
+                  <td> -->
+<!-- <span
+                                > -->
+<!-- {{ invoice.totalamount | number: "1.2-2" }} -->
+<!-- </span> -->
+<!-- </td>
+                  <td>
+                    @if (invoice.adjustedAmount) {
+                    <span class="curson_pointer" style="color: #f7941e"
+                      (click)="openInvoicePaymentModal('invoicePaymentDetailModal', invoice.id)">
+                      {{ invoice.adjustedAmount | number: "1.2-2" }}
+                    </span>
+                    }
+                    @if (!invoice.adjustedAmount) {
+                    <span>0</span>
+                    }
+                  </td>
+                  <td>
+                    <div class="badge badge-success">
+                      {{ invoice.billrunstatus }}
+                    </div>
+                  </td>
+                  <td style="font-weight: 400">
+                    {{ invoice.billdate | date: "dd-MM-yyyy" }}
+                  </td>
+                  <td>
+                    @if (invoice.status != null && invoice.status === 'pending') {
+                    <span class="badge bg-info">
+                      {{ invoice.status }}
+                    </span>
+                    }
+                    @if (invoice.status != null && invoice.status === 'rejected') {
+                    <span class="badge bg-danger">
+                      {{ invoice.status }}
+                    </span>
+                    }
+                    @if (invoice.status != null && invoice.status === 'approved') {
+                    <span class="badge bg-success">
+                      {{ invoice.status }}
+                    </span>
+                    }
+                  </td>
+                  <td class="btnAction">
+                    @if (invoice.billrunstatus == 'Exported') {
+                    <a id="edit-button" href="javascript:void(0)" type="button" title="Download"
+                      (click)="downloadPDFINvoice(invoice.id, invoice.customerName)">
+                      <img style="width: 25px; height: 25px" src="assets/img/DashboardIcons/Document Download.svg" />
+                    </a>
+                    }
+                    @if (invoice.billrunstatus == 'Generated') {
+                    <a id="edit-button" href="javascript:void(0)" type="button" title="Generate"
+                      (click)="generatePDFInvoice(invoice.id)">
+                      <img style="width: 25px; height: 25px" src="assets/img/DashboardIcons/DTV.svg" />
+                    </a>
+                    }
+                    <button class="approve-btn"
+                      style="border: none; background: transparent; padding: 0; margin-right: 3px" type="button"
+                      title="Pick" [disabled]="
+                          invoice.nextStaff != null ||
+                          invoice.status == 'approved' ||
+                          invoice.status == 'rejected'
+                        " (click)="pickModalOpen(invoice)">
+                      <img src="assets/img/DashboardIcons/Pick-ticket-to-resolve.svg" />
+                    </button>
+                    <button [disabled]="
+                          invoice.nextStaff != staffID ||
+                          invoice.status == 'approved' ||
+                          invoice.status == 'rejected' ||
+                          invoice.billrunstatus === 'Cancelled'
+                        " (click)="approveRejectInvoice(invoice.id, true)" type="button" class="approve-btn"
+                      style="border: none; background: transparent; padding: 0; margin-right: 3px" title="Assign">
+                      <img style="width: 25px; height: 25px" src="assets/img/DashboardIcons/Assign.svg" />
+                    </button>
+                    <button [disabled]="
+                          invoice.nextStaff != staffID ||
+                          invoice.status == 'approved' ||
+                          invoice.status == 'rejected' ||
+                          invoice.billrunstatus === 'Cancelled'
+                        " (click)="approveRejectInvoice(invoice.id, false)" type="button" class="approve-btn"
+                      style="border: none; background: transparent; padding: 0; margin-right: 3px" title="Reject">
+                      <img style="width: 25px; height: 25px" src="assets/img/reject.jpg" />
+                    </button>
+                    <button (click)="openAuditWorkflow(invoice.id, 'workFlowAuditModal')" type="button"
+                      class="approve-btn" style="border: none; background: transparent; padding: 0; margin-right: 3px"
+                      title="Workflow">
+                      <img style="width: 25px; height: 25px"
+                        src="assets/img/DashboardIcons/WorkFlow status Details.svg" />
+                    </button>
+                    <button [disabled]="
+                          invoice.nextStaff != staffID ||
+                          invoice.status == 'approved' ||
+                          invoice.status == 'rejected'
+                        " (click)="StaffReasignList1(invoice)" type="button" class="approve-btn"
+                      style="border: none; background: transparent; padding: 0; margin-right: 3px"
+                      title="Reassing BILL_TO_ORG">
+                      <img width="32" height="32" alt="Assign CreditNote"
+                        src="assets/img/DashboardIcons/send-svgrepo-com 1.svg" />
+                    </button>
+                    <button [disabled]="
+                          invoice.status !== 'approved' || invoice.billrunstatus === 'Cancelled'
+                        " (click)="createCreditNote(invoice)" type="button" class="approve-btn"
+                      style="border: none; background: transparent; padding: 0; margin-right: 3px"
+                      title="Create Credit Note">
+                      <img width="32" height="32" alt="Create Credit Note"
+                        src="../assets/img/23_Receipt-Management_Y.png" />
+                    </button> -->
+<!-- <a
+                      style="
+                        border: none;
+                        background: transparent;
+                        padding: 0;
+                        margin-right: 3px;
+                        cursor: pointer;
+                      "
+                                    data-toggle="tooltip"
+                                    data-placement="top"
+                                    id="assign-button"
+                                    title="Reassign CreditNote"
+                                    (click)="StaffReasignList1(invoice)"
+                                    *ngIf="invoice.status == 'rejected'"
+                                    >
+                                    <img
+                                      width="32"
+                                      height="32"
+                                      alt="Assign CreditNote"
+                                      src="assets/img/icons-02.png"
+                                      />
+                                    </a> -->
+<!-- </td>
+                </tr>
+                }
+              </tbody>
+            </table>
+            <br />
+            <div class="pagination_Dropdown">
+              <pagination-controls id="searchinvoiceMasterPageData" [maxSize]="10" [directionLinks]="true"
+                previousLabel="" nextLabel="" (pageChange)="pageChangedinvoiceMasterList($event)"></pagination-controls>
+              <div id="itemPerPageDropdown">
+                <p-dropdown [options]="pageLimitOptions" optionLabel="value" optionValue="value"
+                  (onChange)="TotalItemPerPageInvoice($event)"></p-dropdown>
+              </div>
+            </div>
+          </div>
+          } -->
+<!-- @if (invoiceMasterListData.length === 0) {
+          <div class="col-lg-12 col-md-12">
+            Invoice data not found
+          </div>
+          }
+          @if (ifModelIsShow) {
+          <app-workflow-audit-details-modal [auditcustid]="auditcustid" dialogId="custauditWorkflowModal"
+            (closeParentCustt)="closeParentCustt()"></app-workflow-audit-details-modal>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+} -->
+
+<!-- @if (ifWalletMenu) {
+<div class="row">
+  <div class="col-md-12 col-sm-12">
+    <div class="panel">
+      <div class="panel-heading">
+        <div class="displayflex">
+          <button type="button" class="btn btn-secondary backbtn" data-toggle="tooltip" data-placement="bottom"
+            title="Go to Customer Details" (click)="customerDetailOpen(customerLedgerDetailData.id)">
+            <i class="fa fa-arrow-circle-left" style="color: #f7941e !important; font-size: 28px"></i>
+          </button>
+          <h3 class="panel-title">
+            {{ customerLedgerDetailData.title }}
+            {{ customerLedgerDetailData.custname }} Wallet
+          </h3>
+        </div>
+        <div class="right">
+          <button type="button" class="btn-toggle-collapse" class="btn-toggle-collapse" data-toggle="collapse"
+            data-target="#customerWallet" aria-expanded="false" aria-controls="customerWallet">
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+      <div id="customerWallet" class="panel-body table-responsive">
+        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+          <label class="datalbl">Wallet Balance :</label>
+          <span>{{ getWallatData.customerWalletDetails }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+} -->
+<ng-template #invoicePaymentDialog>
+  <div class="dialog-container" style="width: 75vw; max-width: 100%;">
+    <div class="dialog-header">
+      Payment Details
+      <span>
+        <a mat-icon-button href="javascript:void(0)" (click)="invoicePaymentCloseModal()" aria-label="Close dialog">
+          <img src="assets/img/DashboardIcons/Reject.svg" alt="Close" />
+        </a>
+      </span>
+    </div>
+
+    <div mat-dialog-content>
+      <div class="col-lg-12 col-md-12" style="margin-top: 3rem;">
+        <table mat-table [dataSource]="invoicePaymentData" class="mat-elevation-z8 w-100">
+
+          <!-- Checkbox Column -->
+          <ng-container matColumnDef="select">
+            <th mat-header-cell *matHeaderCellDef class="widthCheckboxColom">
+              <mat-checkbox [(ngModel)]="ispaymentChecked" (change)="checkInvoicePaymentAll($event)"></mat-checkbox>
+            </th>
+            <td mat-cell *matCellDef="let data">
+              <mat-checkbox [(ngModel)]="data.isSinglepaymentChecked"
+                (change)="addInvoicePaymentChecked(data.id, $event)" [id]="data.id"></mat-checkbox>
+            </td>
+          </ng-container>
+
+          <!-- Reference Number Column -->
+          <ng-container matColumnDef="referenceno">
+            <th mat-header-cell *matHeaderCellDef>Reference Number</th>
+            <td mat-cell *matCellDef="let data">{{ data.referenceno }}</td>
+          </ng-container>
+
+          <!-- Payment Date Column -->
+          <ng-container matColumnDef="paymentdate">
+            <th mat-header-cell *matHeaderCellDef>Payment Date</th>
+            <td mat-cell *matCellDef="let data">{{ data.paymentdate }}</td>
+          </ng-container>
+
+          <!-- Payment Amount Column -->
+          <ng-container matColumnDef="amount">
+            <th mat-header-cell *matHeaderCellDef>Payment Amount</th>
+            <td mat-cell *matCellDef="let data">{{ data.amount }}</td>
+          </ng-container>
+
+          <!-- Adjusted Amount Column -->
+          <ng-container matColumnDef="adjustedAmount">
+            <th mat-header-cell *matHeaderCellDef>Adjusted Amount</th>
+            <td mat-cell *matCellDef="let data">{{ data.adjustedAmount }}</td>
+          </ng-container>
+
+          <!-- Payment Mode Column -->
+          <ng-container matColumnDef="paymode">
+            <th mat-header-cell *matHeaderCellDef>Payment Mode</th>
+            <td mat-cell *matCellDef="let data">{{ data.paymode }}</td>
+          </ng-container>
+
+          <!-- Type Column -->
+          <ng-container matColumnDef="type">
+            <th mat-header-cell *matHeaderCellDef>Type</th>
+            <td mat-cell *matCellDef="let data">{{ data.type }}</td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="invoicePaymentDisplayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: invoicePaymentDisplayedColumns"></tr>
+        </table>
+
+        <mat-paginator [length]="invoicePaymenttotalRecords" [pageSize]="invoicePaymentItemPerPage"
+          [pageSizeOptions]="[5,10,20,50,100]" showFirstLastButtons
+          (page)="pageChangedInvoicePaymentList($event)"></mat-paginator>
+      </div>
+    </div>
+
+    <div mat-dialog-actions class="d-flex justify-content-end p-0 mt-3">
+      <button mat-flat-button color="primary" (click)="invoicePaymentAdjsment()"
+        [disabled]="allchakedPaymentData.length === 0" aria-label="Manual Adjustment">
+        Manual Adjustment
+      </button>
+      <button mat-stroked-button color="warn" (click)="invoicePaymentCloseModal()" class="ml-3" aria-label="Close">
+        Close
+      </button>
+    </div>
+  </div>
+</ng-template>
+
+<!-- invoice payment List -->
+<!-- <div *ngIf="ifInvoicePayment"> -->
+<!-- <div class="modal fade" id="invoicePayment" role="dialog">
+  <div class="modal-dialog" style="width: 75%"> -->
+<!-- Modal content-->
+<!-- <div class="modal-content">
+  <div class="modal-header">
+    <h3 class="panel-title">Payment Details</h3>
+  </div>
+  <div class="modal-body">
+    <div class="row">
+      <div class="col-lg-12 col-md-12" style="margin-top: 3rem">
+        <table class="table">
+          <thead>
+            <tr>
+              <th class="widthCheckboxColom">
+                <div class="centerCheckbox">
+                  <p-checkbox name="allChecked" [(ngModel)]="ispaymentChecked" [binary]="true"
+                    (onChange)="checkInvoicePaymentAll($event)"></p-checkbox>
+                </div>
+              </th>
+              <th>Reference Number</th>
+              <th>Payment Date</th>
+              <th>Payment Amount</th>
+              <th>Adjusted Amount</th>
+              <th>Payment Mode</th>
+              <th>Type</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (
+            data of invoicePaymentData
+            | paginate
+            : {
+            id: 'invoicePaymentModal',
+            itemsPerPage: invoicePaymentItemPerPage,
+            currentPage: currentPageinvoicePaymentList,
+            totalItems: invoicePaymenttotalRecords
+            }; track
+            data; let i = $index) {
+            <tr>
+              <td>
+                <div class="centerCheckbox">
+                  <p-checkbox class="p-field-checkbox" [value]="data.isSinglepaymentChecked" [inputId]="data.id"
+                    [(ngModel)]="data.isSinglepaymentChecked" (onChange)="addInvoicePaymentChecked(data.id, $event)"
+                    [binary]="true"></p-checkbox>
+                </div>
+              </td>
+              <td>{{ data.referenceno }}</td>
+              <td>{{ data.paymentdate }}</td>
+              <td>{{ data.amount }}</td>
+              <td>{{ data.adjustedAmount }}</td>
+              <td>{{ data.paymode }}</td>
+              <td>{{ data.type }}</td>
+            </tr>
+            } -->
+<!-- <tr *ngIf="invoicePaymentData.length !== 0">
+                        <td colspan="3"></td>
+                        <td>
+                          <b>Total Adjusted Amount :</b>
+                        </td>
+                        <td colspan="2">{{ totaladjustedAmount }}</td>
+                      </tr> -->
+<!-- </tbody>
+        </table>
+        <pagination-controls id="invoicePaymentModal" [maxSize]="10" [directionLinks]="true" previousLabel=""
+          nextLabel="" (pageChange)="pageChangedInvoicePaymentList($event)"></pagination-controls>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer" style="display: flex; justify-content: flex-end">
+    <div class="addUpdateBtn">
+      <button type="button" class="btn btn-success btn-sm" (click)="invoicePaymentAdjsment()"
+        [disabled]="allchakedPaymentData.length == 0" #closebutton data-dismiss="modal">
+        Manual Adjustment
+      </button>
+    </div>
+    <div class="addUpdateBtn" style="margin-left: 1.5rem">
+      <button type="button" class="btn btn-danger btn-sm" #closebutton data-dismiss="modal"
+        (click)="invoicePaymentCloseModal()">
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+</div>
+</div> -->
+<ng-template #assignApproveDialog>
+  <div class="dialog-container" style="max-width: 600px; width: 100%;">
+    <div class="dialog-header" style="background-color: #3f51b5; color: white; padding: 16px;">
+      <span>Assign Staff</span>
+      <span>
+        <a mat-icon-button href="javascript:void(0)" (click)="onCancel()" aria-label="Close dialog"
+          style="color: white;">
+          <mat-icon>close</mat-icon>
+        </a>
+      </span>
+    </div>
+
+    <div mat-dialog-content>
+      <form [formGroup]="assignStaffForm" class="p-3">
+
+        <mat-card class="cardWithShadow">
+          <mat-card-content>
+            <h5>Select Staff</h5>
+            <table mat-table [dataSource]="staffList" class="mat-elevation-z8 w-100" style="overflow-x: auto;">
+
+              <!-- Radio Selection Column -->
+              <ng-container matColumnDef="select">
+                <th mat-header-cell *matHeaderCellDef style="width: 3rem;"></th>
+                <td mat-cell *matCellDef="let product; let i = index">
+                  <mat-radio-button [value]="product.id" formControlName="staffId"
+                    [checked]="assignStaffForm.controls['staffId'].value === product.id">
+                  </mat-radio-button>
+                </td>
+              </ng-container>
+
+              <!-- Name Column -->
+              <ng-container matColumnDef="fullName">
+                <th mat-header-cell *matHeaderCellDef>Name</th>
+                <td mat-cell *matCellDef="let product">{{ product.fullName }}</td>
+              </ng-container>
+
+              <!-- Username Column -->
+              <ng-container matColumnDef="username">
+                <th mat-header-cell *matHeaderCellDef>Username</th>
+                <td mat-cell *matCellDef="let product">{{ product.username }}</td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="['select', 'fullName', 'username']"></tr>
+              <tr mat-row *matRowDef="let row; columns: ['select', 'fullName', 'username']"></tr>
+            </table>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-form-field appearance="outline" class="w-100 mt-3">
+          <mat-label>Enter remarks..</mat-label>
+          <textarea matInput formControlName="remark" rows="3" placeholder="Enter remarks.."></textarea>
+        </mat-form-field>
+
+      </form>
+    </div>
+
+    <div mat-dialog-actions class="p-3 d-flex justify-content-end">
+      <button mat-flat-button color="primary" (click)="assignToStaff()" [disabled]="!assignStaffForm.valid"
+        aria-label="Assign Staff">
+        <mat-icon>check_circle</mat-icon> Assign
+      </button>
+      <button mat-stroked-button color="warn" (click)="onCancel()" class="ml-2" aria-label="Close dialog">
+        Close
+      </button>
+    </div>
+  </div>
+</ng-template>
+
+<!-- <div aria-labelledby="myModalLabel" class="modal fade" id="assignApproveModal" role="dialog" tabindex="-1">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button aria-label="Close" class="close" data-dismiss="modal" type="button">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title" id="myModalLabel" style="color: #fff !important">Assign Staff</h4>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="assignStaffForm">
+          <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+              <div class="card">
+                <h5>Select Staff</h5>
+                <p-table [(selection)]="selectedStaff" [value]="staffList" responsiveLayout="scroll">
+                  <ng-template pTemplate="header">
+                    <tr>
+                      <th style="width: 3rem"></th>
+                      <th>Name</th>
+                      <th>Username</th>
+                    </tr>
+                  </ng-template>
+                  <ng-template let-product pTemplate="body">
+                    <tr>
+                      <td>
+                        <input formControlName="staffId" type="radio" [value]="product.id" />
+                      </td>
+                      <td>{{ product.fullName }}</td>
+                      <td>
+                        {{ product.username }}
+                      </td>
+                    </tr>
+                  </ng-template>
+                </p-table>
+              </div>
+            </div>
+          </div>
+          <br />
+          <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+              <input class="form-control" type="textarea" placeholder="Enter remarks.." formControlName="remark"
+                name="fileName" />
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button (click)="assignToStaff()" class="btn btn-primary" id="submit" type="submit">
+          <i class="fa fa-check-circle"></i>
+          Assign
+        </button>
+        <button class="btn btn-default" data-dismiss="modal" type="button">Close</button>
+      </div>
+    </div>
+  </div>
+</div> -->
+
+<ng-template #reAssignPlanDialog>
+  <div class="dialog-container" style="max-width: 600px; width: 100%;">
+    <div class="dialog-header" style="background-color: #3f51b5; color: white; padding: 16px;">
+      <span>Reassign BILL_TO_ORG</span>
+      <span>
+        <a mat-icon-button href="javascript:void(0)" (click)="onCancel()" aria-label="Close dialog"
+          style="color: white;">
+          <mat-icon>close</mat-icon>
+        </a>
+      </span>
+    </div>
+
+    <div mat-dialog-content>
+      <form [formGroup]="assignPLANForm" class="p-3">
+
+        <mat-card class="cardWithShadow">
+          <mat-card-content>
+            <h5>Select Staff</h5>
+            <table mat-table [dataSource]="approvableStaff" class="mat-elevation-z8 w-100" style="overflow-x: auto;">
+
+              <!-- Radio Selection Column -->
+              <ng-container matColumnDef="select">
+                <th mat-header-cell *matHeaderCellDef style="width: 3rem;"></th>
+                <td mat-cell *matCellDef="let product">
+                  <mat-radio-button [value]="product.id" formControlName="staffId"
+                    [checked]="assignPLANForm.get('staffId').value === product.id"></mat-radio-button>
+                </td>
+              </ng-container>
+
+              <!-- Name Column -->
+              <ng-container matColumnDef="fullName">
+                <th mat-header-cell *matHeaderCellDef>Name</th>
+                <td mat-cell *matCellDef="let product">{{ product.fullName }}</td>
+              </ng-container>
+
+              <!-- Username Column -->
+              <ng-container matColumnDef="username">
+                <th mat-header-cell *matHeaderCellDef>Username</th>
+                <td mat-cell *matCellDef="let product">{{ product.username }}</td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="['select', 'fullName', 'username']"></tr>
+              <tr mat-row *matRowDef="let row; columns: ['select', 'fullName', 'username']"></tr>
+            </table>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-form-field appearance="outline" class="w-100 mt-3">
+          <mat-label>Remark *</mat-label>
+          <textarea matInput formControlName="remark" rows="3" placeholder="Enter remarks.."
+            [class.is-invalid]="assignPLANsubmitted && assignPLANForm.get('remark').invalid"></textarea>
+          <mat-error *ngIf="assignPLANsubmitted && assignPLANForm.get('remark').hasError('required')">
+            Remark is required.
+          </mat-error>
+        </mat-form-field>
+
+      </form>
+    </div>
+
+    <div mat-dialog-actions class="d-flex justify-content-end p-3">
+      <button mat-flat-button color="primary" (click)="reassignWorkflow()"
+        [disabled]="assignPLANForm.invalid || !assignPLANForm.get('staffId').value" aria-label="Assign Staff">
+        <mat-icon>check_circle</mat-icon> Assign
+      </button>
+      <button mat-stroked-button color="warn" (click)="onCancel()" class="ml-3" aria-label="Close dialog">
+        Close
+      </button>
+    </div>
+  </div>
+</ng-template>
+
+<!-- <div class="modal fade" id="reAssignPLANModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title" id="myModalLabel" style="color: #fff !important">
+          Reassign BILL_TO_ORG
+        </h4>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="assignPLANForm">
+          <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+              <div class="card">
+                <h5>Select Staff</h5>
+                <p-table [value]="approvableStaff" [(selection)]="selectStaff" responsiveLayout="scroll">
+                  <ng-template pTemplate="header">
+                    <tr>
+                      <th style="width: 3rem"></th>
+                      <th>Name</th>
+                      <th>Username</th>
+                    </tr>
+                  </ng-template>
+                  <ng-template pTemplate="body" let-product>
+                    <tr>
+                      <td>
+                        <p-tableRadioButton [value]="product.id"></p-tableRadioButton>
+                      </td>
+                      <td>{{ product.fullName }}</td>
+                      <td>
+                        {{ product.username }}
+                      </td>
+                    </tr>
+                  </ng-template>
+                </p-table>
+              </div>
+            </div>
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+              <label>Remark*</label>
+              <textarea class="form-control" name="remark" formControlName="remark" [ngClass]="{
+                  'is-invalid': assignPLANsubmitted && assignPLANForm.controls.remark.errors
+                }"></textarea>
+              @if (assignPLANsubmitted && assignPLANForm.controls.remark.errors) {
+              <div class="errorWrap text-danger">
+                @if (assignPLANsubmitted && assignPLANForm.controls.remark.errors.required) {
+                <div class="error text-danger">
+                  Remark is required.
+                </div>
+                }
+              </div>
+              }
+              <br />
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary" id="submit" (click)="reassignWorkflow()"
+          [disabled]="!this.assignPLANForm.value.remark || !selectStaff">
+          <i class="fa fa-check-circle"></i>
+          Assign
+        </button>
+
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div> -->
+<ng-template #addCreditNoteDialog>
+  <div class="dialog-container" style="max-width: 75vw; width: 100%;">
+    <div class="dialog-header">
+      <span>Add Credit Note</span>
+      <span>
+        <a mat-icon-button href="javascript:void(0)" (click)="onCancel()" aria-label="Close dialog">
+          <img src="assets/img/DashboardIcons/Reject.svg" alt="Close" />
+        </a>
+      </span>
+    </div>
+
+    <div mat-dialog-content>
+      <form [formGroup]="paymentFormGroup" class="p-3">
+
+        <div class="row">
+
+          <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-3">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Customer *</mat-label>
+              <mat-select formControlName="customerid"
+                [ngClass]="{'is-invalid': submitted && paymentFormGroup.controls.customerid.errors}">
+                <mat-option *ngFor="let cust of custDropdownData" [value]="cust.id">{{ cust.name }}</mat-option>
+              </mat-select>
+              <mat-error *ngIf="submitted && paymentFormGroup.controls.customerid.hasError('required')">
+                Customer is required.
+              </mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-3">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Invoice *</mat-label>
+              <mat-select formControlName="invoiceId" disabled
+                [ngClass]="{'is-invalid': submitted && paymentFormGroup.controls.invoiceId.errors}">
+                <mat-option *ngFor="let invoice of invoiceDropdownData" [value]="invoice.id">
+                  {{ invoice.docnumber }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-3">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Amount *</mat-label>
+              <input matInput type="number" formControlName="amount" placeholder="Enter Amount" min="1" step="0.01"
+                [ngClass]="{'is-invalid': submitted && paymentFormGroup.controls.amount.errors}"
+                (keypress)="keypressId($event)" />
+              <mat-error *ngIf="submitted && paymentFormGroup.controls.amount.hasError('required')">Amount is
+                required.</mat-error>
+              <mat-error *ngIf="submitted && paymentFormGroup.controls.amount.hasError('pattern')">Only numeric
+                characters allowed.</mat-error>
+              <mat-error *ngIf="submitted && paymentFormGroup.controls.amount.hasError('min')">Amount must be greater
+                than 0.</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-3"
+            *ngIf="paymentFormGroup.controls.paymentreferenceno.enabled">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Credit Reference No</mat-label>
+              <input matInput type="text" placeholder="Credit Reference No" formControlName="paymentreferenceno"
+                [ngClass]="{'is-invalid': submitted && paymentFormGroup.controls.paymentreferenceno.errors}" />
+              <mat-error *ngIf="submitted && paymentFormGroup.controls.paymentreferenceno.hasError('required')">Credit
+                Reference No is required.</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 mb-3">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Reference No. *</mat-label>
+              <input matInput type="text" placeholder="Enter Reference No." formControlName="referenceno"
+                [ngClass]="{'is-invalid': submitted && paymentFormGroup.controls.referenceno.errors}" />
+              <mat-error *ngIf="submitted && paymentFormGroup.controls.referenceno.hasError('required')">Reference No.
+                is required.</mat-error>
+            </mat-form-field>
+          </div>
+
+        </div>
+
+        <div class="row">
+          <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Remark *</mat-label>
+              <textarea matInput placeholder="Enter Remark" rows="3" formControlName="remark"
+                [ngClass]="{'is-invalid': submitted && paymentFormGroup.controls.remark.errors}"></textarea>
+              <mat-error *ngIf="submitted && paymentFormGroup.controls.remark.hasError('required')">Remark is
+                required.</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+
+      </form>
+    </div>
+
+    <div mat-dialog-actions class="d-flex justify-content-end p-3">
+      <button mat-flat-button color="primary" (click)="addPayment('')" aria-label="Add Credit Note">
+        <mat-icon>check_circle</mat-icon> Add Credit Note
+      </button>
+      <button mat-stroked-button color="warn" (click)="onCancel()" class="ml-3" aria-label="Close">
+        Close
+      </button>
+    </div>
+  </div>
+</ng-template>
+
+<!-- <div class="modal fade" id="addCreditNoteModal" role="dialog">
+  <div class="modal-dialog" style="width: 75%"> -->
+<!-- Modal content-->
+<!-- <div class="modal-content">
+  <form [formGroup]="paymentFormGroup">
+    <div class="modal-header">
+      <h3 class="panel-title">Add Credit Note</h3>
+    </div>
+    <div class="modal-body">
+      <div class="row">
+        <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+          <label>Customer*</label>
+          <p-dropdown [options]="custDropdownData" optionValue="id" optionLabel="name" filter="true" filterBy="name"
+            placeholder="Select a Customer" formControlName="customerid" [ngClass]="{
+                  'is-invalid': submitted && paymentFormGroup.controls.customerid.errors
+                }"></p-dropdown>
+          @if (submitted && paymentFormGroup.controls.customerid.errors) {
+          <div class="errorWrap text-danger">
+            @if (submitted && paymentFormGroup.controls.customerid.errors.required) {
+            <div class="error text-danger">
+              Customer is required.
+            </div>
+            }
+          </div>
+          }
+          <br />
+        </div>
+        <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+          <label>Invoice*</label>
+          <br />
+          <p-dropdown [options]="invoiceDropdownData" optionValue="id" optionLabel="docnumber" filter="true"
+            filterBy="docnumber" placeholder="Select a Invoice" formControlName="invoiceId" [ngClass]="{
+                  'is-invalid': submitted && paymentFormGroup.controls.invoiceId.errors
+                }" [disabled]="true"></p-dropdown>
+          <br />
+        </div>
+        <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+          <label>Amount*</label>
+          <input type="number" step=".01" class="form-control" min="1" placeholder="Enter Amount"
+            formControlName="amount" [ngClass]="{
+                  'is-invalid': submitted && paymentFormGroup.controls.amount.errors
+                }" customDecimal (keypress)="keypressId($event)" />
+          @if (submitted && paymentFormGroup.controls.amount.errors) {
+          <div class="errorWrap text-danger">
+            @if (submitted && paymentFormGroup.controls.amount.errors.required) {
+            <div class="error text-danger">
+              Amount is required.
+            </div>
+            }
+            @if (submitted && paymentFormGroup.controls.amount.errors.pattern) {
+            <div class="error text-danger">
+              Only numeric characters allowed.
+            </div>
+            }
+            @if (submitted && paymentFormGroup.controls.amount.errors.min) {
+            <div class="error text-danger">
+              Amount must be greater then 0.
+            </div>
+            }
+          </div>
+          }
+          <br />
+        </div>
+        @if (paymentFormGroup.controls.paymentreferenceno.enabled) {
+        <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+          <label>Credit Reference No</label>
+          <input type="text" class="form-control" placeholder="Credit Reference No" formControlName="paymentreferenceno"
+            [ngClass]="{
+                  'is-invalid': submitted && paymentFormGroup.controls.paymentreferenceno.errors
+                }" />
+          @if (submitted && paymentFormGroup.controls.paymentreferenceno.errors) {
+          <div class="errorWrap text-danger">
+            @if (submitted && paymentFormGroup.controls.paymentreferenceno.errors.required) {
+            <div class="error text-danger">
+              Credit Reference No is required.
+            </div>
+            }
+          </div>
+          }
+          <br />
+        </div>
+        }
+        <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+          <label>Reference No.*</label>
+          <input type="text" class="form-control" placeholder="Enter Reference No." formControlName="referenceno"
+            [ngClass]="{
+                  'is-invalid': submitted && paymentFormGroup.controls.referenceno.errors
+                }" />
+          @if (submitted && paymentFormGroup.controls.referenceno.errors) {
+          <div class="errorWrap text-danger">
+            @if (submitted && paymentFormGroup.controls.referenceno.errors.required) {
+            <div class="error text-danger">
+              Reference No. is required.
+            </div>
+            }
+          </div>
+          }
+          <br />
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+          <label>Remark*</label>
+          <textarea class="form-control" placeholder="Enter Remark" rows="3" formControlName="remark" [ngClass]="{
+                  'is-invalid': submitted && paymentFormGroup.controls.remark.errors
+                }"></textarea>
+          @if (submitted && paymentFormGroup.controls.remark.errors) {
+          <div class="errorWrap text-danger">
+            @if (submitted && paymentFormGroup.controls.remark.errors.required) {
+            <div class="error text-danger">
+              Remark is required.
+            </div>
+            }
+          </div>
+          }
+          <br />
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer" style="display: flex; justify-content: flex-end">
+      <div class="addUpdateBtn">
+        <div class="addUpdateBtn">
+          <button type="submit" class="btn btn-primary" id="submit" (click)="addPayment('')">
+            <i class="fa fa-check-circle"></i>
+            Add Credit Note
+          </button>
+        </div>
+      </div>
+      <div class="addUpdateBtn" style="margin-left: 1.5rem">
+        <button type="button" class="btn btn-danger" #closebutton data-dismiss="modal">
+          Close
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+</div>
+</div> -->

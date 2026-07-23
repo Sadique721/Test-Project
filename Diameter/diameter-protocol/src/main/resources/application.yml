@@ -1,0 +1,141 @@
+server:
+  port: ${ENV_SERVER_PORT:8080}
+
+spring:
+  application:
+    name: ${ENV_SERVER_NAME:diameter-server}
+    kafka:
+      admin:
+        auto-create: false
+  datasource:
+    url: ${ENV_DB_URL:jdbc:mysql://216.48.180.92:4406/diameter-sit-db}
+    username: ${ENV_DB_USERNAME:root}
+    password: ${ENV_DB_PASSWORD:diameterserver@2024@db}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: ${ENV_MAX_DB_POOL_SIZE:100}
+      minimum-idle: ${ENV_MIN_DB_IDLE_POOL_SIZE:20}
+      connection-timeout: ${ENV_DB_CONNECTION_TIMEOUT:3000}
+      idle-timeout: ${ENV_DB_IDLE_TIMEOUT:300000}
+      max-lifetime: ${ENV_DB_MAX_LIFETIME:1800000}
+      leak-detection-threshold: ${ENV_DB_LEAK_DETECTION_THRESHOLD:60000}
+      data-source-properties:
+        rewriteBatchedStatements: true
+  
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate.dialect: org.hibernate.dialect.MySQL8Dialect
+    show-sql: false
+
+  liquibase:
+    change-log: classpath:db/changelog/changelog-master.xml
+    enabled: true
+
+logging:
+  config: classpath:log4j2-spring.xml
+  level:
+    STACK: ${ENV_STACK_LOG_LEVEL:INFO}
+    com.diameter: ${ENV_DIAMETER_LOG_LEVEL:INFO}
+    root: ${ENV_ROOT_LOG_LEVEL:INFO}
+
+eureka:
+  instance:
+    instance-id: ${spring.application.name}-${server.port}
+    prefer-ip-address: true
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: ${ENV_EUREKA_URL:http://216.48.180.92:8761/eureka/}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    info:
+      enabled: true
+    health:
+      show-details: always
+
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+info:
+  app:
+    name: Diameter Server
+    description: Actuator info endpoint test
+    version: 1.0.0
+    identity: ${ENV_IDENTITY:diameter.com}
+    realm: ${ENV_REALM:local}
+    diameter-server-configuration: ${ENV_DIAMETER_SERVER_CONFIGURATION:TCP}
+    quotaUnit: ${ENV_QUOTA_UNIT:BYTES}
+    timeUnit: ${ENV_TIME_UNIT:SECOND}
+    gracePeriod: ${ENV_GRACE_PERIOD:30}
+    planExpiryCheckInRx: ${ENV_PLAN_EXPIRY_CHECK_IN_RX:false}
+    podName: ${ENV_POD_NAME:diameter_server}
+    stackRequestTimeout: ${ENV_STACK_REQUEST_TIMEOUT:5000}
+    stackMinThreadPoolSize: ${ENV_STACK_MIN_THREAD_POOL_SIZE:50}
+    stackMaxThreadPoolSize: ${ENV_STACK_MAX_THREAD_POOL_SIZE:200}
+    stackThreadKeepAliveTime: ${ENV_THREAD_KEEP_ALIVE_TIME:300000}
+    stackMaxRequestQueueSize: ${ENV_MAX_REQUEST_QUEUE_SIZE:50000}
+    cacheCleanupInterval: ${ENV_CACHE_CLEANUP_INTERVAL:300000}
+    liveSessionExpiry: ${ENV_LIVE_SESSION_EXPIRY:7200}
+    maxChunkSizeMb: ${ENV_MAX_CHUNK_SIZE_MB:100}
+    maxChunkSizeSecond: ${ENV_MAX_CHUNK_SIZE_SECOND:120}
+    auditEnable: ${ENV_AUDIT_ENABLE:true}
+    rxOriginHost: ${ENV_RX_ORIGIN_HOST:rxasbc83.asbc.system.com}
+    quotaResetCron: ${ENV_APP_QUOTA_RESET_CRON:0 0 0 * * *}
+    
+    
+audit:
+   csv:
+     directory: ${ENV_AUDIT_CSV_DIRECTORY:D:/diameter-audit}
+     queue-size: ${ENV_AUDIT_CSV_QUEUE_SIZE:100000}
+     batch-size: ${ENV_AUDIT_CSV_BATCH_SIZE:500}
+     flush-interval-ms: ${ENV_AUDIT_CSV_FLUSH_INTERVAL_MS:5000}
+     rotate-size-mb: ${ENV_AUDIT_CSV_ROTATE_SIZE_MB:500}
+     buffer-size: ${ENV_AUDIT_CSV_BUFFER_SIZE:1048576}
+    
+   routing:
+     INITIAL_REQUEST: 
+       db: ${ENV_INTIAL_REQUEST_AUDIT_ROUTING_DB:true}
+       csv: ${ENV_INTIAL_REQUEST_AUDIT_ROUTING_CSV:false}
+     UPDATE_REQUEST: 
+       db: ${ENV_UPDATE_REQUEST_AUDIT_ROUTING_DB:false}
+       csv: ${ENV_UPDATE_REQUEST_AUDIT_ROUTING_CSV:true}
+     TERMINATION_REQUEST: 
+       db: ${ENV_TERMINATION_REQUEST_AUDIT_ROUTING_DB:true}
+       csv: ${ENV_TERMINATION_REQUEST_AUDIT_ROUTING_CSV:false}
+     EVENT_REQUEST: 
+       db: ${ENV_EVENT_REQUEST_AUDIT_ROUTING_DB:false}
+       csv: ${ENV_EVENT_REQUEST_AUDIT_ROUTING_CSV:true}
+     UNKNOWN_REQUEST: 
+       db: ${ENV_UNKNOWN_REQUEST_AUDIT_ROUTING_DB:false}
+       csv: ${ENV_UNKNOWN_REQUEST_AUDIT_ROUTING_CSV:true}
+
+# Kafka Custom Properties (used with @Value)
+
+kafka-url: ${KAFKA_URL:216.48.180.92:30084}
+
+kafka:
+  max:
+    request:
+      size: 2000000000
+
+max:
+  poll:
+    records: 15000
+    interval: 300000
+
+fetch:
+  max:
+    bytes: 524288000
+  min:
+    bytes: 1

@@ -1,0 +1,180 @@
+<!-- <p-dialog header="Select {{ deviceType }} Device" [(visible)]="isparentChildDeviceModelOpen" [style]="{ width: '70%' }"
+    [modal]="true" [responsive]="true" [draggable]="false" [closable]="true" [baseZIndex]="1000000"
+    (onHide)="modalCloseStaff()">
+    <div class="modal-body">
+        <h5>Search {{ deviceType }} Device</h5>
+        <div class="row">
+            <div class="col-md-3">
+                <p-dropdown [options]="networkDeviceData" optionValue="text" optionLabel="text" filter="true"
+                    filterBy="text" placeholder="Select a Device Type" [(ngModel)]="searchDeviceType"></p-dropdown>
+            </div>
+            @if (searchDeviceType) {
+            <div class="col-md-3">
+                <input type="text" class="form-control" placeholder="Search by Display Name" [(ngModel)]="searchDeatil"
+                    (keyup.enter)="searchnetworkDevice()">
+            </div>
+            }
+            <div class="col-lg-6 col-md-6 col-sm-12">
+                <button type="button" class="btn btn-primary" id="searchbtn" [disabled]="!searchDeatil"
+                    (click)="searchnetworkDevice()">
+                    <i class="fa fa-search"></i>
+                    Search
+                </button>
+                <button type="reset" class="btn btn-default" id="searchbtn" (click)="clearSearchnetworkDevice()">
+                    <img src="assets/img/DashboardIcons/Close.svg" />
+                    Clear
+                </button>
+            </div>
+        </div>
+        <h5 style="margin-top: 15px">Select Device</h5>
+        <p-table #dt [(selection)]="selectedDevice" [value]="networkDeviceListData" responsiveLayout="scroll" [rows]="5"
+            [rowsPerPageOptions]="[5, 10,  20, 50, 100]" [paginator]="false" [(first)]="newFirst">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th style="width: 5rem"></th>
+                    <th>Name</th>
+                    <th>Device Type</th>
+                    <th>Display Name</th>
+                   
+                </tr>
+            </ng-template>
+            <ng-template let-networkData let-rowIndex="rowIndex" pTemplate="body">
+                <tr>
+                    <td>
+                        <p-tableRadioButton [disabled]="networkData.id == selectedDeviceId"
+                            [ngClass]="{ disabled: networkData.id == selectedDeviceId }"
+                            [value]="networkData"></p-tableRadioButton>
+                    </td>
+                    <td>
+                        {{ networkData?.name }}
+                    </td>
+                    <td>
+                        {{ networkData?.devicetype || "-"}}
+                    </td>
+                    <td>
+                        {{ networkData?.displayname }}
+                    </td>
+                  
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="summary">
+                <p-paginator (onPageChange)="paginateStaff($event)" [first]="newFirst"
+                    [rows]="networkDeviceListdataitemsPerPage" [totalRecords]="networkDeviceListdatatotalRecords"
+                    [rows]="5" [rowsPerPageOptions]="[5, 10,  20, 50, 100]"></p-paginator>
+            </ng-template>
+        </p-table>
+    </div>
+    <div class="modal-footer">
+        <div class="addUpdateBtn">
+            <button (click)="saveSelstaff()" class="btn btn-primary" style="object-fit: cover; padding: 5px 8px"
+                [disabled]="this.selectedDevice.length == 0">
+                <i class="fa fa-check-circle"></i>
+                Save
+            </button>
+            <button (click)="modalCloseStaff()" class="btn btn-danger btn-sm" type="button">Close</button>
+        </div>
+    </div>
+</p-dialog> -->
+
+<div class="container-fluid p-0">
+    <!-- Header -->
+    <div class="dialog-header dialog-title">
+        Select {{ deviceType }} Device
+        <span>
+            <a mat-icon-button  mat-dialog-close>
+                <img src="assets/img/DashboardIcons/Reject.svg" />
+            </a>
+        </span>
+    </div>
+    <mat-dialog-content class="mat-typography">
+
+        <div class="row mb-3">
+            <!-- Device Type Dropdown -->
+            <div class="col-md-3">
+                <mat-form-field appearance="outline" class="w-100 hide-hint mr-10 header-input">
+                    <mat-select [(ngModel)]="searchDeviceType" placeholder="Select a Device Type">
+                        <mat-option *ngFor="let item of networkDeviceData" [value]="item.text">
+                            {{ item.text }}
+                        </mat-option>
+                    </mat-select>
+                </mat-form-field>
+            </div>
+
+            <!-- Search Field -->
+            <div class="col-md-3" *ngIf="searchDeviceType">
+                <mat-form-field appearance="outline" class="w-100 hide-hint mr-10 header-input">
+                    <input matInput [(ngModel)]="searchDeatil" (keyup.enter)="searchnetworkDevice()"
+                        placeholder="Search by Display Name" />
+                </mat-form-field>
+            </div>
+
+            <!-- Search & Clear Buttons -->
+            <div class="col-md-6 d-flex  gap-2">
+                <button mat-button mat-flat-button color="primary" class="button-normal m-r-10" [disabled]="!searchDeatil"
+                    (click)="searchnetworkDevice()">
+                    Search
+                </button>
+
+                <button mat-stroked-button  class="button-normal" (click)="clearSearchnetworkDevice()">
+                    Clear
+                </button>
+            </div>
+        </div>
+
+
+        <div class="mat-elevation-z2 m-t-15">
+            <table mat-table [dataSource]="networkDeviceListData" class="mat-table w-100">
+                <!-- Radio Button Column -->
+                <ng-container matColumnDef="select">
+                    <th mat-header-cell *matHeaderCellDef></th>
+                    <td mat-cell *matCellDef="let row">
+                        <mat-radio-group [(ngModel)]="selectedDevice">
+                            <mat-radio-button [value]="row" [disabled]="row.id === selectedDeviceId"
+                                [ngClass]="{ disabled: row.id === selectedDeviceId }">
+                            </mat-radio-button>
+                        </mat-radio-group>
+
+                        <!-- <mat-radio-button [value]="row" [disabled]="row.id === selectedDeviceId"
+                            [ngClass]="{ disabled: row.id === selectedDeviceId }" (change)="onRowSelection(row)"
+                            [checked]="selectedDevice?.id === row.id">
+                        </mat-radio-button> -->
+                    </td>
+                </ng-container>
+
+                <!-- Name Column -->
+                <ng-container matColumnDef="name">
+                    <th mat-header-cell *matHeaderCellDef>Name</th>
+                    <td mat-cell *matCellDef="let row">{{ row.name }}</td>
+                </ng-container>
+
+                <!-- Device Type Column -->
+                <ng-container matColumnDef="devicetype">
+                    <th mat-header-cell *matHeaderCellDef>Device Type</th>
+                    <td mat-cell *matCellDef="let row">{{ row.devicetype || "-" }}</td>
+                </ng-container>
+
+                <!-- Display Name Column -->
+                <ng-container matColumnDef="displayname">
+                    <th mat-header-cell *matHeaderCellDef>Display Name</th>
+                    <td mat-cell *matCellDef="let row">{{ row.displayname }}</td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+            </table>
+
+            <mat-paginator [length]="networkDeviceListdatatotalRecords" [pageSize]="networkDeviceListdataitemsPerPage"
+                [pageSizeOptions]="[5, 10,  20, 50, 100]" (page)="paginateStaff($event)" showFirstLastButtons>
+            </mat-paginator>
+        </div>
+    </mat-dialog-content>
+    <div class="dialog-action-adjust d-flex justify-content-end" style="gap:8px">
+
+        <button (click)="saveSelstaff()" mat-dialog-close mat-button mat-flat-button class="button-normal" color="primary"
+            [disabled]="this.selectedDevice.length == 0">
+            Save
+        </button>
+
+        <button mat-stroked-button class="button-normal" mat-dialog-close>Close</button>
+    </div>
+</div>

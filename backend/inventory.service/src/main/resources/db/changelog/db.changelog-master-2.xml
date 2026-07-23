@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd
+http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-3.8.xsd">
+
+    <changeSet id="DB0000000104" author="Darshan Bharambe">
+        <preConditions onFail ="MARK_RAN">
+            <not>
+                <tableExists tableName="tbltcustomernetworkbind"></tableExists>
+            </not>
+        </preConditions>
+        <createTable tableName="tbltcustomernetworkbind">
+            <column name="id" type="bigint">
+                <constraints primaryKey="true" nullable="false"
+                             primaryKeyName="tbltcustomernetworkbind_id_pk" unique="true"
+                             uniqueConstraintName="tbltcustomernetworkbind_id_uni"/>
+            </column>
+            <column name="customerid" type="bigint"></column>
+            <column name="popid" type="bigint"></column>
+            <column name="oltid" type="bigint"></column>
+            <column name="dnsplitterid" type="bigint"></column>
+            <column name="snsplitterid" type="bigint"></column>
+            <column name="masterdbid" type="bigint"></column>
+            <column name="createdate" type="TIMESTAMP"
+                    defaultValueComputed="CURRENT_TIMESTAMP">
+            </column>
+            <column name="createdbystaffid" type="bigint"/>
+            <column name="lastmodifiedbystaffid" type="bigint"/>
+            <column name="lastmodifieddate" type="TIMESTAMP"
+                    defaultValueComputed="CURRENT_TIMESTAMP">
+            </column>
+            <column name="createbyname" type="varchar(100)"/>
+            <column name="updatebyname" type="varchar(100)"/>
+        </createTable>
+        <addAutoIncrement tableName="tbltcustomernetworkbind"
+                          columnName="id" columnDataType="bigint" startWith="1" incrementBy="1"/>
+    </changeSet>
+
+    <changeSet id="RDS0015122503" author="Raj Sompura" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="jv_snapshot" columnName="state"/>
+        </preConditions>
+        <modifyDataType tableName="jv_snapshot" columnName="state" newDataType="longtext" />
+    </changeSet>
+
+    <changeSet id="20260216-01-create-serialized-item-skipped" author="ronak">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="tblmserializeditemskipped"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="tblmserializeditemskipped">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+
+            <column name="inward_id" type="BIGINT"/>
+            <column name="outward_id" type="BIGINT"/>
+
+            <column name="mvno_id" type="BIGINT">
+                <constraints nullable="true"/>
+            </column>
+
+            <column name="imsi" type="VARCHAR(100)"/>
+            <column name="iccid" type="VARCHAR(100)"/>
+            <column name="pin1" type="VARCHAR(100)"/>
+            <column name="puk1" type="VARCHAR(100)"/>
+            <column name="pin2" type="VARCHAR(100)"/>
+            <column name="puk2" type="VARCHAR(100)"/>
+            <column name="ki_encrypted" type="VARCHAR(100)"/>
+            <column name="acc" type="VARCHAR(100)"/>
+            <column name="adm" type="VARCHAR(100)"/>
+            <column name="kic" type="VARCHAR(100)"/>
+            <column name="kid" type="VARCHAR(100)"/>
+            <column name="kik" type="VARCHAR(100)"/>
+            <column name="msisdn" type="VARCHAR(100)"/>
+            <column name="serial" type="VARCHAR(100)"/>
+            <column name="trackable" type="VARCHAR(100)"/>
+            <column name="port" type="VARCHAR(100)"/>
+            <column name="mac" type="VARCHAR(100)"/>
+            <column name="type" type="VARCHAR(20)"/>
+
+            <column name="reason" type="TEXT"/>
+            <column name="createdate" type="TIMESTAMP"
+                    defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+
+        <!-- Index for FK -->
+        <createIndex
+                tableName="tblmserializeditemskipped"
+                indexName="idx_tblmserializeditemskipped_mvno_id">
+            <column name="mvno_id"/>
+        </createIndex>
+
+        <!-- Foreign key constraint -->
+        <addForeignKeyConstraint
+                constraintName="serializeditemskipped_inward_id_fk"
+                baseTableName="tblmserializeditemskipped"
+                baseColumnNames="inward_id"
+                referencedTableName="tblminward"
+                referencedColumnNames="inward_id"/>
+
+        <!-- Foreign key constraint -->
+        <addForeignKeyConstraint
+                constraintName="serializeditemskipped_mvno_id_fk"
+                baseTableName="tblmserializeditemskipped"
+                baseColumnNames="mvno_id"
+                referencedTableName="tblmmvno"
+                referencedColumnNames="MVNOID"/>
+
+        <addForeignKeyConstraint
+                constraintName="fk_serializeditemskipped_outward_id"
+                baseTableName="tblmserializeditemskipped"
+                baseColumnNames="outward_id"
+                referencedTableName="tblmoutward"
+                referencedColumnNames="outward_id"/>
+
+    </changeSet>
+</databaseChangeLog>

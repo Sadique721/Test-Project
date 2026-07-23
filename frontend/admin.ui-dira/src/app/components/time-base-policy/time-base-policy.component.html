@@ -1,0 +1,1068 @@
+<div class="row header-row">
+    <mat-card class="cardWithShadow w-100">
+        <mat-card-content class="mat-card-content-border">
+            <div class="row">
+                <div class="col-sm-9 d-flex align-items-center">
+                    <!-- Search Input -->
+                    <mat-form-field appearance="outline" class="w-100 hide-hint mr-10" style="margin-left: 16px">
+                        <input class="input-p-5" matInput [(ngModel)]="searchName" placeholder="Enter Policy Name"
+                            (keydown.enter)="searchPolicyByName()" />
+                        <mat-icon matSuffix class="search-header-search-icon">
+                            <i class="pi pi-search icon-size"></i>
+                        </mat-icon>
+                    </mat-form-field>
+                    <button mat-button mat-flat-button color="primary" class="button-normal m-r-10"
+                        (click)="searchPolicyByName()" aria-label="Search"> Search
+                    </button>
+
+                    <!-- Clear Button -->
+                    <button mat-stroked-button matButton="outlined" class="button-normal" (click)="clearSearchForm()">
+                        Clear
+                    </button>
+                </div>
+                <div class="col-sm-3 search-div">
+                    <button mat-button mat-flat-button color="primary" class="button-normal mr-10"
+                        (click)="CreateUpdatetimePolicy1()">
+                        Add Policy
+                    </button>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+<div class="container-fluid contain-flud">
+    <div class="row">
+        <div class="col-md-12">
+            <mat-card class="cardWithShadow">
+                <mat-card-content class="mat-card-content-border">
+                    <div class="policy-table-list">
+                        <div class="table-container">
+                            <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8 w-100">
+                                <!-- Policy Name Column -->
+                                <ng-container matColumnDef="policyName">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Policy Name
+                                    </th>
+                                    <td mat-cell *matCellDef="let policy" class="f-s-14 detailOnAnchorClick">
+
+                                        {{ policy.name }}
+
+                                    </td>
+                                </ng-container>
+
+                                <!-- Status Column -->
+                                <ng-container matColumnDef="status">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Status
+                                    </th>
+                                    <td mat-cell *matCellDef="let policy" class="f-s-14">
+                                        <span class="status-badge" [ngClass]="{
+                          'status-success': policy.status === 'Active',
+                          'status-danger': policy.status === 'Inactive'
+                        }">
+                                            {{ policy.status }}
+                                        </span>
+                                    </td>
+                                </ng-container>
+
+                                <!-- ISP Name Column -->
+                                <ng-container matColumnDef="ispName">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        ISP Name
+                                    </th>
+                                    <td mat-cell *matCellDef="let policy" class="f-s-14">
+                                        {{ policy.mvnoName }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Action Column -->
+                                @if (deleteAccess || editAccess) {
+                                <ng-container matColumnDef="action">
+                                    <th mat-header-cell *matHeaderCellDef stickyEnd class="table-header-title">
+                                        Action
+                                    </th>
+                                    <td mat-cell *matCellDef="let policy; let i = index">
+                                        <a mat-icon-button href="javascript:void(0)"
+                                            (click)="getPolicyDetails(policy.id)" matTooltip="View">
+                                            <img src="assets/img/DashboardIcons/eye-svgrepo-com (1) 1.svg">
+                                        </a>
+                                        @if (editAccess) {
+                                        <a mat-icon-button href="javascript:void(0)"
+                                            (click)="editPolicyDetailById(policy.id)" matTooltip="Edit">
+                                            <img src="assets/img/DashboardIcons/Edit.svg" />
+                                        </a>
+                                        }
+                                        @if (deleteAccess) {
+                                        <a mat-icon-button href="javascript:void(0)" (click)="deleteConfirm(policy, i)"
+                                            matTooltip="Delete">
+                                            <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" />
+
+                                        </a>
+                                        }
+                                    </td>
+                                </ng-container>
+                                }
+
+                                <!-- Table Header + Rows -->
+                                <tr mat-header-row class="table-header-bg"
+                                    *matHeaderRowDef="getDisplayedPlanDetailsColumns(); sticky: true"></tr>
+                                <tr mat-row class="table-content-row"
+                                    *matRowDef="let row; columns: getDisplayedPlanDetailsColumns()">
+                                </tr>
+                            </table>
+
+                            <!-- Paginator -->
+                            <mat-paginator [length]="totalRecords" [pageSize]="itemsPerPage"
+                                [pageSizeOptions]="[5, 10, 20, 50, 100]" showFirstLastButtons (page)="pageChanged($event)">
+                            </mat-paginator>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </div>
+</div>
+<ng-template #timePolicyDialog let-dialogRef="dialogRef">
+    <div class="dialog-container">
+        <!-- Dialog Header -->
+        <div class="dialog-header">
+            <span>{{ editMode ? "Update" : "Create" }} Policy</span>
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="onCancel()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+
+                </a>
+            </span>
+        </div>
+        <ng-container *ngIf="!createAccess && !isChargeEdit">
+            <mat-card-content class="matcard-content">
+                <div class="panel-body table-responsive">
+                    Sorry you have not privilege to create operation!
+                </div>
+            </mat-card-content>
+        </ng-container>
+
+        <!-- Dialog Content -->
+        @if (createAccess || (editMode && editAccess)) {
+        <div mat-dialog-content>
+            <form [formGroup]="policyForm">
+                <!-- Time Base Policy Parameters Section -->
+                <!-- <fieldset style="margin-bottom: 2rem"> -->
+                <!-- <legend class="section-legend">Time Base Policy Parameters</legend> -->
+                <!-- <div class="create-header"></div> -->
+                <mat-card>
+                    <mat-card-header>
+                        <mat-card-title>Time Base Policy Parameters</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <div class="form-section">
+                            <div class="row">
+                                <!-- Policy Name Field -->
+                                <div class="col-lg-6 col-md-6 col-sm-12">
+                                    <label class="inputLabel" width="33%">Policy Name <span
+                                            class="required">*</span></label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <!-- <mat-label>Enter policy name</mat-label> -->
+                                        <input class="input-p-5" matInput type="text" formControlName="name"
+                                            placeholder="Enter policy name" />
+                                        <mat-error *ngIf="submitted && policyForm.get('name')?.hasError('required')">
+                                            Please Enter Policy Name.
+                                        </mat-error>
+                                        <mat-error
+                                            *ngIf="submitted && policyForm.get('name')?.hasError('cannotContainSpace')">
+                                            White space are not allowed.
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Status Field -->
+                                <div class="col-lg-6 col-md-6 col-sm-12">
+                                    <label class="inputLabel">Status <span class="required">*</span></label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <!-- <mat-label>Select Policy Status</mat-label> -->
+                                        <mat-select class="input-p-5" formControlName="status"
+                                            placeholder="Select a Status">
+                                            <!-- <mat-option>-- Select Status --</mat-option> -->
+                                            <mat-option *ngFor="let item of status" [value]="item.value">
+                                                {{ item.label }}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error *ngIf="submitted && policyForm.get('status')?.hasError('required')">
+                                            Please Select Status.
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+                <!-- </fieldset> -->
+
+                <!-- Policy Details Mapping List Section -->
+                <div class="fieldset-border mt-3">
+                    <!-- <div class="create-header"></div> -->
+                    <mat-card>
+                        <mat-card-header>
+                            <mat-card-title>Policy Details Mapping List</mat-card-title>
+                        </mat-card-header>
+                        <mat-card-content>
+                            <div class="form-section">
+                                <!-- Table for Policy Details -->
+                                <div class="table-responsive">
+                                    <!-- <table mat-table [dataSource]="tableDataRefresh || policyDetailsArray.controls" class="mat-elevation-z2 w-100"> -->
+                                    <table mat-table [dataSource]="tableDataRefresh"
+                                        class="mat-elevation-z2 fixed-table">
+
+                                        <!-- From Day Column -->
+                                        <ng-container matColumnDef="fromDay">
+                                            <th mat-header-cell *matHeaderCellDef
+                                                style="max-width: 40% !important;min-width: 40% !important;width: 40% !important;">
+                                                From Day*</th>
+                                            <td mat-cell *matCellDef="let row; let i = index">
+                                                <mat-form-field appearance="outline" style="width: 140px;">
+                                                    <mat-select class="input-p-5" [formControl]="row.get('fromDay')"
+                                                        placeholder="Select From Day">
+                                                        <!-- <mat-option>-- Select Day --</mat-option> -->
+                                                        <mat-option *ngFor="let day of weekDaysList"
+                                                            [value]="day.value">
+                                                            {{ day.label }}
+                                                        </mat-option>
+                                                    </mat-select>
+                                                    <mat-error
+                                                        *ngIf="submitted && row.get('fromDay')?.hasError('required')">
+                                                        Required
+                                                    </mat-error>
+                                                </mat-form-field>
+                                            </td>
+                                        </ng-container>
+
+                                        <!-- From Time Column -->
+                                        <ng-container matColumnDef="fromTime">
+                                            <th mat-header-cell *matHeaderCellDef width="33%">From Time <span
+                                                    class="required">*</span></th>
+                                            <td mat-cell *matCellDef="let row; let i = index">
+                                                <mat-form-field appearance="outline" class="w-100">
+                                                    <!-- <mat-label>HH:MM</mat-label> -->
+                                                    <input placeholder="HH:MM" class="input-p-5" matInput type="time"
+                                                        [formControl]="row.get('fromTime')" />
+                                                    <mat-error
+                                                        *ngIf="submitted && row.get('fromTime')?.hasError('required')">
+                                                        Required
+                                                    </mat-error>
+                                                </mat-form-field>
+                                            </td>
+                                        </ng-container>
+
+                                        <!-- To Day Column -->
+                                        <ng-container matColumnDef="toDay">
+                                            <th mat-header-cell *matHeaderCellDef width="33%">To Day <span
+                                                    class="required">*</span></th>
+                                            <td mat-cell *matCellDef="let row; let i = index">
+                                                <mat-form-field appearance="outline" class="w-100">
+                                                    <mat-select class="input-p-5" placeholder="Select to Day"
+                                                        [formControl]="row.get('toDay')">
+                                                        <!-- <mat-option>-- Select Day --</mat-option> -->
+                                                        <mat-option *ngFor="let day of weekDaysList"
+                                                            [value]="day.value">
+                                                            {{ day.label }}
+                                                        </mat-option>
+                                                    </mat-select>
+                                                    <mat-error
+                                                        *ngIf="submitted && row.get('toDay')?.hasError('required')">
+                                                        Required
+                                                    </mat-error>
+                                                </mat-form-field>
+                                            </td>
+                                        </ng-container>
+
+                                        <!-- To Time Column -->
+                                        <ng-container matColumnDef="toTime">
+                                            <th mat-header-cell *matHeaderCellDef width="33%">To Time <span
+                                                    class="required">*</span></th>
+                                            <td mat-cell *matCellDef="let row; let i = index">
+                                                <mat-form-field appearance="outline" class="w-100">
+                                                    <!-- <mat-label>HH:MM</mat-label> -->
+                                                    <input placeholder="HH:MM" class="input-p-5" matInput type="time"
+                                                        [formControl]="row.get('toTime')" />
+                                                    <mat-error
+                                                        *ngIf="submitted && row.get('toTime')?.hasError('required')">
+                                                        Required
+                                                    </mat-error>
+                                                </mat-form-field>
+                                            </td>
+                                        </ng-container>
+
+                                        <!-- QoS Policy Column -->
+                                        <ng-container matColumnDef="qqsid">
+                                            <th mat-header-cell *matHeaderCellDef width="33%">Qos Policy <span
+                                                    class="required">*</span></th>
+                                            <td mat-cell *matCellDef="let row; let i = index">
+                                                <mat-form-field appearance="outline" class="w-100">
+                                                    <mat-select class="input-p-5" placeholder="Select Qos Policy"
+                                                        [formControl]="row.get('qqsid')">
+                                                        <!-- <mat-option>-- Select QoS Policy --</mat-option> -->
+                                                        <mat-option *ngFor="let policy of qosPolicyData"
+                                                            [value]="policy.id">
+                                                            {{ policy.name }}
+                                                        </mat-option>
+                                                    </mat-select>
+                                                    <mat-error
+                                                        *ngIf="submitted && row.get('qqsid')?.hasError('required')">
+                                                        Required
+                                                    </mat-error>
+                                                </mat-form-field>
+                                            </td>
+                                        </ng-container>
+
+                                        <!-- Access Column -->
+                                        <ng-container matColumnDef="access">
+                                            <th mat-header-cell *matHeaderCellDef style="width: 22%;">Access</th>
+                                            <td mat-cell *matCellDef="let row; let i = index"
+                                                style="padding-bottom: 32px;">
+                                                <mat-checkbox [formControl]="row.get('access')"
+                                                    style="width: 140px;"></mat-checkbox>
+                                            </td>
+                                        </ng-container>
+
+                                        <!-- Free Quota Column -->
+                                        <ng-container matColumnDef="isFreeQuota">
+                                            <th mat-header-cell *matHeaderCellDef style="width: 28%;">Free Quota</th>
+                                            <td mat-cell *matCellDef="let row; let i = index"
+                                                style="padding-bottom: 32px;">
+                                                <mat-checkbox [formControl]="row.get('isFreeQuota')"
+                                                    style="width: 140px;"></mat-checkbox>
+                                            </td>
+                                        </ng-container>
+
+                                        <!-- Action Column -->
+                                        <ng-container matColumnDef="action">
+                                            <th mat-header-cell *matHeaderCellDef style="width: 8rem">
+                                                <button mat-flat-button color="primary" class="button-normal"
+                                                    type="button" (click)="addNewRow()" matTooltip="Add Policy Detail">
+
+                                                    Add
+                                                </button>
+                                            </th>
+                                            <td mat-cell *matCellDef="let row; let i = index">
+                                                <button *ngIf="policyDetailsArray.length > 1" mat-icon-button
+                                                    color="warn" type="button" (click)="deleteConfirmArray(i)"
+                                                    matTooltip="Delete Row">
+                                                    <!-- <i class="fa fa-trash"></i> -->
+                                                    <i class="pi pi-trash icon-size"></i>
+                                                </button>
+                                            </td>
+                                        </ng-container>
+
+                                        <!-- Table Header and Rows -->
+                                        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                                        <tr mat-row
+                                            *matRowDef="let row; let rowIndex = index; columns: displayedColumns;"></tr>
+
+                                        <!-- Validation Error Row -->
+                                        <tr
+                                            *ngIf="submitted && policyDetailsArray.invalid && policyDetailsArray.length > 0">
+                                            <td [attr.colspan]="displayedColumns.length" class="error-row">
+                                                <div class="error text-danger">Please Enter All the Details.</div>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </mat-card-content>
+                    </mat-card>
+                </div>
+            </form>
+        </div>}
+
+        <!-- Dialog Actions -->
+        @if (createAccess || (editMode && editAccess)) {
+        <mat-dialog-actions align="end">
+            <button mat-flat-button color="primary" class="button-normal mr-10" type="button" (click)="savePolicy()">
+
+                {{ editMode ? "Update Policy" : "Add Policy" }}
+            </button>
+            <button mat-stroked-button type="button" class="button-normal" (click)="onCancel()">
+                Close
+            </button>
+        </mat-dialog-actions>}
+    </div>
+</ng-template>
+
+<ng-template #policyDetailsDialog let-dialogRef="dialogRef">
+    <div class="dialog-container">
+        <!-- Header -->
+        <div class="dialog-header">
+            Policy Detail
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="dialogRef.close()">
+                     <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <!-- Body -->
+        <div mat-dialog-content>
+            <div class="container-fluid">
+                <!-- Policy Info Section -->
+                <div style="margin-top: 0rem; margin-bottom: 2rem;padding: 12px;">
+                    <mat-card>
+                        <mat-card-header>
+                            <mat-card-title>Time Base Policy Parameters</mat-card-title>
+                        </mat-card-header>
+                        <mat-card-content>
+                            <div class="boxWhite" style="padding-left: 12px;">
+                                <div class="row">
+                                    <!-- Policy Name -->
+                                    <div class="col-md-4 col-sm-6">
+                                        <div class="field">
+                                            <span class="label-text f-w-600 f-s-15">Policy Name</span>
+                                            <span class="colon">:</span>
+                                            <span class="m-l-10">{{ policyDetails?.name }}</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Status -->
+                                    <div class="col-md-4 col-sm-6">
+                                        <div class="field">
+                                            <span class="label-text f-w-600 f-s-15">Status</span>
+                                            <span class="colon">:</span>
+                                            <span class="m-l-10">
+                                                @if (policyDetails?.status === 'Active') {
+                                                <span class="badge badge-success">Active</span>
+                                                } @else if (policyDetails?.status === 'Inactive') {
+                                                <span class="badge badge-danger">Inactive</span>
+                                                }
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <!-- MVNO ID (optional example) -->
+                                    <div class="col-md-4 col-sm-6" *ngIf="policyDetails?.mvnoId">
+                                        <div class="field">
+                                            <span class="label-text f-w-600 f-s-15">MVNO ID</span>
+                                            <span class="colon">:</span>
+                                            <span class="m-l-10">{{ policyDetails?.mvnoId }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </mat-card-content>
+                    </mat-card>
+                </div>
+
+
+                <!-- Mapping List Section -->
+                <div style="margin-top: 0rem; margin-bottom: 2rem;padding: 12px;">
+                    <!-- <legend>Policy Details Mapping List</legend> -->
+                    <!-- <span>Policy Details Mapping List</span> -->
+                    <mat-card>
+                        <mat-card-header>
+                            <mat-card-title>Policy Details Mapping List</mat-card-title>
+                        </mat-card-header>
+                        <mat-card-content>
+                            <div class="table-responsive tableViewScrollHeight example-container">
+                                <table mat-table [dataSource]="PolicyMappingDetails">
+
+                                    <!-- From Day -->
+                                    <ng-container matColumnDef="fromDay">
+                                        <th mat-header-cell *matHeaderCellDef class="table-header-title">From Day</th>
+                                        <td mat-cell *matCellDef="let data">{{ data.fromDay }}</td>
+                                    </ng-container>
+
+                                    <!-- From Time -->
+                                    <ng-container matColumnDef="fromTime">
+                                        <th mat-header-cell *matHeaderCellDef class="table-header-title">From Time</th>
+                                        <td mat-cell *matCellDef="let data">{{ data.fromTime }}</td>
+                                    </ng-container>
+
+                                    <!-- To Day -->
+                                    <ng-container matColumnDef="toDay">
+                                        <th mat-header-cell *matHeaderCellDef class="table-header-title">To Day</th>
+                                        <td mat-cell *matCellDef="let data">{{ data.toDay }}</td>
+                                    </ng-container>
+
+                                    <!-- To Time -->
+                                    <ng-container matColumnDef="toTime">
+                                        <th mat-header-cell *matHeaderCellDef class="table-header-title">To Time</th>
+                                        <td mat-cell *matCellDef="let data">{{ data.toTime }}</td>
+                                    </ng-container>
+
+                                    <!-- QoS -->
+                                    <ng-container matColumnDef="qos_name">
+                                        <th mat-header-cell *matHeaderCellDef class="table-header-title">QoS</th>
+                                        <td mat-cell *matCellDef="let data">{{ data.qos_name }}</td>
+                                    </ng-container>
+
+                                    <!-- Access -->
+                                    <ng-container matColumnDef="access">
+                                        <th mat-header-cell *matHeaderCellDef class="table-header-title">Access</th>
+                                        <td mat-cell *matCellDef="let data">
+                                            <mat-checkbox [checked]="data.access" [disabled]="true"></mat-checkbox>
+                                        </td>
+                                    </ng-container><ng-container matColumnDef="isFreeQuota">
+                                        <th mat-header-cell *matHeaderCellDef class="table-header-title">Free Quota</th>
+                                        <td mat-cell *matCellDef="let data">
+                                            <mat-checkbox [checked]="data.isFreeQuota" [disabled]="true"></mat-checkbox>
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- Table Rows -->
+                                    <tr mat-header-row
+                                        *matHeaderRowDef="['fromDay', 'fromTime', 'toDay', 'toTime', 'qos_name', 'access','isFreeQuota']">
+                                    </tr>
+                                    <tr mat-row
+                                        *matRowDef="let row; columns: ['fromDay', 'fromTime', 'toDay', 'toTime', 'qos_name', 'access','isFreeQuota']">
+                                    </tr>
+                                </table>
+                            </div>
+                        </mat-card-content>
+                    </mat-card>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <mat-dialog-actions align="end">
+            <button mat-stroked-button color="primary" class="button-normal" (click)="dialogRef.close()">
+                Close
+            </button>
+        </mat-dialog-actions>
+    </div>
+</ng-template>
+
+
+
+<!-- <div class="childComponent">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="panel top">
+        <div class="panel-heading">
+          <h3 class="panel-title">Time Base Policy Management</h3>
+          <div class="right">
+            <button
+              type="button"
+              class="btn-toggle-collapse"
+              data-toggle="collapse"
+              data-target="#timeBasePolicySearchPanel"
+              aria-expanded="false"
+              aria-controls="timeBasePolicySearchPanel"
+              >
+              <i class="fa fa-minus-circle"></i>
+            </button>
+          </div>
+        </div>
+        <div id="timeBasePolicySearchPanel" class="panel-collapse collapse in">
+          <div class="panel-body">
+            @if (!createtimePolicyFlag) {
+              <div class="searchForm">
+                <div class="row">
+                  <div class="col-lg-3 col-md-4">
+                    <input
+                      type="text"
+                      name="name"
+                      class="form-control"
+                      placeholder="Enter Policy Name"
+                      [(ngModel)]="searchName"
+                      (keydown.enter)="searchPolicyByName()"
+                      />
+                    </div>
+                    <div class="col-md-4">
+                      <button
+                        type="submit"
+                        class="btn btn-primary"
+                        data-title="Search Policy Details"
+                        data-toggle="tooltip"
+                        data-placement="bottom"
+                        (click)="searchPolicyByName()"
+                        >
+                        <i class="fa fa-search"></i>
+                        Search
+                      </button>
+                      &nbsp;
+                      <button
+                        type="reset"
+                        class="btn btn-default"
+                        data-title="Clear"
+                        data-toggle="tooltip"
+                        data-placement="bottom"
+                        (click)="clearSearchForm()"
+                        >
+                         <img src="assets/img/DashboardIcons/Refresh.svg" />
+                        Clear
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+            <div class="panel-body no-padding panel-udata">
+              @if (createAccess) {
+                <div
+                  class="col-md-6 pcol"
+              [ngClass]="{
+                'is-active': createtimePolicyFlag
+              }"
+                  >
+                  <div class="dbox">
+                    <a class="detailOnAnchorClick" (click)="CreateUpdatetimePolicy()">
+                      <img src="../../../assets/img/i01.png" style="width: 32px" />
+                      <h5>Create Policy</h5>
+                    </a>
+                  </div>
+                </div>
+              }
+              <div class="col-md-6 pcol">
+                <div class="dbox">
+                  <a class="detailOnAnchorClick" (click)="timePolicyListData()">
+                    <img src="../../../assets/img/i01.png" style="width: 32px" />
+                    <h5>Search Policy</h5>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      @if (!createtimePolicyFlag) {
+        <div class="col-md-12">
+          <div class="panel">
+            <div class="panel-heading">
+              <h3 class="panel-title">Time Base Policy</h3>
+              <div class="right">
+                <button
+                  type="button"
+                  class="btn-toggle-collapse"
+                  data-toggle="collapse"
+                  data-target="#timeBasePolicyTablePanel"
+                  aria-expanded="false"
+                  aria-controls="timeBasePolicyTablePanel"
+                  >
+                  <i class="fa fa-minus-circle"></i>
+                </button>
+              </div>
+            </div>
+            <div id="timeBasePolicyTablePanel" class="panel-collapse collapse in">
+              <div class="panel-body table-responsive">
+                <div>
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>Policy Name</th>
+                        <th>Status</th>
+                        <th>ISP Name</th>
+                        @if (deleteAccess || editAccess) {
+                          <th>Action</th>
+                        }
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (
+                        policy of filteredPolicyList
+                        | paginate
+                        : {
+                        id: 'listing_groupdata',
+                        itemsPerPage: itemsPerPage,
+                        currentPage: currentPage,
+                        totalItems: totalRecords
+                        }; track
+                        policy; let i = $index) {
+                        <tr
+                          >
+                          <td class="detailOnAnchorClick">
+                            <a
+                              (click)="getPolicyDetails(policy.id)"
+                              data-title="Click here to see Time Base Policy detail"
+                              data-toggle="modal"
+                              data-target="#policyDetailModal"
+                              style="color: #f7941e"
+                              >
+                              {{ policy.name }}
+                            </a>
+                          </td>
+                          <td>
+                            @if (policy.status == 'Active') {
+                              <div>
+                                <span class="badge badge-success">Active</span>
+                              </div>
+                            }
+                            @if (policy.status == 'Inactive') {
+                              <div>
+                                <span class="badge badge-danger">Inactive</span>
+                              </div>
+                            }
+                          </td>
+                          <td>{{ policy.mvnoName }}</td>
+                        
+                        @if (deleteAccess || editAccess) {
+                          <td class="btnAction">
+                            @if (editAccess) {
+                              <a
+                                type="button"
+                                data-title="Edit"
+                                data-toggle="tooltip"
+                                class="detailOnAnchorClick"
+                                (click)="editPolicyDetailById(policy.id)"
+                                >
+                              <img src="assets/img/DashboardIcons/Edit.svg" >
+                              </a>
+                            }
+                            @if (deleteAccess) {
+                              <a
+                                type="button"
+                                class="detailOnAnchorClick"
+                                data-title="Delete"
+                                data-toggle="tooltip"
+                                (click)="deleteConfirm(policy, i)"
+                                >
+                                 <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                              </a>
+                            }
+                          </td>
+                        }
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+                <br />
+                <div class="row">
+                  <div class="col-md-12" style="display: flex">
+                    <pagination-controls
+                      id="listing_groupdata"
+                      [maxSize]="10"
+                      [directionLinks]="true"
+                      previousLabel=""
+                      nextLabel=""
+                      (pageChange)="pageChanged($event)"
+                    ></pagination-controls>
+                    <div id="itemPerPageDropdown">
+                      <p-dropdown
+                        [options]="pageLimitOptions"
+                        optionLabel="value"
+                        optionValue="value"
+                        [(ngModel)]="showItemPerPage"
+                        (onChange)="TotalItemPerPage($event)"
+                      ></p-dropdown>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+    @if (createtimePolicyFlag) {
+      <div class="col-md-12">
+        @if (this.accessData.timeBasePolicy.createUpdateAccess) {
+          <div class="panel">
+            <div class="panel-heading">
+              <h3 class="panel-title">{{ editMode ? "Update" : "Create" }} Policy</h3>
+              <div class="right">
+                <button
+                  type="button"
+                  class="btn-toggle-collapse"
+                  data-toggle="collapse"
+                  data-target="#policyFormToggle"
+                  aria-expanded="false"
+                  aria-controls="policyFormToggle"
+                  >
+                  <i class="fa fa-minus-circle"></i>
+                </button>
+              </div>
+            </div>
+            <div id="policyFormToggle" class="panel-collapse collapse in">
+              <div class="panel-body">
+                <div class="panel-body">
+                  <form class="form-auth-small" [formGroup]="policyForm">
+                    <fieldset style="margin-top: 0rem; margin-bottom: 2rem">
+                      <legend>Time Base Policy Parameters</legend>
+                      <div class="boxWhite">
+                        <div class="row">
+                          <div class="col-lg-4 co-md-4 col-sm-7 col-xs-12">
+                            <label>Policy Name *</label>
+                            <input
+                              type="text"
+                              name="name"
+                              class="form-control"
+                              placeholder="Enter policy name"
+                              formControlName="name"
+                          [ngClass]="{
+                            'is-invalid': submitted && policyForm.controls.name.errors
+                          }"
+                              />
+                              @if (submitted && policyForm.controls.name.errors) {
+                                <div
+                                  class="errorWrap text-danger"
+                                  >
+                                  @if (submitted && policyForm.controls.name.errors.required) {
+                                    <div
+                                      class="error text-danger"
+                                      >
+                                      Please Enter Policy Name.
+                                    </div>
+                                  }
+                                  @if (submitted && policyForm.controls.name.errors?.cannotContainSpace) {
+                                    <div
+                                      class="position"
+                                      >
+                                      <p class="error">White space are not allowed.</p>
+                                    </div>
+                                  }
+                                </div>
+                              }
+                              <br />
+                            </div>
+                            <div class="col-lg-4 co-md-4 col-sm-7 col-xs-12">
+                              <div>
+                                <label>Status *</label>
+                                <p-dropdown
+                                  id="status"
+                                  [options]="status"
+                                  placeholder="Select Policy Status"
+                                  optionLabel="label"
+                                  optionValue="value"
+                                  formControlName="status"
+                            [ngClass]="{
+                              'is-invalid': submitted && policyForm.controls.status.errors
+                            }"
+                                ></p-dropdown>
+                                @if (submitted && policyForm.controls.status.errors) {
+                                  <div
+                                    class="errorWrap text-danger"
+                                    >
+                                    @if (submitted && policyForm.controls.status.errors.required) {
+                                      <div
+                                        class="error text-danger"
+                                        >
+                                        Please Select Status.
+                                      </div>
+                                    }
+                                  </div>
+                                }
+                              </div>
+                              <br />
+                            </div>
+                          </div>
+                        </div>
+                      </fieldset>
+                      <fieldset style="margin-top: 0rem; margin-bottom: 2rem">
+                        <legend>Policy Details Mapping List</legend>
+                        <div class="boxWhite">
+                         
+                        <div class="table-responsive">
+                          <p-table
+                            [value]="this.policyDetailsArray.controls"
+                            styleClass="p-datatable-gridlines"
+                            responsiveLayout="scroll"
+                            >
+                            <ng-template pTemplate="header">
+                              <tr>
+                                <th>From Day *</th>
+                                <th>From Time *</th>
+                                <th>To Day *</th>
+                                <th>To Time *</th>
+                                <th>Qos Policy *</th>
+                                <th>Access</th>
+                                <th>Free Quota</th>
+                                <th>
+                                  <button
+                                    id="addAtt"
+                                    style="object-fit: cover; padding: 5px 8px"
+                                    class="btn btn-primary"
+                                    (click)="onAddAttribute()"
+                                    >
+                                    <i class="fa fa-plus-square" aria-hidden="true"></i>
+                                    Add
+                                  </button>
+                                </th>
+                              </tr>
+                            </ng-template>
+                            <ng-template pTemplate="body" let-product let-rowIndex="rowIndex">
+                              <tr [formGroup]="product">
+                                <td>
+                                  <p-dropdown
+                                    id="fromDay"
+                                    [options]="weekDaysList"
+                                    appendTo="body"
+                                    placeholder="From Day"
+                                    optionLabel="label"
+                                    optionValue="value"
+                                    formControlName="fromDay"
+                                  ></p-dropdown>
+                                </td>
+                                <td>
+                                  <p-calendar
+                                    id="fromTime"
+                                    formControlName="fromTime"
+                                    appendTo="body"
+                                    placeholder="From Time"
+                                    [timeOnly]="true"
+                                  ></p-calendar>
+                                </td>
+                                <td>
+                                  <p-dropdown
+                                    id="toDay"
+                                    [options]="weekDaysList"
+                                    placeholder="To Day"
+                                    optionLabel="label"
+                                    appendTo="body"
+                                    optionValue="value"
+                                    formControlName="toDay"
+                                  ></p-dropdown>
+                                </td>
+                                <td>
+                                  <p-calendar
+                                    id="toTime"
+                                    placeholder="To Time"
+                                    appendTo="body"
+                                    [timeOnly]="true"
+                                    formControlName="toTime"
+                                  ></p-calendar>
+                                </td>
+                                <td>
+                                  <p-dropdown
+                                    [options]="qosPolicyData"
+                                    optionValue="id"
+                                    optionLabel="name"
+                                    filter="true"
+                                    filterBy="name"
+                                    placeholder="Select a Qos Policy"
+                                    formControlName="qqsid"
+                                  ></p-dropdown>
+                                 
+                                </td>
+                                <td>
+                                  <input type="checkbox" formControlName="access" />
+                                </td>
+                                <td>
+                                  <input type="checkbox" formControlName="isFreeQuota" />
+                                </td>
+                                <td>
+                                  @if (this.policyDetailsArray.length > 1) {
+                                    <a
+                                      id="deleteAtt"
+                                      (click)="this.deleteConfirmArray(rowIndex)"
+                                      >
+                                       <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                                    </a>
+                                  }
+                                </td>
+                              </tr>
+                              @if (submitted && product.invalid) {
+                                <tr>
+                                  <td>
+                                    <div class="error text-danger">Please Enter All the Details.</div>
+                                  </td>
+                                </tr>
+                              }
+                            </ng-template>
+                          </p-table>
+                          <br />
+                        </div>
+                      </div>
+                    </fieldset>
+                    <div class="addUpdateBtn">
+                      <button
+                        type="submit"
+                        class="btn btn-primary"
+                        data-title="Submit Details"
+                        data-toggle="tooltip"
+                        data-placement="bottom"
+                        (click)="savePolicy()"
+                        >
+                        <i class="fa fa-check-circle"></i>
+                        {{ editMode ? "Update Policy" : "Add Policy" }}
+                      </button>
+                      <br />
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div> -->
+<!-- <p-dialog
+  header="Policy Detail"
+  [(visible)]="showDialogue"
+  [style]="{ width: '50%' }"
+  [modal]="true"
+  [responsive]="true"
+  [draggable]="false"
+  [closable]="true"
+  (onHide)="closeModal()"
+  ><div class="modal-body">
+  <div class="container-fluid">
+    <fieldset style="margin-top: 0rem; margin-bottom: 2rem">
+      <legend>Time Base Policy Parameters</legend>
+      <div class="boxWhite">
+        <div class="row">
+          <div class="col-lg-4 co-md-4 col-sm-7 col-xs-12">
+            <label for="name">Policy Name :</label>
+            <label for="nameValue">
+              {{ this.policyDetails.name }}
+            </label>
+            <br />
+          </div>
+          <div class="col-lg-4 co-md-4 col-sm-7 col-xs-12">
+            <label for="status">Status :</label>
+            <label for="statusValue">
+              @if (this.policyDetails.status == 'Active') {
+                <span>
+                  <span class="badge badge-success" style="margin-left: 10px">Active</span>
+                </span>
+              }
+              @if (this.policyDetails.status == 'Inactive') {
+                <span>
+                  <span class="badge badge-danger" style="margin-left: 10px">Inactive</span>
+                </span>
+              }
+            </label>
+            <br />
+          </div>
+        </div>
+      </div>
+    </fieldset>
+
+    <fieldset style="margin-top: 0rem; margin-bottom: 2rem">
+      <legend>Policy Details Mapping List</legend>
+      <div class="boxWhite">
+        <table class="table map-table">
+          <thead>
+            <tr>
+              <th>From Day</th>
+              <th>From Time</th>
+              <th>To Day</th>
+              <th>To Time</th>
+              <th>QoS</th>
+              <th>Access</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (data of this.PolicyMappingDetails; track data; let index = $index) {
+              <tr>
+                <td>{{ data.fromDay }}</td>
+                <td>{{ data.fromTime }}</td>
+                <td>{{ data.toDay }}</td>
+                <td>{{ data.toTime }}</td>
+                <td>{{ data.qos_name }}</td>
+                <td>
+                  <input type="checkbox" [value]="data.access" [(ngModel)]="data.access" disabled />
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </fieldset>
+  </div>
+</div>
+</p-dialog> -->

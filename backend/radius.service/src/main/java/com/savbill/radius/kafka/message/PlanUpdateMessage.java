@@ -1,0 +1,14 @@
+package com.savbill.radius.kafka.message;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class PlanUpdateMessage {
+    private List<PlanUpdateCafApprovalMessage> planUpdateCafApprovalMessages;
+}

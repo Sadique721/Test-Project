@@ -1,0 +1,477 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+        http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <!-- ========================================================= -->
+    <!-- LIVE DIAMETER SESSION TABLE                               -->
+    <!-- Stores ACTIVE sessions only                               -->
+    <!-- ========================================================= -->
+    <changeSet id="tbl_diameter_live_session"
+               author="auto-generated">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="tbl_diameter_live_session"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="tbl_diameter_live_session">
+
+            <!-- ================================================= -->
+            <!-- SESSION IDENTIFICATION                            -->
+            <!-- ================================================= -->
+
+            <column name="SESSION_ID"
+                    type="VARCHAR(255)">
+                <constraints primaryKey="true"
+                             nullable="false"/>
+            </column>
+
+            <column name="TRANSACTION_ID"
+                    type="VARCHAR(100)"/>
+
+            <column name="CC_REQUEST_TYPE"
+                    type="VARCHAR(30)"/>
+
+            <!-- INITIAL_REQUEST / UPDATE_REQUEST -->
+
+            <column name="CC_REQUEST_NUMBER"
+                    type="BIGINT"/>
+
+            <column name="DIAMETER_INTERFACE"
+                    type="VARCHAR(20)"/>
+
+            <!-- GX/GY/RX/RO -->
+
+            <column name="SERVICE_TYPE"
+                    type="VARCHAR(30)"/>
+
+            <!-- DATA/VOICE/SMS/VIDEO -->
+
+            <column name="SERVICE_CONTEXT_ID"
+                    type="VARCHAR(255)"/>
+
+            <column name="RATING_GROUP"
+                    type="BIGINT"/>
+
+            <column name="SERVICE_IDENTIFIER"
+                    type="BIGINT"/>
+
+            <!-- ================================================= -->
+            <!-- SUBSCRIBER DETAILS                                -->
+            <!-- ================================================= -->
+
+            <column name="MSISDN"
+                    type="VARCHAR(30)"/>
+
+            <column name="IMSI"
+                    type="VARCHAR(30)"/>
+
+            <column name="IMEI"
+                    type="VARCHAR(30)"/>
+
+            <column name="CALLING_PARTY"
+                    type="VARCHAR(50)"/>
+
+            <column name="CALLED_PARTY"
+                    type="VARCHAR(50)"/>
+
+            <!-- ================================================= -->
+            <!-- NETWORK DETAILS                                   -->
+            <!-- ================================================= -->
+
+            <column name="IP_ADDRESS"
+                    type="VARCHAR(50)"/>
+
+            <column name="APN"
+                    type="VARCHAR(150)"/>
+
+            <column name="ORIGIN_HOST"
+                    type="VARCHAR(150)"/>
+
+            <column name="ORIGIN_REALM"
+                    type="VARCHAR(150)"/>
+
+            <column name="DESTINATION_HOST"
+                    type="VARCHAR(150)"/>
+
+            <column name="DESTINATION_REALM"
+                    type="VARCHAR(150)"/>
+
+            <!-- ================================================= -->
+            <!-- RX / IMS DETAILS                                  -->
+            <!-- ================================================= -->
+
+            <column name="MEDIA_TYPE"
+                    type="VARCHAR(50)"/>
+
+            <column name="SIP_METHOD"
+                    type="VARCHAR(30)"/>
+
+            <column name="AF_CHARGING_IDENTIFIER"
+                    type="VARCHAR(255)"/>
+
+            <column name="FLOW_STATUS"
+                    type="VARCHAR(50)"/>
+
+            <column name="CODEC"
+                    type="VARCHAR(100)"/>
+
+            <!-- ================================================= -->
+            <!-- POLICY / PCC                                      -->
+            <!-- ================================================= -->
+
+            <column name="POLICY_NAME"
+                    type="VARCHAR(100)"/>
+
+            <column name="CHARGING_RULE_BASE_NAME"
+                    type="VARCHAR(100)"/>
+
+            <column name="QOS_PROFILE"
+                    type="VARCHAR(100)"/>
+
+            <column name="QCI"
+                    type="INT"/>
+
+            <!-- ================================================= -->
+            <!-- LIVE USAGE COUNTERS                               -->
+            <!-- ================================================= -->
+
+            <column name="UPLINK_BYTES"
+                    type="BIGINT"
+                    defaultValue="0"/>
+
+            <column name="DOWNLINK_BYTES"
+                    type="BIGINT"
+                    defaultValue="0"/>
+
+            <column name="TOTAL_BYTES"
+                    type="BIGINT"
+                    defaultValue="0"/>
+
+            <column name="VOICE_SECONDS"
+                    type="BIGINT"
+                    defaultValue="0"/>
+
+            <column name="SMS_COUNT"
+                    type="BIGINT"
+                    defaultValue="0"/>
+
+            <column name="USED_UNITS"
+                    type="BIGINT"
+                    defaultValue="0"/>
+
+            <column name="GRANTED_UNITS"
+                    type="BIGINT"
+                    defaultValue="0"/>
+
+            <!-- ================================================= -->
+            <!-- SESSION STATUS                                    -->
+            <!-- ================================================= -->
+
+            <column name="SESSION_STATUS"
+                    type="VARCHAR(30)"
+                    defaultValue="ACTIVE"/>
+
+            <column name="ACTIVE_FLAG"
+                    type="BOOLEAN"
+                    defaultValueBoolean="true"/>
+
+            <column name="RESULT_CODE"
+                    type="INT"/>
+
+            <column name="STATUS"
+                    type="VARCHAR(30)"/>
+
+            <!-- ================================================= -->
+            <!-- SESSION TIMES                                     -->
+            <!-- ================================================= -->
+
+            <column name="START_TIME"
+                    type="TIMESTAMP"
+                    defaultValueComputed="CURRENT_TIMESTAMP"/>
+
+            <column name="LAST_UPDATE_TIME"
+                    type="TIMESTAMP"
+                    defaultValueComputed="CURRENT_TIMESTAMP"/>
+
+            <!-- ================================================= -->
+            <!-- AUDIT                                             -->
+            <!-- ================================================= -->
+
+            <column name="NODE_NAME"
+                    type="VARCHAR(100)"/>
+
+            <column name="POD_NAME"
+                    type="VARCHAR(100)"/>
+
+        </createTable>
+
+        <!-- ===================================================== -->
+        <!-- INDEXES                                               -->
+        <!-- ===================================================== -->
+
+        <createIndex tableName="tbl_diameter_live_session"
+                     indexName="idx_live_msisdn">
+            <column name="MSISDN"/>
+        </createIndex>
+
+        <createIndex tableName="tbl_diameter_live_session"
+                     indexName="idx_live_imsi">
+            <column name="IMSI"/>
+        </createIndex>
+
+        <createIndex tableName="tbl_diameter_live_session"
+                     indexName="idx_live_status">
+            <column name="SESSION_STATUS"/>
+        </createIndex>
+
+        <createIndex tableName="tbl_diameter_live_session"
+                     indexName="idx_live_interface">
+            <column name="DIAMETER_INTERFACE"/>
+        </createIndex>
+
+    </changeSet>
+
+    <changeSet id="alter_tbl_diameter_live_session_varchar_512"
+               author="Vimal Makwana">
+
+        <!-- SESSION IDENTIFICATION -->
+        <modifyDataType tableName="tbl_diameter_live_session"
+                        columnName="SESSION_ID"
+                        newDataType="VARCHAR(512)"/>
+
+        <modifyDataType tableName="tbl_diameter_live_session"
+                        columnName="TRANSACTION_ID"
+                        newDataType="VARCHAR(512)"/>
+
+        <modifyDataType tableName="tbl_diameter_live_session"
+                        columnName="CC_REQUEST_TYPE"
+                        newDataType="VARCHAR(512)"/>
+
+        <modifyDataType tableName="tbl_diameter_live_session"
+                        columnName="DIAMETER_INTERFACE"
+                        newDataType="VARCHAR(512)"/>
+
+        <modifyDataType tableName="tbl_diameter_live_session"
+                        columnName="SERVICE_TYPE"
+                        newDataType="VARCHAR(512)"/>
+
+        <modifyDataType tableName="tbl_diameter_live_session"
+                        columnName="SERVICE_CONTEXT_ID"
+                        newDataType="VARCHAR(512)"/>
+
+        <!-- SUBSCRIBER DETAILS -->
+
+        <modifyDataType tableName="tbl_diameter_live_session"
+                        columnName="MSISDN"
+                        newDataType="VARCHAR(512)"/>
+
+        <modifyDataType tableName="tbl_diameter_live_session"
+                        columnName="IMSI"
+                        newDataType="VARCHAR(512)"/>
+
+        <modifyDataType tableName="tbl_diameter_live_session"
+                        columnName="IMEI"
+                        newDataType="VARCHAR(512)"/>
+
+        <modifyDataType tableName="tbl_diameter_live_session"
+                        columnName="CALLING_PARTY"
+                        newDataType="VARCHAR(512)"/>
+
+        <modifyDataType tableName="tbl_diameter_live_session"
+                        columnName="CALLED_PARTY"
+                        newDataType="VARCHAR(512)"/>
+
+        <!-- NETWORK DETAILS -->
+
+        <modifyDataType tableName="tbl_diameter_live_session"
+                        columnName="IP_ADDRESS"
+                        newDataType="VARCHAR(512)"/>
+
+        <modifyDataType tableName="tbl_diameter_live_session"
+                        columnName="APN"
+                        newDataType="VARCHAR(512)"/>
+
+        <modifyDataType tableName="tbl_diameter_live_session"
+                        columnName="ORIGIN_HOST"
+                        newDataType="VARCHAR(512)"/>
+
+        <modifyDataType tableName="tbl_diameter_live_session"
+                        columnName="ORIGIN_REALM"
+                        newDataType="VARCHAR(512)"/>
+
+        <modifyDataType tableName="tbl_diameter_live_session"
+                        columnName="DESTINATION_HOST"
+                        newDataType="VARCHAR(512)"/>
+
+        <modifyDataType tableName="tbl_diameter_live_session"
+                        columnName="DESTINATION_REALM"
+                        newDataType="VARCHAR(512)"/>
+
+        <!-- RX / IMS DETAILS -->
+
+        <modifyDataType tableName="tbl_diameter_live_session"
+                        columnName="MEDIA_TYPE"
+                        newDataType="VARCHAR(512)"/>
+
+        <modifyDataType tableName="tbl_diameter_live_session"
+                        columnName="SIP_METHOD"
+                        newDataType="VARCHAR(512)"/>
+
+        <modifyDataType tableName="tbl_diameter_live_session"
+                        columnName="AF_CHARGING_IDENTIFIER"
+                        newDataType="VARCHAR(512)"/>
+
+        <modifyDataType tableName="tbl_diameter_live_session"
+                        columnName="FLOW_STATUS"
+                        newDataType="VARCHAR(512)"/>
+
+        <modifyDataType tableName="tbl_diameter_live_session"
+                        columnName="CODEC"
+                        newDataType="VARCHAR(512)"/>
+
+        <!-- POLICY / PCC -->
+
+        <modifyDataType tableName="tbl_diameter_live_session"
+                        columnName="POLICY_NAME"
+                        newDataType="VARCHAR(512)"/>
+
+        <modifyDataType tableName="tbl_diameter_live_session"
+                        columnName="CHARGING_RULE_BASE_NAME"
+                        newDataType="VARCHAR(512)"/>
+
+        <modifyDataType tableName="tbl_diameter_live_session"
+                        columnName="QOS_PROFILE"
+                        newDataType="VARCHAR(512)"/>
+
+        <!-- SESSION STATUS -->
+
+        <modifyDataType tableName="tbl_diameter_live_session"
+                        columnName="SESSION_STATUS"
+                        newDataType="VARCHAR(512)"/>
+
+        <modifyDataType tableName="tbl_diameter_live_session"
+                        columnName="STATUS"
+                        newDataType="VARCHAR(512)"/>
+
+        <!-- AUDIT -->
+
+        <modifyDataType tableName="tbl_diameter_live_session"
+                        columnName="NODE_NAME"
+                        newDataType="VARCHAR(512)"/>
+
+        <modifyDataType tableName="tbl_diameter_live_session"
+                        columnName="POD_NAME"
+                        newDataType="VARCHAR(512)"/>
+
+    </changeSet>
+
+
+    <!-- ========================================================= -->
+    <!-- LIVE SESSION : NAS IP / IP DETAILS / PLAN DETAILS         -->
+    <!-- ========================================================= -->
+    <changeSet id="alter_tbl_diameter_live_session_add_plan_fields"
+               author="Vimal Makwana">
+
+        <preConditions onFail="MARK_RAN"
+                       onError="MARK_RAN">
+
+            <and>
+                <not>
+                    <columnExists tableName="tbl_diameter_live_session"
+                                  columnName="NAS_IP_ADDRESS"/>
+                </not>
+
+                <not>
+                    <columnExists tableName="tbl_diameter_live_session"
+                                  columnName="IPV4_ADDRESS"/>
+                </not>
+
+                <not>
+                    <columnExists tableName="tbl_diameter_live_session"
+                                  columnName="IPV6_ADDRESS"/>
+                </not>
+
+                <not>
+                    <columnExists tableName="tbl_diameter_live_session"
+                                  columnName="CURRENT_PLAN"/>
+                </not>
+
+                <not>
+                    <columnExists tableName="tbl_diameter_live_session"
+                                  columnName="PLAN_START_DATE"/>
+                </not>
+
+                <not>
+                    <columnExists tableName="tbl_diameter_live_session"
+                                  columnName="PLAN_EXPIRY_DATE"/>
+                </not>
+
+            </and>
+
+        </preConditions>
+
+        <addColumn tableName="tbl_diameter_live_session">
+
+            <column name="NAS_IP_ADDRESS"
+                    type="VARCHAR(512)"/>
+
+            <column name="IPV4_ADDRESS"
+                    type="VARCHAR(50)"/>
+
+            <column name="IPV6_ADDRESS"
+                    type="VARCHAR(100)"/>
+
+            <column name="CURRENT_PLAN"
+                    type="VARCHAR(512)"/>
+
+            <column name="PLAN_START_DATE"
+                    type="TIMESTAMP"/>
+
+            <column name="PLAN_EXPIRY_DATE"
+                    type="TIMESTAMP"/>
+
+        </addColumn>
+
+    </changeSet>
+    
+    <changeSet id="add-geo-fields-to-diameter_live_session" author="Vimal Makwana">
+	    <addColumn tableName="tbl_diameter_live_session">
+	
+	        <column name="geo_type" type="VARCHAR(25)">
+	            <constraints nullable="true"/>
+	        </column>
+	
+	        <column name="mcc" type="VARCHAR(25)">
+	            <constraints nullable="true"/>
+	        </column>
+	
+	        <column name="mnc" type="VARCHAR(25)">
+	            <constraints nullable="true"/>
+	        </column>
+	
+	        <column name="tac" type="VARCHAR(25)">
+	            <constraints nullable="true"/>
+	        </column>
+	
+	        <column name="eci" type="VARCHAR(25)">
+	            <constraints nullable="true"/>
+	        </column>
+	
+	        <column name="enodeb_id" type="VARCHAR(25)">
+	            <constraints nullable="true"/>
+	        </column>
+	
+	        <column name="cell_id" type="VARCHAR(25)">
+	            <constraints nullable="true"/>
+	        </column>
+	
+	    </addColumn>
+	</changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,3342 @@
+<mat-tab-group [(selectedIndex)]="activeTabIndex" (selectedTabChange)="onTabChange($event)"
+    style="margin-bottom : 1.5rem">
+    @if (batchPaymentAccess) { <mat-tab label="Batch Payment"></mat-tab>}
+    <mat-tab label="Search Payment"></mat-tab>
+    <mat-tab label="Online Payment Audit"></mat-tab>
+</mat-tab-group>
+
+
+@if (ifPaymentList) {
+<div class="row header-row p-0 m-0">
+    <mat-card class="cardWithShadow w-100">
+        <mat-accordion class="w-100">
+            <mat-expansion-panel [(expanded)]="searchPanelExpanded" class="cardWithShadow w-100">
+                <mat-expansion-panel-header class="dialog-header">
+                    <mat-panel-title class="heading-title">
+                        <mat-card-title class="m-0 f-w-700 f-s-16"> {{ ifAddbatchData ? (BatchName + ' Add New Mapping
+                            Data') : panelTitle }}
+                        </mat-card-title>
+                    </mat-panel-title>
+                </mat-expansion-panel-header>
+                <mat-card-content class="mat-card-content-border">
+                    <div class="row">
+                        <!-- Customer -->
+                        <div class="col-md-4"><label class="inputLabel">Customer</label>
+                            <div class="d-flex">
+                                <mat-form-field appearance="outline" style="width: 100%">
+                                    <mat-select placeholder="Select a Customer" [disabled]="true"
+                                        [(ngModel)]="customerid">
+                                        <mat-option *ngFor="let c of parentCustList" [value]="c.id">
+                                            {{ c.title }} {{ c.name }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                                <button mat-icon-button color="primary" type="button"
+                                    (click)="modalOpenParentCustomer()">
+                                    <img src="assets/img/DashboardIcons/Add.svg">
+
+                                </button>
+                                <button mat-icon-button color="primary" type="button" (click)="removeSelParentCust()"
+                                    [disabled]="!customerid">
+                                    <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Pay From Date -->
+                        <div class="col-md-4"><label class="inputLabel">Pay From Date</label>
+                            <mat-form-field appearance="outline" style="width: 100%;">
+                                <input matInput [matDatepicker]="payFromPicker" [(ngModel)]="payfromdate"
+                                    (keydown.enter)="searchPayment('')" placeholder="Select Date" />
+                                <mat-datepicker-toggle matSuffix [for]="payFromPicker"></mat-datepicker-toggle>
+                                <mat-datepicker #payFromPicker></mat-datepicker>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Pay To Date -->
+                        <div class="col-md-4"><label class="inputLabel">Pay To Date</label>
+                            <mat-form-field appearance="outline" style="width: 100%;">
+                                <input matInput [matDatepicker]="payToPicker" [(ngModel)]="paytodate"
+                                    (keydown.enter)="searchPayment('')" placeholder="Select Date" />
+                                <mat-datepicker-toggle matSuffix [for]="payToPicker"></mat-datepicker-toggle>
+                                <mat-datepicker #payToPicker></mat-datepicker>
+                            </mat-form-field>
+                        </div>
+
+
+                        <!-- Pay Status -->
+                        <div class="col-md-4"><label class="inputLabel">Pay Status</label>
+                            <div class="d-flex">
+                                <mat-form-field appearance="outline" style="width: 100%">
+                                    <mat-select placeholder="Select a Pay Status" [(ngModel)]="paystatus"
+                                        (keydown.enter)="searchPayment('')">
+                                        <mat-option *ngFor="let s of payStatus" [value]="s.value">{{ s.label
+                                            }}</mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+
+                                <button matTooltip="Clear" mat-icon-button color="primary" type="button"
+                                    (click)="clearPayStatus()">
+                                    <img src="assets/img/DashboardIcons/Reject.svg">
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Cheque Number -->
+                        <div class="col-md-4"><label class="inputLabel">Cheque Number</label>
+                            <mat-form-field appearance="outline" style="width: 100%">
+                                <input matInput [(ngModel)]="chequeNumber" placeholder="Enter a Cheque Number"
+                                    (keydown.enter)="searchPayment('')" />
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Invoice Number -->
+                        <!-- <div class="col-md-4"><label class="inputLabel">Invoice Number</label>
+                    <mat-form-field appearance="outline" style="width: 100%">
+                        <input matInput [(ngModel)]="invoiceNumber" placeholder="Enter a Invoice Number"
+                            (keydown.enter)="searchPayment('')" />
+                    </mat-form-field>
+                </div> -->
+                        <!-- Staff -->
+                        <div class="col-md-4"><label class="inputLabel">Created By Staff</label>
+                            <div class="d-flex">
+                                <mat-form-field appearance="outline" style="width: 100%">
+                                    <mat-select placeholder="Select a Created By Staff" [disabled]="true"
+                                        [(ngModel)]="staffid">
+                                        <mat-option *ngFor="let s of staffCustList" [value]="s.id">
+                                            {{ s.title }} {{ s.name }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                                <button mat-icon-button color="primary" type="button" (click)="modalOpenStaff()">
+                                    <img src="assets/img/DashboardIcons/Add.svg">
+
+
+                                </button>
+                                <button mat-icon-button color="primary" type="button" (click)="removeSelStaff()"
+                                    [disabled]="!staffid">
+                                    <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Payment Mode -->
+                        <div class="col-md-4"><label class="inputLabel">Payment Mode</label>
+                            <mat-form-field appearance="outline" style="width: 100%">
+                                <mat-select placeholder="Select a Payment Mode" [(ngModel)]="paymode"
+                                    (selectionChange)="getPaymentMode()">
+                                    <mat-option *ngFor="let p of paymentMode" [value]="p.value">{{ p.text
+                                        }}</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Service Area -->
+                        <div class="col-md-4"><label class="inputLabel">Service Area</label>
+                            <mat-form-field appearance="outline" style="width: 100%">
+                                <mat-select placeholder="Select a Service Area" [(ngModel)]="serviceAreaId">
+                                    <mat-option *ngFor="let a of commondropdownService.serviceAreaList" [value]="a.id">
+                                        {{ a.name }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Branch / Partner -->
+                        <!-- <div class="col-md-4" *ngIf="partnerId == 1"><label class="inputLabel">Branch</label>
+                    <mat-form-field appearance="outline" style="width: 100%">
+                        <mat-select placeholder="Select a Branch" [(ngModel)]="branchName">
+                            <mat-option *ngFor="let b of commondropdownService.branchesByServiceArea" [value]="b.name">
+                                {{ b.name }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div> -->
+
+                        <div class="col-md-4" *ngIf="partnerId != 1"><label class="inputLabel">Partner</label>
+                            <mat-form-field appearance="outline" style="width: 100%">
+                                <mat-select placeholder="Select a Partner" [(ngModel)]="partnerName">
+                                    <mat-option *ngFor="let p of commondropdownService.partnerAllNAme" [value]="p.name">
+                                        {{ p.name }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Transaction Number -->
+                        <div class="col-md-4"><label class="inputLabel">Transaction Number</label>
+                            <mat-form-field appearance="outline" style="width: 100%">
+                                <input matInput [(ngModel)]="referenceno" placeholder="Enter a Transaction Number"
+                                    (keydown.enter)="searchPayment('')" />
+                            </mat-form-field>
+                        </div>
+                        <!-- <div class="col-md-4"><label class="inputLabel">Business Unit</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-select placeholder="Select a Business Unit" [(ngModel)]="buid"
+                            (selectionChange)="getBusinessUnit()" (keydown.enter)="searchPayment('')">
+                            <mat-option>
+                                <ngx-mat-select-search [placeholderLabel]="'Search...'"
+                                    [noEntriesFoundLabel]="'No results found'"></ngx-mat-select-search>
+                            </mat-option>
+                            <mat-option *ngFor="let unit of businessUnit" [value]="unit.id">
+                                {{ unit.buname }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div> -->
+
+
+                        <!-- Assigned Staff -->
+                        <div class="col-md-4"><label class="inputLabel">Assigned to Staff</label>
+                            <div class="d-flex">
+                                <mat-form-field appearance="outline" style="width: 100%">
+                                    <mat-select placeholder="Select a Assigned to Staff" [disabled]="true"
+                                        [(ngModel)]="approveId">
+                                        <mat-option *ngFor="let s of selectApproveList" [value]="s.id">
+                                            {{ s.title }} {{ s.name }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                                <button mat-icon-button color="primary" type="button" (click)="modalOpenApprove()">
+                                    <img src="assets/img/DashboardIcons/Add.svg">
+
+
+                                </button>
+                                <button mat-icon-button color="primary" type="button" (click)="removeSelAssigned()"
+                                    [disabled]="!approveId">
+                                    <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Receipt Number -->
+                        <!-- <div class="col-md-4"><label class="inputLabel">Receipt Number</label>
+                    <mat-form-field appearance="outline" style="width: 100%">
+                        <input matInput [(ngModel)]="receiptNo" placeholder="Enter a Receipt Number"
+                            (keydown.enter)="searchPayment('')" />
+                    </mat-form-field>
+                </div> -->
+
+                        <!-- Cheque Date -->
+                        <!-- <div class="col-md-4"><label class="inputLabel">Cheque Date</label>
+                    <mat-form-field appearance="outline" style="width: 100%;">
+                        <input matInput [matDatepicker]="chequePicker" placeholder="Enter a Cheque Date"
+                            [(ngModel)]="chequedate" (keydown.enter)="searchPayment('')" />
+                        <mat-datepicker-toggle matSuffix [for]="chequePicker"></mat-datepicker-toggle>
+                        <mat-datepicker #chequePicker></mat-datepicker>
+                    </mat-form-field>
+                </div> -->
+
+
+                        <!-- Bank -->
+                        <!-- <div class="col-md-4"><label class="inputLabel">Bank</label>
+                    <mat-form-field appearance="outline" style="width: 100%">
+                        <mat-select placeholder="Select a Bank" [(ngModel)]="paydetails1">
+                            <mat-option value="">Select Source Bank</mat-option>
+                            <mat-option *ngFor="let bank of bankDataList" [value]="bank.bankname">
+                                {{ bank.bankname }} - {{ bank.accountnum }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div> -->
+
+                        <!-- Destination Bank -->
+                        <!-- <div class="col-md-4"><label class="inputLabel">Destination Bank</label>
+                    <mat-form-field appearance="outline" style="width: 100%">
+                        <mat-select placeholder="Select a Destination Bank" [(ngModel)]="destinationBank">
+                            <mat-option value="">Select Destination Bank</mat-option>
+                            <mat-option *ngFor="let b of bankDestination" [value]="b.bankname">
+                                {{ b.bankname }} - {{ b.accountnum }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div> -->
+
+
+                    </div>
+                    <div class="d-flex w-100 justify-content-center align-items-center" style="gap:8px">
+                        <button mat-button mat-flat-button color="'primary'" class="button-normal m-r-10" type="submit"
+                            type="submit" (click)="manualSearch()">
+                            Search Payment
+                        </button>
+                        <button mat-stroked-button matButton="outlined" class="button-normal " (click)="clearPayment()">
+                            Clear
+                        </button>
+                    </div>
+                </mat-card-content>
+            </mat-expansion-panel>
+        </mat-accordion>
+    </mat-card>
+</div>
+@if (isPaymentSearch && !searchPanelExpanded) {
+<div class="row header-row p-0 m-0">
+    <mat-card class="cardWithShadow w-100">
+        <mat-card-header>
+            <mat-card-title>{{ ifAddbatchData ? (BatchName + ' Add New Mapping Data') : 'Payment List'
+                }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="mat-card-content-border">
+            @if (!ifAddbatchData && createBatchAccess) {
+            <div style="margin: 2rem 12px">
+                <button type="submit" cmat-button mat-flat-button color="'primary'" class="addarea-btn" type="submit"
+                    class="addarea-btn" type="submit" matTooltip="Create Batch Name" (click)="clearBatchName()"
+                    [disabled]="chakedPaymentData.length == 0">
+                    Create Batch
+                </button>
+            </div>
+            }
+            @if (ifAddbatchData) {
+            <div style="margin: 2rem 12px">
+                <button mat-button mat-flat-button color="'primary'" class="addarea-btn" type="submit"
+                    class="addarea-btn" type="submit" matTooltip="Add New Batch Mapping Data"
+                    (click)="addBatchPaymentMapping()">
+                    Add New Batch Mapping Data
+                </button>
+            </div>
+            }
+            @if (displayInvoiceDetails) {
+            <app-payment-amount-model dialogId="PaymentDetailModal" [paymentId]="paymentId"
+                (closeParentCustt)="closeParentCust()"></app-payment-amount-model>
+            }
+            @if (ifModelIsShow) {
+            <app-workflow-audit-details-modal [auditcustid]="auditcustid" dialogId="custauditWorkflowModal"
+                (closeParentCustt)="closeParentCustt()"></app-workflow-audit-details-modal>
+            }
+        </mat-card-content>
+        <div class="example-container mat-elevation-z8" tabindex="0">
+
+            <div class="row display-amountSelected">
+                <div class="col-lg-2 col-md-2 col-sm-4 col-xs-12 dataGroup">
+                    <label class="datalbl f-s-15 f-w-700">Total Selected :</label>
+                    <span> {{ this.totalCheckedPayments.totalSelPayments }} </span>
+                </div>
+                <div class="col-lg-2 col-md-2 col-sm-4 col-xs-12 dataGroup">
+                    <label class="datalbl f-s-15 f-w-700">Total Amount :</label>
+                    <span> {{ this.totalCheckedPayments.totalAmount }} </span>
+                </div>
+            </div>
+
+            <table mat-table [dataSource]="searchPaymentData">
+
+                <!-- Master Checkbox Column -->
+                <ng-container matColumnDef="select" sticky>
+                    <th mat-header-cell *matHeaderCellDef>
+                        <mat-checkbox [(ngModel)]="ispaymentChecked" (change)="allSelectBatch($event)"
+                            [disabled]="!ifAddbatchData">
+                        </mat-checkbox>
+                    </th>
+                    <td mat-cell *matCellDef="let payment">
+                        <mat-checkbox [(ngModel)]="payment.isSinglepaymentChecked"
+                            (change)="addbatchChecked(payment.id, $event)" [disabled]="
+                  payment.status === 'approved' ||
+                  payment.status === 'rejected' ||
+                  payment.batchAssigned === true ||
+                  payment.approverid !== staffID
+                ">
+                        </mat-checkbox>
+                    </td>
+                </ng-container>
+
+                <!-- Customer -->
+                <ng-container matColumnDef="customerName" sticky>
+                    <th mat-header-cell *matHeaderCellDef>Customer Name</th>
+                    <td mat-cell *matCellDef="let payment">
+                        <a href="javascript:void(0)" class="text-primary text-decoration-none cursor_pointer"
+                            (click)="openModal('custmerDetailModal', payment.custId)">
+                            {{ payment.customerName ?? '-' }}
+                        </a>
+                    </td>
+                </ng-container>
+                <ng-container matColumnDef="paytype">
+                    <th mat-header-cell *matHeaderCellDef>Pay Type</th>
+                    <td mat-cell *matCellDef="let payment">
+                        {{ payment.paytype ?? '-' }}
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="paymode">
+                    <th mat-header-cell *matHeaderCellDef>Pay Mode</th>
+                    <td mat-cell *matCellDef="let payment">
+                        <ng-container *ngIf="payment.paymode === 'Cheque'; else otherMode">
+                            <a class="text-primary" (click)="openPaymentModal(payment.id)">
+                                {{ payment.paymode ?? '-' }}
+                            </a>
+                        </ng-container>
+                        <ng-template #otherMode>
+                            <span>{{ payment.paymode ?? '-' }}</span>
+                        </ng-template>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="paymentreferenceno">
+                    <th mat-header-cell *matHeaderCellDef>Transaction Number</th>
+                    <td mat-cell *matCellDef="let payment">{{ payment.paymentreferenceno ?? '-' }}</td>
+                </ng-container>
+                <ng-container matColumnDef="status">
+                    <th mat-header-cell *matHeaderCellDef>Status</th>
+                    <td mat-cell *matCellDef="let payment">
+                        <span class="badge" [ngClass]="{
+                                      'badge-success': payment.status === 'Fully Adjusted' || payment.status === 'approved' || payment.status === 'advance' || payment.status === 'Partialy Adjusted',
+                                      'badge-info': payment.status === 'pending',
+                                      'badge-danger': payment.status === 'rejected'
+                                    }">
+                            {{
+                            payment.status
+                            }}
+                        </span>
+                    </td>
+                </ng-container>
+
+                <!-- Amount -->
+                <ng-container matColumnDef="amount">
+                    <th mat-header-cell *matHeaderCellDef style="width:7%">Amount</th>
+                    <td mat-cell *matCellDef="let payment">
+                        <span class="cursor_pointer" class="text-primary"
+                            (click)="openPaymentInvoiceModal('PaymentDetailModal', payment.id)">
+                            {{
+                            payment?.amount
+                            | currency: payment?.currency || currency : 'symbol' : '1.2-2'
+                            }}
+                        </span>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="adjustedAmount">
+                    <th mat-header-cell *matHeaderCellDef>Adjusted Amount</th>
+                    <td mat-cell *matCellDef="let payment">
+                        {{ payment.adjustedAmount ?? '-' }}
+                    </td>
+                </ng-container>
+
+                <!-- Receipt / Credit Note -->
+                <ng-container matColumnDef="createdate">
+                    <th mat-header-cell *matHeaderCellDef>Created Date</th>
+                    <td mat-cell *matCellDef="let payment">{{ payment.createdate ?? '-' }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="createbyname">
+                    <th mat-header-cell *matHeaderCellDef>Payment By</th>
+                    <td mat-cell *matCellDef="let payment">{{ payment.createbyname ?? '-' }}</td>
+                </ng-container>
+
+                <!-- Invoice No -->
+                <!-- <ng-container matColumnDef="invoiceNumber">
+                    <th mat-header-cell *matHeaderCellDef>Invoice No.</th>
+                    <td mat-cell *matCellDef="let payment">{{ payment.invoiceNumber }}</td>
+                </ng-container> -->
+
+                <!-- Cheque No -->
+                <!-- <ng-container matColumnDef="paydetails2">
+                    <th mat-header-cell *matHeaderCellDef>Cheque No.</th>
+                    <td mat-cell *matCellDef="let payment">{{ payment.paydetails2 }}</td>
+                </ng-container> -->
+
+                <!-- TDS -->
+                <!-- <ng-container matColumnDef="tdsamount">
+                    <th mat-header-cell *matHeaderCellDef>TDS</th>
+                    <td mat-cell *matCellDef="let payment">{{ payment.tdsamount }}</td>
+                </ng-container> -->
+
+                <!-- ABBS -->
+                <!-- <ng-container matColumnDef="abbsAmount">
+                    <th mat-header-cell *matHeaderCellDef>ABBS</th>
+                    <td mat-cell *matCellDef="let payment">{{ payment.abbsAmount }}</td>
+                </ng-container> -->
+
+                <!-- Reference No -->
+                <!-- <ng-container matColumnDef="referenceno">
+                    <th mat-header-cell *matHeaderCellDef>Reference No.</th>
+                    <td mat-cell *matCellDef="let payment">{{ payment.referenceno }}</td>
+                </ng-container> -->
+
+                <!-- Attachment -->
+                <!-- <ng-container matColumnDef="attachment">
+                    <th mat-header-cell *matHeaderCellDef>Attachment</th>
+                    <td mat-cell *matCellDef="let payment">
+                        <a (click)="downloadFile(payment.filename, payment.id, payment.custId)"
+                            href="javascript:void(0)" style="color:blue">
+                            {{ payment.filename ? payment.filename : '-' }}
+                        </a>
+                    </td>
+                </ng-container> -->
+
+                <!-- Pay Mode -->
+
+
+                <!-- Type -->
+                <!-- <ng-container matColumnDef="type">
+                    <th mat-header-cell *matHeaderCellDef>Type</th>
+                    <td mat-cell *matCellDef="let payment">{{ payment.type }}</td>
+                </ng-container> -->
+
+                <!-- Payment Date -->
+                <!-- <ng-container matColumnDef="paymentdate">
+                    <th mat-header-cell *matHeaderCellDef>Payment Date</th>
+                    <td mat-cell *matCellDef="let payment">{{ payment.paymentdate }}</td>
+                </ng-container> -->
+
+                <!-- Status -->
+
+
+                <!-- ISP Name -->
+                <!-- <ng-container matColumnDef="mvnoName">
+                    <th mat-header-cell *matHeaderCellDef>ISP Name</th>
+                    <td mat-cell *matCellDef="let payment">{{ payment.mvnoName }}</td>
+                </ng-container> -->
+
+                <!-- Actions -->
+                <ng-container matColumnDef="actions" stickyEnd>
+                    <th mat-header-cell *matHeaderCellDef>Action</th>
+                    <td mat-cell *matCellDef="let payment" class="btnAction">
+                        <div class="d-flex">
+                            <button mat-icon-button matTooltip="Download" (click)="downloadreceipt(payment.id)"
+                                [disabled]="payment.status === 'pending' || payment.status === 'rejected'">
+                                <img src="assets/img/DashboardIcons/Document Download.svg" width="25" height="25" />
+                            </button>
+
+                            <button mat-icon-button matTooltip="Pick" (click)="pickModalOpen(payment)" [disabled]="
+                        payment.status === 'Fully Adjusted' ||
+                        payment.status === 'advance' ||
+                        payment.status === 'approved' ||
+                        payment.status === 'Partialy Adjusted' ||
+                        payment.status === 'rejected' ||
+                        payment.approverid != null">
+                                <img src="assets/img/DashboardIcons/Pick-ticket-to-resolve.svg" />
+                            </button>
+
+                            <button mat-icon-button matTooltip="Approve" (click)="approveModalOpen(payment)" [disabled]="
+                        payment.status === 'Fully Adjusted' ||
+                        payment.status === 'advance' ||
+                        payment.status === 'approved' ||
+                        payment.status === 'Partialy Adjusted' ||
+                        payment.status === 'rejected' ||
+                        payment.batchAssigned === true ||
+                        payment.approverid !== staffID">
+                                <img src="assets/img/DashboardIcons/Assign.svg" />
+                            </button>
+
+                            <button mat-icon-button matTooltip="Reject" (click)="rejectModalOpen(payment)" [disabled]="
+                        payment.status === 'Partialy Adjusted' ||
+                        payment.status === 'approved' ||
+                        payment.status === 'advance' ||
+                        payment.status === 'Fully Adjusted' ||
+                        payment.status === 'rejected' ||
+                        payment.batchAssigned === true ||
+                        payment.approverid !== staffID">
+                                <img src="assets/img/DashboardIcons/Reject.svg" />
+                            </button>
+
+                            <button mat-icon-button matTooltip="Audit & Status Details"
+                                (click)="openPaymentWorkFlow('custauditWorkflowModal', payment.id)">
+                                <img width="25" height="25"
+                                    src="assets/img/DashboardIcons/WorkFlow status Details.svg" />
+                            </button>
+
+                            <button *ngIf="reassignAccess &&
+                !(payment.status === 'Partialy Adjusted' ||
+                  payment.status === 'Fully Adjusted' ||
+                  payment.status === 'approved' ||
+                  payment.status === 'rejected')" mat-icon-button matTooltip="Reassign Payment"
+                                (click)="StaffReasignList(payment.id)" [disabled]="payment.approverid !== staffID">
+                                <img width="32" height="32" src="assets/img/DashboardIcons/send-svgrepo-com 1.svg" />
+
+
+                            </button>
+                        </div>
+                    </td>
+                </ng-container>
+
+                <!-- Header and Row declarations -->
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+        </div>
+        <mat-paginator [length]="paymenttotalRecords" [pageSize]="paymentitemsPerPage"
+            [pageSizeOptions]="[5,10,20,50,100]" (page)="pageChangedPaymentList($event)" showFirstLastButtons>
+        </mat-paginator>
+
+
+
+    </mat-card>
+</div>
+}
+<!-- <div class="row">
+   <div class="col-md-12">
+        <div class="panel">
+            <div class="panel-heading">
+                <div class="right">
+                    <button type="button" class="btn-toggle-collapse" data-toggle="collapse"
+                        data-target="#searchPayment" aria-expanded="false" aria-controls="searchPayment">
+                        <i class="fa fa-minus-circle"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="searchPayment" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-lg-2">
+                            <label>Customer</label>
+                            <div>
+                                <p-dropdown [disabled]="true" [options]="parentCustList" [showClear]="true"
+                                    [filter]="true" filterBy="name" [(ngModel)]="customerid" optionLabel="name"
+                                    optionValue="id" placeholder="Select a Customer" styleClass="disableDropdown">
+                                    <ng-template let-data pTemplate="item">
+                                        <div class="item-drop1">
+                                            <span class="item-value1"> {{ data.title }} {{ data.name }} </span>
+                                        </div>
+                                    </ng-template>
+                                </p-dropdown>
+                                <button type="button" (click)="modalOpenParentCustomer()" class="btn btn-primary"
+                                    style="border-radius: 5px; padding: 5px 10px; line-height: 1.5; margin-left: 10px">
+                                    <i class="fa fa-plus-square"></i>
+                                </button>
+                                <button [disabled]="customerid == null" class="btn btn-danger"
+                                    style="border-radius: 5px; padding: 5px 10px; line-height: 1.5; margin-left: 10px"
+                                    (click)="removeSelParentCust()">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </div>
+                            <br />
+                        </div>
+                        <div class="col-lg-2 pl-lg-1">
+                            <label>Pay From Date</label>
+                            <input type="date" class="form-control" placeholder="Enter Pay From Date"
+                                [(ngModel)]="payfromdate" (keydown.enter)="searchPayment('')" />
+                            <br />
+                        </div>
+                        <div class="col-lg-2 pl-lg-1">
+                            <label>Pay To Date</label>
+                            <input type="date" class="form-control" placeholder="Enter Pay To Date"
+                                [(ngModel)]="paytodate" (keydown.enter)="searchPayment('')" />
+                            <br />
+                        </div>
+                        <div class="col-lg-2 pl-lg-1">
+                            <label>Pay Status</label>
+                            <div>
+                                <p-dropdown [options]="payStatus" optionValue="value" optionLabel="label"
+                                    [filter]="true" filterBy="value" resetFilterOnHide="true"
+                                    placeholder="Select a Pay Status" [(ngModel)]="paystatus"
+                                    (keydown.enter)="searchPayment('')"></p-dropdown>
+                            </div>
+                            <br />
+                        </div>
+                        <div class="col-lg-2 pl-lg-1">
+                            <label>Cheque Number</label>
+                            <div>
+                                <input filterBy="label" class="form-control" placeholder="Select a Cheque Number"
+                                    [(ngModel)]="chequeNumber" (keydown.enter)="searchPayment('')" />
+                            </div>
+                            <br />
+                        </div>
+                        <div class="col-lg-2">
+                            <label>Invoice Number</label>
+                            <div>
+                                <input class="form-control" filterBy="label" placeholder="Select a Invoice Number"
+                                    [(ngModel)]="invoiceNumber" (keydown.enter)="searchPayment('')" />
+                            </div>
+                            <br />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-2 pl-lg-1">
+                            <label>Created By Staff</label>
+                            <div>
+                                <p-dropdown [disabled]="true" [options]="staffCustList" [showClear]="true"
+                                    [filter]="true" filterBy="firstname" [(ngModel)]="staffid" optionLabel="name"
+                                    optionValue="id" placeholder="Select a staff" styleClass="disableDropdown"
+                                    (keydown.enter)="searchPayment('')">
+                                    <ng-template let-data pTemplate="item">
+                                        <div class="item-drop1">
+                                            <span class="item-value1"> {{ data.title }} {{ data.name }} </span>
+                                        </div>
+                                    </ng-template>
+                                </p-dropdown>
+                                <button (click)="modalOpenStaff()" class="btn btn-primary"
+                                    style="border-radius: 5px; padding: 5px 10px; line-height: 1.5; margin-left: 10px">
+                                    <i class="fa fa-plus-square"></i>
+                                </button>
+                                <button [disabled]="staffid == null" class="btn btn-danger"
+                                    style="border-radius: 5px; padding: 5px 10px; line-height: 1.5; margin-left: 10px"
+                                    (click)="removeSelStaff()">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </div>
+                            <br />
+                        </div>
+                        <div class="col-lg-2 pl-lg-1">
+                            <label>Payment Mode</label>
+                            <div>
+                                <p-dropdown [options]="paymentMode" (onChange)="getPaymentMode()" optionLabel="text"
+                                    optionValue="value" [filter]="true" filterBy="text" resetFilterOnHide="true"
+                                    placeholder="Select a Payment Mode" [(ngModel)]="paymode"
+                                    (keydown.enter)="searchPayment('')"></p-dropdown>
+                            </div>
+                            <br />
+                        </div>
+                        <div class="col-lg-2 pl-lg-1">
+                            <label>Serive Area</label>
+                            <p-dropdown [options]="commondropdownService.serviceAreaList" optionLabel="name"
+                                optionValue="id" filter="true" filterBy="name" resetFilterOnHide="true"
+                                placeholder="Select a Service Area" [(ngModel)]="serviceAreaId"
+                                (keydown.enter)="searchPayment('')">
+                            </p-dropdown>
+                            <br />
+                        </div>
+                        @if (partnerId == 1) {
+                        <div class="col-lg-2 pl-lg-1">
+                            <label>Branch</label>
+                            <div>
+                                <p-dropdown [options]="commondropdownService.branchesByServiceArea" optionLabel="name"
+                                    optionValue="name" filter="true" filterBy="name" resetFilterOnHide="true"
+                                    placeholder="Select a Branch" [(ngModel)]="branchName"
+                                    (keydown.enter)="searchPayment('')">
+                                </p-dropdown>
+                            </div>
+                            <br />
+                        </div>
+                        }
+                        @if (partnerId != 1) {
+                        <div class="col-lg-2 pl-lg-1">
+                            <label>Partner</label>
+                            <p-dropdown [options]="commondropdownService.partnerAllNAme" optionLabel="name"
+                                optionValue="name" filter="true" filterBy="name" resetFilterOnHide="true"
+                                placeholder="Select a Partner" [(ngModel)]="partnerName"
+                                (keydown.enter)="searchPayment('')">
+                            </p-dropdown>
+                            <br />
+                        </div>
+                        }
+                        <div class="col-lg-2 pl-lg-1">
+                            <label>Transaction Number</label>
+                            <div>
+                                <input class="form-control" filterBy="label" placeholder="Select a Transaction Number"
+                                    [(ngModel)]="referenceno" (keydown.enter)="searchPayment('')" />
+                            </div>
+                            <br />
+                        </div>
+                        <div class="col-lg-2 pl-lg-1">
+                            <label>Business Unit</label>
+                            <div>
+                                <p-dropdown [options]="businessUnit" (onChange)="getBusinessUnit()" optionLabel="buname"
+                                    optionValue="id" filter="true" filterBy="buname" resetFilterOnHide="true"
+                                    placeholder="Select a Branch" [(ngModel)]="buid"
+                                    (keydown.enter)="searchPayment('')">
+                                </p-dropdown>
+                            </div>
+                            <br />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-2 pl-lg-1">
+                            <label>Assigned to Staff</label>
+                            <div>
+                                <p-dropdown [disabled]="true" [options]="selectApproveList" [showClear]="true"
+                                    [filter]="true" filterBy="firstname" optionLabel="name" optionValue="id"
+                                    placeholder="Select a staff" styleClass="disableDropdown" [(ngModel)]="approveId"
+                                    (keydown.enter)="searchPayment('')">
+                                    <ng-template let-data pTemplate="item">
+                                        <div class="item-drop1">
+                                            <span class="item-value1"> {{ data.title }} {{ data.name }} </span>
+                                        </div>
+                                    </ng-template>
+                                </p-dropdown>
+                                <button (click)="modalOpenApprove()" class="btn btn-primary"
+                                    style="border-radius: 5px; padding: 5px 10px; line-height: 1.5; margin-left: 10px">
+                                    <i class="fa fa-plus-square"></i>
+                                </button>
+                                <button [disabled]="approveId == null" class="btn btn-danger"
+                                    style="border-radius: 5px; padding: 5px 10px; line-height: 1.5; margin-left: 10px"
+                                    (click)="removeSelAssigned()">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </div>
+                            <br />
+                        </div>
+                        <div class="col-lg-2 pl-lg-1">
+                            <label>Receipt Number</label>
+                            <div>
+                                <input class="form-control" filterBy="label" placeholder="Select a Invoice Number"
+                                    [(ngModel)]="receiptNo" (keydown.enter)="searchPayment('')" />
+                            </div>
+                            <br />
+                        </div>
+                        <div class="col-lg-2 pl-lg-1">
+                            <label>Cheque Date</label>
+                            <input type="date" class="form-control" placeholder="Enter Cheque Date"
+                                [(ngModel)]="chequedate" (keydown.enter)="searchPayment('')" />
+                            <br />
+                        </div>
+                        <div class="col-lg-2 pl-lg-1">
+                            <label>Bank</label>
+                            <select [ngClass]="{
+                  'is-invalid': submitted && paymentFormGroup.controls.bankManagement.errors
+                }" class="form-control" [(ngModel)]="paydetails1" style="width: 100%">
+                                <option value="">Select Source Bank</option>
+                                @for (bank of bankDataList; track bank) {
+                                <option value="{{ bank.bankname }}">
+                                    {{ bank.bankname }} - {{ bank.accountnum }}
+                                </option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-lg-2 pl-lg-1">
+                            <label>Destination Bank</label>
+                            <select [ngClass]="{
+                  'is-invalid': submitted && paymentFormGroup.controls.destinationBank.errors
+                }" class="form-control" [(ngModel)]="destinationBank" style="width: 100%">
+                                <option value="">Select Destination Bank</option>
+                                @for (bankDest of bankDestination; track bankDest) {
+                                <option value="{{ bankDest.bankname }}">
+                                    {{ bankDest.bankname }} - {{ bankDest.accountnum }}
+                                </option>
+                                }
+                            </select>
+                            <br />
+                            <br />
+                        </div>
+                    </div>
+                    <div class="addUpdateBtn">
+                        <button type="submit" class="btn btn-primary" id="searchbtn" (click)="searchPayment('')">
+                            <i class="fa fa-search"></i>
+                            Search Payment
+                        </button>
+                        <button type="submit" class="btn btn-default" id="searchbtn" (click)="clearPayment()">
+                            <img src="assets/img/DashboardIcons/Refresh.svg" />
+                            Clear
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @if (isPaymentSearch) {
+    <div class="col-md-12">
+        <div class="panel">
+            <div class="panel-heading">
+                @if (!ifAddbatchData) {
+                <h3 class="panel-title">Payment List</h3>
+                }
+                @if (ifAddbatchData) {
+                <h3 class="panel-title">{{ BatchName }} Add New Mapping Data</h3>
+                }
+                <div class="right">
+                    <button type="button" class="btn-toggle-collapse" data-toggle="collapse" data-target="#paymentList"
+                        aria-expanded="false" aria-controls="paymentList">
+                        <i class="fa fa-minus-circle"></i>
+                    </button>
+                </div>
+            </div>
+            @if (!ifAddbatchData && createBatchAccess) {
+            <div style="margin: 2rem 12px">
+                <button type="submit" class="btn btn-primary" matTooltip="Create Batch Name" data-target="#createBatchName"
+                    data-toggle="modal" data-backdrop="static" data-keyboard="false" (click)="clearBatchName()"
+                    [disabled]="chakedPaymentData.length == 0">
+                    Create Batch
+                </button>
+            </div>
+            }
+            @if (ifAddbatchData) {
+            <div style="margin: 2rem 12px">
+                <button type="submit" class="btn btn-primary" matTooltip="Add New Batch Mapping Data"
+                    (click)="addBatchPaymentMapping()">
+                    Add New Batch Mapping Data
+                </button>
+            </div>
+            }
+            @if (displayInvoiceDetails) {
+            <app-payment-amount-model dialogId="PaymentDetailModal" [paymentId]="paymentId"
+                (closeParentCustt)="closeParentCust()"></app-payment-amount-model>
+            }
+            @if (ifModelIsShow) {
+            <app-workflow-audit-details-modal [auditcustid]="auditcustid" dialogId="custauditWorkflowModal"
+                (closeParentCustt)="closeParentCustt()"></app-workflow-audit-details-modal>
+            }
+            <div id="paymentList" class="panel-collapse collapse in">
+                @if (searchPaymentData.length !== 0) {
+                <div class="panel-body table-responsive">
+                    <div class="row">
+                        <div class="col-lg-2 col-md-2 col-sm-4 col-xs-12 dataGroup">
+                            <label class="datalbl">Total Selected :</label>
+                            <span> {{ this.totalCheckedPayments.totalSelPayments }} </span>
+                        </div>
+                        <div class="col-lg-2 col-md-2 col-sm-4 col-xs-12 dataGroup">
+                            <label class="datalbl">Total Amount :</label>
+                            <span> {{ this.totalCheckedPayments.totalAmount }} </span>
+                        </div>
+                        <div class="col-lg-12 col-md-12">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th class="widthCheckboxColom">
+                                            <div class="centerCheckbox">
+                                                <p-checkbox name="allChecked" [(ngModel)]="ispaymentChecked"
+                                                    [binary]="true" (onChange)="allSelectBatch($event)"
+                                                    [disabled]="!ifAddbatchData"></p-checkbox>
+                                            </div>
+                                        </th>
+                                        <th>Customer</th>
+                                        <th style="width: 7%">Amount</th>
+                                        <th>Receipt No/Credit Note No.</th>
+                                        <th>Invoice No.</th>
+                                        <th>Cheque No.</th>
+                                        <th>TDS</th>
+                                        <th>ABBS</th>
+                                        <th>Reference No.</th>
+                                        <th>Attachment</th>
+                                        <th>Pay Mode</th>
+                                        <th>Type</th>
+                                        <th>Payment Date</th>
+                                        <th>Status</th>
+                                        <th>ISP Name</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (
+                                    payment of searchPaymentData
+                                    | paginate
+                                    : {
+                                    id: 'searchPaymentPageData',
+                                    itemsPerPage: paymentitemsPerPage,
+                                    currentPage: currentPagePaymentSlab,
+                                    totalItems: paymenttotalRecords
+                                    }; track
+                                    payment; let i = $index) {
+                                    <tr>
+                                        <td>
+                                            <div class="centerCheckbox">
+                                                <p-checkbox class="p-field-checkbox"
+                                                    [value]="payment.isSinglepaymentChecked" [inputId]="payment.id"
+                                                    [(ngModel)]="payment.isSinglepaymentChecked"
+                                                    (onChange)="addbatchChecked(payment.id, $event)" [binary]="true"
+                                                    [disabled]="
+                            payment.status === 'approved' ||
+                            payment.status === 'rejected' ||
+                            payment.batchAssigned == true ||
+                            payment.approverid !== this.staffID
+                          "></p-checkbox>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <a href="javascript:void(0)" style="color: #f7941e"
+                                                (click)="openModal('custmerDetailModal', payment.custId)">
+                                                {{ payment.customerName }}
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <span class="curson_pointer" style="color: #f7941e"
+                                                (click)="openPaymentInvoiceModal('PaymentDetailModal', payment.id)">
+                                                <span>
+                                                    {{
+                                                    payment?.amount
+                                                    | currency: payment?.currency || currency : "symbol" : "1.2-2"
+                                                    }}
+                                                </span>
+                                            </span>
+                                        </td>
+                                        <td>{{ payment.documentno }}</td>
+                                        <td>{{ payment.invoiceNumber }}</td>
+                                        <td>{{ payment.paydetails2 }}</td>
+                                        <td>{{ payment.tdsamount }}</td>
+                                        <td>{{ payment.abbsAmount }}</td>
+                                        <td>{{ payment.referenceno }}</td>
+                                        <td>
+                                            <a (click)="downloadFile(payment.filename, payment.id, payment.custId)"
+                                                href="javascript:void(0)" style="color: blue">{{ payment.filename ?
+                                                payment.filename : "-" }}</a>
+                                        </td>
+                                        <td>
+                                            @if (payment.paymode == 'Cheque') {
+                                            <a style="color: #f7941e" class="HoverEffect" data-backdrop="static"
+                                                data-keyboard="false" matTooltip="Payment Details"
+                                                (click)="openPaymentModal(payment.id)">
+                                                {{ payment.paymode }}
+                                            </a>
+                                            }
+                                            @if (payment.paymode !== 'Cheque') {
+                                            <span>
+                                                {{ payment.paymode }}
+                                            </span>
+                                            }
+                                        </td>
+                                        <td>{{ payment.type }}</td>
+                                        <td>{{ payment.paymentdate }}</td>
+                                        @if (payment.status === 'Fully Adjusted') {
+                                        <td>
+                                            <span class="badge badge-success">
+                                                {{ "verified" | titlecase }}
+                                            </span>
+                                        </td>
+                                        }
+                                        @if (payment.status === 'advance') {
+                                        <td>
+                                            <span class="badge badge-success">
+                                                {{ payment.status | titlecase }}
+                                            </span>
+                                        </td>
+                                        }
+                                        @if (payment.status === 'approved') {
+                                        <td>
+                                            <span class="badge badge-success">
+                                                {{ "verified" | titlecase }}
+                                            </span>
+                                        </td>
+                                        }
+                                        @if (
+                                        payment.status === 'pending' && payment.nextTeamHierarchyMappingId == null
+                                        ) {
+                                        <td>
+                                            <span class="badge badge-info">
+                                                {{ "Collected" | titlecase }}
+                                            </span>
+                                        </td>
+                                        }
+                                        @if (
+                                        payment.status === 'pending' && payment.nextTeamHierarchyMappingId != null
+                                        ) {
+                                        <td>
+                                            <span class="badge badge-info">
+                                                {{ "Submitted" | titlecase }}
+                                            </span>
+                                        </td>
+                                        }
+                                        @if (payment.status === 'Partialy Adjusted') {
+                                        <td>
+                                            <span class="badge badge-success">
+                                                {{ "verified" | titlecase }}
+                                            </span>
+                                        </td>
+                                        }
+                                        @if (payment.status === 'rejected') {
+                                        <td>
+                                            <span class="badge badge-danger">
+                                                {{ payment.status | titlecase }}
+                                            </span>
+                                        </td>
+                                        }
+                                        <td>{{ payment.mvnoName }}</td>
+                                        <td class="btnAction">
+                                            @if (downloadAccess) {
+                                            <button id="download-button" type="button" class="approve-btn"
+                                                matTooltip="Download"
+                                                [disabled]="payment.status === 'pending' || payment.status === 'rejected'"
+                                                (click)="downloadreceipt(payment.id)">
+                                                <img style="width: 25px; height: 25px; border-radius: 3px"
+                                                    src="assets/img/DashboardIcons/Document Download.svg" />
+                                            </button>
+                                            }
+                                            @if (payment.status !== 'Fully Adjusted') {
+                                            <button class="approve-btn"
+                                                style="border: none; background: transparent; padding: 0; margin-right: 3px"
+                                                type="button" matTooltip="Pick" [disabled]="
+                          payment.status === 'Fully Adjusted' ||
+                          payment.status === 'advance' ||
+                          payment.status === 'approved' ||
+                          payment.status === 'Partialy Adjusted' ||
+                          payment.status === 'rejected' ||
+                          payment.approverid != null
+                        " (click)="pickModalOpen(payment)">
+                                                <img src="assets/img/DashboardIcons/Pick-ticket-to-resolve.svg" />
+                                            </button>
+                                            }
+                                            <button type="button" class="approve-btn"
+                                                (click)="approveModalOpen(payment)" matTooltip="Approve" [disabled]="
+                          payment.status === 'Fully Adjusted' ||
+                          payment.status === 'advance' ||
+                          payment.status === 'approved' ||
+                          payment.status === 'Partialy Adjusted' ||
+                          payment.status === 'rejected' ||
+                          payment.batchAssigned == true ||
+                          payment.approverid !== this.staffID
+                        ">
+                                                <img src="assets/img/DashboardIcons/Assign.svg">
+                                            </button>
+                                            <button type="button" class="approve-btn" (click)="rejectModalOpen(payment)"
+                                                matTooltip="Reject" [disabled]="
+                          payment.status === 'Partialy Adjusted' ||
+                          payment.status === 'approved' ||
+                          payment.status === 'advance' ||
+                          payment.status === 'Fully Adjusted' ||
+                          payment.status === 'rejected' ||
+                          payment.batchAssigned == true ||
+                          payment.approverid !== this.staffID
+                        ">
+                                                <img src="assets/img/DashboardIcons/Reject.svg">
+                                            </button>
+                                            <a class="detailOnAnchorClick" matTooltip="Audit & Status Details"
+                                                style="margin-left: 4px"
+                                                (click)="openPaymentWorkFlow('custauditWorkflowModal', payment.id)">
+                                                <img width="25" height="25"
+                                                    src="assets/img/DashboardIcons/WorkFlow status Details.svg" />
+                                            </a>
+                                            @if (
+                                            !(
+                                            payment.status == 'Partialy Adjusted' ||
+                                            payment.status == 'Fully Adjusted' ||
+                                            payment.status === 'approved' ||
+                                            payment.status === 'rejected'
+                                            ) && reassignAccess
+                                            ) {
+                                            <button type="button" class="approve-btn" style="
+                          border: none;
+                          background: transparent;
+                          padding: 0;
+                          margin-right: 3px;
+                          cursor: pointer;
+                        " id="assign-button" matTooltip="Reassign Payment" (click)="StaffReasignList(payment.id)"
+                                                [disabled]="payment.approverid !== this.staffID">
+                                                <img width="32" height="32" alt="Assign CAF"
+                                                    src="assets/img/DashboardIcons/send-svgrepo-com 1.svg" />
+                                            </button>
+                                            }
+                                        </td>
+
+                                    </tr>
+                                    }
+                                </tbody>
+                            </table>
+                            <div class="pagination_Dropdown">
+                                <pagination-controls id="searchPaymentPageData" [maxSize]="10" [directionLinks]="true"
+                                    previousLabel="" nextLabel=""
+                                    (pageChange)="pageChangedPaymentList($event)"></pagination-controls>
+                                <div id="itemPerPageDropdown">
+                                    <p-dropdown [options]="pageLimitOptions" optionLabel="value" optionValue="value"
+                                        (onChange)="TotalItemPerPage($event)"></p-dropdown>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                }
+                @if (searchPaymentData.length === 0) {
+                <div class="panel-body table-responsive">
+                    Details are not available
+                </div>
+                }
+            </div>
+        </div>
+    </div>
+    }
+</div> -->
+}
+
+<!-- Batch Payment Search Start-->
+
+@if (ifBatchList && batchPaymentAccess) {
+<mat-card>
+    <mat-accordion class="w-100">
+        <mat-expansion-panel [(expanded)]="batchPanelExpanded" class="cardWithShadow w-100">
+            <mat-expansion-panel-header class="dialog-header">
+                <mat-panel-title class="heading-title">
+                    <mat-card-title class="m-0 f-w-700 f-s-16">
+                        {{ panelTitle }}
+                    </mat-card-title>
+                </mat-panel-title>
+            </mat-expansion-panel-header>
+            <mat-card-content>
+
+                <div class="row">
+
+                    <!-- Batch Status -->
+                    <div class="col-lg-4"><label class="inputLabel">Batch Status</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <mat-select placeholder="Select a Batch Status" multiple [(ngModel)]="status"
+                                (keydown.enter)="searchBatch('')">
+                                <mat-option *ngFor="let s of batchStatus" [value]="s.value">
+                                    {{ s.label }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Staff -->
+                    <div class="col-lg-4"><label class="inputLabel">Staff</label>
+                        <div class="d-flex">
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-select placeholder="Select a Staff" [(ngModel)]="batchStaffid" [disabled]="true"
+                                    (keydown.enter)="searchBatch('')">
+                                    <mat-option>
+                                        <ngx-mat-select-search [placeholderLabel]="'Search staff...'"
+                                            [noEntriesFoundLabel]="'No results found'">
+                                        </ngx-mat-select-search>
+                                    </mat-option>
+                                    <mat-option *ngFor="let staff of staffCustList" [value]="staff.id">
+                                        {{ staff.title }} {{ staff.name }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+
+                            <button mat-icon-button color="primary" type="button" (click)="modalOpenStaff()">
+                                <mat-icon fontIcon="add_box"></mat-icon>
+                            </button>
+
+                            <button mat-icon-button color="primary" type="button" [disabled]="staffid == null"
+                                (click)="removeSelStaff()">
+                                <mat-icon fontIcon="delete"></mat-icon>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Service Area -->
+                    <div class="col-lg-4"><label class="inputLabel">Service Area</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <mat-select placeholder="Select a Service Area" [(ngModel)]="serviceAreaId"
+                                (keydown.enter)="searchBatch('')">
+                                <mat-option>
+                                    <ngx-mat-select-search [placeholderLabel]="'Search...'"
+                                        [noEntriesFoundLabel]="'No results found'"></ngx-mat-select-search>
+                                </mat-option>
+                                <mat-option *ngFor="let sa of commondropdownService.serviceAreaList" [value]="sa.id">
+                                    {{ sa.name }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Branch (Only if partnerId == 1) -->
+                    <ng-container *ngIf="partnerId == 1">
+                        <div class="col-lg-4"><label class="inputLabel">Branch</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-select placeholder="Select a Branch" [(ngModel)]="branchName"
+                                    (keydown.enter)="searchBatch('')">
+                                    <mat-option>
+                                        <ngx-mat-select-search [placeholderLabel]="'Search...'"
+                                            [noEntriesFoundLabel]="'No results found'"></ngx-mat-select-search>
+                                    </mat-option>
+                                    <mat-option *ngFor="let branch of commondropdownService.branchesByServiceArea"
+                                        [value]="branch.id">
+                                        {{ branch.name }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                    </ng-container>
+
+                    <!-- Partner (Only if partnerId != 1) -->
+                    <ng-container *ngIf="partnerId != 1">
+                        <div class="col-lg-4"><label class="inputLabel">Partner</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-select placeholder="Select a Partner" [(ngModel)]="partnerName"
+                                    (keydown.enter)="searchBatch('')">
+                                    <mat-option>
+                                        <ngx-mat-select-search [placeholderLabel]="'Search...'"
+                                            [noEntriesFoundLabel]="'No results found'"></ngx-mat-select-search>
+                                    </mat-option>
+                                    <mat-option *ngFor="let partner of commondropdownService.partnerAllNAme"
+                                        [value]="partner.id">
+                                        {{ partner.name }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                    </ng-container>
+
+                    <!-- Pay From Date -->
+                    <div class="col-lg-4"><label class="inputLabel">Pay From Date</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <input matInput placeholder="Enter a Pay From Date" [matDatepicker]="pickerFrom"
+                                [(ngModel)]="batchPayfromdate" (keydown.enter)="searchBatch('')">
+                            <mat-datepicker-toggle matSuffix [for]="pickerFrom"></mat-datepicker-toggle>
+                            <mat-datepicker #pickerFrom></mat-datepicker>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Pay To Date -->
+                    <div class="col-lg-4"><label class="inputLabel">Pay To Date</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <input matInput placeholder="Enter a Pay To Date" [matDatepicker]="pickerTo"
+                                [(ngModel)]="batchPaytodate" (keydown.enter)="searchBatch('')">
+                            <mat-datepicker-toggle matSuffix [for]="pickerTo"></mat-datepicker-toggle>
+                            <mat-datepicker #pickerTo></mat-datepicker>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Destination Bank -->
+                    <div class="col-lg-4"><label class="inputLabel">Destination Bank</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <mat-select placeholder="Select a Destination Bank" [(ngModel)]="batchDestinationBank">
+                                <mat-option value="">Select Destination Bank</mat-option>
+                                <mat-option *ngFor="let bankDest of bankDestination" [value]="bankDest.id">
+                                    {{ bankDest.bankname }} - {{ bankDest.accountnum }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex w-100 justify-content-center align-items-center" style="gap:8px">
+                    <button mat-button mat-flat-button color="'primary'" class="button-normal m-r-10" type="submit"
+                        (click)="manualSearchBatch()">
+
+                        Search Batch
+                    </button>
+
+                    <button mat-stroked-button color="accent" id="searchbtn" class="button-normal"
+                        (click)="clearBatch()">
+
+                        Clear
+                    </button>
+                </div>
+            </mat-card-content>
+        </mat-expansion-panel>
+    </mat-accordion>
+</mat-card>
+<!-- <div class="row">
+    <div class="col-md-12">
+        <div class="panel">
+            <div class="panel-heading">
+                <div class="right">
+                    <button type="button" class="btn-toggle-collapse" data-toggle="collapse"
+                        data-target="#searchPayment" aria-expanded="false" aria-controls="searchPayment">
+                        <i class="fa fa-minus-circle"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="searchPayment" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-lg-2 pl-lg-1">
+                            <label>Batch Status</label>
+                            <div>
+                                <p-multiSelect [options]="batchStatus" optionValue="value" optionLabel="label"
+                                    [filter]="true" filterBy="value" resetFilterOnHide="true"
+                                    placeholder="Select a Pay Status" [(ngModel)]="status"
+                                    (keydown.enter)="searchBatch('')"></p-multiSelect>
+                            </div>
+                            <br />
+                        </div>
+                        <div class="col-lg-2 pl-lg-1">
+                            <label>Staff</label>
+                            <div>
+                                <p-dropdown [disabled]="true" [options]="staffCustList" [showClear]="true"
+                                    [filter]="true" filterBy="firstname" [(ngModel)]="batchStaffid" optionLabel="name"
+                                    optionValue="id" placeholder="Select a staff" styleClass="disableDropdown"
+                                    (keydown.enter)="searchBatch('')">
+                                    <ng-template let-data pTemplate="item">
+                                        <div class="item-drop1">
+                                            <span class="item-value1"> {{ data.title }} {{ data.name }} </span>
+                                        </div>
+                                    </ng-template>
+                                </p-dropdown>
+                                <button (click)="modalOpenStaff()" class="btn btn-primary"
+                                    style="border-radius: 5px; padding: 5px 10px; line-height: 1.5; margin-left: 10px">
+                                    <i class="fa fa-plus-square"></i>
+                                </button>
+                                <button [disabled]="staffid == null" class="btn btn-danger"
+                                    style="border-radius: 5px; padding: 5px 10px; line-height: 1.5; margin-left: 10px"
+                                    (click)="removeSelStaff()">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </div>
+                            <br />
+                        </div>
+                        <div class="col-lg-2 pl-lg-1">
+                            <label>Serive Area</label>
+                            <p-dropdown [options]="commondropdownService.serviceAreaList" optionLabel="name"
+                                optionValue="id" filter="true" filterBy="name" resetFilterOnHide="true"
+                                placeholder="Select a Service Area" [(ngModel)]="serviceAreaId"
+                                (keydown.enter)="searchBatch('')">
+                            </p-dropdown>
+                            <br />
+                        </div>
+                        @if (partnerId == 1) {
+                        <div class="col-lg-2 pl-lg-1">
+                            <label>Branch</label>
+                            <div>
+                                <p-dropdown [options]="commondropdownService.branchesByServiceArea" optionLabel="name"
+                                    optionValue="id" filter="true" filterBy="name" resetFilterOnHide="true"
+                                    placeholder="Select a Branch" [(ngModel)]="branchName"
+                                    (keydown.enter)="searchBatch('')">
+                                </p-dropdown>
+                            </div>
+                            <br />
+                        </div>
+                        }
+                        @if (partnerId != 1) {
+                        <div class="col-lg-2 pl-lg-1">
+                            <label>Partner</label>
+                            <p-dropdown [options]="commondropdownService.partnerAllNAme" optionLabel="name"
+                                optionValue="id" filter="true" filterBy="name" resetFilterOnHide="true"
+                                placeholder="Select a Partner" [(ngModel)]="partnerName"
+                                (keydown.enter)="searchBatch('')">
+                            </p-dropdown>
+                            <br />
+                        </div>
+                        }
+                        <div class="col-lg-2 pl-lg-1">
+                            <label>Pay From Date</label>
+                            <input type="date" class="form-control" placeholder="Enter From Date"
+                                [(ngModel)]="batchPayfromdate" (keydown.enter)="searchBatch('')" />
+                            <br />
+                        </div>
+                        <div class="col-lg-2 pl-lg-1">
+                            <label>Pay To Date</label>
+                            <input type="date" class="form-control" placeholder="Enter To Date"
+                                [(ngModel)]="batchPaytodate" (keydown.enter)="searchBatch('')" />
+                            <br />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-2 pl-lg-1">
+                            <label>Destination Bank</label>
+                            <select class="form-control" [(ngModel)]="batchDestinationBank" style="width: 100%">
+                                <option value="">Select Destination Bank</option>
+                                @for (bankDest of bankDestination; track bankDest) {
+                                <option value="{{ bankDest.id }}">
+                                    {{ bankDest.bankname }} - {{ bankDest.accountnum }}
+                                </option>
+                                }
+                            </select>
+                            <br />
+                            <br />
+                        </div>
+                    </div>
+                    <div class="addUpdateBtn">
+                        <button type="submit" class="btn btn-primary" id="searchbtn" (click)="searchBatch('')">
+                            <i class="fa fa-search"></i>
+                            Search Batch
+                        </button>
+                        <button type="submit" class="btn btn-default" id="searchbtn" (click)="clearBatch()">
+                            <img src="assets/img/DashboardIcons/Refresh.svg" />
+                            Clear
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> -->
+}
+
+
+
+@if (ifBatchList && !batchPanelExpanded) {
+<mat-card>
+    <mat-card-header>
+        <mat-card-title>Batch</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+        <!-- Show table only if data exists -->
+        <ng-container *ngIf="batchPaymentList.length !== 0; else noData">
+
+            <!-- Angular Material Table -->
+            <div class="example-container mat-elevation-z8" tabindex="0">
+                <table mat-table [dataSource]="batchPaymentList" class="mat-elevation-z1 w-100">
+
+                    <!-- Batch Name -->
+                    <ng-container matColumnDef="batchName">
+                        <th mat-header-cell *matHeaderCellDef> Batch Name </th>
+                        <td mat-cell *matCellDef="let data"> {{ data.batchName }} </td>
+                    </ng-container>
+
+                    <!-- Total Invoices count -->
+                    <ng-container matColumnDef="invoiceCount">
+                        <th mat-header-cell *matHeaderCellDef> Total Invoices count </th>
+                        <td mat-cell *matCellDef="let data"> {{ data.invoiceCount }} </td>
+                    </ng-container>
+
+                    <!-- Total Payment Amount -->
+                    <ng-container matColumnDef="totalAmount">
+                        <th mat-header-cell *matHeaderCellDef> Total Payment Amount </th>
+                        <td mat-cell *matCellDef="let data"> {{ data.totalAmount | number:'1.2-2' }} </td>
+                    </ng-container>
+
+                    <!-- TDS -->
+                    <ng-container matColumnDef="tds">
+                        <th mat-header-cell *matHeaderCellDef> TDS </th>
+                        <td mat-cell *matCellDef="let data"> {{ tdsAmount(data) | number:'1.2-2' }} </td>
+                    </ng-container>
+
+                    <!-- ABBS -->
+                    <ng-container matColumnDef="abbs">
+                        <th mat-header-cell *matHeaderCellDef> ABBS </th>
+                        <td mat-cell *matCellDef="let data"> {{ abbsAmount(data) | number:'1.2-2' }} </td>
+                    </ng-container>
+
+                    <!-- Assignee -->
+                    <ng-container matColumnDef="assignee">
+                        <th mat-header-cell *matHeaderCellDef> Assignee </th>
+                        <td mat-cell *matCellDef="let data"> {{ data.nextstaffname }} </td>
+                    </ng-container>
+
+                    <!-- Batch Status -->
+                    <ng-container matColumnDef="batchStatus">
+                        <th mat-header-cell *matHeaderCellDef> Batch Status </th>
+                        <td mat-cell *matCellDef="let data">
+                            <span *ngIf="data.batchStatus.toLowerCase() === 'approved'"
+                                class="mat-badge mat-badge-success">
+                                <span class="badge badge-success">{{ data.batchStatus | titlecase }}</span>
+                            </span>
+                            <span *ngIf="data.batchStatus.toLowerCase() === 'rejected'">
+                                <span class="badge badge-danger">{{ data.batchStatus | titlecase }}</span>
+                            </span>
+                            <span *ngIf="data.batchStatus.toLowerCase() === 'pending approve'">
+                                <span class="badge badge-info">{{ data.batchStatus | titlecase }}</span>
+                            </span>
+                            <span *ngIf="data.batchStatus.toLowerCase() === 'partial approved'">
+                                <span class="badge badge-success">{{ data.batchStatus | titlecase }}</span>
+                            </span>
+                            <span *ngIf="data.batchStatus.toLowerCase() === 'verified'">
+                                <span class="badge badge-success">{{ data.batchStatus | titlecase }}</span>
+                            </span>
+                            <span *ngIf="data.batchStatus.toLowerCase() === 'pending'">
+                                <span class="badge badge-info">
+                                    {{ checkPendingStatus(data.assignmentStatus, data.batchStatus) | titlecase }}
+                                </span>
+                            </span>
+                        </td>
+                    </ng-container>
+
+                    <!-- File -->
+                    <ng-container matColumnDef="file">
+                        <th mat-header-cell *matHeaderCellDef> File </th>
+                        <td mat-cell *matCellDef="let data">
+                            <a *ngIf="data.filename != null" href="javascript:void(0)"
+                                (click)="downloadInvoice(data.creditDocId, data.custId, data.filename)"
+                                matTooltip="Download File">
+                                <mat-icon color="primary" fontIcon="download"></mat-icon>
+                            </a>
+                            <span *ngIf="data.filename == null"> - </span>
+                        </td>
+                    </ng-container>
+
+                    <!-- Approve / Reject -->
+                    <ng-container matColumnDef="approveReject">
+                        <th mat-header-cell *matHeaderCellDef> Approve / Reject </th>
+                        <td mat-cell *matCellDef="let data" class="btnAction">
+                            <button mat-icon-button color="primary" matTooltip="Approve" [disabled]="
+                                (data.assignmentStatus == 'Approved' && data.batchStatus == 'Approved') ||
+                                (data.assignmentStatus == 'Rejected' && data.batchStatus == 'Rejected') ||
+                                data.assignmentStatus == 'AssignedToOtherTeam'
+                              " (click)="openBatchApporve(data.batchId, data)">
+                                <mat-icon>check</mat-icon>
+                            </button>
+
+                            <button mat-icon-button color="warn" matTooltip="Reject" [disabled]="
+                                (data.assignmentStatus == 'Approved' && data.batchStatus == 'Approved') ||
+                                (data.assignmentStatus == 'Rejected' && data.batchStatus == 'Rejected') ||
+                                data.assignmentStatus == 'AssignedToOtherTeam'
+                              " (click)="openBatchReject(data.batchId)">
+                                <mat-icon>close</mat-icon>
+                            </button>
+                        </td>
+                    </ng-container>
+
+                    <!-- Actions -->
+                    <ng-container matColumnDef="action">
+                        <th mat-header-cell *matHeaderCellDef style="width: 15%"> Action </th>
+                        <td mat-cell *matCellDef="let data" class="btnAction">
+
+                            <ng-container *ngIf="batchAuditDetailsAccess">
+                                <button mat-icon-button matTooltip="Batch Audit Details"
+                                    (click)="batchPaymentAuditDetails(data.batchId, '')">
+                                    <img width="28" height="28"
+                                        src="assets/img/DashboardIcons/WorkFlow status Details.svg" />
+                                </button>
+                            </ng-container>
+
+                            <ng-container *ngIf="createAccess">
+                                <button mat-icon-button matTooltip="Add Batch Payment Mapping"
+                                    [disabled]="data.createdBy != data.assignee || data.batchStatus != 'Pending'"
+                                    (click)="newADDbatch(data)">
+                                    <mat-icon
+                                        style="background:#f7941e; color:white; border-radius:4px; padding:5px;">add</mat-icon>
+                                </button>
+                            </ng-container>
+                        </td>
+                    </ng-container>
+
+                    <!-- Header & Row Definitions -->
+                    <tr mat-header-row *matHeaderRowDef="displayedColumnsBatch"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumnsBatch;"></tr>
+
+                </table>
+            </div>
+            <!-- Angular Material Paginator + Page Size Dropdown -->
+            <mat-paginator [length]="batchtotalRecords" [pageSize]="batchitemsPerPage"
+                [pageSizeOptions]="[5,10,20,50,100]" (page)="pageChangedPaymentBatchList($event)" showFirstLastButtons>
+            </mat-paginator>
+
+        </ng-container>
+
+        <!-- No Data Template -->
+        <ng-template #noData>
+            <div class="panel-body table-responsive">
+                Details are not available
+            </div>
+        </ng-template>
+
+    </mat-card-content>
+</mat-card>
+
+<!-- <div class="row">
+    <div class="col-md-12">
+        <div class="panel">
+            <div class="panel-heading">
+                <h3 class="panel-title">Batch</h3>
+                <div class="right">
+                    <button type="button" class="btn-toggle-collapse" data-toggle="collapse" data-target="#batchPayment"
+                        aria-expanded="false" aria-controls="batchPayment">
+                        <i class="fa fa-minus-circle"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="batchPayment" class="panel-collapse collapse in">
+                @if (batchPaymentList.length !== 0) {
+                <div class="panel-body table-responsive">
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Batch Name</th>
+                                        <th>Total Invoices count</th>
+                                        <th>Total Payment Amount</th>
+                                        <th>TDS</th>
+                                        <th>ABBS</th>
+                                        <th>Assignee</th>
+                                        <th>Batch Status</th>
+                                        <th>File</th>
+                                        <th>Approve / Reject</th>
+                                        <th style="width: 15%">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (
+                                    data of batchPaymentList
+                                    | paginate
+                                    : {
+                                    id: 'searchbatchPageData',
+                                    itemsPerPage: batchitemsPerPage,
+                                    currentPage: currentPagebatch,
+                                    totalItems: batchtotalRecords
+                                    }; track
+                                    data; let i = $index) {
+                                    <tr>
+                                        <td>
+
+                                            {{ data.batchName }}
+                                        </td>
+                                        <td>{{ data.invoiceCount }}</td>
+                                        <td>{{ data.totalAmount | number: "1.2-2" }}</td>
+                                        <td>{{ tdsAmount(data) | number: "1.2-2" }}</td>
+                                        <td>{{ abbsAmount(data) | number: "1.2-2" }}</td>
+                                        <td>{{ data.nextstaffname }}</td>
+
+                                        <td>
+                                            @if (data.batchStatus.toLowerCase() === 'approved') {
+                                            <span>
+                                                <span class="badge badge-success">
+                                                    {{ data.batchStatus | titlecase }}
+                                                </span>
+                                            </span>
+                                            }
+
+                                            @if (data.batchStatus.toLowerCase() === 'rejected') {
+                                            <span>
+                                                <span class="badge badge-danger">
+                                                    {{ data.batchStatus | titlecase }}
+                                                </span>
+                                            </span>
+                                            }
+                                            @if (data.batchStatus.toLowerCase() === 'pending approve') {
+                                            <span>
+                                                <span class="badge badge-info">
+                                                    {{ data.batchStatus | titlecase }}
+                                                </span>
+                                            </span>
+                                            }
+                                            @if (data.batchStatus.toLowerCase() === 'partial approved') {
+                                            <span>
+                                                <span class="badge badge-success">
+                                                    {{ data.batchStatus | titlecase }}
+                                                </span>
+                                            </span>
+                                            }
+                                            @if (data.batchStatus.toLowerCase() === 'verified') {
+                                            <span>
+                                                <span class="badge badge-success">
+                                                    {{ data.batchStatus | titlecase }}
+                                                </span>
+                                            </span>
+                                            }
+                                            @if (data.batchStatus.toLowerCase() === 'pending') {
+                                            <span>
+                                                <span class="badge badge-info">
+                                                    {{
+                                                    checkPendingStatus(data.assignmentStatus, data.batchStatus) |
+                                                    titlecase
+                                                    }}
+                                                </span>
+                                            </span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (data.filename != null) {
+                                            <a (click)="downloadInvoice(data.creditDocId, data.custId, data.filename)"
+                                                href="javascript:void(0)" style="color: #28a745; font-size: 20px"
+                                                matTooltip="Download File">
+                                                <img src="assets/img/DashboardIcons/Document Download.svg"
+                                                    style="width: 25px; height: 25px" />
+                                            </a>
+                                            }
+                                            @if (data.filename == null) {
+                                            <span> - </span>
+                                            }
+                                        </td>
+                                        <td class="btnAction">
+                                            <div class="displayflex">
+                                                <div>
+                                                    <button type="button" class="btn btn-success gridbtn" [disabled]="
+                              (data.assignmentStatus == 'Approved' &&
+                                data.batchStatus == 'Approved') ||
+                              (data.assignmentStatus == 'Rejected' &&
+                                data.batchStatus == 'Rejected') ||
+                              data.assignmentStatus == 'AssignedToOtherTeam'
+                            " (click)="openBatchApporve(data.batchId, data)" matTooltip="Approve">
+                                                        <i class="fa fa-check" aria-hidden="true"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-danger gridbtn" [disabled]="
+                              (data.assignmentStatus == 'Approved' &&
+                                data.batchStatus == 'Approved') ||
+                              (data.assignmentStatus == 'Rejected' &&
+                                data.batchStatus == 'Rejected') ||
+                              data.assignmentStatus == 'AssignedToOtherTeam'
+                            " (click)="openBatchReject(data.batchId)" matTooltip="Reject">
+                                                        <i class="fa fa-times" aria-hidden="true"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="btnAction">
+
+                                            @if (batchAuditDetailsAccess) {
+                                            <a class="detailOnAnchorClick" style="margin-right: 3px"
+                                                matTooltip="Batch Audit Details" data-backdrop="static" data-keyboard="false"
+                                                (click)="batchPaymentAuditDetails(data.batchId, '')">
+                                                <img width="32" height="32"
+                                                    src="assets/img/DashboardIcons/WorkFlow status Details.svg" />
+                                            </a>
+                                            }
+                                            @if (createAccess) {
+                                            <button type="button" class="approve-btn"
+                                                style="border: none; margin-right: 3px" (click)="newADDbatch(data)"
+                                                [disabled]="
+                          data.createdBy != data.assignee || data.batchStatus != 'Pending'
+                        " matTooltip="Add Batch Payment Mapping">
+                                                <i class="fa fa-plus" style="
+                            background: #f7941e;
+                            padding: 5.5px;
+                            height: 31px;
+                            width: 31px;
+                            color: white;
+                            font-size: 16px;
+                          "></i>
+                                            </button>
+                                            }
+                                        </td>
+                                    </tr>
+                                    }
+                                </tbody>
+                            </table>
+                            <div class="pagination_Dropdown">
+                                <pagination-controls id="searchbatchPageData" [maxSize]="10" [directionLinks]="true"
+                                    previousLabel="" nextLabel=""
+                                    (pageChange)="pageChangedPaymentBatchList($event)"></pagination-controls>
+                                <div id="itemPerPageDropdown">
+                                    <p-dropdown [options]="pageLimitOptions" optionLabel="value" optionValue="value"
+                                        (onChange)="TotalItemPerPageBatchList($event)"></p-dropdown>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                }
+                @if (batchPaymentList.length === 0) {
+                <div class="panel-body table-responsive">
+                    Details are not available
+                </div>
+                }
+            </div>
+        </div>
+    </div>
+</div> -->
+}
+<ng-template #createBatchDialog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <!-- Header -->
+        <div class="dialog-header dialog-title">
+            Create Batch
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg" />
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <div mat-dialog-content>
+            <form><label class="inputLabel">Batch Name</label>
+                <mat-form-field appearance="outline" class="w-100">
+                    <input matInput placeholder="Enter Batch Name" [(ngModel)]="newBatchName" name="newBatchName"
+                        required />
+                </mat-form-field>
+            </form>
+        </div>
+
+        <!-- Footer -->
+        <div class="dialog-action-adjust d-flex justify-content-end">
+            <button mat-button mat-flat-button color="'primary'" class="addarea-btn m-r-10" type="submit"
+                (click)="batchSaveOnly(dialogRef)" [disabled]="!newBatchName">
+                Save Only
+            </button>
+            <button mat-stroked-button color="warn" (click)="dialogRef.close()">
+                Close
+            </button>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #assignBatchDialog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <!-- Header -->
+        <div class="dialog-header dialog-title">
+            {{ batchAssignStaff ? 'Batch Payment Assign By Staff' : batchApporve ? 'Approve Batch' : 'Reject Batch' }}
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg" />
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <div mat-dialog-content>
+            <form [formGroup]="assignPaymentStaffForm">
+
+                <!-- Staff Dropdown -->
+                <ng-container *ngIf="batchAssignStaff"><label class="inputLabel">Staff *</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-select placeholder="Select a Staff" formControlName="nextStaffId">
+                            <mat-option *ngFor="let staff of staffList" [value]="staff.staffId">
+                                {{ staff.fullName }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-error
+                            *ngIf="staffsubmmitted && assignPaymentStaffForm.controls.nextStaffId.errors?.required">
+                            Staff is required.
+                        </mat-error>
+                    </mat-form-field>
+                </ng-container>
+
+                <!-- Remark Textarea -->
+                <ng-container *ngIf="batchApporve || batchReject"><label class="inputLabel">Remark *</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <textarea matInput placeholder="Enter a Remark" formControlName="remark" rows="3"></textarea>
+                        <mat-error *ngIf="staffsubmmitted && assignPaymentStaffForm.controls.remark.errors?.required">
+                            Remark is required.
+                        </mat-error>
+                    </mat-form-field>
+                </ng-container>
+
+            </form>
+        </div>
+
+        <!-- Footer -->
+        <div class="dialog-action-adjust d-flex justify-content-end">
+            <button *ngIf="batchAssignStaff" mat-button mat-flat-button color="'primary'" class="addarea-btn"
+                type="submit" (click)="batchPaymentAssignStaff(dialogRef)"
+                [disabled]="!assignPaymentStaffForm.value.nextStaffId">
+
+                Assign Staff
+            </button>
+
+            <button *ngIf="batchApporve" mat-button mat-flat-button color="'primary'" class="addarea-btn" type="submit"
+                (click)="AssignApporveStaff(dialogRef)" [disabled]="!assignPaymentStaffForm.value.remark">
+
+                Approve Batch
+            </button>
+
+            <button *ngIf="batchReject" mat-flat-button color="warn" (click)="AssignRejectedStaff(dialogRef)"
+                [disabled]="!assignPaymentStaffForm.value.remark">
+                <mat-icon>cancel</mat-icon>
+                Reject Batch
+            </button>
+
+
+            <button mat-stroked-button mat-dialog-close>Close</button>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #selectTeamDialog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <!-- Header -->
+        <div class="dialog-header dialog-title">
+            Select Team
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg" />
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <div mat-dialog-content>
+            <!-- Team Table -->
+            <div class="example-container mat-elevation-z8" tabindex="0">
+                <table mat-table [dataSource]="!teamToggle ? teams : staffDataList" class="mat-elevation-z1 w-100">
+
+                    <!-- Radio Column -->
+                    <ng-container matColumnDef="select">
+                        <th mat-header-cell *matHeaderCellDef></th>
+                        <td mat-cell *matCellDef="let element">
+                            <mat-radio-button [value]="element"
+                                [checked]="!teamToggle ? element === teamselected : element === staffselected"
+                                (change)="onRadioChange($event)">
+                            </mat-radio-button>
+                        </td>
+                    </ng-container>
+
+
+                    <!-- Team Columns -->
+                    <ng-container *ngIf="!teamToggle">
+                        <ng-container matColumnDef="name">
+                            <th mat-header-cell *matHeaderCellDef>Name</th>
+                            <td mat-cell *matCellDef="let element">{{ element.name }}</td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="partnername">
+                            <th mat-header-cell *matHeaderCellDef>Partner Name</th>
+                            <td mat-cell *matCellDef="let element">{{ element.partnername }}</td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="status">
+                            <th mat-header-cell *matHeaderCellDef>Status</th>
+                            <td mat-cell *matCellDef="let element">{{ element.status }}</td>
+                        </ng-container>
+                    </ng-container>
+
+                    <!-- Staff Columns -->
+                    <ng-container *ngIf="teamToggle">
+                        <ng-container matColumnDef="name">
+                            <th mat-header-cell *matHeaderCellDef>Name</th>
+                            <td mat-cell *matCellDef="let element">{{ element.name }}</td>
+                        </ng-container>
+                    </ng-container>
+
+                    <tr mat-header-row
+                        *matHeaderRowDef="!teamToggle ? ['select','name','partnername','status'] : ['select','name']">
+                    </tr>
+                    <tr mat-row
+                        *matRowDef="let row; columns: !teamToggle ? ['select','name','partnername','status'] : ['select','name'];">
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="dialog-action-adjust d-flex justify-content-end gap-10">
+            <button *ngIf="teamToggle" mat-stroked-button color="accent" (click)="teamToggle = false">
+
+                Back
+            </button>
+
+            <button *ngIf="!teamToggle" mat-button mat-flat-button color="'primary'" class="addarea-btn" type="submit"
+                (click)="selectedTeam(dialogRef)">
+                Select Staff
+            </button>
+
+            <button *ngIf="teamToggle" mat-button mat-flat-button color="'primary'" class="addarea-btn" type="submit"
+                (click)="assignBatchModelVisible(dialogRef)">
+                Save
+            </button>
+
+
+            <button mat-stroked-button mat-dialog-close>Close</button>
+        </div>
+    </div>
+</ng-template>
+
+
+
+<ng-template #batchPaymentAuditDialog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <!-- Header -->
+        <div class="dialog-header dialog-title">
+            Batch Payment Audit Details
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg" />
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <div mat-dialog-content>
+            <div class="example-container mat-elevation-z8" tabindex="0">
+                <table mat-table [dataSource]="batchPaymentAuditList" class="mat-elevation-z1 w-100">
+
+                    <ng-container matColumnDef="batchName">
+                        <th mat-header-cell *matHeaderCellDef>Batch Name</th>
+                        <td mat-cell *matCellDef="let data">{{ data.batchName }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="staffName">
+                        <th mat-header-cell *matHeaderCellDef>Staff Name</th>
+                        <td mat-cell *matCellDef="let data">{{ data.staffName }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="teamName">
+                        <th mat-header-cell *matHeaderCellDef>Team Name</th>
+                        <td mat-cell *matCellDef="let data">{{ data.teamName || '-' }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="status">
+                        <th mat-header-cell *matHeaderCellDef>Status</th>
+                        <td mat-cell *matCellDef="let data">
+                            <span [ngClass]="{
+              'badge-success': data.status.toLowerCase().includes('approved'),
+              'badge-info': data.status.toLowerCase().includes('pending'),
+              'badge-danger': data.status.toLowerCase().includes('rejected')
+            }">{{ data.status | titlecase }}</span>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="remark">
+                        <th mat-header-cell *matHeaderCellDef>Remarks</th>
+                        <td mat-cell *matCellDef="let data">{{ data.remark || '-' }}</td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="payamentDisply"></tr>
+                    <tr mat-row *matRowDef="let row; columns: payamentDisply;">
+                    </tr>
+                </table>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="dialog-action-adjust d-flex justify-content-end">
+
+            <button mat-stroked-button mat-dialog-close>Close</button>
+        </div>
+    </div>
+</ng-template>
+<ng-template #batchMappingDialog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <!-- Header -->
+        <div class="dialog-header dialog-title">
+            Batch Details
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg" />
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <div mat-dialog-content>
+            <div class="example-container mat-elevation-z8" tabindex="0">
+                <table mat-table [dataSource]="batchMappingData" class="mat-elevation-z1 w-100">
+
+                    <!-- Checkbox Column -->
+                    <ng-container matColumnDef="select">
+                        <th mat-header-cell *matHeaderCellDef>
+                            <mat-checkbox [(ngModel)]="masterSelected"
+                                (change)="checkUncheckAllInvoice()"></mat-checkbox>
+                        </th>
+                        <td mat-cell *matCellDef="let data">
+                            <mat-checkbox [(ngModel)]="data.isSelected"
+                                (change)="isAllSelectedInvoice()"></mat-checkbox>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="customerName">
+                        <th mat-header-cell *matHeaderCellDef>Customer Name</th>
+                        <td mat-cell *matCellDef="let data">{{ data.customerName }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="amount">
+                        <th mat-header-cell *matHeaderCellDef>Amount</th>
+                        <td mat-cell *matCellDef="let data">
+                            <ng-container *ngIf="!data.isSelected">{{ data.amount }}</ng-container>
+                            <ng-container *ngIf="data.isSelected">
+                                <input matInput placeholder="Enter a Amount" type="number" [(ngModel)]="data.amount"
+                                    class="form-control" />
+                            </ng-container>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="tdsAmount">
+                        <th mat-header-cell *matHeaderCellDef>TDS</th>
+                        <td mat-cell *matCellDef="let data">{{ data.tdsAmount }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="abbsAmount">
+                        <th mat-header-cell *matHeaderCellDef>ABBS</th>
+                        <td mat-cell *matCellDef="let data">{{ data.abbsAmount }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="paymode">
+                        <th mat-header-cell *matHeaderCellDef>Paymode</th>
+                        <td mat-cell *matCellDef="let data">{{ data.paymode }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="status">
+                        <th mat-header-cell *matHeaderCellDef>Status</th>
+                        <td mat-cell *matCellDef="let data">
+                            <span [ngClass]="{
+              'badge-success': data.status.toLowerCase().includes('adjusted'),
+              'badge-info': data.status.toLowerCase().includes('pending'),
+              'badge-danger': data.status.toLowerCase().includes('rejected')
+            }">{{ data.status | titlecase }}</span>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="date">
+                        <th mat-header-cell *matHeaderCellDef>Date</th>
+                        <td mat-cell *matCellDef="let data">{{ data.paymentdate }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="delete">
+                        <th mat-header-cell *matHeaderCellDef>Delete</th>
+                        <td mat-cell *matCellDef="let data">
+                            <button mat-icon-button color="warn" (click)="deleteBatchPaymentMapping(data.mappingId)"
+                                [disabled]="batchMappingPersonalData.createdBy != batchMappingPersonalData.assignee || batchMappingPersonalData.batchStatus != 'Pending'">
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                        </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="batchmappingDisplay">
+                    </tr>
+                    <tr mat-row *matRowDef="let row; columns: batchmappingDisplay;">
+                    </tr>
+                </table>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="dialog-action-adjust d-flex justify-content-end">
+            <button mat-button mat-flat-button color="'primary'" class="addarea-btn" type="submit"
+                (click)="updateBatch(dialogRef)" [disabled]="checkedList.length == 0">
+                Save
+            </button>
+
+            <button mat-stroked-button mat-dialog-close>Close</button>
+        </div>
+    </div>
+</ng-template>
+<ng-template #assignCustomerCAFDialog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <div class="dialog-header dialog-title">Assign Payment
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg" />
+                </a>
+            </span>
+        </div>
+
+        <div mat-dialog-content>
+            <div *ngIf="approved"><label class="inputLabel">Search Staff</label>
+                <mat-form-field class="w-100" appearance="outline">
+                    <input matInput placeholder="Global Search Filter" [(ngModel)]="searchStaffDeatil"
+                        (keydown.enter)="searchStaffName()" />
+                </mat-form-field>
+
+                <div class="mb-2">
+                    <button mat-button mat-flat-button color="'primary'" class="addarea-btn" type="submit"
+                        (click)="searchStaffName()" [disabled]="!searchStaffDeatil">
+                        Search
+                    </button>
+                    <button mat-stroked-button (click)="clearSearch()">
+                        Clear
+                    </button>
+                </div>
+                <div class="example-container mat-elevation-z8" tabindex="0">
+                    <table mat-table [dataSource]="approveCAF" class="mat-elevation-z1 w-100">
+                        <ng-container matColumnDef="select">
+                            <th mat-header-cell *matHeaderCellDef></th>
+                            <td mat-cell *matCellDef="let staff">
+                                <mat-radio-button [(ngModel)]="selectStaff" [value]="staff.id"></mat-radio-button>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="fullName">
+                            <th mat-header-cell *matHeaderCellDef>Name</th>
+                            <td mat-cell *matCellDef="let staff">{{ staff.fullName }}</td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="username">
+                            <th mat-header-cell *matHeaderCellDef>Username</th>
+                            <td mat-cell *matCellDef="let staff">{{ staff.username }}</td>
+                        </ng-container>
+
+                        <tr mat-header-row *matHeaderRowDef="custCafDisplay"></tr>
+                        <tr mat-row *matRowDef="let row; columns: custCafDisplay"></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="dialog-action-adjust d-flex justify-content-end">
+            <button *ngIf="approved" mat-button mat-flat-button color="'primary'" class="addarea-btn m-r-10"
+                type="submit" (click)="assignToStaff(true,dialogRef)">
+                Assign
+            </button>
+
+            <button mat-stroked-button mat-dialog-close>Close</button>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #rejectCustomerCAFDialog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <div class="dialog-header dialog-title">Assign Credit Note
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg" />
+                </a>
+            </span>
+        </div>
+
+        <div mat-dialog-content>
+            <div *ngIf="reject">
+                <div class="example-container mat-elevation-z8" tabindex="0">
+                    <table mat-table [dataSource]="rejectCAF" class="mat-elevation-z1 w-100">
+                        <ng-container matColumnDef="select">
+                            <th mat-header-cell *matHeaderCellDef></th>
+                            <td mat-cell *matCellDef="let staff">
+                                <mat-radio-button [(ngModel)]="selectStaffReject" [value]="staff.id"></mat-radio-button>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="fullName">
+                            <th mat-header-cell *matHeaderCellDef>Name</th>
+                            <td mat-cell *matCellDef="let staff">{{ staff.fullName }}</td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="username">
+                            <th mat-header-cell *matHeaderCellDef>Username</th>
+                            <td mat-cell *matCellDef="let staff">{{ staff.username }}</td>
+                        </ng-container>
+
+                        <tr mat-header-row *matHeaderRowDef="rejectDisplay"></tr>
+                        <tr mat-row *matRowDef="let row; columns: rejectDisplay"></tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="dialog-action-adjust d-flex justify-content-end">
+            <button mat-flat-button color="warn" class="m-r-10" (click)="assignToStaff(false,dialogRef)">
+                <mat-icon>cancel</mat-icon> Assign
+            </button>
+
+            <button mat-stroked-button mat-dialog-close>Close</button>
+        </div>
+    </div>
+</ng-template>
+
+
+<ng-template #approveRejectDialog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <!-- Header -->
+        <div class="dialog-header dialog-title">
+            {{ ifApproveStatus ? 'Approve Payment' : 'Reject Payment' }}
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg" />
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <div mat-dialog-content><label class="inputLabel">Remark *</label>
+            <mat-form-field class="w-100" appearance="outline">
+                <textarea matInput [(ngModel)]="approveRejectRemark" placeholder="Remarks"></textarea>
+            </mat-form-field>
+        </div>
+
+        <!-- Footer -->
+        <div class="dialog-action-adjust d-flex justify-content-end">
+            <button *ngIf="ifApproveStatus" mat-button mat-flat-button color="'primary'" class="addarea-btn m-r-10"
+                type="submit" (click)="statusApporeved()" [disabled]="!approveRejectRemark">
+                <mat-icon>check_circle</mat-icon> Save
+            </button>
+
+            <button *ngIf="!ifApproveStatus" mat-button mat-flat-button color="'primary'" class="addarea-btn m-r-10"
+                type="submit" (click)="statusRejected()" [disabled]="!approveRejectRemark">
+                <mat-icon>check_circle</mat-icon> Save
+            </button>
+
+
+            <button mat-stroked-button mat-dialog-close>Close</button>
+        </div>
+    </div>
+</ng-template>
+<ng-template #chequeDetailsDialog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <!-- Header -->
+        <div class="dialog-header dialog-title">
+            Cheque Details
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg" />
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <div mat-dialog-content>
+            <div class="example-container mat-elevation-z8" tabindex="0">
+                <table mat-table [dataSource]="chequeDetail" class="mat-elevation-z1 w-100">
+
+                    <ng-container matColumnDef="amount">
+                        <th mat-header-cell *matHeaderCellDef>Amount</th>
+                        <td mat-cell *matCellDef="let cheque">{{ cheque.amount }}</td>
+                    </ng-container>
+
+                    <!-- Uncomment if branch is needed
+        <ng-container matColumnDef="branch">
+          <th mat-header-cell *matHeaderCellDef>Branch</th>
+          <td mat-cell *matCellDef="let cheque">{{ cheque.branch }}</td>
+        </ng-container>
+        -->
+
+                    <ng-container matColumnDef="chequedate">
+                        <th mat-header-cell *matHeaderCellDef>Cheque Date</th>
+                        <td mat-cell *matCellDef="let cheque">{{ cheque.chequedate }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="chequeNo">
+                        <th mat-header-cell *matHeaderCellDef>Cheque No</th>
+                        <td mat-cell *matCellDef="let cheque">{{ cheque.chequeNo }}</td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="approveRejectDisplay"></tr>
+                    <tr mat-row *matRowDef="let row; columns:approveRejectDisplay"></tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="dialog-action-adjust d-flex justify-content-end">
+
+            <button mat-stroked-button mat-dialog-close>Close</button>
+        </div>
+    </div>
+</ng-template>
+<ng-template #selectParentCustomerDialog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <!-- Header -->
+        <div class="dialog-header dialog-title">
+            Select Customer
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+
+        <!-- Content -->
+        <div mat-dialog-content>
+            <mat-card>
+                <mat-card-header>
+                    <mat-card-title>Search Customer</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="row">
+                        <!-- Search Option Dropdown -->
+                        <div class="col-lg-4 col-md-4 mb-2">
+                            <label class="inputLabel">Search Option</label>
+                            <mat-form-field appearance="outline" class="w-100 hide-hint mr-10">
+                                <mat-select class="input-p-5" placeholder="Select a Search Option" class="input-p-5"
+                                    [(ngModel)]="searchParentCustOption"
+                                    (selectionChange)="selParentSearchOption($event)">
+                                    <mat-option *ngFor="let option of searchOptionSelect" [value]="option.value">
+                                        {{ option.label }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Textbox Search -->
+                        <div class="col-lg-4 col-md-4 mb-2" *ngIf="
+                parentFieldEnable &&
+                searchParentCustOption !== 'status' &&
+                searchParentCustOption !== 'serviceareaName' &&
+                searchParentCustOption !== 'plan'
+              ">
+                            <label class="inputLabel">Search Detail</label>
+                            <mat-form-field appearance="outline" class="w-100 hide-hint mr-10">
+                                <input matInput class="input-p-5" class="input-p-5" placeholder="Enter Search Detail"
+                                    [(ngModel)]="searchParentCustValue" (keydown.enter)="searchParentCustomer()" />
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Status Dropdown -->
+                        <div class="col-lg-4 col-md-4 mb-2" *ngIf="searchParentCustOption === 'status'">
+                            <label class="inputLabel">Status</label>
+                            <mat-form-field placeholder="Select a Status" appearance="outline"
+                                class="w-100 hide-hint mr-10">
+                                <mat-select placeholder="Select a Status" class="input-p-5" class="input-p-5"
+                                    [(ngModel)]="searchParentCustValue">
+                                    <mat-option *ngFor="let status of commondropdownService.CustomerStatusValue"
+                                        [value]="status.value">
+                                        {{ status.text }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Service Area Dropdown -->
+                        <div class="col-lg-4 col-md-4 mb-2" *ngIf="searchParentCustOption === 'serviceareaName'">
+                            <label class="inputLabel">Service Area</label>
+                            <mat-form-field appearance="outline" class="w-100 hide-hint mr-10">
+                                <mat-select class="input-p-5" placeholder="Select Service Area" class="input-p-5"
+                                    [(ngModel)]="searchParentCustValue">
+                                    <mat-option *ngFor="let sa of commondropdownService.serviceAreaList"
+                                        [value]="sa.id">
+                                        {{ sa.name }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Plan Dropdown -->
+                        <div class="col-lg-4 col-md-4 mb-2" *ngIf="searchParentCustOption === 'plan'">
+                            <label class="inputLabel"> Plan</label>
+                            <mat-form-field placeholder="Select a Plan" appearance="outline"
+                                class="w-100 hide-hint mr-10">
+                                <mat-select placeholder="Select a Plan" class="input-p-5" class="input-p-5"
+                                    [(ngModel)]="searchParentCustValue">
+                                    <mat-option *ngFor="let plan of commondropdownService.postpaidplanData"
+                                        [value]="plan.id">
+                                        {{ plan.name }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Search + Clear Buttons -->
+                        <div class="col-lg-12 col-md-12 col-sm-12 d-flex justify-content-center"
+                            *ngIf="parentFieldEnable" style="gap: 8px; margin-top: 1rem">
+                            <button mat-button mat-flat-button color="'primary'" class="addarea-btn" type="submit"
+                                class="addarea-btn" type="submit" (click)="searchParentCustomer()">
+                                Search
+                            </button>
+
+                            <button mat-stroked-button (click)="clearSearchParentCustomer()">Close</button>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+
+            <mat-card>
+                <mat-card-header>
+                    <mat-card-title>Select Customer</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="example-container mat-elevation-z8" tabindex="0">
+                        <table mat-table [dataSource]="customerList">
+                            <!-- Radio Select -->
+                            <ng-container matColumnDef="select">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef></th>
+                                <td mat-cell *matCellDef="let element">
+                                    <mat-radio-group [(ngModel)]="selectedParentCust">
+                                        <mat-radio-button [value]="element"></mat-radio-button>
+                                    </mat-radio-group>
+                                </td>
+                            </ng-container>
+
+                            <!-- Name -->
+                            <ng-container matColumnDef="name">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Name</th>
+                                <td mat-cell *matCellDef="let element">
+                                    {{ element.name }}
+                                </td>
+                            </ng-container>
+
+                            <!-- Username -->
+                            <ng-container matColumnDef="username">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>User Name</th>
+                                <td mat-cell *matCellDef="let element">{{ element.username }}</td>
+                            </ng-container>
+
+                            <tr mat-header-row *matHeaderRowDef="displayedColumnsCutomer"></tr>
+                            <tr mat-row *matRowDef="let row; columns: displayedColumnsCutomer"></tr>
+                        </table>
+                    </div>
+                    <!-- Paginator -->
+                    <mat-paginator [length]="parentCustomerListdatatotalRecords"
+                        [pageSize]="parentCustomerListdataitemsPerPage" [pageSizeOptions]="[5,10,20,50,100]"
+                        (page)="paginate($event)" showFirstLastButtons>
+                    </mat-paginator>
+                </mat-card-content>
+            </mat-card>
+        </div>
+
+        <div class="dialog-action-adjust d-flex justify-content-end" style="gap: 8px">
+            <button mat-button mat-flat-button color="'primary'" class="addarea-btn" type="submit" class="addarea-btn"
+                type="submit" (click)="saveSelCustomer(dialogRef)" [disabled]="!selectedParentCust">
+                Save
+            </button>
+            <button mat-stroked-button mat-dialog-close>Close</button>
+        </div>
+    </div>
+</ng-template>
+
+
+<!-- @if (dialogId) {
+<app-customer-details (closeSelectStaff)="closeSelectStaff()" [custId]="custId"></app-customer-details>
+} -->
+
+<ng-template #selectApproveDialog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <!-- Header -->
+        <div class="dialog-header dialog-title">
+            Select Staff
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <div mat-dialog-content>
+            <h5>Search Staff</h5>
+            <div class="row mb-2">
+                <div class="col-md-3">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <input matInput placeholder="Global Search Filter" [(ngModel)]="searchDeatil"
+                            (keydown.enter)="searchStaffByName()">
+                    </mat-form-field>
+                </div>
+                <div class="col-md-6">
+                    <button mat-button mat-flat-button color="'primary'" class="addarea-btn" type="submit"
+                        (click)="searchStaffByName()" [disabled]="!searchDeatil">
+                        Search
+                    </button>
+                    <button mat-stroked-button (click)="clearSearchForm()">
+                        <img src="assets/img/DashboardIcons/Refresh.svg" /> Clear
+                    </button>
+                </div>
+            </div>
+
+            <h5>Select Staff</h5>
+            <div class="example-container mat-elevation-z8" tabindex="0">
+                <table mat-table [dataSource]="staffData" class="mat-elevation-z1 w-100">
+                    <ng-container matColumnDef="select">
+                        <th mat-header-cell *matHeaderCellDef></th>
+                        <td mat-cell *matCellDef="let row">
+                            <mat-radio-button [(ngModel)]="selectedApprove" [value]="row"></mat-radio-button>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="firstname">
+                        <th mat-header-cell *matHeaderCellDef>Name</th>
+                        <td mat-cell *matCellDef="let row">{{ row.firstname }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="username">
+                        <th mat-header-cell *matHeaderCellDef>User Name</th>
+                        <td mat-cell *matCellDef="let row">{{ row.username }}</td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="approveDisplay"></tr>
+                    <tr mat-row *matRowDef="let row; columns: approveDisplay"></tr>
+                </table>
+            </div>
+            <mat-paginator [length]="parentstaffListdatatotalRecords" [pageSize]="parentStaffListdataitemsPerPage"
+                (page)="paginateStaff($event)" showFirstLastButtons>
+            </mat-paginator>
+        </div>
+
+        <!-- Footer -->
+        <div class="dialog-action-adjust d-flex justify-content-end">
+            <button mat-button mat-flat-button color="'primary'" class="addarea-btn" type="submit"
+                (click)="saveSelstaffApprove(dialogRef)" [disabled]="!selectedApprove">
+                Save
+            </button>
+            <button mat-stroked-button color="warn" (click)="dialogRef.close()">Close</button>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #selectStaffDialog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <!-- Header -->
+        <div class="dialog-header dialog-title">
+            Select Staff
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <div mat-dialog-content>
+            <mat-card>
+                <mat-card-header>
+                    <mat-card-title>Search Staff</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label class="inputLabel">Global Search Filter</label>
+                            <mat-form-field appearance="outline" class="w-100 hide-hint mr-10">
+                                <input matInput class="input-p-5" [(ngModel)]="searchDeatil"
+                                    placeholder="Global Search Filter" />
+                            </mat-form-field>
+                        </div>
+                        <div class="col-md-8 d-flex align-items-center gap-2" style="margin-top: 2.5rem">
+                            <button mat-button mat-flat-button color="primary" class="search-btn"
+                                (click)="searchStaffByName()" [disabled]="!searchDeatil">
+                                Search
+                            </button>
+                            <button class="search-btn" mat-stroked-button matButton="outlined" class="search-btn"
+                                (click)="clearSearchForm()">
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+            <mat-card>
+                <mat-card-header>
+                    <mat-card-title>Select Staff</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="example-container mat-elevation-z8" tabindex="0">
+                        <table mat-table [dataSource]="staffData" class="mat-elevation-z2 w-100">
+                            <!-- Radio -->
+                            <ng-container matColumnDef="select">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef style="width: 5rem"></th>
+                                <td mat-cell *matCellDef="let element">
+                                    <mat-radio-group [(ngModel)]="selectedStaffCust">
+                                        <mat-radio-button [value]="element"></mat-radio-button>
+                                    </mat-radio-group>
+                                </td>
+                            </ng-container>
+
+                            <!-- Name -->
+                            <ng-container matColumnDef="name">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Name</th>
+                                <td mat-cell *matCellDef="let element">{{ element.firstname }}</td>
+                            </ng-container>
+
+                            <!-- Username -->
+                            <ng-container matColumnDef="username">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>User Name</th>
+                                <td mat-cell *matCellDef="let element">{{ element.username }}</td>
+                            </ng-container>
+
+                            <!-- Partner -->
+                            <ng-container matColumnDef="partner">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Partner Name</th>
+                                <td mat-cell *matCellDef="let element">{{ element.partnerName || "-" }}</td>
+                            </ng-container>
+
+                            <tr mat-header-row *matHeaderRowDef="displayStaff"></tr>
+                            <tr mat-row *matRowDef="let row; columns: displayStaff"></tr>
+                        </table>
+                    </div>
+                    <mat-paginator [length]="parentstaffListdatatotalRecords"
+                        [pageSize]="parentStaffListdataitemsPerPage" (page)="paginateStaff($event)"
+                        [pageSizeOptions]="[5,10,20,50,100]" showFirstLastButtons>
+                    </mat-paginator>
+                </mat-card-content>
+            </mat-card>
+        </div>
+        <div class="dialog-action-adjust d-flex justify-content-end" style="gap: 8px">
+            <button mat-button mat-flat-button color="'primary'" class="addarea-btn" type="submit"
+                (click)="saveSelstaff(dialogRef)" [disabled]="!selectedStaffCust">
+                Save
+            </button>
+            <button mat-stroked-button mat-dialog-close>Close</button>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #approveCustomerDialog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <div class="dialog-header dialog-title">
+            Approve Customer
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <div mat-dialog-content>
+            <form [formGroup]="assignPaymentForm">
+                <h5>Select Staff</h5>
+                <div class="example-container mat-elevation-z8" tabindex="0">
+                    <table mat-table [dataSource]="staffDataList" class="mat-elevation-z1 w-100">
+                        <ng-container matColumnDef="select">
+                            <th mat-header-cell *matHeaderCellDef></th>
+                            <td mat-cell *matCellDef="let row">
+                                <mat-radio-button [(ngModel)]="selectStaff" [value]="row.id"></mat-radio-button>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="fullName">
+                            <th mat-header-cell *matHeaderCellDef>Name</th>
+                            <td mat-cell *matCellDef="let row">{{ row.fullName }}</td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="username">
+                            <th mat-header-cell *matHeaderCellDef>Username</th>
+                            <td mat-cell *matCellDef="let row">{{ row.username }}</td>
+                        </ng-container>
+
+                        <tr mat-header-row *matHeaderRowDef="custCafDisplay"></tr>
+                        <tr mat-row *matRowDef="let row; columns: custCafDisplay"></tr>
+                    </table>
+                </div>
+                <mat-form-field class="w-100 mt-2" appearance="outline">
+                    <label class="inputLabel">Remark</label>
+                    <textarea matInput placeholder="Enter a Remark" formControlName="remark"></textarea>
+                </mat-form-field>
+            </form>
+        </div>
+
+        <div class="dialog-action-adjust d-flex justify-content-end">
+            <button mat-button mat-flat-button color="'primary'" class="addarea-btn" type="submit"
+                (click)="reassignWorkflow(dialogRef)" [disabled]="!selectStaff">
+                Assign
+            </button>
+            <button mat-stroked-button color="warn" (click)="dialogRef.close()">Close</button>
+        </div>
+    </div>
+</ng-template>
+@if (ifOnlinePaymentAuditList) {
+<mat-card>
+    <mat-accordion class="w-100">
+        <mat-expansion-panel [(expanded)]="auditPanelExpanded" class="cardWithShadow w-100">
+
+            <mat-expansion-panel-header class="dialog-header">
+                <mat-panel-title>
+                    <mat-card-title class="m-0 f-w-700 f-s-16">
+                        {{ panelTitle }}
+                    </mat-card-title>
+                </mat-panel-title>
+            </mat-expansion-panel-header>
+            <!-- <mat-card-header>
+        <mat-card-title>TAT Mapping Detail</mat-card-title>
+    </mat-card-header> -->
+            <mat-card-content>
+                <div class="row">
+                    <!-- Search Option -->
+                    <div class="col-lg-3"><label class="inputLabel">Search Option</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <mat-select placeholder="Select a Search Option" [(value)]="selectedAuditSearchOption"
+                                (selectionChange)="selSearchOption()">
+                                <mat-option *ngFor="let option of auditSearchOption" [value]="option.value">
+                                    {{ option.label }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Conditional Search Value -->
+                    <div class="col-lg-3" *ngIf="selectedAuditSearchOption !== 'transactionDate'"><label
+                            class="inputLabel">Search
+                            Value</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <input matInput placeholder="Search Value" [(ngModel)]="selectedAuditSearchValue"
+                                (keydown.enter)="searchOnlineAuditPayment(true)" />
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Date Picker for Transaction Date -->
+                    <div class="col-lg-3" *ngIf="selectedAuditSearchOption === 'transactionDate'"><label
+                            class="inputLabel">Search
+                            Value</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <input matInput [matDatepicker]="picker1" placeholder="Enter Date"
+                                [(ngModel)]="selectedAuditSearchValue" />
+                            <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
+                            <mat-datepicker #picker1></mat-datepicker>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- From Date -->
+                    <div class="col-lg-3"><label class="inputLabel">From Date</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <input matInput [matDatepicker]="pickerFrom" placeholder="Select Start Date"
+                                [(ngModel)]="searchFromDate" />
+                            <mat-datepicker-toggle matSuffix [for]="pickerFrom"></mat-datepicker-toggle>
+                            <mat-datepicker #pickerFrom></mat-datepicker>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- To Date -->
+                    <div class="col-lg-3"><label class="inputLabel">To Date</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <input matInput [matDatepicker]="pickerTo" placeholder="Select End Date"
+                                [(ngModel)]="searchTodate" />
+                            <mat-datepicker-toggle matSuffix [for]="pickerTo"></mat-datepicker-toggle>
+                            <mat-datepicker #pickerTo></mat-datepicker>
+                        </mat-form-field>
+                    </div>
+
+
+                </div>
+                <!-- Buttons -->
+                <div class="d-flex justify-content-center align-items-center" style="gap:8px">
+                    <button mat-button mat-flat-button color="'primary'" class="button-normal m-r-10" type="submit"
+                        (click)="manualSearchAudit()"
+                        [disabled]="!selectedAuditSearchValue && !searchFromDate && !searchTodate">
+                        Search Payment
+                    </button>
+                    <button mat-stroked-button matButton="outlined" color="warn" class="button-normal"
+                        (click)="clearAuditSearch()">
+                        Clear
+                    </button>
+                    <button mat-flat-button mat-button color="accent" class="button-normal m-r-10"
+                        (click)="exportExcel()">
+                        <mat-icon>file_download</mat-icon> Export
+                    </button>
+                </div>
+                <!-- Online Payment Audit Table -->
+
+
+            </mat-card-content>
+        </mat-expansion-panel>
+    </mat-accordion>
+</mat-card>
+<div *ngIf="ifOnlinePaymentAuditList && !auditPanelExpanded" class="row">
+    <div class="col-md-12">
+        <mat-card>
+            <mat-card-header>
+                <mat-card-title>Online Payment Audit2</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <!-- <div *ngIf="onlinePaymentAuditList?.length > 0"> -->
+                <div class="example-container mat-elevation-z8" tabindex="0">
+                    <table mat-table [dataSource]="onlinePaymentAuditList" class="mat-elevation-z8"
+                        style="width: 100%;">
+
+                        <!-- Columns -->
+                        <ng-container matColumnDef="orderId">
+                            <th mat-header-cell *matHeaderCellDef> Reference No </th>
+                            <td mat-cell *matCellDef="let data"> {{data.orderId}} </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="pgTransactionId">
+                            <th mat-header-cell *matHeaderCellDef> Transaction No </th>
+                            <td mat-cell *matCellDef="let data"> {{data?.pgTransactionId || '-'}} </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="accountNumber">
+                            <th mat-header-cell *matHeaderCellDef> Account Number </th>
+                            <td mat-cell *matCellDef="let data"> {{data?.accountNumber || '-'}} </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="customerUsername">
+                            <th mat-header-cell *matHeaderCellDef> Customer Username </th>
+                            <td mat-cell *matCellDef="let data"> {{data.customerUsername}} </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="payment">
+                            <th mat-header-cell *matHeaderCellDef> Payment Amount </th>
+                            <td mat-cell *matCellDef="let data"> {{data.payment}} </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="status">
+                            <th mat-header-cell *matHeaderCellDef> Status </th>
+                            <td mat-cell *matCellDef="let data">
+                                <span [ngClass]="{
+                          'badge-info': data.status?.toLowerCase() === 'pending' || data.status?.toLowerCase() === 'initiate',
+                          'badge-success': data.status?.toLowerCase() === 'success' || data.status?.toLowerCase() === 'successful',
+                          'badge-danger': data.status?.toLowerCase() === 'failed'
+                        }">
+                                    {{data.status || '-'}}
+                                </span>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="gatewayStatus">
+                            <th mat-header-cell *matHeaderCellDef> Gateway Status </th>
+                            <td mat-cell *matCellDef="let data">
+                                <span [ngClass]="{
+                          'badge-success': data.gatewayStatus?.toLowerCase() === 'success' || data.gatewayStatus?.toLowerCase() === 'successful',
+                          'badge-info': data.gatewayStatus?.toLowerCase() === 'pending' || data.gatewayStatus?.toLowerCase() === 'initiate',
+                          'badge-danger': data.gatewayStatus?.toLowerCase() === 'failed'
+                        }">
+                                    {{data.gatewayStatus || '-'}}
+                                </span>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="failureDescription">
+                            <th mat-header-cell *matHeaderCellDef> Failure Reason </th>
+                            <td mat-cell *matCellDef="let data">
+                                <button mat-button color="warn" *ngIf="data.failureDescription"
+                                    (click)="openFailureReason(data)">
+                                    View
+                                </button>
+                                <span *ngIf="!data.failureDescription">-</span>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="paymentDate">
+                            <th mat-header-cell *matHeaderCellDef> Payment Date </th>
+                            <td mat-cell *matCellDef="let data"> {{data.paymentDate | date: 'dd-MM-yyyy HH:mm:ss'}}
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="merchantName">
+                            <th mat-header-cell *matHeaderCellDef> Merchant Name </th>
+                            <td mat-cell *matCellDef="let data"> {{data.merchantName}} </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="transactionDate">
+                            <th mat-header-cell *matHeaderCellDef> Transaction Date </th>
+                            <td mat-cell *matCellDef="let data"> {{data.transactionDate | date: 'dd-MM-yyyyHH:mm:ss'}}
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="payerMobileNumber">
+                            <th mat-header-cell *matHeaderCellDef> Payer Mobile Number </th>
+                            <td mat-cell *matCellDef="let data"> {{data.payerMobileNumber}} </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="autoPaymentInitiator">
+                            <th mat-header-cell *matHeaderCellDef> Auto Payment Initiator </th>
+                            <td mat-cell *matCellDef="let data"> {{data.autoPaymentInitiator}} </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="action">
+                            <th mat-header-cell *matHeaderCellDef> Action </th>
+                            <td mat-cell *matCellDef="let data">
+                                <button mat-icon-button color="primary" matTooltip="Retry Status"
+                                    [disabled]="data?.gatewayStatus?.toLowerCase() === 'success' || data?.gatewayStatus?.toLowerCase() === 'successful'"
+                                    (click)="retryPayment(data.orderId)">
+
+                                </button>
+                                <button mat-icon-button color="accent" matTooltip="Manual Settlement"
+                                    [disabled]="!(data?.pgTransactionId == null || data?.pgTransactionId == 'NA')"
+                                    (click)="addToWallet(data.orderId)">
+                                    <mat-icon>payment</mat-icon>
+                                </button>
+                            </td>
+                        </ng-container>
+
+                        <!-- Header and Row Definitions -->
+                        <!-- <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr> -->
+                        <!-- <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr> -->
+                        <tr mat-header-row *matHeaderRowDef="displayedColumnsOnlinePaymentAudit "></tr>
+                        <tr mat-row *matRowDef="let row; columns: displayedColumnsOnlinePaymentAudit ;"></tr>
+                    </table>
+                </div>
+                <!-- Pagination -->
+                <mat-paginator [length]="onlinePaymentAuditotalRecords" [pageSize]="onlinePaymentAudititemsPerPage"
+                    [pageSizeOptions]="[5,10,20,50,100]" (page)="pageChangedOnlinePayAuditList($event)"
+                    showFirstLastButtons>
+                </mat-paginator>
+                <!-- </div> -->
+
+                <!-- No Data -->
+                <div *ngIf="onlinePaymentAuditList?.length === 0">
+                    Details are not available
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+</div>
+<!-- <div class="row">
+    <div class="col-md-12">
+        <div class="panel">
+            <div class="panel-heading">
+                <div class="right">
+                    <button type="button" class="btn-toggle-collapse" data-toggle="collapse"
+                        data-target="#searchPayment" aria-expanded="false" aria-controls="searchPayment">
+                        <i class="fa fa-minus-circle"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="searchPayment" class="panel-collapse collapse in">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-lg-3 pl-lg-3">
+                            <label>Search Option</label>
+                            <div>
+                                <p-dropdown [options]="auditSearchOption" optionValue="value" optionLabel="label"
+                                    [filter]="true" filterBy="value" resetFilterOnHide="true"
+                                    placeholder="Search option" [(ngModel)]="selectedAuditSearchOption"
+                                    (keydown.enter)="searchOnlineAuditPayment(true)"
+                                    (onChange)="selSearchOption()"></p-dropdown>
+                            </div>
+                        </div>
+                        @if (selectedAuditSearchOption != 'transactionDate') {
+                        <div class="col-lg-3 pl-lg-3">
+                            <label>Search Value</label>
+                            <input type="text" class="form-control" placeholder="Search Value"
+                                [(ngModel)]="selectedAuditSearchValue"
+                                (keydown.enter)="searchOnlineAuditPayment(true)" />
+                        </div>
+                        }
+                        @if (selectedAuditSearchOption == 'transactionDate') {
+                        <div class="col-lg-3 pl-lg-3">
+                            <label>Search Value</label>
+                            <p-calendar [hideOnDateTimeSelect]="true" [showButtonBar]="true" [showIcon]="true"
+                                [style]="{ width: '100%' }" dateFormat="dd-MM-yyyy"
+                                [(ngModel)]="selectedAuditSearchValue" placeholder="Enter Date"></p-calendar>
+                        </div>
+                        }
+                        <div class="col-lg-3 pl-lg-3">
+                            <label>From Date</label>
+                            <p-calendar [hideOnDateTimeSelect]="true" [showButtonBar]="true" [showIcon]="true"
+                                [style]="{ width: '100%' }" dateFormat="dd-MM-yyyy" [(ngModel)]="searchFromDate"
+                                placeholder="Select Start Date"></p-calendar>
+                        </div>
+                        <div class="col-lg-3 pl-lg-3">
+                            <label>To Date</label>
+                            <p-calendar [hideOnDateTimeSelect]="true" [showButtonBar]="true" [showIcon]="true"
+                                [style]="{ width: '100%' }" dateFormat="dd-MM-yyyy" [(ngModel)]="searchTodate"
+                                placeholder="Select End Date"></p-calendar>
+                        </div>
+                        <div class="col-lg-12 pl-lg-3">
+                            <div class="addUpdateBtn" style="margin-top: 25px">
+                                <button type="submit" class="btn btn-primary" id="searchbtn"
+                                    (click)="searchOnlineAuditPayment(true)"
+                                    [disabled]="!selectedAuditSearchValue && !searchFromDate && !searchTodate">
+                                    <i class="fa fa-search"></i>
+                                    Search Payment
+                                </button>
+                                <button type="submit" class="btn btn-default" id="searchbtn"
+                                    (click)="clearAuditSearch()">
+                                    <img src="assets/img/DashboardIcons/Refresh.svg" />
+                                    Clear
+                                </button>
+                                <button class="btn btn-success" (click)="exportExcel()" id="searchbtn" type="reset">
+
+                                    <i class="fa fa-file-excel-o"></i>
+                                    Export
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        @if (ifOnlinePaymentAuditList) {
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Online Payment Audit</h3>
+                        <div class="right">
+                            <button type="button" class="btn-toggle-collapse" data-toggle="collapse"
+                                data-target="#batchPayment" aria-expanded="false" aria-controls="batchPayment">
+                                <i class="fa fa-minus-circle"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="onlinePaymentAudit" class="panel-collapse collapse in">
+                        <div class="panel-body table-responsive">
+                            <div class="row">
+                                <div class="col-lg-12 col-md-12">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Reference No</th>
+                                                <th>Transaction No</th>
+                                                <th>Account Number</th>
+                                                <th>Customer Username</th>
+                                                <th>Payment Amount</th>
+                                                <th>Status</th>
+                                                <th>Gateway Status</th>
+                                                <th>Failure reason</th>
+                                                <th>Payment Date</th>
+                                                <th>Merchant Name</th>
+<th>Transaction Date</th>
+<th>Payer Mobile Number</th>
+<th>Auto Payment Initiator</th>
+
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+    @for (
+    data of onlinePaymentAuditList
+    | paginate
+    : {
+    id: 'OnlinPayAuditPageData',
+    itemsPerPage: onlinePaymentAudititemsPerPage,
+    currentPage: currentPageOnlinePaymentAudit,
+    totalItems: onlinePaymentAuditotalRecords
+    }; track
+    data; let i = $index) {
+    <tr>
+        <td>
+            {{ data.orderId }}
+        </td>
+        <td>
+            {{
+            data?.pgTransactionId && data.pgTransactionId !== "null"
+            ? data.pgTransactionId
+            : "-"
+            }}
+        </td>
+        <td>
+            {{
+            data?.accountNumber && data.accountNumber !== "null"
+            ? data.accountNumber
+            : "-"
+            }}
+        </td>
+        <td>{{ data.customerUsername }}</td>
+        <td>{{ data.payment }}</td>
+        <td>
+            <span>
+                @switch (data.status?.toUpperCase()) {
+                @case ('PENDING') {
+                <span class="badge badge-info">{{
+                    data.status | titlecase
+                    }}</span>
+                }
+                @case ('INITIATE') {
+                <span class="badge badge-info">{{
+                    data.status | titlecase
+                    }}</span>
+                }
+                @case ('SUCCESS') {
+                <span class="badge badge-success">{{
+                    data.status | titlecase
+                    }}</span>
+                }
+                @case ('SUCCESSFUL') {
+                <span class="badge badge-success">{{
+                    data.status | titlecase
+                    }}</span>
+                }
+                @case ('FAILED') {
+                <span class="badge badge-danger">{{
+                    data.status | titlecase
+                    }}</span>
+                }
+                @default {
+                <span class="badge badge-info">
+                    {{
+                    data.status == null ||
+                    data.status?.toLowerCase()?.trim() === "" ||
+                    data.status?.toLowerCase()?.trim() === "null"
+                    ? "-"
+                    : data.status
+                    }}
+                </span>
+                }
+                }
+            </span>
+        </td>
+        <td>
+            <span>
+                @switch (data.gatewayStatus?.toLowerCase()) {
+                @case ('success') {
+                <span class="badge badge-success">{{
+                    data.gatewayStatus | titlecase
+                    }}</span>
+                }
+                @case ('successful') {
+                <span class="badge badge-success">{{
+                    data.gatewayStatus | titlecase
+                    }}</span>
+                }
+                @case ('initiate') {
+                <span class="badge badge-info">{{
+                    data.gatewayStatus | titlecase
+                    }}</span>
+                }
+                @case ('pending') {
+                <span class="badge badge-info">{{
+                    data.gatewayStatus | titlecase
+                    }}</span>
+                }
+                @case ('failed') {
+                <span class="badge badge-danger">{{
+                    data.gatewayStatus | titlecase
+                    }}</span>
+                }
+                @default {
+                <span class="badge badge-info">
+                    {{
+                    data.gatewayStatus == null ||
+                    data.gatewayStatus?.toLowerCase()?.trim() === "" ||
+                    data.gatewayStatus?.toLowerCase()?.trim() === "null"
+                    ? "-"
+                    : data.gatewayStatus
+                    }}
+                </span>
+                }
+                }
+            </span>
+        </td>
+
+        <td>
+            @if (data.failureDescription) {
+            <span>
+                <span class="badge badge-warning" style="cursor: pointer" (click)="openFailureReason(data)">
+                    View
+                </span>
+            </span>
+            } @else {
+            <span style="margin-right: 5px">-</span>
+            }
+        </td>
+        <td>{{ data.paymentDate | date: "dd-MM-YYYY HH:mm:ss" }}</td>
+        <td>{{ data.merchantName }}</td>
+        <td>{{ data.transactionDate | date: "dd-MM-YYYY HH:mm:ss" }}</td>
+        <td>
+            {{ data.payerMobileNumber }}
+        </td>
+        <td>
+            {{ data.autoPaymentInitiator }}
+        </td>
+        <td>
+            <button class="approve-btn" style="
+                              border: none;
+                              background: transparent;
+                              padding: 0;
+                              margin-right: 5px;
+                            " matTooltip="Retry Status" [disabled]="
+                              data?.gatewayStatus?.toLowerCase() === 'success' ||
+                              data?.gatewayStatus?.toLowerCase() === 'successful'
+                            " (click)="retryPayment(data.orderId)">
+                <img src="assets/img/refresh.png" alt="Retry Status"
+                    style="width: 25px; height: 25px; margin-right: 3px" />
+            </button>
+            <button class="approve-btn" style="border: none; background: transparent; padding: 0" type="button"
+                matTooltip="Manually Settlement" [disabled]="
+                              !(data?.pgTransactionId == null || data?.pgTransactionId == 'NA')
+                            " (click)="addToWallet(data.orderId)">
+                <img class="icon" style="width: 25px; height: 25px; margin-right: 3px"
+                    src="assets/img/19_Promise-to-Pay_Y.png" />
+            </button>
+        </td>
+    </tr>
+    }
+</tbody>
+</table>
+<div class="pagination_Dropdown">
+    <pagination-controls id="OnlinPayAuditPageData" [maxSize]="10" [directionLinks]="true" previousLabel="" nextLabel=""
+        (pageChange)="pageChangedOnlinePayAuditList($event)"></pagination-controls>
+    <div id="itemPerPageDropdown">
+        <p-dropdown [options]="pageLimitOptions" optionLabel="value" optionValue="value"
+            (onChange)="TotalItemPerPageAuditList($event)" [(ngModel)]="onlinePaymentAudititemsPerPage"></p-dropdown>
+    </div>
+</div>
+</div>
+</div>
+</div>
+@if (onlinePaymentAuditList?.length === 0) {
+<div class="panel-body table-responsive">
+    Details are not available
+</div>
+}
+</div>
+</div>
+</div>
+</div>
+}
+</div>
+</div> -->
+}
+
+<ng-template #failureReasonDialogTemplate let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <!-- Header -->
+        <div class="dialog-header dialog-title">
+            Failure Reason
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <mat-icon>close</mat-icon>
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <div mat-dialog-content>
+            <div *ngIf="selectedFailureDescription">
+                <strong>{{ selectedFailureDescription }}</strong>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="dialog-action-adjust d-flex justify-content-end">
+            <button mat-stroked-button color="warn" (click)="dialogRef.close()">Close</button>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #addTransactionDialogTemplate let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <!-- Header -->
+        <div class="dialog-header dialog-title">
+            Add Transaction No
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <mat-icon>close</mat-icon>
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <div mat-dialog-content><label class="inputLabel">Transaction No</label>
+            <mat-form-field appearance="outline" class="w-100 mt-2">
+                <input matInput placeholder="Enter Transaction No" [(ngModel)]="transactionNo">
+            </mat-form-field>
+        </div>
+
+        <!-- Footer -->
+        <div class="dialog-action-adjust d-flex justify-content-end">
+            <button mat-button mat-flat-button color="'primary'" class="addarea-btn" type="submit"
+                (click)="ConfirmonTransactionNumber(dialogRef)" [disabled]="!transactionNo" style="margin-right: 10px">
+                Add To Wallet
+            </button>
+            <button mat-stroked-button color="warn" (click)="dialogRef.close()">Cancel</button>
+        </div>
+    </div>
+</ng-template>
+
+<!-- <p-dialog header="Failure Reason" [(visible)]="failureReasonDialog" [style]="{ width: '60%' }" [modal]="true"
+    [responsive]="true" [draggable]="false" [closable]="true" (onHide)="closeFailureReason()">
+    <div class="modal-body">
+        @if (selectedFailureDescription) {
+        <div>
+            <strong>{{ selectedFailureDescription }}</strong>
+        </div>
+        }
+    </div>
+</p-dialog> -->
+
+<!-- <p-dialog header="Add Transaction No" [(visible)]="transModal" [modal]="true" [style]="{ width: '30%' }"
+    [draggable]="false" (onHide)="transactionModal()" [resizable]="false">
+    <div class="form-group">
+        <label style="margin-top: 10px">Transaction No: </label>
+        <input type="text" name="transactionNo" id="transactionNo" [(ngModel)]="transactionNo"
+            placeholder="Enter Transaction No" class="form-control" />
+    </div>
+    <ng-template pTemplate="footer">
+        <div class="btnGroup text-center">
+            <button class="btn btn-primary btnStyle" (click)="ConfirmonTransactionNumber()" style="margin-right: 10px"
+                [disabled]="!transactionNo">
+                Add To Wallet
+            </button>
+            <button class="btn btn-danger btnStyle" (click)="transactionModal()">Cancel</button>
+        </div>
+    </ng-template>
+</p-dialog> -->

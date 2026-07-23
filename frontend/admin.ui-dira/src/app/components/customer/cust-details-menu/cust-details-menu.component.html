@@ -1,0 +1,653 @@
+<div class="customer-details-menu">
+    <mat-card>
+        <mat-card-header>
+            <div class="d-flex gap-10">
+                <img src="../../../../assets/img/DashboardIcons/Back Arrow.svg" alt="" (click)="goBack()" />
+                <mat-card-title>{{ custData?.firstname }} {{custData?.lastname}} Details</mat-card-title>
+            </div>
+        </mat-card-header>
+        <mat-card-content>
+            <div class="customer-main-container">
+                <div class="tabs">
+                    <div class="tab cursor-pointer" (click)="openDetails('home')">
+                        <p>Home</p>
+                    </div>
+                    <div class="tab cursor-pointer" (click)="openDetails('finance')">
+                        <p>Finance & Billing</p>
+                        @if (isFinanceDetailsToggle) {
+                        <mat-icon>keyboard_arrow_up</mat-icon>
+                        } @else {
+                        <mat-icon>keyboard_arrow_down</mat-icon>
+                        }
+                    </div>
+                    <div class="tab cursor-pointer" (click)="openDetails('audit')">
+                        <p>Audit</p>
+                        @if (isAuditDetailsToggle) {
+                        <mat-icon>keyboard_arrow_up</mat-icon>
+                        } @else {
+                        <mat-icon>keyboard_arrow_down</mat-icon>
+                        }
+                    </div>
+                    <div class="tab cursor-pointer" (click)="openDetails('user')">
+                        <p>User Management</p>
+                        @if (isUserDetailsToggle) {
+                        <mat-icon>keyboard_arrow_up</mat-icon>
+                        } @else {
+                        <mat-icon>keyboard_arrow_down</mat-icon>
+                        }
+                    </div>
+                    <div class="tab cursor-pointer" (click)="openDetails('support')">
+                        <p>Service & Inventory</p>
+                        @if (isSupportDetailsToggle) {
+                        <mat-icon>keyboard_arrow_up</mat-icon>
+                        } @else {
+                        <mat-icon>keyboard_arrow_down</mat-icon>
+                        }
+                    </div>
+                </div>
+                @if (isFinanceDetailsToggle) {
+                <div class="submenu m-t-20">
+                    @if (
+                    isCustomerDetailSubMenu &&
+                    loginService.hasPermission(
+                    this.custType == "Prepaid"
+                    ? PRE_CUST_CONSTANTS.PRE_CUST_INVOICES
+                    : POST_CUST_CONSTANTS.POST_CUST_INVOICES
+                    ) &&
+                    statusCheckService.isActiveRevenueService
+                    ) {
+                    <a class="submenu-item d-flex align-items-center w-100 cursor-pointer"
+                        [routerLink]="['invoice/' + custId]">
+                        <p>Invoice</p>
+                    </a>
+                    }
+                    @if (
+                    isCustomerDetailSubMenu &&
+                    loginService.hasPermission(
+                    this.custType == "Prepaid"
+                    ? PRE_CUST_CONSTANTS.PRE_CUST_LEDGER
+                    : POST_CUST_CONSTANTS.POST_CUST_LEDGER
+                    ) &&
+                    statusCheckService.isActiveRevenueService
+                    ) {
+                    <span class="separator"></span>
+                    <a class="submenu-item d-flex align-items-center w-100 cursor-pointer"
+                        [routerLink]="['ledger/' + custId]">
+                        <p>Ledger</p>
+                    </a>
+                    }
+                    @if (
+                    isCustomerDetailSubMenu &&
+                    loginService.hasPermission(
+                    this.custType == "Prepaid"
+                    ? PRE_CUST_CONSTANTS.PRE_CUST_PLANS
+                    : POST_CUST_CONSTANTS.POST_CUST_PLANS
+                    )
+                    ) {
+                    <span class="separator"></span>
+                    <a class="submenu-item d-flex align-items-center w-100 cursor-pointer"
+                        [routerLink]="['plans/' + custId]">
+                        <p>Plans</p>
+                    </a>
+                    }
+                    @if (
+                    isCustomerDetailSubMenu &&
+                    loginService.hasPermission(
+                    this.custType == "Prepaid"
+                    ? PRE_CUST_CONSTANTS.PRE_CUST_PAYMENT
+                    : POST_CUST_CONSTANTS.POST_CUST_PAYMENT
+                    ) &&
+                    statusCheckService.isActiveRevenueService
+                    ) {
+                    <span class="separator"></span>
+                    <a class="submenu-item d-flex align-items-center w-100 cursor-pointer" [ngClass]="
+                  isCustomerDetailSubMenu &&
+                  (custData.parentCustomerId == null || hasCustInvoiceTypeIndependent())
+                    ? ''
+                    : 'disabledCustSubmenu'
+                " (click)="
+                  isCustomerDetailSubMenu &&
+                  (custData.parentCustomerId == null || hasCustInvoiceTypeIndependent())
+                    ? openSubMenu('/home/customer/details/' + custType + '/payment/' + custId)
+                    : $event.stopPropagation()
+                ">
+                        <p>Payment</p>
+                    </a>
+                    }
+
+                    @if (
+                    isCustomerDetailSubMenu &&
+                    loginService.hasPermission(
+                    this.custType == "Prepaid"
+                    ? PRE_CUST_CONSTANTS.PRE_CUST_WALLET
+                    : POST_CUST_CONSTANTS.POST_CUST_WALLET
+                    ) &&
+                    statusCheckService.isActiveRevenueService
+                    ) {
+                    <span class="separator"></span>
+                    <a class="submenu-item d-flex align-items-center w-100 cursor-pointer" [ngClass]="
+                  custData.parentCustomerId == null || hasCustInvoiceTypeIndependent()
+                    ? ''
+                    : 'disabledCustSubmenu'
+                " (click)="
+                  custData.parentCustomerId == null || hasCustInvoiceTypeIndependent()
+                    ? openSubMenu('/home/customer/details/' + custType + '/wallet/' + custId)
+                    : $event.stopPropagation()
+                ">
+                        <p>Wallet</p>
+                    </a>
+                    }
+                    @if (
+                    isCustomerDetailSubMenu &&
+                    loginService.hasPermission(
+                    this.custType == "Prepaid"
+                    ? PRE_CUST_CONSTANTS.PRE_CUST_CHARGE
+                    : POST_CUST_CONSTANTS.POST_CUST_CHARGE
+                    )
+                    ) {
+                    <span class="separator"></span>
+                    <a class="submenu-item d-flex align-items-center w-100 cursor-pointer"
+                        [ngClass]="custData.status !== 'Terminate' ? '' : 'disabledCustSubmenu'" (click)="
+                  custData.status === 'Terminate'
+                    ? $event.stopPropagation()
+                    : openSubMenu(
+                        '/home/customer/details/' + custType + '/chargeManagement/' + custId
+                      )
+                ">
+                        <p>Charge Management</p>
+                    </a>
+                    }
+                    @if (
+                    isCustomerDetailSubMenu &&
+                    loginService.hasPermission(
+                    this.custType == "Prepaid"
+                    ? PRE_CUST_CONSTANTS.PRE_CUST_CREDIT_NOTE
+                    : POST_CUST_CONSTANTS.POST_CUST_CREDIT_NOTE
+                    ) &&
+                    loginService.hasPermission(CREDIT_NOTES.CREDIT_NOTE)
+                    ) {
+                    <span class="separator"></span>
+                    <a class="submenu-item d-flex align-items-center w-100 cursor-pointer"
+                        [ngClass]="custData.status !== 'Terminate' ? '' : 'disabledCustSubmenu'" (click)="
+                  custData.status === 'Terminate'
+                    ? $event.stopPropagation()
+                    : openSubMenu('/home/customer/details/' + custType + '/creditNote/' + custId)
+                ">
+                        <p>Credit Note</p>
+                    </a>
+                    }
+                    @if (
+                    isCustomerDetailSubMenu &&
+                    loginService.hasPermission(
+                    this.custType == "Prepaid"
+                    ? PRE_CUST_CONSTANTS.PRE_CUST_REVENUE_REPORT
+                    : POST_CUST_CONSTANTS.POST_CUST_REVENUE_REPORT
+                    ) &&
+                    statusCheckService.isActiveRevenueService
+                    ) {
+                    <span class="separator"></span>
+                    <a class="submenu-item d-flex align-items-center w-100 cursor-pointer"
+                        [routerLink]="['revenueReport/' + custId]" [state]="{ data: this.custData }">
+                        <p>Revenue Report</p>
+                    </a>
+                    }
+                    @if (
+                    isCustomerDetailSubMenu &&
+                    loginService.hasPermission(
+                    this.custType == "Prepaid"
+                    ? PRE_CUST_CONSTANTS.PRE_CUST_DUNNING
+                    : POST_CUST_CONSTANTS.POST_CUST_DUNNING
+                    )
+                    ) {
+                    <span class="separator"></span>
+                    <a class="submenu-item d-flex align-items-center w-100 cursor-pointer"
+                        [ngClass]="{ activeSubMenu: isDunningManagement }"
+                        [routerLink]="['dunningManagement/' + custId]" [state]="{ data: this.custData }">
+                        <p>Dunning Management</p>
+                    </a>
+                    }
+                </div>
+                }
+                @if (isAuditDetailsToggle) {
+                <div class="submenu m-t-20">
+                    @if (
+                    isCustomerDetailSubMenu &&
+                    loginService.hasPermission(
+                    this.custType == "Prepaid"
+                    ? PRE_CUST_CONSTANTS.PRE_CUST_TICKETS
+                    : POST_CUST_CONSTANTS.POST_CUST_TICKETS
+                    ) &&
+                    statusCheckService.isActiveTicketService
+                    ) {
+                    <a class="submenu-item d-flex align-items-center w-100 cursor-pointer"
+                        [state]="{ data: this.custData }" [routerLink]="['tickets/' + custId]">
+                        <p>Ticket</p>
+                    </a>
+                    }
+                    @if (
+                    isCustomerDetailSubMenu &&
+                    loginService.hasPermission(
+                    this.custType == "Prepaid"
+                    ? PRE_CUST_CONSTANTS.PRE_CUST_WORKFLOW_DETAILS
+                    : POST_CUST_CONSTANTS.POST_CUST_WORKFLOW_DETAILS
+                    )
+                    ) {
+                    <span class="separator"></span>
+                    <a class="submenu-item d-flex align-items-center w-100 cursor-pointer"
+                        [routerLink]="['workflowAudit/' + custId]" [state]="{ data: this.custData }">
+                        <p>Workflow Audit</p>
+                    </a>
+                    }
+                    @if (
+                    isCustomerDetailSubMenu &&
+                    loginService.hasPermission(
+                    this.custType == "Prepaid"
+                    ? PRE_CUST_CONSTANTS.PRE_CUST_AUDIT_DETAILS
+                    : POST_CUST_CONSTANTS.POST_CUST_AUDIT_DETAILS
+                    )
+                    ) {
+                    <span class="separator"></span>
+                    <a class="submenu-item d-flex align-items-center w-100 cursor-pointer"
+                        [routerLink]="['auditDetails/' + custId]" [state]="{ data: this.custData }">
+                        <p>Audit Details</p>
+                    </a>
+                    }
+
+                    @if (
+                    isCustomerDetailSubMenu &&
+                    loginService.hasPermission(
+                    this.custType == "Prepaid"
+                    ? PRE_CUST_CONSTANTS.PRE_CUST_TASK_AUDIT
+                    : POST_CUST_CONSTANTS.POST_CUST_TASK_AUDIT
+                    ) &&
+                    statusCheckService.isActiveTaskManagementService
+                    ) {
+                    <span class="separator"></span>
+                    <a class="submenu-item d-flex align-items-center w-100 cursor-pointer"
+                        [routerLink]="['taskAudit/' + custId]" [state]="{ data: this.custData }">
+                        <p>Diary Audit</p>
+                    </a>
+                    }
+                    @if (isCustomerDetailSubMenu) {
+                    <span class="separator"></span>
+                    <a class="submenu-item d-flex align-items-center w-100 cursor-pointer"
+                        [state]="{ data: this.custData }" [routerLink]="['callDetails/' + custId]">
+                        <p>Call Details</p>
+                    </a>
+                    }
+                    @if (
+                    isCustomerDetailSubMenu &&
+                    loginService.hasPermission(
+                    this.custType == 'Prepaid'
+                    ? PRE_CUST_CONSTANTS.PRE_CUST_NOTIFICATION
+                    : POST_CUST_CONSTANTS.POST_CUST_NOTIFICATION
+                    ) &&
+                    statusCheckService.isActiveNotificationService
+                    ) { <span class="separator"></span>
+                    <a class="submenu-item d-flex align-items-center w-100 cursor-pointer"
+                        [state]="{ data: this.custData }" [routerLink]="['notification/' + custId]">
+                        <p>Notification Management</p>
+                    </a>
+                    }
+                </div>
+                }
+                @if (isSupportDetailsToggle) {
+                <div class="submenu m-t-20">
+                    @if (
+                    isCustomerDetailSubMenu &&
+                    loginService.hasPermission(
+                    this.custType == "Prepaid"
+                    ? PRE_CUST_CONSTANTS.PRE_CUST_INVENTORY
+                    : POST_CUST_CONSTANTS.POST_CUST_INVENTORY
+                    ) &&
+                    statusCheckService.isActiveInventoryService
+                    ) {
+                    <a class="submenu-item d-flex align-items-center w-100 cursor-pointer"
+                        [routerLink]="['inventoryManagement/' + custId]">
+                        <p>Inventory</p>
+                    </a>
+                    }
+                    @if (
+                    isCustomerDetailSubMenu &&
+                    loginService.hasPermission(
+                    this.custType == "Prepaid"
+                    ? PRE_CUST_CONSTANTS.PRE_CUST_SHIFT_LOCATION
+                    : POST_CUST_CONSTANTS.POST_CUST_SHIFT_LOCATION
+                    )
+                    ) {
+                    <span class="separator"></span>
+                    <a class="submenu-item d-flex align-items-center w-100 cursor-pointer"
+                        [ngClass]="custData.status !== 'Terminate' ? '' : 'disabledCustSubmenu'" (click)="
+                  custData.status === 'Terminate'
+                    ? $event.stopPropagation()
+                    : openSubMenu('/home/customer/details/' + custType + '/shiftLocation/' + custId)
+                ">
+                        <p>Shift Location</p>
+                    </a>
+                    }
+                    @if (
+                    isCustomerDetailSubMenu &&
+                    loginService.hasPermission(
+                    this.custType == "Prepaid"
+                    ? PRE_CUST_CONSTANTS.PRE_CUST_SERVICE
+                    : POST_CUST_CONSTANTS.POST_CUST_SERVICE
+                    )
+                    ) {
+                    <span class="separator"></span>
+                    <a class="submenu-item d-flex align-items-center w-100 cursor-pointer"
+                        [ngClass]="custData.status !== 'Terminate' ? '' : 'disabledCustSubmenu'" (click)="
+                  custData.status === 'Terminate'
+                    ? $event.stopPropagation()
+                    : getBUFromCurrentStaff()
+                ">
+                        <p>Service Management</p>
+                    </a>
+                    }
+
+                    @if (
+                    isCustomerDetailSubMenu &&
+                    loginService.hasPermission(
+                    this.custType == "Prepaid"
+                    ? PRE_CUST_CONSTANTS.PRE_CUST_IP_MANAGEMENT
+                    : POST_CUST_CONSTANTS.POST_CUST_IP_MANAGEMENT
+                    )
+                    ) {
+                    <span class="separator"></span>
+                    <a class="submenu-item d-flex align-items-center w-100 cursor-pointer"
+                        [state]="{ data: this.custData }" [routerLink]="['ipManagement/' + custId]">
+                        <p>IP Management</p>
+                    </a>
+                    }
+
+                    @if (
+                    isCustomerDetailSubMenu &&
+                    loginService.hasPermission(
+                    this.custType == "Prepaid"
+                    ? PRE_CUST_CONSTANTS.PRE_CUST_MAC_MANAGEMENT
+                    : POST_CUST_CONSTANTS.POST_CUST_MAC_MANAGEMENT
+                    )
+                    ) {
+                    <span class="separator"></span>
+                    <a class="submenu-item d-flex align-items-center w-100 cursor-pointer"
+                        [state]="{ data: this.custData }" [routerLink]="['macManagement/' + custId]">
+                        <p>Mac Management</p>
+                    </a>
+                    }
+                </div>
+                }
+                @if (isUserDetailsToggle) {
+                <div class="submenu m-t-20">
+                    @if (
+                    isCustomerDetailSubMenu &&
+                    loginService.hasPermission(
+                    this.custType == "Prepaid"
+                    ? PRE_CUST_CONSTANTS.PRE_CUST_CHANGE_PLAN
+                    : POST_CUST_CONSTANTS.POST_CUST_CHANGE_PLAN
+                    )
+                    ) {
+                    <a class="submenu-item d-flex align-items-center w-100 cursor-pointer" [ngClass]="
+                  isCustomerDetailSubMenu &&
+                  (custData.parentCustomerId == null || hasCustInvoiceTypeIndependent()) &&
+                  custData.status !== 'Terminate'
+                    ? ''
+                    : 'disabledCustSubmenu'
+                " (click)="
+                  isCustomerDetailSubMenu &&
+                  (custData.parentCustomerId == null || hasCustInvoiceTypeIndependent()) &&
+                  custData.status !== 'Terminate'
+                    ? openSubMenu('/home/customer/details/' + custType + '/changePlan/' + custId)
+                    : $event.stopPropagation()
+                ">
+                        <p>Change Plan</p>
+                    </a>
+                    }
+
+                    @if (
+                    isCustomerDetailSubMenu &&
+                    loginService.hasPermission(
+                    this.custType == "Prepaid"
+                    ? PRE_CUST_CONSTANTS.PRE_CUST_CHANGE_STATUS
+                    : POST_CUST_CONSTANTS.POST_CUST_CHANGE_STATUS
+                    )
+                    ) {
+                    <span class="separator"></span>
+                    <a class="submenu-item d-flex align-items-center w-100 cursor-pointer" (click)="
+                  custData.status === 'Terminate'
+                    ? $event.stopPropagation()
+                    : openSubMenu('/home/customer/details/' + custType + '/changeStatus/' + custId)
+                ">
+                        <p>Change Status</p>
+                    </a>
+                    }
+                    @if (
+                    isCustomerDetailSubMenu &&
+                    loginService.hasPermission(
+                    this.custType == "Prepaid"
+                    ? PRE_CUST_CONSTANTS.PRE_CUST_SESSION_HISTORY
+                    : POST_CUST_CONSTANTS.POST_CUST_SESSION_HISTORY
+                    )
+                    ) {
+                    <span class="separator"></span>
+                    <a class="submenu-item d-flex align-items-center w-100 cursor-pointer"
+                        [routerLink]="['sessionHistory/' + custId]" [state]="{ data: this.custData }">
+                        <p>Session History</p>
+                    </a>
+                    }
+
+                    @if (
+                    isCustomerDetailSubMenu &&
+                    loginService.hasPermission(
+                    this.custType == "Prepaid"
+                    ? PRE_CUST_CONSTANTS.PRE_CUST_FEEDBACK
+                    : POST_CUST_CONSTANTS.POST_CUST_FEEDBACK
+                    )
+                    ) {
+                    <span class="separator"></span>
+
+                    <a class="submenu-item d-flex align-items-center w-100 cursor-pointer"
+                        [routerLink]="['feedback/' + custId]" [state]="{ data: this.custData }">
+                        <p>Feedback</p>
+                    </a>
+                    }
+                    @if (
+                    isCustomerDetailSubMenu &&
+                    loginService.hasPermission(
+                    this.custType == "Prepaid"
+                    ? PRE_CUST_CONSTANTS.PRE_CUST_CHANGE_DISCOUNT
+                    : POST_CUST_CONSTANTS.POST_CUST_CHANGE_DISCOUNT
+                    )
+                    ) {
+                    <span class="separator"></span>
+                    <a class="submenu-item d-flex align-items-center w-100 cursor-pointer" [ngClass]="
+                  isCustomerDetailSubMenu && custData.status !== 'Terminate'
+                    ? ''
+                    : 'disabledCustSubmenu'
+                " (click)="
+                  custData.status !== 'Terminate'
+                    ? openSubMenu(
+                        '/home/customer/details/' + custType + '/changeDiscount/' + custId
+                      )
+                    : $event.stopPropagation()
+                ">
+                        <p>Change Discount</p>
+                    </a>
+                    }
+                    <span class="separator"></span>
+                    <a class="submenu-item d-flex align-items-center w-100 cursor-pointer"
+                        [state]="{ data: this.custData }" [routerLink]="['childManagement/' + custId]">
+                        <p>Child Management</p>
+                    </a>
+                    @if (
+                    isCustomerDetailSubMenu &&
+                    custData.hasChildCust &&
+                    loginService.hasPermission(
+                    this.custType == "Prepaid"
+                    ? PRE_CUST_CONSTANTS.PRE_CUST_CHILD_CUSTS
+                    : POST_CUST_CONSTANTS.POST_CUST_CHILD_CUST
+                    )
+                    ) {
+                    <span class="separator"></span>
+                    <a class="submenu-item d-flex align-items-center w-100 cursor-pointer"
+                        [state]="{ data: this.custData }" [routerLink]="['childCustomers/' + custId]">
+                        <p>My Child Customers</p>
+                    </a>
+                    }
+                    @if (
+                    isCustomerDetailSubMenu &&
+                    loginService.hasPermission(
+                    this.custType == "Prepaid"
+                    ? PRE_CUST_CONSTANTS.PRE_CUST_CHANGE_PASSWORD
+                    : POST_CUST_CONSTANTS.POST_CUST_CHANGE_PASSWORD
+                    )
+                    ) {
+                    <span class="separator"></span>
+                    <a class="submenu-item d-flex align-items-center w-100 cursor-pointer"
+                        [ngClass]="custData.status !== 'Terminate' ? '' : 'disabledCustSubmenu'" (click)="
+                  custData.status === 'Terminate' ? $event.stopPropagation() : openPassChange()
+                ">
+                        <p>Change Password</p>
+                    </a>
+                    }
+                    @if (
+                    isCustomerDetailSubMenu &&
+                    loginService.hasPermission(
+                    this.custType == "Prepaid"
+                    ? PRE_CUST_CONSTANTS.CUSTOMER_NOTES
+                    : POST_CUST_CONSTANTS.POST_CUST_NOTIFICATION
+                    )
+                    ) {
+                    <span class="separator"></span>
+                    <a class="submenu-item d-flex align-items-center w-100 cursor-pointer"
+                        [state]="{ data: this.custData }" [routerLink]="['customerNotes/' + custId]">
+                        <p>Customer Notes</p>
+                    </a>
+                    }
+                </div>
+                }
+            </div>
+            <div class="w-100 d-flex justify-content-end m-t-20">
+                <div class="shortcuts">
+                    @if (
+                    loginService.hasPermission(
+                    this.custType == "Prepaid"
+                    ? PRE_CUST_CONSTANTS.PRE_CUST_PLANS
+                    : POST_CUST_CONSTANTS.POST_CUST_PLANS
+                    )
+                    ) {
+                    <div>
+                        <a class="submenu-item d-flex align-items-center w-100 cursor-pointer"
+                            [routerLink]="['plans/' + custId]" matTooltip="Customer Plans">
+                            <img src="../../../../assets/img/customers/Frame.svg" alt="" />
+                        </a>
+                    </div>
+                    }
+                    @if (
+                    loginService.hasPermission(
+                    this.custType == "Prepaid"
+                    ? PRE_CUST_CONSTANTS.PRE_CUST_CHANGE_PLAN
+                    : POST_CUST_CONSTANTS.POST_CUST_CHANGE_PLAN
+                    )
+                    ) {
+                    <div>
+                        <img src="../../../../assets/img/customers/Vector (1).svg" alt="" style="cursor: pointer;"
+                            (click)="
+                  isCustomerDetailSubMenu &&
+                  (custData.parentCustomerId == null || hasCustInvoiceTypeIndependent()) &&
+                  custData.status !== 'Terminate'
+                    ? openSubMenu('/home/customer/details/' + custType + '/changePlan/' + custId)
+                    : $event.stopPropagation()
+                " matTooltip="Change Customer Plan" />
+                    </div>
+                    }
+                    @if (
+                    loginService.hasPermission(
+                    this.custType == "Prepaid"
+                    ? PRE_CUST_CONSTANTS.PRE_CUST_SERVICE
+                    : POST_CUST_CONSTANTS.POST_CUST_SERVICE
+                    )
+                    ) {
+                    <div>
+                        <img src="../../../../assets/img/customers/Vector (2).svg" alt="" style="cursor: pointer;"
+                            (click)="
+                  custData.status === 'Terminate'
+                    ? $event.stopPropagation()
+                    : getBUFromCurrentStaff() 
+                " matTooltip="Service Detail" />
+                    </div>
+                    }
+                    @if (
+                    loginService.hasPermission(
+                    this.custType == "Prepaid"
+                    ? PRE_CUST_CONSTANTS.PRE_CUST_INVENTORY
+                    : POST_CUST_CONSTANTS.POST_CUST_INVENTORY
+                    ) &&
+                    statusCheckService.isActiveInventoryService
+                    ) {
+                    <div>
+                        <a class="submenu-item d-flex align-items-center w-100 cursor-pointer"
+                            matTooltip="Customer Inventory" [routerLink]="['inventoryManagement/' + custId]">
+                            <img src="../../../../assets/img/customers/Vector (3).svg" alt="" />
+                        </a>
+                    </div>
+                    }
+                    @if (
+                    loginService.hasPermission(
+                    this.custType == "Prepaid"
+                    ? PRE_CUST_CONSTANTS.PRE_CUST_WALLET
+                    : POST_CUST_CONSTANTS.POST_CUST_WALLET
+                    ) &&
+                    statusCheckService.isActiveRevenueService
+                    ) {
+                    <div>
+                        <img src="../../../../assets/img/customers/Vector (4).svg" alt="" style="cursor: pointer;"
+                            (click)="
+                  custData.parentCustomerId == null || hasCustInvoiceTypeIndependent() 
+                    ? openSubMenu('/home/customer/details/' + custType + '/wallet/' + custId)
+                    : $event.stopPropagation()
+                " matTooltip=" Customer Wallet" />
+                    </div>
+                    }
+                    @if (
+                    loginService.hasPermission(
+                    this.custType == "Prepaid"
+                    ? PRE_CUST_CONSTANTS.PRE_CUST_SESSION_HISTORY
+                    : POST_CUST_CONSTANTS.POST_CUST_SESSION_HISTORY
+                    )
+                    ) {
+                    <div>
+                        <a class="submenu-item d-flex align-items-center w-100 cursor-pointer"
+                            matTooltip="Session History" [routerLink]="['sessionHistory/' + custId]"
+                            [state]="{ data: this.custData }">
+                            <img src="../../../../assets/img/customers/Vector (1).svg" alt="" />
+                        </a>
+
+                    </div>
+                    }
+                    @if (
+                    loginService.hasPermission(
+                    this.custType == "Prepaid"
+                    ? PRE_CUST_CONSTANTS.CUSTOMER_NOTES
+                    : POST_CUST_CONSTANTS.POST_CUST_NOTIFICATION
+                    )
+                    ) {
+                    <div>
+                        <a class="submenu-item d-flex align-items-center w-100 cursor-pointer"
+                            matTooltip="Customer Note" [state]="{ data: this.custData }"
+                            [routerLink]="['customerNotes/' + custId]">
+                            <img src="../../../../assets/img/customers/Vector.svg" alt="" />
+                        </a>
+
+                    </div>
+                    }
+                </div>
+            </div>
+            <div class="m-t-20">
+                <router-outlet> </router-outlet>
+                @if (showChangePassword) {
+                <app-cust-change-password [custId]="custId"
+                    (closePassChange)="closePassChange()"></app-cust-change-password>
+                }
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>

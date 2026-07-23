@@ -1,0 +1,1771 @@
+<mat-tab-group mat-align-tabs="start" [(selectedIndex)]="selectedTabIndex" (selectedTabChange)="onTabChange($event)">
+    <mat-tab label="Overview">
+        @if (isOverviewShow) {
+        <div class="overview-container">
+            <!-- Top Row: Customer Info, Active Plan, Quick Actions -->
+            <div class="overview-top-row">
+                <!-- Customer Information Card -->
+                <div class="d-flex flex-col ">
+                    <!-- <span class="section-title">Customer Information</span> -->
+                    <mat-card class="cardWithShadow">
+                        <mat-card-header>
+                            <mat-card-title class="f-s-20 text-primary">Customer Information</mat-card-title>
+                        </mat-card-header>
+                        <mat-card-content>
+                            <div>
+                                <div class="f-s-16  text-primary">
+                                    <p class="f-s-16 text-primary">Name:</p>
+                                    {{ customeroverviewDetails?.customerInformation?.name }}
+                                </div>
+
+                                <div class="d-flex justify-content-between">
+                                    <div class="d-flex flex-col ">
+                                        <div class="f-s-14">
+                                            <p class="f-s-16 text-primary">ID:</p>
+                                            <p class="f-s-16 ">{{ customeroverviewDetails?.customerInformation?.id }}
+                                            </p>
+                                            <p class="f-s-16 text-primary">Account:</p>
+                                            <p class="f-s-16">{{ customeroverviewDetails?.customerInformation?.account
+                                                }}
+                                            </p>
+                                        </div>
+                                        <div class="status-item">
+                                            <span class="f-s-16  text-primary">Customer Status</span>
+                                            @if (customeroverviewDetails?.customerInformation?.status === 'Active') {
+                                            <div class="chip-Active f-s-16 ">
+                                                {{ customeroverviewDetails?.customerInformation?.status }}
+                                            </div>
+                                            }
+                                            @if (customeroverviewDetails?.customerInformation?.status === 'Rejected') {
+                                            <div class="chip-Rejected f-s-16 ">
+                                                {{ customeroverviewDetails?.customerInformation?.status }}
+                                            </div>
+                                            }
+
+                                            @if (customeroverviewDetails?.customerInformation?.status ===
+                                            'NewActivation') {
+                                            <div class="f-s-16 ">
+                                                {{ customeroverviewDetails?.customerInformation?.status }}
+                                            </div>
+                                            }
+
+                                        </div>
+                                    </div>
+                                    <div class="status-section d-flex flex-col gap-20 m-t-10">
+                                        <div class="status-item">
+                                            <span class="f-s-16 text-primary">Connection Status</span>
+                                            @if (customeroverviewDetails?.customerInformation?.connectionStatus ===
+                                            'Oneline') {
+                                            <div class="chip-Online f-s-16 ">
+                                                {{ customeroverviewDetails?.customerInformation?.connectionStatus }}
+                                            </div>
+                                            }
+                                            @if (customeroverviewDetails?.customerInformation?.connectionStatus ===
+                                            'Offline') {
+                                            <div class="chip-Offline f-s-16  ">
+                                                {{ customeroverviewDetails?.customerInformation?.connectionStatus }}
+                                            </div>
+                                            }
+
+                                        </div>
+                                        <div class="wallet-info">
+                                            <span class="f-s-16  text-primary">Wallet Amount</span>
+                                            <!-- <div class="f-s-14 ">
+                                                {{ customeroverviewDetails?.customerInformation?.currency }} {{
+                                                WalletAmount | number: '1.2-2' }}
+                                            </div> -->
+                                            <div class="f-s-14"
+                                                *ngIf="customeroverviewDetails?.customerInformation?.currency && customeroverviewDetails?.customerInformation?.currency !== 'N/A'">
+                                                {{ customeroverviewDetails?.customerInformation?.currency }} {{
+                                                WalletAmount | number: '1.2-2' }}
+                                            </div>
+                                            <div class="f-s-14"
+                                                *ngIf="!customeroverviewDetails?.customerInformation?.currency || customeroverviewDetails?.customerInformation?.currency === 'N/A'">
+                                                {{ WalletAmount | number: '1.2-2' }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </mat-card-content>
+                    </mat-card>
+
+                </div>
+
+                <!-- Active Plan Card -->
+                <div class="d-flex flex-col">
+                    <mat-card class="cardWithShadow h-100">
+                        <mat-card-header>
+                            <mat-card-title class="f-s-20 text-primary">Active Plan</mat-card-title>
+                        </mat-card-header>
+                        <mat-card-content>
+                            <div class="">
+                                <div class="plan-info">
+                                    <div class="plan-name f-s-16  text-primary">{{
+                                        customeroverviewDetails?.planInformation?.name }}
+                                    </div>
+                                    <div class="d-flex m-t-10 gap-10">
+                                        <span class="f-s-16 text-primary">Renewal Date</span> <span
+                                            class="f-s-16 text-primary">:</span> <span>
+                                            {{ formatDate(customeroverviewDetails?.planInformation?.renewalDate) }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <!-- <div class="plan-details">
+                                                        <div class="plan-">{{ planData.name }}</div>
+                                                        <div class="usage-section">
+                                                            <div class="usage-display">
+                                                                <span class="usage-amount">{{ usageData.total }} GB</span>
+                                                                <div class="usage-text">
+                                                                    Usage {{ usageData.used }}/{{ usageData.total }} GB
+                                                                </div>
+                                                            </div>
+                                                            <mat-progress-bar mode="determinate" [value]="getUsagePercentage()"
+                                                                class="usage-progress">
+                                                            </mat-progress-bar>
+                                                        </div>
+                                                    </div> -->
+                            </div>
+                        </mat-card-content>
+                    </mat-card>
+                </div>
+
+                <!-- Quick Actions Card -->
+                <mat-card class="info-card quick-actions cardWithShadow">
+                    <mat-card-header>
+                        <mat-card-title class="f-s-20 text-primary">Quick Actions</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <div class="actions-container">
+                            <button mat-raised-button color="primary" class="action-btn" (click)="editProfile()">
+                                <mat-icon>edit</mat-icon>
+                                Edit Profile
+                            </button>
+                            <button *ngIf="sendPaymentLinkAccessCaf" mat-raised-button color="primary"
+                                class="action-btn" (click)="sendPaymentLink()">
+                                <mat-icon>payment</mat-icon>
+                                Send Payment Link
+                            </button>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+
+            <!-- Bottom Row: Invoices & Payments, Tickets -->
+            <div class="overview-bottom-row">
+                <!-- Invoices & Payments Card -->
+                <mat-card class="info-card invoices-payments cardWithShadow">
+                    <mat-card-header>
+                        <mat-card-title class="f-s-20 text-primary">Invoices & Payments</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <div class="outstanding-dues">
+                            <p class="f-s-20 text-primary">Outstanding Dues</p>
+                        </div>
+
+                        <mat-table [dataSource]="customeroverviewDetails.outstandingAmount" class="payments-table">
+                            <ng-container matColumnDef="docnumber">
+                                <mat-header-cell *matHeaderCellDef class="f-s-16 f-w-700">Doc No.</mat-header-cell>
+                                <mat-cell *matCellDef="let element">{{ element.docnumber }}</mat-cell>
+                            </ng-container>
+
+                            <ng-container matColumnDef="createdate">
+                                <mat-header-cell *matHeaderCellDef class="f-s-16 f-w-700">Created Date</mat-header-cell>
+                                <mat-cell *matCellDef="let element">{{ element.createdate}}</mat-cell>
+                            </ng-container>
+
+                            <ng-container matColumnDef="totalamount">
+                                <mat-header-cell *matHeaderCellDef class="f-s-16 f-w-700">Total Amount</mat-header-cell>
+                                <mat-cell *matCellDef="let element" [class]="element.amountClass">{{
+                                    element.totalamount
+                                    }}</mat-cell>
+                            </ng-container>
+                            <ng-container matColumnDef="adjustedAmount">
+                                <mat-header-cell *matHeaderCellDef class="f-s-16 f-w-700">Adjusted
+                                    Amount</mat-header-cell>
+                                <mat-cell *matCellDef="let element" [class]="element.amountClass">{{
+                                    element.adjustedAmount || 0
+                                    }}</mat-cell>
+                            </ng-container>
+
+                            <mat-header-row *matHeaderRowDef="outstandingColumns"></mat-header-row>
+                            <mat-row *matRowDef="let row; columns: outstandingColumns"></mat-row>
+                        </mat-table>
+
+                        <div class="last-payments">
+                            <p class="f-s-20 text-primary">Last 3 Payments</p>
+                            <mat-table [dataSource]="firstThreePayments" class="last-payments-table">
+                                <ng-container matColumnDef="paymentdate">
+                                    <mat-header-cell *matHeaderCellDef class="f-s-16 f-w-700">
+                                        Date</mat-header-cell>
+                                    <mat-cell *matCellDef="let element">{{ element.paymentdate ?? '-' }}</mat-cell>
+                                </ng-container>
+                                <!-- <ng-container matColumnDef="paytype">
+                                    <mat-header-cell *matHeaderCellDef class="f-s-16 f-w-700">
+                                        Pay Type</mat-header-cell>
+                                    <mat-cell *matCellDef="let element">{{ element.paytype ?? '-' }}</mat-cell>
+                                </ng-container> -->
+                                <ng-container matColumnDef="paymode">
+                                    <mat-header-cell *matHeaderCellDef class="f-s-16 f-w-700"> Pay Mode
+                                    </mat-header-cell>
+                                    <mat-cell *matCellDef="let element">
+                                        {{ element.paymode ?? '-' }}
+                                    </mat-cell>
+                                </ng-container>
+
+                                <ng-container matColumnDef="paymentreferenceno">
+                                    <mat-header-cell *matHeaderCellDef class="f-s-16 f-w-700">Transaction
+                                        Number</mat-header-cell>
+                                    <mat-cell *matCellDef="let element" [matTooltip]="element.paymentreferenceno"
+                                        matTooltipPosition="above">{{ element.paymentreferenceno ??
+                                        '-'}}</mat-cell>
+                                </ng-container>
+
+                                <ng-container matColumnDef="amount">
+                                    <mat-header-cell *matHeaderCellDef class="f-s-16 f-w-700">Amount</mat-header-cell>
+                                    <mat-cell *matCellDef="let element">{{ element.amount ?? '-' }}</mat-cell>
+                                </ng-container>
+                                <ng-container matColumnDef="adjustedAmount">
+                                    <mat-header-cell *matHeaderCellDef class="f-s-16 f-w-700">Adjusted
+                                        Amount</mat-header-cell>
+                                    <mat-cell *matCellDef="let element">{{ element.adjustedAmount ?? '-'}}</mat-cell>
+                                </ng-container>
+                                <!-- <ng-container matColumnDef="amount">
+                                    <mat-header-cell *matHeaderCellDef class="f-s-16 f-w-700">Amount</mat-header-cell>
+                                    <mat-cell *matCellDef="let element">{{ element.amount }}</mat-cell>
+                                </ng-container>
+                                <ng-container matColumnDef="adjustedAmount">
+                                    <mat-header-cell *matHeaderCellDef class="f-s-16 f-w-700">Adjusted
+                                        Amount</mat-header-cell>
+                                    <mat-cell *matCellDef="let element">{{ element.adjustedAmount }}</mat-cell>
+                                </ng-container> -->
+                                <ng-container matColumnDef="status">
+                                    <mat-header-cell *matHeaderCellDef class="f-s-16 f-w-700">Status</mat-header-cell>
+                                    <mat-cell *matCellDef="let element" [class]="element.amountClass">{{
+                                        element.status
+                                        }}</mat-cell>
+                                </ng-container>
+                                <mat-header-row *matHeaderRowDef="paymentColumns"></mat-header-row>
+
+                                <mat-row *matRowDef="let row; columns: paymentColumns"></mat-row>
+                            </mat-table>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+
+                <!-- Tickets Card -->
+                <mat-card class="info-card tickets-section cardWithShadow">
+                    <mat-card-header>
+                        <mat-card-title class="f-s-20 text-primary">Tickets</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <div class="tickets-container">
+                            <div class="open-tickets">
+                                <p class="f-s-20 text-primary">Open Ticket</p>
+                                <mat-table [dataSource]="customeroverviewDetails.ticketsList" class="tickets-table">
+                                    <ng-container matColumnDef="ticketNo">
+                                        <mat-header-cell *matHeaderCellDef class="f-s-16 f-w-700">Ticket
+                                            No.</mat-header-cell>
+                                        <mat-cell *matCellDef="let element">{{ element.caseNumber }}</mat-cell>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="type">
+                                        <mat-header-cell *matHeaderCellDef class="f-s-16 f-w-700">Type</mat-header-cell>
+                                        <mat-cell *matCellDef="let element">{{ element.caseType }}</mat-cell>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="started">
+                                        <mat-header-cell *matHeaderCellDef
+                                            class="f-s-16 f-w-700">Started</mat-header-cell>
+                                        <mat-cell *matCellDef="let element">{{ element.firstAssignedOnString
+                                            }}</mat-cell>
+                                    </ng-container>
+
+                                    <ng-container matColumnDef="call">
+                                        <mat-header-cell *matHeaderCellDef
+                                            class="f-s-16 f-w-700">Status</mat-header-cell>
+                                        <mat-cell *matCellDef="let element">
+                                            <div>{{ element.caseStatus }}</div>
+                                        </mat-cell>
+                                    </ng-container>
+
+                                    <mat-header-row *matHeaderRowDef="ticketColumns"></mat-header-row>
+                                    <mat-row *matRowDef="let row; columns: ticketColumns"></mat-row>
+                                </mat-table>
+                                <div *ngIf="customeroverviewDetails.ticketsListClosed.data.length === 0"
+                                    class="no-record">
+                                    No Record Found.
+                                </div>
+                            </div>
+
+                            <div class="closed-tickets">
+                                <p class="f-s-20 text-primary">Last 3 Closed</p>
+
+
+
+                                <mat-table [dataSource]="customeroverviewDetails.ticketsListClosed"
+                                    class="tickets-table">
+
+                                    <!-- Ticket No -->
+                                    <ng-container matColumnDef="ticketNo">
+                                        <mat-header-cell *matHeaderCellDef class="f-s-16 f-w-700">Ticket
+                                            No</mat-header-cell>
+                                        <mat-cell *matCellDef="let element">{{ element.caseNumber }}</mat-cell>
+                                    </ng-container>
+
+                                    <!-- Type -->
+                                    <ng-container matColumnDef="type">
+                                        <mat-header-cell *matHeaderCellDef class="f-s-16 f-w-700">Type</mat-header-cell>
+                                        <mat-cell *matCellDef="let element">{{ element.caseType }}</mat-cell>
+                                    </ng-container>
+
+                                    <!-- Started -->
+                                    <ng-container matColumnDef="started">
+                                        <mat-header-cell *matHeaderCellDef
+                                            class="f-s-16 f-w-700">Started</mat-header-cell>
+                                        <mat-cell *matCellDef="let element">{{ element.firstAssignedOnString
+                                            }}</mat-cell>
+                                    </ng-container>
+
+                                    <!-- Call -->
+                                    <ng-container matColumnDef="call">
+                                        <mat-header-cell *matHeaderCellDef
+                                            class="f-s-16 f-w-700">Status</mat-header-cell>
+                                        <mat-cell *matCellDef="let element">
+
+                                            {{ element.caseStatus || '-' }}
+
+                                        </mat-cell>
+                                    </ng-container>
+
+                                    <!-- Required Header & Row -->
+                                    <mat-header-row *matHeaderRowDef="ticketColumns"></mat-header-row>
+                                    <mat-row *matRowDef="let row; columns: ticketColumns"></mat-row>
+
+                                </mat-table>
+                                <div *ngIf="customeroverviewDetails.ticketsListClosed.data.length === 0"
+                                    class="no-record">
+                                    No Record Found.
+                                </div>
+
+
+
+                            </div>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+        </div>
+        }
+    </mat-tab>
+    <mat-tab label="Profile">
+        @if (isProfileShow) {
+        <mat-card class="cardWithShadow m-t-30">
+            <mat-tab-group mat-align-tabs="start">
+                <mat-tab label="Basic Information">
+                    <div class="overview-container">
+                        <div class="overview-top-row row">
+
+                            <!-- Customer Information Card -->
+                            <div class="d-flex flex-col col-md-12 m-20 tab-cards-container">
+                                <mat-card class="cardWithShadow">
+                                    <mat-card-header>
+                                        <mat-card-title class="f-s-20 text-primary">Customer
+                                            Information</mat-card-title>
+                                    </mat-card-header>
+                                    <mat-card-content>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <label class="bold">Name :</label>
+                                                <span>{{ customerDetailData.title }} {{ customerDetailData.firstname }}
+                                                    {{ customerDetailData.lastname }}</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Email :</label>
+                                                <span>{{ customerDetailData.email || '-' }}</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Contact Person :</label>
+                                                <span>{{ customerDetailData.contactperson }}</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Telephone :</label>
+                                                <span *ngIf="customerDetailData.phone">{{ customerDetailData.phone
+                                                    }}</span>
+                                                <span *ngIf="!customerDetailData.phone">-</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">FAX No. :</label>
+                                                <span *ngIf="customerDetailData.fax">{{ customerDetailData.fax }}</span>
+                                                <span *ngIf="!customerDetailData.fax">-</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Date of Birth :</label>
+                                                <span>{{ customerDetailData.birthDate | date:'dd-MM-yyyy' }}</span>
+                                            </div>
+                                        </div>
+                                    </mat-card-content>
+                                </mat-card>
+                            </div>
+                            <div class="d-flex flex-col col-md-12 m-20 tab-cards-container">
+                                <mat-card class="cardWithShadow">
+                                    <mat-card-header>
+                                        <mat-card-title class="f-s-20 text-primary">Billing and
+                                            Payments</mat-card-title>
+                                    </mat-card-header>
+                                    <mat-card-content>
+                                        <div class="row">
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Ezybill ID :</label>
+                                                <span>{{ customerDetailData.ezybillID || '-' }}</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Last Payment Amount :</label>
+                                                <span
+                                                    *ngIf="paymentHistoryList?.length > 0 && paymentHistoryList[0]?.amount !== null">
+                                                    {{ roundAmount(paymentHistoryList[0]?.amount) }}
+                                                </span>
+                                                <span
+                                                    *ngIf="!(paymentHistoryList?.length > 0 && paymentHistoryList[0]?.amount !== null)">-</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Bill to Name :</label>
+                                                <span *ngIf="customerBill">{{ customerBill }}</span>
+                                                <span *ngIf="!customerBill">-</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Last Payment Date :</label>
+                                                <span
+                                                    *ngIf="paymentHistoryList?.length > 0 && paymentHistoryList[0]?.paymentdate !== null">
+                                                    {{ paymentHistoryList[0]?.paymentdate | date:'dd-MM-yyyy' }}
+                                                </span>
+                                                <span
+                                                    *ngIf="!(paymentHistoryList?.length > 0 && paymentHistoryList[0]?.paymentdate !== null)">-</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Bill to Address :</label>
+                                                <span>{{ customerBillAddress || '-' }}</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">{{ KraTitle }} Number :</label>
+                                                <span *ngIf="customerDetailData.pan">{{ customerDetailData.pan }}</span>
+                                                <span *ngIf="!customerDetailData.pan">-</span>
+                                            </div>
+                                        </div>
+                                    </mat-card-content></mat-card>
+                            </div>
+                            <div class="d-flex flex-col col-md-12 m-20 tab-cards-container">
+                                <mat-card class="cardWithShadow">
+                                    <mat-card-header>
+                                        <mat-card-title class="f-s-20 text-primary">Service and
+                                            Activation</mat-card-title>
+                                    </mat-card-header>
+                                    <mat-card-content>
+                                        <div class="row">
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Active Plans :</label>
+                                                <span *ngIf="activePlanNames">{{ activePlanNames }}</span>
+                                                <span *ngIf="!activePlanNames">-</span>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <label class="bold">First Activation Date :</label>
+                                                <span>{{ customerDetailData.firstActivationDate | date:'dd-MM-yyyy hh:mm
+                                                    a'
+                                                    }}</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Expiry Date :</label>
+                                                <span
+                                                    *ngIf="activePlanList?.length > 0 && activePlanList[activePlanList.length - 1]?.dbExpiryDate">
+                                                    {{ activePlanList[activePlanList.length - 1]?.dbExpiryDate |
+                                                    date:'dd/MM/yyyy HH:mm:ss' }}
+                                                </span>
+                                                <span
+                                                    *ngIf="!(activePlanList?.length > 0 && activePlanList[activePlanList.length - 1]?.dbExpiryDate)">-</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Calendar Type :</label>
+                                                <span>{{ customerDetailData.calendarType || '-' }}</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Feasibility :</label>
+                                                <span>{{ customerDetailData.feasibility || '-' }}</span>
+                                            </div>
+                                        </div>
+                                    </mat-card-content></mat-card>
+                            </div>
+                            <!-- Account Detail Card -->
+                            <div class="d-flex flex-col col-md-12 m-20 tab-cards-container">
+                                <mat-card class="cardWithShadow">
+                                    <mat-card-header>
+                                        <mat-card-title class="f-s-20 text-primary">Account Detail</mat-card-title>
+                                    </mat-card-header>
+                                    <mat-card-content>
+                                        <div class="row">
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">CAF No. :</label>
+                                                <span>{{ customerDetailData.cafno }}</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Status :</label>
+                                                <span>{{ customerDetailData.status || '-' }}</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Account Status :</label>
+                                                <span>{{ customerDetailData.accountStatus || '-' }}</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">CWSC Username :</label>
+                                                <span>{{ customerDetailData.loginUsername || '-' }}</span>
+                                            </div>
+
+                                            <div *ngIf="aclPreCustCode === 'pre_cust_view_password' && custType === 'Prepaid'"
+                                                class="col-md-12 m-t-10">
+                                                <label class="bold">CWSC
+                                                    Password :</label>
+                                                <input [type]="_CWSCpasswordType"
+                                                    [value]="customerDetailData?.loginPassword"
+                                                    style="border: none; font-weight: 400; font-size: medium; padding-left: 16px;"
+                                                    disabled />
+                                                <div *ngIf="!CWSCshowPassword">
+                                                    <i class="fa fa-eye"
+                                                        (click)="CWSCshowPassword = true; _CWSCpasswordType = 'text'"></i>
+                                                </div>
+                                                <div *ngIf="CWSCshowPassword">
+                                                    <i class="fa fa-eye-slash"
+                                                        (click)="CWSCshowPassword = false; _CWSCpasswordType = 'password'"></i>
+                                                </div>
+                                            </div>
+
+                                            <div *ngIf="aclPreCustCode === 'post_cust_view_password' && custType === 'Postpaid'"
+                                                class="col-md-12 m-t-10">
+                                                <label class="bold">CWSC
+                                                    Password :</label>
+                                                <input [type]="_CWSCpasswordType"
+                                                    [value]="customerDetailData?.loginPassword"
+                                                    style="border: none; font-weight: 400; font-size: medium; padding-left: 16px;"
+                                                    disabled />
+                                                <div *ngIf="!CWSCshowPassword">
+                                                    <i class="fa fa-eye"
+                                                        (click)="CWSCshowPassword = true; _CWSCpasswordType = 'text'"></i>
+                                                </div>
+                                                <div *ngIf="CWSCshowPassword">
+                                                    <i class="fa fa-eye-slash"
+                                                        (click)="CWSCshowPassword = false; _CWSCpasswordType = 'password'"></i>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">AAA Username :</label>
+                                                <span>{{ customerDetailData.username || '-' }}</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Customer Sub Type :</label>
+                                                <span>{{ customerDetailData.customerSubType || '-' }}</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Act No. :</label>
+                                                <span>{{ customerDetailData.acctno }}</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Created By :</label>
+                                                <span>{{ customerDetailData.createdByName || '-' }}</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Customer Type :</label>
+                                                <span>{{ customerDetailData.custtype || '-' }}</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Customer Sector :</label>
+                                                <span>{{ customerDetailData.customerSector || '-' }}</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Customer Sub Sector :</label>
+                                                <span>{{ customerDetailData.customerSubSector || '-' }}</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Activated By :</label>
+                                                <span>{{ customerDetailData.activatedBy || '-' }}</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Customer Category :</label>
+                                                <span>{{ customerDetailData.custcategory || '-' }}</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">{{ getDemographicLabel('Department') }} :</label>
+                                                <span>{{ customerDetailData.department || '-' }}</span>
+                                            </div>
+                                        </div>
+                                    </mat-card-content>
+                                </mat-card>
+                            </div>
+                            <div class="d-flex flex-col col-md-12 m-20 tab-cards-container">
+                                <mat-card class="cardWithShadow">
+                                    <mat-card-header>
+                                        <mat-card-title class="f-s-20 text-primary">Contact Number</mat-card-title>
+                                    </mat-card-header>
+                                    <mat-card-content>
+                                        <div class="row">
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Primary Mobile Number :</label>
+                                                <span>
+                                                    <span *ngIf="customerDetailData.countryCode">({{
+                                                        customerDetailData.countryCode
+                                                        }})&nbsp;</span>{{ customerDetailData.mobile }}
+                                                </span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Secondary Mobile Number :</label>
+                                                <span *ngIf="customerDetailData.altmobile">
+                                                    <span *ngIf="customerDetailData.countryCode">({{
+                                                        customerDetailData.countryCode
+                                                        }})&nbsp;</span>{{ customerDetailData.altmobile }}
+                                                </span>
+                                                <span *ngIf="!customerDetailData.altmobile">-</span>
+                                            </div>
+                                        </div>
+                                    </mat-card-content></mat-card>
+                            </div>
+                            <div class="d-flex flex-col col-md-12 m-20 tab-cards-container">
+                                <mat-card class="cardWithShadow">
+                                    <mat-card-header>
+                                        <mat-card-title class="f-s-20 text-primary">Notification &
+                                            Dunning</mat-card-title>
+                                    </mat-card-header>
+                                    <mat-card-content>
+                                        <div class="row">
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Dunning Enable :</label>
+                                                <span>{{ customerDetailData.isDunningEnable ? 'True' : 'False' }}</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Automatic notification :</label>
+                                                <span>{{ customerDetailData.isNotificationEnable ? 'True' : 'False'
+                                                    }}</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Disable selfcare :</label>
+                                                <span>{{ customerDetailData.disableSelfcare ? 'True' : 'False' }}</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Disable renew (self care & north bound) :</label>
+                                                <span>{{ customerDetailData.disableRenew ? 'True' : 'False' }}</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Unit No :</label>
+                                                <span>{{ customerDetailData.blockNo || '-' }}</span>
+                                            </div>
+                                        </div>
+                                    </mat-card-content></mat-card>
+                            </div>
+                        </div>
+                    </div>
+                </mat-tab>
+                <!-- Service Area Details Tab -->
+                <mat-tab label="Service Area Details">
+                    <div class="overview-container">
+                        <div class="overview-top-row row">
+                            <div class="d-flex flex-col col-md-12 m-20 tab-cards-container">
+                                <mat-card class="cardWithShadow">
+                                    <mat-card-header>
+                                        <mat-card-title class="f-s-20 text-primary">Organization /
+                                            Entity</mat-card-title>
+                                    </mat-card-header>
+                                    <mat-card-content>
+                                        <div class="row">
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Address :</label>
+                                                <span>
+                                                    {{
+                                                    customerDetailData.addressList?.length > 0
+                                                    ? customerDetailData.addressList[0].landmark
+                                                    : '-'
+                                                    }}
+                                                </span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Service Area Name :</label>
+                                                <span *ngIf="customerDetailData.serviceareaid; else noServiceArea">{{
+                                                    serviceAreaDATA }}</span>
+                                                <ng-template #noServiceArea>-</ng-template>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Branch Name / Partner :</label>
+                                                <span>
+                                                    {{
+                                                    customerDetailData.branchName
+                                                    ? customerDetailData.branchName
+                                                    : partnerDATA
+                                                    }}
+                                                </span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Business Verticals :</label>
+                                                <span>{{ customerDetailData.buVerticals }}</span>
+                                            </div>
+                                        </div>
+                                    </mat-card-content>
+                                </mat-card>
+                            </div>
+                            <div class="d-flex flex-col col-md-12 m-20 tab-cards-container">
+                                <mat-card class="cardWithShadow">
+                                    <mat-card-header>
+                                        <mat-card-title class="f-s-20 text-primary">Geographical
+                                            Information</mat-card-title>
+                                    </mat-card-header>
+                                    <mat-card-content>
+                                        <div class="row">
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Region :</label>
+                                                <span>{{ customerDetailData.regionName || '-' }}</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Valley Type :</label>
+                                                <span>{{ customerDetailData.valleyType || '-' }}</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Latitude :</label>
+                                                <span>{{ customerDetailData.latitude || '-' }}</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Longitude :</label>
+                                                <span>{{ customerDetailData.longitude || '-' }}</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Landmark :</label>
+                                                <span>{{ customerDetailData.addressList?.length > 0 ?
+                                                    customerDetailData.addressList[0].landmark1 :
+                                                    '-' }}</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">{{ getDemographicLabel('Country') }} :</label>
+                                                <span *ngIf="presentAdressDATA">{{ presentAdressDATA.countryName || '-'
+                                                    }}</span>
+                                                <span *ngIf="!presentAdressDATA">-</span>
+                                            </div>
+                                        </div>
+                                    </mat-card-content></mat-card>
+                            </div>
+                            <div class="d-flex flex-col col-md-12 m-20 tab-cards-container">
+                                <mat-card class="cardWithShadow">
+                                    <mat-card-header>
+                                        <mat-card-title class="f-s-20 text-primary">Infrastructure / Network
+                                            Details</mat-card-title>
+                                    </mat-card-header>
+                                    <mat-card-content>
+                                        <div class="row">
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">{{ getDemographicLabel('Pincode') }} :</label>
+                                                <span *ngIf="presentAdressDATA">{{ presentAdressDATA.code }}</span>
+                                                <span *ngIf="!presentAdressDATA">-</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">{{ getDemographicLabel('Area') }} :</label>
+                                                <span *ngIf="presentAdressDATA">{{ presentAdressDATA.name }}</span>
+                                                <span *ngIf="!presentAdressDATA">-</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">{{ getDemographicLabel('Sub Area') }} :</label>
+                                                <span *ngIf="presentAdressDATA">{{ presentAdressDATA.subarea || '-'
+                                                    }}</span>
+                                                <span *ngIf="!presentAdressDATA">-</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">{{ getDemographicLabel('Building') }} :</label>
+                                                <span *ngIf="presentAdressDATA">{{ presentAdressDATA.buildingName || '-'
+                                                    }}</span>
+                                                <span *ngIf="!presentAdressDATA">-</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Building Number :</label>
+                                                <span *ngIf="presentAdressDATA">{{ presentAdressDATA.buildingNumber ||
+                                                    '-' }}</span>
+                                                <span *ngIf="!presentAdressDATA">-</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">{{ getDemographicLabel('City') }} :</label>
+                                                <span *ngIf="presentAdressDATA">{{ presentAdressDATA.cityName || '-'
+                                                    }}</span>
+                                                <span *ngIf="!presentAdressDATA">-</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">{{ getDemographicLabel('State') }} :</label>
+                                                <span *ngIf="presentAdressDATA">{{ presentAdressDATA.stateName || '-'
+                                                    }}</span>
+                                                <span *ngIf="!presentAdressDATA">-</span>
+                                            </div>
+                                        </div>
+                                    </mat-card-content></mat-card>
+                            </div>
+                        </div>
+                    </div>
+                </mat-tab>
+
+                <!-- Network Location Details Tab -->
+                <mat-tab label="Network Location Details">
+                    <div class="overview-container">
+                        <div class="overview-top-row row">
+                            <div class="d-flex flex-col col-md-12 m-20 tab-cards-container">
+                                <mat-card class="cardWithShadow">
+                                    <mat-card-header>
+                                        <mat-card-title class="f-s-20 text-primary">Organization /
+                                            Entity</mat-card-title>
+                                    </mat-card-header>
+                                    <mat-card-content>
+                                        <div class="row">
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">POP :</label>
+                                                <span>{{ customerNetworkLocationDetailData?.popName || '-' }}</span>
+                                            </div>
+                                            <!-- <div class="col-md-12 m-t-10">
+                                                <label class="bold">External ONU Serial Number :</label>
+                                                <span>{{ customerNetworkLocationDetailData.externalOnuSerialNumber ||
+                                                    '-' }}</span>
+                                            </div> -->
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">OLT :</label>
+                                                <span>{{ customerNetworkLocationDetailData?.oltDeviceName || '-'
+                                                    }}</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">MAC :</label>
+                                                <span>{{ customerNetworkLocationDetailData?.macAddress || '-' }}</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">ONU Serial Number :</label>
+                                                <span>{{ customerNetworkLocationDetailData?.onuSerialNumber || '-'
+                                                    }}</span>
+                                            </div>
+                                        </div>
+                                    </mat-card-content>
+                                </mat-card>
+                            </div>
+                            <div class="d-flex flex-col col-md-12 m-20 tab-cards-container">
+                                <mat-card class="cardWithShadow">
+                                    <mat-card-header>
+                                        <mat-card-title class="f-s-20 text-primary">IP & Addressing</mat-card-title>
+                                    </mat-card-header>
+                                    <mat-card-content>
+                                        <div class="row">
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Static IP :</label>
+                                                <span>{{ customerDetailData.framedIpBind || '-' }}</span>
+                                            </div>
+
+                                        </div>
+                                    </mat-card-content></mat-card>
+                            </div>
+                            <div class="d-flex flex-col col-md-12 m-20 tab-cards-container">
+                                <mat-card class="cardWithShadow">
+                                    <mat-card-header>
+                                        <mat-card-title class="f-s-20 text-primary">Service & Session
+                                            Control</mat-card-title>
+                                    </mat-card-header>
+                                    <mat-card-content>
+                                        <div class="row">
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Network Profile :</label>
+                                                <span>-</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Max Current Session :</label>
+                                                <span>-</span>
+                                            </div>
+                                            <!-- <div class="col-md-12 m-t-10">
+                                                <label class="bold">Master DB :</label>
+                                                <span>{{ customerNetworkLocationDetailData.masterdbDeviceName || '-'
+                                                    }}</span>
+                                            </div> -->
+                                        </div>
+                                    </mat-card-content></mat-card>
+                            </div>
+                            <div class="d-flex flex-col col-md-12 m-20 tab-cards-container">
+                                <mat-card class="cardWithShadow">
+                                    <mat-card-header>
+                                        <mat-card-title class="f-s-20 text-primary">NAS (Network Access
+                                            Server)</mat-card-title>
+                                    </mat-card-header>
+                                    <mat-card-content>
+                                        <div class="row">
+                                            <!-- <div class="col-md-12 m-t-10">
+                                                <label class="bold">NAS IP :</label>
+                                                <span>{{ customerNetworkLocationDetailData.nasIpAddress || '-' }}</span>
+                                            </div> -->
+                                            <!-- <div class="col-md-12 m-t-10">
+                                                <label class="bold">NAS Port :</label>
+                                                <span>{{ customerNetworkLocationDetailData.nasPort || '-' }}</span>
+                                            </div> -->
+                                            <!-- <div class="col-md-12 m-t-10">
+                                                <label class="bold">DN Splitter :</label>
+                                                <span>{{ customerNetworkLocationDetailData.dnsplitterDerviceName || '-'
+                                                    }}</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">SN Splitter :</label>
+                                                <span>{{ customerNetworkLocationDetailData.snsplitterDerviceName || '-'
+                                                    }}</span>
+                                            </div> -->
+                                        </div>
+                                    </mat-card-content></mat-card>
+                            </div>
+                            <div class="d-flex flex-col col-md-12 m-20 tab-cards-container">
+                                <mat-card class="cardWithShadow">
+                                    <mat-card-header>
+                                        <mat-card-title class="f-s-20 text-primary">Location &
+                                            Assignment</mat-card-title>
+                                    </mat-card-header>
+                                    <mat-card-content>
+                                        <div class="row">
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Assigned DateTime :</label>
+                                                <span
+                                                    *ngIf="customerInventoryList?.length > 0 && customerInventoryList[0]?.assignedDateTime">
+                                                    {{ customerInventoryList[0].assignedDateTime | date:'dd/MM/yyyy
+                                                    HH:mm:ss' }}
+                                                </span>
+                                                <span
+                                                    *ngIf="!(customerInventoryList?.length > 0 && customerInventoryList[0]?.assignedDateTime)">-</span>
+                                            </div>
+                                            <div class="col-md-12 m-t-10">
+                                                <label class="bold">Staff Name :</label>
+                                                <span *ngIf="staffUserData?.username">{{ staffUserData.username || '-'
+                                                    }}</span>
+                                                <span *ngIf="!staffUserData?.username">-</span>
+                                            </div>
+                                        </div>
+                                    </mat-card-content></mat-card>
+                            </div>
+                        </div>
+                    </div>
+                </mat-tab>
+            </mat-tab-group>
+        </mat-card>
+        }
+    </mat-tab>
+    @if (
+    loginService.hasPermission(
+    custType == "Prepaid"
+    ? PRE_CUST_CONSTANTS.PRE_CUST_CAF_CUST_PLANS
+    : POST_CUST_CONSTANTS.POST_CUST_CAF_PLANS
+    )
+    ) {
+    <mat-tab label="Plans">
+        @if (isPlansShow) {
+        <div class="col-md-12 col-sm-12">
+
+            <app-quota-details-modal *ngIf="visibleQuotaDetails" [PlanQuota]="PlanQuota" dialogId="quotaModalOpen"
+                (closeDialogg)="closeModel()">
+            </app-quota-details-modal>
+
+            @if(istrialplan) {
+            <mat-card class="mb-4 current-plans-card">
+                <mat-card-header>
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <!-- Left side: Back button + title -->
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <img src="assets/img/DashboardIcons/Back Arrow.svg" alt="arrow back" class="m-r-10"
+                                (click)="handleBackToList()">
+
+                            <mat-card-title>
+                                {{ customerDetailData?.title }}
+                                {{ customerDetailData?.firstname }}
+                                {{ customerDetailData?.lastname }} Trial Plan
+                            </mat-card-title>
+                        </div>
+
+                        <!-- Right side: Refresh button -->
+                        <div>
+                            <button mat-icon-button color="primary" matTooltip="Refresh"
+                                (click)="getTrailPlanList(customerId, '')">
+                                <img src="assets/img/DashboardIcons/Refresh.svg" alt="Refresh">
+                            </button>
+                        </div>
+                    </div>
+                </mat-card-header>
+
+
+                <mat-card-content>
+                    <div class="table-container list-side-scrollbar">
+                        <table mat-table [dataSource]="TrailPlanList" class="w-100 mat-elevation-z2">
+
+                            <!-- Plan Name -->
+                            <ng-container matColumnDef="Name">
+                                <th mat-header-cell class="table-header-title" *matHeaderCellDef>Name</th>
+                                <td mat-cell *matCellDef="let plan">{{ plan.planName }}</td>
+                            </ng-container>
+
+                            <!-- Plan Group -->
+                            <ng-container matColumnDef="Plan Group">
+                                <th mat-header-cell class="table-header-title" *matHeaderCellDef>Plan Group</th>
+                                <td mat-cell *matCellDef="let plan">{{ plan.planGroupName }}</td>
+                            </ng-container>
+
+                            <!-- Validity -->
+                            <ng-container matColumnDef="Validity">
+                                <th mat-header-cell class="table-header-title" *matHeaderCellDef>Validity</th>
+                                <td mat-cell *matCellDef="let plan">
+                                    <ng-container>{{ plan.validity }}</ng-container>
+                                </td>
+                            </ng-container>
+
+                            <!-- Start Date -->
+                            <ng-container matColumnDef="Start Date">
+                                <th mat-header-cell class="table-header-title" *matHeaderCellDef>Start Date</th>
+                                <td mat-cell *matCellDef="let plan">
+                                    {{ plan.dbStartDate | date: 'dd-MM-yyyy hh:mm a' }}
+                                </td>
+                            </ng-container>
+
+                            <!-- Expiry Date -->
+                            <ng-container matColumnDef="Expiry Date">
+                                <th mat-header-cell class="table-header-title" *matHeaderCellDef>Expiry Date
+                                </th>
+                                <td mat-cell *matCellDef="let plan">
+                                    {{ plan.dbExpiryDate | date: 'dd-MM-yyyy hh:mm a' }}
+                                </td>
+                            </ng-container>
+
+                            <!-- Table Rows -->
+                            <tr mat-header-row *matHeaderRowDef="[
+                                                'Name',
+                                                'Plan Group',
+                                                'Validity',
+                                                'Start Date',
+                                                'Expiry Date'
+                                              ]"></tr>
+                            <tr mat-row *matRowDef="let row; columns: [
+                                                'Name',
+                                                'Plan Group',
+                                                'Validity',
+                                                'Start Date',
+                                                'Expiry Date'
+                                              ]"></tr>
+                        </table>
+
+                        <!-- Empty State -->
+                        <div *ngIf="!TrailPlanList || TrailPlanList.length === 0" class="empty-state py-5">
+                            <p class="text-muted" style="display:flex;justify-content:center">No Trial Plan
+                                found.</p>
+                        </div>
+                    </div>
+                    <!-- Paginator -->
+                    <mat-paginator *ngIf="TrailPlanList && TrailPlanList.length > 0" [length]="currentTrailPlanListdata"
+                        [pageSize]="custTrailPlanItemPerPage" [pageSizeOptions]="[5, 10, 20, 50, 100]"
+                        (page)="pageCustTrailPlanListData($event)" showFirstLastButtons></mat-paginator>
+                </mat-card-content>
+            </mat-card>
+            }
+
+            <mat-card class="mb-4 current-plans-card">
+                <mat-card-header>
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <!-- Left side: Back button + title -->
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <img src="assets/img/DashboardIcons/Back Arrow.svg" alt="arrow back" class="m-r-10"
+                                (click)="handleBackToList()">
+
+                            <mat-card-title>
+                                {{ customerDetailData?.title }}
+                                {{ customerDetailData?.custname }} Current Plan
+                            </mat-card-title>
+                        </div>
+
+                        <!-- Right side: Refresh button -->
+                        <div>
+                            <button mat-icon-button color="primary" matTooltip="Refresh"
+                                (click)="getcustCurrentPlan(customerDetailData.id, '')">
+                                <img src="assets/img/DashboardIcons/Refresh.svg" alt="Refresh">
+                            </button>
+                        </div>
+                    </div>
+                </mat-card-header>
+
+
+                <mat-card-content>
+                    <div class="table-container list-side-scrollbar">
+                        <table mat-table [dataSource]="custCurrentPlanList" class="w-100 mat-elevation-z2">
+
+                            <!-- Plan Name -->
+                            <ng-container matColumnDef="Name">
+                                <th mat-header-cell class="table-header-title" *matHeaderCellDef>Name</th>
+                                <td mat-cell *matCellDef="let plan">{{ plan.planName }}</td>
+                            </ng-container>
+
+                            <!-- Validity -->
+                            <ng-container matColumnDef="Validity">
+                                <th mat-header-cell class="table-header-title" *matHeaderCellDef>Validity</th>
+                                <td mat-cell *matCellDef="let plan">
+                                    <ng-container *ngIf="custType == 'Prepaid'">{{ plan.validity
+                                        }}</ng-container>
+                                    <ng-container *ngIf="custType != 'Prepaid'">N/A</ng-container>
+                                </td>
+                            </ng-container>
+
+                            <!-- Plan Group -->
+                            <ng-container matColumnDef="Plan Group">
+                                <th mat-header-cell class="table-header-title" *matHeaderCellDef>Plan Group</th>
+                                <td mat-cell *matCellDef="let plan">{{ plan.plangroup }}</td>
+                            </ng-container>
+
+                            <!-- Table Rows -->
+                            <tr mat-header-row *matHeaderRowDef="[
+                                                    'Name',
+                                                    'Validity',
+                                                    'Plan Group',
+                                                  ]"></tr>
+                            <tr mat-row *matRowDef="let row; columns: [
+                                                    'Name',
+                                                    'Validity',
+                                                    'Plan Group',
+                                                  ]"></tr>
+                        </table>
+
+                        <!-- Empty State -->
+                        <div *ngIf="!custCurrentPlanList || custCurrentPlanList.length === 0" class="empty-state py-5">
+                            <p class="text-muted" style="display:flex;justify-content:center">No Current Plan
+                                found.</p>
+                        </div>
+                    </div>
+                    <!-- Paginator -->
+                    <mat-paginator *ngIf="custCurrentPlanList && custCurrentPlanList.length > 0"
+                        [length]="currentPagecustomerCurrentPlanListdata" [pageSize]="CurrentPlanShowItemPerPage"
+                        [pageSizeOptions]="[5, 10, 20, 50, 100]" (page)="pageChangedcustomerCurrentPlanListData($event)"
+                        showFirstLastButtons></mat-paginator>
+                </mat-card-content>
+            </mat-card>
+
+            <mat-card class="mb-4 current-plans-card">
+                <mat-card-header>
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <!-- Left side: Back button + title -->
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <img src="assets/img/DashboardIcons/Back Arrow.svg" alt="arrow back" class="m-r-10"
+                                (click)="handleBackToList()">
+
+                            <mat-card-title>
+                                {{ customerDetailData?.title }}
+                                {{ customerDetailData?.custname }} Future Plan
+                            </mat-card-title>
+                        </div>
+
+                        <!-- Right side: Refresh button -->
+                        <div>
+                            <button mat-icon-button color="primary" matTooltip="Refresh"
+                                (click)="getcustFuturePlan(customerDetailData.id, '')">
+                                <img src="assets/img/DashboardIcons/Refresh.svg" alt="Refresh">
+                            </button>
+                        </div>
+                    </div>
+                </mat-card-header>
+
+
+                <mat-card-content>
+                    <div class="table-container list-side-scrollbar">
+                        <table mat-table [dataSource]="custFuturePlanListData" class="w-100 mat-elevation-z2">
+
+                            <!-- Plan Name -->
+                            <ng-container matColumnDef="Name">
+                                <th mat-header-cell class="table-header-title" *matHeaderCellDef>Name</th>
+                                <td mat-cell *matCellDef="let plan">{{ plan.planName }}</td>
+                            </ng-container>
+
+                            <!-- Validity -->
+                            <ng-container matColumnDef="Validity">
+                                <th mat-header-cell class="table-header-title" *matHeaderCellDef>Validity</th>
+                                <td mat-cell *matCellDef="let plan">
+                                    <ng-container *ngIf="custType == 'Prepaid'">{{ plan.validity
+                                        }}</ng-container>
+                                    <ng-container *ngIf="custType != 'Prepaid'">N/A</ng-container>
+                                </td>
+                            </ng-container>
+
+                            <!-- Plan Group -->
+                            <ng-container matColumnDef="Plan Group">
+                                <th mat-header-cell class="table-header-title" *matHeaderCellDef>Plan Group</th>
+                                <td mat-cell *matCellDef="let plan">{{ plan.plangroup }}</td>
+                            </ng-container>
+
+                            <!-- Table Rows -->
+                            <tr mat-header-row *matHeaderRowDef="[
+                                                        'Name',
+                                                        'Validity',
+                                                        'Plan Group',
+                                                      ]"></tr>
+                            <tr mat-row *matRowDef="let row; columns: [
+                                                        'Name',
+                                                        'Validity',
+                                                        'Plan Group',
+                                                      ]"></tr>
+                        </table>
+
+                        <!-- Empty State -->
+                        <div *ngIf="!custFuturePlanList || custFuturePlanList.length === 0" class="empty-state py-5">
+                            <p class="text-muted" style="display:flex;justify-content:center">No Future Plan
+                                found.</p>
+                        </div>
+                    </div>
+                    <!-- Paginator -->
+                    <mat-paginator *ngIf="custFuturePlanList && custFuturePlanList.length > 0"
+                        [length]="currentPagecustomerFuturePlanListdata" [pageSize]="futurePlanShowItemPerPage"
+                        [pageSizeOptions]="[5, 10, 20, 50, 100]" (page)="pageChangedcustFuturePlanListData($event)"
+                        showFirstLastButtons></mat-paginator>
+                </mat-card-content>
+            </mat-card>
+
+            <mat-card class="mb-4 current-plans-card">
+                <mat-card-header>
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <!-- Left side: Back button + title -->
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <img src="assets/img/DashboardIcons/Back Arrow.svg" alt="arrow back" class="m-r-10"
+                                (click)="handleBackToList()">
+
+                            <mat-card-title>
+                                {{ customerDetailData?.title }}
+                                {{ customerDetailData?.custname }} Expired Plan
+                            </mat-card-title>
+                        </div>
+
+                        <!-- Right side: Refresh button -->
+                        <div>
+                            <button mat-icon-button color="primary" matTooltip="Refresh"
+                                (click)="getcustExpiredPlan(customerDetailData.id, '')">
+                                <img src="assets/img/DashboardIcons/Refresh.svg" alt="Refresh">
+                            </button>
+                        </div>
+                    </div>
+                </mat-card-header>
+
+
+                <mat-card-content>
+                    <div class="table-container list-side-scrollbar">
+                        <table mat-table [dataSource]="custExpiredPlanList" class="w-100 mat-elevation-z2">
+
+                            <!-- Plan Name -->
+                            <ng-container matColumnDef="Name">
+                                <th mat-header-cell class="table-header-title" *matHeaderCellDef>Name</th>
+                                <td mat-cell *matCellDef="let plan">{{ plan.planName }}</td>
+                            </ng-container>
+
+                            <!-- Validity -->
+                            <ng-container matColumnDef="Validity">
+                                <th mat-header-cell class="table-header-title" *matHeaderCellDef>Validity</th>
+                                <td mat-cell *matCellDef="let plan">
+                                    <ng-container *ngIf="custType == 'Prepaid'">{{ plan.validity
+                                        }}</ng-container>
+                                    <ng-container *ngIf="custType != 'Prepaid'">N/A</ng-container>
+                                </td>
+                            </ng-container>
+
+                            <!-- Plan Group -->
+                            <ng-container matColumnDef="Plan Group">
+                                <th mat-header-cell class="table-header-title" *matHeaderCellDef>Plan Group</th>
+                                <td mat-cell *matCellDef="let plan">{{ plan.plangroup }}</td>
+                            </ng-container>
+
+                            <!-- Table Rows -->
+                            <tr mat-header-row *matHeaderRowDef="[
+                                                        'Name',
+                                                        'Validity',
+                                                        'Plan Group',
+                                                      ]"></tr>
+                            <tr mat-row *matRowDef="let row; columns: [
+                                                        'Name',
+                                                        'Validity',
+                                                        'Plan Group',
+                                                      ]"></tr>
+                        </table>
+
+                        <!-- Empty State -->
+                        <div *ngIf="!custExpiredPlanList || custExpiredPlanList.length === 0" class="empty-state py-5">
+                            <p class="text-muted" style="display:flex;justify-content:center">No Expired Plan
+                                found.</p>
+                        </div>
+                    </div>
+                    <!-- Paginator -->
+                    <mat-paginator *ngIf="custExpiredPlanList && custExpiredPlanList.length > 0"
+                        [length]="currentPagecustomerExpiryPlanListdata" [pageSize]="expiredShowItemPerPage"
+                        [pageSizeOptions]="[5, 10, 20, 50, 100]" (page)="pageChangedcustomerExpiryPlanListData($event)"
+                        showFirstLastButtons></mat-paginator>
+                </mat-card-content>
+            </mat-card>
+        </div>
+        }
+    </mat-tab>
+    }
+    <!-- <mat-tab label="Usage"> </mat-tab> -->
+    @if (
+    loginService.hasPermission(
+    custType == "Prepaid"
+    ? PRE_CUST_CONSTANTS.PRE_CUST_CAF_INVOICES
+    : POST_CUST_CONSTANTS.POST_CUST_CAF_INVOICES
+    )
+    ) {
+    <mat-tab label="Invoices">
+        @if(isInvoicesShow){
+        <div style="margin-top: 1rem !important;">
+            <div class="row p-0 m-0">
+                <div class="col-md-12">
+                    <mat-card class="cardWithShadow">
+                        <mat-card-header>
+                            <img src="assets/img/DashboardIcons/Back Arrow.svg" alt="arrow back" class="m-r-10"
+                                (click)="handleBackToList()" />
+                            <div style="
+                        font-size: x-large;
+                        align-items: center;
+                        font-weight: 500;
+                        align-content: center;
+                      ">
+                                Search {{ customerDetailData.title }}
+                                {{ customerDetailData.custname }} Invoice
+                            </div>
+                            <div class="">
+                                <button mat-icon-button color="accent" matTooltip="Refresh"
+                                    (click)="clearSearchinvoiceMaster()" style="
+                          position: absolute;
+                          right: 10px;
+                          top: 14%;
+                          transform: translateY(-50%);
+                        ">
+                                    <img src=" assets/img/DashboardIcons/Refresh.svg" alt="Refresh" />
+                                </button>
+                            </div>
+                        </mat-card-header>
+                        <mat-card-content>
+                            <form [formGroup]="searchInvoiceMasterFormGroup">
+                                <div class="row">
+                                    <!-- Invoice Number -->
+                                    <div class="col-md-3 mb-3">
+                                        <mat-form-field appearance="outline" class="w-100">
+                                            <mat-label>Document No</mat-label>
+                                            <input matInput formControlName="docnumber"
+                                                placeholder="Enter Document No" />
+                                        </mat-form-field>
+                                    </div>
+
+                                    <!-- Bill Run ID -->
+                                    <div class="col-md-3 mb-3">
+                                        <mat-form-field appearance="outline" class="w-100">
+                                            <mat-label>Customer Name</mat-label>
+                                            <input matInput
+                                                [value]="customerDetailData.title + ' ' + customerDetailData.custname"
+                                                disabled />
+                                        </mat-form-field>
+                                    </div>
+
+                                    <!-- From Date -->
+                                    <div class="col-md-3 mb-3">
+                                        <mat-form-field appearance="outline" class="w-100">
+                                            <mat-label>Bill From Date</mat-label>
+                                            <input matInput [matDatepicker]="fromDatePicker" placeholder="dd-mm-yyyy"
+                                                formControlName="billfromdate" readonly />
+                                            <mat-datepicker-toggle matSuffix
+                                                [for]="fromDatePicker"></mat-datepicker-toggle>
+                                            <mat-datepicker #fromDatePicker></mat-datepicker>
+                                        </mat-form-field>
+                                    </div>
+
+                                    <!-- To Date -->
+                                    <div class="col-md-3 mb-3">
+                                        <mat-form-field appearance="outline" class="w-100">
+                                            <mat-label>Bill To Date</mat-label>
+                                            <input matInput [matDatepicker]="toDatePicker" placeholder="dd-mm-yyyy"
+                                                formControlName="billtodate" readonly />
+                                            <mat-datepicker-toggle matSuffix
+                                                [for]="toDatePicker"></mat-datepicker-toggle>
+                                            <mat-datepicker #toDatePicker></mat-datepicker>
+                                        </mat-form-field>
+                                    </div>
+
+                                    <!-- Search Buttons -->
+                                    <div class="col-12">
+                                        <div class="d-flex gap-2">
+                                            <button mat-flat-button class="m-r-10" color="primary"
+                                                (click)="searchinvoiceMaster('', '')">
+                                                Search Invoice
+                                            </button>
+                                            <button mat-stroked-button class="button-normal"
+                                                (click)="clearSearchinvoiceMaster()">
+                                                Clear
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </mat-card-content>
+                    </mat-card>
+                </div>
+            </div>
+            <div class="container-fluid contain-flud">
+                <div class="row p-0 m-0">
+                    <div class="col-md-12">
+                        <!-- INVOICES TABLE CARD -->
+                        <mat-card class="mb-4 cardWithShadow">
+                            <mat-card-header>
+                                <mat-card-title>{{ customerDetailData.title }} {{ customerDetailData.custname }} Invoice
+                                    Details
+                                </mat-card-title>
+                            </mat-card-header>
+
+                            <mat-card-content>
+                                <!-- INVOICE TABLE -->
+
+                                <div class="example-container mat-elevation-z8" tabindex="0">
+                                    <table mat-table [dataSource]="invoiceMasterListData"
+                                        *ngIf="invoiceMasterListData?.length > 0">
+                                        <ng-container matColumnDef="customerName">
+                                            <th mat-header-cell *matHeaderCellDef>Customer</th>
+                                            <td mat-cell *matCellDef="let invoice">{{ invoice.customerName }}</td>
+                                        </ng-container>
+
+                                        <ng-container matColumnDef="docnumber">
+                                            <th mat-header-cell *matHeaderCellDef>Document No.</th>
+                                            <td mat-cell *matCellDef="let invoice">
+                                                <span class="curson_pointer text-primary"
+                                                    (click)="openInvoiceModal(invoice.id, invoice)">
+                                                    {{ invoice.docnumber }}
+                                                </span>
+                                            </td>
+                                        </ng-container>
+
+                                        <!-- Purchase By -->
+                                        <ng-container matColumnDef="createdByName">
+                                            <th mat-header-cell *matHeaderCellDef>Created By</th>
+                                            <td mat-cell *matCellDef="let invoice">
+                                                {{ invoice.createdByName }}
+                                            </td>
+                                        </ng-container>
+
+                                        <!-- Billable To -->
+                                        <ng-container matColumnDef="billableToName">
+                                            <th mat-header-cell *matHeaderCellDef>Billable To</th>
+                                            <td mat-cell *matCellDef="let invoice">
+                                                {{ invoice.billableToName ? invoice.billableToName : "-" }}
+                                            </td>
+                                        </ng-container>
+
+                                        <!-- Total Amount -->
+                                        <ng-container matColumnDef="totalamount">
+                                            <th mat-header-cell *matHeaderCellDef>Total Amount</th>
+                                            <td mat-cell *matCellDef="let invoice">
+                                                {{ invoice.totalamount | number: "1.2-2" }}
+                                            </td>
+                                        </ng-container>
+
+                                        <!-- Adjusted Amount -->
+                                        <ng-container matColumnDef="adjustedAmount">
+                                            <th mat-header-cell *matHeaderCellDef>Adjusted Amount</th>
+                                            <td mat-cell *matCellDef="let invoice">
+                                                {{ invoice.adjustedAmount | number: "1.2-2" }}
+                                                <span *ngIf="!invoice.adjustedAmount">0</span>
+                                            </td>
+                                        </ng-container>
+
+                                        <!-- Unpaid Amount -->
+                                        <ng-container matColumnDef="unpaidAmount">
+                                            <th mat-header-cell *matHeaderCellDef>Unpaid Amount</th>
+                                            <td mat-cell *matCellDef="let invoice">
+                                                {{ currency }}
+                                                {{ invoice.totalamount - invoice.adjustedAmount | number: "1.2-2" }}
+                                            </td>
+                                        </ng-container>
+
+                                        <!-- Bill Run Status -->
+                                        <ng-container matColumnDef="billrunstatus">
+                                            <th mat-header-cell *matHeaderCellDef>Bill Run Status</th>
+                                            <td mat-cell *matCellDef="let invoice">
+                                                <span class="status-badge" [ngClass]="{
+                                                        'status-success':
+                                                          invoice.billrunstatus?.toLowerCase() !== 'cancelled',
+                                                        'status-danger':
+                                                          invoice.billrunstatus?.toLowerCase() === 'cancelled'
+                                                      }">
+                                                    {{ invoice.billrunstatus || "-" }}
+                                                </span>
+                                            </td>
+                                        </ng-container>
+
+                                        <!-- Bill Date -->
+                                        <ng-container matColumnDef="billdate">
+                                            <th mat-header-cell *matHeaderCellDef>Bill Date</th>
+                                            <td mat-cell *matCellDef="let invoice">
+                                                {{ invoice.billdate | date: "yyyy-MM-dd" }}
+                                            </td>
+                                        </ng-container>
+
+                                        <!-- Payment Status -->
+                                        <ng-container matColumnDef="paymentStatus">
+                                            <th mat-header-cell *matHeaderCellDef>Payment Status</th>
+                                            <td mat-cell *matCellDef="let invoice">
+                                                <span *ngIf="invoice.paymentStatus?.toLowerCase() === 'unpaid'"
+                                                    class="status-danger status-badge">
+                                                    {{ invoice.paymentStatus || "-" }}
+                                                </span>
+                                                <span *ngIf="invoice.paymentStatus?.toLowerCase() === 'partialy paid'"
+                                                    class="status-info status-badge">
+                                                    {{ invoice.paymentStatus || "-" }}
+                                                </span>
+                                                <span *ngIf="
+                                                        ['fully paid', 'payable', 'approved'].includes(
+                                                          invoice.paymentStatus?.toLowerCase()
+                                                        )
+                                                      " class="status-success status-badge">
+                                                    {{ invoice.paymentStatus || "-" }}
+                                                </span>
+                                                <span *ngIf="
+                                                        ['cancelled', 'rejected'].includes(
+                                                          invoice.paymentStatus?.toLowerCase()
+                                                        )
+                                                      " class="status-danger status-badge">
+                                                    {{ invoice.paymentStatus || "-" }}
+                                                </span>
+                                                <span *ngIf="
+                                                        [
+                                                          'pending',
+                                                          'pending sent',
+                                                          'pending accepted',
+                                                          'partial pending',
+                                                          'clear',
+                                                          'void'
+                                                        ].includes(invoice.paymentStatus?.toLowerCase())
+                                                      " class="status-info status-badge">
+                                                    {{ invoice.paymentStatus || "-" }}
+                                                </span>
+                                                <span *ngIf="!invoice.paymentStatus">–</span>
+                                            </td>
+                                        </ng-container>
+
+                                        <!-- Payment Owner -->
+                                        <ng-container matColumnDef="action">
+                                            <th mat-header-cell *matHeaderCellDef>Action</th>
+                                            <td mat-cell *matCellDef="let invoice">
+                                                <div
+                                                    class="action-buttons d-flex flex-wrap gap-1 justify-content-center align-items-center">
+                                                    <button mat-icon-button *ngIf="
+                                                        invoice.billrunstatus == 'Exported' ||
+                                                        invoice.billrunstatus == 'Printed'
+                                                      " (click)="downloadPDFINvoice(invoice.id, invoice.customerName)"
+                                                        matTooltip="Download">
+                                                        <!-- <mat-icon>file_download</mat-icon> -->
+                                                        <img src="assets/img/DashboardIcons/Add note.svg" />
+                                                    </button>
+                                                    <button mat-icon-button
+                                                        *ngIf="generatePdfAccess && invoice.billrunstatus === 'Generated'"
+                                                        (click)="generatePDFInvoice(invoice.id)" matTooltip="Generate">
+                                                        <img style="width: 25px; height: 25px"
+                                                            src="assets/img/DashboardIcons/DTV.svg" />
+
+                                                    </button>
+                                                    <button mat-icon-button
+                                                        *ngIf="reprintAccess && invoice.billrunstatus !== 'Cancelled'"
+                                                        (click)="InvoiceReprint(invoice.id, invoice.customerName)"
+                                                        matTooltip="Reprint Invoice">
+                                                        <img style="width: 25px; height: 25px"
+                                                            src="assets/img/DashboardIcons/Reprint-invoice.svg" />
+
+                                                    </button>
+                                                    <button mat-icon-button *ngIf="viewInvoiceAccess"
+                                                        (click)="viewInvoice(invoice.id, invoice.customerName)"
+                                                        matTooltip="View Invoice">
+                                                        <img src="assets/img/DashboardIcons/View Invoice.svg" />
+
+                                                    </button>
+                                                    <button mat-icon-button title="Invoice Payment" *ngIf="
+                                                        invoice.totalamount - invoice.adjustedAmount >= 1 &&
+                                                        invoicesPaymentAccess
+                                                      " (click)="openPaymentGatewaysforInvoicePayment(invoice)"
+                                                        [disabled]="invoice.billrunstatus === 'Cancelled'"
+                                                        matTooltip="Invoice payment">
+                                                        <img src="assets/img/DashboardIcons/Invoice Payment 1.svg">
+
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </ng-container>
+
+                                        <mat-header-row *matHeaderRowDef="displayedColumns2"></mat-header-row>
+                                        <mat-row *matRowDef="let row; columns: displayedColumns2"></mat-row>
+                                    </table>
+                                    <!-- Empty State -->
+                                    <div *ngIf="!invoiceMasterListData || invoiceMasterListData.length === 0"
+                                        class="empty-state py-5">
+                                        <mat-icon class="empty-icon">receipt_long</mat-icon>
+                                        <p class="text-muted">Invoice data not found</p>
+                                    </div>
+                                </div>
+                                <!-- Pagination -->
+                                <mat-paginator *ngIf="invoiceMasterListData && invoiceMasterListData.length > 0"
+                                    [length]="invoiceMastertotalRecords" [pageSize]="invoiceMasteritemsPerPage"
+                                    [pageSizeOptions]="[5, 10, 20, 50, 100]"
+                                    [pageIndex]="currentPageinvoiceMasterSlab - 1" showFirstLastButtons
+                                    (page)="pageChangedinvoiceMasterList($event.pageIndex + 1)">
+                                </mat-paginator>
+                            </mat-card-content>
+                        </mat-card>
+                    </div>
+                </div>
+            </div>
+            <!-- <app-invoice-detalis-model *ngIf="isInvoiceDetail" [invoiceID]="invoiceID" [custID]="custID"
+                [sourceType]="'caf'" (closeInvoiceDetails)="closeInvoiceDetails()"></app-invoice-detalis-model> -->
+        </div>
+        }
+    </mat-tab>
+    }
+    @if (
+    loginService.hasPermission(
+    custType == "Prepaid"
+    ? PRE_CUST_CONSTANTS.PRE_CUST_CAF_PAYMENT
+    : POST_CUST_CONSTANTS.POST_CUST_CAF_PAYMENT
+    )
+    ) {
+    <mat-tab label="Payments">
+        @if (isPaymentsShow) {
+        <app-customer-payment [cafCustomerID]="customerDetailData.id" [cafCustomerType]="Prepaid" [isFromCaf]="true"
+            (backToList)="handleBackToList()"></app-customer-payment>
+        }
+    </mat-tab>
+    }
+    @if (
+    loginService.hasPermission(
+    custType == "Prepaid"
+    ? PRE_CUST_CONSTANTS.PRE_CUST_CAF_FOLLOW_UP
+    : POST_CUST_CONSTANTS.POST_CUST_CAF_FOLLOW_UP
+    )
+    ) {
+    <mat-tab label="Tickets">
+        @if (isTicketsShow) {
+        <app-cust-tickets [cafCustomerID]="customerDetailData.id" [cafCustomerType]="Prepaid" [isFromCaf]="true"
+            (backToList)="handleBackToList()"></app-cust-tickets>
+        }
+    </mat-tab>
+    }
+</mat-tab-group>
+
+
+<ng-template #PaymentGateway>
+    <div class="dialog-container cardWithShadow">
+        <div class="dialog-header">
+            Payment Gateway Method
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="OnCancel()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+            <div>
+                <div *ngFor="let config of savedConfig">
+                    <mat-card class="mb-2 w-100">
+                        <mat-card-header style="width: 100%; text-align: center;">
+                            <mat-card-title>
+                                {{ config.paymentConfigName }}
+                            </mat-card-title>
+                        </mat-card-header>
+                        <mat-card-content
+                            style="text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                            <div class="row" style="text-align:center;">
+                                {{ config.paymentGatewayInfo?.substring(0, 50) }}
+                            </div>
+                            <div style="text-align:center;">
+                                {{ config.paymentGatewayInfo?.substring(50) }}
+                            </div>
+                        </mat-card-content>
+                        <div mat-dialog-actions class="dialog-action-adjust" style="justify-content:center;">
+                            <button mat-button mat-flat-button color="primary" id="submit" class="button-normal"
+                                (click)="invoicePaymentpaymentGateway(config)">
+                                Proceed
+                            </button>
+                        </div>
+                    </mat-card>
+                </div>
+            </div>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #Mobilenumber>
+    <div class="dialog-container">
+        <div class="dialog-header">
+            Mobile number
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="hideMpinModal()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content class="matcardContent" style=" overflow:hidden;">
+            <form [formGroup]="mpinForm" class="card-form mb-3">
+                <div class="row g-3">
+                    <label for="countryname" class="inputLabel">Mobile number *</label>
+                    <div class="d-flex gap-2" style="justify-content: center; align-items: center; width: 100%;">
+                        <!-- Country Code Select -->
+                        <mat-form-field appearance="outline" class="country-code-field">
+                            <mat-select formControlName="countryCode" class="input-p-5">
+                                <mat-option *ngFor="let country of countries" [value]="country.dial_code">
+                                    {{ country.dial_code }}
+                                </mat-option>
+                            </mat-select>
+                            <mat-error *ngIf="isMpinFormSubmitted && mpinForm.controls.countryCode?.errors">
+                                Country code is required.
+                            </mat-error>
+                        </mat-form-field>
+
+                        <!-- Mobile Input -->
+                        <mat-form-field appearance="outline" class="flex-grow-1 mat-form-field">
+                            <input matInput class="input-p-5" formControlName="mobileNumber" placeholder="Enter Mobile"
+                                (input)="onInputMobile($event)" [maxlength]="commondropdownService.maxMobileLength"
+                                [ngClass]="{ 'is-invalid': isMpinFormSubmitted && mpinForm.controls.mobileNumber.errors }"
+                                type="tel" maxlength="10" />
+                            <mat-error *ngIf="mpinForm?.get('mobileNumber')?.hasError('required')">
+                                Mobile Number is required
+                            </mat-error>
+                            <mat-error *ngIf="mpinForm?.get('mobileNumber')?.hasError('pattern')">
+                                Invalid mobile number
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+            <button mat-button mat-flat-button color="primary" class="button-normal" type="submit"
+                (click)="invoicePaymentGateway()"
+                [disabled]="inputMobileNumber !== '' || mobileError|| mpinForm.invalid">
+                Buy
+            </button>
+            <button mat-stroked-button matButton="outlined" type="button" color="primary" class="button-normal"
+                (click)="hideMpinModal()">
+                Cancel
+            </button>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #PaymentConfirm>
+    <div class="dialog-container">
+        <div class="dialog-container">
+            <div class="dialog-header">
+                Payment Confirmation
+                <span>
+                    <a mat-icon-button href="javascript:void(0)" (click)="hidepaymentConfirmDialog()">
+                        <img src="assets/img/DashboardIcons/Reject.svg">
+                    </a>
+                </span>
+            </div>
+        </div>
+        <div mat-dialog-content style=" overflow:hidden;">
+            <div class="row">
+                Payment is in the approval flow one It is approved, you will get the confirmation
+                message
+                through SMS
+            </div>
+        </div>
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+            <button mat-stroked-button matButton="outlined" type="button" color="primary" class="button-normal"
+                (click)="hidepaymentConfirmDialog()">
+                Cancel
+            </button>
+        </div>
+    </div>
+</ng-template>

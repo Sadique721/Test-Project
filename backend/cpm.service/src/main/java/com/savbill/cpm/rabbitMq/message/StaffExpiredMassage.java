@@ -1,0 +1,53 @@
+package com.savbill.cpm.rabbitMq.message;
+
+import com.savbill.cpm.model.common.StaffUser;
+import com.savbill.cpm.modules.Template.domain.TemplateNotification;
+import com.savbill.cpm.rabbitMq.RabbitMqConstants;
+import lombok.Data;
+
+import java.util.*;
+
+@Data
+public class StaffExpiredMassage {
+    private String messageId;
+    private String message;
+    private Date messageDate;
+    private String sourceName;
+    private String emailTemplate;
+    private String smsTemplate;
+    private String appendUrl;
+    private String customerName;
+
+
+    private Map<String, Object> staffUserData = new HashMap<>();
+    private boolean isSmsConfigured;
+    private boolean isEmailConfigured;
+
+    public StaffExpiredMassage(String message, TemplateNotification template, String sourceName, StaffUser staffUser , String customerName, Integer mvnoId, Integer buId) {
+
+        this.setMessage(message);
+        this.setSourceName(sourceName);
+        this.setEmailTemplate(template.getEmailTemplateData());
+        this.setSmsTemplate(template.getSmsTemplateData());
+        this.setAppendUrl(template.getAppendUrl());
+        this.setCustomerName(customerName);
+
+        this.messageDate = new Date();
+        this.messageId = UUID.randomUUID().toString();
+
+        this.staffUserData.put("mobileNumber", staffUser.getPhone());
+        this.staffUserData.put("emailId", staffUser.getEmail());
+        this.staffUserData.put("mvnoId", staffUser.getMvnoId());
+        this.staffUserData.put("username", staffUser.getUsername());
+        this.staffUserData.put("countryCode", staffUser.getCountryCode());
+        this.staffUserData.put("customerName" , customerName);
+        if(Objects.isNull(buId)){
+            this.staffUserData.put(RabbitMqConstants.BU_ID,null);
+        }else{
+            this.staffUserData.put(RabbitMqConstants.BU_ID,buId);
+        }
+        this.isEmailConfigured = template.isEmailEventConfigured();
+        this.isSmsConfigured = template.isSmsEventConfigured();
+
+    }
+}

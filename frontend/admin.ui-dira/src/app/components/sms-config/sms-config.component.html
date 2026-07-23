@@ -1,0 +1,517 @@
+<div class="row header-row">
+    <mat-card class="cardWithShadow w-100">
+        <mat-card-content class="mat-card-content-border">
+            <div class="row">
+                <div class="col-sm-9 d-flex">
+                    <mat-form-field appearance="outline" style="margin-left: 16px;"
+                        class="w-100 hide-hint mr-10 header-input">
+                        <input class="input-p-5" [(ngModel)]="searchTeamName" matInput placeholder="Enter ISP Name "
+                            (keydown.enter)="searchTrc()" />
+                        <mat-icon matSuffix class="search-header-search-icon">
+                            <i class="pi pi-search icon-size"></i>
+                        </mat-icon>
+                    </mat-form-field>
+
+                    <button mat-button mat-flat-button color="primary" class="button-normal m-r-10"
+                        (click)="searchTrc()">Search </button>
+                    <button mat-stroked-button matButton="outlined" class="button-normal"
+                        (click)="clearSearchTrc()">Clear
+                    </button>
+                </div>
+
+                <div class="col-sm-3 search-div">
+                    <button mat-button mat-flat-button color="primary" (click)="opensmsDialog()"
+                        class="button-normal m-r-10" style="width: auto;">
+
+                        Add SMS Config</button>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+<div class="container-fluid contain-flud">
+    <div class="row">
+        <div class="col-md-12">
+            <mat-card class="cardWithShadow">
+                <mat-card-content class="mat-card-content-border">
+                    <div class="team-table-list">
+                        <div class="table-responsive" style="overflow-x: hidden;">
+                            <table mat-table [dataSource]="smsConfigData" matSort class="mat-elevation-z8 w-100">
+
+                                <!-- SMS URL Column -->
+                                <ng-container matColumnDef="smsUrl">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title">SMS
+                                        URL</th>
+                                    <td mat-cell *matCellDef="let row" class="f-s-14">{{ row.smsUrl }}</td>
+                                </ng-container>
+
+                                <!-- Status Column -->
+                                <ng-container matColumnDef="status">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title">
+                                        Status</th>
+                                    <td mat-cell *matCellDef="let row">
+                                        <span class="status-badge" [ngClass]="{
+                      'status-success': row.configStatus,
+                      'status-danger': !row.configStatus
+                    }">
+                                            {{ row.configStatus ? 'Active' : 'Inactive' }}
+                                        </span>
+                                    </td>
+                                </ng-container>
+
+                                <!-- ISP Name Column -->
+                                <ng-container matColumnDef="mvnoName">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title">ISP
+                                        Name</th>
+                                    <td mat-cell *matCellDef="let row" class="f-s-14">{{ row.mvnoName }}</td>
+                                </ng-container>
+
+                                <!-- Action Column -->
+                                <ng-container *ngIf="editAccess" matColumnDef="action">
+                                    <th mat-header-cell *matHeaderCellDef stickyEnd class="table-header-title"
+                                        style="text-align:center;">Action</th>
+                                    <td mat-cell *matCellDef="let row; let i = index" class="btnAction"
+                                        style="text-align:center;">
+                                        <a mat-icon-button matTooltip="edit"
+                                            (click)="editConfigById(row.smsConfigId, i)" title="Edit">
+                                            <img src="assets/img/DashboardIcons/Edit.svg">
+                                        </a>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Header & Row -->
+                                <tr mat-header-row class="table-header-bg"
+                                    *matHeaderRowDef="getDisplayedPlanDetailsColumns()"></tr>
+                                <tr mat-row class="table-content-row"
+                                    *matRowDef="let row; columns: getDisplayedPlanDetailsColumns()"></tr>
+
+                            </table>
+
+                            <!-- No Record -->
+                            <div *ngIf="groupData?.smsConfigList?.length === 0" class="no-record">
+                                No Record Found.
+                            </div>
+
+                            <!-- Paginator -->
+                            <mat-paginator [length]="totalRecords" [pageSize]="itemsPerPage"
+                                [pageSizeOptions]="[5, 10, 20,50,100]" showFirstLastButtons
+                                (page)="pageChanged($event)">
+                            </mat-paginator>
+
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </div>
+</div>
+
+<ng-template #smsDialogTemplate>
+    <div class="dialog-container">
+        <!-- Dialog Header -->
+        <div class="dialog-header">
+            {{ editMode ? 'Update SMS Config' : 'Create SMS Config' }}
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="onCancel()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        @if (!createAccess || !editAccess) {
+          <mat-card-content class="matcard-content">
+            <div class="panel-body table-responsive">
+                Sorry you have not privilege to create operation!
+            </div>
+        </mat-card-content>
+        }
+
+        @if (createAccess || (editMode && editAccess)) {
+        <div mat-dialog-content>
+            <mat-card-content class="matcardContent">
+                <form [formGroup]="editForm" class="row g-3">
+
+                    <!-- SMS URL -->
+
+                    <div class="col-md-6 mb-4">
+                        <label for="smsUrl" class="inputLabel">SMS URL*</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <input matInput id="smsUrl" placeholder="Enter SMS URL" formControlName="smsUrl"
+                                class="input-p-5"
+                                [ngClass]="{ 'is-invalid': submitted && editForm.controls.smsUrl.errors }" />
+                            <mat-error *ngIf="submitted && editForm.controls.smsUrl.errors?.['required']">
+                                SMS URL is required.
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Configuration Status -->
+                    <div class="col-md-6 mb-4">
+                        <label for="configStatus" class="inputLabel">Configuration Status*</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <mat-select id="configStatus" formControlName="configStatus"
+                                placeholder="Select a Config Status" class="input-p-5">
+                                <mat-option *ngFor="let option of dropdownOptions" [value]="option.value">
+                                    {{ option.label }}
+                                </mat-option>
+                            </mat-select>
+                            <mat-error *ngIf="submitted && editForm.controls.configStatus.errors?.['required']">
+                                Configuration Status is required.
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- SMS Parameters Table Card -->
+                    <mat-card class="cardWithShadow w-100 mt-3" style="margin-top: 25px;">
+                        <mat-card-header
+                            style="display: flex; justify-content: space-between; align-items: center; border-top-left-radius: 7px; border-top-right-radius: 7px;">
+                            <mat-card-title class="font-900">SMS Parameters</mat-card-title>
+                            <button mat-stroked-button type="button" color="primary" class="button-normal"
+                                (click)="onAddAttribute()">
+                                Add
+                            </button>
+                        </mat-card-header>
+                        <mat-card-content class="mat-card-content-border">
+
+                            <div class="table-container" style="overflow:auto;">
+                                <table mat-table [dataSource]="attributeDataSource"
+                                    class="mat-elevation-z8 w-100 table-layout-fixed">
+
+                                    <!-- Parameter Column -->
+                                    <ng-container matColumnDef="parameter">
+                                        <th mat-header-cell *matHeaderCellDef style="width:40%;">SMS Parameter</th>
+                                        <td mat-cell *matCellDef="let row; let i = index">
+                                            <mat-form-field appearance="outline" class="w-100" style="margin-top:12px;">
+                                                <input matInput [formControl]="row.get('parameter')" class="input-p-5"
+                                                    placeholder="Parameter" />
+                                            </mat-form-field>
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- Value Column -->
+                                    <ng-container matColumnDef="value">
+                                        <th mat-header-cell *matHeaderCellDef style="width:40%;">Value</th>
+                                        <td mat-cell *matCellDef="let row; let i = index">
+                                            <mat-form-field appearance="outline" class="w-100" style="margin-top:12px;">
+                                                <input matInput [formControl]="row.get('value')" class="input-p-5"
+                                                    placeholder="Value" />
+                                            </mat-form-field>
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- Delete Column -->
+                                    <ng-container matColumnDef="delete">
+                                        <th mat-header-cell *matHeaderCellDef style="width:40%;text-align: center;">
+                                            Delete</th>
+                                        <td mat-cell *matCellDef="let row; let i = index" style="text-align:center;">
+                                            <a mat-icon-button
+                                                (click)="deleteConfirmAttribute(i, row.get('smsConfigMappingId').value)">
+                                                <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                            </a>
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- Header & Row Definitions -->
+                                    <tr mat-header-row *matHeaderRowDef="['parameter','value','delete']"></tr>
+                                    <tr mat-row *matRowDef="let row; columns: ['parameter','value','delete']"></tr>
+                                </table>
+
+
+
+                            </div>
+                        </mat-card-content>
+                    </mat-card>
+                </form>
+            </mat-card-content>
+        </div>
+        }
+        <!-- Dialog Actions -->
+        @if (createAccess || (editMode && editAccess)) {
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+            <button mat-button mat-flat-button color="primary" class="button-normal"
+                (click)="editMode ? editSmsConfig() : addSmsConfig()">
+                {{ editMode ? 'Update' : 'Create' }} SMS Config
+            </button>
+            <button mat-stroked-button type="button" color="primary" class="button-normal"
+                (click)="onCancel()">Cancel</button>
+        </div>}
+    </div>
+</ng-template>
+
+
+
+
+<!-- <div class="row">
+  <div class="col-md-6 left">
+    <!- Data Table ->
+    <div class="panel">
+      <div class="panel-heading">
+        <h3 class="panel-title">SMS Configuration Parameters</h3>
+        <div class="right">
+          <button
+            type="button"
+            class="btn-toggle-collapse"
+            data-toggle="collapse"
+            data-target="#searchSMSCON"
+            aria-expanded="false"
+            aria-controls="searchSMSCON"
+            >
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+
+      <div id="searchSMSCON" class="panel-collapse collapse in">
+        <div class="panel-body table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+               
+                <th>SMS URL</th>
+                <th>Status</th>
+                <th>ISP Name</th>
+                @if (editAccess) {
+                  <th>Action</th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (
+                group of groupData.smsConfigList
+                | paginate
+                : {
+                id: 'listing_groupdata',
+                itemsPerPage: itemsPerPage,
+                currentPage: currentPage,
+                totalItems: totalRecords
+                }; track
+                group; let i = $index) {
+                <tr
+                  >
+                  <td>{{ group.smsUrl }}</td>
+                  
+                  <td>
+                    @if (group.configStatus === true) {
+                      <span>
+                        <span class="badge badge-success">Active</span>
+                      </span>
+                    }
+                    @if (group.configStatus === false) {
+                      <span>
+                        <span class="badge badge-danger">Inactive</span>
+                      </span>
+                    }
+                    <td>{{ group.mvnoName }}</td>
+                    @if (editAccess) {
+                      <td class="btnAction">
+                       
+                      @if (editAccess) {
+                        <a
+                          (click)="editConfigById(group.smsConfigId, i)"
+                          class="curson_pointer"
+                          >
+                        <img src="assets/img/DashboardIcons/Edit.svg" >
+                        </a>
+                      }
+                     
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+          <br />
+          <div class="pagination_Dropdown">
+            <pagination-controls
+              id="listing_groupdata"
+              maxSize="10"
+              directionLinks="true"
+              previousLabel=""
+              nextLabel=""
+              (pageChange)="pageChanged($event)"
+            ></pagination-controls>
+         
+        </div>
+      </div>
+    </div>
+  </div>
+  <!- END Data Table ->
+</div>
+
+<div class="col-md-6 right">
+  <!- Form Design ->
+  <div class="panel">
+    <div class="panel-heading">
+      <h3 class="panel-title">{{ editMode ? "Update" : "Create" }} SMS Config</h3>
+      <div class="right">
+        <button
+          type="button"
+          class="btn-toggle-collapse"
+          data-toggle="collapse"
+          data-target="#editSMS"
+          aria-expanded="false"
+          aria-controls="editSMS"
+          >
+          <i class="fa fa-minus-circle"></i>
+        </button>
+      </div>
+    </div>
+
+    <div id="editSMS" class="panel-collapse collapse in">
+      <div class="panel-body">
+        @if (!createAccess && !editMode) {
+          <div class="panel-body table-responsive">
+            Sorry you have not privilege to create operation!
+          </div>
+        }
+        @if (createAccess || (editMode && editAccess)) {
+          <div>
+            <form class="form-auth-small" [formGroup]="editForm">
+              <label>SMS URL</label>
+              <input
+                type="text"
+                name="smsUrl"
+                class="form-control"
+                placeholder="Enter SMS URL"
+                formControlName="smsUrl"
+                [ngClass]="{
+                  'is-invalid': submitted && editForm.controls.smsUrl.errors
+                }"
+                />
+                @if (submitted && editForm.controls.smsUrl.errors) {
+                  <div
+                    class="errorWrap text-danger"
+                    >
+                    @if (submitted && editForm.controls.smsUrl.errors.required) {
+                      <div
+                        class="error text-danger"
+                        >
+                        SMS URL is required
+                      </div>
+                    }
+                  </div>
+                }
+                <br />
+                <div>
+                  <label> Configuration Status</label>
+                  <p-dropdown
+                    [options]="dropdownOptions"
+                    filterBy="label"
+                    optionLabel="label"
+                    optionValue="value"
+                    placeholder="Select a Config status"
+                    formControlName="configStatus"
+                  ></p-dropdown>
+                  <br />
+                </div>
+                <div>
+                  <label>SMS Parameter</label>
+                  <table class="table coa-table" style="margin-top: 10px">
+                    <thead>
+                      <tr>
+                        <th style="text-align: center; width: 41%">SMS Parameter</th>
+                        <th style="text-align: center; width: 41%">Value</th>
+                        <th style="text-align: right; width: 18%; padding: 8px">
+                          <button
+                            id="addAtt"
+                            style="object-fit: cover; padding: 5px 8px"
+                            class="btn btn-primary"
+                            (click)="onAddAttribute()"
+                            >
+                            <i class="fa fa-plus-square" aria-hidden="true"></i>
+                            Add
+                          </button>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (
+                        row of attribute.controls
+                        | paginate
+                        : {
+                        id: 'listing_groupdata',
+                        itemsPerPage: itemsPerPage,
+                        currentPage: currentPage,
+                        totalItems: totalRecords
+                        }; track
+                        row; let index = $index) {
+                        <tr
+                          >
+                          <td style="padding-left: 8px">
+                            <input
+                              id="parameter"
+                              class="form-control"
+                              placeholder="Enter Parameter"
+                              [formControl]="row.get('parameter')"
+                              />
+                            </td>
+                            <td>
+                              <input
+                                id="value"
+                                class="form-control"
+                                placeholder="Enter  Parameter value"
+                                [formControl]="row.get('value')"
+                                />
+                              </td>
+                              <td style="text-align: right">
+                                <a
+                                  id="deleteAtt"
+                                  class="curson_pointer"
+                          (click)="
+                            deleteConfirmAttribute(index, row.get('smsConfigMappingId').value)
+                          "
+                                  >
+                                   <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                                </a>
+                              </td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                      <br />
+                      <div class="row">
+                        <div class="col-md-12">
+                          <pagination-controls
+                            id="listing_groupdata_1"
+                            maxSize="10"
+                            directionLinks="true"
+                            previousLabel=""
+                            nextLabel=""
+                            (pageChange)="pageChanged($event)"
+                          ></pagination-controls>
+                        </div>
+                      </div>
+                    </div>
+                    <br />
+                    @if (editMode == false) {
+                      <div class="addUpdateBtn">
+                        <button type="submit" class="btn btn-primary" (click)="editSmsConfig()">
+                          <i class="fa fa-check-circle"></i>
+                          Add SMS Config
+                        </button>
+                        <br />
+                      </div>
+                    }
+                    @if (editMode == true) {
+                      <div class="addUpdateBtn">
+                        <button
+                          type="submit"
+                          class="btn btn-primary"
+                          (click)="editSmsConfig()"
+                          [disabled]="isSmsConfigEdit"
+                          >
+                          <i class="fa fa-check-circle"></i>
+                          Update SMS Config
+                        </button>
+                        <br />
+                      </div>
+                    }
+                  </form>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+     
+      </div>
+    </div> -->

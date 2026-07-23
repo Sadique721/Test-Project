@@ -1,0 +1,562 @@
+<!-- <div class="row">
+  <div class="col-md-12">
+    <div class="panel top">
+      <div class="panel-heading">
+        <h3 class="panel-title">{{ title }} Management</h3>
+        <div class="right">
+          <button type="button" class="btn-toggle-collapse" data-toggle="collapse" data-target="#searchDataCountry">
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+      <div id="searchDataCountry" class="panel-collapse collapse in">
+        @if (listView) {
+        <div class="panel-body">
+          <div class="row">
+            <div class="col-lg-3 col-md-3">
+              <input id="taxName" type="text" class="form-control" [(ngModel)]="search"
+                placeholder="Global Search Filter" />
+            </div>
+            <div class="col-lg-3 col-md-4 marginTopSearchBtn">
+              <button type="button" class="btn btn-primary" id="searchbtn" (click)="getAllSchedularList()">
+                <i class="fa fa-search"></i>
+                Search
+              </button>
+              <button type="reset" class="btn btn-default" id="searchbtn" (click)="clearsearch()">
+                 <img src="assets/img/DashboardIcons/Refresh.svg" />
+                Clear
+              </button>
+            </div>
+          </div>
+        </div>
+        }
+        <div class="panel-body no-padding panel-udata">
+          <div class="col-md-6 pcol">
+            <div class="dbox">
+              <a (click)="createSchedular()" class="curson_pointer">
+                <img src="../../../assets/img/i01.png" style="width: 32px" />
+                <h5>Create {{ title }}</h5>
+                
+              </a>
+            </div>
+          </div>
+          <div class="col-md-6 pcol">
+            <div class="dbox">
+              <a (click)="searchSchedular()" class="curson_pointer">
+                <img src="../../../assets/img/i01.png" style="width: 32px" />
+                <h5>Search {{ title }}</h5>
+               
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row">
+  @if (listView) {
+  <div class="col-md-12">
+    <div class="panel">
+      <div class="panel-heading">
+        <h3 class="panel-title">{{ title }} Management</h3>
+        <div class="right">
+          <button type="button" class="btn-toggle-collapse" data-toggle="collapse" data-target="#schedularlist"
+            aria-expanded="false" aria-controls="schedularlist">
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+      <div id="schedularlist" class="panel-collapse collapse in">
+        <div class="panel-body table-responsive">
+          <div class="row">
+            <div class="col-lg-12 col-md-12">
+              <p-table styleClass="p-datatable-gridlines advanceTable" dataKey="id" [showCurrentPageReport]="true"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                [tableStyle]="{ 'min-width': '60rem' }" [rowsPerPageOptions]="[5, 10, 20, 50, 100]" rowExpandMode="single"
+                [value]="schedularList" [paginator]="true" [rows]="itemsPerPage" [totalRecords]="totalRecords"
+                [lazy]="true" (onLazyLoad)="loadSchedulers($event)" [(first)]="first">
+                <ng-template pTemplate="header">
+                  <tr>
+                    <th>Scheduler Name</th>
+                    <th>Scheduler Time</th>
+                    <th>Schedule Type</th>
+                    <th>Status</th>
+                    <th>Weekly</th>
+                    <th>Day of Month</th>
+                    <th>Action</th>
+                  </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-scheduler let-i="rowIndex">
+                  <tr>
+                    <td>{{ scheduler.schedulerName || "-" }}</td>
+                    <td>{{ scheduler.schedulerTime || "-" }}</td>
+                    <td>{{ scheduler.scheduleType || "-" }}</td>
+                    @if (scheduler.status == 'ACTIVE' || scheduler.status == 'Active') {
+                    <td>
+                      <span class="badge badge-success">Active</span>
+                    </td>
+                    }
+                    @if (scheduler.status == 'INACTIVE' || scheduler.status == 'Inactive') {
+                    <td>
+                      <span class="badge badge-danger">Inactive</span>
+                    </td>
+                    }
+                    <td>{{ scheduler.weekly || "-" }}</td>
+                    <td>{{ scheduler.dayOfMonth || "-" }}</td>
+                    <td class="btnAction">
+                      <a id="edit-button" href="javascript:void(0)" type="button" (click)="editSchedular(scheduler.id)">
+                      <img src="assets/img/DashboardIcons/Edit.svg" >
+                      </a>
+                      <a id="delete-button" href="javascript:void(0)" (click)="deleteSchedularConfirmation(scheduler)">
+                         <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                      </a>
+                    </td>
+                  </tr>
+                </ng-template>
+              </p-table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+  @if (createView) {
+  <div class="col-md-12">
+    <div class="panel">
+      <div class="panel-heading">
+        <h3 class="panel-title">{{ isSchedularEdit ? "Update" : "Create" }} {{ title }}</h3>
+        <div class="right">
+          <button type="button" class="btn-toggle-collapse" data-toggle="collapse" data-target="#createSchedular"
+            aria-expanded="false" aria-controls="createSchedular">
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+      <div id="createSchedular" class="panel-collapse collapse in">
+        <div class="panel-body">
+          <form [formGroup]="schedularForm" (ngSubmit)="addOrUpdateScheduler()">
+            <fieldset style="margin-top: 0rem; margin-bottom: 2rem">
+              <legend>Schedular Details</legend>
+              <div class="boxWhite">
+                <div class="row">
+                  <div class="col-lg-4 col-md-4 col-12">
+                    <label>Scheduler Name*</label>
+                    <p-dropdown [options]="scheduleNameList" optionValue="value" optionLabel="label" filter="true"
+                      filterBy="label" placeholder="Select Schedule Name" formControlName="schedulerName"
+                      [disabled]="isSchedularEdit" [ngClass]="{
+                        'is-invalid': submitted && schedularForm.controls.schedulerName.errors
+                      }"></p-dropdown>
+                    @if (submitted && schedularForm.controls.schedulerName.errors) {
+                    <div class="errorWrap text-danger">
+                      @if (submitted && schedularForm.controls.schedulerName.errors.required) {
+                      <div class="error text-danger">
+                        {{ title }} Name is required.
+                      </div>
+                      }
+                      @if (
+                      submitted &&
+                      schedularForm.controls.schedulerName.errors?.cannotContainSpace
+                      ) {
+                      <div class="position">
+                        <p class="error">White space are not allowed.</p>
+                      </div>
+                      }
+                    </div>
+                    }
+                    <br />
+                  </div>
+                  <div class="col-lg-4 col-md-4 col-12">
+                    <div>
+                      <label>Scheduler Time *</label>
+                      <p-calendar [timeOnly]="true" appendTo="body" formControlName="schedulerTime"
+                        placeholder="Enter Scheduler Time" inputId="timeonly" dateFormat="HH:mm"></p-calendar>
+                      @if (submitted && schedularForm.controls.schedulerTime.errors) {
+                      <div class="errorWrap text-danger">
+                        @if (submitted && schedularForm.controls.schedulerTime.errors.required) {
+                        <div class="error text-danger">
+                          Scheduler Time is required.
+                        </div>
+                        }
+                      </div>
+                      }
+                    </div>
+                    <br />
+                  </div>
+                  <div class="col-lg-4 col-md-4 col-12">
+                    <div>
+                      <label>Schedule Type*</label>
+                      <p-dropdown [options]="scheduleTypeList" optionValue="value" optionLabel="label" filter="true"
+                        filterBy="label" placeholder="Select Schedule Type" formControlName="scheduleType" [ngClass]="{
+                          'is-invalid': submitted && schedularForm.controls.scheduleType.errors
+                        }"></p-dropdown>
+                      @if (submitted && schedularForm.controls.scheduleType.errors) {
+                      <div class="errorWrap text-danger">
+                        @if (submitted && schedularForm.controls.scheduleType.errors.required) {
+                        <div class="error text-danger">
+                          Schedule Type is required.
+                        </div>
+                        }
+                      </div>
+                      }
+                    </div>
+                    <br />
+                  </div>
+                </div>
+                <div class="row">
+                  @if (schedularForm.value.scheduleType == 'WEEKLY') {
+                  <div class="col-lg-4 col-md-4 col-12">
+                    <label>Weekly*</label>
+                    <p-dropdown appendTo="body" [options]="[
+                        'SUNDAY',
+                        'MONDAY',
+                        'TUESDAY',
+                        'WEDNESDAY',
+                        'THURSDAY',
+                        'FRIDAY',
+                        'SATURDAY'
+                      ]" formControlName="weekly" placeholder="Select Day of week" [ngClass]="{
+                        'is-invalid': submitted && schedularForm.controls.weekly.errors
+                      }"></p-dropdown>
+                    @if (submitted && schedularForm.controls.weekly.errors) {
+                    <div class="errorWrap text-danger">
+                      @if (submitted && schedularForm.controls.weekly.errors.required) {
+                      <div class="error text-danger">
+                        Weekly is required.
+                      </div>
+                      }
+                    </div>
+                    }
+                  </div>
+                  }
+                  @if (schedularForm.value.scheduleType == 'MONTHLY') {
+                  <div class="col-lg-4 col-md-4 col-12">
+                    <label>Day Of Month*</label>
+                    <p-dropdown appendTo="body" [options]="dayOfMonthOptions" formControlName="dayOfMonth"
+                      placeholder="Select Day of Month" [ngClass]="{
+                        'is-invalid': submitted && schedularForm.controls.dayOfMonth.errors
+                      }"></p-dropdown>
+                    @if (submitted && schedularForm.controls.dayOfMonth.errors) {
+                    <div class="errorWrap text-danger">
+                      @if (submitted && schedularForm.controls.dayOfMonth.errors.required) {
+                      <div class="error text-danger">
+                        Day Of Month is required.
+                      </div>
+                      }
+                    </div>
+                    }
+                  </div>
+                  }
+                  <div class="col-lg-4 col-md-4 col-12">
+                    <label>Status*</label>
+                    <p-dropdown [options]="status" placeholder="Select  Status" optionLabel="label" optionValue="label"
+                      formControlName="status" [filter]="true" filterBy="label" [ngClass]="{
+                        'is-invalid': submitted && schedularForm.controls.status.errors
+                      }"></p-dropdown>
+                    @if (submitted && schedularForm.controls.status.errors) {
+                    <div class="errorWrap text-danger">
+                      @if (submitted && schedularForm.controls.status.errors.required) {
+                      <div class="error text-danger">
+                        Status is required.
+                      </div>
+                      }
+                    </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+            <div class="addUpdateBtn" style="margin: 3.5rem 0 2rem">
+              <button type="submit" class="btn btn-primary" id="submit">
+                <i class="fa fa-check-circle"></i>
+                {{ isSchedularEdit ? "Update" : "Add" }} {{ title }}
+              </button>
+              <br />
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+</div> -->
+
+<div class="row header-row">
+  <mat-card class="cardWithShadow w-100">
+    <mat-card-content class="mat-card-content-border">
+      <div class="row">
+        <div class="col-sm-9 d-flex">
+          <mat-form-field appearance="outline" class="w-100 hide-hint mr-10 m-l-16">
+            <input class="input-p-5" [(ngModel)]="search" matInput placeholder="Global Search Filter"
+              (keydown.enter)="getAllSchedularList()" id="taxName" type="text" />
+            <mat-icon matSuffix class="search-header-search-icon">
+              <i class="pi pi-search icon-size"></i>
+            </mat-icon>
+          </mat-form-field>
+
+          <button mat-button mat-flat-button color="primary" class="button-normal m-r-10" (click)="getAllSchedularList()">
+            Search
+          </button>
+
+          <button mat-stroked-button matButton="outlined" class="button-normal" (click)="clearSearch()">
+            Clear
+          </button>
+        </div>
+        <div class="col-sm-3 search-div">
+          <button mat-button mat-flat-button color="primary" (click)="addEditSchedulDialog()"
+            class="button-normal mr-10">
+            Add {{ title }}
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+@if (listView) {
+<div class="container-fluid contain-flud">
+  <div class="row">
+    <div class="col-md-12">
+      <mat-card class="cardWithShadow">
+        <mat-card-content class="mat-card-content-border">
+          <div class="country-table-list">
+            <div class="table-container">
+              <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8 w-100">
+                <ng-container matColumnDef="id">
+                  <!-- Header cell -->
+                  <th mat-header-cell *matHeaderCellDef class="table-header-title">ID</th>
+
+                  <!-- Data cell -->
+                  <td mat-cell *matCellDef="let scheduler">
+                    {{ scheduler.id }}
+                  </td>
+                </ng-container>
+                <!-- Scheduler Name Column -->
+                <ng-container matColumnDef="schedulerName">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title" sticky>
+                    Scheduler Name
+                  </th>
+                  <td mat-cell *matCellDef="let scheduler" class="f-s-14">
+                    {{ scheduler.schedulerName || "-" }}
+                  </td>
+                </ng-container>
+
+                <!-- Scheduler Time Column -->
+                <ng-container matColumnDef="schedulerTime">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title" sticky>
+                    Scheduler Time
+                  </th>
+                  <td mat-cell *matCellDef="let scheduler" class="f-s-14">
+                    {{ scheduler.schedulerTime || "-" }}
+                  </td>
+                </ng-container>
+
+                <!-- Schedule Type Column -->
+                <ng-container matColumnDef="scheduleType">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title" sticky>
+                    Schedule Type
+                  </th>
+                  <td mat-cell *matCellDef="let scheduler" class="f-s-14">
+                    {{ scheduler.scheduleType || "-" }}
+                  </td>
+                </ng-container>
+
+                <!-- Status Column -->
+                <ng-container matColumnDef="status">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title" sticky>
+                    Status
+                  </th>
+                  <td mat-cell *matCellDef="let scheduler" class="f-s-14">
+                    <span class="status-badge" [ngClass]="{
+                        'status-success': scheduler.status === 'ACTIVE' || scheduler.status === 'Active',
+                        'status-danger': scheduler.status === 'INACTIVE' || scheduler.status === 'Inactive'
+                      }">
+                      {{ scheduler.status }}
+                    </span>
+                  </td>
+                </ng-container>
+
+                <!-- Weekly Column -->
+                <ng-container matColumnDef="weekly">
+                  <th mat-header-cell *matHeaderCellDef class="table-header-title" sticky>
+                    Weekly
+                  </th>
+                  <td mat-cell *matCellDef="let scheduler" class="f-s-14">
+                    {{ scheduler.weekly || "-" }}
+                  </td>
+                </ng-container>
+
+                <!-- Day of Month Column -->
+                <ng-container matColumnDef="dayOfMonth">
+                  <th mat-header-cell *matHeaderCellDef class="table-header-title" sticky>
+                    Day of Month
+                  </th>
+                  <td mat-cell *matCellDef="let scheduler" class="f-s-14">
+                    {{ scheduler.dayOfMonth || "-" }}
+                  </td>
+                </ng-container>
+
+                <!-- Action Column -->
+                <ng-container matColumnDef="action">
+                  <th mat-header-cell *matHeaderCellDef stickyEnd class="table-header-title">
+                    Action
+                  </th>
+                  <td mat-cell *matCellDef="let scheduler">
+                    <a mat-icon-button matTooltip="edit" href="javascript:void(0)" (click)="editSchedular(scheduler.id)">
+                      <img src="assets/img/DashboardIcons/Edit.svg" >
+                    </a>
+                    <a mat-icon-button matTooltip="delete" href="javascript:void(0)" (click)="deleteConfirmonSchedularDialog(scheduler)">
+                      <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                    </a>
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row class="table-header-bg" *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+                <tr mat-row class="table-content-row" *matRowDef="let row; columns: displayedColumns"></tr>
+              </table>
+
+              <mat-paginator [length]="totalRecords" [pageSize]="itemsPerPage" [pageSizeOptions]="[5, 10, 20, 50, 100]"
+                showFirstLastButtons (page)="loadSchedulers($event)">
+              </mat-paginator>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>}
+
+<ng-template #createEditDialog let-dialogRef>
+  <div class="dialog-container">
+    <div class="dialog-header">
+      {{ isSchedularEdit ? "Update" : "Create" }} {{ title }}
+      <span>
+        <a mat-icon-button href="javascript:void(0)" (click)="onCancel()">
+           <img src="assets/img/DashboardIcons/Reject.svg">
+        </a>
+      </span>
+    </div>
+
+    <div mat-dialog-content>
+      <div class="col-md-12">
+
+        <mat-card-content class="matcardContent">
+          <form [formGroup]="schedularForm" class="card-form mb-3" (ngSubmit)="addOrUpdateScheduler()">
+            <mat-card>
+              <mat-card-content>
+                <div class="row g-3">
+                  <!-- Scheduler Name -->
+                  <div class="col-md-4 col-sm-6 col-xs-12 mb-4">
+                    <label class="inputLabel">Scheduler Name*</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                      <mat-select class="input-p-5" placeholder="Select Schedule Name" formControlName="schedulerName"
+                        [ngClass]="{'is-invalid': submitted && schedularForm.controls.schedulerName.errors}">
+                        <mat-option *ngFor="let item of scheduleNameList" [value]="item.value">
+                          {{ item.label }}
+                        </mat-option>
+                      </mat-select>
+                      <mat-error *ngIf="submitted && schedularForm.get('schedulerName')?.hasError('required')">
+                        {{ title }} Name is required.
+                      </mat-error>
+                      <mat-error
+                        *ngIf="submitted && schedularForm.get('schedulerName')?.hasError('cannotContainSpace')">
+                        White space are not allowed.
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+
+                  <!-- Scheduler Time -->
+                  <div class="col-md-4 col-sm-6 col-xs-12 mb-4">
+                    <label class="inputLabel">Scheduler Time *</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                      <input matInput [matTimepicker]="timepicker" formControlName="schedulerTime"
+                        placeholder="Enter Time" readonly>
+                      <mat-timepicker #timepicker></mat-timepicker>
+                      <mat-timepicker-toggle [for]="timepicker" matSuffix></mat-timepicker-toggle>
+                      <mat-error *ngIf="submitted && schedularForm.get('schedulerTime')?.hasError('required')">
+                        Scheduler Time is required.
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+                  <!-- Schedule Type -->
+                  <div class="col-md-4 col-sm-6 col-xs-12 mb-4">
+                    <label class="inputLabel">Schedule Type*</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                      <mat-select class="input-p-5" placeholder="Select Schedule Type" formControlName="scheduleType"
+                        [ngClass]="{'is-invalid': submitted && schedularForm.controls.scheduleType.errors}">
+                        <mat-option *ngFor="let item of scheduleTypeList" [value]="item.value">
+                          {{ item.label }}
+                        </mat-option>
+                      </mat-select>
+                      <mat-error *ngIf="submitted && schedularForm.get('scheduleType')?.hasError('required')">
+                        Schedule Type is required.
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+
+                  <!-- Weekly (conditional) -->
+                  <div class="col-md-4 col-sm-6 col-xs-12 mb-4" *ngIf="schedularForm.value.scheduleType === 'WEEKLY'">
+                    <label class="inputLabel">Weekly*</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                      <mat-select class="input-p-5" placeholder="Select Day of week" formControlName="weekly"
+                        [ngClass]="{'is-invalid': submitted && schedularForm.controls.weekly.errors}">
+                        <mat-option
+                          *ngFor="let day of ['SUNDAY','MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY']"
+                          [value]="day">
+                          {{ day }}
+                        </mat-option>
+                      </mat-select>
+                      <mat-error *ngIf="submitted && schedularForm.get('weekly')?.hasError('required')">
+                        Weekly is required.
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+
+                  <!-- Day of Month (conditional) -->
+                  <div class="col-md-4 col-sm-6 col-xs-12 mb-4" *ngIf="schedularForm.value.scheduleType === 'MONTHLY'">
+                    <label class="inputLabel">Day Of Month*</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                      <mat-select class="input-p-5" placeholder="Select Day of Month" formControlName="dayOfMonth"
+                        [ngClass]="{'is-invalid': submitted && schedularForm.controls.dayOfMonth.errors}">
+                        <mat-option *ngFor="let day of dayOfMonthOptions" [value]="day">{{ day }}</mat-option>
+                      </mat-select>
+                      <mat-error *ngIf="submitted && schedularForm.get('dayOfMonth')?.hasError('required')">
+                        Day Of Month is required.
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+
+                  <!-- Status -->
+                  <div class="col-md-4 col-sm-6 col-xs-12 mb-4">
+                    <label class="inputLabel">Status*</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                      <mat-select class="input-p-5" placeholder="Select Status" formControlName="status"
+                        [ngClass]="{'is-invalid': submitted && schedularForm.controls.status.errors}">
+                        <mat-option *ngFor="let s of status" [value]="s.label">
+                          {{ s.label }}
+                        </mat-option>
+                      </mat-select>
+                      <mat-error *ngIf="submitted && schedularForm.get('status')?.hasError('required')">
+                        Status is required.
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+            <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+              <button mat-button mat-flat-button color="primary" class="button-normal" type="submit">
+                {{ isSchedularEdit ? "Update" : "Create" }} {{ title }}
+              </button>
+              <button mat-stroked-button matButton="outlined" type="button" color="primary" class="button-normal"
+                (click)="onCancel()">
+                Cancel
+              </button>
+              <br />
+            </div>
+          </form>
+        </mat-card-content>
+      </div>
+    </div>
+  </div>
+</ng-template>

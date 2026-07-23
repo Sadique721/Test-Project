@@ -1,0 +1,24 @@
+package com.savbill.radius.aaa.webservices;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Request;
+
+ 
+@Path("reloadConfiguration")
+public class ReloadConfiguration {
+	
+	public ReloadConfiguration() {
+		super();
+	}
+
+	@POST
+	@Consumes("text/plain")
+	@Produces("text/plain")
+	public String reloadConfiguration(@Context Request request, String parameter) {
+		return "success";
+	}
+}

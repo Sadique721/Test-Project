@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="true">
+    <property name="APP_LOG_ROOT" value="log"/>
+    <property name="LOG_PATTERN"
+              value='{ "level":"%p","user":"%X{userName}", "trace-Id":"%X{traceId}","span-Id":"%X{spanId}", "type":"%X{type}", "timestamp":"%d{ISO8601}", "module":"Savbill-integration", "thread":"%t","sub-module":"%F", "line":"%L","message":"%m"}%n'/>
+
+    <appender name="savbillintegrationlog" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${APP_LOG_ROOT}/savbill-integration.log</file>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <Pattern>${LOG_PATTERN}</Pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${APP_LOG_ROOT}/archived/savbill-integration.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>1GB</maxFileSize>
+            <totalSizeCap>10GB</totalSizeCap> <!-- This comment is invalid in XML -->
+            <maxHistory>10</maxHistory> <!-- This comment is invalid in XML -->
+        </rollingPolicy>
+    </appender>
+
+    <appender name="savbillintegrationlog-async" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="savbillintegrationlog"/>
+        <queueSize>500</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <includeCallerData>true</includeCallerData>
+    </appender>
+
+    <root level="ERROR">
+        <appender-ref ref="savbillintegrationlog-async"/>
+    </root>
+</configuration>

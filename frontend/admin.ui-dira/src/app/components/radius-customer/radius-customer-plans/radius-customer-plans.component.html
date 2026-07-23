@@ -1,0 +1,1370 @@
+  <mat-card class="cardWithShadow">
+        <mat-card-header>
+          <img src="../../../../assets/img/DashboardIcons/Back Arrow.svg" alt="arrow back" matTooltip="Go to Customer List" (click)="listCustomer()" class="m-r-10" (click)="goBack()" />
+          <div style="font-size:x-large; font-weight: 500;width:60%;margin-top: 7px;">
+             {{ customerLedgerDetailData?.title }}
+            {{ customerLedgerDetailData?.custname }} Plan Details
+          </div>
+        </mat-card-header>
+        </mat-card>
+
+
+                         <!-- Current Plan start -->
+  <mat-card class="cardWithShadow">
+    <mat-card-header class="d-flex justify-content-between">
+      <mat-card-title class="font-900">
+        {{ customerLedgerDetailData?.title }}
+        {{ customerLedgerDetailData?.firstname }}
+        {{ customerLedgerDetailData?.lastname }}
+        Current Plan
+      </mat-card-title>
+
+      <div class="ml-auto d-flex align-items-center gap-10">
+        <button
+          mat-icon-button
+          color="primary"
+          (click)="getcustCurrentPlan(customerId, '')"
+          matTooltip="Refresh"
+        >
+       <img src="assets/img/DashboardIcons/Refresh.svg" />
+        </button>
+      </div>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="table-responsive">
+        <table
+          mat-table
+          [dataSource]="custCurrentPlanList"
+          matSort
+          class="no-wrap m-t-0 v-middle w-100"
+        >
+          <!-- Service Name -->
+          <ng-container matColumnDef="service">
+            <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+              Service Name
+            </th>
+            <td mat-cell *matCellDef="let plan" class="f-s-14">
+              {{ plan.service }}
+            </td>
+          </ng-container>
+
+          <!-- Plan Name -->
+          <ng-container matColumnDef="planName">
+            <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+              Plan Name
+            </th>
+            <td
+              mat-cell
+              *matCellDef="let plan"
+              class="f-s-14 cursor-pointer text-primary"
+              (click)="getCustQuotaList(customerLedgerDetailData?.id, plan)"
+            >
+              {{ plan.planName }}
+            </td>
+          </ng-container>
+
+          <!-- Validity -->
+          <ng-container matColumnDef="validity">
+            <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+              Validity
+            </th>
+            <td mat-cell *matCellDef="let plan" class="f-s-14">
+              @if (custType === 'Prepaid') {
+                {{ plan.validity }}
+              } @else {
+                N/A
+              }
+            </td>
+          </ng-container>
+
+          <!-- Plan Status -->
+          <ng-container matColumnDef="planStatus">
+            <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+              Plan Status
+            </th>
+            <td mat-cell *matCellDef="let plan" class="f-s-14">
+              @if (checkStatus(plan.custPlanStatus, plan.custServMappingStatus)) {
+                <span
+                  [ngClass]="
+                    badgeTypeForStatus == 'green'
+                      ? 'badge badge-success'
+                      : badgeTypeForStatus == 'grey'
+                        ? 'badge badge-primary'
+                        : 'badge badge-danger'
+                  "
+                  >{{ displayStatus }}</span
+                >
+              }
+            </td>
+          </ng-container>
+
+          <!-- Start Date -->
+          <ng-container matColumnDef="startDate">
+            <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+              Start Date
+            </th>
+            <td mat-cell *matCellDef="let plan" class="f-s-14">
+              {{ plan.startDate | date: "dd-MM-yyyy hh:mm a" }}
+            </td>
+          </ng-container>
+
+          <!-- Expiry Date -->
+          <ng-container matColumnDef="endDate">
+            <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+              Service Expiry Date
+            </th>
+            <td mat-cell *matCellDef="let plan" class="f-s-14">
+              @if (custType === 'Prepaid') {
+                {{ plan.endDate | date: "dd-MM-yyyy hh:mm a" }}
+              } @else {
+                N/A
+              }
+            </td>
+          </ng-container>
+
+          <!-- Remaining Days -->
+          <ng-container matColumnDef="remainingDays">
+            <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+              Remaining Days
+            </th>
+            <td mat-cell *matCellDef="let plan" class="f-s-14">
+              @if (custType === 'Prepaid') {
+                {{ findDuration(plan.endDate) }}
+              } @else {
+                N/A
+              }
+            </td>
+          </ng-container>
+
+          <!-- Header & Row -->
+          <tr
+            mat-header-row
+            *matHeaderRowDef="[
+              'service',
+              'planName',
+              'validity',
+              'planStatus',
+              'startDate',
+              'endDate',
+              'remainingDays'
+            ]"
+          ></tr>
+          <tr
+            mat-row
+            *matRowDef="
+              let row;
+              columns: [
+                'service',
+                'planName',
+                'validity',
+                'planStatus',
+                'startDate',
+                'endDate',
+                'remainingDays'
+              ]
+            "
+          ></tr>
+        </table>
+         <!-- No Record -->
+        @if (!custCurrentPlanList || custCurrentPlanList.length === 0) {
+          <div class="m-t-10 text-center f-w-600">No Records Found</div>
+        }
+
+        
+
+        <!-- Pagination -->
+          @if (custCurrentPlanList && custCurrentPlanList.length !== 0) {
+
+          <mat-paginator
+            [length]="customerCurrentPlanListdatatotalRecords"
+            [pageSize]="customerCurrentPlanListdataitemsPerPage"
+            [pageSizeOptions]="pageSizeOptions"
+            showFirstLastButtons
+            (page)="pageChangedcustomerCurrentPlanListData($event)"
+          >
+          </mat-paginator>
+`        }
+      </div>
+    </mat-card-content>
+  </mat-card>
+                        <!-- </div> -->
+                        <!-- Current Plan end -->
+
+                        <!-- future plan start -->
+                         <!-- <div class="f-s-14 p-16 rounded m-t-12"> -->
+  <mat-card class="cardWithShadow">
+    <mat-card-header class="d-flex justify-content-between">
+      <mat-card-title class="font-900">
+        {{ customerLedgerDetailData?.title }}
+        {{ customerLedgerDetailData?.firstname }}
+        {{ customerLedgerDetailData?.lastname }} Future Plan
+      </mat-card-title>
+      <div class="right ml-auto d-flex gap-10">
+        <button
+          mat-icon-button
+          color="primary"
+          (click)="getcustFuturePlan(customerLedgerDetailData.id, '')"
+          matTooltip="Refresh"
+        >
+        <img src="assets/img/DashboardIcons/Refresh.svg" />
+        </button>
+      </div>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="table-responsive">
+        <table
+          mat-table
+          [dataSource]="custFuturePlanList"
+          matSort
+          class="no-wrap m-t-0 v-middle w-100"
+        >
+          <!-- Service Name -->
+          <ng-container matColumnDef="service">
+            <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+              Service Name
+            </th>
+            <td mat-cell *matCellDef="let plan" class="f-s-14">
+              {{ plan.service }}
+            </td>
+          </ng-container>
+
+          <!-- Plan Name -->
+          <ng-container matColumnDef="planName">
+            <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+              Plan Name
+            </th>
+            <td
+              mat-cell
+              *matCellDef="let plan"
+              class="f-s-14 cursor-pointer text-primary"
+              (click)="getCustQuotaList(customerLedgerDetailData?.id, plan)"
+            >
+              {{ plan.planName }}
+            </td>
+          </ng-container>
+
+          <!-- Validity -->
+          <ng-container matColumnDef="validity">
+            <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+              Validity
+            </th>
+            <td mat-cell *matCellDef="let plan" class="f-s-14">
+              @if (custType === 'Prepaid') {
+                {{ plan.validity }}
+              } @else {
+                N/A
+              }
+            </td>
+          </ng-container>
+
+          <!-- Plan Status -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+              Plan Status
+            </th>
+            <td mat-cell *matCellDef="let plan" class="f-s-14">
+              @if (checkStatus(plan.custPlanStatus, plan.custServMappingStatus)) {
+                <span
+                  [ngClass]="
+                    badgeTypeForStatus == 'green'
+                      ? 'badge badge-success'
+                      : badgeTypeForStatus == 'grey'
+                        ? 'badge badge-primary'
+                        : 'badge badge-danger'
+                  "
+                >
+                  {{ displayStatus }}
+                </span>
+              }
+            </td>
+          </ng-container>
+
+          <!-- Start Date -->
+          <ng-container matColumnDef="startDate">
+            <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+              Start Date
+            </th>
+            <td mat-cell *matCellDef="let plan" class="f-s-14">
+              {{ plan.dbStartDate | date: "dd-MM-yyyy hh:mm a" }}
+            </td>
+          </ng-container>
+
+          <!-- Service Expiry Date -->
+          <ng-container matColumnDef="endDate">
+            <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+              Service Expiry Date
+            </th>
+            <td mat-cell *matCellDef="let plan" class="f-s-14">
+              @if (custType === 'Prepaid') {
+                {{ plan.dbEndDate | date: "dd-MM-yyyy hh:mm a" }}
+              } @else {
+                N/A
+              }
+            </td>
+          </ng-container>
+
+          <!-- Billing End Date -->
+          <ng-container matColumnDef="expiryDate">
+            <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+              Billing End Date
+            </th>
+            <td mat-cell *matCellDef="let plan" class="f-s-14">
+              @if (custType === 'Prepaid') {
+                {{ plan.dbExpiryDate | date: "dd-MM-yyyy hh:mm a" }}
+              } @else {
+                N/A
+              }
+            </td>
+          </ng-container>
+
+          <!-- Table Rows -->
+          <tr
+            mat-header-row
+            *matHeaderRowDef="[
+              'service',
+              'planName',
+              'validity',
+              'status',
+              'startDate',
+              'endDate',
+              'expiryDate'
+            ]"
+          ></tr>
+          <tr
+            mat-row
+            *matRowDef="let row; columns: [
+              'service',
+              'planName',
+              'validity',
+              'status',
+              'startDate',
+              'endDate',
+              'expiryDate'
+            ]"
+          ></tr>
+        </table>
+   <!-- No Record -->
+        @if (!custFuturePlanList || custFuturePlanList.length === 0) {
+          <div class="m-t-10 text-center f-w-600">No Records Found</div>
+        }
+
+        <!-- Pagination -->
+          @if (custFuturePlanList && custFuturePlanList.length !== 0) {
+          <mat-paginator
+            [length]="customerFuturePlanListdatatotalRecords"
+            [pageSize]="customerFuturePlanListdataitemsPerPage"
+            [pageSizeOptions]="pageSizeOptions"
+            showFirstLastButtons
+            (page)="pageChangedcustFuturePlanListData($event)"
+          >
+          </mat-paginator>
+          }
+      </div>
+    </mat-card-content>
+  </mat-card>
+<!-- </div> -->
+
+                        <!-- future plan end -->
+                        <!-- expired plan start -->
+                         <!-- <div class="f-s-14 p-16 rounded m-t-12"> -->
+  <mat-card class="cardWithShadow">
+    <mat-card-header class="d-flex justify-content-between">
+      <mat-card-title class="font-900">
+        {{ customerLedgerDetailData?.title }}
+        {{ customerLedgerDetailData?.firstname }}
+        {{ customerLedgerDetailData?.lastname }} Expired Plan
+      </mat-card-title>
+
+      <div class="d-flex align-items-center gap-10 ml-auto">
+        <button mat-icon-button color="primary" (click)="getcustExpiredPlan(customerId, '')">
+         <img src="assets/img/DashboardIcons/Refresh.svg" />
+        </button>
+      </div>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="table-responsive">
+        <table
+          mat-table
+          [dataSource]="custExpiredPlanList"
+          matSort
+          class="no-wrap m-t-0 v-middle w-100"
+        >
+          <!-- Service Name -->
+          <ng-container matColumnDef="service">
+            <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">Service Name</th>
+            <td mat-cell *matCellDef="let plan" class="f-s-14">
+              {{ plan.service }}
+            </td>
+          </ng-container>
+
+          <!-- Plan Name -->
+          <ng-container matColumnDef="planName">
+            <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">Plan Name</th>
+            <td mat-cell *matCellDef="let plan" class="f-s-14 curson_pointer text-primary"
+                (click)="getCustQuotaList(customerLedgerDetailData.id, plan)">
+              {{ plan.planName }}
+            </td>
+          </ng-container>
+
+          <!-- Validity -->
+          <ng-container matColumnDef="validity">
+            <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">Validity</th>
+            <td mat-cell *matCellDef="let plan" class="f-s-14">
+              @if (custType === 'Prepaid') {
+                {{ plan.validity }}
+              } @else {
+                N/A
+              }
+            </td>
+          </ng-container>
+
+          <!-- Plan Status -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">Plan Status</th>
+            <td mat-cell *matCellDef="let plan" class="f-s-14">
+              @if (checkStatus(plan.custPlanStatus, plan.custServMappingStatus)) {
+                <span
+                  [ngClass]="
+                    badgeTypeForStatus == 'green'
+                      ? 'badge badge-success'
+                      : badgeTypeForStatus == 'grey'
+                        ? 'badge badge-primary'
+                        : 'badge badge-danger'
+                  "
+                >
+                  {{ displayStatus }}
+                </span>
+              }
+            </td>
+          </ng-container>
+
+          <!-- Start Date -->
+          <ng-container matColumnDef="startDate">
+            <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">Start Date</th>
+            <td mat-cell *matCellDef="let plan" class="f-s-14">
+              {{ plan.dbStartDate | date: "dd-MM-yyyy hh:mm a" }}
+            </td>
+          </ng-container>
+
+          <!-- Service Expiry Date -->
+          <ng-container matColumnDef="endDate">
+            <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">Service Expiry Date</th>
+            <td mat-cell *matCellDef="let plan" class="f-s-14">
+              @if (custType === 'Prepaid') {
+                {{ plan.dbEndDate | date: "dd-MM-yyyy hh:mm a" }}
+              } @else {
+                N/A
+              }
+            </td>
+          </ng-container>
+
+          <!-- Billing End Date -->
+          <ng-container matColumnDef="billingEnd">
+            <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">Billing End Date</th>
+            <td mat-cell *matCellDef="let plan" class="f-s-14">
+              @if (custType === 'Prepaid') {
+                {{ plan.dbExpiryDate | date: "dd-MM-yyyy hh:mm a" }}
+              } @else {
+                N/A
+              }
+            </td>
+          </ng-container>
+
+          <!-- Table Rows -->
+          <tr mat-header-row *matHeaderRowDef="expiredPlanDisplayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: expiredPlanDisplayedColumns"></tr>
+        </table>
+
+        <!-- No Record -->
+        @if (!custExpiredPlanList || custExpiredPlanList.length === 0) {
+          <div class="m-t-10 text-center f-w-600">No Records Found</div>
+        }
+
+        <!-- Paginator -->
+        @if (custExpiredPlanList && custExpiredPlanList.length !== 0) {
+          <mat-paginator
+            [length]="customerExpiryPlanListdatatotalRecords"
+            [pageSize]="customerExpiryPlanListdataitemsPerPage"
+            [pageSizeOptions]="pageSizeOptions"
+            showFirstLastButtons
+            (page)="pageChangedcustomerExpiryPlanListData($event)"
+          >
+          </mat-paginator>
+        }
+      </div>
+    </mat-card-content>
+  </mat-card>
+<!-- </div> -->
+
+
+
+                        <!-- expired plan end -->
+
+
+
+
+                        
+<!-- ------------------------------------------------------ -->
+<!-- <div class="row">
+  <div class="col-md-12">
+    <div class="panel mb-15">
+      <div class="panel-heading">
+        <div class="displayflex">
+          <button
+            type="button"
+            class="btn btn-secondary backbtn"
+            data-toggle="tooltip"
+            data-placement="bottom"
+            title="Go to Customer List"
+            (click)="listCustomer()"
+            >
+            <i
+              class="fa fa-arrow-circle-left"
+              style="color: #f7941e !important; font-size: 28px"
+            ></i>
+          </button>
+          <h3 class="panel-title">
+            {{ customerLedgerDetailData?.title }}
+            {{ customerLedgerDetailData?.custname }} Plan Details
+          </h3>
+        </div>
+      </div>
+    </div> -->
+
+  <!-- <div class="panel">
+    <div class="panel-heading">
+      <div class="displayflex">
+        <h3 class="panel-title">
+          {{ customerLedgerDetailData?.title }}
+          {{ customerLedgerDetailData?.firstname }}
+          {{ customerLedgerDetailData?.lastname }} Current Plan
+        </h3>
+      </div>
+      <div class="right">
+        <button class="btn refreshbtn" type="reset" (click)="getcustCurrentPlan(customerId, '')">
+           <img src="assets/img/DashboardIcons/Refresh.svg" />
+        </button>
+        <button
+          aria-controls="currenPresCustPlan"
+          aria-expanded="false"
+          class="btn-toggle-collapse"
+          data-target="#currenPresCustPlan"
+          data-toggle="collapse"
+          type="button"
+          >
+          <i class="fa fa-minus-circle"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="panel-collapse collapse in" id="currenPresCustPlan">
+      <div class="panel-body table-responsive">
+        <div class="row">
+          <div class="col-lg-12 col-md-12">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th width="10%">Service Name</th>
+                  <th width="10%">Plan Name</th>
+                  <th width="6%">Validity</th>
+                  <th width="10%">Plan Status</th>
+                  <th width="10%">Start Date</th>
+                  <th width="10%">Service Expiry Date</th>
+                  <th width="10%">Remaining Days</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (
+                  plan of custCurrentPlanList
+                  | paginate
+                  : {
+                  id: 'custCurrentPlanListData',
+                  itemsPerPage: customerCurrentPlanListdataitemsPerPage,
+                  currentPage: currentPagecustomerCurrentPlanListdata,
+                  totalItems: customerCurrentPlanListdatatotalRecords
+                  }; track
+                  plan; let i = $index) {
+                  <tr
+                    >
+                    <td>{{ plan.service }}</td>
+                    
+                  <td
+                    class="curson_pointer"
+                    style="color: #f7941e"
+                    (click)="getCustQuotaList(this.customerLedgerDetailData.id, plan)"
+                    >
+                    {{ plan.planName }}
+                  </td>
+                  <td>
+                    @if (custType === 'Prepaid') {
+                      <div>
+                        <span> {{ plan.validity }} </span>
+                      </div>
+                    }
+                    @if (custType !== 'Prepaid') {
+                      <div>
+                        <span> N/A </span>
+                      </div>
+                    }
+                  </td>
+                  <td>
+                    @if (checkStatus(plan.custPlanStatus, plan.custServMappingStatus)) {
+                      <span>
+                        <span
+                          [ngClass]="
+                            badgeTypeForStatus == 'green'
+                              ? 'badge badge-success'
+                              : badgeTypeForStatus == 'grey'
+                                ? 'badge badge-primary'
+                                : 'badge badge-danger'
+                          "
+                          >{{ displayStatus }}</span
+                          >
+                        </span>
+                      }
+                    </td>
+                    <td>
+                      {{ plan.startDate | date: "yyyy-MM-dd hh:mm a" }}
+                    </td>
+                    <td>
+                      @if (custType === 'Prepaid') {
+                        <div>
+                          <span>
+                            {{ plan.endDate | date: "yyyy-MM-dd hh:mm a" }}
+                          </span>
+                        </div>
+                      }
+                      @if (custType !== 'Prepaid') {
+                        <div>
+                          <span> N/A </span>
+                        </div>
+                      }
+                    </td>
+                    <td>
+                      @if (custType === 'Prepaid') {
+                        <div>
+                          <span> {{ this.findDuration(plan.endDate) }}</span>
+                        </div>
+                      }
+                      @if (custType !== 'Prepaid') {
+                        <div>
+                          <span> N/A </span>
+                        </div>
+                      }
+                    </td>
+                   
+                </tr>
+              }
+            </tbody>
+          </table>
+          <div class="pagination_Dropdown">
+            <pagination-controls
+              (pageChange)="pageChangedcustomerCurrentPlanListData($event)"
+              directionLinks="true"
+              id="custCurrentPlanListData"
+              maxSize="10"
+              nextLabel=""
+              previousLabel=""
+            ></pagination-controls>
+            <div id="itemPerPageDropdown">
+              <p-dropdown
+                (onChange)="TotalCurrentPlanItemPerPage($event)"
+                [options]="pageLimitOptions"
+                optionLabel="value"
+                optionValue="value"
+              ></p-dropdown>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> -->
+
+<!-- <div class="panel">
+  <div class="panel-heading">
+    <div class="displayflex">
+      <h3 class="panel-title">
+        {{ customerLedgerDetailData?.title }}
+        {{ customerLedgerDetailData?.firstname }}
+        {{ customerLedgerDetailData?.lastname }} Future Plan
+      </h3>
+    </div>
+    <div class="right">
+      <button
+        class="btn refreshbtn"
+        type="reset"
+        (click)="getcustFuturePlan(customerLedgerDetailData.id, '')"
+        >
+         <img src="assets/img/DashboardIcons/Refresh.svg" />
+      </button>
+      <button
+        aria-controls="futurePlanCust"
+        aria-expanded="false"
+        class="btn-toggle-collapse"
+        data-target="#futurePlanCust"
+        data-toggle="collapse"
+        type="button"
+        >
+        <i class="fa fa-minus-circle"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="panel-collapse collapse in" id="futurePlanCust">
+    <div class="panel-body table-responsive">
+      <div class="row">
+        <div class="col-lg-12 col-md-12">
+          <table class="table">
+            <thead>
+              <tr>
+                <th width="12%">Service Name</th>
+                <th width="15%">Plan Name</th>
+                <th width="10%">Validity</th>
+                <th width="15%">Plan Status</th>
+                <th width="15%">Start Date</th>
+                <th width="15%">Service Expiry Date</th>
+                <th width="15%">Billing End Date</th>
+           
+              </tr>
+            </thead>
+            <tbody>
+              @for (
+                plan of custFuturePlanList
+                | paginate
+                : {
+                id: 'custFuturePlanListData',
+                itemsPerPage: customerFuturePlanListdataitemsPerPage,
+                currentPage: currentPagecustomerFuturePlanListdata,
+                totalItems: customerFuturePlanListdatatotalRecords
+                }; track
+                plan; let i = $index) {
+                <tr
+                  >
+                  <td>{{ plan.service }}</td>
+                
+                <td
+                  class="curson_pointer"
+                  style="color: #f7941e"
+                  (click)="getCustQuotaList(this.customerLedgerDetailData.id, plan)"
+                  >
+                  {{ plan.planName }}
+                </td>
+                <td>
+                  @if (custType === 'Prepaid') {
+                    <div>
+                      <span> {{ plan.validity }} </span>
+                    </div>
+                  }
+                  @if (custType !== 'Prepaid') {
+                    <div>
+                      <span> N/A </span>
+                    </div>
+                  }
+                </td>
+                <td>
+                  @if (checkStatus(plan.custPlanStatus, plan.custServMappingStatus)) {
+                    <span>
+                      <span
+                          [ngClass]="
+                            badgeTypeForStatus == 'green'
+                              ? 'badge badge-success'
+                              : badgeTypeForStatus == 'grey'
+                                ? 'badge badge-primary'
+                                : 'badge badge-danger'
+                          "
+                        >{{ displayStatus }}</span
+                        >
+                      </span>
+                    }
+                  </td>
+                  <td>
+                    {{ plan.dbStartDate | date: "yyyy-MM-dd hh:mm a" }}
+                  </td>
+                  <td>
+                    @if (custType === 'Prepaid') {
+                      <div>
+                        <span>
+                          {{ plan.dbEndDate | date: "yyyy-MM-dd hh:mm a" }}
+                        </span>
+                      </div>
+                    }
+                    @if (custType !== 'Prepaid') {
+                      <div>
+                        <span> N/A </span>
+                      </div>
+                    }
+                  </td>
+                  <td>
+                    @if (custType === 'Prepaid') {
+                      <div>
+                        <span>
+                          {{ plan.dbExpiryDate | date: "yyyy-MM-dd hh:mm a" }}
+                        </span>
+                      </div>
+                    }
+                    @if (custType !== 'Prepaid') {
+                      <div>
+                        <span> N/A </span>
+                      </div>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          <div class="pagination_Dropdown">
+            <pagination-controls
+              (pageChange)="pageChangedcustFuturePlanListData($event)"
+              [directionLinks]="true"
+              [maxSize]="10"
+              id="custFuturePlanListData"
+              nextLabel=""
+              previousLabel=""
+            ></pagination-controls>
+            <div id="itemPerPageDropdown">
+              <p-dropdown
+                (onChange)="TotalFuturePlanItemPerPage($event)"
+                [options]="pageLimitOptions"
+                optionLabel="value"
+                optionValue="value"
+              ></p-dropdown>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> -->
+
+
+<!-- <div class="panel">
+  <div class="panel-heading">
+    <div class="displayflex">
+      <h3 class="panel-title">
+        {{ customerLedgerDetailData?.title }}
+        {{ customerLedgerDetailData?.firstname }}
+        {{ customerLedgerDetailData?.lastname }} Expired Plan
+      </h3>
+    </div>
+    <div class="right">
+      <button class="btn refreshbtn" type="reset" (click)="getcustExpiredPlan(customerId, '')">
+         <img src="assets/img/DashboardIcons/Refresh.svg" />
+      </button>
+      <button
+        aria-controls="ExpirePlanCust"
+        aria-expanded="false"
+        class="btn-toggle-collapse"
+        data-target="#ExpirePlanCust"
+        data-toggle="collapse"
+        type="button"
+        >
+        <i class="fa fa-minus-circle"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="panel-collapse collapse in" id="ExpirePlanCust">
+    <div class="panel-body table-responsive">
+      <div class="row">
+        <div class="col-lg-12 col-md-12">
+          <table class="table">
+            <thead>
+              <tr>
+                <th width="12%">Service Name</th>
+                <th width="15%">Plan Name</th>
+                <th width="10%">Validity</th>
+                <th width="15%">Plan Status</th>
+                <th width="15%">Start Date</th>
+                <th width="15%">Service Expiry Date</th>
+                <th width="15%">Billing End Date</th>
+               
+              </tr>
+            </thead>
+            <tbody>
+              @for (
+                plan of custExpiredPlanList
+                | paginate
+                : {
+                id: 'custExpiryPlanListData',
+                itemsPerPage: customerExpiryPlanListdataitemsPerPage,
+                currentPage: currentPagecustomerExpiryPlanListdata,
+                totalItems: customerExpiryPlanListdatatotalRecords
+                }; track
+                plan; let i = $index) {
+                <tr
+                  >
+                  <td>{{ plan.service }}</td>
+                
+                <td
+                  class="curson_pointer"
+                  style="color: #f7941e"
+                  (click)="getCustQuotaList(this.customerLedgerDetailData.id, plan)"
+                  >
+                  {{ plan.planName }}
+                </td>
+               
+                <td>
+                  @if (custType === 'Prepaid') {
+                    <div>
+                      <span> {{ plan.validity }} </span>
+                    </div>
+                  }
+                  @if (custType !== 'Prepaid') {
+                    <div>
+                      <span> N/A </span>
+                    </div>
+                  }
+                </td>
+                <td>
+                  @if (checkStatus(plan.custPlanStatus, plan.custServMappingStatus)) {
+                    <span>
+                      <span
+                          [ngClass]="
+                            badgeTypeForStatus == 'green'
+                              ? 'badge badge-success'
+                              : badgeTypeForStatus == 'grey'
+                                ? 'badge badge-primary'
+                                : 'badge badge-danger'
+                          "
+                        >{{ displayStatus }}</span
+                        >
+                      </span>
+                    }
+                  </td>
+                  <td>
+                    {{ plan.dbStartDate | date: "yyyy-MM-dd hh:mm a" }}
+                  </td>
+                  <td>
+                    @if (custType === 'Prepaid') {
+                      <div>
+                        <span>
+                          {{ plan.dbEndDate | date: "yyyy-MM-dd hh:mm a" }}
+                        </span>
+                      </div>
+                    }
+                    @if (custType !== 'Prepaid') {
+                      <div>
+                        <span> N/A </span>
+                      </div>
+                    }
+                  </td>
+                  <td>
+                    @if (custType === 'Prepaid') {
+                      <div>
+                        <span>
+                          {{ plan.dbExpiryDate | date: "yyyy-MM-dd hh:mm a" }}
+                        </span>
+                      </div>
+                    }
+                    @if (custType !== 'Prepaid') {
+                      <div>
+                        <span> N/A </span>
+                      </div>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          <div class="pagination_Dropdown">
+            <pagination-controls
+              (pageChange)="pageChangedcustomerExpiryPlanListData($event)"
+              directionLinks="true"
+              id="custExpiryPlanListData"
+              maxSize="10"
+              nextLabel=""
+              previousLabel=""
+            ></pagination-controls>
+            <div id="itemPerPageDropdown">
+              <p-dropdown
+                (onChange)="TotalExpiredPlanItemPerPage($event)"
+                [options]="pageLimitOptions"
+                optionLabel="value"
+                optionValue="value"
+              ></p-dropdown>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> -->
+<!-- </div>
+</div> -->
+
+<!-- <p-dialog
+  header="Quota Details"
+  [(visible)]="visibleQuotaDetails"
+  [modal]="true"
+  [style]="{ width: '65%' }"
+  [responsive]="true"
+  [draggable]="false"
+  [closable]="true"
+  (onHide)="closeModel()"
+  >
+  <div class="modal-body" id="visibleQuotaDetails">
+    <fieldset style="margin-top: 0rem; margin-bottom: 2rem">
+      <legend>Customer Quota Details</legend>
+      <div class="boxWhite">
+        <div class="row">
+          <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+            <label class="datalbl">Fup Appplied :</label>
+            <span>-</span>
+          </div>
+          <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+            <label class="datalbl">Fup Applied Date :</label>
+            <span>-</span>
+          </div>
+        </div>
+        <div class="row table-responsive">
+          <div class="col-lg-12 col-md-12">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Plan Name</th>
+                  <th>Quota Type</th>
+                  <th>Total Quota</th>
+                  <th>Used Quota</th>
+                  <th>Current Session Volume Quota</th>
+                  <th>Quota Unit</th>
+                  <th>Time Total Quota</th>
+                  <th>Time Quota Used</th>
+                  <th>Time Quota Unit</th>
+                  <th>Current Session Time Quota</th>
+                  <th>Parent Quota Type</th>
+                  <th>Quota Usage Type</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (
+                  quota of custQuotaList
+                  | paginate
+                  : {
+                  id: 'custQuotapageData',
+                  itemsPerPage: custQuotaListItemPerPage,
+                  currentPage: currentPagecustQuotaList,
+                  totalItems: custQuotaListtotalRecords
+                  }; track
+                  quota; let i = $index) {
+                  <tr
+                    >
+                    <td>{{ quota.planName }}</td>
+                    <td>{{ quota.quotaType }}</td>
+                    <td>{{ quota.totalQuota }}</td>
+                    <td>{{ quota.usedQuota }}</td>
+                    <td>{{ quota.currentSessionUsageVolume | number:'1.10-10'}}</td>
+                    <td>{{ quota.quotaUnit }}</td>
+                    <td>{{ quota.timeTotalQuota }}</td>
+                    <td>{{ quota.timeQuotaUsed }}</td>
+                    <td>{{ quota.timeQuotaUnit }}</td>
+                    <td>{{ quota.currentSessionUsageTime }}</td>
+                    <td>{{ quota.parentQuotaType }}</td>
+                    <td>{{ quota.usageQuotaType }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+            <pagination-controls
+              (pageChange)="pageChangedCustQuotaList($event)"
+              directionLinks="true"
+              id="custQuotapageData"
+              maxSize="10"
+              nextLabel=""
+              previousLabel=""
+            ></pagination-controls>
+          </div>
+        </div>
+      </div>
+    </fieldset>
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-default" data-dismiss="modal" (click)="closeModel()">
+      Close
+    </button>
+  </div>
+</p-dialog> -->
+<!-- <ng-template #quotaDetailsDialog1>
+  <div class="dialog-container">
+    <div class="dialog-header">
+      Customer Quota Details
+      <span>
+        <a mat-icon-button (click)="closeModel()">
+          <mat-icon>close</mat-icon>
+        </a>
+      </span>
+    </div>
+
+    <div mat-dialog-content>
+      <mat-card-content class="matcardContent">
+        <div class="table-responsive">
+          <table mat-table [dataSource]="custQuotaList" matSort class="w-100">
+
+              <ng-container matColumnDef="planName">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">Plan Name</th>
+                <td mat-cell *matCellDef="let quota" class="f-s-14">{{ quota.planName }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="quotaType">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">Quota Type</th>
+                <td mat-cell *matCellDef="let quota" class="f-s-14">{{ quota.quotaType }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="totalQuota">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">Total Quota</th>
+                <td mat-cell *matCellDef="let quota" class="f-s-14">{{ quota.totalQuota }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="usedQuota">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">Used Quota</th>
+                <td mat-cell *matCellDef="let quota" class="f-s-14">{{ quota.usedQuota }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="currentSessionUsageVolume">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">Current Session Volume Quota</th>
+                <td mat-cell *matCellDef="let quota" class="f-s-14">
+                  {{ quota.currentSessionUsageVolume | number : "1.2-2" }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="quotaUnit">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">Quota Unit</th>
+                <td mat-cell *matCellDef="let quota" class="f-s-14">{{ quota.quotaUnit }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="timeTotalQuota">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">Time Total Quota</th>
+                <td mat-cell *matCellDef="let quota" class="f-s-14">{{ quota.timeTotalQuota }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="timeQuotaUsed">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">Time Quota Used</th>
+                <td mat-cell *matCellDef="let quota" class="f-s-14">{{ quota.timeQuotaUsed }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="timeQuotaUnit">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">Time Quota Unit</th>
+                <td mat-cell *matCellDef="let quota" class="f-s-14">{{ quota.timeQuotaUnit }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="currentSessionUsageTime">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">Current Session Time Quota</th>
+                <td mat-cell *matCellDef="let quota" class="f-s-14">{{ quota.currentSessionUsageTime }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="parentQuotaType">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">Parent Quota Type</th>
+                <td mat-cell *matCellDef="let quota" class="f-s-14">{{ quota.parentQuotaType }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="usageQuotaType">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">Quota Usage Type</th>
+                <td mat-cell *matCellDef="let quota" class="f-s-14">{{ quota.usageQuotaType }}</td>
+              </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="quotaDisplayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: quotaDisplayedColumns;"></tr>
+          </table>
+        </div>
+      </mat-card-content>
+    </div>
+
+    <mat-dialog-actions align="end">
+      <button mat-stroked-button color="primary" (click)="closeModel()">Close</button>
+    </mat-dialog-actions>
+  </div>
+</ng-template> -->
+
+
+<ng-template #quotaDetailsDialog>
+  <div class="dialog-container">
+    <!-- Header -->
+    <div class="dialog-header">
+      Quota Details
+      <span>
+        <a mat-icon-button href="javascript:void(0)" (click)="closeModel()">
+           <img src="assets/img/DashboardIcons/Reject.svg">
+        </a>
+      </span>
+    </div>
+
+    <!-- Body -->
+    <div mat-dialog-content>
+      <!-- <mat-card > -->
+        <!-- <mat-card-header style="padding: 20px 22px;"> -->
+          <mat-card-title class="font-900" style="padding: 20px 14px;font-size: 21px;margin-bottom: 18px;">Customer Quota Details</mat-card-title>
+        <!-- </mat-card-header> -->
+
+        <mat-card-content class="matcardContent">
+          <!-- Basic Info -->
+          <div class="row">
+            <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+              <label class="datalbl">Fup Applied :</label>
+              <span>-</span>
+            </div>
+            <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12 dataGroup">
+              <label class="datalbl">Fup Applied Date :</label>
+              <span>-</span>
+            </div>
+          </div>
+
+          <!-- Table -->
+          <div class="table-responsive m-t-16">
+            <table
+              mat-table
+              [dataSource]="custQuotaList"
+              class="no-wrap m-t-0 v-middle w-100"
+              matSort
+            >
+              <!-- Plan Name -->
+              <ng-container matColumnDef="planName">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">Plan Name</th>
+                <td mat-cell *matCellDef="let quota" class="f-s-14">{{ quota.planName }}</td>
+              </ng-container>
+
+              <!-- Quota Type -->
+              <ng-container matColumnDef="quotaType">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">Quota Type</th>
+                <td mat-cell *matCellDef="let quota" class="f-s-14">{{ quota.quotaType }}</td>
+              </ng-container>
+
+              <!-- Total Quota -->
+              <ng-container matColumnDef="totalQuota">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">Total Quota</th>
+                <td mat-cell *matCellDef="let quota" class="f-s-14">{{ quota.totalQuota }}</td>
+              </ng-container>
+
+              <!-- Used Quota -->
+              <ng-container matColumnDef="usedQuota">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">Used Quota</th>
+                <td mat-cell *matCellDef="let quota" class="f-s-14">{{ quota.usedQuota }}</td>
+              </ng-container>
+
+              <!-- Current Session Volume Quota -->
+              <ng-container matColumnDef="currentSessionUsageVolume">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">Current Session Volume Quota</th>
+                <td mat-cell *matCellDef="let quota" class="f-s-14">
+                  {{ quota.currentSessionUsageVolume | number : "1.2-2" }}
+                </td>
+              </ng-container>
+
+              <!-- Quota Unit -->
+              <ng-container matColumnDef="quotaUnit">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">Quota Unit</th>
+                <td mat-cell *matCellDef="let quota" class="f-s-14">{{ quota.quotaUnit }}</td>
+              </ng-container>
+
+              <!-- Time Total Quota -->
+              <ng-container matColumnDef="timeTotalQuota">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">Time Total Quota</th>
+                <td mat-cell *matCellDef="let quota" class="f-s-14">{{ quota.timeTotalQuota }}</td>
+              </ng-container>
+
+              <!-- Time Quota Used -->
+              <ng-container matColumnDef="timeQuotaUsed">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">Time Quota Used</th>
+                <td mat-cell *matCellDef="let quota" class="f-s-14">{{ quota.timeQuotaUsed }}</td>
+              </ng-container>
+
+              <!-- Time Quota Unit -->
+              <ng-container matColumnDef="timeQuotaUnit">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">Time Quota Unit</th>
+                <td mat-cell *matCellDef="let quota" class="f-s-14">{{ quota.timeQuotaUnit }}</td>
+              </ng-container>
+
+              <!-- Current Session Time Quota -->
+              <ng-container matColumnDef="currentSessionUsageTime">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">Current Session Time Quota</th>
+                <td mat-cell *matCellDef="let quota" class="f-s-14">{{ quota.currentSessionUsageTime }}</td>
+              </ng-container>
+
+              <!-- Parent Quota Type -->
+              <ng-container matColumnDef="parentQuotaType">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">Parent Quota Type</th>
+                <td mat-cell *matCellDef="let quota" class="f-s-14">{{ quota.parentQuotaType }}</td>
+              </ng-container>
+
+              <!-- Quota Usage Type -->
+              <ng-container matColumnDef="usageQuotaType">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">Quota Usage Type</th>
+                <td mat-cell *matCellDef="let quota" class="f-s-14">{{ quota.usageQuotaType }}</td>
+              </ng-container>
+
+              <!-- Header & Row -->
+              <tr
+                mat-header-row
+                *matHeaderRowDef="[
+                  'planName',
+                  'quotaType',
+                  'totalQuota',
+                  'usedQuota',
+                  'currentSessionUsageVolume',
+                  'quotaUnit',
+                  'timeTotalQuota',
+                  'timeQuotaUsed',
+                  'timeQuotaUnit',
+                  'currentSessionUsageTime',
+                  'parentQuotaType',
+                  'usageQuotaType'
+                ]"
+              ></tr>
+              <tr
+                mat-row
+                *matRowDef="let row; columns: [
+                  'planName',
+                  'quotaType',
+                  'totalQuota',
+                  'usedQuota',
+                  'currentSessionUsageVolume',
+                  'quotaUnit',
+                  'timeTotalQuota',
+                  'timeQuotaUsed',
+                  'timeQuotaUnit',
+                  'currentSessionUsageTime',
+                  'parentQuotaType',
+                  'usageQuotaType'
+                ]"
+              ></tr>
+            </table>
+
+            <!-- No Records -->
+            @if (!custQuotaList || custQuotaList.length === 0) {
+              <div class="m-t-10 text-center f-w-600">No Quota Records Found</div>
+            }
+
+            <!-- Paginator -->
+            @if (custQuotaList && custQuotaList.length > 0) {
+              <mat-paginator
+                [length]="custQuotaListtotalRecords"
+                [pageSize]="custQuotaListItemPerPage"
+                [pageSizeOptions]="pageLimitOptions"
+                showFirstLastButtons
+                (page)="pageChangedCustQuotaList($event)"
+              ></mat-paginator>
+            }
+          </div>
+        </mat-card-content>
+      <!-- </mat-card> -->
+    </div>
+
+    <!-- Footer -->
+    <mat-dialog-actions align="end">
+      <button mat-stroked-button (click)="closeModel()">Close</button>
+    </mat-dialog-actions>
+  </div>
+</ng-template>
+
+<!-- @if (planNameOpen) {
+  <app-plan-connection-no
+    [planForConnection]="planForConnection"
+    (closeDialog)="closeDialog()"
+  ></app-plan-connection-no>
+}
+<app-promisetopay-details-modal
+  [promiseToPayData]="promiseToPayData"
+  dialogId="promiseToPayDataModal"
+></app-promisetopay-details-modal> -->

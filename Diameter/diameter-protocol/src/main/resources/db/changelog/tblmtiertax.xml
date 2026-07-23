@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="create-tblmtiertax-001" author="initial-change">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="tblmtiertax"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="tblmtiertax">
+            <column name="TIERTAXID" type="BIGINT" >
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="NAME" type="VARCHAR(64)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="TAXGROUP" type="VARCHAR(10)"/>
+            <column name="RATE" type="DECIMAL(10,2)"/>
+            <column name="TAXID" type="BIGINT"/>
+            <column name="is_delete" type="TINYINT(1)" defaultValueNumeric="0">
+                <constraints nullable="false"/>
+            </column>
+            <column name="before_discount" type="BIT(1)" defaultValueBoolean="false"/>
+            <column name="ledger_id" type="VARCHAR(100)"/>
+        </createTable>
+
+        <!-- Unique constraint -->
+        <addUniqueConstraint columnNames="TIERTAXID" tableName="tblmtiertax" constraintName="mtiertax_tiertaxId_unq"/>
+
+        <!-- Foreign key -->
+        <addForeignKeyConstraint baseTableName="tblmtiertax"
+                                 baseColumnNames="TAXID"
+                                 constraintName="tblmtiertax_ibfk_1"
+                                 referencedTableName="tblmtax"
+                                 referencedColumnNames="TAXID"
+                                 onDelete="SET NULL"/>
+    </changeSet>
+
+</databaseChangeLog>

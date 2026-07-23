@@ -1,0 +1,478 @@
+<p-dialog header="Wallet Amount" [(visible)]="displayDialogTransfer" [style]="{ width: '65%' }" [modal]="true"
+    [responsive]="true" [draggable]="false" [closable]="false">
+    <div class="modal-body table-responsive">
+        <!-- <div class="panel-body table-responsive"> -->
+        <div class="row">
+            <form class="form-auth-small" [formGroup]="manageBalanceGroupForm">
+                <!-- <fieldset style="margin-top: 0px">
+            <legend>Basic Information</legend>
+            <div class="boxWhite">
+              <div class="row">
+                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                  <label>Operation Mode *</label>
+                  <p-dropdown
+                    [options]="BalanceOpertation"
+                    optionValue="value"
+                    optionLabel="label"
+                    [filter]="true"
+                    filterBy="label"
+                    placeholder="Select a Balance Opertation"
+                    formControlName="operation"
+                    [disabled]="true"
+                    [ngClass]="{
+                      'is-invalid': submitted && manageBalanceGroupForm.controls.operation.errors
+                    }"
+                  ></p-dropdown>
+                  <div
+                    class="errorWrap text-danger"
+                    *ngIf="submitted && manageBalanceGroupForm.controls.operation.errors"
+                  >
+                    <div
+                      class="error text-danger"
+                      *ngIf="submitted && manageBalanceGroupForm.controls.operation.errors.required"
+                    >
+                      Please select Balance Opertation.
+                    </div>
+                  </div>
+                  <br />
+                </div>
+                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                  <div *ngIf="this.ifwithdrawalCommision">
+                    <label>Payment Mode *</label>
+                    <div>
+                      <p-dropdown
+                        [options]="paymentmode"
+                        optionValue="label"
+                        optionLabel="label"
+                        [filter]="true"
+                        filterBy="label"
+                        placeholder="Select a Mode"
+                        formControlName="mode"
+                        (onChange)="getOpetationMode($event)"
+                        [ngClass]="{
+                          'is-invalid': submitted && manageBalanceGroupForm.controls.mode.errors
+                        }"
+                      ></p-dropdown>
+                    </div>
+                    <div
+                      class="errorWrap text-danger"
+                      *ngIf="submitted && manageBalanceGroupForm.controls.mode.errors"
+                    >
+                      <div
+                        class="error text-danger"
+                        *ngIf="submitted && manageBalanceGroupForm.controls.mode.errors.required"
+                      >
+                        Please select Balance Mode.
+                      </div>
+                    </div>
+                    <br />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </fieldset> -->
+
+                <div *ngIf="this.ifwithdrawalCommision">
+                    <fieldset>
+                        <legend>Wallet Amount</legend>
+                        <div class="boxWhite">
+                            <div class="row">
+                                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                    <label>Total Amount*</label>
+                                    <input id="commission" type="text" class="form-control"
+                                        placeholder="Enter Commission" formControlName="commission" readonly />
+                                    <br />
+                                </div>
+                                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                    <label>Transfer Amount *</label>
+                                    <input (keyup)="onKeyWithdrawalAmount()" id="withdrawalAmount" type="text"
+                                        class="form-control" placeholder="Enter Withdrawal Amount "
+                                        formControlName="withdrawalAmount" [ngClass]="{
+                        'is-invalid':
+                          submitted && manageBalanceGroupForm.controls.withdrawalAmount.errors
+                      }" />
+                                    <div class="errorWrap text-danger"
+                                        *ngIf="submitted && manageBalanceGroupForm.controls.withdrawalAmount.errors">
+                                        <div class="error text-danger" *ngIf="
+                          submitted &&
+                          manageBalanceGroupForm.controls.withdrawalAmount.errors.required
+                        ">
+                                            Withdrawal Amount is required.
+                                        </div>
+                                    </div>
+                                    <br />
+                                </div>
+                                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                    <label>Remaining Amount *</label>
+                                    <input id="ReamainingCommision" type="text" class="form-control"
+                                        placeholder="Enter Reamaining Commision " formControlName="ReamainingCommision"
+                                        [ngClass]="{
+                        'is-invalid':
+                          submitted && manageBalanceGroupForm.controls.ReamainingCommision.errors
+                      }" readonly />
+                                    <div class="errorWrap text-danger" *ngIf="
+                        submitted && manageBalanceGroupForm.controls.ReamainingCommision.errors
+                      ">
+                                        <div class="error text-danger" *ngIf="
+                          submitted &&
+                          manageBalanceGroupForm.controls.ReamainingCommision.errors.required
+                        ">
+                                            Reamaining Commision Amount is required.
+                                        </div>
+                                    </div>
+                                    <br />
+                                </div>
+                            </div>
+
+
+                            <div class="row" *ngIf="!ifWithdrawalOnlineMode">
+
+                                <!-- <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12" *ngIf="ifWithdrawalOnlineMode">
+                    <div>
+                      <label>Bank *</label>
+                      <p-dropdown
+                        [options]="bankDataList"
+                        optionValue="bankname"
+                        optionLabel="bankname"
+                        [filter]="true"
+                        filterBy="bankname"
+                        placeholder="Select a Bank"
+                        formControlName="bank"
+                        [ngClass]="{
+                          'is-invalid': submitted && manageBalanceGroupForm.controls.bank.errors
+                        }"
+                      >
+                        <ng-template let-data pTemplate="item">
+                          <div class="item-drop1">
+                            <span class="item-value1">
+                              {{ data.bankname }} ( {{ data.accountnum }} )
+                            </span>
+                          </div>
+                        </ng-template>
+                      </p-dropdown>
+
+                      <div
+                        class="errorWrap text-danger"
+                        *ngIf="submitted && manageBalanceGroupForm.controls.bank.errors"
+                      >
+                        <div
+                          class="error text-danger"
+                          *ngIf="submitted && manageBalanceGroupForm.controls.bank.errors.required"
+                        >
+                          Bank No is required.
+                        </div>
+                      </div>
+                    </div>
+                  </div> -->
+                                <!-- <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12" *ngIf="ifWithdrawalOnlineMode">
+                    <label>Branch *</label>
+                    <input
+                      id="branch"
+                      type="text"
+                      class="form-control"
+                      placeholder="Enter Branch Name"
+                      formControlName="branch"
+                      [ngClass]="{
+                        'is-invalid': submitted && manageBalanceGroupForm.controls.branch.errors
+                      }"
+                    />
+                    <div
+                      class="errorWrap text-danger"
+                      *ngIf="submitted && manageBalanceGroupForm.controls.branch.errors"
+                    >
+                      <div
+                        class="error text-danger"
+                        *ngIf="submitted && manageBalanceGroupForm.controls.branch.errors.required"
+                      >
+                        Branch Name is required.
+                      </div>
+                    </div>
+                    <br />
+                  </div> -->
+                            </div>
+                            <div class="row" *ngIf="ifWithdrawalOnlineMode">
+                                <!-- <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                    <div>
+                      <label>Payment Reference No *</label>
+                      <input
+                        id="referenceNo"
+                        type="text"
+                        class="form-control"
+                        placeholder="Enter Reference No"
+                        formControlName="referenceNo"
+                        [ngClass]="{
+                          'is-invalid':
+                            submitted && manageBalanceGroupForm.controls.referenceNo.errors
+                        }"
+                      />
+                      <div
+                        class="errorWrap text-danger"
+                        *ngIf="submitted && manageBalanceGroupForm.controls.referenceNo.errors"
+                      >
+                        <div
+                          class="error text-danger"
+                          *ngIf="
+                            submitted && manageBalanceGroupForm.controls.referenceNo.errors.required
+                          "
+                        >
+                          Reference No is required.
+                        </div>
+                      </div>
+                    </div>
+                  </div> -->
+                                <!-- <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                    <label>remark</label>
+                    <textarea
+                      id="remark"
+                      type="text"
+                      class="form-control"
+                      placeholder="Enter Remark"
+                      formControlName="remarks"
+                      [ngClass]="{
+                        'is-invalid': submitted && manageBalanceGroupForm.controls.remarks.errors
+                      }"
+                    ></textarea>
+                    <div
+                      class="errorWrap text-danger"
+                      *ngIf="submitted && manageBalanceGroupForm.controls.remarks.errors"
+                    >
+                      <div
+                        class="error text-danger"
+                        *ngIf="submitted && manageBalanceGroupForm.controls.remarks.errors.required"
+                      >
+                        remark is required.
+                      </div>
+                    </div>
+                    <br />
+                  </div> -->
+                            </div>
+                            <div class="row" *ngIf="!ifWithdrawalCash">
+                                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                    <label>Customer*</label>
+                                    <div>
+                                        <!-- [disabled]="true" -->
+                                        <p-dropdown [options]="customerData" [showClear]="true" [disabled]="true"
+                                            [filter]="true" filterBy="name" formControlName="customersId"
+                                            optionLabel="name" optionValue="id" placeholder="Select a Customer"
+                                            styleClass="disableDropdown">
+                                            <ng-template let-data pTemplate="item">
+                                                <div class="item-drop1">
+                                                    <span class="item-value1"> {{ data.title }} {{ data.name }} </span>
+                                                </div>
+                                            </ng-template>
+                                        </p-dropdown>
+                                        <button type="button" (click)="modalOpenParentCustomer()"
+                                            class="btn btn-primary" style="
+                      border-radius: 5px;
+                      padding: 5px 10px;
+                      line-height: 1.5;
+                      margin-left: 10px;
+                    ">
+                                            <i class="fa fa-plus-square"></i>
+                                        </button>
+                                    </div>
+                                    <div *ngIf="submitted && manageBalanceGroupForm.controls.customersId.errors"
+                                        class="errorWrap text-danger">
+                                        <div *ngIf="submitted && manageBalanceGroupForm.controls.customersId.errors.required"
+                                            class="error text-danger">
+                                            Customer is required.
+                                        </div>
+                                    </div>
+                                    <br />
+                                </div>
+                                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                    <div>
+                                        <label>Reference No *</label>
+                                        <input id="referenceNo" type="text" class="form-control"
+                                            placeholder="Enter Reference No" formControlName="referenceNo" [ngClass]="{
+                          'is-invalid':
+                            submitted && manageBalanceGroupForm.controls.referenceNo.errors
+                        }" />
+                                        <div class="errorWrap text-danger"
+                                            *ngIf="submitted && manageBalanceGroupForm.controls.referenceNo.errors">
+                                            <div class="error text-danger" *ngIf="
+                            submitted && manageBalanceGroupForm.controls.referenceNo.errors.required
+                          ">
+                                                Reference No is required.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                    <label>Remark *</label>
+                                    <textarea id="remarks" type="text" class="form-control" placeholder="Enter Remarks"
+                                        formControlName="remarks" [ngClass]="{
+                        'is-invalid': submitted && manageBalanceGroupForm.controls.remarks.errors
+                      }"></textarea>
+                                    <div class="errorWrap text-danger"
+                                        *ngIf="submitted && manageBalanceGroupForm.controls.remarks.errors">
+                                        <div class="error text-danger"
+                                            *ngIf="submitted && manageBalanceGroupForm.controls.remarks.errors.required">
+                                            remark is required.
+                                        </div>
+                                    </div>
+                                    <br />
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+            </form>
+            <fieldset>
+                <legend>Remaining Payment Details</legend>
+                <div class="boxWhite">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="row">
+                                <div class="col-lg-12 col-md-12">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>
+                                                    <input (change)="checkUncheckAll()"
+                                                        [(ngModel)]="this.masterSelected" name="master-checkbox"
+                                                        type="checkbox" />
+                                                </th>
+                                                <th>Reference No.</th>
+                                                <th>Payment Mode</th>
+                                                <th>Remaining Amount</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngFor="
+                            let data of paymentListData
+                              | paginate
+                                : {
+                                    id: 'partnerPaymentpageData',
+                                    itemsPerPage: paymentListdataitemsPerPage,
+                                    currentPage: currentPagePaymentListdata,
+                                    totalItems: paymentListdatatotalRecords
+                                  };
+                            index as i
+                          ">
+                                                <td>
+                                                    <input (change)="isAllSelected()" [(ngModel)]="data.isSelected"
+                                                        name="master-checkbox" type="checkbox" />
+                                                </td>
+                                                <td>{{ data.creditdocumentno }}</td>
+                                                <td>{{ data.paymode }}</td>
+                                                <td>{{ data.remainingAmount }}</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <div style="display: flex">
+                                        <pagination-controls (pageChange)="pageChangedForPayments($event)"
+                                            [directionLinks]="true" id="partnerPaymentpageData" [maxSize]="10"
+                                            nextLabel="" previousLabel=""></pagination-controls>
+                                        <div id="itemPerPageDropdown">
+                                            <p-dropdown (onChange)="totalItemPerPageForPayments($event)"
+                                                [options]="pageLimitOptions" optionLabel="value"
+                                                optionValue="value"></p-dropdown>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
+        <!-- </div> -->
+    </div>
+    <div class="modal-footer">
+        <!-- [disabled]="!manageBalanceGroupForm.valid" -->
+        <button type="submit" class="btn btn-primary" (click)="submitBalance()" id="submit">
+            <i class="fa fa-check-circle"></i>
+            Transfer Amount
+        </button>
+        <button type="button" class="btn btn-default" data-dismiss="modal" (click)="closeSelectStafff()">
+            Close
+        </button>
+    </div>
+</p-dialog>
+
+<p-dialog header="Select Customer" [(visible)]="displaySelectCustomer" [style]="{ width: '70%' }" [modal]="true"
+    [responsive]="true" [draggable]="false" [closable]="false">
+    <div class="modal-body">
+        <h5>Search Customer</h5>
+        <div class="row">
+            <div class="col-lg-3 col-md-3 m-b-10">
+                <p-dropdown (onChange)="selParentSearchOption($event)" [(ngModel)]="searchParentCustOption"
+                    [options]="searchOptionSelect1" [filter]="true" filterBy="label" optionLabel="label"
+                    optionValue="value" placeholder="Select a Search Option"></p-dropdown>
+            </div>
+            <div *ngIf="
+          parentFieldEnable &&
+          searchParentCustOption != 'status' &&
+          searchParentCustOption !== 'serviceareaName' &&
+          searchParentCustOption !== 'plan'
+        " class="col-lg-3 col-md-3 m-b-10">
+                <input [(ngModel)]="searchParentCustValue" class="form-control" id="username"
+                    placeholder="Enter Search Detail" type="text" (keydown.enter)="searchParentCustomer()" />
+            </div>
+            <div class="col-lg-3 col-md-3 m-b-10" *ngIf="searchParentCustOption === 'status'">
+                <p-dropdown [options]="commondropdownService.CustomerStatusValue" optionValue="value" optionLabel="text"
+                    filter="true" filterBy="text" placeholder="Select a Status"
+                    [(ngModel)]="searchParentCustValue"></p-dropdown>
+            </div>
+
+            <div class="col-lg-3 col-md-3 m-b-10" *ngIf="searchParentCustOption == 'serviceareaName'">
+                <p-dropdown [options]="commondropdownService.serviceAreaList" optionValue="id" optionLabel="name"
+                    filter="true" filterBy="name" placeholder="Select a Servicearea"
+                    [(ngModel)]="searchParentCustValue"></p-dropdown>
+            </div>
+            <div class="col-lg-3 col-md-3 m-b-10" *ngIf="searchParentCustOption == 'plan'">
+                <p-dropdown [options]="commondropdownService.postpaidplanData" optionValue="id" optionLabel="name"
+                    filter="true" filterBy="name" placeholder="Select a Plan"
+                    [(ngModel)]="searchParentCustValue"></p-dropdown>
+            </div>
+            <div *ngIf="parentFieldEnable" class="col-lg-6 col-md-6 col-sm-12">
+                <button (click)="searchParentCustomer()" class="btn btn-primary" id="searchbtn" type="button">
+                    <i class="fa fa-search"></i>
+                    Search
+                </button>
+                <button (click)="clearSearchParentCustomer()" class="btn btn-default" id="searchbtn" type="reset">
+                    <i class="fa fa-refresh"></i>
+                    Clear
+                </button>
+            </div>
+        </div>
+        <h5 style="margin-top: 15px">Select Customer</h5>
+        <p-table #dt [(selection)]="selectedParentCust" [value]="customerList" responsiveLayout="scroll">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th style="width: 5rem"></th>
+                    <th>Customer Name</th>
+                    <th>User Name</th>
+                </tr>
+            </ng-template>
+            <ng-template let-customerList let-rowIndex="rowIndex" pTemplate="body">
+                <tr>
+                    <td>
+                        <p-tableRadioButton [value]="customerList"
+                            [disabled]="customerList.status === 'Terminate'"></p-tableRadioButton>
+                    </td>
+                    <td>{{ customerList.name }}</td>
+                    <td>{{ customerList.username }}</td>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="summary">
+                <p-paginator (onPageChange)="paginate($event)" [first]="newFirst"
+                    [rows]="parentCustomerListdataitemsPerPage"
+                    [totalRecords]="parentCustomerListdatatotalRecords"></p-paginator>
+            </ng-template>
+        </p-table>
+    </div>
+    <div class="modal-footer">
+        <div class="addUpdateBtn">
+            <button (click)="saveSelCustomer(true, selectedParentCust)" class="btn btn-primary"
+                style="object-fit: cover; padding: 5px 8px">
+                <i class="fa fa-check-circle"></i>
+                Save
+            </button>
+            <button (click)="modalCloseParentCustomer()" class="btn btn-danger btn-sm" type="button">
+                Close
+            </button>
+        </div>
+    </div>
+</p-dialog>

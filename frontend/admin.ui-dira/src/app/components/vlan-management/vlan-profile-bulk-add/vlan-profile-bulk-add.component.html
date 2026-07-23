@@ -1,0 +1,323 @@
+<div class="row header-row p-0 m-0">
+  <mat-card class="cardWithShadow w-100">
+    <mat-card-content class="mat-card-content-border">
+      <div class="row">
+        <form [formGroup]="customerMigration">
+          <div class="boxWhite p-3">
+            <div class="row">
+              <!-- Select Action -->
+              <div class="col-md-4">
+                <mat-form-field appearance="outline" class="w-100 header-input">
+                  <mat-select
+                    placeholder="Select a Action"
+                    [(value)]="action"
+                    (selectionChange)="selectAction($event)"
+                  >
+                    <mat-option *ngFor="let opt of actionOptions" [value]="opt.value">
+                      {{ opt.label }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+
+              <!-- File Input -->
+              <div class="col-md-4">
+                <input
+                  (change)="onFileChangeUpload($event)"
+                  class="form-control"
+                  formControlName="file"
+                  id="txtSelectDocument"
+                  multiple="multiple"
+                  placeholder="Select Attachment"
+                  type="file"
+                  accept=".XLSX,XLS,.csv,text/csv"
+                />
+                <div
+                  *ngIf="submitted && customerMigration.controls.file.errors"
+                  class="text-danger"
+                >
+                  <div *ngIf="customerMigration.controls.file.errors.required">
+                    File is required.
+                  </div>
+                </div>
+              </div>
+
+              <!-- Buttons -->
+              <div class="col-md-12 d-flex flex-wrap align-items-center mt-3 gap-2">
+                <button
+                  mat-button
+                  mat-flat-button
+                  color="primary"
+                  class="button-normal mr-10"
+                  (click)="uploadDocument()"
+                  [disabled]="!formSubmit"
+                  style="width: fit-content"
+                >
+                  {{ action === "create" ? "Create " : "Update " }} Migrate Data
+                </button>
+
+                <button
+                  class="button-normal mr-10"
+                  mat-button
+                  mat-flat-button
+                  color="primary"
+                  style="width: fit-content"
+                  (click)="clearForm()"
+                >
+                  Clear
+                </button>
+
+                <button
+                  mat-button
+                  mat-flat-button
+                  color="primary"
+                   class="button-normal mr-10"
+                  (click)="download()"
+                  style="width: fit-content"
+                >
+                  Download Sample File
+                </button>
+
+                <button
+                  class="button-normal"
+                  mat-button
+                  mat-flat-button
+                  color="primary"
+                  style="width: fit-content"
+                  (click)="downloadExisitingData()"
+                >
+                  Export Data
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<!-- <div class="row">
+  <div class="col-md-12">
+    <div class="panel">
+      <div class="panel-heading">
+        <h3 class="panel-title">Bulk VLAN</h3>
+        <div class="right">
+          <button
+            type="button"
+            class="btn-toggle-collapse"
+            data-toggle="collapse"
+            data-target="#createProduct"
+            aria-expanded="false"
+            aria-controls="createProduct"
+            >
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+
+      <div id="createProduct" class="panel-collapse collapse in">
+        <div class="panel-body">
+          <div>
+            <form [formGroup]="customerMigration">
+              <div class="boxWhite">
+                <div class="row">
+                  <div class="col-md-2">
+                    <div class="form-group">
+                      <label>Select Action</label>
+                      <p-dropdown
+                        (onChange)="selectAction($event)"
+                        [options]="actionOptions"
+                        optionValue="value"
+                        optionLabel="label"
+                        placeholder="Select a Action"
+                        [(ngModel)]="action"
+                        [ngModelOptions]="{ standalone: true }"
+                      ></p-dropdown>
+                    </div>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="form-group">
+                      <label>Select File</label>
+                      <input
+                        (change)="onFileChangeUpload($event)"
+                        class="form-control"
+                        formControlName="file"
+                        id="txtSelectDocument"
+                        multiple="multiple"
+                        placeholder="Select Attachment"
+                        type="file"
+                        accept=".XLSX,XLS,.csv,text/csv"
+                        />
+                        @if (submitted && customerMigration.controls.file.errors) {
+                          <div
+                            class="errorWrap text-danger"
+                            >
+                            @if (submitted && customerMigration.controls.file.errors.required) {
+                              <div
+                                class="error text-danger"
+                                >
+                                file is required.
+                              </div>
+                            }
+                          </div>
+                        }
+                      </div>
+                    </div>
+                   <button
+                      type="submit"
+                      class="btn btn-primary col-md-1"
+                      data-title="Submit Details"
+                      (click)="uploadDocument()"
+                      style="background: #f7941e !important; width: 18%; margin-top: 25px"
+                      [disabled]="!formSubmit"
+                      >
+                      <i class="fa fa-check-circle"></i>
+                      {{ action === "create" ? "Create " : "Update " }}Migrate data
+                    </button>
+                    <button
+                      type="reset"
+                      class="btn btn-default col-md-1"
+                      title="Clear Form"
+                      data-toggle="tooltip"
+                      (click)="clearForm()"
+                      style="margin-top: 25px; margin-left: 5px"
+                      >
+                       <img src="assets/img/DashboardIcons/Refresh.svg" />
+                      Clear
+                    </button>
+                    <button
+                      type="submit"
+                      class="btn btn-primary col-md-1"
+                      data-title="Submit Details"
+                      (click)="download()"
+                    style="
+                      background: #f7941e !important;
+                      width: 18%;
+                      margin-top: 25px;
+                      margin-left: 5px;
+                    "
+                      >
+                      <i class="fa fa-check-circle"></i>
+                      Download Sample File
+                    </button>
+                    <button
+                      type="submit"
+                      class="btn btn-primary col-md-1"
+                      data-title="Submit Details"
+                      (click)="downloadExisitingData()"
+                    style="
+                      background: #f7941e !important;
+                      width: 12%;
+                      margin-top: 25px;
+                      margin-left: 5px;
+                    "
+                      >
+                      <i class="fa fa-check-circle"></i>
+                      Export data
+                    </button>
+                    <br />
+                  </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> -->
+
+<ng-template #isFIleDialog let-dialogRef="dialogRef">
+  <div class="dialog-container">
+    <div class="dialog-header">
+      Sample File
+      <span>
+        <a mat-icon-button mat-dialog-close>
+           <img src="assets/img/DashboardIcons/Reject.svg">
+        </a>
+      </span>
+    </div>
+
+    <mat-dialog-content>
+      <div class="form-group">
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-select [(value)]="fileName" placeholder="Select a file type" [(ngModel)]="fileName">
+            <mat-option *ngFor="let option of downloadFileOption" [value]="option.value">
+              {{ option.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </mat-dialog-content>
+
+    <div class="dialog-action-adjust d-flex justify-content-end">
+      <button
+        class="search-btn"
+        mat-button
+        mat-flat-button
+        color="primary"
+        class="search-btn"
+        (click)="downloadSampleFile()"
+        [disabled]="!fileName"
+      >
+        Download
+      </button>
+      <button
+        class="search-btn"
+        mat-button
+        mat-flat-button
+        color="primary"
+        class="search-btn"
+        mat-dialog-close
+      >
+        Cancel
+      </button>
+    </div>
+  </div>
+</ng-template>
+
+<!-- 
+<p-dialog
+  header="Sample File"
+  [(visible)]="isFIleNameDialog"
+  [modal]="true"
+  [style]="{ width: '40vw' }"
+  [draggable]="false"
+  [resizable]="false"
+  [responsive]="true"
+  [closable]="true"
+  (onHide)="closeFileNameDialog()"
+  >
+  <div class="modal-body-junk">
+    <div class="form-group">
+      <div class="row">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+          <label>File name</label>
+          <div>
+            <p-dropdown
+              [options]="downloadFileOption"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Select a file type"
+              [(ngModel)]="fileName"
+            ></p-dropdown>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <div class="addUpdateBtn">
+      <button
+        (click)="downloadSampleFile()"
+        class="btn btn-primary"
+        id="submit"
+        type="submit"
+        [disabled]="!fileName"
+        >
+        <i class="fa fa-check-circle"></i>
+        Download
+      </button>
+    </div>
+  </div>
+</p-dialog> -->

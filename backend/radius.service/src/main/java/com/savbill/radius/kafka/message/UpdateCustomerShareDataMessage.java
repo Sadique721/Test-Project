@@ -1,0 +1,80 @@
+package com.savbill.radius.kafka.message;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
+
+@Data
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class UpdateCustomerShareDataMessage {
+    private Integer id;
+    private String title;
+    private String username;
+    private String password;
+    private String firstname;
+    private String lastname;
+    private String custname;
+    private String email;
+    private String mobile;
+    private String countryCode;
+    private Integer serviceAreaId;
+    private Integer networkdevicesId;
+    private String status;
+    private String custtype;
+    private String phone;
+    private Integer mvnoId;
+    private Long buId;
+    private Integer lcoId;
+    private Boolean is_from_pwc;
+    private Boolean isDeleted;
+    private Long oltslotid;
+    private Long oltportid;
+    private String fullName;
+    private Integer parnterId;
+    private String planPurchaseType;
+    private String serviceAreaName;
+    private String partnerName;
+    private String calendarType;
+    private String dunningCategory;
+    private String parentCustUsername;
+    private Integer parentCustId;
+    private String feasibilityRequired;
+    private Long popId;
+    private Long oltId;
+    private Long masterdbid;
+    private Long splitterid;
+    private String framedIp;
+    private String framedIpBind;
+    private String ipPoolNameBind;
+    private String nasPort;
+    private String valleyType;
+    private String customerArea;
+    private String custcategory;
+    private Integer createdById;
+    private Integer lastModifiedById;
+    private String serialNumber;
+    private Integer serviceId;
+    private Boolean istrialplan;
+    private String contactperson;
+    private String vlanId;
+    private String framedIpv6Address;
+    private Integer maxconcurrentsession;
+    private String delegatedprefix;
+    private Boolean mac_provision;
+    private Boolean mac_auth_enable;
+    private String nasPortId;
+
+    private Integer macRetentionPeriod;
+    private String macRetentionUnit;
+    private String secondaryDNS;
+    private String framedIPNetmask;
+    private String framedIPv6Prefix;
+    private String primaryDNS;
+    private String primaryIPv6DNS;
+    private String secondaryIPv6DNS;
+    private String gatewayIP;
+    private String framedroute;
+    private String accountNo;
+    private Integer billday;
+    private  String nextbilldate;
+    private String quotaResetDate;
+}

@@ -1,0 +1,549 @@
+<!-- search part start -->
+<div class="row header-row">
+    <mat-card class="cardWithShadow w-100">
+        <mat-card-header>
+            <mat-card-title class="font-900">
+                <a mat-icon-button matTooltip="delete" href="javascript:void(0)" (click)="customerDetailOpen()">
+                    <i class="pi pi-arrow-left icon-size"></i>
+                </a>
+                {{ custData?.title }}
+                {{ custData?.custname }} Details
+            </mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="matcardContent">
+            <div class="row">
+                <div class="col-sm-9 d-flex">
+                    <mat-form-field appearance="outline" style="margin-left: 16px" class="w-100 hide-hint mr-10">
+                        <input class="input-p-5" [(ngModel)]="childManagementName" matInput
+                            placeholder="Search {{ title }}" (keydown.enter)="searchChild()" />
+                        <mat-icon matSuffix class="search-header-search-icon">
+                            <i class="pi pi-search icon-size"></i>
+                        </mat-icon>
+                    </mat-form-field>
+
+                    <button mat-button mat-flat-button color="primary" class="button-normal m-r-10"
+                        (click)="searchChild()">
+                        Search
+                    </button>
+                    <button mat-stroked-button matButton="outlined" class="button-normal" (click)="clearsearchChild()">
+                        Clear
+                    </button>
+                    
+                </div>
+
+                <div class="col-sm-3 search-div">
+                    <button mat-button mat-flat-button color="primary" (click)="openChildCustomerCreateMenu()"
+                        class="button-normal mr-10">
+                        Add {{ title }}
+                    </button>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+<!-- search part end -->
+
+<!-- body table part start  -->
+@if (isChildList) {
+<div class="container-fluid contain-flud">
+    <div class="row">
+        <!-- item list table start -->
+        <div class="col-md-12">
+            <mat-card class="cardWithShadow">
+                <mat-card-content class="mat-card-content-border">
+                    <div class="item-table-list">
+                        <div class="table-container" *ngIf="childListData?.length > 0">
+                            <table mat-table [dataSource]="childListData" matSort class="mat-elevation-z8 w-100">
+                                <ng-container matColumnDef="id">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">ID</th>
+
+                                    <td mat-cell *matCellDef="let item">
+                                        {{ item.id }}
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="f-name">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        First Name
+                                    </th>
+                                    <td mat-cell *matCellDef="let item" class="f-s-14">{{ item.childFirstName }}</td>
+                                </ng-container>
+                                <ng-container matColumnDef="l-name">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Last Name
+                                    </th>
+                                    <td mat-cell *matCellDef="let item" class="f-s-14">{{ item.childLastName }}</td>
+                                </ng-container>
+                                <ng-container matColumnDef="u-name">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        User Name
+                                    </th>
+                                    <td mat-cell *matCellDef="let item" class="f-s-14">{{ item.childUsername }}</td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="action">
+                                    <th mat-header-cell *matHeaderCellDef stickyEnd class="table-header-title">
+                                        Action
+                                    </th>
+                                    <td mat-cell *matCellDef="let item">
+                                        <a mat-icon-button href="javascript:void(0)" matTooltip="edit"
+                                            (click)="editChild(item.id)">
+                                            <img src="assets/img/DashboardIcons/Edit.svg">
+                                        </a>
+                                        <a mat-icon-button matTooltip="Delete" href="javascript:void(0)"
+                                            (click)="deleteChildConfirmation(item)">
+                                            <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                        </a>
+                                        <a mat-icon-button matTooltip="View" href="javascript:void(0)"
+                                            (click)="openModal(item.id)">
+                                            <img src="assets/img/DashboardIcons/eye-svgrepo-com (1) 1.svg">
+
+                                        </a>
+                                        <a mat-icon-button matTooltip="View Child Wallet" href="javascript:void(0)"
+                                            (click)="viewChildWallet(item.childCustomer)">
+
+                                            <img src="assets/img/DashboardIcons/Wallet Details.svg">
+                                        </a>
+                                        <a mat-icon-button matTooltip="View Child Ledger" href="javascript:void(0)"
+                                            (click)="viewChildLedger(item.childCustomer)">
+                                            <img src="assets/img/DashboardIcons/wallet-svgrepo-com (1) 1.svg">
+                                        </a>
+                                    </td>
+                                </ng-container>
+
+                                <tr mat-header-row class="table-header-bg"
+                                    *matHeaderRowDef="['f-name','l-name','u-name','action']; sticky: true"></tr>
+                                <tr mat-row class="table-content-row"
+                                    *matRowDef="let row; columns: ['f-name','l-name','u-name','action']">
+                                </tr>
+                            </table>
+
+                            <mat-paginator [length]="childTotalRecords" [pageSize]="childitemsPerPage"
+                                [pageSizeOptions]="[5,10,20,50,100]" showFirstLastButtons
+                                (page)="pageChangedChildList($event)">
+                            </mat-paginator>
+                        </div>
+
+                        <div *ngIf="childListData?.length === 0" class="no-data-container text-center">
+                            <p>No Data Avaliable</p>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+        <!-- item list table end -->
+    </div>
+</div>
+}
+<!-- body table part end -->
+
+<!-- create new child dialog start -->
+<ng-template #addChildDialog>
+    @if (isChildCreateOrEdit) {
+    <div class="dialog-container">
+        <div class="dialog-header">
+            {{ isChildEdit ? "Update" : "Create" }} {{ title}}
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="closedialog()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+            <div class="col-md-12">
+                <mat-card-content class="matcardContent">
+                    <form class="card-form mb-3" [formGroup]="childManagementFormGroup">
+                        <div class="row g-3">
+                            <div class="col-md-4 mb-4">
+                                <label for="countryname" class="inputLabel">Mobile Number*</label>
+                                <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                    <input id="countryname" type="text" class="input-p-5" matInput
+                                        placeholder="Enter Mobile Number"
+                                        [attr.maxlength]="commonDropdownService.maxMobileLength"
+                                        formControlName="mobileNumber" (input)="onInputMobile($event)"
+                                        (keypress)="keypressSession($event)" (blur)="onMobileBlur()"
+                                        [readonly]="isChildEdit" [ngClass]="{
+                    'is-invalid': submitted && childManagementFormGroup.controls.mobileNumber.errors
+                  }">
+                                </mat-form-field>
+                                @if (mobileError) {
+                                <div class="errorWrap text-danger" style="margin-top: -14px;">
+                                    Mobile number should not start with 0.
+                                </div>
+                                }
+                                @if (
+                                submitted && childManagementFormGroup.controls.mobileNumber.errors?.required
+                                ) {
+                                <div class="errorWrap text-danger" style="margin-top: -14px;">
+                                    Mobile Number is required.
+                                </div>
+                                }
+                                @if (
+                                submitted &&
+                                (childManagementFormGroup.controls.mobileNumber.errors?.minlength ||
+                                childManagementFormGroup.controls.mobileNumber.errors?.maxlength)
+                                ) {
+                                <div class="errorWrap text-danger" style="margin-top: -14px;">
+                                    @if (
+                                    commonDropdownService.minMobileLength ===
+                                    commonDropdownService.maxMobileLength) {
+                                    Mobile Number must be exactly
+                                    {{ commonDropdownService.minMobileLength }} digits.
+                                    } @else {
+                                    Mobile Number must be between
+                                    {{ commonDropdownService.minMobileLength }} and
+                                    {{ commonDropdownService.maxMobileLength }} digits.
+                                    }
+                                </div>
+                                }
+                            </div>
+                            <div class="col-md-4 mb-4">
+                                <label for="countryname" class="inputLabel">Account Number</label>
+                                <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                    <mat-select class="input-p-5" placeholder="Unit"
+                                        formControlName="parentAccountNumber" placeholder="Select Parent Account"
+                                        (selectionChange)="onParentAccountSelect($event.value)">
+                                        <mat-option *ngFor="let unit of parentAccountList" [value]="unit.value">
+                                            {{ unit.label }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+                            <div class="col-md-4 mb-4">
+                                <label for="countryname" class="inputLabel">First Name*</label>
+                                <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                    <input type="text" id="countryname" class="input-p-5" matInput
+                                        placeholder="Enter First Name" formControlName="firstName" [ngClass]="{
+                    'is-invalid': submitted && childManagementFormGroup.controls.firstName.errors
+                  }" maxLength="250" [readonly]="isAccountSelected">
+                                </mat-form-field>
+                                @if (submitted && childManagementFormGroup.controls.firstName.errors) {
+                                <div class="errorWrap text-danger" style="margin-top: -14px;">
+                                    @if (childManagementFormGroup.controls.firstName.errors.required) {
+                                    <div class="error text-danger">
+                                        FirstName is required.
+                                    </div>
+                                    }
+                                </div>
+                                }
+                            </div>
+                            <div class="col-md-4 mb-4">
+                                <label for="countryname" class="inputLabel">Last Name*</label>
+                                <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                    <input type="text" id="countryname" class="input-p-5" matInput
+                                        placeholder="Enter Last Name" formControlName="lastName" [ngClass]="{
+                    'is-invalid': submitted && childManagementFormGroup.controls.lastName.errors
+                  }" maxLength="250" [readonly]="isAccountSelected">
+                                </mat-form-field>
+                                @if (submitted && childManagementFormGroup.controls.lastName.errors) {
+                                <div class="errorWrap text-danger" style="margin-top: -14px;">
+                                    @if (childManagementFormGroup.controls.lastName.errors.required) {
+                                    <div class="error text-danger">
+                                        Last Name is required.
+                                    </div>
+                                    }
+                                </div>
+                                }
+                            </div>
+                            <div class="col-md-4 mb-4">
+                                <label for="countryname" class="inputLabel">User Name*</label>
+                                <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                    <input type="text" id="countryname" class="input-p-5" matInput
+                                        placeholder="Enter User Name" formControlName="userName" [ngClass]="{
+                    'is-invalid': submitted && childManagementFormGroup.controls.userName.errors
+                  }" maxLength="250" [readonly]="isChildEdit || isAccountSelected">
+                                </mat-form-field>
+                                @if (submitted && childManagementFormGroup.controls.userName.errors) {
+                                <div class="errorWrap text-danger" style="margin-top: -14px;">
+                                    @if (childManagementFormGroup.controls.userName.errors.required) {
+                                    <div class="error text-danger">
+                                        User Name is required.
+                                    </div>
+                                    }
+                                </div>
+                                }
+                            </div>
+                            <div class="col-md-4 mb-4">
+                                <label for="countryname" class="inputLabel">Password*</label>
+                                <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                    <input [type]="_passwordType" id="countryname" class="input-p-5" matInput
+                                        placeholder="Enter Password" formControlName="password" [ngClass]="{
+                      'is-invalid': submitted && childManagementFormGroup.controls.password.errors,
+                      'readonly-input': isChildEdit || isAccountSelected
+                    }" maxlength="250" [readonly]="isChildEdit || isAccountSelected">
+                                    @if (showPassword) {
+                                    <i class="fa fa-eye toggle-icon"
+                                        (click)="showPassword = false; _passwordType = 'password'"></i>
+                                    }
+                                    @if (!showPassword) {
+                                    <i class="fa fa-eye-slash toggle-icon"
+                                        (click)="showPassword = true; _passwordType = 'text'"></i>
+                                    }
+                                </mat-form-field>
+                            </div>
+                            <div class="col-md-4 mb-4">
+                                <label for="countryname" class="inputLabel">Email*</label>
+                                <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                    <input type="email" id="countryname" class="input-p-5" matInput
+                                        placeholder="Enter Email" formControlName="email" [ngClass]="{
+                    'is-invalid': submitted && childManagementFormGroup.controls.email.errors
+                  }" maxLength="250" [readonly]="isAccountSelected">
+                                </mat-form-field>
+                                @if (submitted && childManagementFormGroup.controls.email.errors) {
+                                <div class="errorWrap text-danger" style="margin-top: -14px;">
+                                    @if (submitted && childManagementFormGroup.controls.email.errors.required) {
+                                    <div class="error text-danger">
+                                        E-mail is required.
+                                    </div>
+                                    }
+                                    @if (submitted && childManagementFormGroup.controls.email.errors.email) {
+                                    <div class="error text-danger">
+                                        Email is not valid.
+                                    </div>
+                                    }
+                                </div>
+                                }
+                            </div>
+
+                            <div class="col-md-4 mb-4">
+                                <label for="countryname" class="inputLabel">Status*</label>
+                                <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                    <mat-select class="input-p-5" placeholder="Unit" formControlName="status"
+                                        placeholder="Select Status" [ngClass]="{
+                    'is-invalid': submitted && childManagementFormGroup.controls.status.errors
+                  }" [disabled]="isAccountSelected">
+                                        <mat-option *ngFor="let unit of statusOptions" [value]="unit.label">
+                                            {{ unit.label }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                                @if (submitted && childManagementFormGroup.controls.status.errors) {
+                                <div class="errorWrap text-danger" style="margin-top: -14px;">
+                                    @if (childManagementFormGroup.controls.status.errors.required) {
+                                    <div class="error text-danger">
+                                        Status is required.
+                                    </div>
+                                    }
+                                </div>
+                                }
+                            </div>
+
+                        </div>
+                    </form>
+                </mat-card-content>
+
+            </div>
+        </div>
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+            <div class="button-normal m-r-10">
+                @if (!isChildEdit) {
+                <button mat-button mat-flat-button color="primary" (click)="addEditChildManagement('')"
+                    class="button-normal" type="submit">
+                    Create {{title}}
+                </button>
+                }
+                @if (isChildEdit) {
+                <button mat-button mat-flat-button color="primary"
+                    (click)="addEditChildManagement(viewChildListData.id)" class="button-normal" type="submit">
+                    Update {{title}}
+                </button>
+                }
+            </div>
+            <div class="button-normal">
+                <button mat-stroked-button matButton="outlined" type="button" color="primary"
+                    class="button-normal w-100" (click)="closedialog()">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+    }
+</ng-template>
+<!-- create new child dialog end -->
+
+<!-- view child wallet detail dialog start -->
+<ng-template #childwalletDetails>
+    <div class="dialog-container">
+        <div class="dialog-header">
+            Child Wallet Details
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="closewalletDialog()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+            <div class="col-md-12">
+                <mat-card-content class="matcardContent">
+                    <mat-card class="">
+                        <mat-card-header>
+                            <mat-card-title class="font-900">Wallet Balance</mat-card-title>
+                        </mat-card-header>
+                        <div class="row p-15 m-t-10">
+                            <div class="d-inline-block py-2 px-4 rounded-lg mt-3">
+                                <ng-container *ngIf="viewChildWalletData >= 0; else negativeWallet">
+                                    <mat-chip color="primary" selected class="wallet-chip positive">
+                                        {{ viewChildWalletData | currency: currency }}
+                                    </mat-chip>
+                                </ng-container>
+
+                                <ng-template #negativeWallet>
+                                    <mat-chip color="warn" selected class="wallet-chip negative">
+                                        {{ viewChildWalletData | currency: currency }}
+                                    </mat-chip>
+                                </ng-template>
+                            </div>
+                        </div>
+                    </mat-card>
+                </mat-card-content>
+
+            </div>
+        </div>
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+            <div class="button-normal">
+                <button mat-stroked-button matButton="outlined" type="button" color="primary"
+                    class="button-normal w-100" (click)="closewalletDialog()">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</ng-template>
+<!-- child wallet detail dialog end -->
+
+<!-- view child ledger dialog start -->
+<ng-template #viewchildledger>
+    <div class="dialog-container">
+        <div class="dialog-header">
+            Child Ledger Details
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="closeViewChildLedger()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+            <div class="col-md-12">
+                <mat-card-content class="mat-card-content-border">
+                    <div class="item-table-list">
+                        <div class="table-container">
+                            <table mat-table [dataSource]="viewChildLedgerData" matSort class="mat-elevation-z8 w-100">
+                                <ng-container matColumnDef="t-type">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Transaction Type
+                                    </th>
+                                    <td mat-cell *matCellDef="let item" class="f-s-14">{{ item.transtype }}</td>
+                                </ng-container>
+                                <ng-container matColumnDef="t-category">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Transaction Category
+                                    </th>
+                                    <td mat-cell *matCellDef="let item" class="f-s-14">{{ item.transcategory }}</td>
+                                </ng-container>
+                                <ng-container matColumnDef="amount">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Amount
+                                    </th>
+                                    <td mat-cell *matCellDef="let item" class="f-s-14">{{ item.amount }}</td>
+                                </ng-container>
+                                <ng-container matColumnDef="b-amount">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Balance Amount
+                                    </th>
+                                    <td mat-cell *matCellDef="let item" class="f-s-14">{{ item.balAmount }}</td>
+                                </ng-container>
+                                <ng-container matColumnDef="c-date">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Created Date
+                                    </th>
+                                    <td mat-cell *matCellDef="let item" class="f-s-14">{{ item.create_DATE }}</td>
+                                </ng-container>
+
+                                <tr mat-header-row class="table-header-bg"
+                                    *matHeaderRowDef="['t-type','t-category','amount','b-amount','c-date']; sticky: true">
+                                </tr>
+                                <tr mat-row class="table-content-row"
+                                    *matRowDef="let row; columns:['t-type','t-category','amount','b-amount','c-date'] ">
+                                </tr>
+                            </table>
+                            <div *ngIf="!viewChildLedgerData || viewChildLedgerData.length === 0"
+                                class="no-data-container text-center">
+                                <p>No Data Avaliable</p>
+                            </div>
+                            <mat-paginator [length]="childLedgerTotalRecords" [pageSize]="childLedgerItemsPerPage"
+                                [pageSizeOptions]="[5,10,20,50,100]" showFirstLastButtons
+                                (page)="pageChangedChildLedgerList($event)">
+                            </mat-paginator>
+                        </div>
+                    </div>
+                </mat-card-content>
+
+            </div>
+        </div>
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+            <div class="button-normal">
+                <button mat-stroked-button matButton="outlined" type="button" color="primary"
+                    class="button-normal w-100" (click)="closeViewChildLedger()">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</ng-template>
+<!-- view child ledger dialog end -->
+
+<!-- view child dialog start -->
+<ng-template #viewchildDialog>
+    <div class="container-fluid p-0">
+        <div class="dialog-header dialog-title">
+            View {{ title }}
+            <span>
+                <a mat-icon-button (click)="closeViewChildDialog()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <mat-dialog-content>
+            <div class="row p-15 m-t-10">
+                <div class="col-md-6">
+                    <view-detail-card [title]="'First Name'" [value]="viewChildData?.childFirstName">
+                    </view-detail-card>
+                </div>
+                <div class="col-md-6">
+                    <view-detail-card [title]="'Last Name'" [value]="viewChildData?.childLastName">
+                    </view-detail-card>
+                </div>
+                <div class="col-md-6">
+                    <view-detail-card [title]="'Email'" [value]="viewChildData?.childEmail">
+                    </view-detail-card>
+                </div>
+                <div class="col-md-6">
+                    <view-detail-card [title]="'Username'" [value]="viewChildData?.childUsername">
+                    </view-detail-card>
+                </div>
+                <div class="col-md-6">
+                    <view-detail-card [title]="'Status'" [value]="viewChildData?.status">
+                    </view-detail-card>
+                </div>
+                <div class="col-md-6">
+                    <view-detail-card [title]="'Mobile'" [value]="viewChildData?.childMobile">
+                    </view-detail-card>
+                </div>
+            </div>
+        </mat-dialog-content>
+
+        <mat-dialog-actions align="end">
+            <button mat-stroked-button color="warn" (click)="closeViewChildDialog()">Close</button>
+        </mat-dialog-actions>
+    </div>
+</ng-template>
+<!-- view child dialog end -->

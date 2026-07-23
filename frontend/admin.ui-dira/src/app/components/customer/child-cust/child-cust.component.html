@@ -1,0 +1,197 @@
+<!-- <div class="row">
+  <div class="col-md-12 col-sm-12">
+    <div class="panel">
+      <div class="panel-heading">
+        <div class="displayflex">
+          <button (click)="customerDetailOpen()" class="btn btn-secondary backbtn" data-placement="bottom"
+            data-toggle="tooltip" title="Go to Customer Details" type="button">
+            <i class="fa fa-arrow-circle-left" style="color: #f7941e !important; font-size: 28px"></i>
+          </button>
+          <h3 class="panel-title">
+            {{ custData.title }}
+            {{ custData.custname }} Child Customer List
+          </h3>
+        </div>
+        <div class="right">
+          <button aria-controls="inventoryListPreCust" aria-expanded="false" class="btn-toggle-collapse"
+            data-target="#inventoryListPreCust" data-toggle="collapse" type="button">
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+        @if (removeAccess) {
+        <button (click)="removeFromParent()" [disabled]="this.checkedList.length == 0" class="right"
+          class="btn btn-primary statusbtn" data-backdrop="static" data-keyboard="false" data-target="#removeParent"
+          data-toggle="modal" style="
+            background-color: #f7941e !important;
+            font-size: 16px;
+            padding: 3px 12px;
+            margin-top: 10px;
+          " title="Remove parent" type="submit">
+          Remove
+        </button>
+        }
+        @if (makeParentAccess) {
+        <button (click)="makeParent(custData.id)" [disabled]="this.checkedList.length == 0" class="right"
+          class="btn btn-primary statusbtn" data-backdrop="static" data-keyboard="false" data-target="#removeParent"
+          data-toggle="modal" style="
+            background-color: #f7941e !important;
+            font-size: 16px;
+            padding: 3px 12px;
+            margin-top: 10px;
+          " title="Remove parent" type="submit">
+          Make Parent
+        </button>
+        }
+      </div>
+
+      <div class="panel-collapse collapse in" id="inventoryListPreCust">
+        <div class="panel-body table-responsive">
+          <div class="row">
+            <div class="col-lg-12 col-md-12">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th width="2%">
+                      <input (change)="checkUncheckAll()" [(ngModel)]="this.masterSelected" name="master-checkbox"
+                        type="checkbox" />
+                    </th>
+                    <th width="16%">Name</th>
+                    <th width="10%">Username</th>
+                    <th width="12%">Service Area</th>
+                    <th width="10%">Mobile Number</th>
+                    <th width="18%">Account No</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (
+                  data of childCustomerDataList
+                  | paginate
+                  : {
+                  id: 'childCustomerDataList',
+                  itemsPerPage: pageSizeForChildsPage,
+                  currentPage: pageNumberForChildsPage,
+                  totalItems: childCustomerDataTotalRecords
+                  }; track
+                  data; let i = $index) {
+                  <tr>
+                    <td width="2%">
+                      <input (change)="isAllSelected()" [(ngModel)]="data.isSelected" name="master-checkbox"
+                        type="checkbox" />
+                    </td>
+                    <td>
+                      <a [routerLink]="['/home/customer/details/' + custType + '/x/' + data.id]"
+                        href="javascript:void(0)" style="color: #f7941e">
+                        {{ data.firstname }} {{ data.lastname }}
+                      </a>
+                    </td>
+                    <td>{{ data.username }}</td>
+                    <td>{{ data.serviceareaName }}</td>
+                    <td>{{ data.mobile }}</td>
+                    <td>{{ data.acctno }}</td>
+                  </tr>
+                  }
+                </tbody>
+              </table>
+              <div style="display: flex">
+                <pagination-controls (pageChange)="pageChangeEventForChildCustomers($event)" [directionLinks]="true"
+                  [maxSize]="10" id="childCustomerDataList" nextLabel="" previousLabel=""></pagination-controls>
+                <div id="itemPerPageDropdown">
+                  <p-dropdown (onChange)="itemPerPageChangeEvent($event)" [options]="pageLimitOptions"
+                    optionLabel="value" optionValue="value"></p-dropdown>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> -->
+
+<div class="row">
+  <div class="col-md-12">
+    <mat-card class="cardWithShadow">
+      <mat-card-header>
+        <img src="assets/img/DashboardIcons/Back Arrow.svg" alt="arrow back" class="m-r-10"
+          (click)="customerDetailOpen()" style="cursor:pointer;">
+        <div style="font-size: x-large; align-items: center; font-weight: 500; align-content: center;">
+          {{ custData.title }} {{ custData.custname }} Child Customer List
+        </div>
+        <div class="right" style="margin-left:auto;">
+          <ng-container *ngIf="removeAccess">
+            <button mat-flat-button color="primary" [disabled]="checkedList.length == 0" class="button-normal m-r-10"
+              (click)="removeFromParent()"
+              
+              matTooltip="Remove parent">
+              Remove
+            </button>
+          </ng-container>
+          <ng-container *ngIf="makeParentAccess">
+            <button mat-flat-button color="primary" [disabled]="checkedList.length == 0" class="button-normal"
+              (click)="makeParent(custData.id)"
+              matTooltip="Make parent">
+              Make Parent
+            </button>
+          </ng-container>
+        </div>
+      </mat-card-header>
+
+      <mat-card-content class="mat-card-content-border">
+        <div class="country-table-list">
+          <div class="table-container">
+            <table mat-table [dataSource]="childCustomerDataList" matSort class="mat-elevation-z8 w-100">
+
+              <ng-container matColumnDef="select">
+                <th mat-header-cell *matHeaderCellDef>
+                  <mat-checkbox (change)="checkUncheckAll()" [(ngModel)]="masterSelected"
+                    aria-label="Select All"></mat-checkbox>
+                </th>
+                <td mat-cell *matCellDef="let data">
+                  <mat-checkbox (change)="isAllSelected()" [(ngModel)]="data.isSelected"
+                    aria-label="Select row"></mat-checkbox>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title" sticky> Name </th>
+                <td mat-cell *matCellDef="let data">
+                  <a [routerLink]="['/home/customer/details/' + custType + '/x/' + data.id]"
+                    style="color: #f7941e; cursor:pointer;">
+                    {{ data.firstname }} {{ data.lastname }}
+                  </a>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="username">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title" sticky> Username </th>
+                <td mat-cell *matCellDef="let data"> {{ data.username }} </td>
+              </ng-container>
+
+              <ng-container matColumnDef="serviceArea">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title" sticky> Service Area </th>
+                <td mat-cell *matCellDef="let data"> {{ data.serviceareaName }} </td>
+              </ng-container>
+
+              <ng-container matColumnDef="mobileNumber">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title" sticky> Mobile Number </th>
+                <td mat-cell *matCellDef="let data"> {{ data.mobile }} </td>
+              </ng-container>
+
+              <ng-container matColumnDef="accountNo">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title" sticky> Account No </th>
+                <td mat-cell *matCellDef="let data"> {{ data.acctno }} </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+
+            <mat-paginator [length]="childCustomerDataTotalRecords" [pageSize]="pageSizeForChildsPage"
+              [pageSizeOptions]="[5,10,20,50,100]" showFirstLastButtons (page)="pageChangeEventForChildCustomers($event)">
+            </mat-paginator>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

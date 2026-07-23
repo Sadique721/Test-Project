@@ -1,0 +1,440 @@
+<div class="dialog-container">
+  <div class="dialog-header">
+    {{ data.title }}
+    <span>
+      <a mat-icon-button href="javascript:void(0)" (click)="onCancel()">
+         <img src="assets/img/DashboardIcons/Reject.svg">
+      </a>
+    </span>
+  </div>
+
+  <div mat-dialog-content>
+    <div class="col-md-12">
+      @if (!createAccess && !isBuildingEdit) {
+        <mat-card-content class="matcard-content">
+          <div class="panel-body table-responsive">
+            Sorry you have not privilege to create operation!
+          </div>
+        </mat-card-content>
+      }
+
+      @if (createAccess || (isBuildingEdit && editAccess)) {
+        <mat-card-content class="matcard-content">
+          <form
+            class="card-form mb-3"
+            [formGroup]="buildingFormGroup"
+            (ngSubmit)="addOrUpdateBuilding(isBuildingEdit ? buildingData : '')"
+          >
+            <div class="row g-3">
+              <div class="col-md-6 mb-4">
+                <label class="inputLabel">Building Name *</label>
+
+                @if (isBuildingEdit) {
+                  <mat-form-field appearance="outline" class="w-100">
+                    <input
+                      matInput
+                      placeholder="isBuildingEdit Enter {{ areaTitle }} Name"
+                      formControlName="buildingName"
+                      [readonly]="isReadonly"
+                      maxlength="250"
+                      class="input-p-5"
+                    />
+                  </mat-form-field>
+                }
+
+                @if (!isBuildingEdit && selectedMappingFrom === "Pin Code") {
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-select
+                      formControlName="pincode"
+                      class="input-p-5"
+                      placeholder="Select Building Name "
+                      (selectionChange)="onChange($event)"
+                    >
+                      @for (pin of pincodeListData; track pin.pincodeid) {
+                        <mat-option [value]="pin.pincodeid">
+                          {{ pin.pincode }}
+                        </mat-option>
+                      }
+                    </mat-select>
+                    <mat-error>
+                      @if (submitted && buildingFormGroup.get("pincode")?.hasError("required")) {
+                        Pin Code is required.
+                      }
+                    </mat-error>
+                  </mat-form-field>
+                }
+
+                @if (!isBuildingEdit && selectedMappingFrom === "Area") {
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-select
+                      formControlName="areaId"
+                      class="input-p-5"
+                      placeholder="Select Building Name "
+                      (selectionChange)="onChnage($event)"
+                    >
+                      @for (area of areaListData; track area) {
+                        <mat-option [value]="area.id">
+                          {{ area.name }}
+                        </mat-option>
+                      }
+                    </mat-select>
+                    @if (submitted && buildingFormGroup.get("areaId")?.hasError("required")) {
+                      <mat-error> Area is required. </mat-error>
+                    }
+                  </mat-form-field>
+                }
+                @if (!isBuildingEdit && selectedMappingFrom === "Sub Area") {
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-select
+                      formControlName="subAreaId"
+                      class="input-p-5"
+                      placeholder="Select Building Name "
+                      (selectionChange)="onChnage($event)"
+                    >
+                      @for (subArea of subAreaListData; track subArea) {
+                        <mat-option [value]="subArea.id">
+                          {{ subArea.name }}
+                        </mat-option>
+                      }
+                    </mat-select>
+                    @if (submitted && buildingFormGroup.get("subAreaId")?.hasError("required")) {
+                      <mat-error> Sub Area is required. </mat-error>
+                    }
+                  </mat-form-field>
+                }
+              </div>
+
+              <div class="col-md-6 mb-4">
+                <label for="buildingType" class="inputLabel">Building Type</label>
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-select
+                    formControlName="buildingType"
+                    class="input-p-5"
+                    placeholder="Select Building Type"
+                  >
+                    @for (type of buildingTypeData; track type) {
+                      <mat-option [value]="type.displayName">
+                        {{ type.displayName }}
+                      </mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+              </div>
+
+              @if (!isBuildingEdit) {
+                <div class="col-md-6 mb-4">
+                  <label for="selectedMethod" class="inputLabel">Method*</label>
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-select
+                      formControlName="selectedMethod"
+                      class="input-p-5"
+                      placeholder="Select a Method"
+                      (selectionChange)="onMethodChange($event)"
+                    >
+                      @for (method of methodOptions; track method) {
+                        <mat-option [value]="method.value">
+                          {{ method.label }}
+                        </mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+              }
+
+              @if (buildingFormGroup.get("selectedMethod")?.value === "Range") {
+                <div class="col-md-12 mb-4">
+                  <label for="range" class="inputLabel">Range*</label>
+                  <div class="range-select">
+                    <mat-form-field appearance="outline" class="flex-grow-1">
+                      <input
+                        matInput
+                        type="text"
+                        class="input-p-5"
+                        formControlName="rangeStart"
+                        placeholder="Start"
+                      />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="flex-grow-1">
+                      <input
+                        matInput
+                        type="text"
+                        class="input-p-5"
+                        formControlName="rangeEnd"
+                        placeholder="End"
+                      />
+                    </mat-form-field>
+                  </div>
+                </div>
+              }
+              @if (buildingFormGroup.get("selectedMethod")?.value === "CSV") {
+                <div class="col-md-12 mb-4">
+                  <label for="file" class="inputLabel">Upload CSV*</label>
+                  <input
+                    type="file"
+                    (change)="onFileChange($event)"
+                    class="input-p-5"
+                    formControlName="file"
+                    multiple
+                    placeholder="Select Attachment"
+                  />
+                </div>
+              }
+
+              @if (buildingFormGroup.get("selectedMethod")?.value === "Manual") {
+                <div class="col-md-12 mb-4">
+                  <div class="row g-2">
+                    <label for="manualControls" class="inputLabel col-md-6">Building Number*</label>
+                    <button
+                      mat-button
+                      mat-flat-button
+                      class="button-normal"
+                      color="primary"
+                      type="button"
+                      (click)="addManualInput()"
+                    >
+                      Add Another
+                    </button>
+                  </div>
+                  <div formArrayName="manualControls" class="m-t-10">
+                    @for (control of manualControls.controls; let i = $index; track i) {
+                      <div class="manual-select row g-2">
+                        <mat-form-field appearance="outline" class="col-md-6">
+                          <input
+                            matInput
+                            class="input-p-5"
+                            [formControlName]="i"
+                            placeholder="Enter value"
+                          />
+                        </mat-form-field>
+                        @if (manualControls.length > 1) {
+                          <a
+                            mat-icon-button
+                            class="m-l-30"
+                            href="javascript:void(0)"
+                            (click)="removeManualInput(i)"
+                          >
+                            <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                          </a>
+                        }
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          </form>
+        </mat-card-content>
+      }
+    </div>
+  </div>
+  <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+    <button
+      mat-flat-button
+      color="primary"
+      (click)="addOrUpdateBuilding(isBuildingEdit ? buildingData : '')"
+      [disabled]="buildingFormGroup.invalid"
+    >
+      {{ isBuildingEdit ? "Update" : "Add" }} Home Pass
+    </button>
+    <button mat-stroked-button type="button" (click)="onCancel()">Cancel</button>
+  </div>
+</div>
+
+<!-- -------------------------------------------- -->
+<!-- <div class="dialog-container">
+    <div class="dialog-header">
+        {{ isBuildingEdit ? "Update" : "Create" }} {{ title }}
+        <span>
+            <a mat-icon-button href="javascript:void(0)" (click)="onCancel()">
+                 <img src="assets/img/DashboardIcons/Reject.svg">
+            </a>
+        </span>
+    </div>
+    <div mat-dialog-content>
+        <div class="col-md-12">
+            @if(!createAccess && !isBuildingEdit){
+            <mat-card-content class="matcard-content">
+                <div class="panel-body table-responsive">
+                    Sorry you have not privilege to create operation!
+                </div>
+            </mat-card-content>
+            }
+            @if(createAccess || (isBuildingEdit && editAccess)) {
+            <mat-card-content class="matcardContent">
+                <form class="card-form mb-3" [formGroup]="buildingFormGroup" (ngSubmit)="onSubmitBuilding()">
+                    <div class="row g-3">
+                        <div class="col-md-12 mb-4">
+                            <label class="inputLabel">Building Name *</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input matInput placeholder="Enter {{ areaTitle }} Name" formControlName="buildingName"
+                                    [disabled]="isBuildingEdit"
+                                    [ngClass]="{ 'is-invalid': submitted && buildingFormGroup.controls.buildingName.errors }"
+                                    maxLength="250" />
+                                <mat-error
+                                    *ngIf="buildingFormGroup.get('buildingName')?.errors?.['required'] && (submitted || buildingFormGroup.get('buildingName')?.touched)">
+                                    Building Name is required.
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+
+                        @if(selectedMappingFrom === 'Pin Code' && !isBuildingEdit) {
+                        <div class="col-md-12 mb-4">
+                            <label class="inputLabel">Select Building Name *</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-select formControlName="pincode" [placeholder]="'Select Building Name'"
+                                    [disabled]="isBuildingEdit" (selectionChange)="onChnage($event)"
+                                    [ngClass]="{ 'is-invalid': submitted && buildingFormGroup.controls.pincode.errors }">
+                                    <mat-option *ngFor="let item of pincodeListData" [value]="item.pincodeid">
+                                        {{ item.pincode }}
+                                    </mat-option>
+                                </mat-select>
+                                <mat-error
+                                    *ngIf="buildingFormGroup.get('pincode')?.errors?.['required'] && (submitted || buildingFormGroup.get('pincode')?.touched)">
+                                    Building Name is required.
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                        }
+                        @if(selectedMappingFrom === 'Area' && !isBuildingEdit) {
+                        <div class="col-md-12 mb-4">
+                            <label class="inputLabel">Select Building Name *</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-select formControlName="areaId" [placeholder]="'Select Building Name'"
+                                    [disabled]="isBuildingEdit" (selectionChange)="onChnage($event)"
+                                    [ngClass]="{ 'is-invalid': submitted && buildingFormGroup.controls.areaId.errors }">
+                                    <mat-option *ngFor="let item of areaListData" [value]="item.id">
+                                        {{ item.name }}
+                                    </mat-option>
+                                </mat-select>
+                                <mat-error
+                                    *ngIf="buildingFormGroup.get('areaId')?.errors?.['required'] && (submitted || buildingFormGroup.get('areaId')?.touched)">
+                                    Building Name is required.
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                        }
+                        @if(selectedMappingFrom === 'Sub Area' && !isBuildingEdit) {
+                        <div class="col-md-12 mb-4">
+                            <label class="inputLabel">Select Building Name *</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-select formControlName="subAreaId" [placeholder]="'Select Building Name'"
+                                    [disabled]="isBuildingEdit" (selectionChange)="onChnage($event)"
+                                    [ngClass]="{ 'is-invalid': submitted && buildingFormGroup.controls.subAreaId.errors }">
+                                    <mat-option *ngFor="let item of subAreaListData" [value]="item.id">
+                                        {{ item.name }}
+                                    </mat-option>
+                                </mat-select>
+                                <mat-error
+                                    *ngIf="buildingFormGroup.get('subAreaId')?.errors?.['required'] && (submitted || buildingFormGroup.get('subAreaId')?.touched)">
+                                    Building Name is required.
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                        }
+
+                        <div class="col-md-12 mb-4">
+                            <label class="inputLabel">Building Type</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-select formControlName="buildingType" [placeholder]="'Select a Building Type'">
+                                    <mat-option *ngFor="let t of buildingTypeData" [value]="t.displayName">
+                                        {{ t.displayName }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                        @if(!isBuildingEdit) {
+                        <div class="col-md-12 mb-4">
+                            <label class="inputLabel">Method*</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-select formControlName="selectedMethod" placeholder="Select a Method"
+                                    (selectionChange)="onMethodChange($event)">
+                                    <mat-option *ngFor="let method of methodOptions" [value]="method.value">
+                                        {{ method.label }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+                        }
+
+                        @if(buildingFormGroup.get('selectedMethod')?.value === 'Range') {
+                        <div class="col-md-12 mb-4">
+                            <label class="inputLabel">Range*</label>
+                            <div class="range-row" style="display: flex; justify-content: space-between">
+                                <span>
+                                    <mat-form-field appearance="outline">
+                                        <input matInput formControlName="rangeStart" placeholder="Start" />
+                                    </mat-form-field>
+                                </span>
+                                <span class="mx-2" style="display: flex; align-items: center">To</span>
+                                <span>
+                                    <mat-form-field appearance="outline">
+                                        <input matInput formControlName="rangeEnd" placeholder="End" />
+                                    </mat-form-field>
+                                </span>
+                            </div>
+                        </div>
+                        }
+                        @if(buildingFormGroup.get('selectedMethod')?.value === 'CSV') {
+                        <div class="col-md-12 mb-4">
+                            <label class="inputLabel">Upload CSV*</label>
+                            <input type="file" (change)="onFileChange($event)" formControlName="file"
+                                class="form-control" multiple placeholder="Select Attachment"
+                                style="padding: 2px; width: 100%" />
+                        </div>
+                        }
+                        @if(buildingFormGroup.get('selectedMethod')?.value === 'Manual') {
+                        <div class="col-md-12 mb-4">
+                            <label class="inputLabel">Building Number*</label>
+                            @for (control of manualControls.controls; track control; let i = $index) {
+                            <div formArrayName="manualControls" class="d-flex align-items-center mb-2"
+                                style="display: flex; justify-content: space-between; gap: 10px; margin-bottom: 10px;">
+                                <mat-form-field class="me-2" appearance="outline">
+                                    <input matInput [formControlName]="i" placeholder="Enter value" />
+                                </mat-form-field>
+                                @if(manualControls.length > 1) {
+                                <a id="delete-button" href="javascript:void(0)" (click)="removeManualInput(i)">
+                                     <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                                </a>
+                                }
+                            </div>
+                            }
+                            <button (click)="addManualInput()" mat-button color="primary" type="button"
+                                style="margin-top: 5px">
+                                <i class="fa fa-plus-square"></i> Add
+                            </button>
+                        </div>
+                        }
+                    </div>
+
+                    <div mat-dialog-actions class="addUpdateBtn p-0">
+                        <div class="addcountry-div">
+                            @if(!isBuildingEdit) {
+                            <button mat-button mat-flat-button color="primary" class="addcountry-btn w-100"
+                                type="submit" [disabled]="buildingFormGroup.invalid">
+                                <i class="fa fa-check-circle"></i>
+                                Add {{ title }}
+                            </button>
+                            }
+                            @if(isBuildingEdit) {
+                            <button mat-button mat-flat-button color="primary" class="addcountry-btn w-100"
+                                type="submit" (click)="addOrUpdateBuilding(buildingData.buildingMgmtId)"
+                                [disabled]="buildingFormGroup.invalid">
+                                <i class="fa fa-check-circle"></i>
+                                Update {{ title }}
+                            </button>
+                            }
+                        </div>
+                        <div class="addcountry-div">
+                            <button mat-stroked-button type="button" color="primary" class="addcountry-btn w-100"
+                                (click)="onCancel()">
+                                {{ noLabel || 'Cancel' }}
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </mat-card-content>
+            }
+        </div>
+    </div>
+</div> -->

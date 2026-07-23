@@ -1,0 +1,413 @@
+<div class="row header-row p-0 m-0">
+  <mat-card class="cardWithShadow w-100">
+    <mat-card-content class="mat-card-content-border">
+      <form [formGroup]="searchProfileForm" class="form-auth-small">
+        <div class="row">
+          <!-- Angular Material Dropdown -->
+          <div class="col-lg-3 col-md-3 mb-2">
+            <mat-form-field appearance="outline" class="w-100 hide-hint mr-10 header-input">
+              <mat-select
+                class="input-p-5"
+                [(value)]="searchOption"
+                (selectionChange)="selSearchOption($event)"
+                placeholder="Select a Search Option"
+              >
+                <mat-option *ngFor="let option of searchOptionSelect" [value]="option.value">
+                  {{ option.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- Staff Name Input -->
+          <div
+            class="col-lg-3 col-md-3"
+            *ngIf="searchOption === 'staffName'"
+            style="padding-left: 0%"
+          >
+            <mat-form-field appearance="outline" class="w-100 hide-hint mr-10 header-input">
+              <input
+                matInput
+                class="input-p-5"
+                type="text"
+                formControlName="staffName"
+                placeholder="Staff Name"
+                (keydown.enter)="searchProfileByName()"
+              />
+            </mat-form-field>
+          </div>
+
+          <!-- Action Input -->
+          <div class="col-lg-3 col-md-3" *ngIf="searchOption === 'action'" style="padding-left: 0%">
+            <mat-form-field appearance="outline" class="w-100 hide-hint mr-10 header-input">
+              <input
+                matInput
+                class="input-p-5"
+                type="text"
+                formControlName="action"
+                placeholder="Enter Action"
+                (keydown.enter)="searchProfileByName()"
+              />
+            </mat-form-field>
+          </div>
+
+          <!-- Buttons -->
+          <div class="col-lg-3 col-md-3" style="padding-left: 0%">
+            <button
+              mat-button
+              mat-flat-button
+              color="primary"
+               class="button-normal mr-10"
+              (click)="searchProfileByName()"
+              [disabled]="!searchProfileForm.value.staffName && !searchProfileForm.value.action"
+            >
+              Search
+            </button>
+            &nbsp;
+            <button
+              mat-stroked-button
+              matButton="outlined"
+              color="primary"
+             class="button-normal"
+              (click)="clearSearchForm()"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<div class="row header-row p-0 m-0">
+  <mat-card class="cardWithShadow w-100">
+    <mat-card-content class="mat-card-content-border">
+      <div class="example-container mat-elevation-z8" tabindex="0">
+        <table mat-table [dataSource]="auditDetails" class="w-100">
+          <!-- Vlan Name Column -->
+          <ng-container matColumnDef="vlanName">
+            <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Vlan Name</th>
+            <td mat-cell *matCellDef="let audit">{{ audit.entitytName || "" }}</td>
+          </ng-container>
+
+          <!-- Action Column -->
+          <ng-container matColumnDef="action">
+            <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Action</th>
+            <td mat-cell *matCellDef="let audit">{{ audit.action }}</td>
+          </ng-container>
+
+          <!-- Staff Name Column -->
+          <ng-container matColumnDef="staffName">
+            <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Staff Name</th>
+            <td mat-cell *matCellDef="let audit">{{ audit.actionByName }}</td>
+          </ng-container>
+
+          <!-- Remark Column -->
+          <ng-container matColumnDef="remark">
+            <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Remark</th>
+            <td mat-cell *matCellDef="let audit">{{ audit.remark }}</td>
+          </ng-container>
+
+          <!-- Action Date Column -->
+          <ng-container matColumnDef="actionDate">
+            <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Action Date</th>
+            <td mat-cell *matCellDef="let audit">
+              {{ audit.actionDateTime | date: "yyyy-MM-dd hh:mm a" }}
+            </td>
+          </ng-container>
+
+          <!-- Details Column -->
+          <ng-container matColumnDef="details">
+            <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Details</th>
+            <td mat-cell *matCellDef="let audit">
+              <textarea
+                [(ngModel)]="audit.details"
+                readonly
+                rows="5"
+                style="width: 100%; border: none; resize: none; background-color: transparent"
+              ></textarea>
+            </td>
+          </ng-container>
+
+          <!-- File Column -->
+          <ng-container matColumnDef="file">
+            <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>File</th>
+            <td mat-cell *matCellDef="let audit">
+              <ng-container *ngIf="audit.fileName; else noFile">
+                <a
+                  (click)="downloadAuditFile(audit.fileName)"
+                  title="Click To See Radius Client Group Detail"
+                  style="cursor: pointer"
+                  class="text-primary"
+                >
+                  {{ audit.fileName }}
+                </a>
+              </ng-container>
+              <ng-template #noFile>N/A</ng-template>
+            </td>
+          </ng-container>
+
+          <!-- Table Header & Row Declarations -->
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+          <!-- No Records Row -->
+          <tr *ngIf="auditDetails.length === 0">
+            <td [attr.colspan]="displayedColumns.length" class="text-center">No Record Found.</td>
+          </tr>
+        </table>
+      </div>
+
+      <mat-paginator
+        [length]="totalRecords"
+        [pageSize]="itemsPerPage"
+        [pageSizeOptions]="[5,10,20,50,100]"
+        (page)="pageAuditChanged($event)"
+        showFirstLastButtons
+      >
+      </mat-paginator>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<!-- <div class="row">
+  <div class="col-md-12">
+    <div class="panel mb-15">
+      <div class="panel-heading">
+        <h3 class="panel-title">VLAN Audit</h3>
+        <div class="right">
+          <button
+            aria-controls="searchPreCust"
+            aria-expanded="false"
+            class="btn-toggle-collapse"
+            data-target="#searchPreCust"
+            data-toggle="collapse"
+            type="button"
+          >
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+      <div id="acctProfileSearchPanel" class="panel-collapse collapse in">
+        <div class="panel-body">
+          <div class="searchForm">
+            <form class="form-auth-small" [formGroup]="searchProfileForm">
+              <div class="row">
+                <div class="col-lg-3 col-md-3 m-b-10">
+                  <p-dropdown
+                    [options]="searchOptionSelect"
+                    optionValue="value"
+                    optionLabel="label"
+                    filter="true"
+                    filterBy="label"
+                    placeholder="Select a Search Option"
+                    [(ngModel)]="searchOption"
+                    [ngModelOptions]="{ standalone: true }"
+                    (onChange)="selSearchOption($event)"
+                  ></p-dropdown>
+                </div>
+                @if (searchOption == "staffName") {
+                  <div class="col-md-3" style="padding-left: 0%">
+                    <input
+                      type="text"
+                      name="name"
+                      class="form-control"
+                      placeholder="Staff Name"
+                      formControlName="staffName"
+                      (keydown.enter)="searchProfileByName()"
+                    />
+                  </div>
+                }
+                @if (searchOption == "action") {
+                  <div class="col-md-3" style="padding-left: 0%">
+                    <input
+                      type="text"
+                      name="name"
+                      class="form-control"
+                      placeholder="Enter Action"
+                      formControlName="staffName"
+                      (keydown.enter)="searchProfileByName()"
+                    />
+                  </div>
+                }
+                <div class="col-md-4" style="padding-left: 0%">
+                  <button
+                    type="submit"
+                    class="btn btn-primary"
+                    title="Search Profile"
+                    data-toggle="tooltip"
+                    (click)="searchProfileByName()"
+                    [disabled]="
+                      !searchProfileForm.value.staffName && !searchProfileForm.value.action
+                    "
+                  >
+                    Search
+                  </button>
+                  &nbsp;
+                  <button
+                    type="reset"
+                    class="btn btn-default"
+                    title="Clear"
+                    data-toggle="tooltip"
+                    (click)="clearSearchForm()"
+                  >
+                    Clear
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> -->
+
+<!-- <div class="row">
+  <div class="col-md-12 col-sm-12">
+    <div class="panel">
+      <div class="panel-heading">
+        @if (!iscustomerEdit) {
+          <h3 class="panel-title">Vlan Audit</h3>
+        }
+        <div class="right">
+          <button
+            id="create"
+            aria-controls="createPreCust"
+            aria-expanded="false"
+            class="btn-toggle-collapse"
+            data-target="#createPreCust"
+            data-toggle="collapse"
+            type="button"
+          >
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="panel-collapse collapse in" id="createPreCust">
+        <div class="panel-body">
+          <div class="row">
+            <div class="col-lg-12 col-md-12">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Vlan Name</th>
+                    <th>Action</th>
+                    <th>Staff name</th>
+                    <th>Remark</th>
+                    <th>Action Date</th>
+                    <th>Details</th>
+                    <th>File</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (
+                    audit of auditDetails
+                      | paginate
+                        : {
+                            id: "listing_groupdata",
+                            itemsPerPage: itemsPerPage,
+                            currentPage: currentPage,
+                            totalItems: totalRecords
+                          };
+                    track audit;
+                    let i = $index
+                  ) {
+                    <tr>
+                      <td>
+                        @if (audit.entitytName) {
+                          <div>
+                            {{ audit.entitytName }}
+                          </div>
+                        }
+                      </td>
+                      <td>
+                        <div>
+                          {{ audit.action }}
+                        </div>
+                      </td>
+                      <td>
+                        <div>
+                          {{ audit.actionByName }}
+                        </div>
+                      </td>
+                      <td>
+                        <div>
+                          {{ audit.remark }}
+                        </div>
+                      </td>
+                      <td>
+                        <div>
+                          {{ audit.actionDateTime | date: "yyyy-MM-dd hh:mm a" }}
+                        </div>
+                      </td>
+                      <td>
+                        <textarea
+                          [(ngModel)]="audit.details"
+                          readonly
+                          rows="5"
+                          style="
+                            width: 100%;
+                            border: none;
+                            resize: none;
+                            background-color: transparent;
+                          "
+                        >
+                        </textarea>
+                      </td>
+                      <td>
+                        @if (audit.fileName) {
+                          <div>
+                            <a
+                              (click)="downloadAuditFile(audit.fileName)"
+                              title="Click To See Radius Client Group Detail"
+                              style="color: #f7941e"
+                              class="curson_pointer"
+                            >
+                              {{ audit.fileName }}
+                            </a>
+                          </div>
+                        }
+                        @if (!audit.fileName) {
+                          <div>N/A</div>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+
+                <ng-template #noRecords>
+                  <tr>
+                    <td colspan="1" class="text-center">No Record Found.</td>
+                  </tr>
+                </ng-template>
+              </table>
+              <br />
+              <br />
+              <div style="display: flex">
+                <pagination-controls
+                  id="listing_groupdata"
+                  [maxSize]="10"
+                  [directionLinks]="true"
+                  previousLabel=""
+                  nextLabel=""
+                  (pageChange)="pageAuditChanged($event)"
+                ></pagination-controls>
+                <div id="itemPerPageDropdown">
+                  <p-dropdown
+                    [options]="pageLimitOptions"
+                    optionLabel="value"
+                    optionValue="value"
+                    (onChange)="TotalItemPerPageAudit($event)"
+                  ></p-dropdown>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> -->

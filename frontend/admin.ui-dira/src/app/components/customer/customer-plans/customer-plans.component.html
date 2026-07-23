@@ -1,0 +1,1374 @@
+<mat-card class="cardWithShadow w-100">
+    <div class="container-fluid contain-flud">
+        <!-- <mat-card-header class="justify-end"> -->
+        <div class="action-buttons" style="display: flex; align-items: center; gap: 8px;margin: 10px 20px;">
+
+            <!-- Extend Validity Button -->
+            @if (extendValidityPlanAccess) {
+            <button mat-icon-button color="primary" matTooltip="Extend Validity"
+                [disabled]="!extendValidityBulkFlag || custType !== 'Prepaid'" (click)="extendValidityForBulk()"
+                [style.opacity]="(!extendValidityBulkFlag || custType !== 'Prepaid') ? '0.5' : '1'"
+                [style.pointer-events]="(!extendValidityBulkFlag || custType !== 'Prepaid') ? 'none' : 'auto'"
+                style="transition: opacity 0.3s ease;">
+                <img src="assets/img/DashboardIcons/Service Extension1.svg" style="width: 32px; height: 32px;" />
+            </button>
+            }
+
+            <!-- Promise to Pay Button -->
+            @if (promiseToPayPlanAccess) {
+            <button mat-icon-button color="accent" matTooltip="Promise to Pay"
+                [disabled]="!promiseToPayBulkFlag || custType !== 'Prepaid'" (click)="onPromiseToPayClick()"
+                [style.opacity]="(!promiseToPayBulkFlag || custType !== 'Prepaid') ? '0.5' : '1'"
+                [style.pointer-events]="(!promiseToPayBulkFlag || custType !== 'Prepaid') ? 'none' : 'auto'"
+                style="transition: opacity 0.3s ease;">
+                <img src="assets/img/DashboardIcons/Money.svg" style="width: 32px; height: 32px;" />
+
+            </button>
+            }
+
+        </div>
+        <!-- </mat-card-header> -->
+
+
+
+        <!-- ---------trial start---------- -->
+        @if (istrialplan) {
+        <mat-card class="mb-4 trial-plan-card">
+            <mat-card-header>
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                      <div style="display: flex; align-items: center; gap: 12px;">
+                    <img src="assets/img/DashboardIcons/Back Arrow.svg" alt="arrow back" class="m-r-10"
+                        (click)="customerDetailOpen()">
+
+                    <mat-card-title>
+                        {{ customerLedgerDetailData?.title }}
+                        {{ customerLedgerDetailData?.firstname }}
+                        {{ customerLedgerDetailData?.lastname }}
+                        Trial Plan
+                    </mat-card-title>
+                </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button mat-icon-button color="accent" matTooltip="Refresh"
+                        (click)="getTrailPlanList(customerId, '')">
+                        <img src="assets/img/DashboardIcons/Refresh.svg" alt="Refresh">
+                    </button>
+
+                    <!-- <button mat-icon-button color="warn" matTooltip="Collapse" (click)="isTrialCollapsed = !isTrialCollapsed">
+                        <mat-icon>{{
+                            isTrialCollapsed ? 'expand_more' : 'expand_less'
+                            }}</mat-icon>
+                    </button> -->
+                </div>
+            </mat-card-header>
+
+            <mat-card-content *ngIf="!isTrialCollapsed">
+                <div class="table-container list-side-scrollbar">
+                    <table mat-table [dataSource]="TrailPlanList" class="w-100 mat-elevation-z2"
+                        *ngIf="TrailPlanList?.length > 0">
+                        <!-- Name -->
+                        <ng-container matColumnDef="name">
+                            <th mat-header-cell *matHeaderCellDef>Name</th>
+                            <td mat-cell *matCellDef="let plan">{{ plan.planName }}</td>
+                        </ng-container>
+
+                        <!-- Plan Group -->
+                        <ng-container matColumnDef="planGroup">
+                            <th mat-header-cell *matHeaderCellDef>Plan Group</th>
+                            <td mat-cell *matCellDef="let plan">{{ plan.planGroupName }}</td>
+                        </ng-container>
+
+                        <!-- Validity -->
+                        <ng-container matColumnDef="validity">
+                            <th mat-header-cell *matHeaderCellDef>Validity</th>
+                            <td mat-cell *matCellDef="let plan">{{ plan.validity }}</td>
+                        </ng-container>
+
+                        <!-- Start Date -->
+                        <ng-container matColumnDef="startDate">
+                            <th mat-header-cell *matHeaderCellDef>Start Date</th>
+                            <td mat-cell *matCellDef="let plan">
+                                {{ plan.dbStartDate | date: 'dd-MM-yyyy hh:mm a' }}
+                            </td>
+                        </ng-container>
+
+                        <!-- Expiry Date -->
+                        <ng-container matColumnDef="expiryDate">
+                            <th mat-header-cell *matHeaderCellDef>Expiry Date</th>
+                            <td mat-cell *matCellDef="let plan">
+                                {{ plan.dbExpiryDate | date: 'dd-MM-yyyy hh:mm a' }}
+                            </td>
+                        </ng-container>
+
+                        <!-- Action -->
+                        <ng-container matColumnDef="action">
+                            <th mat-header-cell *matHeaderCellDef>Action</th>
+                            <td mat-cell *matCellDef="let plan" class="flex gap-1">
+                                <!-- Extend -->
+                                @if (
+                                customerLedgerDetailData?.status !== 'Terminate' &&
+                                extendTrailPlanAccess
+                                ) {
+                                <button mat-mini-fab color="primary" matTooltip="Extend Trial"
+                                    [disabled]="plan.custPlanStatus === 'STOP'"
+                                    (click)="extanTrailPlanModel(plan, 'extend')">
+                                     <img src="assets/img/DashboardIcons/Extend Trial.svg" />
+                                </button>
+                                }
+
+                                <!-- Subscribe -->
+                                @if (
+                                customerLedgerDetailData?.status !== 'Terminate' &&
+                                subscribePlanAccess
+                                ) {
+
+                                <button mat-mini-fab color="accent" matTooltip="Subscribe Plan"
+                                    [disabled]="plan.custPlanStatus === 'STOP'" (click)="subscribeTrailPlanModel(plan)">
+                                    <img src="assets/img/DashboardIcons/10622118 1.svg" />
+
+                                </button>
+                                }
+
+                                <!-- Cancel -->
+                                @if (
+                                customerLedgerDetailData?.status !== 'Terminate' &&
+                                deleteTrailPlanAccess
+                                ) {
+                                <button mat-icon-button color="warn" matTooltip="Cancel Trial"
+                                    [disabled]="plan.custPlanStatus === 'STOP'"
+                                    (click)="cancelConfirmonTrialmode(plan)">
+                                    <img src="assets\img\DashboardIcons\Close.svg" />
+
+                                </button>
+                                }
+                            </td>
+                        </ng-container>
+
+                        <!-- Table Header & Rows -->
+                        <tr mat-header-row *matHeaderRowDef="[
+                      'name',
+                      'planGroup',
+                      'validity',
+                      'startDate',
+                      'expiryDate',
+                      'action'
+                    ]"></tr>
+                        <tr mat-row *matRowDef="let row; columns: [
+                      'name',
+                      'planGroup',
+                      'validity',
+                      'startDate',
+                      'expiryDate',
+                      'action'
+                    ]"></tr>
+                    </table>
+
+                    <!-- Empty State -->
+                    <div *ngIf="!TrailPlanList || TrailPlanList.length === 0" class="empty-state py-5">
+                        <!-- <mat-icon class="empty-icon">search_off</mat-icon> -->
+                        <img src="assets/img/DashboardIcons/search_off.svg" alt="search_off">
+                        <p class="text-muted">No Trial Plan found.</p>
+                    </div>
+
+                    <!-- Paginator -->
+                    <mat-paginator *ngIf="TrailPlanList && TrailPlanList.length > 0"
+                        [length]="custTrailPlantotalRecords" [pageSize]="custTrailPlanItemPerPage"
+                        [pageSizeOptions]="[5, 10, 20, 50, 100]" (page)="pageCustTrailPlanListData($event)"
+                        showFirstLastButtons></mat-paginator>
+                </div>
+            </mat-card-content>
+        </mat-card>
+        }
+
+        <!-- ---------trial end---------- -->
+
+        <!-- ---------current start---------- -->
+        <mat-card class="mb-4 current-plans-card">
+            <mat-card-header>
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <!-- Left side: Back button + title -->
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <img src="assets/img/DashboardIcons/Back Arrow.svg" alt="arrow back" class="m-r-10"
+                            (click)="customerDetailOpen()">
+
+                        <mat-card-title>
+                            {{ customerLedgerDetailData?.title }}
+                            {{ customerLedgerDetailData?.firstname }}
+                            {{ customerLedgerDetailData?.lastname }}
+                            Current Plan
+                        </mat-card-title>
+                    </div>
+
+                    <!-- Right side: Refresh button -->
+                    <div>
+                        <button mat-icon-button color="primary" matTooltip="Refresh"
+                            (click)="getcustCurrentPlan(customerId, '')">
+                            <img src="assets/img/DashboardIcons/Refresh.svg" alt="Refresh">
+                        </button>
+                    </div>
+                </div>
+            </mat-card-header>
+
+
+            <mat-card-content>
+                <div class="table-container list-side-scrollbar">
+                    <table mat-table [dataSource]="custCurrentPlanList" class="w-100 mat-elevation-z2">
+                        <!-- Checkbox Column -->
+                        <ng-container matColumnDef="select">
+                            <th mat-header-cell *matHeaderCellDef></th>
+                            <td mat-cell *matCellDef="let plan">
+                                <mat-checkbox *ngIf="
+                        isExtendInCurrentPlan(plan.custPlanMapppingId, plan.expiryDate) &&
+                        plan.plangroup !== 'Volume Booster' &&
+                        plan.plangroup !== 'Bandwidthbooster' &&
+                        plan.plangroup !== 'DTV Addon' &&
+                        !plan.istrialplan &&
+                        customerLedgerDetailData?.status !== 'Terminate' &&
+                        chekcPlanGroup(plan, custCurrentPlanList) &&
+                        !checkIfChildCustomer(plan) &&
+                        plan.invoiceType != 'Group' &&
+                        !['disable', 'hold', 'newactivation'].includes(
+                          plan.custPlanStatus.toLowerCase()
+                        )
+                      " (change)="extendValidityBulk(plan, $event)"></mat-checkbox>
+                            </td>
+                        </ng-container>
+
+                        <!-- Service Name -->
+                        <ng-container matColumnDef="service">
+                            <th mat-header-cell *matHeaderCellDef>Service Name</th>
+                            <td mat-cell *matCellDef="let plan">{{ plan.service }}</td>
+                        </ng-container>
+
+                        <!-- Serial No -->
+                        <ng-container matColumnDef="serialNo">
+                            <th mat-header-cell *matHeaderCellDef>Serial No</th>
+                            <td mat-cell *matCellDef="let plan">
+                                <a href="javascript:void(0)" (click)="openPlanConnectionModal(plan)">
+                                    {{ getSerialNumber(plan) || 'NA' }}
+                                </a>
+                            </td>
+                        </ng-container>
+
+                        <!-- Plan Name -->
+                        <ng-container matColumnDef="planName">
+                            <th mat-header-cell *matHeaderCellDef>Plan Name</th>
+                            <td mat-cell *matCellDef="let plan">
+                                <a href="javascript:void(0)"
+                                    (click)="quotaPlanDetailsModel('quotaModalOpen', customerLedgerDetailData.id, plan)">
+                                    {{ plan.planName }}
+                                </a>
+                            </td>
+                        </ng-container>
+
+                        <!-- Plan Group -->
+                        <ng-container matColumnDef="planGroup">
+                            <th mat-header-cell *matHeaderCellDef>Plan Group</th>
+                            <td mat-cell *matCellDef="let plan">{{ plan.planGroupName }}</td>
+                        </ng-container>
+
+                        <!-- Validity -->
+                        <ng-container matColumnDef="validity">
+                            <th mat-header-cell *matHeaderCellDef>Validity</th>
+                            <td mat-cell *matCellDef="let plan">
+                                <ng-container *ngIf="custType === 'Prepaid'">{{ plan.validity }}</ng-container>
+                                <ng-container *ngIf="custType !== 'Prepaid'">N/A</ng-container>
+                            </td>
+                        </ng-container>
+
+                        <!-- Plan Status -->
+                        <ng-container matColumnDef="status">
+                            <th mat-header-cell *matHeaderCellDef>Plan Status</th>
+                            <td mat-cell *matCellDef="let plan">
+                                <span class="status-badge" [ngClass]="{
+                                  'status-success': plan.custPlanStatus === 'Active',
+                                  'status-hold': plan.custPlanStatus === 'Hold',
+                                  'status-danger': plan.custPlanStatus === 'Inactive'
+                                }">
+                                    {{ plan.custPlanStatus }}
+                                </span>
+                            </td>
+                        </ng-container>
+
+                        <!-- Start Date -->
+                        <ng-container matColumnDef="startDate">
+                            <th mat-header-cell *matHeaderCellDef>Start Date</th>
+                            <td mat-cell *matCellDef="let plan">
+                                {{ plan.dbStartDate | date: 'dd-MM-yyyy hh:mm a' }}
+                            </td>
+                        </ng-container>
+
+                        <!-- Expiry Date -->
+                        <ng-container matColumnDef="expiryDate">
+                            <th mat-header-cell *matHeaderCellDef>Service Expiry Date</th>
+                            <td mat-cell *matCellDef="let plan">
+                                {{ plan.dbEndDate | date: 'dd-MM-yyyy hh:mm a' }}
+                            </td>
+                        </ng-container>
+
+                        <!-- Billing End Date -->
+                        <ng-container matColumnDef="billingEndDate">
+                            <th mat-header-cell *matHeaderCellDef>Billing End Date</th>
+                            <td mat-cell *matCellDef="let plan">
+                                {{ plan.dbExpiryDate | date: 'dd-MM-yyyy hh:mm a' }}
+                            </td>
+                        </ng-container>
+
+                        <!-- Remaining Days -->
+                        <ng-container matColumnDef="remainingDays">
+                            <th mat-header-cell *matHeaderCellDef>Remaining Days</th>
+                            <td mat-cell *matCellDef="let plan">
+                                <ng-container *ngIf="custType === 'Prepaid'">
+                                    {{ plan.remainingDays }}
+                                </ng-container>
+                                <ng-container *ngIf="custType !== 'Prepaid'">N/A</ng-container>
+                            </td>
+                        </ng-container>
+
+                        <!-- Promise To Pay -->
+                        <ng-container matColumnDef="promiseToPay">
+                            <th mat-header-cell *matHeaderCellDef>Promise To Pay Taken</th>
+                            <td mat-cell *matCellDef="let plan">
+                                <span *ngIf="!plan.isPromiseToPayTaken" class="badge badge-secondary">No</span>
+                                <span *ngIf="plan.isPromiseToPayTaken && promiseToPayPlanAccess"
+                                    class="badge badge-success cursor-pointer" (click)="
+                        promiseToPayDetailsClick(
+                          'promiseToPayDataModal',
+                          plan.promiseToPayStartDate,
+                          plan.promiseToPayEndDate,
+                          plan.promiseToPayDays
+                        )
+                      ">
+                                    Yes
+                                </span>
+                            </td>
+                        </ng-container>
+
+                        <!-- Action Column -->
+                        <ng-container matColumnDef="action">
+                            <th mat-header-cell *matHeaderCellDef>Action</th>
+                            <td mat-cell *matCellDef="let plan" class="action-buttons">
+                                <!-- Notes -->
+                                <button mat-icon-button matTooltip="Notes"
+                                    *ngIf="planNotesAccess && customerLedgerDetailData?.status !== 'Terminate'"
+                                    (click)="displayNote('plan')">
+                                    <img src="assets/img/DashboardIcons/Add note.svg" alt="Add note">
+                                </button>
+
+                                <!-- Extend Validity -->
+                                <button mat-icon-button matTooltip="Extend Validity" color="primary" *ngIf="
+                        custType === 'Prepaid' &&
+                        isExtendInCurrentPlan(plan.custPlanMapppingId, plan.expiryDate) &&
+                        plan.plangroup !== 'Volume Booster' &&
+                        plan.plangroup !== 'Bandwidthbooster' &&
+                        plan.plangroup !== 'DTV Addon' &&
+                        !plan.istrialplan &&
+                        customerLedgerDetailData?.status !== 'Terminate' &&
+                        chekcPlanGroup(plan, custCurrentPlanList) &&
+                        !checkIfChildCustomer(plan) &&
+                        plan.invoiceType != 'Group' &&
+                        !['disable', 'hold', 'newactivation'].includes(plan.custPlanStatus.toLowerCase()) &&
+                        extendValidityPlanAccess
+                      " (click)="extendValidityForPlanBundle(plan)">
+                                    <!-- <mat-icon>update</mat-icon> -->
+                                    <img src="assets/img/DashboardIcons/Service Extension1.svg" />
+                                </button>
+
+                                <!-- Void Plan -->
+                                <button mat-icon-button matTooltip="Void Plan" color="warn"
+                                    *ngIf="plan.debitdocid == null && plan.offerPrice == '0.0' && voidPlanAcces"
+                                    (click)="onVoidPlan(plan, 'void')">
+                                    <img src="assets/img/DashboardIcons/Void-Invoice.svg" alt="">
+                                </button>
+                            </td>
+                        </ng-container>
+
+                        <!-- Table Rows -->
+                        <tr mat-header-row *matHeaderRowDef="[
+                    'select',
+                    'service',
+                    'serialNo',
+                    'planName',
+                    'planGroup',
+                    'validity',
+                    'status',
+                    'startDate',
+                    'expiryDate',
+                    'billingEndDate',
+                    'remainingDays',
+                    'promiseToPay',
+                    'action'
+                  ]"></tr>
+                        <tr mat-row *matRowDef="let row; columns: [
+                    'select',
+                    'service',
+                    'serialNo',
+                    'planName',
+                    'planGroup',
+                    'validity',
+                    'status',
+                    'startDate',
+                    'expiryDate',
+                    'billingEndDate',
+                    'remainingDays',
+                    'promiseToPay',
+                    'action'
+                  ]"></tr>
+                    </table>
+
+                    <!-- Empty State -->
+                    <div *ngIf="!custCurrentPlanList || custCurrentPlanList.length === 0" class="empty-state py-5">
+
+                        <p class="text-muted" style="display:flex;justify-content:center">No Current Plan found.</p>
+                    </div>
+                </div>
+                <!-- Paginator -->
+                <mat-paginator *ngIf="custCurrentPlanList && custCurrentPlanList.length > 0"
+                    [length]="customerCurrentPlanListdatatotalRecords"
+                    [pageSize]="customerCurrentPlanListdataitemsPerPage" [pageSizeOptions]="[5, 10, 20, 50, 100]"
+                    (page)="pageChangedcustomerCurrentPlanListData($event)" showFirstLastButtons></mat-paginator>
+            </mat-card-content>
+        </mat-card>
+
+        <!-- ---------current end---------- -->
+
+        <!-- ---------future start---------- -->
+        <mat-card class="mb-4 future-plans-card">
+
+
+            <mat-card-header>
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <!-- Left side: Back button + title -->
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <img src="assets/img/DashboardIcons/Back Arrow.svg" alt="arrow back" class="m-r-10"
+                            (click)="customerDetailOpen()">
+
+                        <mat-card-title>
+                            {{ customerLedgerDetailData?.title }}
+                            {{ customerLedgerDetailData?.firstname }}
+                            {{ customerLedgerDetailData?.lastname }} Future Plan
+                        </mat-card-title>
+                    </div>
+
+                    <!-- Right side: Refresh button -->
+                    <div>
+                        <button mat-icon-button color="primary" matTooltip="Refresh"
+                            (click)="getcustFuturePlan(customerLedgerDetailData.id, '')">
+                            <img src="assets/img/DashboardIcons/Refresh.svg" alt="Refresh">
+                        </button>
+                    </div>
+                </div>
+            </mat-card-header>
+
+            <mat-card-content>
+                <div class="table-container list-side-scrollbar">
+                    <table mat-table [dataSource]="custFuturePlanList" class="w-100 mat-elevation-z2">
+                        <!-- Checkbox Column -->
+                        <ng-container matColumnDef="select">
+                            <th mat-header-cell *matHeaderCellDef></th>
+                            <td mat-cell *matCellDef="let plan">
+                                <mat-checkbox *ngIf="
+                        isLatestFuturePlan(plan.custPlanMapppingId, plan.expiryDate) &&
+                        plan.plangroup !== 'Volume Booster' &&
+                        plan.plangroup !== 'Bandwidthbooster' &&
+                        plan.plangroup !== 'DTV Addon' &&
+                        customerLedgerDetailData?.status !== 'Terminate' &&
+                        chekcPlanGroup(plan, custFuturePlanList) &&
+                        !checkIfChildCustomer(plan) &&
+                        plan.invoiceType != 'Group' &&
+                        !['disable', 'hold'].includes(plan.custPlanStatus.toLowerCase())
+                      " (change)="extendValidityBulk(plan, $event)"></mat-checkbox>
+                            </td>
+                        </ng-container>
+
+                        <!-- Service Name -->
+                        <ng-container matColumnDef="service">
+                            <th mat-header-cell *matHeaderCellDef>Service Name</th>
+                            <td mat-cell *matCellDef="let plan">{{ plan.service }}</td>
+                        </ng-container>
+
+                        <!-- Serial No -->
+                        <ng-container matColumnDef="serialNo">
+                            <th mat-header-cell *matHeaderCellDef>Serial No</th>
+                            <td mat-cell *matCellDef="let plan">
+                                <a href="javascript:void(0)" class="link-text" (click)="openPlanConnectionModal(plan)">
+                                    {{ getSerialNumber(plan) !== '' ? getSerialNumber(plan) : 'NA' }}
+                                </a>
+                            </td>
+                        </ng-container>
+
+                        <!-- Plan Name -->
+                        <ng-container matColumnDef="planName">
+                            <th mat-header-cell *matHeaderCellDef>Plan Name</th>
+                            <td mat-cell *matCellDef="let plan">
+                                <a href="javascript:void(0)" class="link-text"
+                                    (click)="quotaPlanDetailsModel('quotaModalOpen', customerLedgerDetailData.id, plan)">
+                                    {{ plan.planName }}
+                                </a>
+                            </td>
+                        </ng-container>
+
+                        <!-- Plan Group -->
+                        <ng-container matColumnDef="planGroup">
+                            <th mat-header-cell *matHeaderCellDef>Plan Group</th>
+                            <td mat-cell *matCellDef="let plan">{{ plan.planGroupName }}</td>
+                        </ng-container>
+
+                        <!-- Validity -->
+                        <ng-container matColumnDef="validity">
+                            <th mat-header-cell *matHeaderCellDef>Validity</th>
+                            <td mat-cell *matCellDef="let plan">
+                                <ng-container *ngIf="custType === 'Prepaid'">
+                                    {{ plan.validity }}
+                                </ng-container>
+                                <ng-container *ngIf="custType === 'Postpaid'">
+                                    <span
+                                        *ngIf="['Volume Booster', 'Bandwidthbooster', 'DTV Addon'].includes(plan.plangroup)">
+                                        {{ plan.validity }}
+                                    </span>
+                                    <span
+                                        *ngIf="['Renew', 'Registration', 'Registration and Renewal'].includes(plan.plangroup)">
+                                        N/A
+                                    </span>
+                                </ng-container>
+                            </td>
+                        </ng-container>
+
+                        <!-- Plan Status -->
+                        <ng-container matColumnDef="status">
+                            <th mat-header-cell *matHeaderCellDef>Plan Status</th>
+                            <td mat-cell *matCellDef="let plan">
+                                <!-- <span *ngIf="checkStatus(plan.custPlanStatus, plan.custServMappingStatus)"
+                                    class="status-badge" [ngClass]="{
+                        'status-success': badgeTypeForStatus === 'green',
+                        'status-primary': badgeTypeForStatus === 'grey',
+                        'status-danger': badgeTypeForStatus === 'red'
+                      }">
+                                    {{ displayStatus }}
+                                </span> -->
+                                <span *ngIf="checkStatus(plan.custPlanStatus, plan.custServMappingStatus)"
+                                    class="status-badge" [ngClass]="{
+                                    'status-success': badgeTypeForStatus === 'green',
+                                    'status-primary': badgeTypeForStatus === 'grey',
+                                    'status-danger': badgeTypeForStatus === 'red'
+                                  }">
+                                    {{ displayStatus }}
+                                </span>
+                            </td>
+                        </ng-container>
+
+                        <!-- Start Date -->
+                        <ng-container matColumnDef="startDate">
+                            <th mat-header-cell *matHeaderCellDef>Start Date</th>
+                            <td mat-cell *matCellDef="let plan">
+                                {{ plan.dbStartDate | date: 'dd-MM-yyyy hh:mm a' }}
+                            </td>
+                        </ng-container>
+
+                        <!-- Service Expiry Date -->
+                        <ng-container matColumnDef="expiryDate">
+                            <th mat-header-cell *matHeaderCellDef>Service Expiry Date</th>
+                            <td mat-cell *matCellDef="let plan">
+                                <ng-container *ngIf="custType === 'Prepaid'">
+                                    {{ plan.dbEndDate | date: 'dd-MM-yyyy hh:mm a' }}
+                                </ng-container>
+                                <ng-container *ngIf="custType === 'Postpaid'">
+                                    <span
+                                        *ngIf="['Volume Booster', 'Bandwidthbooster', 'DTV Addon'].includes(plan.plangroup)">
+                                        {{ plan.dbEndDate | date: 'dd-MM-yyyy hh:mm a' }}
+                                    </span>
+                                    <span
+                                        *ngIf="['Renew', 'Registration', 'Registration and Renewal'].includes(plan.plangroup)">
+                                        N/A
+                                    </span>
+                                </ng-container>
+                            </td>
+                        </ng-container>
+
+                        <!-- Billing End Date -->
+                        <ng-container matColumnDef="billingEndDate">
+                            <th mat-header-cell *matHeaderCellDef>Billing End Date</th>
+                            <td mat-cell *matCellDef="let plan">
+                                <ng-container *ngIf="custType === 'Prepaid'">
+                                    {{ plan.dbExpiryDate | date: 'dd-MM-yyyy hh:mm a' }}
+                                </ng-container>
+                                <ng-container *ngIf="custType === 'Postpaid'">
+                                    <span
+                                        *ngIf="['Volume Booster', 'Bandwidthbooster', 'DTV Addon'].includes(plan.plangroup)">
+                                        {{ plan.dbExpiryDate | date: 'dd-MM-yyyy hh:mm a' }}
+                                    </span>
+                                    <span
+                                        *ngIf="['Renew', 'Registration', 'Registration and Renewal'].includes(plan.plangroup)">
+                                        N/A
+                                    </span>
+                                </ng-container>
+                            </td>
+                        </ng-container>
+
+                        <!-- Action -->
+                        <ng-container matColumnDef="action">
+                            <th mat-header-cell *matHeaderCellDef>Action</th>
+                            <td mat-cell *matCellDef="let plan" class="action-buttons">
+                                <!-- Extend Validity -->
+                                <button mat-icon-button color="primary" matTooltip="Extend Validity" *ngIf="
+                        custType === 'Prepaid' &&
+                        isLatestFuturePlan(plan.custPlanMapppingId, plan.expiryDate) &&
+                        plan.plangroup !== 'Volume Booster' &&
+                        plan.plangroup !== 'Bandwidthbooster' &&
+                        plan.plangroup !== 'DTV Addon' &&
+                        customerLedgerDetailData?.status !== 'Terminate' &&
+                        chekcPlanGroup(plan, custFuturePlanList) &&
+                        !checkIfChildCustomer(plan) &&
+                        plan.invoiceType != 'Group' &&
+                        !['disable', 'hold'].includes(plan.custPlanStatus.toLowerCase()) &&
+                        extendValidityPlanAccess
+                      " (click)="extendValidityForPlanBundle(plan)">
+                                    <img src="assets/img/DashboardIcons/Service Extension1.svg" />
+
+                                </button>
+
+                                <!-- Void Plan -->
+                                <button mat-icon-button color="warn" matTooltip="Void Plan"
+                                    *ngIf="plan.debitdocid == null && plan.offerPrice == '0.0' && voidPlanAcces"
+                                    (click)="onVoidPlan(plan, 'void')">
+                                    <img src="assets/img/DashboardIcons/Reject.svg" alt="Reject">
+                                </button>
+                            </td>
+                        </ng-container>
+
+                        <!-- Header and Rows -->
+                        <tr mat-header-row *matHeaderRowDef="[
+                    'select',
+                    'service',
+                    'serialNo',
+                    'planName',
+                    'planGroup',
+                    'validity',
+                    'status',
+                    'startDate',
+                    'expiryDate',
+                    'billingEndDate',
+                    'action'
+                  ]"></tr>
+                        <tr mat-row *matRowDef="let row; columns: [
+                    'select',
+                    'service',
+                    'serialNo',
+                    'planName',
+                    'planGroup',
+                    'validity',
+                    'status',
+                    'startDate',
+                    'expiryDate',
+                    'billingEndDate',
+                    'action'
+                  ]"></tr>
+                    </table>
+
+                    <!-- Empty State -->
+                    <div *ngIf="!custFuturePlanList || custFuturePlanList.length === 0" class="empty-state py-5">
+
+                        <p class="text-muted" style="display:flex;justify-content:center">No Future Plan found.</p>
+                    </div>
+                </div>
+                <!-- Paginator -->
+                <mat-paginator *ngIf="custFuturePlanList && custFuturePlanList.length > 0"
+                    [length]="customerFuturePlanListdatatotalRecords"
+                    [pageSize]="customerFuturePlanListdataitemsPerPage" [pageSizeOptions]="[5, 10, 20, 50, 100]"
+                    (page)="pageChangedcustFuturePlanListData($event)" showFirstLastButtons></mat-paginator>
+            </mat-card-content>
+        </mat-card>
+
+
+        <!-- ---------future end---------- -->
+
+        <!-- ---------expired start---------- -->
+        <mat-card class="mb-4 expired-plans-card">
+
+            <mat-card-header>
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <!-- Left side: Back button + title -->
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <img src="assets/img/DashboardIcons/Back Arrow.svg" alt="arrow back" class="m-r-10"
+                            (click)="customerDetailOpen()">
+                        <mat-card-title>
+                            {{ customerLedgerDetailData?.title }}
+                            {{ customerLedgerDetailData?.firstname }}
+                            {{ customerLedgerDetailData?.lastname }} Expired Plan
+                        </mat-card-title>
+                    </div>
+
+                    <!-- Right side: Refresh button -->
+                    <div>
+                        <button mat-icon-button color="primary" matTooltip="Refresh"
+                            (click)="getcustExpiredPlan(customerId, '')">
+                            <img src="assets/img/DashboardIcons/Refresh.svg" alt="Refresh">
+                        </button>
+                    </div>
+                </div>
+            </mat-card-header>
+
+            <mat-card-content>
+                <div class="table-container list-side-scrollbar">
+                    <table mat-table [dataSource]="custExpiredPlanList" class="w-100 mat-elevation-z2">
+                        <!-- Checkbox Column -->
+                        <ng-container matColumnDef="select">
+                            <th mat-header-cell *matHeaderCellDef></th>
+                            <td mat-cell *matCellDef="let plan">
+                                <mat-checkbox *ngIf="
+                        (plan.custPlanStatus.toLowerCase() === 'stop' ||
+                          plan.custPlanStatus.toLowerCase() === 'expired') &&
+                        plan.plangroup !== 'Volume Booster' &&
+                        plan.plangroup !== 'Bandwidthbooster' &&
+                        plan.plangroup !== 'DTV Addon' &&
+                        !plan.istrialplan &&
+                        !plan.isVoid &&
+                        chekcPlanGroup(plan, custExpiredPlanList) &&
+                        plan.custPlanStatus.toLowerCase() != 'disable' &&
+                        plan.custPlanStatus.toLowerCase() != 'hold' &&
+                        plan.isPromiseTopay
+                      " (change)="
+                        extendValidityBulk(plan, $event);
+                        promiseToPayBulk(plan.planmapid, $event)
+                      "></mat-checkbox>
+                            </td>
+                        </ng-container>
+
+                        <!-- Service Name -->
+                        <ng-container matColumnDef="service">
+                            <th mat-header-cell *matHeaderCellDef>Service Name</th>
+                            <td mat-cell *matCellDef="let plan">{{ plan.service }}</td>
+                        </ng-container>
+
+                        <!-- Serial No -->
+                        <ng-container matColumnDef="serialNo">
+                            <th mat-header-cell *matHeaderCellDef>Serial No</th>
+                            <td mat-cell *matCellDef="let plan">
+                                <a href="javascript:void(0)" class="link-text" (click)="openPlanConnectionModal(plan)">
+                                    {{ getSerialNumber(plan) !== '' ? getSerialNumber(plan) : 'NA' }}
+                                </a>
+                            </td>
+                        </ng-container>
+
+                        <!-- Plan Name -->
+                        <ng-container matColumnDef="planName">
+                            <th mat-header-cell *matHeaderCellDef>Plan Name</th>
+                            <td mat-cell *matCellDef="let plan">
+                                <a href="javascript:void(0)" class="link-text"
+                                    (click)="quotaPlanDetailsModel('quotaModalOpen', customerLedgerDetailData.id, plan)">
+                                    {{ plan.planName }}
+                                </a>
+                            </td>
+                        </ng-container>
+
+                        <!-- Plan Group -->
+                        <ng-container matColumnDef="planGroup">
+                            <th mat-header-cell *matHeaderCellDef>Plan Group</th>
+                            <td mat-cell *matCellDef="let plan">{{ plan.planGroupName }}</td>
+                        </ng-container>
+
+                        <!-- Validity -->
+                        <ng-container matColumnDef="validity">
+                            <th mat-header-cell *matHeaderCellDef>Validity</th>
+                            <td mat-cell *matCellDef="let plan">
+                                <ng-container *ngIf="custType === 'Prepaid'">
+                                    {{ plan.validity }}
+                                </ng-container>
+                                <ng-container *ngIf="custType === 'Postpaid'">
+                                    <span
+                                        *ngIf="['Volume Booster', 'Bandwidthbooster', 'DTV Addon'].includes(plan.plangroup)">
+                                        {{ plan.validity }}
+                                    </span>
+                                    <span
+                                        *ngIf="['Renew', 'Registration', 'Registration and Renewal'].includes(plan.plangroup)">
+                                        N/A
+                                    </span>
+                                </ng-container>
+                            </td>
+                        </ng-container>
+
+                        <!-- Plan Status -->
+                        <ng-container matColumnDef="status">
+                            <th mat-header-cell *matHeaderCellDef>Plan Status</th>
+                            <td mat-cell *matCellDef="let plan">
+                                <span *ngIf="checkStatus(plan.custPlanStatus, plan.custServMappingStatus)"
+                                    class="status-badge" [ngClass]="{
+                                      'status-success': badgeTypeForStatus === 'green',
+                                      'status-primary': badgeTypeForStatus === 'grey',
+                                      'status-danger': badgeTypeForStatus === 'red'
+                                    }">
+                                    {{ displayStatus }}
+                                </span>
+                            </td>
+                        </ng-container>
+
+                        <!-- Start Date -->
+                        <ng-container matColumnDef="startDate">
+                            <th mat-header-cell *matHeaderCellDef>Start Date</th>
+                            <td mat-cell *matCellDef="let plan">
+                                {{ plan.dbStartDate | date: 'dd-MM-yyyy hh:mm a' }}
+                            </td>
+                        </ng-container>
+
+                        <!-- Service Expiry Date -->
+                        <ng-container matColumnDef="expiryDate">
+                            <th mat-header-cell *matHeaderCellDef>Service Expiry Date</th>
+                            <td mat-cell *matCellDef="let plan">
+                                <ng-container *ngIf="custType === 'Prepaid'">
+                                    {{ plan.dbExpiryDate | date: 'dd-MM-yyyy hh:mm a' }}
+                                </ng-container>
+                                <ng-container *ngIf="custType === 'Postpaid'">
+                                    <span
+                                        *ngIf="['Volume Booster', 'Bandwidthbooster', 'DTV Addon'].includes(plan.plangroup)">
+                                        {{ plan.dbExpiryDate | date: 'dd-MM-yyyy hh:mm a' }}
+                                    </span>
+                                    <span
+                                        *ngIf="['Renew', 'Registration', 'Registration and Renewal'].includes(plan.plangroup)">
+                                        N/A
+                                    </span>
+                                </ng-container>
+                            </td>
+                        </ng-container>
+
+                        <!-- Billing End Date -->
+                        <ng-container matColumnDef="billingEndDate">
+                            <th mat-header-cell *matHeaderCellDef>Billing End Date</th>
+                            <td mat-cell *matCellDef="let plan">
+                                <ng-container *ngIf="custType === 'Prepaid'">
+                                    {{ plan.dbEndDate | date: 'dd-MM-yyyy hh:mm a' }}
+                                </ng-container>
+                                <ng-container *ngIf="custType === 'Postpaid'">
+                                    <span
+                                        *ngIf="['Volume Booster', 'Bandwidthbooster', 'DTV Addon'].includes(plan.plangroup)">
+                                        {{ plan.dbEndDate | date: 'dd-MM-yyyy hh:mm a' }}
+                                    </span>
+                                    <span
+                                        *ngIf="['Renew', 'Registration', 'Registration and Renewal'].includes(plan.plangroup)">
+                                        N/A
+                                    </span>
+                                </ng-container>
+                            </td>
+                        </ng-container>
+
+                        <!-- Action -->
+                        <ng-container matColumnDef="action">
+                            <th mat-header-cell *matHeaderCellDef>Action</th>
+                            <td mat-cell *matCellDef="let plan" class="action-buttons">
+                                <!-- Promise to Pay -->
+                                <button mat-icon-button color="accent" matTooltip="Promise to Pay" *ngIf="
+                        custType === 'Prepaid' &&
+                        !plan.isVoid &&
+                        plan.plangroup !== 'Volume Booster' &&
+                        plan.plangroup !== 'Bandwidthbooster' &&
+                        plan.plangroup !== 'DTV Addon' &&
+                        !plan.istrialplan &&
+                        plan.invoiceType != 'Group' &&
+                        plan.custPlanStatus.toLowerCase() != 'disable' &&
+                        plan.custPlanStatus.toLowerCase() != 'terminate' &&
+                        promiseToPayPlanAccess &&
+                        plan.isPromiseTopay
+                      " (click)="onPromiseToPay(plan.planmapid)">
+                                    <img src="assets/img/DashboardIcons/Money.svg">
+
+
+                                </button>
+
+                                <!-- Extend Validity -->
+                                <button mat-icon-button color="primary" matTooltip="Extend Validity" *ngIf="
+                        custType === 'Prepaid' &&
+                        isExtendInExpiredPlan(plan.custPlanMapppingId, plan.planExpiryDate) &&
+                        plan.plangroup !== 'Volume Booster' &&
+                        plan.plangroup !== 'Bandwidthbooster' &&
+                        plan.plangroup !== 'DTV Addon' &&
+                        customerLedgerDetailData?.status !== 'Terminate' &&
+                        chekcPlanGroup(plan, custExpiredPlanList) &&
+                        !checkIfChildCustomer(plan) &&
+                        plan.custPlanStatus.toLowerCase() != 'disable' &&
+                        plan.custPlanStatus.toLowerCase() != 'terminate' &&
+                        plan.custPlanStatus.toLowerCase() != 'hold' &&
+                        !plan.isVoid &&
+                        extendValidityPlanAccess
+                      " (click)="extendValidityForPlanBundle(plan)">
+                                    <img src="assets/img/DashboardIcons/Service Extension1.svg" />
+
+                                </button>
+                            </td>
+                        </ng-container>
+
+                        <!-- Header and Rows -->
+                        <tr mat-header-row *matHeaderRowDef="[
+                    'select',
+                    'service',
+                    'serialNo',
+                    'planName',
+                    'planGroup',
+                    'validity',
+                    'status',
+                    'startDate',
+                    'expiryDate',
+                    'billingEndDate',
+                    'action'
+                  ]"></tr>
+                        <tr mat-row *matRowDef="let row; columns: [
+                    'select',
+                    'service',
+                    'serialNo',
+                    'planName',
+                    'planGroup',
+                    'validity',
+                    'status',
+                    'startDate',
+                    'expiryDate',
+                    'billingEndDate',
+                    'action'
+                  ]"></tr>
+                    </table>
+
+                    <!-- Empty State -->
+                    <div *ngIf="!custExpiredPlanList || custExpiredPlanList.length === 0" class="empty-state py-5">
+
+                        <p class="text-muted" style="display:flex;justify-content:center">No Expired Plan found.</p>
+                    </div>
+                </div>
+                <mat-paginator *ngIf="custExpiredPlanList && custExpiredPlanList.length > 0"
+                    [length]="customerExpiryPlanListdatatotalRecords"
+                    [pageSize]="customerExpiryPlanListdataitemsPerPage" [pageSizeOptions]="[5, 10, 20, 50, 100]"
+                    (page)="pageChangedcustomerExpiryPlanListData($event)" showFirstLastButtons></mat-paginator>
+            </mat-card-content>
+        </mat-card>
+
+        <!-- ---------future end---------- -->
+
+
+
+
+
+
+    </div>
+</mat-card>
+
+
+<!-- Remark Dialog Template -->
+<ng-template #remarkDialog>
+    <div class="dialog-container">
+        <!-- Dialog Header -->
+        <div class="dialog-header">
+            Remark
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="onCancelRemarkDialog()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+
+
+                </a>
+            </span>
+        </div>
+
+        <!-- Dialog Content -->
+        <div mat-dialog-content>
+            <div class="row">
+                <div class="col-12">
+                    <label class="inputLabel">Remark*</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <input class="input-p-5" matInput [(ngModel)]="remark" placeholder="Enter Remark" />
+                    </mat-form-field>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dialog Actions -->
+        <mat-dialog-actions align="end">
+            <button class="button-normal mr-10" mat-button mat-flat-button color="primary" [disabled]="!remark"
+                (click)="saveRemark()">
+
+                Save
+            </button>
+            <button mat-stroked-button matButton="outlined" class="button-normal" color="primary"
+                (click)="onCancelRemarkDialog()">
+                Close
+            </button>
+        </mat-dialog-actions>
+    </div>
+</ng-template>
+
+<!-- ----------------Remark Dialog Template end----------- -->
+<!-- ----------------extent validity Dialog Template start----------- -->
+<!-- Extend Validity Dialog Template -->
+<ng-template #extendValidityDialog>
+    <div class="dialog-container">
+        <!-- Dialog Header -->
+        <div class="dialog-header">
+            Extend Validity
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="onCancelExtendValidityDialog()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+
+
+                </a>
+            </span>
+        </div>
+
+        <!-- Dialog Content -->
+        <div mat-dialog-content>
+            <form [formGroup]="extendValidityForm">
+                <div class="row">
+                    <!-- Number of Days -->
+                    <div class="col-12 col-md-6">
+                        <label class="inputLabel">Number of Days*</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <input class="input-p-5" type="number" matInput formControlName="numberOfDays"
+                                placeholder="Enter Number of Days" />
+                        </mat-form-field>
+                        @if (extendValiditysubmitted && extendValidityForm.controls.numberOfDays.errors) {
+                        <mat-error>
+                            Number of Days is required.
+                        </mat-error>
+                        }
+                    </div>
+
+                    <!-- Remarks -->
+                    <div class="col-12" style="margin-top: 10px">
+                        <label class="inputLabel">Remarks*</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <textarea class="input-p-5" matInput formControlName="extend_validity_remarks"
+                                placeholder="Enter Remark" rows="3"></textarea>
+                        </mat-form-field>
+                        @if (extendValiditysubmitted && extendValidityForm.controls.extend_validity_remarks.errors) {
+                        <mat-error>
+                            Remarks is required.
+                        </mat-error>
+                        }
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Dialog Actions -->
+        <mat-dialog-actions align="end">
+            <button class="button-normal mr-10" mat-button mat-flat-button color="primary"
+                (click)="extendValidityConfirmation()">
+                Save
+            </button>
+            <button mat-stroked-button matButton="outlined" class="button-normal" color="primary"
+                (click)="onCancelExtendValidityDialog()">
+                Close
+            </button>
+        </mat-dialog-actions>
+    </div>
+</ng-template>
+
+<!-- ----------------extent validity Dialog Template end----------- -->
+
+<!-- --------------audit start--------- -->
+<ng-template #noteDialog>
+    <div class="dialog-container">
+        <!-- Dialog Header -->
+        <div class="dialog-header">
+            Audit
+            <span>
+                <a mat-icon-button (click)="onCancel()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+
+
+                </a>
+            </span>
+        </div>
+
+        <!-- Dialog Content -->
+        <div mat-dialog-content>
+            <mat-card-content>
+                <div class="row">
+                    <div class="col-12">
+                        <!-- Table for planNotes = false -->
+                        <table mat-table *ngIf="!planNotes" [dataSource]="showdata" class="mat-elevation-z2 w-100">
+                            <ng-container matColumnDef="event">
+                                <th mat-header-cell *matHeaderCellDef>Event</th>
+                                <td mat-cell *matCellDef="let data">
+                                    {{ data.billrunstatus === 'Cancelled' ? 'Cancel and Regenerate Invoice' : '' }}
+                                    {{ data.billrunstatus === 'VOID' ? 'Void Invoice' : '' }}
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="date">
+                                <th mat-header-cell *matHeaderCellDef>Date</th>
+                                <td mat-cell *matCellDef="let data">{{ data.createdate | date: "dd-MM-yyy HH:mm" }}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="remark">
+                                <th mat-header-cell *matHeaderCellDef>Remark</th>
+                                <td mat-cell *matCellDef="let data">{{ data.invoiceCancelRemarks || '-' }}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="modifiedBy">
+                                <th mat-header-cell *matHeaderCellDef>Modified By</th>
+                                <td mat-cell *matCellDef="let data">{{ data.lastModifiedByName || '-' }}</td>
+                            </ng-container>
+
+                            <tr mat-header-row *matHeaderRowDef="['event', 'date', 'remark', 'modifiedBy']"></tr>
+                            <tr mat-row *matRowDef="let row; columns: ['event', 'date', 'remark', 'modifiedBy']"></tr>
+                        </table>
+
+                        <!-- Table for planNotes = true -->
+                        <table mat-table *ngIf="planNotes" [dataSource]="showdata" class="mat-elevation-z2 w-100">
+                            <ng-container matColumnDef="event">
+                                <th mat-header-cell *matHeaderCellDef>Event</th>
+                                <td mat-cell *matCellDef="let data">
+                                    {{ data.extendValidityremarks ? 'Extend Validity' : '' }}
+                                    {{ data.promiseToPayRemarks ? 'Promise To Pay' : '' }}
+                                    {{ !data.extendValidityremarks && !data.promiseToPayRemarks ? '-' : '' }}
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="connectionNo">
+                                <th mat-header-cell *matHeaderCellDef>Connection No.</th>
+                                <td mat-cell *matCellDef="let data">{{ data.connection_no || '-' }}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="staffName">
+                                <th mat-header-cell *matHeaderCellDef>Staff Name</th>
+                                <td mat-cell *matCellDef="let data">{{ data.createbyname || '-' }}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="date">
+                                <th mat-header-cell *matHeaderCellDef>Date</th>
+                                <td mat-cell *matCellDef="let data">{{ data.createdate || '-' }}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="remark">
+                                <th mat-header-cell *matHeaderCellDef>Remark</th>
+                                <td mat-cell *matCellDef="let data">
+                                    {{ data.extendValidityremarks || data.promiseToPayRemarks || '-' }}
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="modifiedBy">
+                                <th mat-header-cell *matHeaderCellDef>Modified By</th>
+                                <td mat-cell *matCellDef="let data">{{ data.lastModifiedByName || '-' }}</td>
+                            </ng-container>
+
+                            <tr mat-header-row
+                                *matHeaderRowDef="['event','connectionNo','staffName','date','remark','modifiedBy']">
+                            </tr>
+                            <tr mat-row
+                                *matRowDef="let row; columns: ['event','connectionNo','staffName','date','remark','modifiedBy']">
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </mat-card-content>
+        </div>
+
+        <!-- Dialog Actions -->
+        <div class="dialog-action-adjust d-flex justify-content-end">
+            <button mat-stroked-button matButton="outlined" type="button" color="primary" class="button-normal"
+                (click)="onCancel()">Close</button>
+        </div>
+    </div>
+</ng-template>
+
+<!-- --------------audit end--------- -->
+
+
+<!-- Extend Validity Dialog -->
+<!-- <ng-template #extendValidityDialog let-dialogRef="dialogRef">
+    <div class="dialog-container">
+        <div class="dialog-header">
+            Extend Validity
+            <span>
+                <a mat-icon-button (click)="onCancelExtendValidityDialog()">
+                    <mat-icon>close</mat-icon>
+                </a>
+            </span>
+        </div>
+
+        <div mat-dialog-content>
+            <mat-card-content>
+                <form [formGroup]="extendValidityForm" class="row">
+                    <div class="col-md-6 col-sm-12 mb-3">
+                        <label class="inputLabel">Number of Days*</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <input matInput type="number" placeholder="Enter Number of Days"
+                                formControlName="numberOfDays" />
+                        </mat-form-field>
+                        @if (extendValiditysubmitted && extendValidityForm.controls.numberOfDays.errors) {
+                        <mat-error>Number of Days is required.</mat-error>
+                        }
+                    </div>
+
+                    <div class="col-md-12 col-sm-12 mb-3">
+                        <label class="inputLabel">Remarks*</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <textarea matInput placeholder="Enter Remark" formControlName="extend_validity_remarks"
+                                rows="3"></textarea>
+                        </mat-form-field>
+                        @if (extendValiditysubmitted && extendValidityForm.controls.extend_validity_remarks.errors) {
+                        <mat-error>Remarks are required.</mat-error>
+                        }
+                    </div>
+                </form>
+            </mat-card-content>
+        </div>
+
+        <div class="dialog-action-adjust d-flex justify-content-end">
+            <button mat-flat-button color="primary" (click)="extendValidityConfirmation()">Save</button>
+            <button mat-stroked-button color="warn" (click)="onCancelExtendValidityDialog()">Close</button>
+        </div>
+    </div>
+</ng-template> -->
+
+<!-- -----------add remarks------ -->
+<!-- Remark Dialog -->
+<ng-template #addremarkDialog let-dialogRef="dialogRef">
+    <div class="dialog-container">
+        <!-- Dialog Header -->
+        <div class="dialog-header">
+            Add Remark
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="onCancelAddRemarkDialog(dialogRef)">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+
+                </a>
+            </span>
+        </div>
+
+        <!-- Dialog Content -->
+        <div mat-dialog-content>
+            <div class="row">
+                <div class="col-12">
+                    <label class="inputLabel">Remark*</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <textarea matInput [(ngModel)]="voidPlanCancelRemarks" placeholder="Enter Remark"
+                            rows="3"></textarea>
+                    </mat-form-field>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dialog Actions -->
+        <mat-dialog-actions align="end">
+            <button mat-flat-button color="primary" class="button-normal mr-10" [disabled]="!voidPlanCancelRemarks"
+                (click)="voidPlan()">
+                Save
+            </button>
+            <button mat-stroked-button color="warn" class="button-normal" (click)="onCancelAddRemarkDialog(dialogRef)">
+                Close
+            </button>
+        </mat-dialog-actions>
+    </div>
+</ng-template>
+
+
+<!-- Subscriber Trial Plan Dialog -->
+<ng-template #subscribeTrailDialog let-dialogRef="dialogRef">
+    <div class="dialog-container">
+        <!-- Dialog Header -->
+        <div class="dialog-header">
+            Subscriber Trial Plan
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="onCancelSubscribeTrailDialog(dialogRef)">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+
+                </a>
+            </span>
+        </div>
+
+        <!-- Dialog Content -->
+        <div mat-dialog-content>
+            <form [formGroup]="Subscriberform" class="w-100">
+                <div class="row">
+                    <!-- Billing Starts -->
+                    <div class="col-12">
+                        <label class="inputLabel">Billing Starts*</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <mat-select formControlName="billinng" placeholder="Select Date"
+                                [(ngModel)]="selectScbscribeDate" (selectionChange)="showRemark($event, trialDateData)">
+                                <mat-option *ngFor="let item of trialDateData" [value]="item.date">
+                                    {{ item.label }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Remark (Conditional) -->
+                    @if (plane) {
+                    <div class="col-12">
+                        <label class="inputLabel">Remark</label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <textarea matInput formControlName="remarks" [(ngModel)]="changeTrialPlanRemark"
+                                placeholder="Enter Remark" rows="3"></textarea>
+                        </mat-form-field>
+                    </div>
+                    }
+                </div>
+            </form>
+        </div>
+
+        <!-- Dialog Actions -->
+        <mat-dialog-actions align="end">
+            <button mat-flat-button color="primary" class="button-normal mr-10" [disabled]="!selectScbscribeDate"
+                (click)="subscribeTrailPlan()">
+                Save
+            </button>
+            <button mat-stroked-button color="warn" class="button-normal"
+                (click)="onCancelSubscribeTrailDialog(dialogRef)">
+                Close
+            </button>
+        </mat-dialog-actions>
+    </div>
+</ng-template>
+
+<!-- Trial Plan Dialog -->
+<ng-template #trailPlanDialog let-dialogRef="dialogRef">
+    <div class="dialog-container">
+        <!-- Dialog Header -->
+        <div class="dialog-header">
+            <span *ngIf="trailbtnTypeSelect === 'extend'">Extend Trial Plan</span>
+            <span *ngIf="trailbtnTypeSelect === 'cancel'">Cancel Trial Plan</span>
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="onCancelTrailPlanDialog(dialogRef)">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <!-- Dialog Content -->
+        <div mat-dialog-content>
+            <div class="row">
+                <div class="col-12">
+                    <label class="inputLabel">Extend Days*</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                        <input matInput type="number" [(ngModel)]="ExtendDays" placeholder="Enter Number of Days"
+                            (keyup)="keypressId($event)" />
+                    </mat-form-field>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dialog Actions -->
+        <mat-dialog-actions align="end">
+            <button *ngIf="trailbtnTypeSelect === 'extend'" mat-flat-button color="primary" class="button-normal mr-10"
+                [disabled]="!ExtendDays" (click)="extendTrailPlan()">
+                Save
+            </button>
+
+            <button *ngIf="trailbtnTypeSelect === 'cancel'" mat-flat-button color="warn" class="button-normal mr-10"
+                [disabled]="!ExtendDays" (click)="cancelTrailPlan()">
+                Save
+            </button>
+
+            <button mat-stroked-button color="primary" class="button-normal"
+                (click)="onCancelTrailPlanDialog(dialogRef)">
+                Close
+            </button>
+        </mat-dialog-actions>
+    </div>
+</ng-template>
+
+<!-- ------------------------------------------------------------------ -->
+
+<app-quota-details-modal *ngIf="visibleQuotaDetails" [PlanQuota]="PlanQuota" dialogId="quotaModalOpen"
+    (closeDialogg)="closeModel()"></app-quota-details-modal>
+<app-plan-connection-no *ngIf="planNameOpen" [planForConnection]="planForConnection"
+    (closeDialog)="closeDialog()"></app-plan-connection-no>
+<!-- <app-promisetopay-details-modal [promiseToPayData]="promiseToPayData"
+    dialogId="promiseToPayDataModal"></app-promisetopay-details-modal> -->

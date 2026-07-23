@@ -1,0 +1,117 @@
+<span [dir]="options.dir!">
+  <mat-sidenav-container class="mainWrapper" autosize autoFocus [ngClass]="{
+      'sidebarNav-mini': options.sidenavCollapsed && options.navPos !== 'top' && !resView,
+      'sidebarNav-horizontal': options.horizontal,
+      cardBorder: options.cardBorder
+    }">
+    @if (!options.horizontal) {
+    <mat-sidenav #leftsidenav [mode]="isOver ? 'over' : 'side'"
+      [opened]="options.navPos === 'side' && options.sidenavOpened && !isOver && !resView"
+      (openedChange)="onSidenavOpenedChange($event)" (closedStart)="onSidenavClosedStart()" class="sidebarNav">
+      <div class="flex-layout">
+        <app-logo-container [userName]="userName" (toggleMobileNav)="leftsidenav.toggle()"
+          [showToggle]="isOver"></app-logo-container>
+        <ng-scrollbar class="position-relative custom-ng-scroll" style="height: 100%; width: 100%">
+          <mat-nav-list class="sidebar-list">
+            <div *ngFor="let l1 of mainMenuList;  trackBy: trackByL1">
+              <div *ngIf="l1.isVisible">
+                <app-nav-item [item]="l1" [depth]="0" [isActive]="activeL1 === l1"
+                  (secondLevelSelect)="onSecondLevelSelect($event)" (firstLevelSelect)="onFirstLevelSelect($event)"
+                  (notify)="leftsidenav.toggle()"></app-nav-item>
+              </div>
+            </div>
+          </mat-nav-list>
+        </ng-scrollbar>
+
+        <div class="p-24 m-t-auto profile-bar">
+          <div class="bg-light-secondary d-flex align-items-center rounded p-16">
+            <img src="/assets/images/profile/user-1.jpg" class="rounded-circle" width="40" />
+            <div class="m-l-16" style="max-width: 100px;">
+              <h4 class="f-w-600  text-ellipsis" matTooltip="{{ userName }}" matTooltipPosition="above">{{ userName }}
+              </h4>
+              <span class="f-s-12 text-ellipsis" matTooltip="{{ userEmailId }}" matTooltipPosition="above">{{
+                userEmailId }}</span>
+            </div>
+            <div class="m-l-auto">
+              <a mat-icon-button class="d-flex pi pi-power-off justify-content-center" (click)="loginService.logout()">
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-sidenav>
+    }
+
+    <mat-sidenav-content class="contentWrapper sidebarNav-horizontal" #content>
+      <!-- Header -->
+      @if (!options.horizontal) {
+      <app-header [showToggle]="!isOver" (toggleCollapsed)="toggleCollapsed()" (toggleMobileNav)="leftsidenav.toggle()"
+        (toggleMobileFilterNav)="toggleFilterNav()" (optionsChange)="receiveOptions($event)"></app-header>
+      } @else {
+      <app-horizontal-header (toggleMobileNav)="leftsidenav.toggle()" (toggleMobileFilterNav)="toggleFilterNav()"
+        (optionsChange)="receiveOptions($event)"></app-horizontal-header>
+      }
+
+      @if (options.horizontal) {
+      <app-horizontal-sidebar [navItems]="mainMenuList" (secondLevelSelect)="onSecondLevelSelect($event)">
+      </app-horizontal-sidebar>
+      }
+
+      <!-- ============================================
+       ADD THIS SECTION - 2nd Level Menu Bar
+       ============================================ -->
+
+      <!-- ============================================
+       END 2nd Level Menu Bar
+       ============================================ -->
+      <div *ngIf="activeL2Menu && activeL2Menu.length && !options.horizontal" class="menutab-strip">
+        <app-horizontal-sidebar [navItems]="activeL2Menu" (secondLevelSelect)="onSecondLevelClick($event)">
+        </app-horizontal-sidebar>
+       
+      </div>
+      <main class="pageWrapper" [ngClass]="{ maxWidth: options.boxed }">
+        <app-breadcrumb></app-breadcrumb>
+        <div class="customizerBtn">
+          <button mat-fab class="bg-primary text-white" (click)="customizerRight.toggle()">
+            <mat-icon>settings</mat-icon>
+          </button>
+        </div>
+        <router-outlet></router-outlet>
+      </main>
+
+      <!-- ------------------------------------------------------------------
+        Mobile Apps Sidebar
+        ------------------------------------------------------------------ -->
+      <div [class.open]="isFilterNavOpen" class="filter-sidebar">
+        <div>
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="branding">
+              @if (options.theme === "light") {
+              <a href="/">
+                <img src="./assets/images/logos/dark-logo.svg" class="align-middle m-2" alt="logo" />
+              </a>
+              } @else {
+              <a href="/">
+                <img src="./assets/images/logos/light-logo.svg" class="align-middle m-2" alt="logo" />
+              </a>
+              }
+            </div>
+            <button mat-icon-button (click)="isFilterNavOpen = !isFilterNavOpen" class="d-flex justify-content-center">
+              <i-tabler name="x" class="icon-18 d-flex"></i-tabler>
+            </button>
+          </div>
+        </div>
+      </div>
+    </mat-sidenav-content>
+
+    <mat-sidenav #customizerRight mode="over" position="end">
+      <div class="p-x-16 p-y-20 d-flex align-items-center justify-content-between">
+        <span class="f-s-21 f-w-600">Settings</span>
+        <button class="d-lg-none" mat-button (click)="customizerRight.toggle()">Close</button>
+      </div>
+      <mat-divider></mat-divider>
+
+      <app-customizer (optionsChange)="receiveOptions($event)"></app-customizer>
+    </mat-sidenav>
+  </mat-sidenav-container>
+</span>

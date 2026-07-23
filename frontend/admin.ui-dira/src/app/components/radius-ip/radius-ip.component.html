@@ -1,0 +1,1276 @@
+<div class="row header-row">
+  <mat-card class="cardWithShadow w-100">
+    <mat-card-content class="mat-card-content-border">
+      <div class="row d-flex justify-content-end align-items-center">
+         <div class="col-sm-9 d-flex">
+          <mat-form-field
+            appearance="outline"
+            style="margin-left: 16px"
+            class="w-100 hide-hint mr-10"
+          >
+            <input
+              class="input-p-5"
+          
+              matInput
+              placeholder=" Enter Search Value"
+             
+            />
+            <mat-icon matSuffix class="search-header-search-icon">
+              <i class="pi pi-search icon-size"></i>
+            </mat-icon>
+          </mat-form-field>
+
+          <button
+            mat-button
+            mat-flat-button
+            color="primary"
+            class="button-normal m-r-10"
+         
+          >
+            Search
+          </button>
+          <button
+            mat-stroked-button
+            matButton="outlined"
+            class="button-normal"
+          
+          >
+            Clear
+          </button>
+        </div> 
+
+        <div class="col-sm-3 search-div">
+          <button
+            mat-button
+            mat-flat-button
+            color="primary"
+            (click)="createIpView()"
+            class="button-normal mr-10"
+          >
+            Add IP
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+
+<!-- @if (listView) { -->
+<div class="container-fluid contain-flud">
+  <div class="row">
+    <!-- IP list table start -->
+    <div class="col-md-12">
+      <mat-card class="cardWithShadow">
+        <mat-card-content class="mat-card-content-border">
+          <div class="ip-table-list">
+            <div class="table-header d-flex justify-content-between align-items-center mb-3">
+              <!-- <div class="action-buttons">
+                <button
+                  mat-icon-button
+                  color="primary"
+                  (click)="getIpDataList(ipListdataitemsPerPage)"
+                >
+                  <mat-icon>refresh</mat-icon>
+                </button>
+              </div> -->
+            </div>
+
+            <div class="table-container">
+              <table
+                mat-table
+                [dataSource]="dataSource"
+                matSort
+                class="mat-elevation-z8 w-100"
+              >
+                <!-- Pool Name Column -->
+                <ng-container matColumnDef="poolName">
+                  <th
+                    mat-header-cell
+                    *matHeaderCellDef
+                    mat-sort-header
+                    class="table-header-title"
+                    sticky
+                  >
+                    Pool Name
+                  </th>
+                  <td
+                    mat-cell
+                    *matCellDef="let ip"
+                  >
+                   <span
+                     
+                       
+                      >
+                       {{ ip.poolName }}
+                      </span>
+                  </td>
+                  <!-- <td
+                    mat-cell
+                    *matCellDef="let ip"
+                    class="curson_pointer f-s-14"
+                    (click)="IpAllDetails(ip.poolId)"
+                    style="color:#f7941e"
+                  >
+                    {{ ip.poolName }}
+                  </td> -->
+                </ng-container>
+
+                <!-- IP Range Column -->
+                <ng-container matColumnDef="ipRange">
+                  <th
+                    mat-header-cell
+                    *matHeaderCellDef
+                    mat-sort-header
+                    class="table-header-title"
+                  >
+                    IP Range
+                  </th>
+                  <td mat-cell *matCellDef="let ip" class="f-s-14">
+                    {{ ip.ipRange }}
+                  </td>
+                </ng-container>
+
+                <!-- Usage Category Column -->
+                <ng-container matColumnDef="usageCategory">
+                  <th
+                    mat-header-cell
+                    *matHeaderCellDef
+                    mat-sort-header
+                    class="table-header-title"
+                  >
+                    Usage Category
+                  </th>
+                  <td mat-cell *matCellDef="let ip" class="f-s-14">
+                    {{ ip.usageCategory }}
+                  </td>
+                </ng-container>
+
+                <!-- Status Column -->
+                <ng-container matColumnDef="status">
+                  <th
+                    mat-header-cell
+                    *matHeaderCellDef
+                    mat-sort-header
+                    class="table-header-title"
+                  >
+                    Status
+                  </th>
+                  <td mat-cell *matCellDef="let ip" class="f-s-14">
+                    <span
+                      class="status-badge"
+                      [ngClass]="{
+                        'status-success': ip.status === 'Active',
+                        'status-danger': ip.status === 'Inactive'
+                      }"
+                    >
+                      {{ ip.status }}
+                    </span>
+                  </td>
+                </ng-container>
+
+                <!-- Action Column -->
+                @if (editAccess || deleteAccess) {
+                  <ng-container matColumnDef="action">
+                    <th
+                      mat-header-cell
+                      *matHeaderCellDef
+                      stickyEnd
+                      class="table-header-title"
+                    >
+                      Action
+                    </th>
+                    <td mat-cell *matCellDef="let ip">
+                          <a
+                          mat-icon-button
+                          href="javascript:void(0)"
+                          (click)="IpAllDetails(ip.poolId)"
+
+                          matTooltip="View"
+                        >
+                         <img src="assets/img/DashboardIcons/eye-svgrepo-com (1) 1.svg" >
+                        </a>
+                      @if (editAccess) {
+                        <a
+                          mat-icon-button
+                          href="javascript:void(0)"
+                          (click)="editIp(ip.poolId)"
+                           matTooltip="Edit"
+                        >
+                        <img src="assets/img/DashboardIcons/Edit.svg" >
+                         
+                        </a>
+                      }
+                      @if (deleteAccess) {
+                        <a
+                          mat-icon-button
+                          href="javascript:void(0)"
+                          (click)="deleteConfirmonIp(ip)"
+                           matTooltip="Delete"
+                        >
+                          <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                        </a>
+                      }
+                    </td>
+                  </ng-container>
+                }
+
+                <!-- Header and Row Definitions -->
+                <tr
+                  mat-header-row
+                  class="table-header-bg"
+                  *matHeaderRowDef="getDisplayedPlanDetailsColumns(); sticky: true"
+                ></tr>
+                <tr
+                  mat-row
+                  class="table-content-row"
+                  *matRowDef="let row; columns: getDisplayedPlanDetailsColumns()"
+                ></tr>
+              </table>
+
+              <!-- Paginator -->
+              <mat-paginator
+                [length]="ipListdatatotalRecords"
+                [pageSize]="ipListdataitemsPerPage"
+                [pageSizeOptions]="[5,10,20,50,100]"
+                showFirstLastButtons
+                (page)="pageChangedIpList($event)"
+              >
+              </mat-paginator>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+    <!-- IP list table end -->
+  </div>
+</div>
+<!-- } -->
+
+<ng-template #ipDialog>
+  <div class="dialog-container">
+    <!-- Dialog Header -->
+    <div class="dialog-header">
+      {{ isIpEdit ? "Update" : "Create" }} IP
+      <span>
+        <a mat-icon-button href="javascript:void(0)" (click)="onCancel()">
+           <img src="assets/img/DashboardIcons/Reject.svg">
+        </a>
+      </span>
+    </div>
+
+    <!-- Dialog Content -->
+    <div mat-dialog-content>
+      <ng-container *ngIf="!createAccess && !editAccess">
+                            <mat-card-content class="matcard-content">
+                                <div class="panel-body table-responsive">
+                                    Sorry you have not privilege to create operation!
+                                </div>
+                            </mat-card-content>
+                        </ng-container>
+                        @if (editAccess || createAccess) {
+      <mat-card-content class="matcardContent">
+        <form class="card-form mb-3" [formGroup]="ipForm">
+          <!-- Section: IP Information -->
+            <div class="row">
+              <!-- Pool Name -->
+              <div class="col-md-4 mb-4">
+                <label class="inputLabel">Pool Name*</label>
+                <mat-form-field appearance="outline" class="w-100 mb-3">
+                  <input class="input-p-5"
+                    matInput
+                    placeholder="Enter Pool Name"
+                    formControlName="poolName"
+                  />
+                  @if (submitted && ipForm.controls.poolName.errors?.required) {
+                  <mat-error>
+                    Pool Name is required.
+                  </mat-error>
+                }
+                </mat-form-field>
+              </div>
+
+              <!-- IP Range -->
+              <div class="col-md-4 mb-4">
+                <label class="inputLabel">IP Range*</label>
+                <mat-form-field appearance="outline" class="w-100 mb-3">
+                  <input class="input-p-5"
+                    matInput
+                    placeholder="Enter IP Range"
+                    formControlName="ipRange"
+                  />
+                  @if (submitted && ipForm.controls.ipRange.errors?.required) {
+                  <mat-error>
+                    IP Range is required.
+                  </mat-error>
+                }
+                </mat-form-field>
+              </div>
+
+              <!-- Usage Category -->
+              <div class="col-md-4 mb-4">
+                <label class="inputLabel">Usage Category*</label>
+                <mat-form-field appearance="outline" class="w-100 mb-3">
+                  <mat-select class="input-p-5"
+                    placeholder="Select a Usage Category"
+                    formControlName="usageCategory"
+                  >
+                    @for (cat of UsageCategory; track cat.label) {
+                      <mat-option [value]="cat.label">{{ cat.label }}</mat-option>
+                    }
+                  </mat-select>
+                  @if (submitted && ipForm.controls.usageCategory.errors?.required) {
+                  <mat-error>
+                    Usage Category is required.
+                  </mat-error>
+                }
+                </mat-form-field>
+              </div>
+            </div>
+
+            <div class="row">
+              <!-- Status -->
+              <div class="col-md-4 mb-4">
+                <label class="inputLabel">Status*</label>
+                <mat-form-field appearance="outline" class="w-100 mb-3">
+                  <mat-select class="input-p-5" placeholder="Select a Status" formControlName="status">
+                    @for (st of statusOptions; track st.label) {
+                      <mat-option [value]="st.label">{{ st.label }}</mat-option>
+                    }
+                  </mat-select>
+                  @if (submitted && ipForm.controls.status.errors?.required) {
+                  <mat-error>
+                    Status is required.
+                  </mat-error>
+                }
+                </mat-form-field>
+              </div>
+
+              <!-- Remark -->
+              <div class="col-md-8 mb-4">
+                <label class="inputLabel">Remark*</label>
+                <mat-form-field appearance="outline" class="w-100 mb-3">
+                  <textarea
+                    matInput
+                    placeholder="Enter Remark"
+                    formControlName="remark"
+                  ></textarea>
+                  @if (submitted && ipForm.controls.remark.errors?.required) {
+                  <mat-error>
+                    Remark is required.
+                  </mat-error>
+                }
+                </mat-form-field>
+              </div>
+            </div>
+        </form>
+      </mat-card-content>
+    }
+    </div>
+
+    <!-- Dialog Actions -->
+    <mat-dialog-actions align="end">
+      @if (!isIpEdit) {
+        <button
+          mat-flat-button
+          color="primary"
+          (click)="addEditIp()"
+          [disabled]="!ipForm.valid"
+        > Create IP
+        </button>
+      }
+      @if (isIpEdit) {
+        <button
+          mat-flat-button
+          color="primary"
+          (click)="addEditIp(viewIpData.poolId)"
+          [disabled]="!ipForm.valid"
+        >
+          Update IP
+        </button>
+      }
+      <button mat-stroked-button (click)="onCancel()">Cancel</button>
+    </mat-dialog-actions>
+  </div>
+</ng-template>
+
+<ng-template #ipDetailDialog>
+  <div class="dialog-container">
+    <div class="dialog-header">
+      IP Details
+      <span>
+        <a mat-icon-button href="javascript:void(0)" (click)="onCancel()">
+         <img src="assets/img/DashboardIcons/Reject.svg">
+        </a>
+      </span>
+    </div>
+
+    <div mat-dialog-content>
+      <!-- @if (viewIpData) { -->
+        <!-- Basic Details -->
+        <!-- <fieldset class="m-b-20"> -->
+          <!-- <legend>Basic Details</legend> -->
+          <mat-card>
+  <mat-card-header>
+    <mat-card-title>Basic Details</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <div class="grid-container row">
+      <!-- Pool Name -->
+      <div class="col-lg-4 col-md-4 dataGroup">
+        <div class="field">
+          <span class="label-text f-w-600 f-s-15">Pool Name</span>
+          <span class="colon">:</span>
+          <span class="m-l-10">{{ viewIpData.poolName || '-' }}</span>
+        </div>
+      </div>
+
+      <!-- IP Range -->
+      <div class="col-lg-4 col-md-4 dataGroup">
+        <div class="field">
+          <span class="label-text f-w-600 f-s-15">IP Range</span>
+          <span class="colon">:</span>
+          <span class="m-l-10">{{ viewIpData.ipRange || '-' }}</span>
+        </div>
+      </div>
+
+      <!-- Usage Category -->
+      <div class="col-lg-4 col-md-4 dataGroup">
+        <div class="field">
+          <span class="label-text f-w-600 f-s-15">Usage Category</span>
+          <span class="colon">:</span>
+          <span class="m-l-10">{{ viewIpData.usageCategory || '-' }}</span>
+        </div>
+      </div>
+
+      <!-- Network IP -->
+      <div class="col-lg-4 col-md-4 dataGroup">
+        <div class="field">
+          <span class="label-text f-w-600 f-s-15">Network IP</span>
+          <span class="colon">:</span>
+          <span class="m-l-10">{{ viewIpData.networkIp || '-' }}</span>
+        </div>
+      </div>
+
+      <!-- Broadcast IP -->
+      <div class="col-lg-4 col-md-4 dataGroup">
+        <div class="field">
+          <span class="label-text f-w-600 f-s-15">Broadcast IP</span>
+          <span class="colon">:</span>
+          <span class="m-l-10">{{ viewIpData.broadcastIp || '-' }}</span>
+        </div>
+      </div>
+
+      <!-- First Host -->
+      <div class="col-lg-4 col-md-4 dataGroup">
+        <div class="field">
+          <span class="label-text f-w-600 f-s-15">First Host</span>
+          <span class="colon">:</span>
+          <span class="m-l-10">{{ viewIpData.firstHost || '-' }}</span>
+        </div>
+      </div>
+
+      <!-- Last Host -->
+      <div class="col-lg-4 col-md-4 dataGroup">
+        <div class="field">
+          <span class="label-text f-w-600 f-s-15">Last Host</span>
+          <span class="colon">:</span>
+          <span class="m-l-10">{{ viewIpData.lastHost || '-' }}</span>
+        </div>
+      </div>
+
+      <!-- Total Host -->
+      <div class="col-lg-4 col-md-4 dataGroup">
+        <div class="field">
+          <span class="label-text f-w-600 f-s-15">Total Host</span>
+          <span class="colon">:</span>
+          <span class="m-l-10">{{ viewIpData.totalHost || '-' }}</span>
+        </div>
+      </div>
+
+      <!-- Net Mask -->
+      <div class="col-lg-4 col-md-4 dataGroup">
+        <div class="field">
+          <span class="label-text f-w-600 f-s-15">Net Mask</span>
+          <span class="colon">:</span>
+          <span class="m-l-10">{{ viewIpData.netMask || '-' }}</span>
+        </div>
+      </div>
+
+      <!-- Status -->
+      <div class="col-lg-4 col-md-4 dataGroup">
+        <div class="field">
+          <span class="label-text f-w-600 f-s-15">Status</span>
+          <span class="colon">:</span>
+          <span class="m-l-10">
+            @if (viewIpData.status === 'Active') {
+              <mat-chip color="primary" selected>Active</mat-chip>
+            }
+            @if (viewIpData.status === 'Inactive') {
+              <mat-chip color="warn" selected>Inactive</mat-chip>
+            }
+          </span>
+        </div>
+      </div>
+
+      <!-- Remark -->
+      <div class="col-lg-4 col-md-4 dataGroup">
+        <div class="field">
+          <span class="label-text f-w-600 f-s-15">Remark</span>
+          <span class="colon">:</span>
+          <span class="m-l-10">{{ viewIpData.remark || '-' }}</span>
+        </div>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+        <!-- </fieldset> -->
+      <!-- } -->
+
+      <!-- Search Panel -->
+      <!-- <fieldset class="m-b-20"> -->
+        <!-- <legend>IP Management</legend> -->
+         <div >
+        <!-- <form [formGroup]="searchForm" class="row p-15">
+          <div class="custom">
+              <label class="cus-search">IP Address-</label>
+            <mat-form-field appearance="outline" class="w-100">
+              <input class="input-p-5"
+                matInput
+                placeholder="Enter IP Address"
+                formControlName="ipAddress"
+                (keydown.enter)="searchIPByIpAddress()"
+              />
+            </mat-form-field>
+          </div>
+          <div class="aa">
+            <button
+            class="button-normal m-r-10"
+              mat-flat-button
+              color="primary"
+              (click)="searchIPByIpAddress()"
+              [disabled]="searchForm.invalid"
+            >
+              <mat-icon>search</mat-icon> Search
+            </button>
+          
+            <button mat-stroked-button (click)="clearSearchForm()">
+              Clear
+            </button>
+          </div>
+        </form> -->
+    <form [formGroup]="searchForm" class="d-flex align-items-center gap-3" style="padding: 15px;">
+  <label class="cus-search mb-0">IP Address-</label>
+
+  <mat-form-field appearance="outline" class="mb-0 flex-grow-1" style="max-width: 260px; margin-right: 12px;">
+    <input
+      class="input-p-5"
+      matInput
+      placeholder="Enter IP Address"
+      formControlName="ipAddress"
+      (keydown.enter)="searchIPByIpAddress()" />
+  </mat-form-field>
+
+  <button
+    class="custom-button"
+    mat-flat-button
+    color="primary"
+    type="button"
+    (click)="searchIPByIpAddress()"
+    [disabled]="searchForm.invalid"
+    style="min-width:110px;margin-bottom: 18px;">
+     Search
+  </button>
+
+  <button mat-stroked-button type="button" (click)="clearSearchForm()" style="min-width:75px;margin-bottom: 18px;">
+    Clear
+  </button>
+</form>
+
+   
+    </div>
+      <!-- </fieldset> -->
+
+      <!-- Table -->
+      <mat-card>
+        <mat-card-content>
+          <table
+            mat-table
+            [dataSource]="ipPoolDataList"
+            class="mat-elevation-z2"
+          >
+            <!-- IP Address -->
+            <ng-container matColumnDef="ipAddress">
+              <th mat-header-cell *matHeaderCellDef> IP Address </th>
+              <td mat-cell *matCellDef="let ippool"> {{ ippool.ipAddress }} </td>
+            </ng-container>
+
+            <!-- Status -->
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef> Status </th>
+              <td mat-cell *matCellDef="let ippool"> {{ ippool.status }} </td>
+            </ng-container>
+
+            <!-- Customer Name -->
+            <ng-container matColumnDef="userName">
+              <th mat-header-cell *matHeaderCellDef> Customer Name </th>
+              <td mat-cell *matCellDef="let ippool"> {{ ippool.userName }} </td>
+            </ng-container>
+
+            <!-- Acct Session Id -->
+            <ng-container matColumnDef="blockBySessionId">
+              <th mat-header-cell *matHeaderCellDef> Acct Session Id </th>
+              <td mat-cell *matCellDef="let ippool"> {{ ippool.blockBySessionId }} </td>
+            </ng-container>
+
+            <!-- NAS IP Address -->
+            <ng-container matColumnDef="nasIpAddress">
+              <th mat-header-cell *matHeaderCellDef> Nas IP Address </th>
+              <td mat-cell *matCellDef="let ippool"> {{ ippool.nasIpAddress }} </td>
+            </ng-container>
+
+            <!-- Table Header & Row -->
+            <tr mat-header-row *matHeaderRowDef="['ipAddress','status','userName','blockBySessionId','nasIpAddress']"></tr>
+            <tr mat-row *matRowDef="let row; columns: ['ipAddress','status','userName','blockBySessionId','nasIpAddress'];"></tr>
+          </table>
+
+          <!-- Pagination -->
+          <mat-paginator
+            [length]="ipListdatatotalRecords"
+            [pageSize]="ipListdataitemsPerPage" showFirstLastButtons
+               [pageSizeOptions]="[5,10,20,50,100]"
+            (page)="pageChanged($event)"
+          >
+          </mat-paginator>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <mat-dialog-actions align="end">
+      <button mat-stroked-button color="warn" (click)="onCancel()">Close</button>
+    </mat-dialog-actions>
+  </div>
+</ng-template>
+
+
+<!-- ----------------------------------------------- -->
+<!-- <div class="row"> -->
+  <!-- <div class="col-md-12">
+    <div class="panel top">
+      <div class="panel-heading">
+        <h3 class="panel-title">IP Management</h3>
+        <div class="right">
+          <button
+            type="button"
+            class="btn-toggle-collapse"
+            data-toggle="collapse"
+            data-target="#searchIp"
+            aria-expanded="false"
+            aria-controls="searchIp"
+            >
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+
+      <div id="searchIp" class="panel-collapse collapse in">
+        <div class="panel-body no-padding panel-udata">
+          @if (createAccess) {
+            <div class="col-md-6 pcol">
+              <div class="dbox">
+                <a (click)="createIpView()" class="curson_pointer">
+                  <img src="../../../assets/img/i01.png" style="width: 32px" />
+                  <h5>Create IP</h5>
+                </a>
+              </div>
+            </div>
+          }
+          <div class="col-md-6 pcol">
+            <div class="dbox">
+              <a (click)="listIpView()" class="curson_pointer">
+                <img src="../../../assets/img/i01.png" style="width: 32px" />
+                <h5>Search IP</h5>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div> -->
+  <!-- @if (listView) {
+    <div class="col-md-12">
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">IP</h3>
+          <div class="right">
+            <button
+              class="btn refreshbtn"
+              type="reset"
+              (click)="getIpDataList(ipListdataitemsPerPage)"
+              >
+               <img src="assets/img/DashboardIcons/Refresh.svg" />
+            </button>
+            <button
+              type="button"
+              class="btn-toggle-collapse"
+              data-toggle="collapse"
+              data-target="#listIp"
+              aria-expanded="false"
+              aria-controls="listIp"
+              >
+              <i class="fa fa-minus-circle"></i>
+            </button>
+          </div>
+        </div>
+        <div id="listIp" class="panel-collapse collapse in">
+          <div class="panel-body table-responsive">
+            <div>
+              <div class="row">
+                <div class="col-md-12">
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>Pool Name</th>
+                        <th>IP Range</th>
+                        <th>Usage Category</th>
+                        <th>Status</th>
+                        @if (editAccess || deleteAccess) {
+                          <th>Action</th>
+                        }
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (
+                        ip of ipListData
+                        | paginate
+                        : {
+                        id: 'ipListData',
+                        itemsPerPage: ipListdataitemsPerPage,
+                        currentPage: currentPageIpListdata,
+                        totalItems: ipListdatatotalRecords
+                        }; track
+                        ip; let i = $index) {
+                        <tr
+                          >
+                          <td
+                            class="curson_pointer"
+                            (click)="IpAllDetails(ip.poolId)"
+                            style="color: #f7941e"
+                            >
+                            {{ ip.poolName }}
+                          </td>
+                          <td>{{ ip.ipRange }}</td>
+                          <td>{{ ip.usageCategory }}</td>
+                          @if (ip.status == 'Active') {
+                            <td>
+                              <span class="badge badge-success">Active</span>
+                            </td>
+                          }
+                          @if (ip.status == 'Inactive') {
+                            <td>
+                              <span class="badge badge-danger">Inactive</span>
+                            </td>
+                          }
+                          @if (editAccess || deleteAccess) {
+                            <td class="btnAction">
+                              @if (editAccess) {
+                                <a
+                                  id="edit-button"
+                                  type="button"
+                                  href="javascript:void(0)"
+                                  (click)="editIp(ip.poolId)"
+                                  >
+                                <img src="assets/img/DashboardIcons/Edit.svg" >
+                                </a>
+                              }
+                              @if (deleteAccess) {
+                                <a
+                                  id="delete-button"
+                                  href="javascript:void(0)"
+                                  (click)="deleteConfirmonIp(ip.poolId)"
+                                  >
+                                   <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                                </a>
+                              }
+                            </td>
+                          }
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                  <div class="pagination_Dropdown">
+                    <pagination-controls
+                      id="ipListData"
+                      maxSize="10"
+                      directionLinks="true"
+                      previousLabel=""
+                      nextLabel=""
+                      (pageChange)="pageChangedIpList((currentPageIpListdata = $event))"
+                    ></pagination-controls>
+                    <div id="itemPerPageDropdown">
+                      <p-dropdown
+                        [options]="pageLimitOptions"
+                        optionLabel="value"
+                        optionValue="value"
+                        (onChange)="TotalItemPerPage($event)"
+                      ></p-dropdown>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  } -->
+  <!-- @if (createView) {
+    <div class="col-md-12">
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">{{ isIpEdit ? "Update" : "Create" }} IP</h3>
+          <div class="right">
+            <button
+              type="button"
+              class="btn-toggle-collapse"
+              data-toggle="collapse"
+              data-target="#createIP"
+              aria-expanded="false"
+              aria-controls="createIP"
+              >
+              <i class="fa fa-minus-circle"></i>
+            </button>
+          </div>
+        </div>
+        <div id="createIP" class="panel-collapse collapse in">
+          <div class="panel-body">
+            <form class="form-auth-small" [formGroup]="ipForm">
+              <fieldset style="margin-top: 0px">
+                <legend>IP Information</legend>
+                <div class="boxWhite">
+                  <div class="row">
+                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                      <label>Pool Name*</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        placeholder="Enter Pool Name"
+                        formControlName="poolName"
+                      [ngClass]="{
+                        'is-invalid': submitted && ipForm.controls.poolName.errors
+                      }"
+                        />
+                        @if (submitted && ipForm.controls.poolName.errors) {
+                          <div
+                            class="errorWrap text-danger"
+                            >
+                            @if (submitted && ipForm.controls.poolName.errors.required) {
+                              <div
+                                class="error text-danger"
+                                >
+                                Pool Name is required.
+                              </div>
+                            }
+                          </div>
+                        }
+                        <br />
+                      </div>
+                      <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                        <label>IP Range*</label>
+                        <input
+                          type="text"
+                          class="form-control"
+                          placeholder="Enter IP Range"
+                          formControlName="ipRange"
+                      [ngClass]="{
+                        'is-invalid': submitted && ipForm.controls.ipRange.errors
+                      }"
+                          />
+                          @if (submitted && ipForm.controls.ipRange.errors) {
+                            <div
+                              class="errorWrap text-danger"
+                              >
+                              @if (submitted && ipForm.controls.ipRange.errors.required) {
+                                <div
+                                  class="error text-danger"
+                                  >
+                                  IP Range is required.
+                                </div>
+                              }
+                            </div>
+                          }
+                          <br />
+                        </div>
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                          <label>Usage Category*</label>
+                          <p-dropdown
+                            [options]="UsageCategory"
+                            optionValue="label"
+                            optionLabel="label"
+                            filter="true"
+                            filterBy="label"
+                            placeholder="Select a Usage Category"
+                            formControlName="usageCategory"
+                      [ngClass]="{
+                        'is-invalid': submitted && ipForm.controls.usageCategory.errors
+                      }"
+                          ></p-dropdown>
+                          @if (submitted && ipForm.controls.usageCategory.errors) {
+                            <div
+                              class="errorWrap text-danger"
+                              >
+                              @if (submitted && ipForm.controls.usageCategory.errors.required) {
+                                <div
+                                  class="error text-danger"
+                                  >
+                                  Usage Category is required.
+                                </div>
+                              }
+                            </div>
+                          }
+                          <br />
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                          <label>Status*</label>
+                          <p-dropdown
+                            [options]="statusOptions"
+                            optionValue="label"
+                            optionLabel="label"
+                            filter="true"
+                            filterBy="label"
+                            placeholder="Select a Status"
+                            formControlName="status"
+                      [ngClass]="{
+                        'is-invalid': submitted && ipForm.controls.status.errors
+                      }"
+                          ></p-dropdown>
+                         
+                        @if (submitted && ipForm.controls.status.errors) {
+                          <div
+                            class="errorWrap text-danger"
+                            >
+                            @if (submitted && ipForm.controls.status.errors.required) {
+                              <div
+                                class="error text-danger"
+                                >
+                                Status is required.
+                              </div>
+                            }
+                          </div>
+                        }
+                        <br />
+                      </div>
+                      <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                        <label>Remark*</label>
+                        <textarea
+                          class="form-control"
+                          placeholder="Enter Remark"
+                          formControlName="remark"
+                      [ngClass]="{
+                        'is-invalid': submitted && ipForm.controls.remark.errors
+                      }"
+                        ></textarea>
+                        @if (submitted && ipForm.controls.remark.errors) {
+                          <div
+                            class="errorWrap text-danger"
+                            >
+                            @if (submitted && ipForm.controls.remark.errors.required) {
+                              <div
+                                class="error text-danger"
+                                >
+                                Remark is required.
+                              </div>
+                            }
+                          </div>
+                        }
+                        <br />
+                      </div>
+                    </div>
+                  </div>
+                </fieldset>
+                <div class="addUpdateBtn" style="margin: 3.5rem 0 2rem">
+                  @if (!isIpEdit) {
+                    <button
+                      type="submit"
+                      class="btn btn-primary"
+                      (click)="addEditIp()"
+                      id="submit"
+                      >
+                      <i class="fa fa-check-circle"></i>
+                      Add IP
+                    </button>
+                  }
+                  @if (isIpEdit) {
+                    <button
+                      type="submit"
+                      class="btn btn-primary"
+                      (click)="addEditIp(viewIpData.poolId)"
+                      id="submit"
+                      >
+                      <i class="fa fa-check-circle"></i>
+                      Update IP
+                    </button>
+                  }
+                  <br />
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    } -->
+  <!-- </div> -->
+
+  <!-- @if (detailView) {
+    <div class="row">
+      <div class="col-md-12 col-sm-12">
+        <div class="panel">
+          <div class="panel-heading">
+            <div class="displayflex">
+              <button
+                type="button"
+                class="btn btn-secondary backbtn"
+                data-toggle="tooltip"
+                data-placement="bottom"
+                title="Go to Ip Details"
+                (click)="listIpView()"
+                >
+                <i
+                  class="fa fa-arrow-circle-left"
+                  style="color: #f7941e !important; font-size: 28px"
+                ></i>
+              </button>
+              <h3 class="panel-title">IP</h3>
+            </div>
+            <div class="right">
+              <button
+                type="button"
+                class="btn-toggle-collapse"
+                data-toggle="collapse"
+                data-target="#deatilsIP"
+                aria-expanded="false"
+                aria-controls="deatilsIP"
+                >
+                <i class="fa fa-minus-circle"></i>
+              </button>
+            </div>
+          </div>
+          <div id="deatilsIP" class="panel-collapse collapse in">
+            <div class="panel-body table-responsive">
+              <fieldset style="margin-top: 0rem; margin-bottom: 2rem">
+                <legend>Basic Details</legend>
+                <div class="boxWhite">
+                  <div class="row">
+                    <div class="col-lg-4 col-md-4 dataGroup">
+                      <label class="datalbl">Pool Name :</label>
+                      <span>{{ viewIpData.poolName }}</span>
+                    </div>
+                    <div class="col-lg-4 col-md-4 dataGroup">
+                      <label class="datalbl">IP Range :</label>
+                      <span>{{ viewIpData.ipRange }}</span>
+                    </div>
+                    <div class="col-lg-4 col-md-4 dataGroup">
+                      <label class="datalbl">Usage Category :</label>
+                      <span>{{ viewIpData.usageCategory }}</span>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-lg-4 col-md-4 dataGroup">
+                      <label class="datalbl">Network IP :</label>
+                      <span>{{ viewIpData.networkIp }}</span>
+                    </div>
+                    <div class="col-lg-4 col-md-4 dataGroup">
+                      <label class="datalbl">Broadcast IP :</label>
+                      <span>{{ viewIpData.broadcastIp }}</span>
+                    </div>
+                    <div class="col-lg-4 col-md-4 dataGroup">
+                      <label class="datalbl">First Host :</label>
+                      <span>{{ viewIpData.firstHost }}</span>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-lg-4 col-md-4 dataGroup">
+                      <label class="datalbl">Last Host :</label>
+                      <span>{{ viewIpData.lastHost }}</span>
+                    </div>
+                    <div class="col-lg-4 col-md-4 dataGroup">
+                      <label class="datalbl">Total Host :</label>
+                      <span>{{ viewIpData.totalHost }}</span>
+                    </div>
+                    <div class="col-lg-4 col-md-4 dataGroup">
+                      <label class="datalbl">Net Mask :</label>
+                      <span>{{ viewIpData.netMask }}</span>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-lg-4 col-md-4 dataGroup">
+                      <label class="datalbl">Status :</label>
+                      @if (viewIpData.status == 'Active') {
+                        <span class="badge badge-success">
+                          Active
+                        </span>
+                      }
+                      @if (viewIpData.status == 'Inactive') {
+                        <span class="badge badge-danger">
+                          Inactive
+                        </span>
+                      }
+                    </div>
+                    <div class="col-lg-4 col-md-4 dataGroup">
+                      <label class="datalbl">Remark :</label>
+                      <span>{{ viewIpData.remark }}</span>
+                    </div>
+                  </div>
+                </div>
+              </fieldset>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-12">
+        <div class="panel top">
+          <div class="panel-heading">
+            <h3 class="panel-title">IP Management</h3>
+            <div class="right">
+              <button
+                type="button"
+                class="btn-toggle-collapse"
+                data-toggle="collapse"
+                data-target="#ipMangemnetSearchPanel"
+                aria-expanded="false"
+                aria-controls="ipMangemnetSearchPanel"
+                >
+                <i class="fa fa-minus-circle"></i>
+              </button>
+            </div>
+          </div>
+          <div id="ipMangemnetSearchPanel" class="panel-collapse collapse in">
+            <div class="panel-body">
+              <div class="ipForm">
+                <form class="form-auth-small" [formGroup]="searchForm">
+                  <div class="row">
+                    <div class="col-md-3" style="padding-right: 0%; text-align: right">
+                      <label style="padding: 5px">IP Address:</label>
+                    </div>
+                    <div class="col-md-5" style="padding-left: 0%">
+                      <input
+                        type="text"
+                        name="ipAddress"
+                        class="form-control"
+                        placeholder="Enter IP Address"
+                        formControlName="ipAddress"
+                        (keydown.enter)="searchIPByIpAddress()"
+                        />
+                      </div>
+                      <div class="col-md-4" style="padding-left: 0%">
+                        <button
+                          type="submit"
+                          class="btn btn-primary"
+                          title="Search IP Address"
+                          data-toggle="tooltip"
+                          (click)="searchIPByIpAddress()"
+                          [disabled]="searchForm.invalid"
+                          >
+                          <i class="fa fa-search"></i>
+                          Search
+                        </button>
+                        &nbsp;
+                        <button
+                          type="reset"
+                          class="btn btn-default"
+                          title="Clear"
+                          data-toggle="tooltip"
+                          (click)="clearSearchForm()"
+                          >
+                           <img src="assets/img/DashboardIcons/Refresh.svg" />
+                          Clear
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-heading">
+              <div class="right">
+                <button
+                  aria-controls="listPreCust"
+                  aria-expanded="false"
+                  class="btn-toggle-collapse"
+                  data-target="#listPreCust"
+                  data-toggle="collapse"
+                  type="button"
+                  >
+                  <i class="fa fa-minus-circle"></i>
+                </button>
+              </div>
+            </div>
+            <div class="panel-collapse collapse in" id="listPreCust">
+              <div class="panel-body table-responsive">
+                <div class="row">
+                  <div class="col-lg-12 col-md-12">
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th>IP Address</th>
+                          <th>Status</th>
+                          <th>Customer Name</th>
+                          <th>Acct Seesion Id</th>
+                          <th>Nas IP Address</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (
+                          ippool of ipPoolDataList
+                          | paginate
+                          : {
+                          id: 'ipPoolDataList',
+                          itemsPerPage: ipListdataitemsPerPage,
+                          currentPage: currentPageIpListdata,
+                          totalItems: ipListdatatotalRecords
+                          }; track
+                          ippool; let i = $index) {
+                          <tr
+                            >
+                            <td>{{ ippool.ipAddress }}</td>
+                            <td>{{ ippool.status }}</td>
+                            <td>{{ ippool.userName }}</td>
+                            <td>{{ ippool.blockBySessionId }}</td>
+                            <td>{{ ippool.nasIpAddress }}</td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                    <div class="row">
+                      <div style="display: flex">
+                        <pagination-controls
+                          id="ipPoolDataList"
+                          [maxSize]="10"
+                          [directionLinks]="true"
+                          previousLabel=""
+                          nextLabel=""
+                          (pageChange)="pageChanged($event)"
+                          >
+                        </pagination-controls>
+                        <div id="itemPerPageDropdown">
+                          <p-dropdown
+                            [options]="pageLimitOptions"
+                            optionLabel="value"
+                            optionValue="value"
+                            (onChange)="TotalItemPerPageIp($event)"
+                          ></p-dropdown>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    } -->

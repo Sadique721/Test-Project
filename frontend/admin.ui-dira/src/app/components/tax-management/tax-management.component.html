@@ -1,0 +1,1006 @@
+<div class="row m-0">
+    <mat-card class="cardWithShadow w-100">
+        <mat-card-content class="mat-card-content-border">
+            <div class="row">
+                <div class="col-sm-9 d-flex">
+                    <mat-form-field appearance="outline" style="margin-left: 16px" class="w-100 hide-hint mr-10">
+                        <input class="input-p-5" [(ngModel)]="searchTaxName" matInput placeholder="Enter Tax Name"
+                            (keydown.enter)="searchTax()" />
+                        <mat-icon matSuffix class="m-b-10">
+                            <i class="pi pi-search f-s-15"></i>
+                        </mat-icon>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" style="margin-left: 16px" class="w-100 hide-hint mr-10">
+                        <mat-label>Select a Tax Type</mat-label>
+                        <mat-select [(value)]="searchTaxType" (selectionChange)="searchTax()"
+                            panelClass="custom-select-panel">
+                            <mat-option *ngFor="let taxType of taxTypeAll" [value]="taxType.value">
+                                {{ taxType.label }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <button mat-button mat-flat-button color="primary" class="button-normal m-r-10"
+                        (click)="searchTax()">
+                        Search
+                    </button>
+                    <button mat-stroked-button matButton="outlined" class="button-normal" (click)="clearSearchTax()">
+                        Clear
+                    </button>
+                </div>
+                <div class="col-sm-3 d-flex justify-content-end">
+                    <button mat-button mat-flat-button color="primary" (click)="createTax()"
+                        class="button-normal m-r-10">
+                        Add Tax
+                    </button>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+<div class="row">
+    @if (listView) {
+    <div class="col-md-12">
+        <mat-card class="cardWithShadow">
+            <mat-card-content>
+                <div class="table-responsive p-16">
+                    <table mat-table [dataSource]="taxListData?.taxlist || []" class="w-100">
+                        <!-- Name Column -->
+                        <ng-container matColumnDef="name">
+                            <th mat-header-cell *matHeaderCellDef class="f-w-600 table-header-title">Name</th>
+                            <td mat-cell *matCellDef="let tax">
+                                <span>
+                                    {{ tax.name }}
+                                </span>
+                            </td>
+                        </ng-container>
+
+                        <!-- Type Column -->
+                        <ng-container matColumnDef="type">
+                            <th mat-header-cell *matHeaderCellDef class="f-w-600 table-header-title">Type</th>
+                            <td mat-cell *matCellDef="let tax">{{ tax.taxtype }}</td>
+                        </ng-container>
+
+                        <!-- Status Column -->
+                        <ng-container matColumnDef="status">
+                            <th mat-header-cell *matHeaderCellDef class="f-w-600 table-header-title">Status</th>
+                            <td mat-cell *matCellDef="let tax">
+                                @if (tax.status == "Y") {
+                                <span class="status-badge status-success">Active</span>
+                                }
+                                @if (tax.status == "N") {
+                                <span class="status-badge status-danger">Inactive</span>
+                                }
+                            </td>
+                        </ng-container>
+
+                        <!-- ISP Name Column -->
+                        <ng-container matColumnDef="ispName">
+                            <th mat-header-cell *matHeaderCellDef class="f-w-600 table-header-title">
+                                ISP Name
+                            </th>
+                            <td mat-cell *matCellDef="let tax">{{ tax.mvnoName }}</td>
+                        </ng-container>
+
+                        <!-- Action Column -->
+                        <ng-container matColumnDef="action">
+                            <th mat-header-cell *matHeaderCellDef class="f-w-600 table-header-title">Action</th>
+                            <td mat-cell *matCellDef="let tax">
+                                <a mat-icon-button matTooltip="view" href="javascript:void(0)"
+                                    (click)="taxAllDetails(tax)">
+                                    <img src="assets/img/DashboardIcons/eye-svgrepo-com (1) 1.svg">
+                                </a>
+                                @if (editAccess) {
+                                <a mat-icon-button matTooltip="edit" href="javascript:void(0)"
+                                    (click)="editTax(tax.id)">
+                                    <img src="assets/img/DashboardIcons/Edit.svg" />
+                                </a>
+                                }
+                                @if (deleteAccess) {
+                                <a mat-icon-button matTooltip="delete" href="javascript:void(0)"
+                                    (click)="deleteConfirmonTax(tax)">
+                                    <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" />
+                                </a>
+                                }
+                            </td>
+                        </ng-container>
+
+                        <!-- Header and Row Definitions -->
+                        <tr mat-header-row *matHeaderRowDef="
+                  getDisplayedPlanDetailsColumns()
+                "></tr>
+                        <tr mat-row *matRowDef="
+                  let row;
+                  columns: deleteAccess || editAccess
+                    ? ['name', 'type', 'status', 'ispName', 'action']
+                    : ['name', 'type', 'status', 'ispName']
+                "></tr>
+
+                        <!-- No Data Row -->
+                        <tr class="mat-row" *matNoDataRow>
+                            <td class="mat-cell text-center" [attr.colspan]="deleteAccess || editAccess ? 5 : 4">
+                                No Record Found.
+                            </td>
+                        </tr>
+                    </table>
+
+                    @if (taxListData?.taxlist && taxListData?.taxlist?.length > 0) {
+                    <mat-paginator [length]="TaxListdatatotalRecords" [pageSize]="TaxListdataitemsPerPage"
+                        [pageSizeOptions]="[5, 10,  20, 50, 100]" showFirstLastButtons
+                        (page)="pageChangedTaxList($event)"></mat-paginator>
+                    }
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+    }
+</div>
+
+<ng-template #allDetailsShow>
+    <div class="dialog-container">
+        <div class="dialog-header">
+            Tax Details
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="closeDialog()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+            <mat-card>
+                <mat-card-header>
+                    <mat-card-title>Basic Details</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="row">
+                        <div class="col-lg-4 col-md-4 dataGroup">
+                            <div class="field">
+                                <span class="label-text">Name</span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">{{ taxAllData.name }}</span>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4 col-md-4 dataGroup">
+                            <div class="field">
+                                <span class="label-text">Type</span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">{{ taxAllData.taxtype }}</span>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4 col-md-4 dataGroup">
+                            <div class="field">
+                                <span class="label-text">Status</span>
+                                <span class="colon">:</span>
+                                @if (taxAllData.status == "Y") {
+                                <span class="badge badge-success m-l-10"> Active </span>
+                                }
+                                @if (taxAllData.status == "N") {
+                                <span class="badge badge-danger m-l-10"> Inactive </span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-lg-4 col-md-4 dataGroup">
+                            <div class="field">
+                                <span class="label-text">Description</span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">{{ taxAllData.desc }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+            @if (taxAllData.slabList.length !== 0) {
+            <mat-card>
+                <mat-card-header>
+                    <mat-card-title>Tax Type Mapping</mat-card-title>
+                </mat-card-header>
+                <mat-card-contnet>
+                    <div class="table-responsive">
+                        <table mat-table [dataSource]="taxAllData.slabList" matSort
+                            class="no-wrap m-t-0 v-middle w-100">
+                            <ng-container matColumnDef="name">
+                                <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15" width="25%">Name</th>
+                                <td mat-cell *matCellDef="let element" class="f-s-14">
+                                    {{ element.name }}
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="rangeFrom">
+                                <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15" width="25%">
+                                    Range From
+                                </th>
+                                <td mat-cell *matCellDef="let element" class="f-s-14">
+                                    {{ element.rangeFrom }}
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="rangeUpTo">
+                                <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15" width="25%">
+                                    Range UpTo
+                                </th>
+                                <td mat-cell *matCellDef="let element" class="f-s-14">
+                                    {{ element.rangeUpTo }}
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="rate">
+                                <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15" width="25%">Rate</th>
+                                <td mat-cell *matCellDef="let element" class="f-s-14">{{ element.rate }}%</td>
+                            </ng-container>
+
+                            <tr mat-header-row *matHeaderRowDef="['name', 'rangeFrom', 'rangeUpTo', 'rate']"></tr>
+                            <tr mat-row *matRowDef="let row; columns: ['name', 'rangeFrom', 'rangeUpTo', 'rate']"></tr>
+                        </table>
+
+                        @if (!taxAllData.slabList || taxAllData.slabList?.length === 0) {
+                        <div class="m-t-10 text-center f-w-600">No Records Found</div>
+                        }
+
+                        @if (taxAllData.slabList && taxAllData.slabList?.length !== 0) {
+                        <mat-paginator [length]="typeslabtotalRecords" [pageSize]="typeslabItemPerPage"
+                            [pageSizeOptions]="[5, 10, 25]" [pageIndex]="currentPagetypeslabList - 1"
+                            showFirstLastButtons (page)="pageChangedtypeslabList($event)"></mat-paginator>
+                        }
+                    </div>
+                </mat-card-contnet>
+            </mat-card>
+            }
+            @if (taxAllData.tieredList.length !== 0) {
+            <mat-card>
+                <mat-card-header>
+                    <mat-card-title> Tax Tier list </mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="table-responsive">
+                        <table mat-table [dataSource]="taxAllData.tieredList" matSort
+                            class="no-wrap m-t-0 v-middle w-100">
+                            <ng-container matColumnDef="name">
+                                <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15" width="33%">Name</th>
+                                <td mat-cell *matCellDef="let element" class="f-s-14">
+                                    {{ element.name }}
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="taxGroup">
+                                <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15" width="33%">
+                                    Tax Group
+                                </th>
+                                <td mat-cell *matCellDef="let element" class="f-s-14">
+                                    {{ element.taxGroup }}
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="rate">
+                                <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15" width="34%">Rate</th>
+                                <td mat-cell *matCellDef="let element" class="f-s-14">{{ element.rate }}%</td>
+                            </ng-container>
+
+                            <tr mat-header-row *matHeaderRowDef="['name', 'taxGroup', 'rate']"></tr>
+                            <tr mat-row *matRowDef="let row; columns: ['name', 'taxGroup', 'rate']"></tr>
+                        </table>
+
+                        @if (!taxAllData.tieredList || taxAllData.tieredList?.length === 0) {
+                        <div class="m-t-10 text-center f-w-600">No Records Found</div>
+                        }
+
+                        @if (taxAllData.tieredList && taxAllData.tieredList?.length !== 0) {
+                        <mat-paginator [length]="taxTierListTotalRecords" [pageSize]="taxTierListPageSize"
+                            [pageSizeOptions]="[5, 10, 25]" [pageIndex]="taxTierListCurrentPage" showFirstLastButtons
+                            (page)="pageChangedtypeTieredList($event)"></mat-paginator>
+                        }
+                    </div>
+                </mat-card-content>
+            </mat-card>
+            }
+        </div>
+        <div class="dialog-action-adjust d-flex justify-content-end">
+            <button mat-stroked-button mat-dialog-close class="button-normal">Close</button>
+        </div>
+    </div>
+    <!-- <div class="row">
+    <div class="col-md-12 col-sm-12">
+      <div class="panel">
+        <div class="panel-heading">
+          <div class="displayflex">
+            <button
+              type="button"
+              class="btn btn-secondary backbtn"
+              data-toggle="tooltip"
+              data-placement="bottom"
+              title="Go to Tax Details"
+              (click)="listTax()"
+            >
+              <i
+                class="fa fa-arrow-circle-left"
+                style="color: #f7941e !important; font-size: 28px"
+              ></i>
+            </button>
+            <h3 class="panel-title">Tax</h3>
+          </div>
+          <div class="right">
+            <button
+              type="button"
+              class="btn-toggle-collapse"
+              data-toggle="collapse"
+              data-target="#taxalldea"
+              aria-expanded="false"
+              aria-controls="taxalldea"
+            >
+              <i class="fa fa-minus-circle"></i>
+            </button>
+          </div>
+        </div>
+        <div id="taxalldea" class="panel-collapse collapse in">
+          <div class="panel-body table-responsive">
+            <fieldset style="margin-top: 0rem; margin-bottom: 2rem">
+              <legend>Basic Details</legend>
+              <div class="boxWhite">
+                <div class="row">
+                  <div class="col-lg-4 col-md-4 dataGroup">
+                    <label class="datalbl">Name :</label>
+                    <span>{{ taxAllData.name }}</span>
+                  </div>
+                  <div class="col-lg-4 col-md-4 dataGroup">
+                    <label class="datalbl">Type :</label>
+                    <span>{{ taxAllData.taxtype }}</span>
+                  </div>
+                  <div class="col-lg-4 col-md-4 dataGroup">
+                    <label class="datalbl">Status :</label>
+                    @if (taxAllData.status == "Y") {
+                      <span class="badge badge-success"> Active </span>
+                    }
+                    @if (taxAllData.status == "N") {
+                      <span class="badge badge-danger"> Inactive </span>
+                    }
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-lg-12 col-md-12 dataGroup">
+                    <label class="datalbl">Description :</label>
+                    <span>{{ taxAllData.desc }}</span>
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+            @if (taxAllData.slabList.length !== 0) {
+              <fieldset>
+                <legend>Tax Type Mapping</legend>
+                <div class="boxWhite">
+                  <div class="row table-responsive">
+                    <div class="col-lg-12 col-md-12">
+                      <table class="table">
+                        <thead>
+                          <tr>
+                            <th>Name</th>
+                            <th>Range From</th>
+                            <th>Range UpTo</th>
+                            <th>Rate</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @for (
+                            data of taxAllData.slabList
+                              | paginate
+                                : {
+                                    id: "typeslabPageData",
+                                    itemsPerPage: typeslabItemPerPage,
+                                    currentPage: currentPagetypeslabList,
+                                    totalItems: typeslabtotalRecords
+                                  };
+                            track data;
+                            let i = $index
+                          ) {
+                            <tr>
+                              <td>{{ data.name }}</td>
+                              <td>{{ data.rangeFrom }}</td>
+                              <td>{{ data.rangeUpTo }}</td>
+                              <td>{{ data.rate }}</td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                      <pagination-controls
+                        id="typeslabPageData"
+                        maxSize="10"
+                        directionLinks="true"
+                        previousLabel=""
+                        nextLabel=""
+                        (pageChange)="pageChangedtypeslabList($event)"
+                      ></pagination-controls>
+                    </div>
+                  </div>
+                </div>
+              </fieldset>
+            }
+            @if (taxAllData.tieredList.length !== 0) {
+              <fieldset>
+                <legend>Tax Tier list</legend>
+                <div class="boxWhite">
+                  <div class="row table-responsive">
+                    <div class="col-lg-12 col-md-12">
+                      <table class="table">
+                        <thead>
+                          <tr>
+                            <th>Name</th>
+                            <th>Tax Group</th>
+                            <th>Rate</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @for (
+                            data of taxAllData.tieredList
+                              | paginate
+                                : {
+                                    id: "typeTieredPageData",
+                                    itemsPerPage: typeTieredItemPerPage,
+                                    currentPage: currentPagetypeTieredList,
+                                    totalItems: typeTieredtotalRecords
+                                  };
+                            track data;
+                            let i = $index
+                          ) {
+                            <tr>
+                              <td>{{ data.name }}</td>
+                              <td>{{ data.taxGroup }}</td>
+                              <td>{{ data.rate }}%</td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                      <pagination-controls
+                        id="typeTieredPageData"
+                        maxSize="10"
+                        directionLinks="true"
+                        previousLabel=""
+                        nextLabel=""
+                        (pageChange)="pageChangedtypeTieredList($event)"
+                      ></pagination-controls>
+                    </div>
+                  </div>
+                </div>
+              </fieldset>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div> -->
+</ng-template>
+
+<ng-template #createUpdateModal>
+    <div class="dialog-container">
+        <div class="dialog-header">
+            {{ isTaxEdit ? "Update" : "Create" }} Tax
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="closeDialog()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+            <div class="col-md-12">
+                @if (!createAccess && !isTaxEdit) {
+                <mat-card-content class="matcard-content">
+                    <div class="panel-body table-responsive">
+                        Sorry you have not privilege to create operation!
+                    </div>
+                </mat-card-content>
+                }
+                @if (createAccess || (isTaxEdit && editAccess)) {
+                <mat-card-content class="matcardContent">
+                    <form class="card-form mb-3" [formGroup]="taxGroupForm">
+                        <!-- Tax Information Section -->
+                        <mat-card>
+                            <mat-card-header>
+                                <mat-card-title class="font-900">Tax Information</mat-card-title>
+                            </mat-card-header>
+                            <mat-card-content>
+                                <div class="row g-3">
+                                    <!-- Tax Name Input -->
+                                    <div class="col-md-4 mb-4">
+                                        <label for="taxName" class="inputLabel">Tax Name*</label>
+                                        <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                            <input id="taxName" class="input-p-5" matInput placeholder="Enter Tax Name"
+                                                formControlName="name" maxLength="250" />
+                                            <mat-error *ngIf="
+                            taxGroupForm.get('name')?.errors?.['required'] &&
+                            (submitted || taxGroupForm.get('name')?.touched)
+                          ">
+                                                Tax name is required
+                                            </mat-error>
+                                            <mat-error *ngIf="
+                            submitted && taxGroupForm.get('name')?.hasError('cannotContainSpace')
+                          ">
+                                                Tax name cannot contain only spaces
+                                            </mat-error>
+                                        </mat-form-field>
+                                    </div>
+
+                                    <!-- Tax Type Select -->
+                                    <div class="col-md-4 mb-4">
+                                        <label for="taxTypeSelect" class="inputLabel">Tax Type*</label>
+                                        <mat-form-field appearance="outline" class="w-100">
+                                            <mat-select id="taxTypeSelect" class="input-p-5"
+                                                placeholder="Select a Tax Type" formControlName="taxtype"
+                                                (selectionChange)="getSelTaxType($event.value)" [disabled]="isTaxEdit">
+                                                <mat-option *ngFor="let taxType of taxTypeAll" [value]="taxType.value">
+                                                    {{ taxType.label }}
+                                                </mat-option>
+                                            </mat-select>
+                                            <mat-error *ngIf="
+                            taxGroupForm.get('taxtype')?.errors?.['required'] &&
+                            (submitted || taxGroupForm.get('taxtype')?.touched)
+                          ">
+                                                Tax Type is required
+                                            </mat-error>
+                                        </mat-form-field>
+                                    </div>
+
+                                    <!-- Tax Status Select -->
+                                    <div class="col-md-4 mb-4">
+                                        <label for="statusSelect" class="inputLabel">Tax Status*</label>
+                                        <mat-form-field appearance="outline" class="w-100">
+                                            <mat-select id="statusSelect" class="input-p-5"
+                                                placeholder="Select a Status" formControlName="status">
+                                                <mat-option *ngFor="let status of statusOptions" [value]="status.value">
+                                                    {{ status.label }}
+                                                </mat-option>
+                                            </mat-select>
+                                            <mat-error *ngIf="
+                            taxGroupForm.get('status')?.errors?.['required'] &&
+                            (submitted || taxGroupForm.get('status')?.touched)
+                          ">
+                                                Tax Status is required
+                                            </mat-error>
+                                        </mat-form-field>
+                                    </div>
+
+                                    <!-- Tax Description -->
+                                    <div class="col-md-12 mb-4">
+                                        <label for="taxDescription" class="inputLabel">Tax Description*</label>
+                                        <mat-form-field class="mat-form-field" appearance="outline" class="w-100">
+                                            <textarea id="taxDescription" class="input-p-5" matInput
+                                                placeholder="Enter Tax Description" rows="3" formControlName="desc"
+                                                maxLength="150"></textarea>
+                                            <mat-error *ngIf="
+                            taxGroupForm.get('desc')?.errors?.['required'] &&
+                            (submitted || taxGroupForm.get('desc')?.touched)
+                          ">
+                                                Tax Description is required
+                                            </mat-error>
+                                            <mat-error
+                                                *ngIf="submitted && taxGroupForm.get('desc')?.hasError('pattern')">
+                                                Maximum 150 characters required
+                                            </mat-error>
+                                        </mat-form-field>
+                                    </div>
+                                </div>
+                            </mat-card-content>
+                        </mat-card>
+
+                        <!-- Tax Type SLAB Mapping Section -->
+                        @if (this.taxTypeSlab.enabled) {
+                        <mat-card>
+                            <mat-card-header>
+                                <mat-card-title>Tax Type Mapping</mat-card-title>
+                            </mat-card-header>
+                            <mat-card-content>
+                                <div class="slab-form-section" [formGroup]="typeslebForm">
+                                    <div class="row g-3 mb-3">
+                                        <!-- Slab Name -->
+                                        <div class="col-md-3">
+                                            <mat-form-field appearance="outline" class="w-100">
+                                                <input matInput placeholder="Enter Name" formControlName="name"
+                                                    class="input-p-5" />
+                                                <mat-error *ngIf="
+                                typeslebForm.get('name')?.errors?.['required'] &&
+                                (typeSlebSubmitted || typeslebForm.get('name')?.touched)
+                              ">
+                                                    Name is required
+                                                </mat-error>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <!-- Range From -->
+                                        <div class="col-md-3">
+                                            <mat-form-field appearance="outline" class="w-100">
+                                                <input matInput class="input-p-5" type="number" min="1"
+                                                    placeholder="Enter Range From" formControlName="rangeFrom" />
+                                                <mat-error *ngIf="
+                                typeslebForm.get('rangeFrom')?.errors?.['required'] &&
+                                (typeSlebSubmitted || typeslebForm.get('rangeFrom')?.touched)
+                              ">
+                                                    Range From is required
+                                                </mat-error>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <!-- Range UpTo -->
+                                        <div class="col-md-2">
+                                            <mat-form-field appearance="outline" class="w-100">
+                                                <input matInput type="number" class="input-p-5" min="1"
+                                                    placeholder="Enter Range UpTo" formControlName="rangeUpTo" />
+                                                <mat-error *ngIf="
+                                typeslebForm.get('rangeUpTo')?.errors?.['required'] &&
+                                (typeSlebSubmitted || typeslebForm.get('rangeUpTo')?.touched)
+                              ">
+                                                    Range UpTo is required
+                                                </mat-error>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <!-- Rate -->
+                                        <div class="col-md-2">
+                                            <mat-form-field appearance="outline" class="w-100">
+                                                <input matInput type="number" min="1" class="input-p-5"
+                                                    placeholder="Enter Rate" formControlName="rate" />
+                                                <mat-error *ngIf="
+                                typeslebForm.get('rate')?.errors?.['required'] &&
+                                (typeSlebSubmitted || typeslebForm.get('rate')?.touched)
+                              ">
+                                                    Rate is required
+                                                </mat-error>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <!-- Before Discount -->
+                                        <div class="col-md-2">
+                                            <mat-form-field appearance="outline" class="w-100">
+                                                <mat-select placeholder="Before Discount"
+                                                    formControlName="beforeDiscount">
+                                                    <mat-option *ngFor="let option of beforeTax" [value]="option.value">
+                                                        {{ option.label }}
+                                                    </mat-option>
+                                                </mat-select>
+                                            </mat-form-field>
+                                        </div>
+                                    </div>
+
+                                    <!-- Add Button -->
+                                    <div class="d-flex justify-content-end mb-3">
+                                        <button mat-flat-button color="primary" (click)="onAddTaxTypeSlabField()"
+                                            class="button-normal">
+                                            Add
+                                        </button>
+                                    </div>
+
+                                    <!-- Slab Table -->
+                                    <div class="table-responsive">
+                                        <table mat-table [dataSource]="taxTypeSlab.controls" class="w-100 slab-table">
+                                            <!-- Name Column -->
+                                            <ng-container matColumnDef="name">
+                                                <th mat-header-cell *matHeaderCellDef>Name*</th>
+                                                <td mat-cell *matCellDef="let row">
+                                                    <mat-form-field appearance="outline" class="w-100 table-field">
+                                                        <input matInput class="input-p-5" placeholder="Enter Name"
+                                                            [formControl]="row.get('name')" />
+                                                    </mat-form-field>
+                                                </td>
+                                            </ng-container>
+
+                                            <!-- Range From Column -->
+                                            <ng-container matColumnDef="rangeFrom">
+                                                <th mat-header-cell *matHeaderCellDef>Range From*</th>
+                                                <td mat-cell *matCellDef="let row">
+                                                    <mat-form-field appearance="outline" class="w-100 table-field">
+                                                        <input matInput class="input-p-5" type="number" min="1"
+                                                            placeholder="Enter Range From"
+                                                            [formControl]="row.get('rangeFrom')" />
+                                                    </mat-form-field>
+                                                </td>
+                                            </ng-container>
+
+                                            <!-- Range UpTo Column -->
+                                            <ng-container matColumnDef="rangeUpTo">
+                                                <th mat-header-cell *matHeaderCellDef>Range UpTo*</th>
+                                                <td mat-cell *matCellDef="let row">
+                                                    <mat-form-field appearance="outline" class="w-100 table-field">
+                                                        <input matInput type="number" class="input-p-5" min="1"
+                                                            placeholder="Enter Range UpTo"
+                                                            [formControl]="row.get('rangeUpTo')" />
+                                                    </mat-form-field>
+                                                </td>
+                                            </ng-container>
+
+                                            <!-- Rate Column -->
+                                            <ng-container matColumnDef="rate">
+                                                <th mat-header-cell *matHeaderCellDef>Rate*</th>
+                                                <td mat-cell *matCellDef="let row">
+                                                    <mat-form-field appearance="outline" class="w-100 table-field">
+                                                        <input matInput type="number" class="input-p-5" min="1"
+                                                            placeholder="Enter Rate" [formControl]="row.get('rate')" />
+                                                    </mat-form-field>
+                                                </td>
+                                            </ng-container>
+
+                                            <!-- Delete Column -->
+                                            <ng-container matColumnDef="delete">
+                                                <th mat-header-cell *matHeaderCellDef>Delete</th>
+                                                <td mat-cell *matCellDef="let row; let index = index">
+                                                    <button mat-icon-button class="button-normal" color="warn" (click)="
+                                  deleteConfirmonTaxTypeSlabField(index, row.get('id').value)
+                                "></button>
+                                                </td>
+                                            </ng-container>
+
+                                            <tr mat-header-row
+                                                *matHeaderRowDef="['name', 'rangeFrom', 'rangeUpTo', 'rate', 'delete']">
+                                            </tr>
+                                            <tr mat-row *matRowDef="
+                              let row;
+                              columns: ['name', 'rangeFrom', 'rangeUpTo', 'rate', 'delete']
+                            "></tr>
+                                        </table>
+                                    </div>
+
+                                    @if (taxTypeSlab.controls.length > 5) {
+                                    <mat-paginator [length]="TaxSlabtotalRecords" [pageSize]="TaxSlabitemsPerPage"
+                                        [pageSizeOptions]="[5, 10, 25]"
+                                        (page)="pageChangedTaxSlab($event)"></mat-paginator>
+                                    }
+                                </div>
+                            </mat-card-content>
+                        </mat-card>
+                        }
+
+                        <!-- Tax Type TIERED Mapping Section -->
+                        @if (this.taxTypeTiered.enabled) {
+                        <mat-card>
+                            <mat-card-header>
+                                <mat-card-title>Tax Tier List</mat-card-title>
+                            </mat-card-header>
+                            <mat-card-content>
+                                @if (!isTaxEdit) {
+                                <div class="tiered-form-section" [formGroup]="typeTieredForm">
+                                    <div class="row g-3 mb-3">
+                                        <!-- Tiered Name -->
+                                        <div class="col-md-2">
+                                            <label class="inputLabel">Name*</label>
+                                            <mat-form-field appearance="outline" class="w-100">
+                                                <input matInput placeholder="Enter Name" formControlName="name"
+                                                    class="input-p-5" />
+                                                <mat-error *ngIf="
+                                  typeTieredForm.get('name')?.errors?.['required'] &&
+                                  (typeTieredSubmitted || typeTieredForm.get('name')?.touched)
+                                ">
+                                                    Name is required
+                                                </mat-error>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <!-- Ledger ID -->
+                                        <div class="col-md-2">
+                                            <label class="inputLabel">Ledger ID</label>
+                                            <mat-form-field appearance="outline" class="w-100">
+                                                <input matInput class="input-p-5" placeholder="Enter Ledger ID"
+                                                    formControlName="ledgerId" />
+                                            </mat-form-field>
+                                        </div>
+
+                                        <!-- Rate -->
+                                        <div class="col-md-2">
+                                            <label class="inputLabel">Rate*</label>
+                                            <mat-form-field appearance="outline" class="w-100">
+                                                <input matInput class="input-p-5" type="number" min="0"
+                                                    placeholder="Enter Rate" formControlName="rate" />
+                                                <mat-error *ngIf="
+                                  typeTieredForm.get('rate')?.errors?.['required'] &&
+                                  (typeTieredSubmitted || typeTieredForm.get('rate')?.touched)
+                                ">
+                                                    Rate is required
+                                                </mat-error>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <!-- Tax Group -->
+                                        <div class="col-md-2">
+                                            <label class="inputLabel">Tax Group*</label>
+                                            <mat-form-field appearance="outline" class="w-100">
+                                                <mat-select placeholder="Select Tax Group" formControlName="taxGroup"
+                                                    class="input-p-5" (selectionChange)="handleTaxGroupChange($event)"
+                                                    [disabled]="isCompound">
+                                                    <mat-option *ngFor="let group of taxGroupOptions"
+                                                        [value]="group.value">
+                                                        {{ group.label }}
+                                                    </mat-option>
+                                                </mat-select>
+                                                <mat-error *ngIf="
+                                  typeTieredForm.get('taxGroup')?.errors?.['required'] &&
+                                  (typeTieredSubmitted || typeTieredForm.get('taxGroup')?.touched)
+                                ">
+                                                    Tax Group is required
+                                                </mat-error>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <!-- Before Discount -->
+                                        <div class="col-md-2">
+                                            <label class="inputLabel">Before Discount</label>
+                                            <mat-form-field appearance="outline" class="w-100">
+                                                <mat-select placeholder="Before Discount"
+                                                    formControlName="beforeDiscount" class="input-p-5">
+                                                    <mat-option *ngFor="let option of beforeTax" [value]="option.value">
+                                                        {{ option.label }}
+                                                    </mat-option>
+                                                </mat-select>
+                                            </mat-form-field>
+                                        </div>
+
+                                        <!-- Add Button -->
+                                        <div class="col-md-2 d-flex align-items-center">
+                                            <button mat-flat-button color="primary" (click)="onAddTaxTypeTieredField()"
+                                                [disabled]="infoMessageDisplayed" class="button-normal m-t-15">
+                                                Add
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    @if (infoMessageDisplayed) {
+                                    <div class="alert alert-info mb-3">
+                                        {{ infoMessage }}
+                                    </div>
+                                    }
+                                </div>
+                                }
+
+                                <!-- ...existing code... -->
+
+                                <!-- Tiered Table -->
+                                <div>
+                                    @if (taxTypeTiered.controls && taxTypeTiered.controls.length > 0) {
+                                    <table mat-table [dataSource]="taxTypeTieredDataSource.data"
+                                        class="w-100 table-layout-fixed">
+                                        <!-- Name Column -->
+                                        <ng-container matColumnDef="name">
+                                            <th mat-header-cell *matHeaderCellDef>Name*</th>
+                                            <td mat-cell *matCellDef="let row; let i = index">
+                                                <mat-form-field appearance="outline"
+                                                    class="w-100 hide-hint table-field m-t-10 m-b-10">
+                                                    <input matInput class="input-p-5" placeholder="Enter Name"
+                                                        [formControl]="row.get('name')" readonly />
+                                                </mat-form-field>
+                                            </td>
+                                        </ng-container>
+
+                                        <!-- Ledger ID Column -->
+                                        <ng-container matColumnDef="ledgerId">
+                                            <th mat-header-cell *matHeaderCellDef>Ledger ID</th>
+                                            <td mat-cell *matCellDef="let row; let i = index">
+                                                <mat-form-field appearance="outline"
+                                                    class="w-100 hide-hint table-field m-t-10 m-b-10">
+                                                    <input matInput class="input-p-5" placeholder="Enter Ledger ID"
+                                                        [formControl]="row.get('ledgerId')" readonly />
+                                                </mat-form-field>
+                                            </td>
+                                        </ng-container>
+
+                                        <!-- Rate Column -->
+                                        <ng-container matColumnDef="rate">
+                                            <th mat-header-cell *matHeaderCellDef>Rate*</th>
+                                            <td mat-cell *matCellDef="let row; let i = index">
+                                                <mat-form-field appearance="outline"
+                                                    class="w-100 hide-hint table-field m-t-10 m-b-10">
+                                                    <input matInput type="number" min="1" class="input-p-5"
+                                                        placeholder="Enter Rate" [formControl]="row.get('rate')"
+                                                        readonly />
+                                                </mat-form-field>
+                                            </td>
+                                        </ng-container>
+
+                                        <!-- Tax Group Column -->
+                                        <ng-container matColumnDef="taxGroup">
+                                            <th mat-header-cell *matHeaderCellDef>Tax Group*</th>
+                                            <td mat-cell *matCellDef="let row; let i = index">
+                                                <mat-form-field appearance="outline"
+                                                    class="w-100 hide-hint table-field m-t-10 m-b-10">
+                                                    <mat-select placeholder="Select Tax Group" class="input-p-5"
+                                                        [formControl]="row.get('taxGroup')" [disabled]="true">
+                                                        <mat-option *ngFor="let group of taxGroupOptions"
+                                                            [value]="group.value">
+                                                            {{ group.label }}
+                                                        </mat-option>
+                                                    </mat-select>
+                                                </mat-form-field>
+                                            </td>
+                                        </ng-container>
+
+                                        <!-- Before Discount Column -->
+                                        <ng-container matColumnDef="beforeDiscount">
+                                            <th mat-header-cell *matHeaderCellDef>Before Discount</th>
+                                            <td mat-cell *matCellDef="let row; let i = index">
+                                                <mat-form-field appearance="outline"
+                                                    class="w-100 hide-hint table-field m-t-10 m-b-10">
+                                                    <mat-label>Before Discount</mat-label>
+                                                    <mat-select class="input-p-5"
+                                                        [formControl]="row.get('beforeDiscount')" [disabled]="true">
+                                                        <mat-option *ngFor="let option of beforeTax"
+                                                            [value]="option.value">
+                                                            {{ option.label }}
+                                                        </mat-option>
+                                                    </mat-select>
+                                                </mat-form-field>
+                                            </td>
+                                        </ng-container>
+
+
+                                        <!-- Delete Column -->
+                                        @if (!isTaxEdit) {
+                                        <ng-container matColumnDef="delete">
+                                            <th mat-header-cell *matHeaderCellDef>Delete</th>
+                                            <td mat-cell *matCellDef="let row; let index = index">
+                                                <a mat-icon-button class="m-t-10 m-b-10" href="javascript:void(0)"
+                                                    (click)="
+                                    deleteConfirmonTaxTypeTieredField(index, row.get('id')?.value)
+                                  ">
+                                                    <img
+                                                        src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" />
+                                                </a>
+                                            </td>
+                                        </ng-container>
+                                        }
+
+                                        <tr mat-header-row *matHeaderRowDef="
+                              !isTaxEdit
+                                ? [
+                                    'name',
+                                    'ledgerId',
+                                    'rate',
+                                    'taxGroup',
+                                    'beforeDiscount',
+                                    'delete'
+                                  ]
+                                : ['name', 'ledgerId', 'rate', 'taxGroup', 'beforeDiscount']
+                            "></tr>
+                                        <tr mat-row *matRowDef="
+                              let row;
+                              columns: !isTaxEdit
+                                ? [
+                                    'name',
+                                    'ledgerId',
+                                    'rate',
+                                    'taxGroup',
+                                    'beforeDiscount',
+                                    'delete'
+                                  ]
+                                : ['name', 'ledgerId', 'rate', 'taxGroup', 'beforeDiscount'];
+                              trackBy: trackByFn
+                            "></tr>
+                                    </table>
+                                    } @else {
+                                    <div class="text-center p-16">
+                                        <p>No tax tier items added yet.</p>
+                                    </div>
+                                    }
+                                </div>
+
+                                <!-- ...existing code... -->
+
+                                @if (taxTypeTiered.controls.length > 5) {
+                                <mat-paginator [length]="TaxTieredtotalRecords" [pageSize]="TaxTiereditemsPerPage"
+                                    [pageIndex]="currentPageTaxTiered" [pageSizeOptions]="[5, 10, 25]"
+                                    (page)="pageChangedTaxTiered($event)"></mat-paginator>
+                                }
+                            </mat-card-content>
+                        </mat-card>
+                        }
+
+                        <!-- Dialog Actions -->
+                    </form>
+                </mat-card-content>
+                }
+            </div>
+        </div>
+        <div mat-dialog-actions class="p-0 mt-4 dialog-action-adjust">
+            <button mat-button mat-flat-button class="button-normal" color="primary"
+                (click)="isTaxEdit ? addTax(viewTaxListData.id) : addTax('')">
+                {{ isTaxEdit ? "Update" : "Add" }} Tax
+            </button>
+            <button mat-stroked-button mat-dialog-close class="button-normal">Close</button>
+        </div>
+    </div>
+</ng-template>

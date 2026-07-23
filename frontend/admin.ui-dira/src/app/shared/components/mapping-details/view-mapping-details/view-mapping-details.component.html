@@ -1,0 +1,241 @@
+<div class="dialog-container">
+    <div class="dialog-header">
+
+        {{headerTitle}}
+
+        <span>
+            <a mat-icon-button (click)="onClose()">
+                <img src="assets/img/DashboardIcons/Reject.svg">
+            </a>
+        </span>
+    </div>
+    <mat-dialog-content>
+        <div class="row m-b-10">
+            <div class="col-sm-12">
+                <mat-button-toggle-group [(ngModel)]="macAddMode" name="fontStyle" aria-label="Font Style"
+                    [hideSingleSelectionIndicator]="true">
+                    <mat-button-toggle value="manual">Show MAC Address</mat-button-toggle>
+
+                    <mat-button-toggle value="bulk" *ngIf="dataSource.data.length">Show failed Bulk MAC
+                        Address</mat-button-toggle>
+                </mat-button-toggle-group>
+            </div>
+        </div>
+        @if (macAddMode === 'manual') {
+        <mat-card>
+            <mat-card-content class="mat-card-content-border">
+                <div class="row">
+                    <div class="col-lg-2 col-md-2">
+                        <mat-form-field appearance="outline" class="mat-form-field w-100">
+                            <mat-select placeholder="Select a Option" class="input-p-5"
+                                [formControl]="searchOptionControl">
+                                <!-- <mat-option *ngFor="let opt of macOptionSelect" [value]="opt.value">
+                                    {{ opt.label }}
+                                </mat-option> -->
+                                <mat-option *ngFor="let opt of macOptionSelect; trackBy: trackByFn" [value]="opt.value">
+                                    {{ opt.label }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Conditional Inputs -->
+                    <div class="col-lg-2 col-md-2" *ngIf="searchOptionControl.value === 'itemId'">
+                        <mat-form-field appearance="outline" class="mat-form-field w-100">
+                            <input matInput placeholder="Enter Item ID" class="input-p-5"
+                                [formControl]="searchMacDeatilControl" (keydown.enter)="onSearchMac()" />
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-lg-2 col-md-2" *ngIf="searchOptionControl.value === 'mac'">
+                        <mat-form-field appearance="outline" class="mat-form-field w-100">
+                            <input matInput placeholder="Enter MAC" class="input-p-5"
+                                [formControl]="searchMacDeatilControl" (keydown.enter)="onSearchMac()" />
+                        </mat-form-field>
+                    </div>
+                    <div class="col-lg-2 col-md-2" *ngIf="searchOptionControl.value === 'msisdn'">
+                        <mat-form-field appearance="outline" class="mat-form-field w-100">
+                            <input matInput placeholder="Enter MSISDN" class="input-p-5"
+                                [formControl]="searchMacDeatilControl" (keydown.enter)="onSearchMac()" />
+                        </mat-form-field>
+                    </div>
+                    <div class="col-lg-2 col-md-2" *ngIf="searchOptionControl.value === 'imsi'">
+                        <mat-form-field appearance="outline" class="mat-form-field w-100">
+                            <input matInput placeholder="Enter IMSI" class="input-p-5"
+                                [formControl]="searchMacDeatilControl" (keydown.enter)="onSearchMac()" />
+                        </mat-form-field>
+                    </div>
+                    <div class="col-lg-2 col-md-2" *ngIf="searchOptionControl.value === 'iccid'">
+                        <mat-form-field appearance="outline" class="mat-form-field w-100">
+                            <input matInput placeholder="Enter ICCID" class="input-p-5"
+                                [formControl]="searchMacDeatilControl" (keydown.enter)="onSearchMac()" />
+                        </mat-form-field>
+                    </div>
+                    <div class="col-lg-2 col-md-2" *ngIf="searchOptionControl.value === 'kik'">
+                        <mat-form-field appearance="outline" class="mat-form-field w-100">
+                            <input matInput placeholder="Enter KIK" class="input-p-5"
+                                [formControl]="searchMacDeatilControl" (keydown.enter)="onSearchMac()" />
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-lg-2 col-md-2" *ngIf="searchOptionControl.value === 'serialNumber'">
+                        <mat-form-field appearance="outline" class="mat-form-field w-100">
+                            <input matInput placeholder="Enter Serial Number" class="input-p-5"
+                                [formControl]="searchMacDeatilControl" (keydown.enter)="onSearchMac()" />
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-lg-2 col-md-2" *ngIf="searchOptionControl.value === 'assetId'">
+                        <mat-form-field appearance="outline" class="mat-form-field w-100">
+                            <input matInput placeholder="Enter Asset ID" class="input-p-5"
+                                [formControl]="searchMacDeatilControl" (keydown.enter)="onSearchMac()" />
+                        </mat-form-field>
+                    </div>
+
+                    <div class="col-lg-2 col-md-2" *ngIf="searchOptionControl.value === 'itemType'">
+                        <mat-form-field appearance="outline" class="mat-form-field w-100">
+                            <input matInput placeholder="Enter Item Type" class="input-p-5"
+                                [formControl]="searchMacDeatilControl" (keydown.enter)="onSearchMac()" />
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Search & Clear Buttons -->
+                    <div class="col-lg-2 col-md-2 d-flex align-items-center gap-2" style="margin-bottom: 13px;">
+                        <button class="search-btn" mat-button mat-flat-button color="primary" class="search-btn"
+                            (click)="onSearchMac()" [disabled]="!searchMacDeatilControl.value">
+                            Search
+                        </button>
+                        <button class="search-btn" mat-stroked-button matButton="outlined" class="search-btn"
+                            (click)="onClearMac()">
+                            Clear
+                        </button>
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+        <mat-card>
+            <mat-card-content class="mat-card-content-border">
+                <table mat-table [dataSource]="dataSource" class="mat-elevation-z2">
+                    @for (col of displayedMacShowColumns; track col) {
+                    <ng-container [matColumnDef]="col">
+                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+                            {{ getHeaderName(col) }}
+                        </th>
+
+                        <td mat-cell *matCellDef="let row">
+                            @if (col === 'action') {
+                            <button mat-icon-button (click)="onDeleteShowMACMapping(row)">
+                                <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" />
+                            </button>
+                            } @else {
+                            {{ row[col] ?? row[col?.toLowerCase()] ?? '-' }}
+                            }
+                        </td>
+                    </ng-container>
+                    }
+
+
+                    <tr mat-header-row *matHeaderRowDef="displayedMacShowColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedMacShowColumns"></tr>
+
+                </table>
+
+                @if(dataSource.data.length === 0 ){
+                <div class="no-record text-center py-3 f-s-15 m-t-10 text-muted">
+                    No Record Found.
+                </div>
+                }
+
+                <!-- Paginator -->
+                <mat-paginator #paginator [length]="mappingListdatatotalRecords " [pageSize]="mappingListitemsPerPage"
+                    [pageSizeOptions]="[5,10,20,50,100]" (page)="onPaginate($event)" showFirstLastButtons>
+                </mat-paginator>
+            </mat-card-content>
+        </mat-card>
+        }
+        @if (macAddMode === 'bulk' ) {
+        <div mat-dialog-content>
+            <mat-card>
+                <mat-card-header>
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <!-- Left side: Back button + title -->
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <mat-card-title>Skipping row details</mat-card-title>
+                        </div>
+                        <div>
+                            <button mat-icon-button color="primary" matTooltip="Download"
+                                (click)="downloadFile(this.inwardId)">
+                                <img src="assets/img/DashboardIcons/Document Download.svg" alt="Download">
+                            </button>
+                            <button mat-icon-button color="primary" matTooltip="Refresh"
+                                (click)="getSkipRecord(this.inwardId)">
+                                <img src="assets/img/DashboardIcons/Refresh.svg" alt="Refresh">
+                            </button>
+                        </div>
+                    </div>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="mt-3">
+                        <div class="table-responsive example-container">
+
+                            <!-- Table -->
+                            <!-- <table mat-table [dataSource]="getData" class="mat-elevation-z2 w-100" matSort>
+
+                                @for (column of displayedMacShowColumns2; track column.field) {
+                                <ng-container [matColumnDef]="column.field">
+                                    <th mat-header-cell *matHeaderCellDef>
+                                        {{ column.header }}
+                                    </th>
+                                    <td mat-cell *matCellDef="let element">
+                                        {{ element[column.field] }}
+                                    </td>
+                                </ng-container>
+                                }
+
+                                <tr mat-header-row *matHeaderRowDef="displayedMacShowColumns2"></tr>
+                                <tr mat-row *matRowDef="let row; columns: displayedMacShowColumns2"></tr>
+                            </table> -->
+                            <table mat-table [dataSource]="getData" class="mat-elevation-z2">
+                                @for (col of displayedMacShowColumns2; track col) {
+                                <ng-container [matColumnDef]="col">
+                                    <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+                                        {{ getHeaderName(col) }}
+                                    </th>
+
+                                    <td mat-cell *matCellDef="let row">
+
+                                        {{ row[col] ?? row[col?.toLowerCase()] ?? '-' }}
+
+
+                                    </td>
+                                </ng-container>
+                                }
+
+
+                                <tr mat-header-row *matHeaderRowDef="displayedMacShowColumns2"></tr>
+                                <tr mat-row *matRowDef="let row; columns: displayedMacShowColumns2"></tr>
+
+                            </table>
+
+                            <!-- No Record Found -->
+                            <div *ngIf="!skippedTotalRecords || skippedTotalRecords.length === 0"
+                                class="no-record text-center mt-5">
+                                No Record Found.
+                            </div>
+                        </div>
+
+                        <mat-paginator [length]="skippedTotalRecords" [pageSize]="skiptemsPerPage"
+                            [pageSizeOptions]="[5,10,20,50,100]" (page)="pageChangedSkipList($event)"
+                            showFirstLastButtons>
+                        </mat-paginator>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+        }
+
+    </mat-dialog-content>
+    <div style="gap: 8px" class="dialog-action-adjust d-flex justify-content-end">
+        <button mat-stroked-button (click)="onClose()">Close</button>
+    </div>
+</div>

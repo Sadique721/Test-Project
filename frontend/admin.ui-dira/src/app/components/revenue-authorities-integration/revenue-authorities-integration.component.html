@@ -1,0 +1,1136 @@
+<div class="row">
+    <div class="col-md-12">
+        <div class="">
+            <div class="panel-collapse collapse in" id="revenueAuthMenu">
+                <div class="panel-body no-padding">
+                    <div class="dashboard-tab-wrapper">
+                        <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start"
+                            (selectedTabChange)="onTabChange($event)">
+
+                            <!-- ===================== CUSTOMER TAB ===================== -->
+                            <mat-tab label="Customer">
+                                <div class="f-s-14 p-16 rounded m-t-12">
+                                    <!-- Search card (standalone, above the list card) -->
+                                    <mat-card class="cardWithShadow mb-8">
+                                        <mat-card-content>
+                                            <div class="row">
+                                                <div class="col-lg-3 col-md-3">
+                                                    <mat-form-field appearance="outline"
+                                                        class="w-100 hide-hint header-input">
+
+                                                        <mat-select [(ngModel)]="customerSearchField"
+                                                            (selectionChange)="onCustomerSearchFieldChange()">
+                                                            <mat-option *ngFor="let option of searchFields"
+                                                                [value]="option.value">
+                                                                {{ option.label }}
+                                                            </mat-option>
+                                                        </mat-select>
+                                                    </mat-form-field>
+                                                </div>
+                                                <div class="col-lg-3 col-md-3">
+                                                    <mat-form-field appearance="outline"
+                                                        class="w-100 hide-hint header-input">
+                                                        <input matInput
+                                                            [type]="customerSearchField === 'mobileNumber' ? 'number' : 'text'"
+                                                            [placeholder]="customerSearchField === 'accountNumber' ? 'Search account number' : customerSearchField === 'mobileNumber' ? 'Search mobile number' : 'Search customer name'"
+                                                            [(ngModel)]="customerSearchText"
+                                                            (keyup.enter)="searchCustomer()"
+                                                            (wheel)="preventScrollOnNumber($event)"
+                                                            (keydown)="preventScrollOnNumber($event)" class="input-p-5">
+                                                    </mat-form-field>
+                                                </div>
+                                                <div class="col-lg-3 col-md-3">
+                                                    <div class="d-flex gap-2">
+                                                        <button mat-button mat-flat-button color="primary"
+                                                            class="button-normal m-r-10" (click)="searchCustomer()">
+                                                            Search
+                                                        </button>
+                                                        <button mat-stroked-button (click)="clearCustomerSearch()"
+                                                            class="button-normal">Clear</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </mat-card-content>
+                                    </mat-card>
+                                    <mat-card class="cardWithShadow">
+                                        <mat-card-header>
+                                            <mat-card-title class="font-900">Customer List</mat-card-title>
+                                            <div class="tab-header-action">
+                                                <button mat-flat-button color="primary" class="button-normal"
+                                                    (click)="addSelectedCustomers()"
+                                                    [disabled]="customerSelection.isEmpty()">
+                                                    Add Selected
+                                                    @if (customerSelection.selected.length > 0) {
+                                                    ({{ customerSelection.selected.length }})
+                                                    }
+                                                </button>
+                                            </div>
+                                        </mat-card-header>
+                                        <mat-card-content>
+                                            <div class="table-responsive">
+                                                <table mat-table [dataSource]="customerDataSource" matSort
+                                                    class="no-wrap m-t-0 v-middle w-100">
+
+                                                    <!-- Select All Checkbox Column -->
+                                                    <ng-container matColumnDef="select">
+                                                        <th mat-header-cell *matHeaderCellDef>
+                                                            <mat-checkbox (change)="$event ? toggleAllCustomer() : null"
+                                                                [checked]="isAllCustomerSelected()"
+                                                                [indeterminate]="customerSelection.hasValue() && !isAllCustomerSelected()"
+                                                                color="primary">
+                                                            </mat-checkbox>
+                                                        </th>
+                                                        <td mat-cell *matCellDef="let row">
+                                                            <mat-checkbox (click)="$event.stopPropagation()"
+                                                                (change)="$event ? customerSelection.toggle(row) : null"
+                                                                [checked]="customerSelection.isSelected(row)"
+                                                                color="primary">
+                                                            </mat-checkbox>
+                                                        </td>
+                                                    </ng-container>
+
+                                                    <!-- Name Column -->
+                                                    <ng-container matColumnDef="name">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+                                                            Name</th>
+                                                        <td mat-cell *matCellDef="let element" class="f-s-14">{{
+                                                            element.name }}</td>
+                                                    </ng-container>
+
+                                                    <!-- AAA Username Column -->
+                                                    <ng-container matColumnDef="username">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">AAA
+                                                            Username</th>
+                                                        <td mat-cell *matCellDef="let element" class="f-s-14">{{
+                                                            element.username }}</td>
+                                                    </ng-container>
+
+                                                    <!-- Account No Column -->
+                                                    <ng-container matColumnDef="acctno">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+                                                            Account Number</th>
+                                                        <td mat-cell *matCellDef="let element" class="f-s-14">{{
+                                                            element.acctno || '-' }}</td>
+                                                    </ng-container>
+
+                                                    <!-- Mobile Column -->
+                                                    <ng-container matColumnDef="mobile">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+                                                            Mobile Number</th>
+                                                        <td mat-cell *matCellDef="let element" class="f-s-14">{{
+                                                            element.mobile }}</td>
+                                                    </ng-container>
+
+                                                    <!-- Service Area Column -->
+                                                    <ng-container matColumnDef="serviceArea">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+                                                            Service Area</th>
+                                                        <td mat-cell *matCellDef="let element" class="f-s-14">{{
+                                                            element.serviceArea }}</td>
+                                                    </ng-container>
+
+                                                    <!-- Connection Status Column -->
+                                                    <ng-container matColumnDef="connectionMode">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+                                                            Connection Status</th>
+                                                        <td mat-cell *matCellDef="let element" class="f-s-14">{{
+                                                            element.connectionMode }}</td>
+                                                    </ng-container>
+
+                                                    <tr mat-header-row *matHeaderRowDef="customerDisplayedColumns"></tr>
+                                                    <tr mat-row *matRowDef="let row; columns: customerDisplayedColumns"
+                                                        [class.selected-row]="customerSelection.isSelected(row)">
+                                                    </tr>
+                                                </table>
+
+                                                @if (!customerDataSource || customerDataSource?.length === 0) {
+                                                <div class="m-t-10 text-center f-w-600">No Records Found</div>
+                                                }
+                                                @if (customerDataSource && customerDataSource?.length !== 0) {
+                                                <mat-paginator [pageIndex]="customerCurrentPage - 1"
+                                                    [length]="customerTotalRecords" [pageSize]="customerItemsPerPage"
+                                                    [pageSizeOptions]="pageSizeOptions" showFirstLastButtons
+                                                    (page)="pageChangedCustomer($event)">
+                                                </mat-paginator>
+                                                }
+                                            </div>
+                                        </mat-card-content>
+                                    </mat-card>
+                                </div>
+                            </mat-tab>
+
+                            <!-- ===================== PLAN TAB ===================== -->
+                            <mat-tab label="Plan">
+                                <div class="f-s-14 p-16 rounded m-t-12">
+                                    <mat-card class="cardWithShadow">
+                                        <mat-card-header>
+                                            <mat-card-title class="font-900">Plan List</mat-card-title>
+                                            <div class="tab-header-action">
+                                                <button mat-flat-button color="primary" class="button-normal"
+                                                    (click)="addSelectedPlans()" [disabled]="planSelection.isEmpty()">
+                                                    Add Selected
+                                                    @if (planSelection.selected.length > 0) {
+                                                    ({{ planSelection.selected.length }})
+                                                    }
+                                                </button>
+                                            </div>
+                                        </mat-card-header>
+                                        <mat-card-content>
+                                            <div class="table-responsive">
+                                                <table mat-table [dataSource]="planDataSource" matSort
+                                                    class="no-wrap m-t-0 v-middle w-100">
+
+                                                    <!-- Select All Checkbox Column -->
+                                                    <ng-container matColumnDef="select">
+                                                        <th mat-header-cell *matHeaderCellDef>
+                                                            <mat-checkbox (change)="$event ? toggleAllPlan() : null"
+                                                                [checked]="isAllPlanSelected()"
+                                                                [indeterminate]="planSelection.hasValue() && !isAllPlanSelected()"
+                                                                color="primary">
+                                                            </mat-checkbox>
+                                                        </th>
+                                                        <td mat-cell *matCellDef="let row">
+                                                            <mat-checkbox (click)="$event.stopPropagation()"
+                                                                (change)="$event ? planSelection.toggle(row) : null"
+                                                                [checked]="planSelection.isSelected(row)"
+                                                                color="primary">
+                                                            </mat-checkbox>
+                                                        </td>
+                                                    </ng-container>
+
+                                                    <!-- Plan Name Column -->
+                                                    <ng-container matColumnDef="name">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15"
+                                                            width="30%">Name</th>
+                                                        <td mat-cell *matCellDef="let element" class="f-s-14">{{
+                                                            element.displayName }}</td>
+                                                    </ng-container>
+
+                                                    <!-- Plan Code Column -->
+                                                    <ng-container matColumnDef="code">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15"
+                                                            width="20%">Code</th>
+                                                        <td mat-cell *matCellDef="let element" class="f-s-14">{{
+                                                            element.code || '-' }}</td>
+                                                    </ng-container>
+
+                                                    <!-- Plan Mode Column -->
+                                                    <ng-container matColumnDef="mode">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15"
+                                                            width="10%">Mode</th>
+                                                        <td mat-cell *matCellDef="let element" class="f-s-14">{{
+                                                            element.plantype }}</td>
+                                                    </ng-container>
+
+                                                    <!-- Created By Column -->
+                                                    <ng-container matColumnDef="createdByName">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15"
+                                                            width="20%">Created By</th>
+                                                        <td mat-cell *matCellDef="let element" class="f-s-14">{{
+                                                            element.createdByName }}</td>
+                                                    </ng-container>
+
+                                                    <!-- Created Date Column -->
+                                                    <ng-container matColumnDef="createdate">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15"
+                                                            width="20%">Created Date</th>
+                                                        <td mat-cell *matCellDef="let element" class="f-s-14">
+                                                            {{ (element.createdate ? element.createdate :
+                                                            element.startDate) | date:'dd-MM-yyyy' }}
+                                                        </td>
+                                                    </ng-container>
+
+                                                    <tr mat-header-row *matHeaderRowDef="planDisplayedColumns"></tr>
+                                                    <tr mat-row *matRowDef="let row; columns: planDisplayedColumns"
+                                                        [class.selected-row]="planSelection.isSelected(row)">
+                                                    </tr>
+                                                </table>
+
+                                                @if (!planDataSource || planDataSource?.length === 0) {
+                                                <div class="m-t-10 text-center f-w-600">No Records Found</div>
+                                                }
+                                                @if (planDataSource && planDataSource?.length !== 0) {
+                                                <mat-paginator [pageIndex]="planCurrentPage - 1"
+                                                    [length]="planTotalRecords" [pageSize]="planItemsPerPage"
+                                                    [pageSizeOptions]="pageSizeOptions" showFirstLastButtons
+                                                    (page)="pageChangedPlan($event)">
+                                                </mat-paginator>
+                                                }
+                                            </div>
+                                        </mat-card-content>
+                                    </mat-card>
+                                </div>
+                            </mat-tab>
+
+                            <!-- ===================== INVOICE TAB ===================== -->
+                            <mat-tab label="Pending Invoice">
+                                <div class="f-s-14 p-16 rounded m-t-12">
+                                    <!-- Search card (standalone, above the list card) -->
+                                    <mat-card class="cardWithShadow mb-8 w-100">
+                                        <mat-card-content>
+                                            <div class="row invoice-search-row">
+                                                <div
+                                                    class="col-lg-3 col-md-4 col-sm-6 col-xs-12 invoice-search-small-field">
+                                                    <mat-form-field appearance="outline"
+                                                        class="w-100 hide-hint header-input">
+                                                        <input matInput [(ngModel)]="invoiceAccountNumberSearch"
+                                                            (keyup.enter)="searchInvoice()" placeholder="Account Number"
+                                                            class="input-p-5">
+                                                    </mat-form-field>
+                                                </div>
+                                                <div
+                                                    class="col-lg-3 col-md-4 col-sm-6 col-xs-12 invoice-customer-col d-flex align-items-center">
+                                                    <mat-form-field appearance="outline"
+                                                        class="w-100 hide-hint header-input">
+                                                        <mat-select placeholder="Select Customer" class="input-p-5"
+                                                            [disabled]="true" [(ngModel)]="selectedParentCust">
+                                                            <mat-option *ngFor="let item of parentCustList"
+                                                                [value]="item.id">
+                                                                {{ item.title ? item.title + ' ' : '' }}{{ item.name }}
+                                                            </mat-option>
+                                                        </mat-select>
+                                                    </mat-form-field>
+                                                    <button mat-icon-button color="primary"
+                                                        class="customer-action-button"
+                                                        (click)="modalOpenParentCustomer()"
+                                                        matTooltip="Select a Customer">
+                                                        <img src="assets/img/DashboardIcons/Add.svg">
+                                                    </button>
+                                                    <button mat-icon-button color="warn" class="customer-action-button"
+                                                        [disabled]="!selectedParentCust" (click)="removeSelParentCust()"
+                                                        matTooltip="Deselect a Customer">
+                                                        <img
+                                                            src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                                    </button>
+                                                </div>
+                                                <div
+                                                    class="col-lg-3 col-md-4 col-sm-6 col-xs-12 invoice-search-small-field">
+                                                    <mat-form-field appearance="outline"
+                                                        class="w-100 hide-hint header-input">
+                                                        <input matInput [(ngModel)]="invoiceNumberSearch"
+                                                            (keyup.enter)="searchInvoice()" placeholder="Invoice Number"
+                                                            class="input-p-5">
+                                                    </mat-form-field>
+                                                </div>
+                                                <div
+                                                    class="col-lg-3 col-md-4 col-sm-6 col-xs-12 invoice-search-small-field invoice-search-small-field">
+                                                    <mat-form-field appearance="outline"
+                                                        class="w-100 hide-hint header-input">
+                                                        <input matInput [matDatepicker]="invoiceBillFromPicker"
+                                                            [(ngModel)]="invoiceBillFromDate" placeholder="Start Date"
+                                                            class="input-p-5">
+                                                        <mat-datepicker-toggle matSuffix
+                                                            [for]="invoiceBillFromPicker"></mat-datepicker-toggle>
+                                                        <mat-datepicker #invoiceBillFromPicker></mat-datepicker>
+                                                    </mat-form-field>
+                                                </div>
+                                                <div
+                                                    class="col-lg-3 col-md-4 col-sm-6 col-xs-12 invoice-search-small-field">
+                                                    <mat-form-field appearance="outline"
+                                                        class="w-100 hide-hint header-input">
+                                                        <input matInput [matDatepicker]="invoiceBillToPicker"
+                                                            [(ngModel)]="invoiceBillToDate" placeholder="End Date"
+                                                            class="input-p-5">
+                                                        <mat-datepicker-toggle matSuffix
+                                                            [for]="invoiceBillToPicker"></mat-datepicker-toggle>
+                                                        <mat-datepicker #invoiceBillToPicker></mat-datepicker>
+                                                    </mat-form-field>
+                                                </div>
+
+                                            </div>
+                                            <div class="d-flex justify-content-center mt-2 gap-10"
+                                                style="margin-top: 1rem">
+                                                <button mat-button mat-flat-button color="primary"
+                                                    class="button-normal " (click)="searchInvoice()">
+                                                    Search
+                                                </button>
+                                                <button mat-stroked-button (click)="clearInvoiceSearch()"
+                                                    class="button-normal">Clear</button>
+                                            </div>
+                                        </mat-card-content>
+                                    </mat-card>
+                                    <mat-card class="cardWithShadow">
+                                        <mat-card-header>
+                                            <mat-card-title class="font-900">Pending Invoice List</mat-card-title>
+                                            <div class="tab-header-action">
+                                                <button mat-flat-button color="primary" class="button-normal"
+                                                    (click)="addSelectedInvoices()"
+                                                    [disabled]="invoiceSelection.isEmpty()">
+                                                    Add Selected
+                                                    @if (invoiceSelection.selected.length > 0) {
+                                                    ({{ invoiceSelection.selected.length }})
+                                                    }
+                                                </button>
+                                            </div>
+                                        </mat-card-header>
+                                        <mat-card-content>
+                                            <div class="table-responsive">
+                                                <table mat-table [dataSource]="invoiceDataSource" matSort
+                                                    class="no-wrap m-t-0 v-middle w-100">
+
+                                                    <!-- Select All Checkbox Column -->
+                                                    <ng-container matColumnDef="select">
+                                                        <th mat-header-cell *matHeaderCellDef>
+                                                            <mat-checkbox (change)="$event ? toggleAllInvoice() : null"
+                                                                [checked]="isAllInvoiceSelected()"
+                                                                [indeterminate]="invoiceSelection.hasValue() && !isAllInvoiceSelected()"
+                                                                color="primary">
+                                                            </mat-checkbox>
+                                                        </th>
+                                                        <td mat-cell *matCellDef="let row">
+                                                            <mat-checkbox (click)="$event.stopPropagation()"
+                                                                (change)="$event ? invoiceSelection.toggle(row) : null"
+                                                                [checked]="invoiceSelection.isSelected(row)"
+                                                                color="primary">
+                                                            </mat-checkbox>
+                                                        </td>
+                                                    </ng-container>
+
+                                                    <!-- Customer Column -->
+                                                    <ng-container matColumnDef="customer">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+                                                            Customer</th>
+                                                        <td mat-cell *matCellDef="let element" class="f-s-14">{{
+                                                            (element.firstName + ' ' + element.lastName) }}</td>
+                                                    </ng-container>
+
+                                                    <ng-container matColumnDef="accountNumber">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+                                                            Account Number</th>
+                                                        <td mat-cell *matCellDef="let element" class="f-s-14">{{
+                                                            element.accountNumber }}</td>
+                                                    </ng-container>
+
+
+
+                                                    <!-- Document No Column -->
+                                                    <ng-container matColumnDef="docnumber">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+                                                            Document No.</th>
+                                                        <td mat-cell *matCellDef="let element" class="f-s-14">{{
+                                                            element.docnumber }}</td>
+                                                    </ng-container>
+
+                                                    <!-- Bill Run ID Column -->
+                                                    <ng-container matColumnDef="startdate">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+                                                            Start Date</th>
+                                                        <td mat-cell *matCellDef="let element" class="f-s-14">{{
+                                                            element.startdate }}</td>
+                                                    </ng-container>
+
+                                                    <!-- Total Amount Column -->
+                                                    <ng-container matColumnDef="totalamount">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+                                                            Total Amount</th>
+                                                        <td mat-cell *matCellDef="let element" class="f-s-14">
+                                                            {{ element.totalamount | number:'1.2-2' }}
+                                                        </td>
+                                                    </ng-container>
+
+                                                    <!-- Bill Run Status Column -->
+                                                    <ng-container matColumnDef="billrunstatus">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+                                                            Bill Run Status</th>
+                                                        <td mat-cell *matCellDef="let element" class="f-s-14">
+                                                            <span class="status-badge"
+                                                                [ngClass]="getBillRunStatusClass(element.billrunstatus)">
+                                                                {{ element.billrunstatus || '-' }}
+                                                            </span>
+                                                        </td>
+                                                    </ng-container>
+
+                                                    <!-- Payment Status Column -->
+                                                    <ng-container matColumnDef="paymentStatus">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+                                                            Payment Status</th>
+                                                        <td mat-cell *matCellDef="let element" class="f-s-14">
+                                                            <span class="status-badge"
+                                                                [ngClass]="getStatusClass(element.paymentStatus)">
+                                                                {{ element.paymentStatus || 'UnPaid' }}
+                                                            </span>
+                                                        </td>
+                                                    </ng-container>
+
+                                                    <tr mat-header-row *matHeaderRowDef="invoiceDisplayedColumns"></tr>
+                                                    <tr mat-row *matRowDef="let row; columns: invoiceDisplayedColumns"
+                                                        [class.selected-row]="invoiceSelection.isSelected(row)">
+                                                    </tr>
+                                                </table>
+
+                                                @if (!invoiceDataSource || invoiceDataSource?.length === 0) {
+                                                <div class="m-t-10 text-center f-w-600">No Records Found</div>
+                                                }
+                                                @if (invoiceDataSource && invoiceDataSource?.length !== 0) {
+                                                <div class="custom-paginator-wrapper">
+                                                    <mat-paginator [pageIndex]="invoiceCurrentPage - 1"
+                                                        [length]="invoiceTotalRecords" [pageSize]="invoiceItemsPerPage"
+                                                        [pageSizeOptions]="pageSizeOptionsForInvoice"
+                                                        showFirstLastButtons (page)="pageChangedInvoice($event)">
+                                                    </mat-paginator>
+                                                </div>
+                                                }
+                                            </div>
+                                        </mat-card-content>
+                                    </mat-card>
+                                </div>
+                            </mat-tab>
+
+                            <mat-tab label="Synced Invoice">
+                                <div class="f-s-14 p-16 rounded m-t-12">
+                                    <mat-card class="cardWithShadow mb-8 w-100">
+                                        <mat-card-content>
+                                            <div class="row invoice-search-row">
+                                                <div
+                                                    class="col-lg-3 col-md-4 col-sm-6 col-xs-12 invoice-search-small-field">
+                                                    <mat-form-field appearance="outline"
+                                                        class="w-100 hide-hint header-input">
+                                                        <input matInput [(ngModel)]="pendingInvoiceAccountNumberSearch"
+                                                            (keyup.enter)="searchPendingInvoice()"
+                                                            placeholder="Account Number" class="input-p-5">
+                                                    </mat-form-field>
+                                                </div>
+                                                <div
+                                                    class="col-lg-3 col-md-4 col-sm-6 col-xs-12 invoice-customer-col d-flex align-items-center">
+                                                    <mat-form-field appearance="outline"
+                                                        class="w-100 hide-hint header-input">
+                                                        <mat-select placeholder="Select Customer" class="input-p-5"
+                                                            [disabled]="true" [(ngModel)]="selectedPendingInvoiceCust">
+                                                            <mat-option
+                                                                *ngFor="let item of pendingInvoiceParentCustList"
+                                                                [value]="item.id">
+                                                                {{ item.title ? item.title + ' ' : '' }}{{ item.name }}
+                                                            </mat-option>
+                                                        </mat-select>
+                                                    </mat-form-field>
+                                                    <button mat-icon-button color="primary"
+                                                        class="customer-action-button"
+                                                        (click)="modalOpenPendingInvoiceParentCustomer()"
+                                                        matTooltip="Select a Customer">
+                                                        <img src="assets/img/DashboardIcons/Add.svg">
+                                                    </button>
+
+                                                    <button mat-icon-button color="warn" class="customer-action-button"
+                                                        [disabled]="!selectedPendingInvoiceCust"
+                                                        (click)="removeSelPendingInvoiceParentCust()"
+                                                        matTooltip="Deselect a Customer">
+                                                        <img
+                                                            src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                                    </button>
+                                                </div>
+                                                <div
+                                                    class="col-lg-3 col-md-4 col-sm-6 col-xs-12 invoice-search-small-field">
+                                                    <mat-form-field appearance="outline"
+                                                        class="w-100 hide-hint header-input">
+                                                        <input matInput [(ngModel)]="pendingInvoiceNumberSearch"
+                                                            (keyup.enter)="searchPendingInvoice()"
+                                                            placeholder="Invoice Number" class="input-p-5">
+                                                    </mat-form-field>
+                                                </div>
+                                                <div
+                                                    class="col-lg-3 col-md-4 col-sm-6 col-xs-12 invoice-search-small-field invoice-search-small-field">
+                                                    <mat-form-field appearance="outline"
+                                                        class="w-100 hide-hint header-input">
+                                                        <input matInput [matDatepicker]="pendingInvoiceBillFromPicker"
+                                                            [(ngModel)]="pendingInvoiceBillFromDate"
+                                                            placeholder="Start Date" class="input-p-5">
+                                                        <mat-datepicker-toggle matSuffix
+                                                            [for]="pendingInvoiceBillFromPicker"></mat-datepicker-toggle>
+                                                        <mat-datepicker #pendingInvoiceBillFromPicker></mat-datepicker>
+                                                    </mat-form-field>
+                                                </div>
+                                                <div
+                                                    class="col-lg-3 col-md-4 col-sm-6 col-xs-12 invoice-search-small-field">
+                                                    <mat-form-field appearance="outline"
+                                                        class="w-100 hide-hint header-input">
+                                                        <input matInput [matDatepicker]="pendingInvoiceBillToPicker"
+                                                            [(ngModel)]="pendingInvoiceBillToDate"
+                                                            placeholder="End Date" class="input-p-5">
+                                                        <mat-datepicker-toggle matSuffix
+                                                            [for]="pendingInvoiceBillToPicker"></mat-datepicker-toggle>
+                                                        <mat-datepicker #pendingInvoiceBillToPicker></mat-datepicker>
+                                                    </mat-form-field>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex justify-content-center mt-2 gap-10"
+                                                style="margin-top: 1rem">
+                                                <button mat-button mat-flat-button color="primary" class="button-normal"
+                                                    (click)="searchPendingInvoice()">
+                                                    Search
+                                                </button>
+                                                <button mat-stroked-button (click)="clearPendingInvoiceSearch()"
+                                                    class="button-normal">Clear</button>
+                                            </div>
+                                        </mat-card-content>
+                                    </mat-card>
+                                    <mat-card class="cardWithShadow">
+                                        <mat-card-header>
+                                            <mat-card-title class="font-900">Synced Invoice List</mat-card-title>
+                                            <div class="tab-header-action" style="display: flex; gap: 10px;">
+                                                <button mat-flat-button color="accent" class="button-normal"
+                                                    (click)="bulkDownloadSyncedInvoices()"
+                                                    [disabled]="pendingInvoiceSelection.isEmpty()">
+                                                    Bulk Download
+                                                    @if (pendingInvoiceSelection.selected.length > 0) {
+                                                    ({{ pendingInvoiceSelection.selected.length }})
+                                                    }
+                                                </button>
+                                            </div>
+                                        </mat-card-header>
+                                        <mat-card-content>
+                                            <div class="table-responsive">
+                                                <table mat-table [dataSource]="pendingInvoiceDataSource" matSort
+                                                    class="no-wrap m-t-0 v-middle w-100">
+
+                                                    <!-- Select All Checkbox Column -->
+                                                    <ng-container matColumnDef="select">
+                                                        <th mat-header-cell *matHeaderCellDef>
+                                                            <mat-checkbox
+                                                                (change)="$event ? toggleAllPendingInvoice() : null"
+                                                                [checked]="isAllPendingInvoiceSelected()"
+                                                                [indeterminate]="pendingInvoiceSelection.hasValue() && !isAllPendingInvoiceSelected()"
+                                                                color="primary">
+                                                            </mat-checkbox>
+                                                        </th>
+                                                        <td mat-cell *matCellDef="let row">
+                                                            <mat-checkbox (click)="$event.stopPropagation()"
+                                                                (change)="$event ? pendingInvoiceSelection.toggle(row) : null"
+                                                                [checked]="pendingInvoiceSelection.isSelected(row)"
+                                                                color="primary">
+                                                            </mat-checkbox>
+                                                        </td>
+                                                    </ng-container>
+
+                                                    <!-- Customer Column -->
+                                                    <ng-container matColumnDef="customer">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+                                                            Customer</th>
+                                                        <td mat-cell *matCellDef="let element" class="f-s-14">{{
+                                                            (element.firstName + ' ' + element.lastName) }}</td>
+                                                    </ng-container>
+
+                                                    <ng-container matColumnDef="accountNumber">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+                                                            Account Number</th>
+                                                        <td mat-cell *matCellDef="let element" class="f-s-14">{{
+                                                            element.accountNumber }}</td>
+                                                    </ng-container>
+
+
+
+                                                    <!-- Document No Column -->
+                                                    <ng-container matColumnDef="docnumber">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+                                                            Document No.</th>
+                                                        <td mat-cell *matCellDef="let element" class="f-s-14">{{
+                                                            element.docnumber }}</td>
+                                                    </ng-container>
+
+                                                    <!-- Bill Run ID Column -->
+                                                    <ng-container matColumnDef="startdate">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+                                                            Start Date</th>
+                                                        <td mat-cell *matCellDef="let element" class="f-s-14">{{
+                                                            element.startdate }}</td>
+                                                    </ng-container>
+
+                                                    <!-- Total Amount Column -->
+                                                    <ng-container matColumnDef="totalamount">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+                                                            Total Amount</th>
+                                                        <td mat-cell *matCellDef="let element" class="f-s-14">
+                                                            {{ element.totalamount | number:'1.2-2' }}
+                                                        </td>
+                                                    </ng-container>
+
+                                                    <!-- Bill Run Status Column -->
+                                                    <ng-container matColumnDef="billrunstatus">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+                                                            Bill Run Status</th>
+                                                        <td mat-cell *matCellDef="let element" class="f-s-14">
+                                                            <span class="status-badge"
+                                                                [ngClass]="getBillRunStatusClass(element.billrunstatus)">
+                                                                {{ element.billrunstatus || '-' }}
+                                                            </span>
+                                                        </td>
+                                                    </ng-container>
+
+                                                    <!-- Payment Status Column -->
+                                                    <ng-container matColumnDef="paymentStatus">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+                                                            Payment Status</th>
+                                                        <td mat-cell *matCellDef="let element" class="f-s-14">
+                                                            <span class="status-badge"
+                                                                [ngClass]="getStatusClass(element.paymentStatus)">
+                                                                {{ element.paymentStatus || 'UnPaid' }}
+                                                            </span>
+                                                        </td>
+                                                    </ng-container>
+
+                                                    <ng-container matColumnDef="download">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+                                                            Action</th>
+                                                        <td mat-cell *matCellDef="let element" class="f-s-14">
+                                                            <button mat-icon-button color="primary" class="action-btn"
+                                                                matTooltip="Download Invoice"
+                                                                aria-label="Download Invoice"
+                                                                (click)="downloadInvoice(element.id, element.custId || element.customerid, element.docnumber || 'invoice.pdf')">
+                                                                <mat-icon>file_download</mat-icon>
+                                                            </button>
+                                                            <button mat-icon-button color="accent" class="action-btn"
+                                                                matTooltip="Generate Invoice"
+                                                                aria-label="Generate Invoice"
+                                                                (click)="generateInvoice(element)">
+                                                                <mat-icon>receipt_long</mat-icon>
+                                                            </button>
+                                                            <button mat-icon-button class="action-btn"
+                                                                matTooltip="View Invoice" aria-label="View Invoice"
+                                                                (click)="viewInvoice(element)">
+                                                                <mat-icon>visibility</mat-icon>
+                                                            </button>
+                                                        </td>
+                                                    </ng-container>
+
+                                                    <tr mat-header-row
+                                                        *matHeaderRowDef="pendingInvoiceDisplayedColumns"></tr>
+                                                    <tr mat-row
+                                                        *matRowDef="let row; columns: pendingInvoiceDisplayedColumns"
+                                                        [class.selected-row]="pendingInvoiceSelection.isSelected(row)">
+                                                    </tr>
+                                                </table>
+
+                                                @if (!pendingInvoiceDataSource || pendingInvoiceDataSource?.length ===
+                                                0) {
+                                                <div class="m-t-10 text-center f-w-600">No Records Found</div>
+                                                }
+                                                @if (pendingInvoiceDataSource && pendingInvoiceDataSource?.length !== 0)
+                                                {
+                                                <div class="custom-paginator-wrapper">
+                                                    <mat-paginator [pageIndex]="pendingInvoiceCurrentPage - 1"
+                                                        [length]="pendingInvoiceTotalRecords"
+                                                        [pageSize]="pendingInvoiceItemsPerPage"
+                                                        [pageSizeOptions]="pageSizeOptionsForInvoice"
+                                                        showFirstLastButtons (page)="pageChangedPendingInvoice($event)">
+                                                    </mat-paginator>
+                                                </div>
+                                                }
+                                            </div>
+                                        </mat-card-content>
+                                    </mat-card>
+                                </div>
+                            </mat-tab>
+
+                            <!-- ===================== CREDIT NOTE TAB ===================== -->
+                            <mat-tab label="Credit Note">
+                                <div class="f-s-14 p-16 rounded m-t-12">
+                                    <!-- Search card (standalone, above the list card) -->
+                                    <mat-card class="cardWithShadow mb-8 w-100">
+                                        <mat-card-content>
+                                            <div class="row invoice-search-row">
+                                                <div
+                                                    class="col-lg-3 col-md-4 col-sm-6 col-xs-12 invoice-search-small-field">
+                                                    <mat-form-field appearance="outline"
+                                                        class="w-100 hide-hint header-input">
+                                                        <input matInput [(ngModel)]="creditNoteAccountNumberSearch"
+                                                            (keyup.enter)="searchCreditNote()"
+                                                            placeholder="Account Number" class="input-p-5">
+                                                    </mat-form-field>
+                                                </div>
+                                                <div
+                                                    class="col-lg-3 col-md-4 col-sm-6 col-xs-12 invoice-customer-col d-flex align-items-center">
+                                                    <mat-form-field appearance="outline"
+                                                        class="w-100 hide-hint header-input">
+                                                        <mat-select placeholder="Select Customer" class="input-p-5"
+                                                            [disabled]="true" [(ngModel)]="selectedCreditNoteCust">
+                                                            <mat-option *ngFor="let item of creditNoteParentCustList"
+                                                                [value]="item.id">
+                                                                {{ item.title ? item.title + ' ' : '' }}{{ item.name }}
+                                                            </mat-option>
+                                                        </mat-select>
+                                                    </mat-form-field>
+                                                    <button mat-icon-button color="primary"
+                                                        class="customer-action-button"
+                                                        (click)="modalOpenCreditNoteParentCustomer()"
+                                                        matTooltip="Select a Customer">
+                                                        <img src="assets/img/DashboardIcons/Add.svg">
+                                                    </button>
+                                                    <button mat-icon-button color="warn" class="customer-action-button"
+                                                        [disabled]="!selectedCreditNoteCust"
+                                                        (click)="removeSelCreditNoteParentCust()"
+                                                        matTooltip="Deselect a Customer">
+                                                        <img
+                                                            src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                                    </button>
+                                                </div>
+                                                <div
+                                                    class="col-lg-3 col-md-4 col-sm-6 col-xs-12 invoice-search-small-field">
+                                                    <mat-form-field appearance="outline"
+                                                        class="w-100 hide-hint header-input">
+                                                        <input matInput [(ngModel)]="creditNoteNumberSearch"
+                                                            (keyup.enter)="searchCreditNote()"
+                                                            placeholder="Credit Note Number" class="input-p-5">
+                                                    </mat-form-field>
+                                                </div>
+                                                <div
+                                                    class="col-lg-3 col-md-4 col-sm-6 col-xs-12 invoice-search-small-field invoice-search-small-field">
+                                                    <mat-form-field appearance="outline"
+                                                        class="w-100 hide-hint header-input">
+                                                        <input matInput [matDatepicker]="creditNoteBillFromPicker"
+                                                            [(ngModel)]="creditNoteBillFromDate"
+                                                            placeholder="Bill From Date" class="input-p-5">
+                                                        <mat-datepicker-toggle matSuffix
+                                                            [for]="creditNoteBillFromPicker"></mat-datepicker-toggle>
+                                                        <mat-datepicker #creditNoteBillFromPicker></mat-datepicker>
+                                                    </mat-form-field>
+                                                </div>
+                                                <div
+                                                    class="col-lg-3 col-md-4 col-sm-6 col-xs-12 invoice-search-small-field">
+                                                    <mat-form-field appearance="outline"
+                                                        class="w-100 hide-hint header-input">
+                                                        <input matInput [matDatepicker]="creditNoteBillToPicker"
+                                                            [(ngModel)]="creditNoteBillToDate"
+                                                            placeholder="Bill To Date" class="input-p-5">
+                                                        <mat-datepicker-toggle matSuffix
+                                                            [for]="creditNoteBillToPicker"></mat-datepicker-toggle>
+                                                        <mat-datepicker #creditNoteBillToPicker></mat-datepicker>
+                                                    </mat-form-field>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex justify-content-center mt-2 gap-10"
+                                                style="margin-top: 1rem">
+                                                <button mat-button mat-flat-button color="primary"
+                                                    class="button-normal " (click)="searchCreditNote()">
+                                                    Search
+                                                </button>
+                                                <button mat-stroked-button (click)="clearCreditNoteSearch()"
+                                                    class="button-normal">Clear</button>
+                                            </div>
+                                        </mat-card-content>
+                                    </mat-card>
+                                    <mat-card class="cardWithShadow">
+                                        <mat-card-header>
+                                            <mat-card-title class="font-900">Credit Note List</mat-card-title>
+                                            <div class="tab-header-action">
+                                                <button mat-flat-button color="primary" class="button-normal"
+                                                    (click)="addSelectedCreditNotes()"
+                                                    [disabled]="creditNoteSelection.isEmpty()">
+                                                    Add Selected
+                                                    @if (creditNoteSelection.selected.length > 0) {
+                                                    ({{ creditNoteSelection.selected.length }})
+                                                    }
+                                                </button>
+                                            </div>
+                                        </mat-card-header>
+                                        <mat-card-content>
+                                            <div class="table-responsive">
+                                                <table mat-table [dataSource]="creditNoteDataSource" matSort
+                                                    class="no-wrap m-t-0 v-middle w-100">
+
+                                                    <!-- Select All Checkbox Column -->
+                                                    <ng-container matColumnDef="select">
+                                                        <th mat-header-cell *matHeaderCellDef>
+                                                            <mat-checkbox
+                                                                (change)="$event ? toggleAllCreditNote() : null"
+                                                                [checked]="isAllCreditNoteSelected()"
+                                                                [indeterminate]="creditNoteSelection.hasValue() && !isAllCreditNoteSelected()"
+                                                                color="primary">
+                                                            </mat-checkbox>
+                                                        </th>
+                                                        <td mat-cell *matCellDef="let row">
+                                                            <mat-checkbox (click)="$event.stopPropagation()"
+                                                                (change)="$event ? creditNoteSelection.toggle(row) : null"
+                                                                [checked]="creditNoteSelection.isSelected(row)"
+                                                                color="primary">
+                                                            </mat-checkbox>
+                                                        </td>
+                                                    </ng-container>
+
+                                                    <!-- Customer Column -->
+                                                    <ng-container matColumnDef="customer">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+                                                            Customer</th>
+                                                        <td mat-cell *matCellDef="let element" class="f-s-14">{{
+                                                            element.customerName || '-' }}</td>
+                                                    </ng-container>
+
+                                                    <!-- Document No Column -->
+                                                    <ng-container matColumnDef="accountNumber">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+                                                            Account Number</th>
+                                                        <td mat-cell *matCellDef="let element" class="f-s-14">{{
+                                                            element.acctno || '-' }}</td>
+                                                    </ng-container>
+
+                                                    <ng-container matColumnDef="invoiceNumber">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+                                                            Invoice Number</th>
+                                                        <td mat-cell *matCellDef="let element" class="f-s-14">{{
+                                                            element.invoiceNumber || '-' }}</td>
+                                                    </ng-container>
+
+                                                    <ng-container matColumnDef="docnumber">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+                                                            Document No.</th>
+                                                        <td mat-cell *matCellDef="let element" class="f-s-14">{{
+                                                            element.documentno || '-' }}</td>
+                                                    </ng-container>
+
+                                                    <!-- Credit Amount Column -->
+                                                    <ng-container matColumnDef="creditAmount">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+                                                            Credit Amount</th>
+                                                        <td mat-cell *matCellDef="let element" class="f-s-14">
+                                                            {{ element.amount | number:'1.2-2' }}
+                                                        </td>
+                                                    </ng-container>
+
+                                                    <!-- Reason Column -->
+                                                    <ng-container matColumnDef="reason">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+                                                            Reason</th>
+                                                        <td mat-cell *matCellDef="let element" class="f-s-14"
+                                                            [title]="element.remarks">
+                                                            <!-- Displaying remarks as reason, truncating if too long -->
+                                                            {{ element.remarks?.length > 40 ? (element.remarks |
+                                                            slice:0:40) + '...' : (element.remarks || '-') }}
+                                                        </td>
+                                                    </ng-container>
+
+                                                    <!-- Status Column -->
+                                                    <ng-container matColumnDef="status">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+                                                            Status</th>
+                                                        <td mat-cell *matCellDef="let element" class="f-s-14">{{
+                                                            element.status | titlecase }}</td>
+                                                    </ng-container>
+
+                                                    <!-- Created By Column -->
+                                                    <ng-container matColumnDef="createdByName">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+                                                            Created By</th>
+                                                        <td mat-cell *matCellDef="let element" class="f-s-14">{{
+                                                            element.createdByName }}</td>
+                                                    </ng-container>
+
+                                                    <tr mat-header-row *matHeaderRowDef="creditNoteDisplayedColumns">
+                                                    </tr>
+                                                    <tr mat-row
+                                                        *matRowDef="let row; columns: creditNoteDisplayedColumns"
+                                                        [class.selected-row]="creditNoteSelection.isSelected(row)">
+                                                    </tr>
+                                                </table>
+
+                                                @if (!creditNoteDataSource || creditNoteDataSource?.length === 0) {
+                                                <div class="m-t-10 text-center f-w-600">No Records Found</div>
+                                                }
+                                                @if (creditNoteDataSource && creditNoteDataSource?.length !== 0) {
+                                                <mat-paginator [pageIndex]="creditNoteCurrentPage - 1"
+                                                    [length]="creditNoteTotalRecords"
+                                                    [pageSize]="creditNoteItemsPerPage"
+                                                    [pageSizeOptions]="pageSizeOptions" showFirstLastButtons
+                                                    (page)="pageChangedCreditNote($event)">
+                                                </mat-paginator>
+                                                }
+                                            </div>
+                                        </mat-card-content>
+                                    </mat-card>
+                                </div>
+                            </mat-tab>
+
+                            <!-- ===================== CHARGE TAB ===================== -->
+                            <mat-tab label="Charge">
+                                <div class="f-s-14 p-16 rounded m-t-12">
+                                    <!-- Search card -->
+                                    <mat-card class="cardWithShadow mb-8">
+                                        <mat-card-content>
+                                            <div class="row">
+                                                <div class="col-lg-3 col-md-3">
+                                                    <mat-form-field appearance="outline"
+                                                        class="w-100 hide-hint header-input">
+                                                        <mat-select class="input-p-5" [(ngModel)]="chargeSearchOption"
+                                                            (selectionChange)="selChargeSearchOption($event)"
+                                                            placeholder="Select a Search Option">
+                                                            <mat-option *ngFor="let option of chargeSearchOptionSelect"
+                                                                [value]="option.value">
+                                                                {{ option.label }}
+                                                            </mat-option>
+                                                        </mat-select>
+                                                    </mat-form-field>
+                                                </div>
+                                                <div class="col-lg-3 col-md-3" *ngIf="isChargeNameSearch">
+                                                    <mat-form-field appearance="outline"
+                                                        class="w-100 hide-hint header-input">
+                                                        <input matInput class="input-p-5"
+                                                            placeholder="Enter Search Detail"
+                                                            [(ngModel)]="chargeSearchInput"
+                                                            (keyup.enter)="searchCharge()" />
+                                                    </mat-form-field>
+                                                </div>
+                                                <div class="col-lg-3 col-md-3" *ngIf="isChargeCategorySearch">
+                                                    <mat-form-field appearance="outline"
+                                                        class="w-100 hide-hint header-input">
+                                                        <mat-select class="input-p-5" [(ngModel)]="chargeSearchInput"
+                                                            placeholder="Select Charge Category">
+                                                            <mat-option *ngFor="let cat of chargeCategoryList"
+                                                                [value]="cat.value">
+                                                                {{ cat.text }}
+                                                            </mat-option>
+                                                        </mat-select>
+                                                    </mat-form-field>
+                                                </div>
+                                                <div class="col-lg-3 col-md-3" *ngIf="isChargeTypeSearch">
+                                                    <mat-form-field appearance="outline"
+                                                        class="w-100 hide-hint header-input">
+                                                        <mat-select class="input-p-5" [(ngModel)]="chargeSearchInput"
+                                                            placeholder="Select Charge Type">
+                                                            <mat-option *ngFor="let type of chargeTypeList"
+                                                                [value]="type.value">
+                                                                {{ type.text }}
+                                                            </mat-option>
+                                                        </mat-select>
+                                                    </mat-form-field>
+                                                </div>
+                                                <div class="col-lg-3 col-sm-3">
+                                                    <div class="d-flex gap-2">
+                                                        <button mat-button mat-flat-button color="primary"
+                                                            class="button-normal m-r-10" (click)="searchCharge()">
+                                                            Search
+                                                        </button>
+                                                        <button mat-stroked-button class="button-normal"
+                                                            (click)="clearChargeSearch()">
+                                                            Clear
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </mat-card-content>
+                                    </mat-card>
+                                    <mat-card class="cardWithShadow">
+                                        <mat-card-header>
+                                            <mat-card-title class="font-900">Charge List</mat-card-title>
+                                            <div class="tab-header-action">
+                                                <button mat-flat-button color="primary" class="button-normal"
+                                                    (click)="addSelectedCharges()"
+                                                    [disabled]="chargeSelection.isEmpty()">
+                                                    Add Selected
+                                                    @if (chargeSelection.selected.length > 0) {
+                                                    ({{ chargeSelection.selected.length }})
+                                                    }
+                                                </button>
+                                            </div>
+                                        </mat-card-header>
+                                        <mat-card-content>
+                                            <div class="table-responsive">
+                                                <table mat-table [dataSource]="chargeDataSource" matSort
+                                                    class="no-wrap m-t-0 v-middle w-100">
+
+                                                    <!-- Select Checkbox Column -->
+                                                    <ng-container matColumnDef="select">
+                                                        <th mat-header-cell *matHeaderCellDef>
+                                                            <mat-checkbox (change)="$event ? toggleAllCharge() : null"
+                                                                [checked]="isAllChargeSelected()"
+                                                                [indeterminate]="chargeSelection.hasValue() && !isAllChargeSelected()"
+                                                                color="primary">
+                                                            </mat-checkbox>
+                                                        </th>
+                                                        <td mat-cell *matCellDef="let row">
+                                                            <mat-checkbox (click)="$event.stopPropagation()"
+                                                                (change)="$event ? chargeSelection.toggle(row) : null"
+                                                                [checked]="chargeSelection.isSelected(row)"
+                                                                color="primary">
+                                                            </mat-checkbox>
+                                                        </td>
+                                                    </ng-container>
+
+                                                    <!-- Name Column -->
+                                                    <ng-container matColumnDef="name">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+                                                            Charge Name</th>
+                                                        <td mat-cell *matCellDef="let element" class="f-s-14">{{
+                                                            element.name }}</td>
+                                                    </ng-container>
+
+                                                    <!-- Type Column -->
+                                                    <ng-container matColumnDef="type">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+                                                            Type</th>
+                                                        <td mat-cell *matCellDef="let element" class="f-s-14">{{
+                                                            getChargeTypeName(element.chargetype) }}</td>
+                                                    </ng-container>
+
+                                                    <!-- Charge Amount Column -->
+                                                    <ng-container matColumnDef="chargeAmount">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+                                                            Charge Amount</th>
+                                                        <td mat-cell *matCellDef="let element" class="f-s-14">
+                                                            {{ element.price | number:'1.2-2' }}
+                                                        </td>
+                                                    </ng-container>
+
+                                                    <!-- Tax Column -->
+                                                    <ng-container matColumnDef="tax">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+                                                            Tax</th>
+                                                        <td mat-cell *matCellDef="let element" class="f-s-14">{{
+                                                            element.taxName || '-' }}</td>
+                                                    </ng-container>
+
+                                                    <!-- Total Charge Amount Column -->
+                                                    <ng-container matColumnDef="totalChargeAmount">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+                                                            Total Charge Amount</th>
+                                                        <td mat-cell *matCellDef="let element" class="f-s-14">
+                                                            {{ (element.price + element.taxamount) | number:'1.2-2' }}
+                                                        </td>
+                                                    </ng-container>
+
+                                                    <!-- Status Column -->
+                                                    <ng-container matColumnDef="status">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+                                                            Status</th>
+                                                        <td mat-cell *matCellDef="let element" class="f-s-14">
+                                                            <span class="status-badge" [ngClass]="{
+                                                                'status-paid': element.status?.toLowerCase() === 'active',
+                                                                'status-unpaid': element.status?.toLowerCase() !== 'active'
+                                                            }">
+                                                                {{ element.status }}
+                                                            </span>
+                                                        </td>
+                                                    </ng-container>
+
+                                                    <!-- ISP Name Column -->
+                                                    <ng-container matColumnDef="ispName">
+                                                        <th mat-header-cell *matHeaderCellDef class="f-w-600 f-s-15">
+                                                            ISP Name</th>
+                                                        <td mat-cell *matCellDef="let element" class="f-s-14">{{
+                                                            element.mvnoName || '-' }}</td>
+                                                    </ng-container>
+
+                                                    <tr mat-header-row *matHeaderRowDef="chargeDisplayedColumns"></tr>
+                                                    <tr mat-row *matRowDef="let row; columns: chargeDisplayedColumns">
+                                                    </tr>
+                                                </table>
+
+                                                @if (!chargeDataSource || chargeDataSource?.length === 0) {
+                                                <div class="m-t-10 text-center f-w-600">No Records Found</div>
+                                                }
+                                                @if (chargeDataSource && chargeDataSource?.length !== 0) {
+                                                <mat-paginator [pageIndex]="chargeCurrentPage - 1"
+                                                    [length]="chargeTotalRecords" [pageSize]="chargeItemsPerPage"
+                                                    [pageSizeOptions]="pageSizeOptions" showFirstLastButtons
+                                                    (page)="pageChangedCharge($event)">
+                                                </mat-paginator>
+                                                }
+                                            </div>
+                                        </mat-card-content>
+                                    </mat-card>
+                                </div>
+                            </mat-tab>
+
+                        </mat-tab-group>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

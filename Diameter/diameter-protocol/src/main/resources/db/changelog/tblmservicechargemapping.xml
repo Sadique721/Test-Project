@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="create-tblmservicechargemapping-001" author="initial-change">
+
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="tblmservicechargemapping"/>
+            </not>
+        </preConditions>
+
+        <createTable tableName="tblmservicechargemapping">
+            <column name="id" type="BIGINT" >
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="chargeid" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="servicesid" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_deleted" type="TINYINT" defaultValueNumeric="0"/>
+        </createTable>
+
+        <!-- Unique key on ID -->
+        <addUniqueConstraint
+                columnNames="id"
+                constraintName="tblmservicechargemapping_uniq"
+                tableName="tblmservicechargemapping"/>
+
+        <!-- Indexes -->
+        <createIndex indexName="tblmservicechargemapping_fk2" tableName="tblmservicechargemapping">
+            <column name="chargeid"/>
+        </createIndex>
+        <createIndex indexName="tblmservicechargemapping_fk1" tableName="tblmservicechargemapping">
+            <column name="servicesid"/>
+        </createIndex>
+
+        <!-- Foreign Key Constraints -->
+        <addForeignKeyConstraint
+                baseColumnNames="servicesid"
+                baseTableName="tblmservicechargemapping"
+                constraintName="tblmservicechargemapping_fk1"
+                referencedColumnNames="serviceid"
+                referencedTableName="tblmservices"
+                onDelete="CASCADE"/>
+
+        <addForeignKeyConstraint
+                baseColumnNames="chargeid"
+                baseTableName="tblmservicechargemapping"
+                constraintName="tblmservicechargemapping_fk2"
+                referencedColumnNames="CHARGEID"
+                referencedTableName="tblcharges"
+                onDelete="CASCADE"/>
+    </changeSet>
+
+</databaseChangeLog>

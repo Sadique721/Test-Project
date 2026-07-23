@@ -1,0 +1,840 @@
+<div class="row header-row p-0 m-0">
+    <mat-card class="cardWithShadow w-100">
+        <mat-card-content class="mat-card-content-border">
+            <div class="row">
+                <div class="col-lg-6 col-sm-6 col-12 d-flex justify-content-start align-items-center">
+                    <div class="d-flex justify-content-start">
+                        <span class="text-primary" style="cursor: pointer" (click)="listPartner()">
+                            <i class="pi pi-arrow-left icon-size"></i> &nbsp;Go to Partner List
+                        </span>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-sm-6 col-12 search-div">
+                    <div class="d-flex justify-content-end">
+                        <button mat-button mat-flat-button color="primary" (click)="openCustmerDocCreateMenu()"
+                            class="search-btn" style="width: auto">
+                            Add Partner Document
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+<div class="container-fluid contain-flud">
+    <div class="row">
+        <div class="col-md-12">
+            <mat-card class="cardWithShadow">
+                <mat-card-content class="mat-card-content-border">
+                    <div class="country-table-list">
+                        <div class="country-table-list">
+                            <div class="mat-elevation-z2">
+                                <div class="example-container mat-elevation-z8" tabindex="0">
+                                    <table mat-table [dataSource]="custmerDocList" class="full-width-table">
+                                        <ng-container matColumnDef="id">
+                                            <th mat-header-cell class="table-header-title" *matHeaderCellDef>ID</th>
+                                            <td mat-cell *matCellDef="let row">{{ row.docId }}</td>
+                                        </ng-container>
+                                        <!-- Document Type -->
+                                        <ng-container matColumnDef="docType">
+                                            <th mat-header-cell class="table-header-title" *matHeaderCellDef>
+                                                Document Type
+                                            </th>
+                                            <td mat-cell *matCellDef="let row">{{ row.docType }}</td>
+                                        </ng-container>
+
+                                        <!-- Document Sub Type -->
+                                        <ng-container matColumnDef="docSubType">
+                                            <th mat-header-cell class="table-header-title" *matHeaderCellDef>
+                                                Document Sub Type
+                                            </th>
+                                            <td mat-cell *matCellDef="let row">{{ row.docSubType }}</td>
+                                        </ng-container>
+
+                                        <!-- Document Number -->
+                                        <ng-container matColumnDef="documentNumber">
+                                            <th mat-header-cell class="table-header-title" *matHeaderCellDef>
+                                                Document Number
+                                            </th>
+                                            <td mat-cell *matCellDef="let row">
+                                                {{ row.documentNumber ? row.documentNumber : "-" }}
+                                            </td>
+                                        </ng-container>
+
+                                        <!-- Status -->
+                                        <ng-container matColumnDef="docStatus">
+                                            <th mat-header-cell class="table-header-title" *matHeaderCellDef>Status</th>
+                                            <td mat-cell *matCellDef="let row">{{ row.docStatus }}</td>
+                                        </ng-container>
+
+                                        <!-- File Name -->
+                                        <ng-container matColumnDef="filename">
+                                            <th mat-header-cell class="table-header-title" *matHeaderCellDef>
+                                                File Name
+                                            </th>
+                                            <td mat-cell *matCellDef="let row">
+                                                <ng-container *ngIf="row.filename; else noFile">
+                                                    <a href="javascript:void(0)"
+                                                        (click)="downloadDoc(row.filename, row.docId, row.custId)"
+                                                        class="text-primary">
+                                                        {{ row.filename }}
+                                                    </a>
+                                                </ng-container>
+                                                <ng-template #noFile>-</ng-template>
+                                            </td>
+                                        </ng-container>
+
+                                        <!-- Remark -->
+                                        <ng-container matColumnDef="remark">
+                                            <th mat-header-cell class="table-header-title" *matHeaderCellDef>Remark</th>
+                                            <td mat-cell *matCellDef="let row">{{ row.remark ? row.remark : "-" }}</td>
+                                        </ng-container>
+
+                                        <!-- Document Mode -->
+                                        <ng-container matColumnDef="mode">
+                                            <th mat-header-cell class="table-header-title" *matHeaderCellDef>
+                                                Document Mode
+                                            </th>
+                                            <td mat-cell *matCellDef="let row">{{ row.mode }}</td>
+                                        </ng-container>
+
+                                        <!-- Action -->
+                                        <ng-container matColumnDef="action" stickyEnd>
+                                            <th mat-header-cell class="table-header-title" *matHeaderCellDef>Action</th>
+                                            <td mat-cell *matCellDef="let row; let i = index" class="btnAction">
+                                                <!-- Edit -->
+                                                <a mat-icon-button href="javascript:void(0)"
+                                                    (click)="editCustDocById(row.docId, i)" matTooltip="Update">
+                                                    <img src="assets/img/DashboardIcons/Edit.svg">
+                                                </a>
+                                                <a mat-icon-button href="javascript:void(0)"
+                                                    (click)="deleteConfirm(row)">
+                                                    <img
+                                                        src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                                </a>
+
+                                                <!-- Verify -->
+                                                <button *ngIf="row.mode === 'Online'" mat-icon-button color="accent"
+                                                    matTooltip="Verify Document" (click)="verifyDocument(row)"
+                                                    [disabled]="
+                            (row.docStatus === 'Verified' && row.mode === 'Online') ||
+                            row.docStatus === 'verified'
+                          ">
+                                                    <img src="assets/img/DashboardIcons/Document Verify.svg">
+
+                                                </button>
+                                            </td>
+                                        </ng-container>
+
+                                        <!-- Header & Row binding -->
+                                        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                                        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+                                    </table>
+                                </div>
+                                <!-- Paginator -->
+                                <mat-paginator [length]="totalRecords" [pageSize]="itemsPerPage"
+                                    [pageSizeOptions]="[5,10,20,50,100]" (page)="pageChanged($event)" showFirstLastButtons>
+                                </mat-paginator>
+                            </div>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </div>
+</div>
+
+<ng-template #addEditDialog let-dialogRef="dialogRef">
+    <div class="dialog-container">
+        <div class="dialog-header dialog-header-titleFont">
+            {{ editMode ? "Update" : "Create" }} Partner Document
+            <span>
+                <a mat-icon-button href="javascript:void(0)">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+            <mat-card-content class="matcard-content">
+                <!-- create new country card start -->
+
+                <form class="form-auth-small" [formGroup]="insertPartnerDocumentForm">
+                    <div class="form-group row">
+                        <!-- Verification Mode -->
+                        <div class="col-md-4 ml-15">
+                            <label class="inputLabel">Verification Mode *</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-select class="input-p-5" formControlName="mode" [disabled]="editMode"
+                                    (selectionChange)="documentType($event)" placeholder="Select a Verification Mode">
+                                    <mat-option *ngFor="let item of VerificationModeValue" [value]="item.value">
+                                        {{ item.text }}
+                                    </mat-option>
+                                </mat-select>
+                                <mat-error class="errorWrap text-danger"
+                                    *ngIf="submitted && insertPartnerDocumentForm.controls.mode.errors">
+                                    Verification Mode is required.
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Document Type -->
+                        <div class="col-md-4 ml-15">
+                            <label class="inputLabel">Document Type *</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-select class="input-p-5" formControlName="docType" [disabled]="editMode"
+                                    placeholder="Select a  Document Type" (selectionChange)="documentSubType($event)">
+                                    <mat-option *ngFor="let item of docTypeList" [value]="item.value">
+                                        {{ item.text }}
+                                    </mat-option>
+                                </mat-select>
+                                <mat-error class="errorWrap text-danger"
+                                    *ngIf="submitted && insertPartnerDocumentForm.controls.docType.errors">
+                                    Document Type is required.
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Document Sub Type -->
+                        <div class="col-md-4 ml-15">
+                            <label class="inputLabel">Document Sub Type *</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-select class="input-p-5" placeholder="Select a Document SubType"
+                                    formControlName="docSubType">
+                                    <mat-option *ngFor="let item of docSubTypeList" [value]="item.value">
+                                        {{ item.text }}
+                                    </mat-option>
+                                </mat-select>
+                                <mat-error class="errorWrap text-danger"
+                                    *ngIf="submitted && insertPartnerDocumentForm.controls.docSubType.errors">
+                                    Document Sub Type is required.
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Conditional Mode -->
+                        <div class="col-md-4 ml-15" *ngIf="ifModeInput">
+                            <label class="inputLabel">Document Number</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input matInput class="input-p-5" type="text" placeholder="Enter Document No."
+                                    formControlName="documentNumber" />
+                                <mat-error class="errorWrap text-danger"
+                                    *ngIf="submitted && insertPartnerDocumentForm.controls.documentNumber.errors">
+                                    Please Document number required.
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- File Upload -->
+                        <div class="col-md-4 ml-15" *ngIf="!ifModeInput">
+                            <label class="inputLabel">Select Document *</label>
+                            <input type="file" class="form-control" formControlName="file"
+                                (change)="onFileChange($event)" placeholder="Select Document" />
+                            <span>{{ this.custmerDoc?.filename }}</span>
+                        </div>
+
+                        <!-- Document Status -->
+                        <div class="col-md-4 ml-15">
+                            <label class="inputLabel">Document Status *</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-select class="input-p-5" placeholder="Select Document Status"
+                                    formControlName="docStatus" [disabled]="isstatus">
+                                    <mat-option *ngFor="let s of documentStatusList" [value]="s.value">
+                                        {{ s.value }}
+                                    </mat-option>
+                                </mat-select>
+                                <mat-error class="errorWrap text-danger"
+                                    *ngIf="submitted && insertPartnerDocumentForm.controls.docStatus.errors">
+                                    Document Status is required.
+                                </mat-error>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Start Date -->
+                        <div class="col-md-4 ml-15">
+                            <label class="inputLabel">Start Date</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input matInput class="input-p-5" [matDatepicker]="picker1" formControlName="startDate"
+                                    (dateChange)="dateDisble($event)" [max]="maxDisbleDate"
+                                    placeholder="Enter Start Date" />
+                                <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
+                                <mat-datepicker #picker1></mat-datepicker>
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- End Date -->
+                        <div class="col-md-4 ml-15" style="margin-top: 1rem">
+                            <label class="inputLabel">End Date</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input matInput class="input-p-5" [matDatepicker]="picker2" formControlName="endDate"
+                                    (dateChange)="dateMaxDisble($event)" placeholder="Enter End Date"
+                                    [min]="disbleDate" />
+                                <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
+                                <mat-datepicker #picker2></mat-datepicker>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Remarks -->
+                        <div class="col-md-4 ml-15" style="margin-top: 1rem">
+                            <label class="inputLabel">Remarks</label>
+                            <mat-form-field appearance="outline" class="w-100">
+                                <textarea matInput class="input-p-5" rows="3" placeholder="Enter Remarks"
+                                    formControlName="remark"></textarea>
+                            </mat-form-field>
+                        </div>
+                    </div>
+                </form>
+            </mat-card-content>
+        </div>
+        <div class="dialog-action-adjust d-flex justify-content-end gap-4">
+            <button mat-button mat-flat-button color="{{ editMode ? 'accent' : 'primary' }}" color="primary"
+                class="button-normal" type="submit" (click)="addDocument(dialogRef)">
+                {{ editMode ? "Update Document" : "Add Document" }}
+            </button>
+
+            <button mat-stroked-button matButton="outlined" type="button" color="primary" class="button-normal"
+                (click)="dialogRef.close()">
+                Cancel
+            </button>
+        </div>
+    </div>
+</ng-template>
+
+<!-- <div class="childComponent"> -->
+<!-- <div class="row">
+    <div class="col-md-12">
+      <div class="panel top">
+        <div class="panel-heading">
+          <h3 class="panel-title">Partner Document Management</h3>
+          <div class="right">
+            <button type="button" class="btn-toggle-collapse">
+              <i class="fa fa-minus-circle"></i>
+            </button>
+          </div>
+        </div>
+        <div class="panel-body no-padding panel-udata">
+          <div class="col-md-6 pcol">
+            <div class="dbox">
+              <a class="curson_pointer" (click)="openCustmerDocCreateMenu()">
+                <img src="../../../assets/img/i01.png" style="width: 32px" />
+                <h5>Create Partner Document</h5>
+              </a>
+            </div>
+          </div>
+          <div class="col-md-6 pcol">
+            <div class="dbox">
+              <a class="curson_pointer" (click)="openCustmerDocListMenu()">
+                <img src="../../../assets/img/i01.png" style="width: 32px" />
+                <h5>Partner Document List</h5>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  @if (isCustmerDocList) {
+    <div class="row">
+      <div class="col-md-12">
+        <div class="panel">
+          <div class="panel-heading">
+            <div class="displayflex">
+              <button
+                type="button"
+                class="btn btn-secondary backbtn"
+                data-toggle="tooltip"
+                data-placement="bottom"
+                title="Go to Partner List"
+                (click)="listPartner()"
+              >
+                <i
+                  class="fa fa-arrow-circle-left"
+                  style="color: #f7941e !important; font-size: 28px"
+                ></i>
+              </button>
+              <h3 class="panel-title">Partner Documents</h3>
+            </div>
+            <div class="right">
+              <button
+                type="button"
+                class="btn-toggle-collapse"
+                data-toggle="collapse"
+                data-target="#listpartner"
+                aria-expanded="false"
+                aria-controls="listpartner"
+              >
+                <i class="fa fa-minus-circle"></i>
+              </button>
+            </div>
+          </div>
+          <div id="listpartner" class="panel-body table-responsive">
+            <div class="panel-body table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Documents Type</th>
+                    <th>Documents Sub Type</th>
+                    <th>Document Number</th>
+                    <th>Status</th>
+                    <th>File Name</th>
+                    <th>Remark</th>
+                    <th>Document Mode</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (
+                    custDocObj of custmerDocList
+                      | paginate
+                        : {
+                            id: "listing_docListdata",
+                            itemsPerPage: itemsPerPage,
+                            currentPage: currentPage,
+                            totalItems: totalRecords
+                          };
+                    track custDocObj;
+                    let i = $index
+                  ) {
+                    <tr>
+                      <td>{{ custDocObj.docType }}</td>
+                      <td>{{ custDocObj.docSubType }}</td>
+                      <td>
+                        @if (custDocObj.documentNumber) {
+                          <span>
+                            {{ custDocObj.documentNumber }}
+                          </span>
+                        }
+                        @if (!custDocObj.documentNumber) {
+                          <span>-</span>
+                        }
+                      </td>
+                      <td>{{ custDocObj.docStatus }}</td>
+                      @if (custDocObj.filename) {
+                        <td>
+                          <a
+                            href="javascript:void(0)"
+                            style="color: blue"
+                            (click)="
+                              downloadDoc(custDocObj.filename, custDocObj.docId, custDocObj.custId)
+                            "
+                          >
+                            {{ custDocObj.filename }}
+                          </a>
+                        </td>
+                      }
+                      @if (!custDocObj.filename) {
+                        <td>-</td>
+                      }
+                      <td>
+                        @if (custDocObj.remark) {
+                          <span>{{ custDocObj.remark }}</span>
+                        }
+                        @if (!custDocObj.remark) {
+                          <span>-</span>
+                        }
+                      </td>
+                      <td>{{ custDocObj.mode }}</td>
+                      <td class="btnAction">
+                        <a
+                          class="curson_pointer"
+                          type="button"
+                          (click)="editCustDocById(custDocObj.docId, i)"
+                        >
+                        <img src="assets/img/DashboardIcons/Edit.svg" >
+                        </a>
+                        <a class="curson_pointer" (click)="deleteConfirm(custDocObj)">
+                           <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                        </a>
+                       
+                        @if (custDocObj.mode === "Online") {
+                          <button
+                            class="approve-btn"
+                            title="Verify Document"
+                            (click)="verifyDocument(custDocObj)"
+                            [disabled]="
+                              (custDocObj.docStatus == 'Verified' &&
+                                custDocObj.mode === 'Online') ||
+                              custDocObj.docStatus == 'verified'
+                            "
+                          >
+                            <img class="IconVerifyBtn" src="assets/img/verifyicon.svg" />
+                          </button>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+              <br />
+              <div class="pagination_Dropdown">
+                <pagination-controls
+                  id="listing_docListdata"
+                  maxSize="10"
+                  directionLinks="true"
+                  previousLabel=""
+                  nextLabel=""
+                  (pageChange)="pageChanged($event)"
+                ></pagination-controls>
+                <div id="itemPerPageDropdown">
+                  <p-dropdown
+                    [(ngModel)]="pageItem"
+                    [options]="pageLimitOptions"
+                    optionLabel="value"
+                    optionValue="value"
+                    (onChange)="TotalItemPerPage($event)"
+                  ></p-dropdown>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  } -->
+<!-- @if (isCustmerDocCreateOrEdit) {
+    <div class="row">
+      <div class="col-md-12">
+        <div class="panel">
+          <div class="panel-heading">
+            <h3 class="panel-title">{{ editMode ? "Update" : "Create" }} Partner Document</h3>
+            <div class="right">
+              <button
+                type="button"
+                class="btn-toggle-collapse"
+                data-toggle="collapse"
+                data-target="#UpdatePartner"
+                aria-expanded="false"
+                aria-controls="UpdatePartner"
+              >
+                <i class="fa fa-minus-circle"></i>
+              </button>
+            </div>
+          </div>
+          <div id="UpdatePartner" class="panel-collapse collapse in">
+            <div class="panel-body">
+              <form class="form-auth-small" [formGroup]="insertPartnerDocumentForm">
+                <div class="panel-body">
+                  <div class="form-group row">
+                    <div class="col-md-4 ml-15">
+                      <label class="inputLabel" for="mode">Verification Mode *</label>
+                      <p-dropdown
+                        [options]="VerificationModeValue"
+                        optionValue="value"
+                        optionLabel="text"
+                        filter="true"
+                        filterBy="text"
+                        placeholder="Select a Verification Mode"
+                        formControlName="mode"
+                        [disabled]="editMode"
+                        (onChange)="documentType($event)"
+                        [ngClass]="{
+                          'is-invalid': submitted && insertPartnerDocumentForm.controls.mode.errors
+                        }"
+                      ></p-dropdown>
+                       @if (submitted && insertPartnerDocumentForm.controls.mode.errors) {
+                        <div class="errorWrap text-danger">
+                          <div class="error text-danger">Verification Mode is required.</div>
+                        </div>
+                      }
+                    </div>
+                    <div class="col-md-4 ml-15">
+                      <label class="inputLabel" for="docType">Document Type *</label>
+                      <p-dropdown
+                        [options]="docTypeList"
+                        optionValue="value"
+                        optionLabel="text"
+                        filter="true"
+                        filterBy="text"
+                        placeholder="Select a  Document Type"
+                        formControlName="docType"
+                        [disabled]="editMode"
+                        (onChange)="documentSubType($event)"
+                        [ngClass]="{
+                          'is-invalid':
+                            submitted && insertPartnerDocumentForm.controls.docType.errors
+                        }"
+                      ></p-dropdown>
+                      
+                      @if (submitted && insertPartnerDocumentForm.controls.docType.errors) {
+                        <div class="errorWrap text-danger">
+                          <div class="error text-danger">Document Type is required.</div>
+                        </div>
+                      }
+                    </div>
+                    <div class="col-md-4 ml-15">
+                      <label class="inputLabel" for="docSubType">Document Sub Type *</label>
+                      <p-dropdown
+                        [options]="docSubTypeList"
+                        optionValue="value"
+                        optionLabel="text"
+                        filter="true"
+                        filterBy="text"
+                        placeholder="Select a Document SubType"
+                        formControlName="docSubType"
+                        [ngClass]="{
+                          'is-invalid':
+                            submitted && insertPartnerDocumentForm.controls.docSubType.errors
+                        }"
+                      ></p-dropdown>
+                      @if (submitted && insertPartnerDocumentForm.controls.docSubType.errors) {
+                        <div class="errorWrap text-danger">
+                          <div class="error text-danger">Document Sub Type is required.</div>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                  <div class="row">
+                    @if (ifModeInput) {
+                      <div class="col-md-4 ml-15">
+                        <label class="inputLabel" for="docStatus">Document Number</label>
+                        <input
+                          id=""
+                          type="text"
+                          class="form-control"
+                          placeholder="Enter Document No. "
+                          formControlName="documentNumber"
+                          [ngClass]="{
+                            'is-invalid':
+                              submitted && insertPartnerDocumentForm.controls.documentNumber.errors
+                          }"
+                        />
+                        @if (
+                          submitted && insertPartnerDocumentForm.controls.documentNumber.errors
+                        ) {
+                          <div class="errorWrap text-danger">Please Document number required.</div>
+                        }
+                      </div>
+                    }
+                    @if (!ifModeInput) {
+                      <div class="col-md-4 ml-15">
+                        <label class="inputLabel">Select Document *</label>
+                        <input
+                          type="file"
+                          id="txtSelectDocument"
+                          class="form-control"
+                          formControlName="file"
+                          placeholder="Select Document"
+                          style="padding: 2px; width: 100%"
+                          (change)="onFileChange($event)"
+                        />
+                        <span>
+                          {{ this.custmerDoc.filename }}
+                        </span>
+                        
+                      </div>
+                    }
+                    <div class="col-md-4 ml-15">
+                      <label class="inputLabel" for="docStatus">Document Status *</label>
+                      @if (!isEnableStatus) {
+                        <div>
+                          <p-dropdown
+                            [options]="documentStatusList"
+                            optionLabel="value"
+                            optionValue="value"
+                            formControlName="docStatus"
+                            [readonly]="isstatus"
+                            filter="true"
+                            filterBy="value"
+                          ></p-dropdown>
+                        </div>
+                      }
+                      @if (isEnableStatus) {
+                        <div>
+                          <p-dropdown
+                            [options]="documentStatusList"
+                            optionLabel="value"
+                            optionValue="value"
+                            [readonly]="isstatus"
+                            formControlName="docStatus"
+                            filter="true"
+                            filterBy="value"
+                          ></p-dropdown>
+                        </div>
+                      }
+                      @if (submitted && insertPartnerDocumentForm.controls.docStatus.errors) {
+                        <div class="errorWrap text-danger">
+                          <div class="error text-danger">Document Status is required.</div>
+                        </div>
+                      }
+                    </div>
+                    <div class="col-md-4 ml-15">
+                      <label class="inputLabel">Start Date</label>
+                      <input
+                        type="date"
+                        class="form-control"
+                        placeholder="Enter Start Date"
+                        formControlName="startDate"
+                        (change)="dateDisble($event)"
+                        [max]="maxDisbleDate"
+                        [ngClass]="{
+                          'is-invalid':
+                            submitted && insertPartnerDocumentForm.controls.startDate.errors
+                        }"
+                      />
+                      
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-4 ml-15" style="margin-top: 1rem">
+                      <label class="inputLabel">End Date</label>
+                      <input
+                        type="date"
+                        class="form-control"
+                        placeholder="Enter End Date"
+                        formControlName="endDate"
+                        (change)="dateMaxDisble($event)"
+                        [min]="disbleDate"
+                        [ngClass]="{
+                          'is-invalid':
+                            submitted && insertPartnerDocumentForm.controls.endDate.errors
+                        }"
+                      />
+                     
+                    </div>
+                    <div class="col-md-4 ml-15" style="margin-top: 1rem">
+                      <label class="inputLabel">Remarks</label>
+                      <textarea
+                        class="form-control"
+                        id="textarea"
+                        rows="3"
+                        placeholder="Enter Remarks"
+                        formControlName="remark"
+                      ></textarea>
+                    </div>
+                  </div>
+                  <div class="addUpdateBtn" style="margin-top: 1rem">
+                    <button type="submit" class="btn btn-primary" (click)="addDocument()">
+                      <i class="fa fa-check-circle"></i>
+                      {{ editMode ? "Update Document" : "Add Document" }}
+                    </button>
+                    <br />
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  } -->
+<!-- </div> -->
+
+<!-- <div class="modal fade" id="remarkModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4>Add Remark</h4>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="form-group row">
+              <div class="col-md-2">
+                <label class="inputLabel" for="normal-field">Remarks *</label>
+              </div>
+              <div class="col-md-10">
+                <textarea
+                  class="form-control"
+                  rows="4"
+                  cols="60"
+                  [(ngModel)]="remark"
+                  placeholder="Enter Remarks"
+                  [ngClass]="{
+                    'border-danger': !remark && remarksubmit
+                  }"
+                ></textarea>
+                @if (!remark && remarksubmit) {
+                  <div class="text-danger">This field is required</div>
+                }
+              </div>
+            </div>
+          </div>
+          <div class="col-md-10"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button
+          disabled="remark"
+          type="submit"
+          class="btn btn-primary"
+          (click)="approvedCustDoc(approveDataobj)"
+        >
+          Approve
+        </button>
+      </div>
+    </div>
+  </div>
+</div> -->
+
+<ng-template #remarksDialog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <!-- Header -->
+        <div class="dialog-header dialog-title">
+            Add Remark
+            <span>
+                <a mat-icon-button mat-dialog-close>
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <div mat-dialog-content>
+            <mat-card>
+                <mat-card-header>
+                    <mat-card-title>Basic Details</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <form [formGroup]="remarkForm">
+                        <mat-form-field appearance="fill" class="w-100">
+                            <label class="inputLabel">Remarks *</label>
+                            <textarea matInput class="input-p-5" rows="4" formControlName="remark"
+                                placeholder="Enter Remarks"></textarea>
+                            <mat-error *ngIf="remarkForm.get('remark')?.hasError('required')">
+                                This field is required
+                            </mat-error>
+                        </mat-form-field>
+                    </form>
+                </mat-card-content>
+            </mat-card>
+        </div>
+
+        <div class="dialog-action-adjust d-flex justify-content-end">
+            <button disabled="remark" type="submit" class="btn btn-primary" (click)="approvedCustDoc(approveDataobj)">
+                Approve
+            </button>
+            <button mat-stroked-button mat-dialog-close>Close</button>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #confirmDialog let-data>
+    <div class="dialog-container">
+        <div class="dialog-header dialog-header-titleFont">
+            {{ data.title || "Delete Confirmation" }}
+            <span class="w-h-18">
+                <a mat-icon-button href="javascript:void(0)" mat-dialog-close="false">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+            <p class="dialog-description">{{ data.description }}</p>
+
+            <div mat-dialog-actions class="p-0">
+                <button mat-flat-button type="button" class="primary" [mat-dialog-close]="true">
+                    {{ data.yesLabel || "Confirm" }}
+                </button>
+                <button mat-stroked-button matButton="outlined" color="primary" mat-dialog-close="false">
+                    {{ data.noLabel || "Cancel" }}
+                </button>
+            </div>
+        </div>
+    </div>
+</ng-template>

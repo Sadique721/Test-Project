@@ -1,0 +1,330 @@
+<div class="row">
+  <div class="col-lg-6 col-md-6">
+    <div class="h-100">
+      <mat-card
+        class="h-100"
+        *ngIf="
+          !isLoading &&
+          custDetails?.status !== 'NewActivation' &&
+          custDetails?.status !== 'ActivationPending'
+        "
+      >
+        <mat-card-header style="display: flex; justify-content: space-between; align-items: center">
+          <mat-card-title>
+            {{ custDetails?.title }}
+            {{ custDetails?.username }}
+            Wallet</mat-card-title
+          >
+          <button mat-button mat-flat-button color="primary" (click)="addWalletIncustomer()">
+            <i class="fa fa-refresh"></i>
+          </button>
+        </mat-card-header>
+        <mat-card-content>
+          <div style="display: flex; justify-content: center; text-align: center">
+            <mat-card style="width: 360px; margin-bottom: 0px">
+              <mat-card-header style="justify-content: center">
+                <mat-card-title>
+                  <h1 style="margin: 0">Wallet Balance</h1>
+                </mat-card-title>
+              </mat-card-header>
+
+              <mat-card-content>
+                <div
+                  [ngClass]="
+                    getWallatData?.customerWalletDetails >= 0 ? 'success-badge' : 'danger-badge'
+                  "
+                  class="wallet-badge"
+                >
+                  {{ getWallatData?.customerWalletDetails | currency: currency }}
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+  <div class="col-lg-6 col-md-6">
+    <div class="h-100">
+      <mat-card
+        class="h-100"
+        *ngIf="
+          !isLoading &&
+          custDetails?.status !== 'NewActivation' &&
+          custDetails?.status !== 'ActivationPending'
+        "
+      >
+        <mat-card-header>
+          <mat-card-title> Advance Payment</mat-card-title>
+        </mat-card-header>
+        <mat-card-content style="margin: auto">
+          <div style="display: flex; justify-content: center; align-items: center">
+            <button
+              mat-button
+              mat-flat-button
+              color="primary"
+              (click)="openDialog()"
+              style="width: auto"
+            >
+              Pay
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>
+
+<ng-template #displayPaymentDialogs let-dialogRef="dialogRef">
+  <div class="container-fluid p-0">
+    <div class="dialog-header dialog-title">
+      Enter Payment Amount
+      <span>
+        <a mat-icon-button (click)="dialogRef.close()">
+          <img src="assets/img/DashboardIcons/Reject.svg" />
+        </a>
+      </span>
+    </div>
+
+    <div mat-dialog-content>
+      <mat-card>
+        <mat-card-content>
+          <form [formGroup]="paymentForm">
+            <mat-label>Amount</mat-label>
+            <mat-form-field appearance="outline" class="w-100">
+              <input matInput type="number" formControlName="amount" placeholder="Enter amount" />
+
+              <mat-error *ngIf="submitted && paymentForm.controls.amount.errors?.required">
+                Amount is required.
+              </mat-error>
+              <mat-error *ngIf="submitted && paymentForm.controls.amount.errors?.min">
+                Amount must be greater than 0.
+              </mat-error>
+            </mat-form-field>
+          </form>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div class="dialog-action-adjust d-flex justify-content-end" style="gap: 8px">
+      <button mat-button mat-flat-button color="primary" (click)="proceedPayment(dialogRef)">
+        Proceed
+      </button>
+      <button mat-stroked-button mat-dialog-close>Close</button>
+    </div>
+  </div>
+</ng-template>
+<ng-template #displayDialogs let-dialogRef="dialogRef">
+  <div class="container-fluid p-0">
+    <div class="dialog-header dialog-title">
+      Payment Gateway Method
+      <span>
+        <a mat-icon-button (click)="dialogRef.close()">
+          <img src="assets/img/DashboardIcons/Reject.svg" />
+        </a>
+      </span>
+    </div>
+
+    <div mat-dialog-content>
+      <mat-card *ngFor="let config of savedConfig" class="gateway-card">
+        <mat-card-header>
+          <mat-card-title class="title">
+            {{ config.paymentConfigName }}
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>{{ config.paymentGatewayInfo?.substring(0, 50) }}</p>
+          <p>{{ config.paymentGatewayInfo?.substring(50) }}</p>
+          <div class="d-flex justify-content-center" style="margin-top: 1.5rem">
+            <button mat-button mat-flat-button color="primary" (click)="buyPlan(config, dialogRef)">
+              Proceed
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div class="dialog-action-adjust d-flex justify-content-end">
+      <button mat-stroked-button mat-dialog-close>Close</button>
+    </div>
+  </div>
+</ng-template>
+<ng-template #paymentConfirmationModals let-dialogRef="dialogRef">
+  <div class="container-fluid p-0">
+    <div class="dialog-header dialog-title">
+      Payment Confirmation
+      <span>
+        <a mat-icon-button (click)="dialogRef.close()">
+          <img src="assets/img/DashboardIcons/Reject.svg" />
+        </a>
+      </span>
+    </div>
+
+    <div mat-dialog-content>
+      <mat-card>
+        <mat-card-content
+          >Payment is in the approval flow. Once approved, you will receive a confirmation
+          SMS.</mat-card-content
+        >
+      </mat-card>
+    </div>
+
+    <div class="dialog-action-adjust d-flex justify-content-end">
+      <button
+        mat-button
+        mat-flat-button
+        color="primary"
+        [disabled]="exitBuy"
+        mat-dialog-close
+        (click)="hidepaymentConfirmDialog()"
+      >
+        Close
+        <span *ngIf="exitBuy">({{ paymentstatusCount }})</span>
+      </button>
+    </div>
+  </div>
+</ng-template>
+
+<mat-card style="margin-top: 1.5rem">
+  <mat-card-header>
+    <mat-card-title> Current Subscription </mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content>
+    <div class="example-container mat-elevation-z8" tabindex="0">
+      <table
+        mat-table
+        [dataSource]="
+          custCurrentPlanList.slice(
+            currentPagecustomerCurrentPlanListdata * customerCurrentPlanListdataitemsPerPage,
+            currentPagecustomerCurrentPlanListdata * customerCurrentPlanListdataitemsPerPage +
+              customerCurrentPlanListdataitemsPerPage
+          )
+        "
+      >
+        <!-- Dynamic Columns -->
+        <ng-container *ngFor="let col of cols" [matColumnDef]="col.field">
+          <th mat-header-cell *matHeaderCellDef class="f-w-600 table-header-title">
+            {{ col.header }}
+          </th>
+          <td mat-cell *matCellDef="let row">
+            @if (
+              col.field === "dbStartDate" ||
+              col.field === "dbEndDate" ||
+              col.field === "dbExpiryDate"
+            ) {
+              {{ row[col.field] | date: "dd-MM-yyyy hh:mm a" }}
+            } @else if (col.field === "offerPrice") {
+              {{ row[col.field] | currency: currency : "symbol" : "1.2-2" }}
+            } @else {
+              {{ row[col.field] }}
+            }
+          </td>
+        </ng-container>
+
+        <!-- Header Row -->
+        <tr mat-header-row *matHeaderRowDef="displaycolom"></tr>
+
+        <!-- Data Rows -->
+        <tr mat-row *matRowDef="let row; columns: displaycolom"></tr>
+
+        <!-- No Data Message -->
+        <tr class="mat-row" *ngIf="custCurrentPlanList.length === 0">
+          <td
+            class="mat-cell"
+            [attr.colspan]="displaycolom.length"
+            style="text-align: center; padding: 1rem"
+          >
+            No Records found.
+          </td>
+        </tr>
+      </table>
+    </div>
+    @if (custCurrentPlanList.length > 0) {
+      <mat-paginator
+        [length]="custCurrentPlanList.length"
+        [pageSize]="customerCurrentPlanListdataitemsPerPage"
+        [pageIndex]="currentPagecustomerCurrentPlanListdata"
+        [pageSizeOptions]="[5, 10, 20]"
+        showFirstLastButtons
+        (page)="
+          currentPagecustomerCurrentPlanListdata = $event.pageIndex;
+          customerCurrentPlanListdataitemsPerPage = $event.pageSize
+        "
+      >
+      </mat-paginator>
+    }
+  </mat-card-content>
+</mat-card>
+
+<ng-template #mpinModals let-dialogRef="dialogRef">
+  <div class="container-fluid p-0">
+    <div class="dialog-header dialog-title">
+      Mobile Number
+      <span>
+        <a mat-icon-button (click)="dialogRef.close()">
+          <img src="assets/img/DashboardIcons/Reject.svg" />
+        </a>
+      </span>
+    </div>
+
+    <div mat-dialog-content>
+      <mat-card>
+        <mat-card-content>
+          <form [formGroup]="mpinForm">
+            <div style="display: flex; gap: 10px">
+              <!-- Country Code Dropdown -->
+              <mat-form-field appearance="outline" style="width: 30%">
+                <mat-label>Code</mat-label>
+                <mat-select formControlName="countryCode" placeholder="+91">
+                  <mat-option *ngFor="let c of countries" [value]="c.dial_code">
+                    {{ c.dial_code }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <!-- Mobile Number Field -->
+              <mat-form-field appearance="outline" style="width: 70%">
+                <mat-label>Mobile Number</mat-label>
+                <input
+                  matInput
+                  type="number"
+                  formControlName="mobileNumber"
+                  placeholder="Enter mobile number"
+                  (input)="onInputMobile($event)"
+                  (keyup)="onKeymobilelength($event)"
+                />
+
+                <mat-error
+                  *ngIf="isMpinFormSubmitted && mpinForm.controls.mobileNumber.errors?.required"
+                >
+                  Mobile number is required.
+                </mat-error>
+              </mat-form-field>
+            </div>
+            <div class="mat-mdc-form-field-error" *ngIf="mobileError">
+              Mobile number should not start with 0.
+            </div>
+
+            <div class="mat-mdc-form-field-error" *ngIf="!mobileError && inputMobile">
+              {{ inputMobile }}
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div class="dialog-action-adjust d-flex justify-content-end" style="gap: 8px">
+      <button
+        mat-button
+        mat-flat-button
+        color="primary"
+        (click)="buy(dialogRef)"
+        [disabled]="inputMobile !== '' || mobileError || !mpinForm.value.mobileNumber"
+      >
+        Buy
+      </button>
+      <button mat-stroked-button mat-dialog-close>Close</button>
+    </div>
+  </div>
+</ng-template>

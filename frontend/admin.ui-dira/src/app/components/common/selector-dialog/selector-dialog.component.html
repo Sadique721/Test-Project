@@ -1,0 +1,96 @@
+<div class="container-fluid p-0">
+    <!-- Header -->
+    <div class="dialog-header dialog-title">
+        Select {{ data?.headerTitle }}
+        <button mat-icon-button (click)="dialogRef.close()">
+            <img src="assets/img/DashboardIcons/Reject.svg" alt="Close icon">
+        </button>
+    </div>
+
+    <!-- Dialog Content -->
+    <mat-dialog-content class="dialog-content">
+
+        <mat-card>
+            <mat-card-header>
+                <mat-card-title>Search {{data?.headerTitle}}</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <label class="inputLabel">Search Filter</label>
+                        <mat-form-field appearance="outline" class="w-100 hide-hint mr-10">
+                            <input matInput class="input-p-5" [(ngModel)]="searchDetail"
+                                placeholder="Search {{headerTitle}} Name" />
+                        </mat-form-field>
+                    </div>
+                    <div class="col-md-8 d-flex align-items-center gap-2" style="margin-top: 2.5rem">
+                        <button mat-button mat-flat-button color="primary" class="search-btn" (click)="searchByName()"
+                            [disabled]="!searchDetail">
+                            Search
+                        </button>
+                        <button class="search-btn" mat-stroked-button matButton="outlined" class="search-btn"
+                            (click)="clearSearchForm()">
+                            Clear
+                        </button>
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+
+        <mat-card>
+            <mat-card-header>
+                <mat-card-title>Select {{data?.headerTitle}}</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <div class="table-container">
+                    <mat-table [dataSource]="dataSource" class="data-table" matSort>
+
+                        <!-- Select Column -->
+                        <ng-container matColumnDef="select">
+                            <mat-header-cell *matHeaderCellDef class="selection-column">Select</mat-header-cell>
+
+                            <mat-cell *matCellDef="let data" class="f-s-14">
+                                <mat-radio-button [value]="selectedItemId" [checked]="selectedItemId === data.id"
+                                    (change)="onSelectItem(data)" color="primary">
+                                </mat-radio-button>
+                            </mat-cell>
+                        </ng-container>
+
+                        <!-- Id Column -->
+                        <ng-container matColumnDef="id">
+                            <mat-header-cell *matHeaderCellDef class="table-header-title">Id</mat-header-cell>
+                            <mat-cell *matCellDef="let data" class="table-cell">
+                                {{ data.id }}
+                            </mat-cell>
+                        </ng-container>
+
+                        <!-- Name Column -->
+                        <ng-container matColumnDef="name">
+                            <mat-header-cell *matHeaderCellDef class="table-header-title">Name</mat-header-cell>
+                            <mat-cell *matCellDef="let data" class="table-cell">
+                                {{ data.name }}
+                            </mat-cell>
+                        </ng-container>
+
+                        <mat-header-row *matHeaderRowDef="displayedColumns" class="table-header-bg"></mat-header-row>
+                        <mat-row *matRowDef="let row; columns: displayedColumns" class="table-content-row"
+                            [class.selected-row]="selectedItemId === row.id"></mat-row>
+                    </mat-table>
+                </div>
+
+                <div class="pagination-container">
+                    <mat-paginator [length]="totalItem" [pageSize]="itemPerPage" [pageSizeOptions]="[5, 10,  20, 50, 100]"
+                        (page)="onPaginateChange($event)" showFirstLastButtons>
+                    </mat-paginator>
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </mat-dialog-content>
+
+    <div class="dialog-action-adjust d-flex justify-content-end" style="gap: 8px">
+        <button mat-flat-button class="button-normal" color="primary" (click)="onSave()">
+            Save
+        </button>
+        <button mat-stroked-button (click)="onCancel()" class="button-normal">Close</button>
+    </div>
+</div>

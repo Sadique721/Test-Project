@@ -1,0 +1,924 @@
+<div class="row">
+    <div class="col-md-12">
+        <mat-card class="cardWithShadow">
+            <mat-card-header>
+                <img src="assets/img/DashboardIcons/Back Arrow.svg" alt="arrow back" class="m-r-10"
+                    (click)="customerDetailOpen()" style="cursor: pointer;">
+                <div style="font-size:x-large; align-items: center; font-weight: 500; align-content: center;">
+                    {{ custData.title }} {{ custData.firstname }} {{ custData.lastname }} My Address
+                </div>
+                <div style="margin-left: auto;">
+                    <div *ngIf="addShiftLocationAccess">
+                        <button mat-flat-button color="primary" (click)="openShiftLocationForm()" class="button-normal"
+                            [disabled]="disableShiftButton" class="button-normal" matTooltip="Shift Location">
+                            Shift Location
+                        </button>
+                    </div>
+                </div>
+            </mat-card-header>
+            <mat-card-content class="mat-card-content-border">
+                <div style="margin-top: 20px;" class="country-table-list">
+                    <div class="table-container">
+                        <table mat-table [dataSource]="newCustomerAddressDataForCustometr" matSort
+                            class="mat-elevation-z8 w-100">
+
+                            <!-- New Address Column -->
+                            <ng-container matColumnDef="fullAddress">
+                                <th mat-header-cell *matHeaderCellDef class="table-header-title" sticky>New Address</th>
+                                <td mat-cell *matCellDef="let address">
+                                    <div style="padding:8px;">
+                                        {{ address?.fullAddress }}
+                                    </div>
+                                </td>
+                            </ng-container>
+
+                            <!-- Requested By Column -->
+                            <ng-container matColumnDef="requestedByName">
+                                <th mat-header-cell *matHeaderCellDef class="table-header-title" sticky>Requested By
+                                </th>
+                                <td mat-cell *matCellDef="let address"> {{ address?.requestedByName }} </td>
+                            </ng-container>
+
+                            <!-- Requested Date Column -->
+                            <ng-container matColumnDef="requestedDate">
+                                <th mat-header-cell *matHeaderCellDef class="table-header-title" sticky>Requested Date
+                                </th>
+                                <td mat-cell *matCellDef="let address">
+                                    {{ address?.requestedDate | date: 'dd/MM/yyyy' }}
+                                </td>
+                            </ng-container>
+
+                            <!-- Status Column -->
+                            <ng-container matColumnDef="status">
+                                <th mat-header-cell *matHeaderCellDef class="table-header-title" sticky>Status</th>
+                                <td mat-cell *matCellDef="let address">{{ address?.status }}</td>
+                            </ng-container>
+
+                            <!-- Action Column -->
+                            <ng-container matColumnDef="action">
+                                <th mat-header-cell *matHeaderCellDef class="table-header-title" sticky>Action</th>
+                                <td mat-cell *matCellDef="let address">
+                                    <button mat-icon-button matTooltip="Pick" (click)="pickModalOpen(address)"
+                                        [disabled]="address?.status != 'NewActivation' || address?.nextStaff != null">
+                                        <img src="assets/img/DashboardIcons/Pick-ticket-to-resolve.svg" width="24"
+                                            height="24" />
+                                    </button>
+                                    <button mat-icon-button matTooltip="Approve"
+                                        (click)="shiftLocationApproved(address)"
+                                        [disabled]="address?.nextStaff == null || address?.nextStaff != loggedInStaffId || address?.status != 'NewActivation'">
+                                        <img src="assets/img/DashboardIcons/Assign.svg" width="24" height="24" />
+                                    </button>
+                                    <button mat-icon-button matTooltip="Reject" (click)="shiftLocationRejected(address)"
+                                        [disabled]="address?.nextStaff == null || address?.nextStaff != loggedInStaffId || address?.status != 'NewActivation'">
+                                        <img src="assets/img/DashboardIcons/Reject.svg" width="24" height="24" />
+                                    </button>
+                                </td>
+                            </ng-container>
+
+                            <tr mat-header-row *matHeaderRowDef="displayedColumnsShiftLocation; sticky: true"></tr>
+                            <tr mat-row *matRowDef="let row; columns: displayedColumnsShiftLocation"></tr>
+                        </table>
+                        <!-- <mat-paginator [length]="addressTotalRecords" [pageSize]="addressItemsPerPage"
+                            [pageSizeOptions]="[5,10,20,50,100]" showFirstLastButtons
+                            (page)="pageChangedAddressList($event)">
+                        </mat-paginator> -->
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+</div>
+
+<ng-template #shiftLocationDialog *ngIf="showMainDialog">
+    <div class="dialog-container">
+        <div class="dialog-header">
+            Shift Location Details
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="closeShiftLocation()">
+                    <img src="assets/img/DashboardIcons/Reject.svg" />
+                </a>
+            </span>
+        </div>
+
+        <div mat-dialog-content>
+            <mat-card-content class="matcardContent">
+                <form [formGroup]="presentGroupForm" novalidate>
+                    <mat-card class="cardWithShadow mb-3">
+                        <div class="dialog-header">New Address Details</div>
+                        <mat-card-content class="mat-card-content-border">
+                            <div class="row g-3 p-3">
+                                <div class="col-md-4 col-sm-6 mb-4">
+                                    <label class="inputLabel">Service Area *</label>
+                                    <!-- <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select placeholder="Select a Service Area"
+                                            formControlName="updateAddressServiceAreaId" [disabled]="serviceAreaDisable"
+                                            (selectionChange)="selServiceArea($event, true)"
+                                            [ngClass]="{'is-invalid': submitted && presentGroupForm.controls.updateAddressServiceAreaId.errors}">
+                                            <mat-option *ngFor="let sa of commondropdownService.serviceAreaList"
+                                                [value]="sa.id">
+                                                {{ sa.name }}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error
+                                            *ngIf="submitted && presentGroupForm.controls.updateAddressServiceAreaId.hasError('required')">
+                                            Service Area is required.
+                                        </mat-error>
+                                    </mat-form-field> -->
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select placeholder="Select a Service Area"
+                                            [(ngModel)]="shiftLocationDTO.updateAddressServiceAreaId"
+                                            name="updateAddressServiceAreaId" [disabled]="serviceAreaDisable"
+                                            [ngModelOptions]="{standalone: true}"
+                                            (selectionChange)="selServiceArea($event, true)" required>
+                                            <mat-option *ngFor="let sa of commondropdownService.serviceAreaList"
+                                                [value]="sa.id">
+                                                {{ sa.name }}
+                                            </mat-option>
+                                        </mat-select>
+
+                                        <mat-error *ngIf="!shiftLocationDTO.updateAddressServiceAreaId">
+                                            Service Area is required.
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="col-md-4 col-sm-6 mb-4">
+                                    <label class="inputLabel">POP</label>
+                                    <!-- <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select placeholder="Select a POP" [(value)]="shiftLocationPopId" 
+                                            [ngClass]="{'is-invalid': submitted && !shiftLocationPopId}">
+                                            <mat-option *ngFor="let pop of commondropdownService.popListData"
+                                                [value]="pop.id">
+                                                {{ pop.name }}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field> -->
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select placeholder="Select a POP" [(ngModel)]="shiftLocationPopId"
+                                            [ngModelOptions]="{standalone: true}" name="shiftLocationPopId">
+                                            <mat-option *ngFor="let pop of commondropdownService.popListData"
+                                                [value]="pop.id">
+                                                {{ pop.name }}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="col-md-4 col-sm-6 mb-4">
+                                    <label class="inputLabel">OLT</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select placeholder="Select OLT devices" [(value)]="shiftLocationOltId"
+                                            [ngClass]="{'is-invalid': submitted && !shiftLocationOltId}">
+                                            <mat-option *ngFor="let olt of oltDevices" [value]="olt.id">
+                                                {{ olt.name }}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="col-md-4 col-sm-6 mb-4">
+                                    <label class="inputLabel">Address *</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <input matInput placeholder="Enter Address" formControlName="landmark" />
+                                        <mat-error
+                                            *ngIf="submitted && presentGroupForm.controls.landmark.hasError('required')">
+                                            Address is required.
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="col-md-4 col-sm-6 mb-4">
+                                    <label class="inputLabel">{{ pincodeTitle }} *</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select placeholder="Select a {{ pincodeTitle }}"
+                                            formControlName="pincodeId"
+                                            (selectionChange)="selectPINCODEChange($event, 'present')">
+                                            <mat-option *ngFor="let pin of pincodeDD" [value]="pin.pincodeid">
+                                                {{ pin.pincode }}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error
+                                            *ngIf="submitted && presentGroupForm.controls.pincodeId.hasError('required')">
+                                            {{ pincodeTitle }} is required.
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="col-md-4 col-sm-6 mb-4">
+                                    <label class="inputLabel">{{ areaTitle }} *</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select placeholder="Select a {{ areaTitle }}" formControlName="areaId"
+                                            (selectionChange)="selectAreaChange($event, 'present')">
+                                            <mat-option *ngFor="let area of AreaListDD" [value]="area.id">
+                                                {{ area.name }}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error
+                                            *ngIf="submitted && presentGroupForm.controls.areaId.hasError('required')">
+                                            {{ areaTitle }} is required.
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- <div class="col-md-4 col-sm-6 mb-4">
+                                    <label class="inputLabel">Building</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select formControlName="subareaId"
+                                            (selectionChange)="onChangeSubArea($event, 'present')"
+                                            placeholder="Select a {{ subareaTitle }}">
+                                            <mat-option *ngFor="let option of subAreaListDD" [value]="option.id">
+                                                {{ option.name }}
+                                                <span *ngIf="option.isUnderDevelopment"
+                                                    class="badge badge-info underDevelopBadge">UnderDevelopment</span>
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div> -->
+
+                                <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12 ">
+                                    <label class="inputLabel">Building</label>
+                                    <div class="d-flex align-items-start gap-2">
+                                        <mat-form-field appearance="outline" class="w-100">
+                                            <input matInput readonly formControlName="subareaName" class="input-p-5"
+                                                placeholder="Select a {{ subareaTitle }}">
+                                        </mat-form-field>
+                                        <button mat-icon-button color="primary" type="button"
+                                            (click)="openSelectBuildingDialogComponent()">
+                                            <img src="assets/img/DashboardIcons/Add.svg">
+
+
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4 col-sm-6 mb-4">
+                                    <label class="inputLabel">Homepass</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select formControlName="building_mgmt_id"
+                                            (selectionChange)="onChangeBuildingArea($event, 'present')"
+                                            placeholder="Select a {{ buildingTitle }}">
+                                            <mat-option *ngFor="let building of buildingListDD"
+                                                [value]="building.buildingMgmtId">
+                                                {{ building.buildingName }}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="col-md-4 col-sm-6 mb-4">
+                                    <label class="inputLabel">Building Number</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select formControlName="buildingNumber"
+                                            placeholder="Select a Building Number">
+                                            <mat-option *ngFor="let number of buildingNoDD"
+                                                [value]="number.buildingNumber">
+                                                {{ number.buildingNumber }}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- City -->
+                                <div class="col-md-4 col-sm-6 mb-4">
+                                    <label class="inputLabel">{{ cityTitle }} *</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select formControlName="cityId">
+                                            <mat-option *ngFor="let item of commondropdownService.cityListData"
+                                                [value]="item.id">
+                                                {{ item.name }}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error *ngIf="submitted && presentGroupForm.controls.cityId.errors">
+                                            {{ cityTitle }} is required.
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- State -->
+                                <div class="col-md-4 col-sm-6 mb-4">
+                                    <label class="inputLabel">{{ stateTitle }} *</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select formControlName="stateId">
+                                            <mat-option *ngFor="let item of commondropdownService.stateListData"
+                                                [value]="item.id">
+                                                {{ item.name }}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error *ngIf="submitted && presentGroupForm.controls.stateId.errors">
+                                            {{ stateTitle }} is required.
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Country -->
+                                <div class="col-md-4 col-sm-6 mb-4">
+                                    <label class="inputLabel">{{ countryTitle }} *</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select formControlName="countryId">
+                                            <mat-option *ngFor="let item of commondropdownService.countryListData"
+                                                [value]="item.id">
+                                                {{ item.name }}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error *ngIf="submitted && presentGroupForm.controls.countryId.errors">
+                                            {{ countryTitle }} is required.
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="col-md-4 col-sm-6 mb-4">
+                                    <label class="inputLabel">Requested By</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select [disabled]="true" [(value)]="requestedByID"
+                                            placeholder="Select a staff">
+                                            <mat-option *ngFor="let staff of staffCustList" [value]="staff.id">
+                                                {{ staff.name }}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                    <button mat-icon-button color="primary" type="button" aria-label="Add Staff"
+                                        (click)="modalOpenStaff('requestedBy')">
+                                        <img src="assets/img/DashboardIcons/Add.svg">
+
+                                    </button>
+                                    <button mat-icon-button color="primary" type="button" aria-label="Remove Staff"
+                                        (click)="removeSelStaff('requestedBy')" [disabled]="!requestedByID"
+                                        style="margin-left: 8px;">
+                                        <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+
+                                    </button>
+                                    <div *ngIf="submitted && requestedByID == 0" class="errorWrap text-danger">
+                                        Requested By is required.
+                                    </div>
+                                </div>
+                                <div class="col-md-4 col-sm-6 mb-4" *ngIf="isBranchShiftLocation">
+                                    <label class="inputLabel">Branch/Partner *</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select [(value)]="branchID" placeholder="Select a branch" required>
+                                            <mat-option *ngFor="let branch of branchData" [value]="branch.id">{{
+                                                branch.name }}</mat-option>
+                                        </mat-select>
+                                        <mat-error *ngIf="submitted && branchID == 0">Branch is required.</mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Partner select when isBranchShiftLocation = false -->
+                                <div class="col-md-4 col-sm-6 mb-4" *ngIf="!isBranchShiftLocation">
+                                    <label class="inputLabel">Branch/Partner *</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select [(value)]="shiftLocationDTO.shiftPartnerid"
+                                            placeholder="Select a partner" required>
+                                            <mat-option *ngFor="let partner of partnerListByServiceArea"
+                                                [value]="partner.id">{{ partner.name }}</mat-option>
+                                        </mat-select>
+                                        <mat-error *ngIf="submitted && shiftLocationDTO.shiftPartnerid == 0">Partner is
+                                            required.</mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Wallet Amount readonly -->
+                                <div class="col-md-4 col-sm-6 mb-4">
+                                    <label class="inputLabel">Wallet Amount</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <input matInput [value]="walletValue" readonly />
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Prepaid Value readonly -->
+                                <div class="col-md-4 col-sm-6 mb-4">
+                                    <mat-label>Prepaid Value</mat-label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <input matInput [value]="prepaid" readonly />
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Due Value readonly -->
+                                <div class="col-md-4 col-sm-6 mb-4">
+                                    <mat-label>Due Value</mat-label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <input matInput [value]="dueValue" readonly />
+                                    </mat-form-field>
+                                </div>
+
+
+                                <!-- Checkbox options -->
+                                <div class="col-md-6 col-sm-6 mb-4">
+                                    <mat-checkbox formControlName="isPaymentAddresSame">
+                                        Set <b>Payment Address</b> same as present address
+                                    </mat-checkbox>
+                                </div>
+                                <div class="col-md-6 col-sm-6 mb-4">
+                                    <mat-checkbox formControlName="isPermanentAddress">
+                                        Set <b>Permanent Address</b> same as present address
+                                    </mat-checkbox>
+                                </div>
+                            </div>
+                        </mat-card-content>
+                    </mat-card>
+
+                    <mat-card class="cardWithShadow mb-3">
+                        <div class="dialog-header">Charge Details</div>
+                        <mat-card-content class="mat-card-content-border">
+                            <form [formGroup]="shiftLocationChargeGroupForm" class="row g-3">
+
+                                <div class="col-md-4 col-sm-6 mb-4">
+                                    <label class="inputLabel">Billable To</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select placeholder="Select a Billable" [disabled]="true"
+                                            formControlName="billableCustomerId">
+                                            <mat-option *ngFor="let billable of billableCustList" [value]="billable.id">
+                                                {{ billable.name }}
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                    <button mat-icon-button color="primary" type="button" aria-label="Add Billable"
+                                        (click)="modalOpenParentCustomer('billable-shift-location')">
+                                        <img src="assets/img/DashboardIcons/Add.svg">
+
+                                    </button>
+                                    <button mat-icon-button color="primary" type="button" aria-label="Remove Billable"
+                                        (click)="removeSelParentCust('billable-shift-location')">
+                                        <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+
+                                    </button>
+                                </div>
+
+                                <div class="col-md-4 col-sm-6 mb-4">
+                                    <label class="inputLabel">Payment Owner *</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select placeholder="Select a Staff" [disabled]="true"
+                                            formControlName="paymentOwnerId">
+                                            <mat-option *ngFor="let staff of staffCustList" [value]="staff.id">
+                                                {{ staff.name }}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error
+                                            *ngIf="ifUpdateAddressSubmited && shiftLocationChargeGroupForm.controls.paymentOwnerId.hasError('required')">
+                                            Payment Owner is required.
+                                        </mat-error>
+                                    </mat-form-field>
+
+                                    <button mat-icon-button color="primary" aria-label="Add Payment Owner"
+                                        (click)="modalOpenStaff('paymentCharge')">
+                                        <img src="assets/img/DashboardIcons/Add.svg">
+
+                                    </button>
+                                    <button mat-icon-button color="primary" aria-label="Remove Payment Owner"
+                                        (click)="removeSelStaff('paymentCharge')" [disabled]="!paymentOwnerId"
+                                        style="margin-left: 8px;">
+                                        <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+
+                                    </button>
+                                </div>
+
+                                <div class="col-md-12 mt-3">
+                                    <table class="w-100" style="table-layout: fixed;">
+                                        <tr>
+                                            <td style="padding-right: 10px; width: 20%;">
+                                                <label class="inputLabel">Charge *</label>
+                                                <mat-form-field appearance="outline" class="w-100">
+                                                    <mat-select formControlName="chargeid" placeholder="Select A Charge"
+                                                        (selectionChange)="selectcharge($event, 'shiftLocation')"
+                                                        [ngClass]="{'is-invalid': ifUpdateAddressSubmited && shiftLocationChargeGroupForm.controls.chargeid.errors}">
+                                                        <mat-option
+                                                            *ngFor="let charge of commondropdownService.chargeByTypeData"
+                                                            [value]="charge.id">
+                                                            {{ charge.name }}
+                                                        </mat-option>
+                                                    </mat-select>
+                                                    <mat-error
+                                                        *ngIf="ifUpdateAddressSubmited && shiftLocationChargeGroupForm.controls.chargeid.hasError('required')">Charge
+                                                        is required.</mat-error>
+                                                </mat-form-field>
+                                            </td>
+
+                                            <td style="padding-right: 10px; width: 20%;">
+                                                <label class="inputLabel">Actual Price *</label>
+                                                <mat-form-field appearance="outline" class="w-100">
+                                                    <input matInput type="number" min="0"
+                                                        placeholder="Enter Actual Price" formControlName="actualprice"
+                                                        [disabled]="selectchargeValueShow"
+                                                        [ngClass]="{'is-invalid': ifUpdateAddressSubmited && shiftLocationChargeGroupForm.controls.actualprice.errors}">
+                                                    <mat-error
+                                                        *ngIf="ifUpdateAddressSubmited && shiftLocationChargeGroupForm.controls.actualprice.hasError('required')">Charge
+                                                        Amount is required.</mat-error>
+                                                </mat-form-field>
+                                            </td>
+
+                                            <td style="padding-right: 10px; width: 20%;">
+                                                <label class="inputLabel">Charge Type *</label>
+                                                <mat-form-field appearance="outline" class="w-100">
+                                                    <mat-select formControlName="type" placeholder="Select A Type"
+                                                        (selectionChange)="selectTypecharge($event)"
+                                                        [ngClass]="{'is-invalid': ifUpdateAddressSubmited && shiftLocationChargeGroupForm.controls.type.errors}">
+                                                        <mat-option *ngFor="let type of chargeType"
+                                                            [value]="type.label">
+                                                            {{ type.label }}
+                                                        </mat-option>
+                                                    </mat-select>
+                                                    <mat-error
+                                                        *ngIf="ifUpdateAddressSubmited && shiftLocationChargeGroupForm.controls.type.hasError('required')">Charge
+                                                        Type is required.</mat-error>
+                                                </mat-form-field>
+                                            </td>
+
+                                            <td style="padding-right: 10px; width: 20%;">
+                                                <label class="inputLabel">New Price *</label>
+                                                <mat-form-field appearance="outline" class="w-100">
+                                                    <input matInput type="number" min="0" placeholder="Enter New Price"
+                                                        formControlName="price"
+                                                        [ngClass]="{'is-invalid': ifUpdateAddressSubmited && shiftLocationChargeGroupForm.controls.price.errors}">
+                                                    <mat-error
+                                                        *ngIf="ifUpdateAddressSubmited && shiftLocationChargeGroupForm.controls.price.hasError('required')">New
+                                                        Price is required.</mat-error>
+                                                </mat-form-field>
+                                            </td>
+
+                                            <td style="width: 20%;">
+                                                <label class="inputLabel">Discount</label>
+                                                <mat-form-field appearance="outline" class="w-100">
+                                                    <input matInput type="number" min="0" placeholder="Enter Discount"
+                                                        formControlName="discount" />
+                                                </mat-form-field>
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    <div *ngIf="shiftLocationChargeGroupForm.value.price < shiftLocationChargeGroupForm.value.actualprice"
+                                        class="errorWrap text-danger mt-2">
+                                        New Price must not be less than the actual charge price
+                                    </div>
+                                </div>
+                            </form>
+                        </mat-card-content>
+                    </mat-card>
+                </form>
+            </mat-card-content>
+        </div>
+
+        <div mat-dialog-actions class="dialog-action-adjust">
+            <button mat-button mat-flat-button color="primary" class="button-normal" type="submit"
+                (click)="saveShiftLocation()">
+                Save
+            </button>
+            <button mat-stroked-button color="primary" matButton="outlined" type="button" class="button-normal"
+                (click)="closeShiftLocation()">
+                Close
+            </button>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #rejectApproveShiftLocationDialog>
+    <div class="dialog-container" style="width: 40vw;">
+        <div class="dialog-header">
+            {{ AppRjecHeader }} Shift Location
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="closeDisplayShiftLocationDetails()">
+                    <img src="assets/img/DashboardIcons/Reject.svg" alt="Close" />
+                </a>
+            </span>
+        </div>
+
+        <div mat-dialog-content>
+            <form [formGroup]="assignAppRejectShiftLocationForm" novalidate>
+                <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Remark *</mat-label>
+                    <textarea matInput formControlName="remark" rows="4"
+                        [ngClass]="{'is-invalid': assignShiftLocationsubmitted && assignAppRejectShiftLocationForm.controls.remark.errors}">
+          </textarea>
+                    <mat-error
+                        *ngIf="assignShiftLocationsubmitted && assignAppRejectShiftLocationForm.controls.remark.hasError('required')">
+                        Remark is required.
+                    </mat-error>
+                </mat-form-field>
+            </form>
+        </div>
+
+        <div mat-dialog-actions class="dialog-action-adjust">
+            <button mat-flat-button color="primary" (click)="assignAddressApprove()"
+                [disabled]="!assignAppRejectShiftLocationForm.valid">
+                <mat-icon>cancel</mat-icon> {{ AppRjecHeader }}
+            </button>
+            <button mat-stroked-button color="primary" (click)="closeDisplayShiftLocationDetails()">
+                Close
+            </button>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #rejectCustomerInventoryDialog>
+    <div class="dialog-container">
+        <div class="dialog-header">
+            Assign Staff
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="closeDisplayShiftLocationDetails()">
+                    <mat-icon>close</mat-icon>
+                </a>
+            </span>
+        </div>
+
+        <div mat-dialog-content>
+            <div *ngIf="reject">
+                <mat-card class="cardWithShadow">
+                    <table mat-table [dataSource]="rejectInventoryData" class="mat-elevation-z8 w-100"
+                        multiTemplateDataRows>
+
+                        <!-- Radio Button Column -->
+                        <ng-container matColumnDef="select">
+                            <th mat-header-cell *matHeaderCellDef style="width: 3rem;"></th>
+                            <td mat-cell *matCellDef="let row">
+                                <mat-radio-button [checked]="selectStaffReject === row.id"
+                                    (change)="selectStaffReject = row.id">
+                                </mat-radio-button>
+                            </td>
+                        </ng-container>
+
+                        <!-- Name Column -->
+                        <ng-container matColumnDef="name">
+                            <th mat-header-cell *matHeaderCellDef>Name</th>
+                            <td mat-cell *matCellDef="let row">{{ row.fullName }}</td>
+                        </ng-container>
+
+                        <!-- Username Column -->
+                        <ng-container matColumnDef="username">
+                            <th mat-header-cell *matHeaderCellDef>Username</th>
+                            <td mat-cell *matCellDef="let row">{{ row.username }}</td>
+                        </ng-container>
+
+                        <tr mat-header-row *matHeaderRowDef="['select', 'name', 'username']"></tr>
+                        <tr mat-row *matRowDef="let row; columns: ['select', 'name', 'username']"></tr>
+                    </table>
+                </mat-card>
+            </div>
+        </div>
+
+        <div mat-dialog-actions class="dialog-action-adjust">
+            <button mat-flat-button color="primary" (click)="assignToStaff(false)" *ngIf="reject"
+                [disabled]="!selectStaffReject">
+                <mat-icon>cancel</mat-icon>
+                Assign
+            </button>
+            <button mat-stroked-button color="primary" (click)="closeDisplayShiftLocationDetails()">
+                Close
+            </button>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #assignShiftLocationDialog>
+    <div class="dialog-container">
+        <div class="dialog-header">
+            Assign Staff
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="closeStaffModel(true)">
+                    <mat-icon>close</mat-icon>
+                </a>
+            </span>
+        </div>
+
+        <div mat-dialog-content>
+            <div *ngIf="approved">
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <mat-form-field appearance="outline" class="w-100">
+                            <input matInput placeholder="Global Search Filter" [(ngModel)]="searchStaffDeatil"
+                                (keydown.enter)="searchStaffByName()" />
+                        </mat-form-field>
+                    </div>
+                    <div class="col-6 d-flex align-items-center gap-2">
+                        <button mat-flat-button color="primary" class="button-normal m-r-10"
+                            (click)="searchStaffByName()" [disabled]="!searchStaffDeatil">
+                            Search
+                        </button>
+                        <button mat-stroked-button color="primary" class="button-normal" (click)="clearSearchForm()">
+                            Clear
+                        </button>
+                    </div>
+                </div>
+
+                <mat-card class="cardWithShadow">
+                    <table mat-table [dataSource]="approveInventoryData" class="mat-elevation-z8 w-100">
+
+                        <!-- Radio Button Column -->
+                        <ng-container matColumnDef="select">
+                            <th mat-header-cell *matHeaderCellDef style="width: 3rem;"></th>
+                            <td mat-cell *matCellDef="let row">
+                                <mat-radio-button [checked]="selectStaff === row.id" (change)="selectStaff = row.id">
+                                </mat-radio-button>
+                            </td>
+                        </ng-container>
+
+                        <!-- Name Column -->
+                        <ng-container matColumnDef="name">
+                            <th mat-header-cell *matHeaderCellDef>Name</th>
+                            <td mat-cell *matCellDef="let row">{{ row.fullName }}</td>
+                        </ng-container>
+
+                        <!-- Username Column -->
+                        <ng-container matColumnDef="username">
+                            <th mat-header-cell *matHeaderCellDef>Username</th>
+                            <td mat-cell *matCellDef="let row">{{ row.username }}</td>
+                        </ng-container>
+
+                        <tr mat-header-row *matHeaderRowDef="['select', 'name', 'username']"></tr>
+                        <tr mat-row *matRowDef="let row; columns: ['select', 'name', 'username']"></tr>
+                    </table>
+                </mat-card>
+            </div>
+        </div>
+
+        <div mat-dialog-actions class="dialog-action-adjust">
+            <button mat-flat-button color="primary" (click)="assignToStaff(true)" *ngIf="approved"
+                [disabled]="!selectStaff">
+                <mat-icon>check_circle</mat-icon>
+                Assign
+            </button>
+            <button mat-stroked-button color="primary" (click)="closeStaffModel(true)">
+                Close
+            </button>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #rejectCustomerInventoryDialog>
+    <div class="dialog-container">
+        <div class="dialog-header">
+            Assign Staff
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="closeDisplayShiftLocationDetails()">
+                    <mat-icon>close</mat-icon>
+                </a>
+            </span>
+        </div>
+
+        <div mat-dialog-content>
+            <div *ngIf="reject">
+                <mat-card class="cardWithShadow">
+
+                    <table mat-table [dataSource]="rejectInventoryData" class="mat-elevation-z8 w-100">
+
+                        <!-- Select Radio Column -->
+                        <ng-container matColumnDef="select">
+                            <th mat-header-cell *matHeaderCellDef style="width: 3rem;"></th>
+                            <td mat-cell *matCellDef="let row">
+                                <mat-radio-button [checked]="selectStaffReject === row.id"
+                                    (change)="selectStaffReject = row.id">
+                                </mat-radio-button>
+                            </td>
+                        </ng-container>
+
+                        <!-- Name Column -->
+                        <ng-container matColumnDef="name">
+                            <th mat-header-cell *matHeaderCellDef>Name</th>
+                            <td mat-cell *matCellDef="let row">{{ row.fullName }}</td>
+                        </ng-container>
+
+                        <!-- Username Column -->
+                        <ng-container matColumnDef="username">
+                            <th mat-header-cell *matHeaderCellDef>Username</th>
+                            <td mat-cell *matCellDef="let row">{{ row.username }}</td>
+                        </ng-container>
+
+                        <tr mat-header-row *matHeaderRowDef="['select', 'name', 'username']"></tr>
+                        <tr mat-row *matRowDef="let row; columns: ['select', 'name', 'username']"></tr>
+                    </table>
+                </mat-card>
+            </div>
+        </div>
+
+        <div mat-dialog-actions class="dialog-action-adjust">
+            <button mat-flat-button color="primary" (click)="assignToStaff(false)" *ngIf="reject"
+                [disabled]="!selectStaffReject">
+                <mat-icon>cancel</mat-icon>
+                Assign
+            </button>
+            <button mat-stroked-button color="primary" (click)="closeDisplayShiftLocationDetails()">
+                Close
+            </button>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #reAssignPLANDialog>
+    <div class="dialog-container" style="width: 40vw; max-width: 400px;">
+        <div class="dialog-header">
+            Approve Shift Location
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="closeAssignPlanDialog()">
+                    <mat-icon>close</mat-icon>
+                </a>
+            </span>
+        </div>
+
+        <div mat-dialog-content>
+            <form [formGroup]="assignDocForm" novalidate>
+                <mat-card class="cardWithShadow mb-3">
+                    <table mat-table [dataSource]="approvableStaff" class="mat-elevation-z8 w-100">
+
+                        <!-- Select Radio Button Column -->
+                        <ng-container matColumnDef="select">
+                            <th mat-header-cell *matHeaderCellDef style="width: 3rem;"></th>
+                            <td mat-cell *matCellDef="let row">
+                                <mat-radio-button [checked]="selectStaff === row.id" (change)="selectStaff = row.id">
+                                </mat-radio-button>
+                            </td>
+                        </ng-container>
+
+                        <!-- Name Column -->
+                        <ng-container matColumnDef="name">
+                            <th mat-header-cell *matHeaderCellDef>Name</th>
+                            <td mat-cell *matCellDef="let row">{{ row.fullName }}</td>
+                        </ng-container>
+
+                        <!-- Username Column -->
+                        <ng-container matColumnDef="username">
+                            <th mat-header-cell *matHeaderCellDef>Username</th>
+                            <td mat-cell *matCellDef="let row">{{ row.username }}</td>
+                        </ng-container>
+
+                        <tr mat-header-row *matHeaderRowDef="['select', 'name', 'username']"></tr>
+                        <tr mat-row *matRowDef="let row; columns: ['select', 'name', 'username']"></tr>
+                    </table>
+                </mat-card>
+
+                <mat-form-field appearance="outline" class="w-100">
+                    <mat-label>Remark *</mat-label>
+                    <textarea matInput rows="4" formControlName="remark"
+                        [ngClass]="{'is-invalid': assignPlansubmitted && assignPlanForm.controls.remark.errors}">
+          </textarea>
+                    <mat-error *ngIf="assignPlansubmitted && assignPlanForm.controls.remark.hasError('required')">
+                        Remark is required.
+                    </mat-error>
+                </mat-form-field>
+            </form>
+        </div>
+
+        <div mat-dialog-actions class="dialog-action-adjust">
+            <button mat-flat-button color="primary" (click)="reassignWorkflow()" [disabled]="!assignDocForm.valid">
+                <mat-icon>check_circle</mat-icon>
+                Assign
+            </button>
+            <button mat-stroked-button color="primary" (click)="closeAssignPlanDialog()">
+                Close
+            </button>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #shiftLocationApproveDialog>
+    <div class="dialog-container">
+        <!-- Header -->
+        <div class="dialog-header">
+            {{ AppRjecHeader }} Shift Location
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="shiftLocationApproveDialogRef.close()">
+                    <mat-icon>close</mat-icon>
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <div mat-dialog-content>
+            <form [formGroup]="assignAppRejectShiftLocationForm">
+                <label class="inputLabel">Remark *</label>
+                <mat-form-field appearance="outline" class="w-100">
+                    <textarea matInput formControlName="remark" placeholder="Enter Remark" [ngClass]="{
+              'is-invalid': assignShiftLocationsubmitted &&
+              assignAppRejectShiftLocationForm.controls['remark'].errors
+            }" rows="3"></textarea>
+                    <mat-error *ngIf="
+              assignShiftLocationsubmitted &&
+              assignAppRejectShiftLocationForm.controls['remark'].hasError('required')
+            ">
+                        Remark is required.
+                    </mat-error>
+                </mat-form-field>
+            </form>
+        </div>
+
+        <!-- Footer -->
+        <mat-dialog-actions align="end">
+            <button mat-flat-button color="primary" (click)="assignAddressApprove()"
+                [disabled]="!assignAppRejectShiftLocationForm.valid">
+
+                {{ AppRjecHeader }}
+            </button>
+
+            <button mat-stroked-button color="warn"
+                (click)="closeDisplayShiftLocationDetails(); shiftLocationApproveDialogRef.close()">
+                Close
+            </button>
+        </mat-dialog-actions>
+    </div>
+</ng-template>
+
+<!-- <app-select-staff *ngIf="isSelectStaff" [selectedStaff]="selectedStaff"
+    (selectedStaffChange)="selectedStaffChange($event)" (closeStaff)="closeStaff()"></app-select-staff> -->
+
+<!-- <app-customer-select *ngIf="showParentCustomerModel" [type]="custType" [custId]="custData.id"
+    [selectedCust]="selectedParentCust" (selectedCustChange)="selectedCustChange($event)"
+    (closeParentCust)="closeParentCust()"></app-customer-select> -->
+
+<app-workflow-audit-details-modal *ngIf="ifModelIsShow" [auditcustid]="auditcustid" dialogId="custauditWorkflowModal"
+    (closeParentCustt)="closeParentCustt()"></app-workflow-audit-details-modal>

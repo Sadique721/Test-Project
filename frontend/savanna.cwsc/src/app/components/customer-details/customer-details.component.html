@@ -1,0 +1,2442 @@
+<mat-tab-group [(selectedIndex)]="activeTabIndex" (selectedTabChange)="onTabChange($event)">
+  <!-- 1. CUSTOMER DETAILS -->
+  <mat-tab label="Customer Details">
+    <div *ngIf="isCustomerDetailOpen">
+      <mat-card style="margin-top: 1.5rem">
+        <mat-card-header>
+          <mat-card-title
+            >{{ customerLedgerDetailData.title }}
+            {{ customerLedgerDetailData.firstname + " " + customerLedgerDetailData.lastname }}
+            Details</mat-card-title
+          >
+        </mat-card-header>
+        <mat-card-content>
+          <mat-tab-group [(selectedIndex)]="activeIndex" class="mat-elevation-z2">
+            <mat-tab label="Basic Details">
+              <mat-card style="margin-top: 1.5rem">
+                <mat-card-content>
+                  <div class="row">
+                    <!-- NAME -->
+                    <div class="col-lg-4 col-md-4">
+                      <div class="field">
+                        <span class="label-text f-w-600 f-s-15">Name </span>
+                        <span class="colon">:</span>
+                        <span *ngIf="!isEditing">
+                          {{ createcustomerData?.title }} {{ createcustomerData?.firstname }}
+                          {{ createcustomerData?.lastname }}
+                        </span>
+
+                        <a
+                          *ngIf="isEditing"
+                          (click)="nameModelOpen()"
+                          class="mat-primary"
+                          style="cursor: pointer"
+                        >
+                          {{ createcustomerData?.title }} {{ createcustomerData?.firstname }}
+                          {{ createcustomerData?.lastname }}
+                        </a>
+                      </div>
+                    </div>
+
+                    <!-- BUSINESS NAME -->
+                    <div class="col-lg-4 col-md-4">
+                      <div class="field">
+                        <span class="label-text f-w-600 f-s-15">Business Name </span>
+                        <span class="colon">:</span>
+                        <span *ngIf="!isEditing">{{ createcustomerData?.contactperson }}</span>
+
+                        <mat-form-field *ngIf="isEditing" appearance="outline" class="w-100">
+                          <input matInput [(ngModel)]="createcustomerData.contactperson" />
+                        </mat-form-field>
+                      </div>
+                    </div>
+
+                    <!-- BUSINESS EMAIL -->
+                    <!-- <div class="col-lg-4 col-md-4">
+                      <div class="field">
+                        <span class="label-text f-w-600 f-s-15">Business Email </span>
+                        <span class="colon">:</span>
+                        <span *ngIf="!isEditing">{{ createcustomerData?.altemail }}</span>
+
+                        <mat-form-field *ngIf="isEditing" appearance="outline" class="w-100">
+                          <input matInput [(ngModel)]="createcustomerData.altemail" />
+                        </mat-form-field>
+                      </div>
+                    </div> -->
+
+                    <!-- PRIMARY MOBILE -->
+                    <div class="col-lg-4 col-md-4">
+                      <div class="field">
+                        <span class="label-text f-w-600 f-s-15">Primary Mobile Number </span>
+                        <span class="colon">:</span>
+                        <span *ngIf="!isEditing">
+                          <span *ngIf="createcustomerData?.countryCode">
+                            ({{ createcustomerData?.countryCode }})
+                          </span>
+                          {{ createcustomerData?.mobile }}
+                        </span>
+
+                        <mat-form-field *ngIf="isEditing" appearance="outline" class="w-100">
+                          <input
+                            matInput
+                            [(ngModel)]="createcustomerData.mobile"
+                            type="number"
+                            (keypress)="numberOnly($event)"
+                          />
+                        </mat-form-field>
+                      </div>
+                    </div>
+
+                    <!-- SECONDARY MOBILE -->
+                    <div class="col-lg-4 col-md-4">
+                      <div class="field">
+                        <span class="label-text f-w-600 f-s-15">Secondary Mobile Number </span>
+                        <span class="colon">:</span>
+                        <span *ngIf="createcustomerData?.altmobile && !isEditing">
+                          {{ createcustomerData?.altmobile }}
+                        </span>
+
+                        <mat-form-field *ngIf="isEditing" appearance="outline" class="w-100">
+                          <input
+                            matInput
+                            type="number"
+                            [(ngModel)]="createcustomerData.altmobile"
+                            (keypress)="numberOnly($event)"
+                          />
+                        </mat-form-field>
+                      </div>
+                    </div>
+
+                    <!-- EMAIL -->
+                    <div class="col-lg-4 col-md-4">
+                      <div class="field">
+                        <span class="label-text f-w-600 f-s-15">Email </span>
+                        <span class="colon">:</span>
+                        <span *ngIf="!isEditing">{{ createcustomerData?.email }}</span>
+
+                        <mat-form-field *ngIf="isEditing" appearance="outline" class="w-100">
+                          <input
+                            matInput
+                            [(ngModel)]="createcustomerData.email"
+                            name="email"
+                            #emailRef="ngModel"
+                            required
+                            [pattern]="emailPattern"
+                          />
+
+                          <mat-error *ngIf="emailRef?.invalid && emailRef?.touched">
+                            Enter a valid email address
+                          </mat-error>
+                        </mat-form-field>
+                      </div>
+                    </div>
+
+                    <!-- DOB -->
+                    <div class="col-lg-4 col-md-4">
+                      <div class="field">
+                        <span class="label-text f-w-600 f-s-15">Date of Birth </span>
+                        <span class="colon">:</span>
+                        <span *ngIf="!isEditing">{{
+                          customerLedgerDetailData?.birthDate | date: "dd-MM-yyyy"
+                        }}</span>
+
+                        <mat-form-field *ngIf="isEditing" appearance="outline" class="w-100">
+                          <input
+                            matInput
+                            [matDatepicker]="pickerDOB"
+                            [(ngModel)]="birthDate"
+                            [max]="today"
+                          />
+                          <mat-datepicker-toggle
+                            matSuffix
+                            [for]="pickerDOB"
+                          ></mat-datepicker-toggle>
+                          <mat-datepicker #pickerDOB></mat-datepicker>
+                        </mat-form-field>
+                      </div>
+                    </div>
+
+                    <!-- STATIC FIELDS -->
+                    <div class="col-lg-4 col-md-4">
+                      <div class="field">
+                        <span class="label-text f-w-600 f-s-15">Act No. </span>
+                        <span class="colon">:</span>{{ customerLedgerDetailData?.acctno }}
+                      </div>
+                    </div>
+                    <div class="col-lg-4 col-md-4">
+                      <div class="field">
+                        <span class="label-text f-w-600 f-s-15">Username </span>
+                        <span class="colon">:</span>{{ customerLedgerDetailData?.username }}
+                      </div>
+                    </div>
+                    <div class="col-lg-4 col-md-4">
+                      <div class="field">
+                        <span class="label-text f-w-600 f-s-15">Status </span>
+                        <span class="colon">:</span>{{ customerLedgerDetailData?.status }}
+                      </div>
+                    </div>
+                    <div class="col-lg-4 col-md-4">
+                      <div class="field">
+                        <span class="label-text f-w-600 f-s-15">Customer Type </span>
+                        <span class="colon">:</span>{{ customerLedgerDetailData?.custtype }}
+                      </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-4" *ngIf="customerLedgerDetailData?.billday">
+                      <div class="field">
+                        <span class="label-text f-w-600 f-s-15">Bill Day </span>
+                        <span class="colon">:</span>
+                        {{ customerLedgerDetailData?.billday }}
+                      </div>
+                    </div>
+
+                    <div
+                      class="col-lg-4 col-md-4"
+                      *ngIf="customerLedgerDetailData?.planMappingList"
+                    >
+                      <div class="field">
+                        <span class="label-text f-w-600 f-s-15">Next Bill Date </span>
+                        <span class="colon">:</span>
+                        {{
+                          customerLedgerDetailData.planMappingList[
+                            customerLedgerDetailData.planMappingList.length - 1
+                          ]?.endDate | date: "dd-MM-yyyy"
+                        }}
+                      </div>
+                    </div>
+
+                    <div
+                      class="col-lg-4 col-md-4"
+                      *ngIf="customerLedgerDetailData?.parentCustomerName"
+                    >
+                      <div class="field">
+                        <span class="label-text f-w-600 f-s-15">Parent Customer </span>
+                        <span class="colon">:</span>
+                        {{ customerLedgerDetailData?.parentCustomerName }}
+                      </div>
+                    </div>
+
+                    <!-- <div class="col-lg-4 col-md-4">
+                      <div class="field">
+                        <span class="label-text f-w-600 f-s-15">Invoice Type </span>
+                        <span class="colon">:</span>
+                        {{ customerLedgerDetailData?.invoiceType }}
+                      </div>
+                    </div> -->
+
+                    <div class="col-lg-4 col-md-4">
+                      <div class="field">
+                        <span class="label-text f-w-600 f-s-15">First Activation Date </span>
+                        <span class="colon">:</span>
+                        {{
+                          customerLedgerDetailData?.firstActivationDate | date: "dd-MM-yyyy hh:mm a"
+                        }}
+                      </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-4">
+                      <div class="field">
+                        <span class="label-text f-w-600 f-s-15">Telephone </span>
+                        <span class="colon">:</span>
+                        {{ customerLedgerDetailData?.phone || "-" }}
+                      </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-4" *ngIf="customerLedgerDetailData?.fax">
+                      <div class="field">
+                        <span class="label-text f-w-600 f-s-15">FAX Number </span>
+                        <span class="colon">:</span>
+                        {{ customerLedgerDetailData?.fax }}
+                      </div>
+                    </div>
+
+                    <div
+                      class="col-lg-4 col-md-4"
+                      *ngIf="customerLedgerDetailData?.customerbillingid"
+                    >
+                      <div class="field">
+                        <span class="label-text f-w-600 f-s-15">Bill to Name </span>
+                        <span class="colon">:</span>
+                        {{ customerLedgerDetailData.customerbillingid }}
+                      </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-4" *ngIf="customerLedgerDetailData?.pan">
+                      <div class="field">
+                        <span class="label-text f-w-600 f-s-15">PAN Number </span>
+                        <span class="colon">:</span>
+                        {{ customerLedgerDetailData?.pan }}
+                      </div>
+                    </div>
+
+                    <!-- <div class="col-lg-4 col-md-4">
+                      <div class="field">
+                        <span class="label-text f-w-600 f-s-15">Activated By </span>
+                        <span class="colon">:</span>
+                        {{ customerLedgerDetailData?.activationByName || "-" }}
+                      </div>
+                    </div> -->
+
+                    <div class="col-lg-4 col-md-4">
+                      <div class="field">
+                        <span class="label-text f-w-600 f-s-15">Unit No </span>
+                        <span class="colon">:</span>
+                        {{ customerLedgerDetailData?.blockNo || "-" }}
+                      </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-4">
+                      <div class="field">
+                        <span class="label-text f-w-600 f-s-15">Customer Category </span>
+                        <span class="colon">:</span>
+                        {{ customerLedgerDetailData?.dunningCategory || "-" }}
+                      </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-4">
+                      <div class="field">
+                        <span class="label-text f-w-600 f-s-15">Dunning Enable </span>
+                        <span class="colon">:</span>
+                        {{ customerLedgerDetailData?.isDunningEnable }}
+                      </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-4">
+                      <div class="field">
+                        <span class="label-text f-w-600 f-s-15">Notification </span>
+                        <span class="colon">:</span>
+                        {{ customerLedgerDetailData?.isNotificationEnable }}
+                      </div>
+                    </div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            </mat-tab>
+
+            <mat-tab label="Address Details">
+              <mat-card style="margin-top: 1.5rem">
+                <mat-card-content>
+                  <div class="row">
+                    <div class="col-lg-4 col-md-4">
+                      <div class="field">
+                        <span class="label-text f-w-600 f-s-15">Address </span>
+                        <span class="colon">:</span>
+                        {{
+                          customerLedgerDetailData.addressList?.length > 0
+                            ? customerLedgerDetailData.addressList[0].landmark
+                            : "-"
+                        }}
+                      </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-4">
+                      <div class="field">
+                        <span class="label-text f-w-600 f-s-15">Service Area </span>
+                        <span class="colon">:</span>
+                        {{ customerLedgerDetailData?.serviceareaName || "-" }}
+                      </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-4">
+                      <div class="field">
+                        <span class="label-text f-w-600 f-s-15">Branch / Partner </span>
+                        <span class="colon">:</span>
+                        {{ customerLedgerDetailData?.branchName }}
+                      </div>
+                    </div>
+
+                    <!-- <div class="col-lg-4 col-md-4">
+                      <div class="field">
+                        <span class="label-text f-w-600 f-s-15">Region </span>
+                        <span class="colon">:</span>{{ customerLedgerDetailData?.regionName }}
+                      </div>
+                    </div> -->
+                    <div class="col-lg-4 col-md-4">
+                      <div class="field">
+                        <span class="label-text f-w-600 f-s-15">Business Verticals </span>
+                        <span class="colon">:</span>{{ customerLedgerDetailData?.buVerticals }}
+                      </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-4">
+                      <div class="field">
+                        <span class="label-text f-w-600 f-s-15"
+                          >{{ getDemographicLabel("Pincode") }}
+                        </span>
+                        <span class="colon">:</span>
+                        {{ presentAdressDATA?.code || "-" }}
+                      </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-4">
+                      <div class="field">
+                        <span class="label-text f-w-600 f-s-15"
+                          >{{ getDemographicLabel("Area") }}
+                        </span>
+                        <span class="colon">:</span>
+                        {{ presentAdressDATA?.name || "-" }}
+                      </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-4">
+                      <div class="field">
+                        <span class="label-text f-w-600 f-s-15"
+                          >{{ getDemographicLabel("City") }}
+                        </span>
+                        <span class="colon">:</span>
+                        {{ presentAdressDATA?.cityName || "-" }}
+                      </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-4">
+                      <div class="field">
+                        <span class="label-text f-w-600 f-s-15"
+                          >{{ getDemographicLabel("State") }}
+                        </span>
+                        <span class="colon">:</span>
+                        {{ presentAdressDATA?.stateName || "-" }}
+                      </div>
+                    </div>
+
+                    <!-- <div class="col-lg-4 col-md-4">
+                      <div class="field">
+                        <span class="label-text f-w-600 f-s-15">Sub Area </span>
+                        <span class="colon">:</span>{{ presentAdressDATA?.subarea || "-" }}
+                      </div>
+                    </div> -->
+                    <div class="col-lg-4 col-md-4">
+                      <div class="field">
+                        <span class="label-text f-w-600 f-s-15">Building Name </span>
+                        <span class="colon">:</span>{{ presentAdressDATA?.buildingName || "-" }}
+                      </div>
+                    </div>
+                    <div class="col-lg-4 col-md-4">
+                      <div class="field">
+                        <span class="label-text f-w-600 f-s-15">Building Number </span>
+                        <span class="colon">:</span>{{ presentAdressDATA?.buildingNumber || "-" }}
+                      </div>
+                    </div>
+                    <!-- <div class="col-lg-4 col-md-4">
+                      <div class="field">
+                        <span class="label-text f-w-600 f-s-15">Valley Type </span>
+                        <span class="colon">:</span
+                        >{{ customerLedgerDetailData?.valleyType || "-" }}
+                      </div>
+                    </div> -->
+                    <div class="col-lg-4 col-md-4">
+                      <div class="field">
+                        <span class="label-text f-w-600 f-s-15">Latitude </span>
+                        <span class="colon">:</span>{{ customerLedgerDetailData?.latitude || "-" }}
+                      </div>
+                    </div>
+                    <div class="col-lg-4 col-md-4">
+                      <div class="field">
+                        <span class="label-text f-w-600 f-s-15">Longitude </span>
+                        <span class="colon">:</span>{{ customerLedgerDetailData?.longitude || "-" }}
+                      </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-4">
+                      <div class="field">
+                        <span class="label-text f-w-600 f-s-15">Landmark </span>
+                        <span class="colon">:</span>
+                        {{ customerAddress?.landmark }}
+                      </div>
+                    </div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            </mat-tab>
+          </mat-tab-group>
+
+          <div class="bottom mat-pt-2" *ngIf="activeIndex === 0">
+            <button
+              mat-button
+              mat-flat-button
+              color="'primary'"
+              class="addarea-btn"
+              style="margin: 4px"
+              *ngIf="!isEditing"
+              (click)="editCustomer()"
+            >
+              Edit
+            </button>
+
+            <button
+              mat-button
+              mat-flat-button
+              color="'primary'"
+              class="addarea-btn"
+              style="margin: 4px"
+              *ngIf="isEditing"
+              (click)="saveCustomer()"
+            >
+              Save
+            </button>
+
+            <button
+              mat-stroked-button
+              style="margin: 4px"
+              *ngIf="isEditing"
+              (click)="stopEditing()"
+            >
+              Cancel
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </mat-tab>
+
+  <!-- 2 LEDGER -->
+  <mat-tab
+    *ngIf="
+      loginService.hasPermission(
+        customerLedgerDetailData.custtype == 'Prepaid'
+          ? PRE_CUST_CONSTANTS.PRE_CUST_LEDGER
+          : POST_CUST_CONSTANTS.POST_CUST_LEDGER
+      )
+    "
+    [class.disabledCustSubmenu]="customerLedgerDetailData.status !== 'Active'"
+    label="Ledger"
+  >
+    <div>
+      <mat-card class="cardWithShadow" style="margin-top: 1.5rem">
+        <mat-card-header>
+          <img
+            src="assets/img/DashboardIcons/Back Arrow.svg"
+            alt="arrow back"
+            class="m-r-10"
+            (click)="customerDetailOpen()"
+          />
+          <div
+            style="font-size: x-large; align-items: center; font-weight: 500; align-content: center"
+          >
+            {{ customerLedgerDetailData?.title }}
+            {{ customerLedgerDetailData?.firstname }}
+            {{ customerLedgerDetailData?.lastname }}
+            Search Ledger
+          </div>
+        </mat-card-header>
+        <mat-card-content class="mat-card-content-border" style="margin-left: 25px">
+          <form class="form-auth-small" [formGroup]="custLedgerForm">
+            <div class="row">
+              <div class="addcss w-100">
+                <div class="searchForm">
+                  <div class="row">
+                    <div class="col-md-4">
+                      <label class="inputLabel">From Ledger Date</label>
+                      <mat-form-field appearance="outline" class="w-100 d-flex align-items-center">
+                        <input
+                          matInput
+                          [matDatepicker]="fromDatePicker"
+                          placeholder="Select From Date"
+                          class="input-p-5"
+                          formControlName="startDateCustLedger"
+                          (keydown.enter)="searchCustomerLedger()"
+                          [ngClass]="{
+                            'is-invalid':
+                              custLedgerSubmitted &&
+                              custLedgerForm.controls.startDateCustLedger.errors
+                          }"
+                        />
+                        <mat-datepicker-toggle
+                          class="add-event-date"
+                          matSuffix
+                          [for]="fromDatePicker"
+                        >
+                        </mat-datepicker-toggle>
+                        <mat-datepicker #fromDatePicker></mat-datepicker>
+
+                        @if (
+                          custLedgerSubmitted && custLedgerForm.controls.startDateCustLedger.errors
+                        ) {
+                          <mat-error>
+                            @if (
+                              custLedgerSubmitted &&
+                              custLedgerForm.controls.startDateCustLedger.errors.required
+                            ) {
+                              From Date is required.
+                            }
+                          </mat-error>
+                        }
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-md-4">
+                      <label class="inputLabel">To Ledger Date</label>
+                      <mat-form-field appearance="outline" class="w-100 d-flex align-items-center">
+                        <input
+                          matInput
+                          [matDatepicker]="toDatePicker"
+                          placeholder="Select To Date"
+                          class="input-p-5"
+                          formControlName="endDateCustLedger"
+                          [min]="custLedgerForm.get('startDateCustLedger')?.value"
+                          (keydown.enter)="searchCustomerLedger()"
+                          [ngClass]="{
+                            'is-invalid':
+                              custLedgerSubmitted &&
+                              custLedgerForm.controls.endDateCustLedger.errors
+                          }"
+                        />
+                        <mat-datepicker-toggle
+                          class="add-event-date"
+                          matSuffix
+                          [for]="toDatePicker"
+                        >
+                        </mat-datepicker-toggle>
+                        <mat-datepicker #toDatePicker></mat-datepicker>
+
+                        @if (
+                          custLedgerSubmitted && custLedgerForm.controls.endDateCustLedger.errors
+                        ) {
+                          <mat-error>
+                            @if (
+                              custLedgerSubmitted &&
+                              custLedgerForm.controls.endDateCustLedger.errors.required
+                            ) {
+                              To Date is required.
+                            }
+                          </mat-error>
+                        }
+                      </mat-form-field>
+                    </div>
+
+                    <div class="col-md-4 addmargin">
+                      <label class="inputLabel">&nbsp;</label>
+                      <div class="button-group">
+                        <button
+                          type="button"
+                          mat-flat-button
+                          color="primary"
+                          id="searchbtn"
+                          class="button-normal mr-10"
+                          title="Search Customer Ledger"
+                          (click)="searchCustomerLedger()"
+                        >
+                          Search
+                        </button>
+                        <button
+                          type="button"
+                          mat-stroked-button
+                          class="button-normal"
+                          id="searchbtn"
+                          title="Clear Search"
+                          (click)="clearSearchCustomerLedger()"
+                        >
+                          Clear
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+      <mat-card class="cardWithShadow">
+        <mat-card-header>
+          <mat-card-title>Customer Ledger Details</mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content class="mat-card-content-border">
+          <div class="col-md-12">
+            <!-- Customer Details Card -->
+            <div class="row">
+              <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                <div class="field">
+                  <span class="label-text">Name</span>
+                  <span class="colon">:</span>
+                  <span class="m-l-10">
+                    {{ customerLedgerDetailData?.title }}
+                    {{ customerLedgerDetailData?.firstname }}
+                    {{ customerLedgerDetailData?.lastname }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                <div class="field">
+                  <span class="label-text">Status</span>
+                  <span class="colon">:</span>
+                  <span class="m-l-10">
+                    @if (customerLedgerData.status == "Active") {
+                      <span class="status-badge status-success">Active</span>
+                    }
+                    @if (customerLedgerData.status == "NewActivation") {
+                      <span class="status-badge status-info">New Activation</span>
+                    }
+                    @if (customerLedgerData.status == "Terminate") {
+                      <span class="status-badge status-warning">Terminated</span>
+                    }
+                  </span>
+                </div>
+              </div>
+
+              <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                <div class="field">
+                  <span class="label-text">AAA Username</span>
+                  <span class="colon">:</span>
+                  <span class="m-l-10">{{ customerLedgerData.username || "-" }}</span>
+                </div>
+              </div>
+
+              <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                <div class="field">
+                  <span class="label-text">Customer ID</span>
+                  <span class="colon">:</span>
+                  <span class="m-l-10">{{ customerId || "-" }}</span>
+                </div>
+              </div>
+
+              <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                <div class="field">
+                  <span class="label-text">Address</span>
+                  <span class="colon">:</span>
+                  <span class="m-l-10">{{ customerLedgerData.address || "-" }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ledger Table Section -->
+          <div class="country-table-list">
+            <div class="table-container">
+              <table
+                mat-table
+                [dataSource]="ledgerDataSource"
+                matSort
+                class="mat-elevation-z8 w-100"
+              >
+                <!-- Create Date Column -->
+                <ng-container matColumnDef="createDate">
+                  <th
+                    mat-header-cell
+                    *matHeaderCellDef
+                    mat-sort-header
+                    class="table-header-title"
+                    sticky
+                  >
+                    Create Date
+                  </th>
+                  <td mat-cell *matCellDef="let data" class="f-s-14">{{ data.create_DATE }}</td>
+                </ng-container>
+
+                <!-- Receipt/Credit No Column -->
+                <ng-container matColumnDef="receiptNo">
+                  <th
+                    mat-header-cell
+                    *matHeaderCellDef
+                    mat-sort-header
+                    class="table-header-title"
+                    sticky
+                  >
+                    Receipt No./Credit No.
+                  </th>
+                  <td mat-cell *matCellDef="let data" class="f-s-14">{{ data.paymentRefNo }}</td>
+                </ng-container>
+
+                <!-- Invoice No Column -->
+                <ng-container matColumnDef="invoiceNo">
+                  <th
+                    mat-header-cell
+                    *matHeaderCellDef
+                    mat-sort-header
+                    class="table-header-title"
+                    sticky
+                  >
+                    Invoice No.
+                  </th>
+                  <td mat-cell *matCellDef="let data" class="f-s-14">
+                    @for (invoice of data.invoiceNo; track invoice) {
+                      <span class="invoice-item">{{ invoice }}</span>
+                    }
+                  </td>
+                </ng-container>
+
+                <!-- Category Column -->
+                <ng-container matColumnDef="category">
+                  <th
+                    mat-header-cell
+                    *matHeaderCellDef
+                    mat-sort-header
+                    class="table-header-title"
+                    sticky
+                  >
+                    Category
+                  </th>
+                  <td mat-cell *matCellDef="let data" class="f-s-14">{{ data.transcategory }}</td>
+                </ng-container>
+
+                <!-- Debit Column -->
+                <ng-container matColumnDef="debit">
+                  <th
+                    mat-header-cell
+                    *matHeaderCellDef
+                    mat-sort-header
+                    class="table-header-title"
+                    sticky
+                  >
+                    Debit
+                  </th>
+                  <td mat-cell *matCellDef="let data" class="f-s-14 amount-cell">
+                    @if (
+                      data.transtype == "DR" || data.transtype == "TR" || data.transtype == "CBINV"
+                    ) {
+                      <span class="amount debit-amount">
+                        {{ data.amount | currency: currency : "symbol" : "1.2-2" }}
+                      </span>
+                    } @else {
+                      <span class="no-amount">-</span>
+                    }
+                  </td>
+                </ng-container>
+
+                <!-- Credit Column -->
+                <ng-container matColumnDef="credit">
+                  <th
+                    mat-header-cell
+                    *matHeaderCellDef
+                    mat-sort-header
+                    class="table-header-title"
+                    sticky
+                  >
+                    Credit
+                  </th>
+                  <td mat-cell *matCellDef="let data" class="f-s-14 amount-cell">
+                    @if (
+                      data.transtype == "CR" ||
+                      data.transtype == "CHWALLETAUDIT" ||
+                      data.transtype == "TR"
+                    ) {
+                      <span class="amount credit-amount">
+                        {{ data.amount | currency: currency : "symbol" : "1.2-2" }}
+                      </span>
+                    } @else {
+                      <span class="no-amount">-</span>
+                    }
+                  </td>
+                </ng-container>
+
+                <!-- Balance Amount Column -->
+                <ng-container matColumnDef="balAmount">
+                  <th
+                    mat-header-cell
+                    *matHeaderCellDef
+                    mat-sort-header
+                    class="table-header-title"
+                    sticky
+                  >
+                    Bal Amount
+                  </th>
+                  <td mat-cell *matCellDef="let data" class="f-s-14 amount-cell">
+                    <span class="amount balance-amount">
+                      {{ data.balAmount | currency: currency : "symbol" : "1.2-2" }}
+                    </span>
+                  </td>
+                </ng-container>
+
+                <!-- Remarks Column -->
+                <ng-container matColumnDef="remarks">
+                  <th
+                    mat-header-cell
+                    *matHeaderCellDef
+                    class="table-header-title remarks-header"
+                    sticky
+                  >
+                    Remarks
+                  </th>
+                  <td mat-cell *matCellDef="let data" class="f-s-14 remarks-cell">
+                    <span class="remarks-text" [title]="data.remarks">{{ data.remarks }}</span>
+                  </td>
+                </ng-container>
+
+                <tr
+                  mat-header-row
+                  class="table-header-bg"
+                  *matHeaderRowDef="ledgerDisplayedColumns; sticky: true"
+                ></tr>
+                <tr
+                  mat-row
+                  class="table-content-row"
+                  *matRowDef="let row; columns: ledgerDisplayedColumns"
+                ></tr>
+              </table>
+              <mat-paginator
+                [length]="custLedgertotalRecords"
+                [pageSize]="custLedgerItemPerPage"
+                [pageSizeOptions]="[5, 10, 15, 20]"
+                showFirstLastButtons
+                (page)="onLedgerPageChange($event)"
+              >
+              </mat-paginator>
+            </div>
+          </div>
+
+          <!-- Summary Section -->
+          <br /><br />
+          <div class="col-md-12">
+            <!-- Summary Section -->
+            <div class="row">
+              <div class="col-lg-12 col-md-12 m-b-5 dataGroup">
+                <div class="field">
+                  <span class="label-text">Opening Amount</span>
+                  <span class="colons" style="margin-left: -250px">:</span>
+                  <span class="m-l-10 summary-amount opening-amount">
+                    {{
+                      customerLedgerData?.customerLedgerInfoPojo?.openingAmount
+                        | currency: currency : "symbol" : "1.2-2"
+                    }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="col-lg-12 col-md-12 m-b-5 dataGroup">
+                <div class="field">
+                  <span class="label-text">Closing Balance</span>
+                  <span class="colons" style="margin-left: -250px">:</span>
+                  <span class="m-l-10 summary-amount closing-balance">
+                    {{
+                      customerLedgerData?.customerLedgerInfoPojo?.closingBalance
+                        | currency: currency : "symbol" : "1.2-2"
+                    }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </mat-tab>
+
+  <!-- 3 PAYMENT -->
+  <mat-tab
+    *ngIf="
+      loginService.hasPermission(
+        customerLedgerDetailData.custtype == 'Prepaid'
+          ? PRE_CUST_CONSTANTS.PRE_CUST_PAYMENT
+          : POST_CUST_CONSTANTS.POST_CUST_PAYMENT
+      )
+    "
+    label="Payment"
+  >
+    <div class="tab-content-wrapper">
+      <mat-card class="cardWithShadow" style="margin-top: 1.5rem">
+        <mat-card-header>
+          <mat-card-title>Payment Details</mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content>
+          <div class="mat-elevation-z2" *ngIf="customerPaymentData?.length > 0">
+            <table
+              mat-table
+              [dataSource]="
+                customerPaymentData.slice(
+                  currentPagecustomerPaymentdata * customerPaymentdataitemsPerPage,
+                  currentPagecustomerPaymentdata * customerPaymentdataitemsPerPage +
+                    customerPaymentdataitemsPerPage
+                )
+              "
+              matSort
+              class="w-100-table"
+            >
+              <!-- Payment By -->
+              <ng-container matColumnDef="paymentBy">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 table-header-title">
+                  Payment By
+                </th>
+                <td mat-cell *matCellDef="let data">{{ data.paymentBy }}</td>
+              </ng-container>
+
+              <!-- Reference No -->
+              <ng-container matColumnDef="referenceNo">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 table-header-title">
+                  Reference No
+                </th>
+                <td mat-cell *matCellDef="let data">{{ data.referenceno || "-" }}</td>
+              </ng-container>
+
+              <!-- Paymode -->
+              <ng-container matColumnDef="paymode">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 table-header-title">
+                  Paymode
+                </th>
+                <td mat-cell *matCellDef="let data">{{ data.paymode }}</td>
+              </ng-container>
+              <ng-container matColumnDef="paymentreferenceno">
+                <th mat-header-cell class="table-header-title" *matHeaderCellDef>
+                  Transaction Number
+                </th>
+                <td mat-cell *matCellDef="let data">{{ data.paymentreferenceno || "-" }}</td>
+              </ng-container>
+              <!-- Amount -->
+              <ng-container matColumnDef="amount">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 table-header-title">Amount</th>
+                <td mat-cell *matCellDef="let data">
+                  {{ data.amount | currency: currency : "symbol" : "1.2-2" }}
+                </td>
+              </ng-container>
+
+              <!-- Payment Date -->
+              <ng-container matColumnDef="paymentdate">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 table-header-title">
+                  Payment Date
+                </th>
+                <td mat-cell *matCellDef="let data">
+                  <span *ngIf="data.paymentdate">{{ data.paymentdate }}</span>
+                  <span *ngIf="!data.paymentdate"> - </span>
+                </td>
+              </ng-container>
+
+              <!-- Status -->
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 table-header-title">Status</th>
+                <td mat-cell *matCellDef="let data">
+                  <!-- Chip Mapping -->
+                  <mat-chip
+                    color="primary"
+                    selected
+                    *ngIf="data.status === 'Portal_Payment_Pending'"
+                  >
+                    Portal Payment Pending
+                  </mat-chip>
+
+                  <mat-chip
+                    color="primary"
+                    selected
+                    *ngIf="data.status === 'pending' && data.nextTeamHierarchyMappingId == null"
+                  >
+                    Collected
+                  </mat-chip>
+
+                  <mat-chip
+                    color="primary"
+                    selected
+                    *ngIf="data.status === 'pending' && data.nextTeamHierarchyMappingId != null"
+                  >
+                    Submitted
+                  </mat-chip>
+
+                  <mat-chip
+                    color="accent"
+                    selected
+                    *ngIf="
+                      data.status === 'Fully Adjusted' ||
+                      data.status === 'Partialy Adjusted' ||
+                      data.status === 'approved' ||
+                      data.status === 'advance'
+                    "
+                  >
+                    Verified
+                  </mat-chip>
+
+                  <mat-chip color="warn" selected *ngIf="data.status === 'rejected'">
+                    Rejected
+                  </mat-chip>
+                </td>
+              </ng-container>
+
+              <!-- Header + Row -->
+              <tr mat-header-row *matHeaderRowDef="paymentDisplayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: paymentDisplayedColumns"></tr>
+            </table>
+
+            <!-- <mat-paginator
+              [length]="customerPaymentdatatotalRecords"
+              [pageSize]="customerPaymentdataitemsPerPage"
+              [pageSizeOptions]="pageLimitOptions"
+              (page)="onPaymentPageChange($event)"
+            >
+            </mat-paginator> -->
+          </div>
+          @if (customerPaymentData.length > 0) {
+            <mat-paginator
+              [length]="customerPaymentData.length"
+              [pageSize]="customerPaymentdataitemsPerPage"
+              [pageIndex]="currentPagecustomerPaymentdata"
+              [pageSizeOptions]="[5, 10, 20]"
+              showFirstLastButtons
+              (page)="
+                currentPagecustomerPaymentdata = $event.pageIndex;
+                customerPaymentdataitemsPerPage = $event.pageSize
+              "
+            >
+            </mat-paginator>
+          }
+
+          <div *ngIf="customerPaymentData?.length === 0" class="mt-3">
+            Payment Details are not available.
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </mat-tab>
+
+  <!-- 4 INVOICE -->
+  <mat-tab
+    *ngIf="
+      loginService.hasPermission(
+        customerLedgerDetailData.custtype == 'Prepaid'
+          ? PRE_CUST_CONSTANTS.PRE_CUST_INVOICES
+          : POST_CUST_CONSTANTS.POST_CUST_INVOICES
+      )
+    "
+    label="Invoice"
+  >
+    <div class="">
+      <mat-card class="cardWithShadow" style="margin-top: 1.5rem">
+        <mat-card-header>
+          <img
+            src="assets/img/DashboardIcons/Back Arrow.svg"
+            alt="arrow back"
+            class="m-r-10"
+            (click)="customerDetailOpen()"
+          />
+          <div
+            style="font-size: x-large; align-items: center; font-weight: 500; align-content: center"
+          >
+            {{ customerLedgerDetailData.title }} {{ customerLedgerDetailData.firstname }}
+            {{ customerLedgerDetailData.lastname }}
+          </div>
+          <button
+            mat-icon-button
+            color="accent"
+            matTooltip="Refresh"
+            (click)="clearSearchinvoiceMaster()"
+            style="position: absolute; right: 10px; top: 14%; transform: translateY(-50%)"
+          >
+            <img src=" assets/img/DashboardIcons/Refresh.svg" alt="Refresh" />
+          </button>
+        </mat-card-header>
+        <mat-card-content>
+          <form [formGroup]="searchInvoiceMasterFormGroup">
+            <div class="row">
+              <!-- Invoice Number -->
+              <div class="col-md-3 mb-3">
+                <label>Invoice Number</label>
+                <mat-form-field appearance="outline" class="w-100">
+                  <input
+                    matInput
+                    class="input-p-5"
+                    formControlName="docnumber"
+                    placeholder="Enter invoice number"
+                  />
+                </mat-form-field>
+              </div>
+
+              <!-- Bill Run ID -->
+              <!-- <div class="col-md-3 mb-3">
+                <label>Bill Run ID</label>
+                <mat-form-field appearance="outline" class="w-100">
+                  <input
+                    matInput
+                    class="input-p-5"
+                    formControlName="billrunid"
+                    placeholder="Enter bill run ID"
+                    [value]="
+                      customerLedgerDetailData.title + ' ' + customerLedgerDetailData.custname
+                    "
+                  />
+                </mat-form-field>
+              </div> -->
+
+              <!-- From Date -->
+              <div class="col-md-3 mb-3">
+                <label>From Date</label>
+                <mat-form-field appearance="outline" class="w-100">
+                  <input
+                    matInput
+                    class="input-p-5"
+                    placeholder="Enter From Date"
+                    [matDatepicker]="fromDatePicker"
+                    formControlName="billfromdate"
+                  />
+                  <mat-datepicker-toggle matSuffix [for]="fromDatePicker"></mat-datepicker-toggle>
+                  <mat-datepicker #fromDatePicker></mat-datepicker>
+                </mat-form-field>
+              </div>
+
+              <!-- To Date -->
+              <div class="col-md-3 mb-3">
+                <label>To Date</label>
+                <mat-form-field appearance="outline" class="w-100">
+                  <input
+                    matInput
+                    class="input-p-5"
+                    [matDatepicker]="toDatePicker"
+                    formControlName="billtodate"
+                    placeholder="Enter To Date"
+                  />
+                  <mat-datepicker-toggle matSuffix [for]="toDatePicker"></mat-datepicker-toggle>
+                  <mat-datepicker #toDatePicker></mat-datepicker>
+                </mat-form-field>
+              </div>
+
+              <!-- Search Buttons -->
+              <div class="col-12">
+                <div class="d-flex gap-2" style="gap: 8px">
+                  <button mat-flat-button color="primary" (click)="searchInvoices()">Search</button>
+                  <button mat-stroked-button (click)="clearSearchinvoiceMaster()">Clear</button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- INVOICES TABLE CARD -->
+      <mat-card class="mb-4">
+        <mat-card-header>
+          <div
+            style="font-size: x-large; align-items: center; font-weight: 500; align-content: center"
+          >
+            Invoice List
+          </div>
+        </mat-card-header>
+
+        <mat-card-content>
+          <!-- INVOICE TABLE -->
+          <div
+            class="table-container"
+            style="overflow-x: scroll !important"
+            *ngIf="customerInvoiceData?.length > 0"
+          >
+            <table mat-table [dataSource]="customerInvoiceData" class="w-100 mat-elevation-z2">
+              <!-- Customer -->
+              <ng-container matColumnDef="customer">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 table-header-title">
+                  Customer
+                </th>
+                <td mat-cell *matCellDef="let invoice">{{ invoice.customerName }}</td>
+              </ng-container>
+
+              <!-- Invoice Number -->
+              <ng-container matColumnDef="invoiceNumber">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 table-header-title">
+                  Document Number
+                </th>
+                <td mat-cell *matCellDef="let invoice">
+                  {{ invoice.docnumber }}
+                </td>
+              </ng-container>
+
+              <!-- Purchase By -->
+              <ng-container matColumnDef="purchaseBy">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 table-header-title">
+                  Purchase By
+                </th>
+                <td mat-cell *matCellDef="let invoice">
+                  {{ invoice.createdByName || "N/A" }}
+                </td>
+              </ng-container>
+
+              <!-- Billable To -->
+              <ng-container matColumnDef="billableTo">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 table-header-title">
+                  Billable To
+                </th>
+                <td mat-cell *matCellDef="let invoice">
+                  {{
+                    invoice.billableToName !== null && invoice.billableToName !== ""
+                      ? invoice.billableToName
+                      : "-"
+                  }}
+                </td>
+              </ng-container>
+
+              <!-- Total Amount -->
+              <ng-container matColumnDef="totalAmount">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 table-header-title">
+                  Total Amount
+                </th>
+                <td mat-cell *matCellDef="let invoice">
+                  {{ invoice.totalamount | currency: currency : "symbol" : "1.2-2" }}
+                </td>
+              </ng-container>
+
+              <!-- Adjusted Amount -->
+              <ng-container matColumnDef="adjustedAmount">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 table-header-title">
+                  Adjusted Amount
+                </th>
+                <td mat-cell *matCellDef="let invoice">
+                  {{ invoice.adjustedAmount || 0 | currency: currency : "symbol" : "1.2-2" }}
+                </td>
+              </ng-container>
+
+              <!-- Unpaid Amount -->
+              <ng-container matColumnDef="unpaidAmount">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 table-header-title">
+                  Unpaid Amount
+                </th>
+                <td mat-cell *matCellDef="let invoice">
+                  {{
+                    invoice.totalamount - invoice.adjustedAmount
+                      | currency: currency : "symbol" : "1.2-2"
+                  }}
+                </td>
+              </ng-container>
+
+              <!-- Bill Run Status -->
+              <ng-container matColumnDef="billRunStatus">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 table-header-title">
+                  Bill Run Status
+                </th>
+                <td mat-cell *matCellDef="let invoice">
+                  <span
+                    class="status-badge"
+                    [ngClass]="{
+                      'status-success': invoice.billrunstatus?.toLowerCase() === 'success',
+                      'status-void': invoice.billrunstatus?.toLowerCase() === 'void',
+                      'status-cancelled': invoice.billrunstatus?.toLowerCase() === 'cancelled',
+                      'status-pending': invoice.billrunstatus?.toLowerCase() === 'pending'
+                    }"
+                  >
+                    {{ invoice.billrunstatus || "-" }}
+                  </span>
+                </td>
+              </ng-container>
+
+              <!-- Bill Date -->
+              <ng-container matColumnDef="billDate">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 table-header-title">
+                  Bill Date
+                </th>
+                <td mat-cell *matCellDef="let invoice">
+                  {{ invoice.billdate | date: "yyyy-MM-dd" }}
+                </td>
+              </ng-container>
+
+              <!-- Payment Status -->
+              <ng-container matColumnDef="paymentStatus">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 table-header-title">
+                  Payment Status
+                </th>
+                <td mat-cell *matCellDef="let invoice">
+                  <span
+                    class="status-badge"
+                    [ngClass]="{
+                      'status-paid': invoice.paymentStatus?.toLowerCase() === 'paid',
+                      'status-unpaid': invoice.paymentStatus?.toLowerCase() === 'unpaid',
+                      'status-partial': invoice.paymentStatus?.toLowerCase() === 'partial'
+                    }"
+                  >
+                    {{ invoice.paymentStatus || "–" }}
+                  </span>
+                </td>
+              </ng-container>
+
+              <!-- Payment Owner -->
+              <ng-container matColumnDef="paymentOwner">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 table-header-title">
+                  Payment Owner
+                </th>
+                <td mat-cell *matCellDef="let invoice">{{ invoice.paymentowner || "-" }}</td>
+              </ng-container>
+
+              <!-- Action -->
+              <ng-container matColumnDef="action">
+                <th
+                  mat-header-cell
+                  *matHeaderCellDef
+                  class="f-w-600 table-header-title"
+                  style="width: 350px"
+                >
+                  Action
+                </th>
+                <td mat-cell *matCellDef="let invoice">
+                  <div style="display: flex">
+                    <button
+                      *ngIf="
+                        customerLedgerDetailData?.status !== 'Terminate' &&
+                        invoice.billrunstatus === 'Generated' &&
+                        generateAccess
+                      "
+                      mat-icon-button
+                      color="primary"
+                      (click)="generatePDFInvoice(invoice.id)"
+                      [disabled]="!invoice.docnumber"
+                      matTooltip="Generate Invoice"
+                    >
+                      <img
+                        src="assets/img/DashboardIcons/DTV.svg"
+                        alt="Generate"
+                        width="25"
+                        height="25"
+                      />
+                    </button>
+
+                    <!-- Download Invoice -->
+                    <button
+                      mat-icon-button
+                      color="primary"
+                      (click)="downloadPDFINvoice(invoice.id, invoice.customerName)"
+                      matTooltip="Download Invoice"
+                    >
+                      <img src="assets/img/DashboardIcons/Document Download.svg" alt="" />
+                    </button>
+
+                    <!-- Send Email -->
+                    <button
+                      mat-icon-button
+                      color="primary"
+                      *ngIf="
+                        invoice.billrunstatus == 'Exported' ||
+                        invoice.billrunstatus == 'Distributed'
+                      "
+                      (click)="sendemailinvoice(invoice.id)"
+                      matTooltip="Send Email"
+                    >
+                      <img src="assets/img/DashboardIcons/mail-svgrepo-com 1.svg" alt="" />
+                    </button>
+                    <!-- Payment Gateway -->
+                    <button
+                      *ngIf="invoice.totalamount - invoice.adjustedAmount >= 1"
+                      [disabled]="invoice.billrunstatus == 'Cancelled'"
+                      mat-icon-button
+                      color="accent"
+                      (click)="openPaymentGatewaysforInvoicePayment(invoice)"
+                      matTooltip="Invoice Payment"
+                    >
+                      <mat-icon>credit_card</mat-icon>
+                    </button>
+                  </div>
+                </td>
+              </ng-container>
+
+              <tr
+                mat-header-row
+                *matHeaderRowDef="[
+                  'customer',
+                  'invoiceNumber',
+                  'purchaseBy',
+                  'billableTo',
+                  'totalAmount',
+                  'adjustedAmount',
+                  'unpaidAmount',
+                  'billRunStatus',
+                  'billDate',
+                  'paymentStatus',
+                  'paymentOwner',
+                  'action'
+                ]"
+              ></tr>
+              <tr
+                mat-row
+                *matRowDef="
+                  let row;
+                  columns: [
+                    'customer',
+                    'invoiceNumber',
+                    'purchaseBy',
+                    'billableTo',
+                    'totalAmount',
+                    'adjustedAmount',
+                    'unpaidAmount',
+                    'billRunStatus',
+                    'billDate',
+                    'paymentStatus',
+                    'paymentOwner',
+                    'action'
+                  ]
+                "
+              ></tr>
+            </table>
+            <!-- Empty State -->
+            <div
+              *ngIf="!customerInvoiceData || customerInvoiceData.length === 0"
+              class="empty-state py-5"
+            >
+              <mat-icon class="empty-icon">receipt_long</mat-icon>
+              <p class="text-muted">No invoices found.</p>
+            </div>
+          </div>
+          <!-- Pagination -->
+          <mat-paginator
+            *ngIf="customerInvoiceData && customerInvoiceData.length > 0"
+            [length]="invoiceMastertotalRecords"
+            [pageSize]="invoiceMasteritemsPerPage"
+            [pageSizeOptions]="[5, 10, 20, 50]"
+            [pageIndex]="currentPageinvoiceMasterSlab - 1"
+            showFirstLastButtons
+            (page)="pageChangedinvoiceMasterList($event)"
+          >
+          </mat-paginator>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </mat-tab>
+
+  <!-- 5 BUY PLAN / USE VOUCHER -->
+  <mat-tab
+    *ngIf="
+      loginService.hasPermission(
+        customerLedgerDetailData.custtype == 'Prepaid'
+          ? PRE_CUST_CONSTANTS.PRE_CUST_CHANGE_PLAN
+          : POST_CUST_CONSTANTS.POST_CUST_CHANGE_PLAN
+      )
+    "
+    label="Buy Plan"
+    [class.disabledCustSubmenu]="customerLedgerDetailData.status !== 'Active'"
+  >
+    @if (buyplan) {
+      <app-cust-change_plan [isIn]="buyplan"></app-cust-change_plan>
+    }
+  </mat-tab>
+
+  <!-- 6 WALLET -->
+  <!-- <mat-tab
+    *ngIf="
+      loginService.hasPermission(
+        customerLedgerDetailData.custtype == 'Prepaid'
+          ? PRE_CUST_CONSTANTS.PRE_CUST_WALLET
+          : POST_CUST_CONSTANTS.POST_CUST_WALLET
+      )
+    "
+    label="Wallet"
+    [class.disabledCustSubmenu]="customerLedgerDetailData.status !== 'Active'"
+  >
+    <div style="margin-top: 1.5rem">
+      <div class="d-flex justify-content-center">
+        <mat-card class="wallet-balance-card">
+          <mat-card-header>
+            <mat-card-title class="text-center w-100">Wallet Balance</mat-card-title>
+          </mat-card-header>
+
+          <mat-card-content class="text-center">
+            @if (getWallatData.customerWalletDetails >= 0) {
+              <mat-chip class="balance-chip positive">
+                {{ currency }} {{ getWallatData.customerWalletDetails | number: "1.2-2" }}
+              </mat-chip>
+            }
+            @if (getWallatData.customerWalletDetails < 0) {
+              <mat-chip class="balance-chip negative">
+                {{ currency }} {{ getWallatData.customerWalletDetails | number: "1.2-2" }}
+              </mat-chip>
+            }
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  </mat-tab> -->
+
+  <!-- 7 INVENTORY -->
+  <mat-tab label="Inventory">
+    <div>
+      <mat-card class="cardWithShadow" style="margin-top: 1.5rem">
+        <!-- Header Section -->
+        <mat-card-header>
+          <div class="d-flex justify-content-between w-100">
+            <div class="d-flex align-items-center gap-3">
+              <mat-card-title>
+                {{ customerLedgerDetailData.title }} {{ customerLedgerDetailData.firstname }}
+                {{ customerLedgerDetailData.lastname }} Inventory List
+              </mat-card-title>
+            </div>
+          </div>
+        </mat-card-header>
+
+        <!-- Card Content -->
+        <mat-card-content class="mat-card-content-border">
+          <!-- Inventory Table -->
+
+          <div class="table-responsive tableViewScrollHeight example-container">
+            <mat-table [dataSource]="assignedInventoryList" class="mat-elevation-z1">
+              <!-- Product Name -->
+              <ng-container matColumnDef="productName">
+                <mat-header-cell *matHeaderCellDef class="table-header-title"
+                  >Product Name</mat-header-cell
+                >
+                <mat-cell *matCellDef="let inventory">
+                  <button
+                    mat-button
+                    color="accent"
+                    (click)="openInventoryDetailModal('customerInventoryDetailModal', inventory)"
+                  >
+                    {{ inventory.productName }}
+                  </button>
+                </mat-cell>
+              </ng-container>
+
+              <!-- Current Plan -->
+              <ng-container matColumnDef="currentPlan">
+                <mat-header-cell *matHeaderCellDef class="table-header-title"
+                  >Current Plan</mat-header-cell
+                >
+                <mat-cell *matCellDef="let inventory">{{ inventory.currentPlan }}</mat-cell>
+              </ng-container>
+
+              <!-- Item Type -->
+              <ng-container matColumnDef="itemType">
+                <mat-header-cell *matHeaderCellDef class="table-header-title"
+                  >Item Type</mat-header-cell
+                >
+                <mat-cell *matCellDef="let inventory">{{ inventory.itemType }}</mat-cell>
+              </ng-container>
+
+              <!-- Qty -->
+              <ng-container matColumnDef="qty">
+                <mat-header-cell *matHeaderCellDef class="table-header-title"
+                  >Assigned Qty.</mat-header-cell
+                >
+                <mat-cell *matCellDef="let inventory">{{ inventory.qty }}</mat-cell>
+              </ng-container>
+
+              <!-- Status -->
+              <ng-container matColumnDef="status">
+                <mat-header-cell *matHeaderCellDef class="table-header-title"
+                  >Status</mat-header-cell
+                >
+                <mat-cell *matCellDef="let inventory">
+                  @if (inventory.status.toLowerCase() === "active") {
+                    <span class="status-badge status-success">Active</span>
+                  }
+                  @if (inventory.status.toLowerCase() == "rejected") {
+                    <span class="status-badge status-danger">Rejected</span>
+                  }
+                  @if (inventory.status.toLowerCase() == "pending") {
+                    <span class="status-badge status-info">Pending For Approve</span>
+                  }
+                  @if (inventory.status.toLowerCase() == "pending for remove") {
+                    <span class="status-badge status-info">Pending For Remove</span>
+                  }
+                  @if (inventory.status.toLowerCase() == "inactive") {
+                    <span class="status-badge status-danger">InActive</span>
+                  }
+                  @if (inventory.status.toLowerCase() == "activationpending") {
+                    <span class="status-badge status-info">ActivationPending</span>
+                  }
+                </mat-cell>
+              </ng-container>
+
+              <!-- Next Approver -->
+              <ng-container matColumnDef="assigneeName">
+                <mat-header-cell *matHeaderCellDef class="table-header-title"
+                  >Next Approver</mat-header-cell
+                >
+                <mat-cell *matCellDef="let inventory">{{ inventory.assigneeName }}</mat-cell>
+              </ng-container>
+
+              <mat-header-row
+                *matHeaderRowDef="[
+                  'productName',
+                  'currentPlan',
+                  'itemType',
+                  'qty',
+                  'status',
+                  'assigneeName'
+                ]"
+              ></mat-header-row>
+              <mat-row
+                *matRowDef="
+                  let row;
+                  columns: [
+                    'productName',
+                    'currentPlan',
+                    'itemType',
+                    'qty',
+                    'status',
+                    'assigneeName'
+                  ]
+                "
+              ></mat-row>
+            </mat-table>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </mat-tab>
+
+  <!-- 8 RATING -->
+  <!-- <mat-tab *ngIf="loginService.hasPermission(PRE_CUST_CONSTANTS.PRE_CUST_RATING)" label="Rating">
+    <div class="tab-content-wrapper">
+      <mat-card style="margin-top: 1.5rem">
+        <mat-card-content>
+          <form [formGroup]="ratingForm">
+            <div class="row p-0 m-0">
+              <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                <label class="datalbl">Rating</label>
+                <div
+                  class="d-flex justify-content-start align-items-center"
+                  style="margin-top: 1.5rem"
+                >
+                  <ngx-star-rating formControlName="rating" [id]="'rating'"></ngx-star-rating>
+                </div>
+                <div
+                  class="errorWrap text-danger"
+                  *ngIf="isRatingError && ratingForm.controls.rating.errors"
+                >
+                  <div
+                    class="error text-danger"
+                    *ngIf="isRatingError && ratingForm.controls.rating.errors?.required"
+                  >
+                    Rating is required.
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-lg-6 col-md-6 col-sm-6 col-xs-6">
+                <mat-form-field appearance="outline" class="w-100">
+                  <mat-label>Feedback</mat-label>
+                  <textarea
+                    matInput
+                    rows="3"
+                    formControlName="feedback"
+                    [readonly]="!isEditRating && isRatingPresent"
+                    [ngClass]="{
+                      'is-invalid':
+                        ratingSubmmitted && ratingTicketForm.controls.customerFeedback?.errors
+                    }"
+                  ></textarea>
+                </mat-form-field>
+              </div>
+            </div>
+          </form>
+
+          <div class="d-flex justify-contant-center">
+            <div style="margin-top: 10px">
+              <button
+                mat-flat-button
+                color="primary"
+                style="margin: 3px"
+                *ngIf="isEditRating"
+                (click)="updateRating()"
+              >
+                Update
+              </button>
+
+              <button
+                mat-flat-button
+                color="primary"
+                style="margin: 3px"
+                *ngIf="!isEditRating && isRatingPresent"
+                (click)="editRating()"
+              >
+                Edit
+              </button>
+
+              <button
+                mat-flat-button
+                color="primary"
+                style="margin: 3px"
+                *ngIf="!isRatingPresent"
+                (click)="saveRating()"
+              >
+                Save
+              </button>
+
+              <button
+                mat-stroked-button
+                style="margin: 3px"
+                *ngIf="isEditRating"
+                (click)="cancelEditRating()"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </mat-tab> -->
+
+  <!-- 9 CHANGE PASSWORD -->
+  <!-- <mat-tab
+    *ngIf="
+      loginService.hasPermission(
+        customerLedgerDetailData.custtype == 'Prepaid'
+          ? PRE_CUST_CONSTANTS.PRE_CUST_CHANGE_PASSWORD
+          : POST_CUST_CONSTANTS.POST_CUST_CHANGE_PASSWORD
+      )
+    "
+    label="Change Password"
+  >
+    <div class="d-flex justify-content-center align-items-center" style="width: 100%">
+      <mat-card class="cardWithShadow" style="margin-top: 1.5rem; width: 500px">
+        <mat-card-header>
+          <mat-card-title>Change Password</mat-card-title>
+        </mat-card-header>
+
+        <mat-card-content>
+          <form [formGroup]="changePasswordForm" class="mat-form">
+            <div class="row">
+              <label>Old Password</label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input
+                  matInput
+                  type="password"
+                  formControlName="oldPassword"
+                  placeholder="Enter old password"
+                />
+                <mat-error *ngIf="changePasswordForm.controls.oldPassword.errors?.required">
+                  Old password is required
+                </mat-error>
+              </mat-form-field>
+
+              <label>New Password</label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input
+                  matInput
+                  type="password"
+                  formControlName="newPassword"
+                  placeholder="Enter new password"
+                />
+                <mat-error *ngIf="changePasswordForm.controls.newPassword.errors?.required">
+                  New password is required
+                </mat-error>
+              </mat-form-field>
+
+              <label>Confirm Password</label>
+              <mat-form-field appearance="outline" class="w-100">
+                <input
+                  matInput
+                  type="password"
+                  formControlName="confirmPassword"
+                  placeholder="Confirm password"
+                />
+                <mat-error *ngIf="changePasswordForm.controls.confirmPassword.errors?.required">
+                  Confirm password is required
+                </mat-error>
+                <mat-error *ngIf="changePasswordForm.hasError('passwordMismatch')">
+                  Passwords do not match
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </mat-tab> -->
+</mat-tab-group>
+
+<ng-template #payamentGetwayMethode let-dialogRef="dialogRef">
+  <div class="container-fluid p-0">
+    <!-- Header -->
+    <div class="dialog-header dialog-title">
+      Payment Gateway Method
+      <span>
+        <a mat-icon-button (click)="dialogRef.close()">
+          <img src="assets/img/DashboardIcons/Reject.svg" />
+        </a>
+      </span>
+    </div>
+
+    <!-- Content -->
+    <div mat-dialog-content>
+      <div *ngFor="let config of savedConfig">
+        <mat-card class="payment-card mat-elevation-z4">
+          <!-- Card Title -->
+          <mat-card-header>
+            <mat-card-title class="title-text">
+              {{ config.paymentConfigName }}
+            </mat-card-title>
+          </mat-card-header>
+
+          <!-- Card Content -->
+          <mat-card-content>
+            <div>
+              {{ config.paymentGatewayInfo?.substring(0, 50) }}
+            </div>
+            <div style="white-space: normal">
+              {{ config.paymentGatewayInfo?.substring(50) }}
+            </div>
+            <div class="d-flex justify-content-center" style="margin-top: 1rem">
+              <button
+                mat-flat-button
+                color="primary"
+                (click)="invoicePaymentpaymentGateway(config, dialogRef)"
+              >
+                Proceed
+              </button>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+
+    <div class="dialog-action-adjust d-flex justify-content-end">
+      <button mat-stroked-button mat-dialog-close>Close</button>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #mpinModalDailog let-dialogRef="dialogRef">
+  <div class="container-fluid p-0">
+    <!-- Header -->
+    <div class="dialog-header dialog-title">
+      Mobile Number
+      <span>
+        <a mat-icon-button (click)="dialogRef.close()">
+          <img src="assets/img/DashboardIcons/Reject.svg" />
+        </a>
+      </span>
+    </div>
+
+    <!-- Content -->
+    <div mat-dialog-content>
+      <form [formGroup]="mpinForm">
+        <div class="row">
+          <div class="col-4 mb-3">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-select formControlName="countryCode" placeholder="Country Code">
+                <mat-option *ngFor="let country of countries" [value]="country.dial_code">
+                  {{ country.dial_code }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="col-8 mb-3">
+            <!-- Mobile Number -->
+            <mat-form-field appearance="outline" class="w-100">
+              <input
+                matInput
+                type="text"
+                formControlName="mobileNumber"
+                [maxlength]="commondropdownService.maxMobileLength"
+                (input)="onInputMobile($event)"
+                placeholder="Enter mobile number"
+              />
+              <mat-error *ngIf="isMpinFormSubmitted && mpinForm.controls.mobileNumber.errors">
+                <ng-container *ngIf="mpinForm.controls.mobileNumber.errors.required">
+                  Mobile Number is required.
+                </ng-container>
+
+                <ng-container
+                  *ngIf="
+                    mpinForm.controls.mobileNumber.errors.minlength ||
+                    mpinForm.controls.mobileNumber.errors.maxlength
+                  "
+                >
+                  <ng-container
+                    *ngIf="
+                      commondropdownService.minMobileLength ===
+                        commondropdownService.maxMobileLength;
+                      else mpinRangeError
+                    "
+                  >
+                    Mobile Number must be exactly
+                    {{ commondropdownService.minMobileLength }} digits.
+                  </ng-container>
+                  <ng-template #mpinRangeError>
+                    Mobile Number must be between
+                    {{ commondropdownService.minMobileLength }} and
+                    {{ commondropdownService.maxMobileLength }} digits.
+                  </ng-template>
+                </ng-container>
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="dialog-action-adjust d-flex justify-content-end" style="gap: 5px">
+      <button
+        mat-flat-button
+        color="primary"
+        (click)="invoicePaymentGateway(dialogRef)"
+        [disabled]="mpinForm.invalid || mobileError"
+      >
+        Buy
+      </button>
+      <button mat-stroked-button mat-dialog-close>Close</button>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #paymentConfirmationModals let-dialogRef="dialogRef">
+  <div class="container-fluid p-0">
+    <div class="dialog-header dialog-title">
+      Payment Confirmation
+      <span>
+        <a mat-icon-button (click)="dialogRef.close()">
+          <img src="assets/img/DashboardIcons/Reject.svg" />
+        </a>
+      </span>
+    </div>
+
+    <div mat-dialog-content>
+      <h5>Payment is in the approval flow. Once approved, you will receive a confirmation SMS.</h5>
+    </div>
+
+    <div class="dialog-action-adjust d-flex justify-content-end">
+      <button
+        mat-button
+        mat-flat-button
+        color="primary"
+        [disabled]="exitBuy"
+        mat-dialog-close
+        (click)="hidepaymentConfirmDialog()"
+      >
+        Close
+        <span *ngIf="exitBuy">({{ paymentstatusCount }})</span>
+      </button>
+    </div>
+  </div>
+</ng-template>
+<!-- <div class="row" *ngIf="isUsageHistoryOpen">
+  <div class="col-md-12 col-sm-12">
+    <div class="panel">
+      <div class="panel-heading">
+        <div class="displayflex">
+          <h3 class="panel-title">
+            {{ customerLedgerDetailData.title }}
+            {{ customerLedgerDetailData.custname }} Usage Details
+          </h3>
+        </div>
+        <div class="right">
+          <button
+            type="button"
+            class="btn-toggle-collapse"
+            data-toggle="collapse"
+            data-target="#usageDetails"
+            aria-expanded="false"
+            aria-controls="usageDetails"
+          >
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+      <div id="usageDetails" class="panel-collapse collapse in">
+        <div class="panel-body table-responsive">
+          <fieldset style="margin-top: 0rem; margin-bottom: 2rem">
+            <legend>Usage Details</legend>
+            <div class="boxWhite">
+              <div class="row table-responsive displayView">
+                <div class="col-lg-12 col-md-12">
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>Plan Name</th>
+                        <th>Quota Type</th>
+                        <th>Total Quota</th>
+                        <th>Used Quota</th>
+                        <th>Quota Unit</th>
+                        <th>Time Total Quota</th>
+                        <th>Time Quota Used</th>
+                        <th>Time Quota Unit</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr
+                        *ngFor="
+                          let quota of custQuotaList
+                            | paginate
+                              : {
+                                  id: 'custQuotapageData',
+                                  itemsPerPage: custQuotaListItemPerPage,
+                                  currentPage: currentPagecustQuotaList,
+                                  totalItems: custQuotaListtotalRecords
+                                };
+                          index as i
+                        "
+                      >
+                        <td>{{ quota.planName }}</td>
+                        <td>{{ quota.quotaType }}</td>
+                        <td>{{ quota.totalQuota }}</td>
+                        <td>{{ quota.usedQuota }}</td>
+                        <td>{{ quota.quotaUnit }}</td>
+                        <td>{{ quota.timeTotalQuota }}</td>
+                        <td>{{ quota.timeQuotaUsed }}</td>
+                        <td>{{ quota.timeQuotaUnit }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <pagination-controls
+                    id="custQuotapageData"
+                    maxSize="10"
+                    directionLinks="true"
+                    previousLabel=""
+                    nextLabel=""
+                    (pageChange)="pageChangedCustQuotaList($event)"
+                  ></pagination-controls>
+                </div>
+              </div>
+
+              <div class="mobileViewBlock">
+                <p-accordion
+                  *ngFor="
+                    let quota of custQuotaList
+                      | paginate
+                        : {
+                            id: 'custQuotapageData',
+                            itemsPerPage: custQuotaListItemPerPage,
+                            currentPage: currentPagecustQuotaList,
+                            totalItems: custQuotaListtotalRecords
+                          };
+                    index as i
+                  "
+                >
+                  <p-accordionTab
+                    header="Plan Name : {{ quota.planName }}"
+                    [(selected)]="activeQuotaState[i]"
+                  >
+                    <p>
+                      <span>
+                        <b>Plan Name :</b>
+                        {{ quota.planName }}
+                      </span>
+                      <br />
+                      <span>
+                        <b>Quota Type :</b>
+                        {{ quota.quotaType }}
+                      </span>
+                      <br />
+                      <span>
+                        <b>Total Quota :</b>
+                        {{ quota.totalQuota }}
+                      </span>
+                      <br />
+                      <span>
+                        <b>Used Quota :</b>
+                        {{ quota.usedQuota }}
+                      </span>
+                      <br />
+                      <span>
+                        <b>Quota Unit :</b>
+                        {{ quota.quotaUnit }}
+                      </span>
+                      <br />
+                      <span>
+                        <b>Time Total Quota :</b>
+                        {{ quota.timeTotalQuota }}
+                      </span>
+                      <br />
+                      <span>
+                        <b>Time Quota Used :</b>
+                        {{ quota.timeQuotaUsed }}
+                      </span>
+                      <br />
+                      <span>
+                        <b>Time Quota Unit :</b>
+                        {{ quota.timeQuotaUnit }}
+                      </span>
+                    </p>
+                  </p-accordionTab>
+                </p-accordion>
+                <div style="margin-top: 2rem">
+                  <pagination-controls
+                    id="custQuotapageData"
+                    maxSize="10"
+                    directionLinks="true"
+                    previousLabel=""
+                    nextLabel=""
+                    (pageChange)="pageChangedCustQuotaList($event)"
+                  ></pagination-controls>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> -->
+
+<!-- <p-dialog
+  header="Customer Name"
+  [(visible)]="isNameEdit"
+  [modal]="true"
+  [style]="{ width: '30vw' }"
+  [draggable]="false"
+  [resizable]="false"
+  [responsive]="true"
+  [closable]="false"
+>
+  <div class="modal-body-junk">
+    <div class="form-group">
+      <label>Title *</label>
+      <div style="display: flex">
+        <div style="width: 100%">
+          <p-dropdown
+            [options]="selectTitile"
+            [(ngModel)]="createcustomerData.title"
+            optionLabel="label"
+            optionValue="label"
+            placeholder="Select Title"
+          >
+          </p-dropdown>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>FirstName</label>
+      <div style="display: flex">
+        <div style="width: 100%">
+          <input
+            class="form-control"
+            id="firstName"
+            type="text"
+            [(ngModel)]="createcustomerData.firstname"
+          />
+        </div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>LastName </label>
+      <div style="display: flex">
+        <div style="width: 100%">
+          <input
+            class="form-control"
+            id="lastName"
+            type="text"
+            [(ngModel)]="createcustomerData.lastname"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <div class="addUpdateBtn">
+      <button class="btn btn-primary btnStyle" (click)="save()">Save</button>
+      <button class="btn btn-danger btnStyle" (click)="nameModelClose()">Cancel</button>
+    </div>
+  </div>
+</p-dialog>
+<p-dialog
+  header="Payment Gateway Method"
+  [(visible)]="displayInvoicePaymentDialog"
+  [modal]="true"
+  [style]="{ width: '50%' }"
+  [draggable]="false"
+  [resizable]="false"
+>
+  <div class="card" style="text-align: center">
+    <div *ngFor="let config of savedConfig">
+      <p-card
+        [style]="{
+          margin: '25px',
+          'box-shadow': '0 4px 8px rgba(0, 0, 0, 0.3)'
+        }"
+      >
+        <div class="p-card-title" style="color: #f7b206; font-size: 20px">
+          {{ config.paymentConfigName }}
+        </div>
+        <div class="p-card-content" style="width: 100%">
+          <div>
+            {{ config.paymentGatewayInfo?.substring(0, 50) }}
+          </div>
+          <div style="white-space: normal">
+            {{ config.paymentGatewayInfo?.substring(50) }}
+          </div>
+        </div>
+        <div class="p-card-footer">
+          <button
+            class="btn btn-primary"
+            id="submit"
+            type="submit"
+            (click)="invoicePaymentpaymentGateway(config)"
+          >
+            Proceed
+          </button>
+        </div>
+      </p-card>
+    </div>
+  </div>
+</p-dialog>
+
+<p-dialog
+  header="Payment Confirmation"
+  [(visible)]="paymentConfirmationModal"
+  [modal]="true"
+  [breakpoints]="{ '1024px': '75vw', '767px': '90vw' }"
+  [style]="{ width: '50vw' }"
+  [draggable]="false"
+  (onHide)="hidepaymentConfirmDialog()"
+  [resizable]="false"
+>
+  <h5 class="modalHeadTxt">
+    Payment is in the approval flow one It is approved, you will get the confirmation message
+    through SMS
+  </h5>
+
+  <button
+    class="btn btn-success btnStyle"
+    [disabled]="exitBuy"
+    (click)="hidepaymentConfirmDialog()"
+  >
+    <i class="fa-solid fa-xmark"></i> Close<span *ngIf="exitBuy"> ({{ paymentstatusCount }}) </span>
+  </button>
+</p-dialog>
+
+<p-dialog
+  header="Payment Success"
+  [(visible)]="paymentSucessModel"
+  [modal]="true"
+  [breakpoints]="{ '1024px': '75vw', '767px': '90vw' }"
+  [style]="{ width: '50vw' }"
+  [draggable]="false"
+  (onHide)="hidepaymentSucessDialog()"
+  [resizable]="false"
+>
+  <h5 class="modalHeadTxt plan-sucess-content">Plan purchased successfully</h5>
+
+  <button class="btn btn-success btnStyle plan-sucess-btn" (click)="hidepaymentSucessDialog()">
+    OK
+  </button>
+</p-dialog>
+<p-dialog
+  header="Wifi Config"
+  [(visible)]="wifiModel"
+  [style]="{ width: '70%' }"
+  [modal]="true"
+  [responsive]="true"
+  [draggable]="false"
+  [closable]="true"
+>
+  <div class="modal-body">
+    <form [formGroup]="wifiForm">
+      <div class="row">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+          <div class="form-group">
+            <label>SSID Username</label>
+            <input
+              type="text"
+              class="form-control"
+              formControlName="username"
+              placeholder="Enter User Name"
+              [readonly]="editWifi"
+            />
+            <div
+              *ngIf="wifiSubmitted && wifiForm.controls.username.errors"
+              class="errorWrap text-danger"
+            >
+              <div
+                *ngIf="wifiSubmitted && wifiForm.controls.username.errors.required"
+                class="error text-danger"
+              >
+                User Name is required.
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+          <div class="form-group">
+            <label>SSID Password</label>
+            <input
+              type="text"
+              class="form-control"
+              formControlName="password"
+              placeholder="Enter Password"
+              [readonly]="editWifi"
+            />
+            <div
+              *ngIf="wifiSubmitted && wifiForm.controls.password.errors"
+              class="errorWrap text-danger"
+            >
+              <div
+                *ngIf="wifiSubmitted && wifiForm.controls.password.errors.required"
+                class="error text-danger"
+              >
+                Password is required.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <div class="addUpdateBtn">
+      <button
+        (click)="editWifiModel()"
+        class="btn btn-success btn-sm"
+        type="button"
+        [disabled]="!editWifi"
+      >
+        Edit
+      </button>
+      <button
+        (click)="saveWifi()"
+        class="btn btn-primary"
+        style="object-fit: cover; padding: 5px 8px"
+      >
+        <i class="fa fa-check-circle"></i>
+        Save
+      </button>
+      <button (click)="closeWifiModal()" class="btn btn-danger btn-sm" type="button">Close</button>
+    </div>
+  </div>
+</p-dialog>
+
+<p-dialog
+  header="Mobile number"
+  [(visible)]="mpinModal"
+  [modal]="true"
+  [style]="{ width: '30%' }"
+  [draggable]="false"
+  (onHide)="hideMpinModal()"
+  [resizable]="false"
+>
+  <form [formGroup]="mpinForm">
+    <div class="form-group">
+      <label>Mobile number: <span class="reqSign">*</span></label>
+      <div style="display: flex">
+        <div style="width: 30%">
+          <p-dropdown
+            [filter]="true"
+            [options]="countries"
+            formControlName="countryCode"
+            id="countryCode"
+            optionLabel="dial_code"
+            optionValue="dial_code"
+            placeholder="+91"
+            appendTo="body"
+          ></p-dropdown>
+        </div>
+        <div style="width: 70%">
+          <input
+            (input)="onInputMobile($event)"
+            (keyup)="onKeymobilelength($event)"
+            type="number"
+            name="mobileNo"
+            id="mobileNo"
+            min="0"
+            formControlName="mobileNumber"
+            [ngClass]="{
+              'is-invalid': isMpinFormSubmitted && mpinForm.controls.mobileNumber.errors
+            }"
+            placeholder="Enter mobile number"
+          />
+        </div>
+      </div>
+      <div *ngIf="mobileError" class="errorWrap text-danger">
+        <div class="error text-danger">Mobile number should not start with 0.</div>
+      </div>
+      <div style="display: flex">
+        <div style="width: 30%"></div>
+        <div style="width: 70%">
+          <div
+            *ngIf="isMpinFormSubmitted && mpinForm.controls.mobileNumber.errors"
+            class="errorWrap text-danger"
+          >
+            <div *ngIf="mpinForm.controls.mobileNumber.errors.required">
+              Mobile Number is required.
+            </div>
+          </div>
+          <div *ngIf="inputMobile && mpinForm.value.mobileNumber" class="error text-danger">
+            {{ this.inputMobile }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+  <ng-template pTemplate="footer">
+    <div class="btnGroup text-center">
+      <button
+        class="btn btn-primary btnStyle"
+        (click)="invoicePaymentGateway(momoPayinvoice)"
+        style="margin-right: 10px"
+        [disabled]="inputMobile !== '' || mobileError"
+      >
+        Buy
+      </button>
+      <button class="btn btn-danger btnStyle" (click)="hideMpinModal()">Cancel</button>
+    </div>
+  </ng-template>
+</p-dialog> -->

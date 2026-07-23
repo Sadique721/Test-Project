@@ -1,0 +1,512 @@
+<div class="container-fluid contain-flud">
+    <div class="row">
+        <div class="col-md-12">
+            <mat-card class="cardWithShadow">
+                <mat-card-header>
+                    <img src="assets/img/DashboardIcons/Back Arrow.svg" alt="arrow back" class="m-r-10"
+                        (click)="customerDetailOpen()">
+                    <div style="font-size:x-large; align-items: center; font-weight: 500; align-content: center;">
+                        {{ custData.title }}
+                        {{ custData.firstname }} {{ custData.lastname }} Mac Details
+                    </div>
+                </mat-card-header>
+                <mat-card-content class="mat-card-content-border">
+                    <div class="button-container" style="margin-top: 1rem">
+                        <button mat-flat-button color="primary" type="button" (click)="addMac()">
+                            Add MAC
+                        </button>
+                    </div>
+
+                    <div class="country-table-list">
+                        <div class="table-container">
+                            <table mat-table [dataSource]="macListData" matSort class="mat-elevation-z8 w-100">
+                                <ng-container matColumnDef="macAddress">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        MAC Address
+                                    </th>
+                                    <td mat-cell *matCellDef="let data" class="f-s-14">
+                                        @if (displaymode || currentEditRecord?.id !== data?.id) {
+                                        <span>
+                                            {{ data.macAddress }}
+                                        </span>
+                                        }
+                                        @if (!displaymode && currentEditRecord?.id === data?.id) {
+                                        <mat-form-field appearance="outline" class="w-100 hide-hint mr-10"
+                                            style="padding-left: 8px">
+                                            <input matInput class="input-p-5" placeholder="Enter Ip Address"
+                                                [(ngModel)]="editingRecord.macAddress" />
+                                        </mat-form-field>
+                                        }
+                                    </td>
+                                </ng-container>
+                                <ng-container matColumnDef="service">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Service
+                                    </th>
+                                    <td mat-cell *matCellDef="let data" class="f-s-14">
+                                        @if (displaymode || currentEditRecord?.id !== data?.id) {
+                                        <span>
+                                            {{ data.service }}
+                                        </span>
+                                        }
+                                        @if (!displaymode && currentEditRecord?.id === data?.id) {
+                                        <mat-form-field appearance="outline" class="w-100 hide-hint mr-10"
+                                            style="padding-left: 8px">
+                                            <input matInput class="input-p-5" placeholder="Enter Ip Address"
+                                                [(ngModel)]="editingRecord.service" readonly />
+                                        </mat-form-field>
+                                        }
+                                    </td>
+                                </ng-container>
+                                <ng-container matColumnDef="actions">
+                                    <th mat-header-cell *matHeaderCellDef stickyEnd class="table-header-title">
+                                        Actions
+                                    </th>
+                                    <td mat-cell *matCellDef="let data; let i = index" class="btnAction">
+                                        @if (displaymode) {
+                                        <a mat-icon-button matTooltip="edit" href="javascript:void(0)"
+                                            (click)="editMacById(data, i)">
+                                            <img src="assets/img/DashboardIcons/Edit.svg">
+                                        </a>
+                                        <a mat-icon-button matTooltip="delete" href="javascript:void(0)"
+                                            (click)="deleteConfirm(data.id)">
+                                            <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                        </a>
+                                        }
+                                        @if (!displaymode && editingIndex === i) {
+                                        <a mat-icon-button matTooltip="Save Changes" href="javascript:void(0)"
+                                            (click)="saveChanges()">
+                                            <img src="assets/img/DashboardIcons/Assign.svg" />
+                                        </a>
+                                        <a mat-icon-button matTooltip="Reject Changes" href="javascript:void(0)"
+                                            (click)="cancelChanges()">
+                                            <img src="assets/img/DashboardIcons/Reject.svg">
+
+                                        </a>
+                                        }
+                                    </td>
+                                </ng-container>
+                                <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"
+                                    class="table-header-bg"></tr>
+                                <tr mat-row *matRowDef="let row; columns: displayedColumns" class="table-content-row">
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </div>
+</div>
+
+<!-- Create Dialog -->
+<ng-template #MacCreate>
+    <div class="dialog-container" style="width: 900px; max-width: 90vw; max-height: 90vh; overflow-y: auto">
+        <div class="dialog-header">
+            MAC details
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="closeaddMac()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+            <div class="row" style="padding-top: 10px" [formGroup]="macManagementGroup">
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <mat-form-field appearance="outline" class="w-100 hide-hint mr-10" style="padding-left: 8px">
+                        <input matInput class="input-p-5" placeholder="Enter Mac Address" formControlName="macAddress"
+                            [ngClass]="{
+                'is-invalid': macSubmitted && macManagementGroup.controls.macAddress.errors
+              }" />
+                        <mat-error *ngIf="macSubmitted && macManagementGroup.get('macAddress')?.hasError('required')">
+                            Mac Address is required.
+                        </mat-error>
+                        <mat-error *ngIf="macSubmitted && macManagementGroup.controls.macAddress.errors?.invalidMac">
+                            Mac Address is invalid.
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <mat-form-field appearance="outline" class="w-100 hide-hint mr-10" style="padding-left: 8px">
+                        <mat-select placeholder="Select Service" class="input-p-5" formControlName="custid" [ngClass]="{
+                'is-invalid': macSubmitted && macManagementGroup.get('custid')?.errors
+              }">
+                            <mat-option *ngFor="let option of dropdownOptions" [value]="option.value">
+                                {{ option.label }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="macSubmitted && macManagementGroup.get('custid')?.hasError('required')">
+                            Service is required.
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+                <div class="col-md-4 d-flex align-items-end mb-3 m-b-20">
+                    <button mat-flat-button color="primary" type="button" class="button-normal" (click)="onAddmacList()">
+                        Add
+                    </button>
+                </div>
+            </div>
+            <div class="table-container mt-4" style="overflow: auto">
+                <table mat-table [dataSource]="macMappingDataSource" class="mat-elevation-z2 w-100">
+
+                    <!-- MAC Address -->
+                    <ng-container matColumnDef="macAddress">
+                        <th mat-header-cell *matHeaderCellDef class="table-header-title">MAC Address</th>
+                        <td mat-cell *matCellDef="let row">
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input class="input-p-5" matInput readonly [formControl]="row.get('macAddress')" />
+                            </mat-form-field>
+                        </td>
+                    </ng-container>
+
+                    <!-- Service -->
+                    <ng-container matColumnDef="service">
+                        <th mat-header-cell *matHeaderCellDef class="table-header-title">Service</th>
+                        <td mat-cell *matCellDef="let row">
+                            <mat-form-field appearance="outline" class="w-100">
+                                <input class="input-p-5" matInput readonly [formControl]="row.get('service')" />
+                            </mat-form-field>
+                        </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns1"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns1"></tr>
+                </table>
+                <!-- <table class="mat-elevation-z8 w-100">
+
+                    <thead>
+                        <tr>
+                            <th class="table-header-title">Mac Address</th>
+                            <th class="table-header-title">Service</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (row of macMapppingListFromArray.controls; track row; let index = $index) {
+                        <tr>
+                            <td style="text-align: center">
+                                <input class="input-p-5" readonly [formControl]="row.get('macAddress')" />
+                            </td>
+                            <td style="text-align: center">
+                                <input class="input-p-5" readonly [formControl]="row.get('service')" />
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+
+                </table> -->
+            </div>
+        </div>
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust text-right">
+            <button mat-button mat-flat-button color="primary" class="button-normal mr-10" type="submit"
+                (click)="saveMac()">
+                Save
+            </button>
+            <button mat-stroked-button matButton="outlined" type="button" color="primary" class="button-normal mr-10"
+                (click)="closeaddMac()">
+                Cancel
+            </button>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #confirmDialog let-data>
+    <div class="dialog-container">
+        <div class="dialog-header dialog-header-titleFont">
+            {{ data.title || "Delete Confirmation" }}
+            <span class="w-h-18">
+                <a mat-icon-button href="javascript:void(0)" mat-dialog-close="false">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+            <p class="dialog-description">{{ data.description }}</p>
+
+            <div mat-dialog-actions class="p-0">
+                <button mat-flat-button type="button" class="primary" [mat-dialog-close]="true">
+                    {{ data.yesLabel || "Confirm" }}
+                </button>
+                <button mat-stroked-button matButton="outlined" color="primary" mat-dialog-close="false">
+                    {{ data.noLabel || "Cancel" }}
+                </button>
+            </div>
+        </div>
+    </div>
+</ng-template>
+<!-- Create Dialog -->
+<!-- <div class="row">
+  <div class="col-md-12 col-sm-12">
+    <div class="panel">
+      <div class="panel-heading">
+        <div class="displayflex">
+          <button
+            (click)="customerDetailOpen()"
+            class="btn btn-secondary backbtn"
+            data-placement="bottom"
+            data-toggle="tooltmac"
+            title="Go to Customer Details"
+            type="button"
+            >
+            <i
+              class="fa fa-arrow-circle-left"
+              style="color: #f7941e !important; font-size: 28px"
+            ></i>
+          </button>
+          <h3 class="panel-title">
+            {{ custData.title }}
+            {{ custData.firstname }} {{ custData.lastname }} MAC Details
+          </h3>
+        </div>
+        <div class="right">
+          <button
+            aria-controls="custStatus"
+            aria-expanded="false"
+            class="btn-toggle-collapse"
+            data-target="#custStatus"
+            data-toggle="collapse"
+            type="button"
+            >
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+      <div class="panel-collapse collapse in" id="custStatuss">
+        <div class="panel-body table-responsive">
+          <div style="margin: 20px">
+            <div class="row" style="margin-bottom: 20px">
+              <button type="submit" class="btn btn-primary" id="submit" (click)="addMac()">
+                <i class="fa fa-check-circle"></i>
+                Add MAC
+              </button>
+            </div>
+            <div class="table-responsive">
+              <div class="row">
+                <div class="col-lg-12 col-md-12">
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>MAC Address</th>
+                        <th>Service</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (data of macListData; track data; let index = $index) {
+                        <tr>
+                          <td>
+                            @if (displaymode || currentEditRecord?.id !== data?.id) {
+                              <div>
+                                {{ data.macAddress }}
+                              </div>
+                            }
+                            @if (!displaymode && currentEditRecord?.id === data?.id) {
+                              <div>
+                                <input
+                                  type="text"
+                                  class="form-control"
+                                  placeholder="Enter Ip Address"
+                                  [(ngModel)]="editingRecord.macAddress"
+                                  />
+                                </div>
+                              }
+                            </td>
+                            <td>
+                              @if (displaymode || currentEditRecord?.id !== data?.id) {
+                                <div>
+                                  {{ data.service }}
+                                </div>
+                              }
+                              @if (!displaymode && currentEditRecord?.id === data?.id) {
+                                <div>
+                                  <input
+                                    type="text"
+                                    class="form-control"
+                                    placeholder="Enter Ip Address"
+                                    [(ngModel)]="editingRecord.service"
+                                    readonly
+                                    />
+                                  </div>
+                                }
+                              </td>
+                              <td>
+                                @if (displaymode) {
+                                  <div style="display: flex; gap: 10px">
+                                    <a
+                                      type="button"
+                                      data-title="Edit"
+                                      data-toggle="tooltmac"
+                                      class="curson_pointer"
+                                      (click)="editMacById(data, index)"
+                                      >
+                                    <img src="assets/img/DashboardIcons/Edit.svg" >
+                                    </a>
+                                    <a
+                                      type="button"
+                                      data-title="Delete"
+                                      data-toggle="tooltmac"
+                                      class="curson_pointer"
+                                      (click)="deleteConfirm(data.id)"
+                                      >
+                                       <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                                    </a>
+                                  </div>
+                                }
+                                @if (!displaymode && editingIndex === index) {
+                                  <div
+                                    style="display: flex; gap: 10px"
+                                    >
+                                    <a
+                                      type="button"
+                                      data-title="Edit"
+                                      data-toggle="tooltmac"
+                                      class="curson_pointer"
+                                      (click)="saveChanges()"
+                                      >
+                                     <img src="assets/img/DashboardIcons/Assign.svg">
+                                    </a>
+                                    <a
+                                      type="button"
+                                      data-title="Delete"
+                                      data-toggle="tooltmac"
+                                      class="curson_pointer"
+                                      (click)="cancelChanges()"
+                                      >
+                                       <img src="assets/img/DashboardIcons/Reject.svg">
+                                    </a>
+                                  </div>
+                                }
+                              </td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                      <br />
+                      <br />
+                      <div class="pagination_Dropdown">
+                        <pagination-controls
+                          (pageChange)="pageChangedMasterNotificationList($event)"
+                          directionLinks="true"
+                          id="searchNotificationPageData"
+                          maxSize="10"
+                          nextLabel=""
+                          previousLabel=""
+                        ></pagination-controls>
+                        <div id="itemPerPageDropdown">
+                          <p-dropdown
+                            (onChange)="TotalItemPerPageNotificationHistory($event)"
+                            [options]="pageLimitOptions"
+                            optionLabel="value"
+                            optionValue="value"
+                          ></p-dropdown>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p-dialog
+      header="MAC details"
+      [(visible)]="createMac"
+      [style]="{ width: '60%' }"
+      [modal]="true"
+      [responsive]="true"
+      [draggable]="false"
+      [closable]="true"
+      >
+      <div class="modal-body">
+        <div class="row" [formGroup]="macManagementGroup">
+          <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Enter Mac Address"
+              formControlName="macAddress"
+          [ngClass]="{
+            'is-invalid': macSubmitted && macManagementGroup.controls.macAddress.errors
+          }"
+              />
+              @if (macSubmitted && macManagementGroup.controls.macAddress.errors) {
+                <div
+                  class="errorWrap text-danger"
+                  >
+                  <div class="error text-danger">Mac Address is required.</div>
+                </div>
+              }
+              @if (
+                macManagementGroup.controls.macAddress.errors &&
+                (macManagementGroup.controls.macAddress.touched ||
+                macManagementGroup.controls.macAddress.dirty)
+                ) {
+                <div
+                  class="errorWrap text-danger"
+                  >
+                  <div class="error text-danger">Mac Address is invalid</div>
+                </div>
+              }
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+              <p-dropdown
+                [options]="dropdownOptions"
+                placeholder="Select Service"
+                optionLabel="label"
+                optionValue="value"
+                formControlName="custid"
+          [ngClass]="{
+            'is-invalid': macSubmitted && macManagementGroup.controls.custid.errors
+          }"
+              ></p-dropdown>
+            </div>
+            <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
+              <button
+                style="object-fit: cover; padding: 5px 8px"
+                class="btn btn-primary"
+                (click)="onAddmacList()"
+                >
+                <i class="fa fa-plus-square" aria-hidden="true"></i>
+                Add
+              </button>
+            </div>
+          </div>
+          <table class="table coa-table" style="margin-top: 10px">
+            <thead>
+              <tr>
+                <th style="text-align: center; width: 10%">Mac Address</th>
+                <th style="text-align: center; width: 10%; padding: 8px">Service</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of macMapppingListFromArray.controls; track row; let index = $index) {
+                <tr>
+                  <td style="text-align: center">
+                    <input
+                      class="form-control"
+                      type="text"
+                      readonly
+                      [formControl]="row.get('macAddress')"
+                      />
+                    </td>
+                    <td style="text-align: center">
+                      <input class="form-control" type="text" readonly [formControl]="row.get('service')" />
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          <div class="modal-footer">
+            <div class="addUpdateBtn">
+              <button (click)="saveMac()" class="btn btn-primary" data-title="Shift Location" type="button">
+                Save
+              </button>
+              <button type="button" class="btn btn-default" (click)="closeaddMac()">Close</button>
+            </div>
+          </div>
+        </p-dialog> -->
+<!-- hello hi hello hi -->

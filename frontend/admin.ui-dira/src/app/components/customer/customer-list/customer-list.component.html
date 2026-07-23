@@ -1,0 +1,455 @@
+<div class="row header-row">
+    <mat-card class="cardWithShadow w-100">
+        <!-- Search Section -->
+
+        <mat-card-content>
+            <div class="row" style="margin-inline-start: 2px;">
+                <!-- Search Option Dropdown -->
+                <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+                    <!-- <mat-form-field appearance="outline" class="w-100 hide-hint header-input">
+                        <mat-label>Search Option</mat-label>
+                        <mat-select [(ngModel)]="searchOption" placeholder="Select Search Option"
+                            (selectionChange)="selSearchOption($event)">
+                            <mat-option *ngFor="let option of searchOptionSelect" [value]="option.value">
+                                {{ option.label }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field> -->
+                    <app-c-dropdown [options]="searchOptionSelect" [optionLabel]="'label'" [optionValue]="'value'"
+                        placeholder="Select Search Option" [(ngModel)]="searchOption"
+                        (ngModelChange)="selSearchOption($event)" class="w-100 d-block header-input"
+                        [isHideError]="true" [idHeaderInput]="true">
+                    </app-c-dropdown>
+                </div>
+
+                <!-- Search Detail Input (for text fields) -->
+                <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12" *ngIf="
+            searchOption != 'status' &&
+            searchOption != 'cafStatus' &&
+            searchOption != 'custtype' &&
+            searchOption != 'currentAssigneeName' &&
+            searchOption != 'cafCreatedDate' &&
+            searchOption != 'currentAssignedTeam' &&
+            searchOption != 'currentAssignedTeamAndStaff' &&
+            searchOption != 'expiryDate' &&
+            searchOption != 'subscriptionMode' &&
+            searchOption != 'firstactivationdate' &&
+            searchOption != 'createbyname' &&
+            searchOption != 'activationbyname'
+          ">
+                    <mat-form-field appearance="outline" class="w-100 hide-hint header-input">
+                        <mat-label>Search Detail</mat-label>
+                        <input matInput [(ngModel)]="searchDeatil" placeholder="Enter Search Detail"
+                            (keydown.enter)="searchCustomer()" />
+                        <mat-icon matSuffix>search</mat-icon>
+                    </mat-form-field>
+                </div>
+
+                <!-- Status Dropdown -->
+                <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12"
+                    *ngIf="searchOption === 'status' || searchOption === 'cafStatus'">
+                    <!-- <mat-form-field appearance="outline" class="w-100 hide-hint header-input">
+                        <mat-label>Status</mat-label>
+                        <mat-select [(ngModel)]="searchDeatil" placeholder="Select Status">
+                            <mat-option *ngFor="let status of commondropdownService.CustomerStatusValue" [value]="status.value">
+                                {{ status.text }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field> -->
+                    <app-c-dropdown [options]="commondropdownService.CustomerNewStatusValue" [optionLabel]="'text'"
+                        [optionValue]="'value'" placeholder="Select Status" [(ngModel)]="searchDeatil"
+                        class="w-100 d-block header-input" [isHideError]="true" [idHeaderInput]="true">
+                    </app-c-dropdown>
+                </div>
+
+                <!-- Customer Type Dropdown -->
+                <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12" *ngIf="searchOption === 'custtype'">
+                    <!-- <mat-form-field appearance="outline" class="w-100 hide-hint header-input">
+                        <mat-label>Customer Type</mat-label>
+                        <mat-select [(ngModel)]="searchDeatil" placeholder="Select Customer Type">
+                            <mat-option *ngFor="let type of commondropdownService.customerTypeSearchOption" [value]="type.value">
+                                {{ type.label }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field> -->
+                    <app-c-dropdown [options]="commondropdownService.customerTypeSearchOption" [optionLabel]="'label'"
+                        [optionValue]="'value'" placeholder="Select Customer Type" [(ngModel)]="searchDeatil"
+                        class="w-100 d-block header-input" [isHideError]="true" [idHeaderInput]="true">
+                    </app-c-dropdown>
+                </div>
+
+                <!-- Subscription Mode -->
+                <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12" *ngIf="searchOption === 'subscriptionMode'">
+                    <!-- <mat-form-field appearance="outline" class="w-100 hide-hint header-input">
+                        <mat-label>Subscription Mode</mat-label>
+                        <mat-select [(ngModel)]="searchDeatil" (selectionChange)="getCustomerType($event)"
+                            placeholder="Select Subscription Mode">
+                            <mat-option *ngFor="let type of customerType" [value]="type.text">
+                                {{ type.text }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field> -->
+                    <app-c-dropdown [options]="customerType" [optionLabel]="'text'" [optionValue]="'text'"
+                        placeholder="Select Subscription Mode" [(ngModel)]="searchDeatil"
+                        (ngModelChange)="getCustomerType($event)" class="w-100 d-block header-input"
+                        [isHideError]="true" [idHeaderInput]="true">
+                    </app-c-dropdown>
+                </div>
+
+                <!-- Current Assignee Name -->
+                <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12" *ngIf="searchOption === 'currentAssigneeName'">
+                    <!-- <mat-form-field appearance="outline" class="w-100 hide-hint header-input">
+                        <mat-label>Assigned Staff</mat-label>
+                        <mat-select [(ngModel)]="searchDeatil" placeholder="Select Staff">
+                            <mat-option *ngFor="let staff of commondropdownService.activeStaffList" [value]="staff.username">
+                                {{ staff.username }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field> -->
+                    <app-c-dropdown [options]="commondropdownService.activeStaffList" [optionLabel]="'username'"
+                        [optionValue]="'username'" placeholder="Select Staff" [(ngModel)]="searchDeatil"
+                        class="w-100 d-block header-input" [isHideError]="true" [idHeaderInput]="true">
+                    </app-c-dropdown>
+                </div>
+
+                <!-- Created By / Activation By -->
+                <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12"
+                    *ngIf="searchOption === 'createbyname' || searchOption === 'activationbyname'">
+                    <!-- <mat-form-field appearance="outline" class="w-100 hide-hint header-input">
+                        <mat-label>Full Name</mat-label>
+                        <mat-select [(ngModel)]="searchDeatil" placeholder="Select Full Name">
+                            <mat-option *ngFor="let staff of commondropdownService.activeStaffList" [value]="staff.fullName">
+                                {{ staff.fullName }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field> -->
+                    <app-c-dropdown [options]="activeStaffListNameSort" [optionLabel]="'fullName'"
+                        [optionValue]="'fullName'" placeholder="Select Full Name" [(ngModel)]="searchDeatil"
+                        class="w-100 d-block header-input" [isHideError]="true" [idHeaderInput]="true">
+                    </app-c-dropdown>
+                </div>
+
+                <!-- Assigned Team -->
+                <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12" *ngIf="searchOption === 'currentAssignedTeam'">
+                    <!-- <mat-form-field appearance="outline" class="w-100 hide-hint header-input">
+                        <mat-label>Assigned Team</mat-label>
+                        <mat-select [(ngModel)]="searchDeatil" placeholder="Select Team">
+                            <mat-option *ngFor="let team of commondropdownService.teamListData" [value]="team.name">
+                                {{ team.name }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field> -->
+                    <app-c-dropdown [options]="commondropdownService.teamListData" [optionLabel]="'name'"
+                        [optionValue]="'name'" placeholder="Select Team" [(ngModel)]="searchDeatil"
+                        class="w-100 d-block header-input" [isHideError]="true" [idHeaderInput]="true">
+                    </app-c-dropdown>
+                </div>
+
+                <!-- Team and Staff -->
+                <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12"
+                    *ngIf="searchOption === 'currentAssignedTeamAndStaff'">
+                    <!-- <mat-form-field appearance="outline" class="w-100 hide-hint header-input">
+                        <mat-label>Team for Staff</mat-label>
+                        <mat-select [(ngModel)]="searchDeatil" placeholder="Select Team">
+                            <mat-option *ngFor="let team of commondropdownService.teamListData" [value]="team.name">
+                                {{ team.name }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field> -->
+                    <app-c-dropdown [options]="commondropdownService.teamListData" [optionLabel]="'name'"
+                        [optionValue]="'name'" placeholder="Select Team" [(ngModel)]="searchDeatil"
+                        class="w-100 d-block header-input" [isHideError]="true" [idHeaderInput]="true">
+                    </app-c-dropdown>
+                </div>
+
+                <!-- Date Picker for Date Fields -->
+                <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12" *ngIf="
+            searchOption === 'cafCreatedDate' ||
+            searchOption === 'expiryDate' ||
+            searchOption === 'firstactivationdate'
+          ">
+                    <mat-form-field appearance="outline" class="w-100 hide-hint header-input">
+                        <mat-label>Select Date</mat-label>
+                        <input matInput [matDatepicker]="searchDatePicker" [(ngModel)]="searchDeatil"
+                            placeholder="Select Date" />
+                        <mat-datepicker-toggle matSuffix [for]="searchDatePicker"></mat-datepicker-toggle>
+                        <mat-datepicker #searchDatePicker></mat-datepicker>
+                    </mat-form-field>
+                </div>
+
+                <!-- From Date -->
+                <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+                    <mat-form-field appearance="outline" class="w-100 hide-hint header-input">
+                        <mat-label>Start Date</mat-label>
+                        <input matInput [matDatepicker]="fromDatePicker" [(ngModel)]="fromDate"
+                            placeholder="Select Start Date" />
+                        <mat-datepicker-toggle matSuffix [for]="fromDatePicker"></mat-datepicker-toggle>
+                        <mat-datepicker #fromDatePicker></mat-datepicker>
+                    </mat-form-field>
+                </div>
+
+                <!-- To Date -->
+                <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+                    <mat-form-field appearance="outline" class="w-100 hide-hint header-input">
+                        <mat-label>End Date</mat-label>
+                        <input matInput [matDatepicker]="toDatePicker" [(ngModel)]="toDate"
+                            placeholder="Select End Date" />
+                        <mat-datepicker-toggle matSuffix [for]="toDatePicker"></mat-datepicker-toggle>
+                        <mat-datepicker #toDatePicker></mat-datepicker>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="row">
+                <div class="col d-flex align-items-center gap-2 mb-3 mt-3" style="margin-top: 20px">
+                    <div class="col-md-6">
+                        <button mat-button mat-flat-button color="primary" class="button-normal m-r-10"
+                            [disabled]="!searchDeatil && !fromDate && !toDate" (click)="searchCustomer()">
+                            Search
+                        </button>
+                        <button mat-stroked-button matButton="outlined" class="button-normal"
+                            (click)="clearSearchcustomer()">
+                            Clear
+                        </button>
+                    </div>
+                    <!-- <button mat-icon-button matTooltip="Search" (click)="searchCustomer()"
+                    [disabled]="!searchDeatil && !fromDate && !toDate">
+                    <mat-icon>search</mat-icon>
+                </button>
+
+                <button mat-icon-button matTooltip="Clear" (click)="clearSearchcustomer()">
+                    <img src="assets/img/DashboardIcons/Clear.svg" />
+                </button> -->
+                    <div class="col-md-6" style="text-align:right">
+                        <button mat-stroked-button color="primary" (click)="exportCustomer()"
+                            [disabled]="!customerListData || customerListData.length === 0" style="margin-right: 10px;"
+                            class="button-normal m-r-10">
+                            <mat-icon>file_download</mat-icon>
+                            Export
+                        </button>
+
+                        <button *ngIf="createAccess" mat-flat-button color="primary" class="button-normal m-r-10"
+                            [routerLink]="buttonRouterLink">
+                            <mat-icon>add</mat-icon>
+                            {{ buttonText }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+
+<!-- Customer List Table -->
+<div class="row header-row mt-3">
+    <mat-card class="cardWithShadow w-100">
+        <mat-card-content>
+            <div class="example-container">
+                <table mat-table [dataSource]="dataSource" matSort class="w-100">
+                    <!-- Name Column -->
+                    <ng-container matColumnDef="name" sticky>
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header class="f-w-600">Name</th>
+                        <td mat-cell *matCellDef="let data">
+
+                            <a [routerLink]="['/home/customer/details/' + custType + '/x/', data.id]"
+                                class="text-primary">
+                                {{ data.name }}
+                            </a>
+                        </td>
+                    </ng-container>
+
+                    <!-- Username Column -->
+                    <ng-container matColumnDef="username">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header class="f-w-600">AAA Username</th>
+                        <td mat-cell *matCellDef="let data">{{ data.username }}</td>
+                    </ng-container>
+
+                    <!-- Service Area Column -->
+                    <ng-container matColumnDef="serviceArea">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header class="f-w-600">Service Area</th>
+                        <td mat-cell *matCellDef="let data">{{ data.serviceArea }}</td>
+                    </ng-container>
+
+                    <!-- Mobile Column -->
+                    <ng-container matColumnDef="mobile">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header class="f-w-600">Mobile Number</th>
+                        <td mat-cell *matCellDef="let data">{{ data.mobile }}</td>
+                    </ng-container>
+
+                    <!-- Account No Column -->
+                    <ng-container matColumnDef="acctno">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header class="f-w-600">Account No</th>
+                        <td mat-cell *matCellDef="let data">{{ data.acctno }}</td>
+                    </ng-container>
+
+                    <!-- Connection Status Column -->
+                    <ng-container matColumnDef="connectionMode">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header class="f-w-600">
+                            Connection Status
+                        </th>
+
+                        <td mat-cell *matCellDef="let data">
+                            <span class="status-badge" [ngClass]="{
+                  'status-success':
+                    data.connectionMode.toLowerCase() === 'online' ||
+                    data.connectionMode.toLowerCase() === 'active' ||
+                    data.connectionMode.toLowerCase() === 'newactivation',
+                  'status-danger':
+                    data.connectionMode.toLowerCase() === 'offline' ||
+                    data.connectionMode.toLowerCase() === 'inactive' ||
+                    data.connectionMode.toLowerCase() === 'rejected' ||
+                    data.connectionMode.toLowerCase() === 'expired'
+                }">
+                                <span *ngIf="data.connectionMode.toLowerCase() === 'online'">Online</span>
+                                <span *ngIf="data.connectionMode.toLowerCase() === 'offline'">Offline</span>
+
+                                <span *ngIf="data.connectionMode.toLowerCase() === 'active'">Active</span>
+                                <span *ngIf="data.connectionMode.toLowerCase() === 'inactive'">Inactive</span>
+                                <span *ngIf="data.connectionMode.toLowerCase() === 'rejected'">Rejected</span>
+                                <span *ngIf="data.connectionMode.toLowerCase() === 'newactivation'">New
+                                    Activation</span>
+                                <span *ngIf="data.connectionMode.toLowerCase() === ''">Expired</span>
+                            </span>
+                        </td>
+                    </ng-container>
+
+                    <!-- ISP Name Column -->
+                    <ng-container matColumnDef="mvnoName">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header class="f-w-600">ISP Name</th>
+                        <td mat-cell *matCellDef="let data">{{ data.mvnoName }}</td>
+                    </ng-container>
+
+                    <!-- Action Column -->
+                    <ng-container matColumnDef="action" stickyEnd>
+                        <th mat-header-cell *matHeaderCellDef class="f-w-600">Action</th>
+                        <td mat-cell *matCellDef="let data">
+                            <div class="action-buttons"
+                                style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; max-width: 150px;">
+                                <!-- Add Notes -->
+                                <button *ngIf="addNotesAccess" mat-icon-button (click)="addNotesSetFunction(data.id)"
+                                    matTooltip="Add Notes">
+                                    <img src="assets/img/DashboardIcons/Add note.svg" />
+                                </button>
+
+                                <!-- Edit -->
+                                <button *ngIf="editAccess" mat-icon-button
+                                    [routerLink]="['/home/customer/edit/', custType, data.id]" matTooltip="Edit">
+                                    <img src="assets/img/DashboardIcons/Edit.svg">
+                                </button>
+
+                                <!-- Upload Documents -->
+                                <button *ngIf="uploadAccess" mat-icon-button
+                                    [routerLink]="['/home/customer-documents/', custType, data.id]"
+                                    matTooltip="Upload Documents">
+                                    <img src="assets/img/DashboardIcons/Upload.svg" />
+                                </button>
+
+                                <!-- Near By Device -->
+                                <button *ngIf="nearByDeviceAccess" mat-icon-button
+                                    (click)="openNearLocationModal(data.id)" matTooltip="Near By Device">
+                                    <img src="assets/img/DashboardIcons/Find-My-current-location.svg" />
+                                </button>
+
+                                <!-- Send Payment Link -->
+                                <button *ngIf="this.commondropdownService.ifPaytmLinkSendBtn && sendPaymentLinkAccess"
+                                    mat-icon-button (click)="getPaytmLink(data.id)" matTooltip="Send Payment Link"
+                                    [disabled]="true">
+                                    <img src="assets/img/DashboardIcons/PAYMENT LINK.svg" />
+
+                                </button>
+
+                                <!-- Change Status -->
+                                <button *ngIf="changeStatusAccess" mat-icon-button
+                                    (click)="openChangeStatus(data.id, data.status)" matTooltip="Change Status">
+                                    <img src="assets/img/DashboardIcons/Status.svg" />
+                                </button>
+
+                                <!-- Stop Billing -->
+                                <button *ngIf="data.isinvoicestop !== true && isPlanOnDemand" mat-icon-button
+                                    (click)="stopBilling(data.id)" matTooltip="Stop Billing">
+                                    <mat-icon>pause_circle</mat-icon>
+                                </button>
+
+                                <!-- Start Billing -->
+                                <button *ngIf="data.isinvoicestop == true && isPlanOnDemand" mat-icon-button
+                                    (click)="playstartBilling(data.id)" matTooltip="Start Billing">
+                                    <mat-icon>play_circle</mat-icon>
+                                </button>
+
+                                <!-- Renew Payment -->
+                                <button *ngIf="renewPaymentLinkAccess" mat-icon-button
+                                    (click)="openRenewPaymentGateways(data.id, true)" matTooltip="Renew Payment">
+                                    <img src="assets/img/DashboardIcons/Refresh.svg" />
+                                </button>
+
+                                <!-- View Details -->
+                                <button mat-icon-button (click)="openModal(data.id)" matTooltip="View Details">
+                                    <img src="assets/img/DashboardIcons/eye-svgrepo-com (1) 1.svg">
+                                </button>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+                    <!-- No Data Row -->
+                    <tr class="mat-row" *matNoDataRow>
+                        <td class="mat-cell text-center p-5" [attr.colspan]="displayedColumns.length">
+                            <div class="d-flex flex-column align-items-center">
+                                <mat-icon class="text-muted mb-2"
+                                    style="font-size: 48px; height: 48px; width: 48px">inbox</mat-icon>
+                                <p class="text-muted">No customers found</p>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <mat-paginator #paginator [length]="customerListdatatotalRecords" [pageSize]="customerListdataitemsPerPage"
+                [pageSizeOptions]="[5, 10, 20, 50, 100]" (page)="pageChangedCustomerList($event)" showFirstLastButtons>
+            </mat-paginator>
+        </mat-card-content>
+    </mat-card>
+</div>
+
+<!-- Add Notes Dialog -->
+<ng-template #addNotesDialogTemplate>
+    <div class="dialog-header dialog-title">
+        Add Notes
+        <span>
+            <button mat-icon-button mat-dialog-close class="close-btn">
+                <img src="assets/img/DashboardIcons/Reject.svg" alt="Close">
+            </button>
+        </span>
+    </div>
+
+    <mat-dialog-content>
+        <form [formGroup]="addNotesForm">
+            <mat-form-field appearance="outline" class="w-100">
+                <textarea matInput rows="4" formControlName="notes" placeholder="Enter Notes..."></textarea>
+                <mat-error *ngIf="notesSubmitted && addNotesForm.controls['notes'].errors?.['required']">
+                    Notes is required.
+                </mat-error>
+            </mat-form-field>
+        </form>
+    </mat-dialog-content>
+    <mat-dialog-actions>
+        <button mat-flat-button color="primary" (click)="saveNotes(custIdForNotes)">Save</button>
+        <button mat-stroked-button mat-dialog-close>Close</button>
+    </mat-dialog-actions>
+</ng-template>
+
+<!-- Customer Near By Devices Modal -->
+<app-customer-near-by-devices *ngIf="showNearLocationModal" [custId]="selectedCustId"
+    (closeNearLocationModal)="closeNearLocationModal()"></app-customer-near-by-devices>
+
+<!-- Change Status Modal -->
+<!-- <app-cust-change-status *ngIf="showChangeStatusModal" [custId]="selectedCustId" [custStatus]="custStatus"
+    [moduleType]="'cpm'" (closeChangeStatusEvent)="closeChangeStatusEvent()"></app-cust-change-status> -->
+
+<!-- Customer View Details Modal -->
+<app-customer-view-details *ngIf="dialog" (closeCustomerViewDetails)="closeSelectStaff()" [custId]="custId"
+    [sourceType]="'customer'"></app-customer-view-details>

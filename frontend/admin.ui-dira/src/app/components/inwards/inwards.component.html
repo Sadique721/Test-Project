@@ -1,0 +1,3305 @@
+<div class="row header-row p-0 m-0">
+    <mat-card class="cardWithShadow w-100">
+        <mat-card-content class="mat-card-content-border">
+            <div class="row">
+                <!-- Search Option Dropdown -->
+                <div class="col-lg-3 col-md-3">
+                    <mat-form-field appearance="outline" appearance="outline"
+                        class="w-100 hide-hint mr-10 header-input">
+                        <mat-select class="input-p-5" [(value)]="searchInward1"
+                            (selectionChange)="selSearchOption($event)" placeholder="Search Option">
+                            <mat-option *ngFor="let option of searchOptionSelect" [value]="option.value">
+                                {{ option.label }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                @if (
+                searchOption != "status" &&
+                searchOption != "cafStatus" &&
+                searchOption != "custtype" &&
+                searchOption != "currentAssigneeName" &&
+                searchOption != "cafCreatedDate" &&
+                searchOption != "currentAssignedTeam"
+                ) {
+                <!-- Text Input for other search options -->
+                <div class="col-lg-3 col-md-3">
+                    <mat-form-field appearance="outline" appearance="outline"
+                        class="w-100 hide-hint mr-10 header-input">
+                        <input matInput class="input-p-5" [(ngModel)]="searchInward"
+                            (keydown.enter)="searchInwardData()" placeholder="Enter Search Detail" />
+                    </mat-form-field>
+                </div>
+                }
+                @if (searchOption === "status" || searchOption === "cafStatus") {
+                <!-- Status Dropdown -->
+                <div class="col-lg-3 col-md-3">
+                    <mat-form-field appearance="outline" appearance="outline" class="w-100 hide-hint mr-10">
+                        <mat-select class="input-p-5" [(value)]="searchInward">
+                            <mat-option placeholder="Select a Status"
+                                *ngFor="let status of commondropdownService.CustomerStatusValue" [value]="status.value">
+                                {{ status.text }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                }
+                @if (searchOption === "custtype") {
+                <!-- Customer Type Dropdown -->
+                <div class="col-lg-3 col-md-3">
+                    <mat-form-field appearance="outline" appearance="outline" class="w-100 hide-hint mr-10">
+                        <mat-select placeholder="Select a Customer Type" class="input-p-5" [(value)]="searchInward">
+                            <mat-option *ngFor="let type of commondropdownService.customerTypeSearchOption"
+                                [value]="type.value">
+                                {{ type.label }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                }
+                @if (searchOption === "currentAssigneeName") {
+                <!-- Assigned Staff Dropdown -->
+                <div class="col-lg-3 col-md-3">
+                    <mat-form-field appearance="outline" appearance="outline" class="w-100 hide-hint mr-10">
+                        <mat-select class="input-p-5" [(value)]="searchInward">
+                            <mat-option placeholder="Select a Assigned Staff"
+                                *ngFor="let staff of commondropdownService.activeStaffList" [value]="staff.username">
+                                {{ staff.username }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                }
+                @if (searchOption === "currentAssignedTeam") {
+                <!-- Assigned Team Dropdown -->
+                <div class="col-lg-3 col-md-3">
+                    <mat-form-field appearance="outline" appearance="outline" class="w-100 hide-hint mr-10">
+                        <mat-select class="input-p-5" [(value)]="searchInward">
+                            <mat-option placeholder="Select a Assigned Team"
+                                *ngFor="let team of commondropdownService.teamListData" [value]="team.name">
+                                {{ team.name }}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                }
+                <!-- Buttons -->
+                <div class="col-lg-3 col-md-3">
+                    <div class="d-flex" style="margin-left: -2%">
+                        <button mat-button mat-flat-button color="primary" class="button-normal mr-10"
+                            (click)="searchInwardData()">
+                            Search
+                        </button>
+
+                        <button mat-stroked-button matButton="outlined" class="button-normal"
+                            (click)="clearSearchInward()">
+                            Clear
+                        </button>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-3 search-div">
+                    <div class="d-flex justify-content-end">
+                        <button mat-button mat-flat-button color="primary" (click)="createWareHouse()"
+                            class="button-normal mr-10" style="width: auto">
+                            Add Inward
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+
+<div class="container-fluid contain-flud">
+    <div class="row">
+        <div class="col-md-12">
+            <mat-card class="cardWithShadow">
+                <mat-card-content class="mat-card-content-border">
+                    <div class="country-table-list">
+                        <div class="example-container mat-elevation-z8" tabindex="0">
+                            <table mat-table [dataSource]="inwardListData" matSort class="full-width-table">
+                                <ng-container matColumnDef="id">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef>ID</th>
+                                    <td mat-cell *matCellDef="let inward">{{ inward.id }}</td>
+                                </ng-container>
+                                <!-- Inward Number -->
+                                <ng-container matColumnDef="inwardNumber" sticky>
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef>
+                                        Inward Number
+                                    </th>
+                                    <td mat-cell *matCellDef="let inward">
+                                        {{ inward.inwardNumber }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Product Name -->
+                                <ng-container matColumnDef="productName">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef>Product Name</th>
+                                    <td mat-cell *matCellDef="let inward">
+                                        @if (inward.isGroup === true) {
+                                        <a (click)="openBulkProductDialog(inward)" class="text-primary cursor-pointer">
+                                            View Products
+                                        </a>
+                                        } @else {
+                                        {{ inward.productId?.name }}
+                                        }
+                                    </td>
+                                </ng-container>
+
+                                <!-- Type -->
+                                <ng-container matColumnDef="type">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef>Type</th>
+                                    <td mat-cell *matCellDef="let inward">{{ inward.type ? inward.type : "-" }}</td>
+                                </ng-container>
+
+                                <!-- Quantity -->
+                                <ng-container matColumnDef="qty">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef>Quantity</th>
+
+                                    <td mat-cell *matCellDef="let inward" class="f-s-14">
+                                        @if (inward.isGroup === true) {
+                                        <!-- {{ inward.productId?.name }} -->
+                                        -
+                                        } @else {
+                                        {{ inward.qty }}
+                                        }
+                                    </td>
+                                </ng-container>
+
+                                <!-- InTransit Qty -->
+                                <ng-container matColumnDef="inTransitQty">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef>
+                                        InTransit Quantity
+                                    </th>
+                                    <td mat-cell *matCellDef="let inward" class="f-s-14">
+                                        @if (inward.isGroup === true) {
+                                        <!-- {{ inward.productId?.name }} -->
+                                        -
+                                        } @else {
+                                        {{ inward.inTransitQty }}
+                                        }
+                                    </td>
+                                </ng-container>
+
+                                <!-- Created By -->
+                                <ng-container matColumnDef="createdBy">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef>Created By</th>
+                                    <td mat-cell *matCellDef="let inward">{{ inward.createdBy }}</td>
+                                </ng-container>
+
+                                <!-- Status -->
+                                <ng-container matColumnDef="status">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef>Status</th>
+                                    <td mat-cell *matCellDef="let inward">
+                                        <span [ngClass]="{
+                        'mat-badge-success': inward.status === 'ACTIVE',
+                        'mat-badge-danger': inward.status === 'INACTIVE'
+                      }">
+                                            {{ inward.status }}
+                                        </span>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Approval Status -->
+                                <ng-container matColumnDef="approvalStatus">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef>
+                                        Approval Status
+                                    </th>
+                                    <td mat-cell *matCellDef="let inward">
+                                        <span [ngClass]="{
+                        'badge-primary': inward.approvalStatus === 'Pending',
+                        'badge-success': inward.approvalStatus === 'Approve',
+                        'badge-danger': inward.approvalStatus === 'Rejected'
+                      }">
+                                            {{ inward.approvalStatus || "-" }}
+                                        </span>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Action Buttons -->
+                                <ng-container matColumnDef="action" stickyEnd>
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef>Action</th>
+                                    <td mat-cell *matCellDef="let inward">
+                                        <div class="d-flex align-items-center">
+                                            <a mat-icon-button href="javascript:void(0)"
+                                                (click)="getInwardDetails(inward.id)" matTooltip="View">
+                                                <img src="assets/img/DashboardIcons/eye-svgrepo-com (1) 1.svg">
+                                            </a>
+                                            <a mat-icon-button href="javascript:void(0)" matTooltip="Edit"
+                                                *ngIf="editAccess" (click)="editInward(inward.id)"
+                                                [disabled]="inward.approvalStatus !== 'Pending' || inward.outwardId">
+                                                <img src="assets/img/DashboardIcons/Edit.svg">
+                                            </a>
+
+                                            <a mat-icon-button href="javascript:void(0)" *ngIf="
+                                                              deleteAccess  " [disabled]="
+                                                                inward.approvalStatus != 'Pending' || inward.outwardId != null
+                                                              " matTooltip="Delete"
+                                                (click)="deleteConfirmInward(inward.id)">
+                                                <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                            </a>
+
+                                            <!-- Delete -->
+                                            <!-- <button
+                        mat-icon-button
+                        color="warn"
+                        *ngIf="deleteAccess"
+                        
+                        matTooltip="Delete"
+                        (click)="deleteConfirmInward(inward.id)"
+                        [disabled]="inward.approvalStatus !== 'Pending' || inward.outwardId"
+                      >
+                        <mat-icon>delete</mat-icon>
+                      </button> -->
+
+                                            <!-- Add MAC -->
+                                            <button mat-icon-button color="accent" (click)="addMACC(inward)"
+                                                matTooltip="Add MAC Address" [disabled]="
+                          (inward.approvalStatus === 'Pending' && inward.status === 'INACTIVE') ||
+                          inward.approvalStatus === 'Approve' ||
+                          inward.approvalStatus === 'Rejected' ||
+                          inward.outwardId
+                        ">
+                                                <img src="assets/img/DashboardIcons/Add MAC.svg">
+
+                                            </button>
+
+                                            <!-- show mac address -->
+                                            <a mat-icon-button href="javascript:void(0)" matTooltip="Show MAC Address"
+                                                matTooltipPosition="above" (click)="addMAC(inward)">
+                                                <img src="assets/img/DashboardIcons/Status.svg">
+
+                                            </a>
+
+
+                                            <!-- Approve -->
+                                            <button mat-icon-button color="primary" matTooltip="Approve" (click)="
+                          approveChangeStatus(inward.id, inward.productId, inward.outwardId, inward)
+                        " [disabled]="
+                          (inward.approvalStatus === 'Pending' && inward.status === 'INACTIVE') ||
+                          inward.approvalStatus === 'Approve' ||
+                          inward.approvalStatus === 'Rejected'
+                        ">
+                                                <img src="assets/img/DashboardIcons/Assign.svg">
+                                            </button>
+
+                                            <!-- Reject -->
+                                            <button mat-icon-button color="warn" matTooltip="Reject"
+                                                (click)="rejectChangeStatus(inward.id, inward.productId)" [disabled]="
+                          (inward.approvalStatus === 'Pending' && inward.status === 'INACTIVE') ||
+                          inward.approvalStatus === 'Approve' ||
+                          inward.approvalStatus === 'Rejected'">
+                                                <img src="assets/img/DashboardIcons/Reject.svg" />
+
+                                            </button>
+
+                                            <!-- Upload Document -->
+                                            <button mat-icon-button color="accent" matTooltip="Upload File"
+                                                (click)="uploadDocument(inward)" [disabled]="
+                          (inward.approvalStatus === 'Pending' && inward.status === 'INACTIVE') ||
+                          inward.approvalStatus === 'Approve' ||
+                          inward.approvalStatus === 'Rejected' ||
+                          inward.outwardId
+                        "><img src="assets/img/DashboardIcons/Upload.svg">
+
+                                            </button>
+                                        </div>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Render rows -->
+                                <tr mat-header-row *matHeaderRowDef="getDisplayedPlanDetailsColumns()"></tr>
+                                <tr mat-row *matRowDef="let inward; columns: getDisplayedPlanDetailsColumns()"></tr>
+                            </table>
+                        </div>
+
+                        <mat-paginator [length]="productListdatatotalRecords" [pageSize]="productListdataitemsPerPage"
+                            [pageSizeOptions]="[5,10,20,50,100]" (page)="pageChangedProductList($event)"
+                            showFirstLastButtons>
+                        </mat-paginator>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </div>
+</div>
+<ng-template #AddEditDialog let-dialogRef="dialogRef">
+    <div class="dialog-container">
+        <div class="dialog-header">
+            {{ this.editMode ? "Update" : "Create" }} Inward
+            <span>
+                <a mat-icon-button mat-dialog-close>
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+            @if (!createAccess && !editAccess) {
+            <mat-card-content class="matcard-content">
+                <div class="panel-body table-responsive">
+                    Sorry you have not privilege to create operation!
+                </div>
+            </mat-card-content>
+            }
+
+            @if (createAccess || editAccess) {
+            <mat-card>
+                <mat-card-header>
+                    <mat-card-title>Basic Details</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <form [formGroup]="inwardFormGroup" class="mat-form">
+                        <div class="row" fxLayout="row" fxLayoutGap="16px" fxLayoutWrap>
+                            <!-- Inward Number -->
+                            <div *ngIf="editMode" class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Inward Number *</label>
+                                <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                    <input matInput class="input-p-5" placeholder="Enter Inward Number"
+                                        formControlName="inwardNumber" [readonly]="editMode" />
+                                    <mat-error
+                                        *ngIf="submitted && inwardFormGroup.controls.inwardNumber.errors?.required">
+                                        Inward Number is required.
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Product Dropdown -->
+                            <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Product *</label>
+                                <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                    <mat-select placeholder="Select a Product" class="input-p-5"
+                                        formControlName="productId" [disabled]="editMode"
+                                        (selectionChange)="getUnit($event)">
+                                        <mat-option *ngFor="let product of products" [value]="product.id">
+                                            {{ product.name }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error *ngIf="submitted && inwardFormGroup.controls.productId.errors?.required">
+                                        Product is required.
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Warehouse Dropdown -->
+                            <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Warehouse *</label>
+                                <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                    <mat-select placeholder="Select a Warehouse" class="input-p-5"
+                                        formControlName="destinationId" [disabled]="editMode">
+                                        <mat-option *ngFor="let warehouse of warehouses" [value]="warehouse.id">
+                                            {{ warehouse.name }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error
+                                        *ngIf="submitted && inwardFormGroup.controls.destinationId.errors?.required">
+                                        Warehouse is required.
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Unit (read-only) -->
+                            <div *ngIf="!editMode" class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Unit</label>
+                                <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                    <input matInput class="input-p-5" [disabled]="true" formControlName="unit" />
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Quantity -->
+                            <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Quantity in {{ unit }} *</label>
+                                <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                    <input matInput class="input-p-5" type="number" placeholder="Enter Quantity"
+                                        formControlName="inTransitQty" (keypress)="quantityInValidation($event)" />
+                                    <mat-error
+                                        *ngIf="submitted && inwardFormGroup.controls.inTransitQty.errors?.required">
+                                        Quantity is required.
+                                    </mat-error>
+                                    <mat-error *ngIf="showQtyError"> {{ qtyErroMsg }} </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Inward Date -->
+                            <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Inward Date *</label>
+                                <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                    <input matInput placeholder="Enter Inward Date" class="input-p-5"
+                                        [matDatepicker]="picker" formControlName="inwardDateTime"
+                                        [readonly]="editMode" />
+                                    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                                    <mat-datepicker #picker showSeconds="true"></mat-datepicker>
+                                    <mat-error
+                                        *ngIf="submitted && inwardFormGroup.controls.inwardDateTime.errors?.required">
+                                        Inward Date is required.
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Type Dropdown -->
+                            <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Type *</label>
+                                <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                    <mat-select placeholder="Select a Type" class="input-p-5" formControlName="type"
+                                        [disabled]="editMode">
+                                        <mat-option *ngFor="let t of types" [value]="t.value">{{ t.label }}</mat-option>
+                                    </mat-select>
+                                    <mat-error *ngIf="submitted && inwardFormGroup.controls.type.errors?.required">
+                                        Type is required.
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Status Dropdown -->
+                            <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Status *</label>
+                                <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                    <mat-select placeholder="Select a Status" class="input-p-5"
+                                        formControlName="status">
+                                        <mat-option *ngFor="let s of status" [value]="s.value">{{
+                                            s.label
+                                            }}</mat-option>
+                                    </mat-select>
+                                    <mat-error *ngIf="submitted && inwardFormGroup.controls.status.errors?.required">
+                                        Inward status is required.
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Unit (editMode) -->
+                            <div *ngIf="editMode" class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Unit</label>
+                                <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                    <input matInput class="input-p-5" [disabled]="true" formControlName="unit" />
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Warranty Dates (OEM Consideration) -->
+                            <div *ngIf="hasOEMConsider" class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Warranty Start Date</label>
+                                <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                    <input matInput class="input-p-5" [matDatepicker]="startpicker"
+                                        placeholder="Select start date" formControlName="startDateTime"
+                                        (dateChange)="calculateExpiryDateTime()" />
+                                    <mat-datepicker-toggle matSuffix [for]="startpicker"></mat-datepicker-toggle>
+                                    <mat-datepicker #startpicker></mat-datepicker>
+                                </mat-form-field>
+                            </div>
+                            <div *ngIf="hasOEMConsider" class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Warranty Expiry Date</label>
+                                <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                    <input matInput [matDatepicker]="endpicker" placeholder="Select expiry date"
+                                        formControlName="expiryDateTime" class="input-p-5" readonly />
+                                    <!-- <mat-datepicker-toggle matSuffix [for]="endpicker"></mat-datepicker-toggle>
+                  <mat-datepicker #endpicker></mat-datepicker> -->
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                <label class="inputLabel">Description *</label>
+                                <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                    <textarea matInput class="input-p-5" rows="3" placeholder="Enter Description"
+                                        formControlName="description"></textarea>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                    </form>
+                </mat-card-content>
+            </mat-card>
+
+            @if (specificationParametersDTOList?.controls?.length > 0) {
+            <mat-card>
+                <mat-card-header>
+                    <mat-card-title>Inventory Specification Parameter Details</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <form [formGroup]="specificationParametersDTO">
+                        <div class="table-responsive tableAddEditScrollHeight example-container">
+                            <table mat-table [dataSource]="specificationParametersDTOList.controls"
+                                class="mat-table w-100">
+                                <!-- Parameter Column -->
+                                <ng-container matColumnDef="paramName">
+                                    <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Parameter</th>
+                                    <td mat-cell *matCellDef="let parameter" style="padding-left: 40px">
+                                        {{ parameter.get("paramName").value }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Mandatory Column -->
+                                <ng-container matColumnDef="isMandatory">
+                                    <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Mandatory</th>
+                                    <td mat-cell *matCellDef="let parameter">
+                                        <mat-checkbox [formControl]="parameter.get('isMandatory')"
+                                            [disabled]="true"></mat-checkbox>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Value Column -->
+                                <ng-container matColumnDef="paramValue">
+                                    <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Value</th>
+                                    <td mat-cell *matCellDef="let parameter" style="text-align: center">
+                                        <!-- Single value -->
+                                        <ng-container *ngIf="!parameter.get('isMultiValueParam').value">
+                                            <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                                <input matInput class="input-p-5" placeholder="Enter Param Value"
+                                                    [formControl]="parameter.get('paramValue')" />
+                                            </mat-form-field>
+                                        </ng-container>
+
+                                        <!-- Multi-value Dropdown -->
+                                        <ng-container *ngIf="parameter.get('isMultiValueParam').value">
+                                            <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                                <mat-select class="input-p-5"
+                                                    [formControl]="parameter.get('paramValue')"
+                                                    placeholder="Select Parameter">
+                                                    <mat-option
+                                                        *ngFor="let option of parameter.get('paramValues').value"
+                                                        [value]="option.value">
+                                                        {{ option.label }}
+                                                    </mat-option>
+                                                </mat-select>
+                                            </mat-form-field>
+                                        </ng-container>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Header and Row -->
+                                <tr mat-header-row *matHeaderRowDef="displayedinventoryColumns"></tr>
+                                <tr mat-row *matRowDef="let row; columns: displayedinventoryColumns"></tr>
+                            </table>
+                        </div>
+                    </form>
+                </mat-card-content>
+            </mat-card>
+            }
+            }
+        </div>
+        <div style="gap: 8px" class="dialog-action-adjust d-flex justify-content-end">
+            <button class="search-btn" mat-button mat-flat-button color="primary" class="search-btn"
+                (click)="submit(dialogRef)" [disabled]="this.showQtyError || !inwardFormGroup.valid">
+                Save
+            </button>
+            <button mat-stroked-button mat-dialog-close>Close</button>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #detailsDialog let-dialogRef="dialogRef">
+    <div class="dialog-container">
+        <div class="dialog-header">
+            {{ viewInwardsDetails.inwardNumber }} Inward
+            <span>
+                <a mat-icon-button mat-dialog-close>
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+            <mat-card>
+                <mat-card-header>
+                    <mat-card-title>Basic Details</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="row">
+                        <div class="col-lg-4 col-md-4">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Inward Name </span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">
+                                    <span>{{ viewInwardsDetails.productId.name }}</span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Quantity </span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">
+                                    <span>{{ viewInwardsDetails.qty }}</span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Transit Quality </span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">
+                                    <span>{{ viewInwardsDetails.inTransitQty }}</span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4 col-md-4">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Status </span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">
+                                    <span>{{ viewInwardsDetails.status }}</span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Destination Type </span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">
+                                    <span>{{ viewInwardsDetails.destinationType }}</span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Destination </span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">
+                                    <span>{{ viewInwardsDetails.destination }}</span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4 col-md-4">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Category Type </span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">
+                                    <span>{{ viewInwardsDetails.categoryType }}</span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Source </span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">
+                                    <span>{{ viewInwardsDetails.source }}</span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Source Type </span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">
+                                    <span>{{ viewInwardsDetails.sourceType }}</span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4 col-md-4">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Inward Date </span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">
+                                    <span>{{ viewInwardsDetails.inwardDateTime }}</span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Warranty Start Date </span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">
+                                    @if (viewInwardsDetails.startDateTime != null) {
+                                    <span>{{ viewInwardsDetails.startDateTime }}</span>
+                                    }
+                                    @if (viewInwardsDetails.startDateTime == null) {
+                                    <span>-</span>
+                                    }
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-4">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Warranty End Date </span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">
+                                    @if (viewInwardsDetails.expiryDateTime != null) {
+                                    <span>{{ viewInwardsDetails.expiryDateTime }}</span>
+                                    }
+                                    @if (viewInwardsDetails.expiryDateTime == null) {
+                                    <span>-</span>
+                                    }
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4 col-md-4">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">Description </span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">
+                                    <span>{{ viewInwardsDetails.description }}</span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+
+            @if (viewInwardsDetails.specificationParametersDTOList?.length > 0) {
+            <mat-card>
+                <mat-card-header>
+                    <mat-card-title>Inventory Specification Parameter Details</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="table-responsive tableViewScrollHeight example-container">
+                        <table mat-table [dataSource]="viewInwardsDetails.specificationParametersDTOList"
+                            class="mat-elevation-z2 w-100">
+                            <!-- Parameter Column -->
+                            <ng-container matColumnDef="paramName">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Parameter</th>
+                                <td mat-cell *matCellDef="let element">{{ element.paramName }}</td>
+                            </ng-container>
+
+                            <!-- Mandatory Column -->
+                            <ng-container matColumnDef="isMandatory">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Mandatory</th>
+                                <td mat-cell *matCellDef="let element">
+                                    {{ element.isMandatory ? "Yes" : "No" }}
+                                </td>
+                            </ng-container>
+
+                            <!-- Value Column -->
+                            <ng-container matColumnDef="paramValue">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Value</th>
+                                <td mat-cell *matCellDef="let element">{{ element.paramValue }}</td>
+                            </ng-container>
+
+                            <!-- Header + Row -->
+                            <tr mat-header-row *matHeaderRowDef="displayedinventoryColumns"></tr>
+                            <tr mat-row *matRowDef="let row; columns: displayedinventoryColumns"></tr>
+                        </table>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+            }
+            @if (viewInwardsDetails.itemList?.length > 0) {
+            <mat-card>
+                <mat-card-header>
+                    <mat-card-title>Item Details</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="table-responsive tableViewScrollHeight example-container">
+                        <table mat-table [dataSource]="viewInwardsDetails.itemList" class="mat-elevation-z2 w-100">
+                            <!-- AssetId Column -->
+                            <ng-container matColumnDef="assetId">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>AssetId</th>
+                                <td mat-cell *matCellDef="let element">{{ element.assetId }}</td>
+                            </ng-container>
+
+                            <!-- Mac Address Column -->
+                            <ng-container matColumnDef="macAddress">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Mac Address</th>
+                                <td mat-cell *matCellDef="let element">{{ element.macAddress }}</td>
+                            </ng-container>
+
+                            <!-- Serial Number Column -->
+                            <ng-container matColumnDef="serialNumber">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Serial Number</th>
+                                <td mat-cell *matCellDef="let element">{{ element.serialNumber }}</td>
+                            </ng-container>
+
+                            <!-- Warranty Status Column -->
+                            <ng-container matColumnDef="oemWarrantyStatus">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Warranty Status</th>
+                                <td mat-cell *matCellDef="let element">{{ element.oemWarrantyStatus }}</td>
+                            </ng-container>
+
+                            <!-- Warranty Period Column -->
+                            <ng-container matColumnDef="oemWarrantyRemainingDays">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Warranty Period</th>
+                                <td mat-cell *matCellDef="let element">{{ element.oemWarrantyRemainingDays }}</td>
+                            </ng-container>
+
+                            <!-- Header and Row -->
+                            <tr mat-header-row *matHeaderRowDef="displayedItemsColumns"></tr>
+                            <tr mat-row *matRowDef="let row; columns: displayedItemsColumns"></tr>
+                        </table>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+            }
+        </div>
+        <div style="gap: 8px" class="dialog-action-adjust d-flex justify-content-end">
+            <button mat-stroked-button mat-dialog-close>Close</button>
+        </div>
+    </div>
+</ng-template>
+
+<!-- MACShowModal -->
+<ng-template #MACShowModalDialog>
+    <div class="dialog-container">
+        <div class="dialog-header">
+            Inward MAC Mapping
+            <span>
+                <a mat-icon-button (click)="MACShowModalDialogClose()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+            <mat-card>
+                <mat-card-content class="mat-card-content-border">
+                    <div class="row">
+                        <div class="col-lg-2 col-md-2">
+                            <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                <mat-select placeholder="Select a Option" class="input-p-5" [(ngModel)]="searchOption"
+                                    (selectionChange)="selSearchOption($event.value)">
+                                    <mat-option *ngFor="let opt of macOptionSelect" [value]="opt.value">
+                                        {{ opt.label }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Conditional Inputs -->
+                        <div class="col-lg-2 col-md-2" *ngIf="searchOption === 'itemId'">
+                            <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                <input matInput placeholder="Enter Item ID" class="input-p-5"
+                                    [(ngModel)]="searchMacDeatil" (keydown.enter)="searchMac()" />
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-lg-2 col-md-2" *ngIf="searchOption === 'mac'">
+                            <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                <input matInput placeholder="Enter MAC" class="input-p-5" [(ngModel)]="searchMacDeatil"
+                                    (keydown.enter)="searchMac()" />
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-lg-2 col-md-2" *ngIf="searchOption === 'serialNumber'">
+                            <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                <input matInput placeholder="Enter Serial Number" class="input-p-5"
+                                    [(ngModel)]="searchMacDeatil" (keydown.enter)="searchMac()" />
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-lg-2 col-md-2" *ngIf="searchOption === 'assetId'">
+                            <label class="inputLabel">Enter Asset Id</label>
+                            <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                <input matInput placeholder="Enter Asset ID" class="input-p-5"
+                                    [(ngModel)]="searchMacDeatil" (keydown.enter)="searchMac()" />
+                            </mat-form-field>
+                        </div>
+
+                        <div class="col-lg-2 col-md-2" *ngIf="searchOption === 'itemType'">
+                            <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                <input matInput placeholder="Enter Item Type" class="input-p-5"
+                                    [(ngModel)]="searchMacDeatil" (keydown.enter)="searchMac()" />
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Search & Clear Buttons -->
+                        <div class="col-lg-2 col-md-2 d-flex align-items-center gap-2" style="margin-bottom: 13px;">
+                            <button class="search-btn" mat-button mat-flat-button color="primary" class="search-btn"
+                                (click)="searchMac()" [disabled]="!searchMacDeatil">
+                                Search
+                            </button>
+                            <button class="search-btn" mat-stroked-button matButton="outlined" class="search-btn"
+                                (click)="clearMac()">
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+            <mat-card>
+                <mat-card-content class="mat-card-content-border">
+                    <table #inwardMactable mat-table [dataSource]="inwardMacList" class="mat-elevation-z2" matSort>
+                        <!-- Item Id -->
+                        <ng-container matColumnDef="id">
+                            <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef mat-sort-header>
+                                Item Id
+                            </th>
+                            <td mat-cell *matCellDef="let row" (click)="InventoryDetails(row.id)">
+                                {{ row.id }}
+                            </td>
+                        </ng-container>
+
+                        <!-- MAC Address -->
+                        <ng-container matColumnDef="macAddress" *ngIf="hasMac">
+                            <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>MAC Address</th>
+                            <td mat-cell *matCellDef="let row">{{ row.macAddress }}</td>
+                        </ng-container>
+
+                        <!-- Serial Number -->
+                        <ng-container matColumnDef="serialNumber" *ngIf="hasSerial">
+                            <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Serial Number</th>
+                            <td mat-cell *matCellDef="let row">{{ row.serialNumber }}</td>
+                        </ng-container>
+
+                        <!-- Asset Id -->
+                        <ng-container matColumnDef="assetId">
+                            <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Asset Id</th>
+                            <td mat-cell *matCellDef="let row">{{ row.assetId || "-" }}</td>
+                        </ng-container>
+
+                        <!-- Item Type -->
+                        <ng-container matColumnDef="condition">
+                            <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Item Type</th>
+                            <td mat-cell *matCellDef="let row">{{ row.condition || "-" }}</td>
+                        </ng-container>
+
+                        <!-- Action -->
+                        <ng-container matColumnDef="action">
+                            <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Action</th>
+                            <td mat-cell *matCellDef="let row">
+                                <a mat-icon-button href="javascript:void(0)" (click)="deleteShowMACMapping(row)">
+                                    <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                </a>
+                            </td>
+                        </ng-container>
+
+                        <!-- Render Rows -->
+                        <tr mat-header-row *matHeaderRowDef="displayedMacShowColumns"></tr>
+                        <tr mat-row *matRowDef="let row; columns: displayedMacShowColumns"></tr>
+                    </table>
+
+                    <!-- Paginator -->
+                    <mat-paginator [length]="inwardMappingListdatatotalRecords"
+                        [pageSize]="inwardMappingListitemsPerPage" [pageSizeOptions]="[5,10,20,50,100]"
+                        (page)="paginate($event)" showFirstLastButtons>
+                    </mat-paginator>
+                </mat-card-content>
+            </mat-card>
+        </div>
+        <div style="gap: 8px" class="dialog-action-adjust d-flex justify-content-end">
+            <button mat-stroked-button (click)="MACShowModalDialogClose()">Close</button>
+        </div>
+    </div>
+</ng-template>
+
+<!-- addMACaddress -->
+<ng-template #addMACaddressDialog let-dialogRef="dialogRef">
+    <div class="dialog-container">
+        <div class="dialog-header">
+            Inward Item MAC Mapping
+            <span>
+                <a mat-icon-button mat-dialog-close>
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+            <mat-card>
+                <mat-card-content>
+                    <form [formGroup]="macForm">
+                        <div class="table-responsive tableAddEditScrollHeight example-container">
+                            <table mat-table [dataSource]="dataSourceData">
+                                <!-- MAC Address Input -->
+                                <ng-container matColumnDef="macAddress" *ngIf="this.hasMac">
+                                    <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>MAC Address</th>
+                                    <td mat-cell *matCellDef="let row">
+                                        <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                            <input matInput class="input-p-5" formControlName="macAddress"
+                                                placeholder="Enter MAC Address" />
+                                            <mat-error
+                                                *ngIf="macSubmitted && macForm.controls['macAddress'].hasError('required')">
+                                                MAC Address is required.
+                                            </mat-error>
+                                        </mat-form-field>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Serial Number Input -->
+                                <ng-container matColumnDef="serialNumber" *ngIf="this.hasSerial">
+                                    <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Serial Number</th>
+                                    <td mat-cell *matCellDef="let row">
+                                        <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                            <input matInput class="input-p-5" formControlName="serialNumber"
+                                                placeholder="Enter Serial Number" />
+                                            <mat-error *ngIf="
+                          macSubmitted && macForm.controls['serialNumber'].hasError('required')
+                        ">
+                                                Serial Number is required.
+                                            </mat-error>
+                                        </mat-form-field>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Action Button -->
+                                <ng-container matColumnDef="actions">
+                                    <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>ADD</th>
+                                    <td mat-cell *matCellDef="let row">
+                                        <button mat-button mat-flat-button color="'primary'" class="addarea-btn"
+                                            type="submit" (click)="onAddAttributee()">
+                                            Add
+                                        </button>
+                                    </td>
+                                </ng-container>
+
+                                <tr mat-header-row *matHeaderRowDef="displayedAddMacColumns"></tr>
+                                <tr mat-row *matRowDef="let row; columns: displayedAddMacColumns"></tr>
+                            </table>
+                        </div>
+                    </form>
+                    <div class="table-responsive tableAddEditScrollHeight example-container">
+                        <table mat-table #addMacTableTable mat-table [dataSource]="inwardMacList"
+                            class="mat-elevation-z2 w-100">
+                            <!-- MAC -->
+                            <ng-container matColumnDef="macAddress" *ngIf="this.hasMac">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>MAC Address</th>
+                                <td mat-cell *matCellDef="let product">
+                                    <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                        <input matInput class="input-p-5" placeholder="MAC Address"
+                                            [value]="isEditMode ? selectedProductForEdit?.macAddress : product.macAddress"
+                                            [disabled]="!isEditMode" />
+                                    </mat-form-field>
+                                </td>
+                            </ng-container>
+
+                            <!-- Serial -->
+                            <ng-container matColumnDef="serialNumber" *ngIf="this.hasSerial">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Serial Number</th>
+                                <td mat-cell *matCellDef="let product">
+                                    <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                        <input matInput class="input-p-5" placeholder="Serial Number" [value]="
+                        isEditMode ? selectedProductForEdit?.serialNumber : product.serialNumber
+                      " [disabled]="!isEditMode" />
+                                    </mat-form-field>
+                                </td>
+                            </ng-container>
+
+                            <!-- Actions -->
+                            <ng-container matColumnDef="actions">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Actions</th>
+                                <td mat-cell *matCellDef="let product">
+                                    <a mat-icon-button href="javascript:void(0)"
+                                        (click)="deleteMACMapping(product.itemId)">
+                                        <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                    </a>
+                                </td>
+                            </ng-container>
+
+                            <tr mat-header-row *matHeaderRowDef="displayedAddMacColumns"></tr>
+                            <tr mat-row *matRowDef="let row; columns: displayedAddMacColumns"></tr>
+                        </table>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+        <div style="gap: 8px" class="dialog-action-adjust d-flex justify-content-end">
+            <button mat-button mat-flat-button color="'primary'" class="addarea-btn" type="submit"
+                (click)="addMacMapping(dialogRef)">
+                Save
+            </button>
+            <button mat-stroked-button mat-dialog-close>Close</button>
+        </div>
+    </div>
+</ng-template>
+
+<!-- approveChangeStatusModal -->
+<ng-template #approveChangeStatusModalDialog let-dialogRef="dialogRef">
+    <div class="dialog-container">
+        <div class="dialog-header">
+            Approve
+            <span>
+                <a mat-icon-button mat-dialog-close>
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+            <form [formGroup]="assignInwardForm">
+                <div class="row">
+                    <div class="col-lg-12 col-md-13 col-xs-12">
+                        <label class="f-w-600">Remark*:</label>
+                        <br />
+                        <mat-form-field appearance="outline" class="mat-form-field w-100">
+                            <textarea matInput class="input-p-5" placeholder="Enter Remark" formControlName="remark"
+                                rows="3"></textarea>
+                            <mat-error *ngIf="
+                  assignInwardSubmitted && assignInwardForm.controls['remark'].hasError('required')
+                ">
+                                Remark is required.
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div style="gap: 8px" class="dialog-action-adjust d-flex justify-content-end">
+            <button mat-button mat-flat-button color="'primary'" class="addarea-btn" type="submit"
+                (click)="approveInward(dialogRef)">
+                Approve
+            </button>
+            <button mat-stroked-button mat-dialog-close>Close</button>
+        </div>
+    </div>
+</ng-template>
+
+<!-- rejectChangeStatusModal -->
+<ng-template #rejectChangeStatusModalDialog let-dialogRef="dialogRef">
+    <div class="dialog-container">
+        <div class="dialog-header">
+            Reject Approval
+            <span>
+                <a mat-icon-button mat-dialog-close>
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+            <form [formGroup]="rejectInwardForm">
+                <div class="row">
+                    <div class="col-lg-12 col-md-12 col-xs-12">
+                        <label class="f-w-600">Remark*:</label>
+                        <br />
+                        <mat-form-field appearance="outline" class="mat-form-field w-100">
+                            <textarea matInput class="input-p-5" placeholder="Enter Remark" formControlName="remark"
+                                rows="3"></textarea>
+                            <mat-error *ngIf="
+                  rejectInwardSubmitted && rejectInwardForm.controls['remark'].hasError('required')
+                ">
+                                Remark is required.
+                            </mat-error>
+                        </mat-form-field>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div style="gap: 8px" class="dialog-action-adjust d-flex justify-content-end">
+            <button mat-button mat-flat-button color="'primary'" class="addarea-btn" type="submit"
+                (click)="rejectInward(dialogRef)">
+                Reject
+            </button>
+            <button mat-stroked-button mat-dialog-close>Close</button>
+        </div>
+    </div>
+</ng-template>
+
+<!-- inventoryDetailModal -->
+<ng-template #inventoryDetailModalDialog let-dialogRef="dialogRef">
+    <div class="dialog-container">
+        <div class="dialog-header">
+            Inventory Detail
+            <span>
+                <a mat-icon-button mat-dialog-close>
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+            <mat-card>
+                <mat-card-header>
+                    <mat-card-title>Inventory Specification Parameter Details</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="table-responsive tableViewScrollHeight example-container">
+                        <table mat-table [dataSource]="inventorySpecificationDetails" class="mat-elevation-z2 w-100">
+                            <!-- Parameter Column -->
+                            <ng-container matColumnDef="paramName">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Parameter</th>
+                                <td mat-cell *matCellDef="let element">{{ element.paramName }}</td>
+                            </ng-container>
+
+                            <!-- Mandatory Column -->
+                            <ng-container matColumnDef="isMandatory">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Mandatory</th>
+                                <td mat-cell *matCellDef="let element">{{ element.isMandatory ? "Yes" : "No" }}</td>
+                            </ng-container>
+
+                            <!-- Value Column -->
+                            <ng-container matColumnDef="paramValue">
+                                <th mat-header-cell class="f-w-600 f-s-15" *matHeaderCellDef>Value</th>
+                                <td mat-cell *matCellDef="let element">{{ element.paramValue }}</td>
+                            </ng-container>
+
+                            <!-- Header + Row -->
+                            <tr mat-header-row *matHeaderRowDef="displayedinventoryColumns"></tr>
+                            <tr mat-row *matRowDef="let row; columns: displayedinventoryColumns"></tr>
+                        </table>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+        <div style="gap: 8px" class="dialog-action-adjust d-flex justify-content-end">
+            <button mat-stroked-button mat-dialog-close>Close</button>
+        </div>
+    </div>
+</ng-template>
+
+<!-- isBuldUpload -->
+<ng-template #isBuldUploadDialog let-dialogRef="dialogRef">
+    <div class="dialog-container" style="width: 900px; max-width: 90vw; max-height: 90vh; overflow-y: auto">
+        <!-- Header -->
+        <div class="dialog-header">
+            Bulk Add
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="closed(dialogRef)">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <!-- Dialog Content -->
+        <div mat-dialog-content>
+
+            <!-- Upload Section -->
+            <form [formGroup]="uploadDocForm">
+                <mat-card class="mb-3">
+                    <mat-card-content>
+                        <div class="row">
+
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                <label class="inputLabel">Select files to upload *</label>
+
+                                <input class="input-p-5" type="file" formControlName="file"
+                                    (change)="onFileChangeUpload($event)" multiple accept=".csv,text/csv"
+                                    placeholder="Select Attachment" />
+
+                                <!-- Selected Files Preview -->
+                                @for (file of selectedFileUploadPreview; track file; let i = $index) {
+                                <div class="d-flex align-items-center mt-2 p-2 border rounded">
+                                    <span>{{ file?.name }}</span>
+                                    <button mat-icon-button color="warn" type="button"
+                                        (click)="deletUploadedFile(file?.name)">
+                                        <mat-icon>close</mat-icon>
+                                    </button>
+                                </div>
+                                }
+
+                                <!-- Validation -->
+                                @if (submitted && uploadDocForm.controls.file.errors) {
+                                <div class="text-danger mt-2">
+                                    @if (uploadDocForm.controls.file.errors.required) {
+                                    <div>File is required.</div>
+                                    }
+                                </div>
+                                }
+
+                            </div>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+            </form>
+
+            <!-- Skipped Records Section -->
+            @if (showSkippedTable) {
+            <mat-card>
+
+                <mat-card-header>
+                    <div class="d-flex justify-content-between align-items-center w-100">
+                        <mat-card-title>Skipping Row Details</mat-card-title>
+
+                        <button mat-icon-button color="primary" matTooltip="Refresh"
+                            (click)="getSkipRecord(uploadInwardId)">
+                            <img src="assets/img/DashboardIcons/Refresh.svg" alt="Refresh">
+                        </button>
+                    </div>
+                </mat-card-header>
+
+                <mat-card-content>
+
+                    <div class="table-responsive example-container">
+
+                        <!-- Table -->
+                        <table mat-table [dataSource]="getData" class="mat-elevation-z2 w-100" matSort>
+
+                            @for (column of displayedMacShowColumns2; track column.field) {
+                            <ng-container [matColumnDef]="column.field">
+                                <th mat-header-cell *matHeaderCellDef>
+                                    {{ column.header }}
+                                </th>
+                                <td mat-cell *matCellDef="let element">
+                                    {{ element[column.field] }}
+                                </td>
+                            </ng-container>
+                            }
+
+                            <tr mat-header-row *matHeaderRowDef="displayedMacShowColumnsFields">
+                            </tr>
+
+                            <tr mat-row *matRowDef="let row; columns: displayedMacShowColumnsFields">
+                            </tr>
+
+                        </table>
+
+                        <!-- No Record -->
+                        <div *ngIf="!skippedTotalRecords || skippedTotalRecords === 0" class="text-center mt-4">
+                            No Record Found.
+                        </div>
+
+                    </div>
+
+                    <!-- Paginator -->
+                    <mat-paginator [length]="skippedTotalRecords" [pageSize]="skiptemsPerPage"
+                        [pageSizeOptions]="[5,10,20,50,100]" (page)="pageChangedSkipList($event)" showFirstLastButtons>
+                    </mat-paginator>
+
+                </mat-card-content>
+            </mat-card>
+            }
+
+        </div>
+
+        <!-- Actions -->
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+            <button mat-flat-button color="primary" class="button-normal" type="button"
+                (click)="uploadDocuments(dialogRef)">
+                Upload
+            </button>
+
+            <button mat-stroked-button mat-dialog-close (click)="closed(dialogRef)">
+                Close
+            </button>
+        </div>
+
+    </div>
+</ng-template>
+
+<ng-template #confirmDialog let-data>
+    <div class="dialog-container">
+        <div class="dialog-header dialog-header-titleFont">
+            {{ data.title || "Delete Confirmation" }}
+            <span class="w-h-18">
+                <a mat-icon-button href="javascript:void(0)" mat-dialog-close="false">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+            <p class="dialog-description">{{ data.description }}</p>
+
+            <div mat-dialog-actions class="p-0">
+                <button mat-flat-button type="button" class="primary" [mat-dialog-close]="true">
+                    {{ data.yesLabel || "Confirm" }}
+                </button>
+                <button mat-stroked-button matButton="outlined" color="primary" mat-dialog-close="false">
+                    {{ data.noLabel || "Cancel" }}
+                </button>
+            </div>
+        </div>
+    </div>
+</ng-template>
+
+<!-- <div class="row">
+  <div class="col-md-12">
+    <div class="panel top">
+      <div class="panel-heading">
+        <h3 class="panel-title">Inwards</h3>
+        <div class="right">
+          <button
+            type="button"
+            class="btn-toggle-collapse"
+            data-toggle="collapse"
+            data-target="#searchInward"
+            aria-expanded="false"
+            aria-controls="searchInward"
+          >
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+      <div id="searchInward" class="panel-collapse collapse in">
+        <div class="panel-body">
+          <div class="row">
+            <div class="col-lg-3 col-md-3">
+              <p-dropdown
+                (onChange)="selSearchOption($event)"
+                [(ngModel)]="searchInward1"
+                [filter]="true"
+                [options]="searchOptionSelect"
+                filterBy="label"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Select a Search Option"
+              ></p-dropdown>
+            </div>
+            @if (
+              searchOption != "status" &&
+              searchOption != "cafStatus" &&
+              searchOption != "custtype" &&
+              searchOption != "currentAssigneeName" &&
+              searchOption != "cafCreatedDate" &&
+              searchOption != "currentAssignedTeam"
+            ) {
+              <div class="col-lg-3 col-md-3 m-b-10">
+                <input
+                  [(ngModel)]="searchInward"
+                  class="form-control"
+                  id="username"
+                  placeholder="Enter Search Detail"
+                  type="text"
+                  (keydown.enter)="searchInwardData()"
+                />
+              </div>
+            }
+            @if (searchOption === "status" || searchOption === "cafStatus") {
+              <div class="col-lg-3 col-md-3 m-b-10">
+                <p-dropdown
+                  [options]="commondropdownService.CustomerStatusValue"
+                  optionValue="value"
+                  optionLabel="text"
+                  filter="true"
+                  filterBy="text"
+                  placeholder="Select a Status"
+                  [(ngModel)]="searchInward"
+                ></p-dropdown>
+              </div>
+            }
+            @if (searchOption === "custtype") {
+              <div class="col-lg-3 col-md-3 m-b-10">
+                <p-dropdown
+                  [options]="commondropdownService.customerTypeSearchOption"
+                  optionValue="value"
+                  optionLabel="label"
+                  filter="true"
+                  filterBy="label"
+                  placeholder="Select a Customer Type"
+                  [(ngModel)]="searchInward"
+                ></p-dropdown>
+              </div>
+            }
+            @if (searchOption === "currentAssigneeName") {
+              <div class="col-lg-3 col-md-3 m-b-10">
+                <p-dropdown
+                  [options]="commondropdownService.activeStaffList"
+                  optionValue="username"
+                  optionLabel="username"
+                  filter="true"
+                  filterBy="username"
+                  placeholder="Select a Assigned Staff"
+                  [(ngModel)]="searchInward"
+                ></p-dropdown>
+              </div>
+            }
+            @if (searchOption === "currentAssignedTeam") {
+              <div class="col-lg-3 col-md-3 m-b-10">
+                <p-dropdown
+                  [options]="commondropdownService.teamListData"
+                  optionValue="name"
+                  optionLabel="name"
+                  filter="true"
+                  filterBy="name"
+                  placeholder="Select a Assigned Team"
+                  [(ngModel)]="searchInward"
+                ></p-dropdown>
+              </div>
+            }
+            <div class="col-lg-3 col-md-4 marginTopSearchBtn">
+              <button
+                type="button"
+                class="btn btn-primary"
+                id="searchbtn"
+                (click)="searchInwardData()"
+              >
+                <i class="fa fa-search"></i>
+                Search
+              </button>
+              <button
+                type="reset"
+                class="btn btn-default"
+                id="searchbtn"
+                (click)="clearSearchInward()"
+              >
+                 <img src="assets/img/DashboardIcons/Refresh.svg" />
+                Clear
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="panel-body no-padding panel-udata">
+          @if (createAccess) {
+            <div class="pcol col-md-6">
+              <div class="dbox">
+                <a (click)="createWareHouse()" class="curson_pointer">
+                  <img src="../../../assets/img/i01.png" style="width: 32px" />
+                  <h5>Create Inward</h5>
+                </a>
+              </div>
+            </div>
+          }
+          <div class="pcol col-md-6">
+            <div class="dbox">
+              <a (click)="this.clearSearchInward()" class="curson_pointer">
+                <img src="../../../assets/img/i01.png" style="width: 32px" />
+                <h5>Search Inward</h5>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> -->
+<!-- <div class="row">
+
+
+  @if (this.createView) {
+    <div class="col-md-12">
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">{{ this.editMode ? "Update" : "Create" }} Inward</h3>
+          <div class="right">
+            <button
+              type="button"
+              class="btn-toggle-collapse"
+              data-toggle="collapse"
+              data-target="#createInward"
+              aria-expanded="false"
+              aria-controls="createInward"
+            >
+              <i class="fa fa-minus-circle"></i>
+            </button>
+          </div>
+        </div>
+        <div id="createInward" class="panel-collapse collapse in">
+          <div class="panel-body">
+            <div>
+              <form [formGroup]="inwardFormGroup">
+                <fieldset style="margin-top: 0px">
+                  <legend>Basic Details</legend>
+                  <div class="boxWhite">
+                    <div class="row">
+                      @if (this.editMode) {
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                          <div class="form-group">
+                            <label>Inwared Number *</label>
+                            <input
+                              type="text"
+                              class="form-control"
+                              placeholder="Enter Inward Number"
+                              formControlName="inwardNumber"
+                              [readonly]="this.editMode"
+                              [ngClass]="{
+                                'is-invalid':
+                                  submitted && inwardFormGroup.controls.inwardNumber.errors
+                              }"
+                            />
+                            @if (submitted && inwardFormGroup.controls.inwardNumber.errors) {
+                              <div class="errorWrap text-danger">
+                                @if (
+                                  submitted && inwardFormGroup.controls.inwardNumber.errors.required
+                                ) {
+                                  <div class="error text-danger">Inward Number is required.</div>
+                                }
+                              </div>
+                            }
+                          </div>
+                        </div>
+                      }
+                      <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                        <div class="form-group">
+                          <label>Product*</label>
+                          <p-dropdown
+                            [options]="this.products"
+                            formControlName="productId"
+                            optionLabel="name"
+                            optionValue="id"
+                            filter="true"
+                            filterBy="name"
+                            [disabled]="this.editMode"
+                            placeholder="Select Product"
+                            (onChange)="getUnit($event)"
+                          >
+                          </p-dropdown>
+                          @if (submitted && inwardFormGroup.controls.productId.errors) {
+                            <div class="errorWrap text-danger">
+                              @if (
+                                submitted && inwardFormGroup.controls.productId.errors.required
+                              ) {
+                                <div class="error text-danger">Product is required.</div>
+                              }
+                            </div>
+                          }
+                        </div>
+                      </div>
+                      <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                        <div class="form-group">
+                          <label>Warehouse *</label>
+                          <p-dropdown
+                            [options]="this.warehouses"
+                            formControlName="destinationId"
+                            optionLabel="name"
+                            optionValue="id"
+                            placeholder="Select Warehouse"
+                            [disabled]="this.editMode"
+                            filter="true"
+                            filterBy="name"
+                          ></p-dropdown>
+                          @if (submitted && inwardFormGroup.controls.destinationId.errors) {
+                            <div class="errorWrap text-danger">
+                              @if (
+                                submitted && inwardFormGroup.controls.destinationId.errors.required
+                              ) {
+                                <div class="error text-danger">Warehouse is required.</div>
+                              }
+                            </div>
+                          }
+                        </div>
+                      </div>
+
+                      <div *ngIf="!this.editMode" class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                        <div class="form-group">
+                          <label>Unit</label>
+                          <input
+                            type="text"
+                            [disabled]="true"
+                            class="form-control"
+                            formControlName="unit"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                        <div class="form-group">
+                          <label>Quantity in {{ this.unit }} *</label>
+                          @if (this.editMode) {
+                            <label>
+                              &nbsp; (Total MacSerial Quantity :- {{ this.totalMacSerial }})
+                            </label>
+                          }
+                          <input
+                            type="number"
+                            (keypress)="quantityInValidation($event)"
+                            class="form-control"
+                            placeholder="Enter Quantity"
+                            formControlName="inTransitQty"
+                            [ngClass]="{
+                              'is-invalid': submitted && inwardFormGroup.controls.qty.errors
+                            }"
+                          />
+                          @if (this.showQtyError) {
+                            <div class="error text-danger">
+                              {{ this.qtyErroMsg }}
+                            </div>
+                          }
+                          @if (submitted && inwardFormGroup.controls.inTransitQty.errors) {
+                            <div class="errorWrap text-danger">
+                              @if (
+                                submitted && inwardFormGroup.controls.inTransitQty.errors.required
+                              ) {
+                                <div class="error text-danger">Quantity is required.</div>
+                              }
+                              @if (
+                                this.editMode &&
+                                inwardFormGroup.controls.inTransitQty.errors.pattern
+                              ) {
+                                <div class="error text-danger">Only Numeric value are allowed.</div>
+                              }
+                              @if (
+                                this.editMode &&
+                                this.inwardFormGroup.controls.inTransitQty.errors.min
+                              ) {
+                                <div class="error text-danger">
+                                  Please enter more than 0 quantity.
+                                </div>
+                              }
+                            </div>
+                          }
+                        </div>
+                      </div>
+                      <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                        <div class="form-group">
+                          <label>Inward Date*</label>
+                          <p-calendar
+                            formControlName="inwardDateTime"
+                            [showTime]="true"
+                            [showSeconds]="true"
+                            inputId="time"
+                            [numberOfMonths]="1"
+                            [disabled]="this.editMode"
+                          ></p-calendar>
+                          @if (submitted && inwardFormGroup.controls.inwardDateTime.errors) {
+                            <div class="errorWrap text-danger">
+                              @if (
+                                submitted && inwardFormGroup.controls.inwardDateTime.errors.required
+                              ) {
+                                <div class="error text-danger">Inward Date is required.</div>
+                              }
+                            </div>
+                          }
+                        </div>
+                      </div>
+                      <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                        <div class="form-group">
+                          <label>Type*</label>
+                          <p-dropdown
+                            [options]="this.types"
+                            formControlName="type"
+                            optionLabel="label"
+                            optionValue="value"
+                            filter="true"
+                            filterBy="label"
+                            [disabled]="this.editMode"
+                            placeholder="Select type"
+                          ></p-dropdown>
+                          @if (submitted && inwardFormGroup.controls.type.errors) {
+                            <div class="errorWrap text-danger">
+                              @if (submitted && inwardFormGroup.controls.type.errors.required) {
+                                <div class="error text-danger">Type is required.</div>
+                              }
+                            </div>
+                          }
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                        <div class="form-group">
+                          <label>Status*</label>
+                          <p-dropdown
+                            [options]="status"
+                            formControlName="status"
+                            optionLabel="label"
+                            optionValue="value"
+                            filter="true"
+                            filterBy="label"
+                            placeholder="Select status"
+                          ></p-dropdown>
+                          @if (submitted && inwardFormGroup.controls.status.errors) {
+                            <div class="errorWrap text-danger">
+                              @if (submitted && inwardFormGroup.controls.status.errors.required) {
+                                <div class="error text-danger">Inward status is required.</div>
+                              }
+                            </div>
+                          }
+                        </div>
+                      </div>
+
+                      <div *ngIf="this.editMode" class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                        <div class="form-group">
+                          <label>Unit</label>
+                          <input
+                            type="text"
+                            [disabled]="true"
+                            class="form-control"
+                            formControlName="unit"
+                          />
+                        </div>
+                      </div>
+
+                      @if (hasOEMConsider) {
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                          <label for="startDate">Warranty Start Date:</label>
+                          <input
+                            type="date"
+                            id="startDateTime"
+                            class="form-control"
+                            formControlName="startDateTime"
+                            (change)="calculateExpiryDateTime()"
+                          />
+                        </div>
+                      }
+                      @if (hasOEMConsider) {
+                        <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                          <label for="expiryDate">Warranty Expiry Date:</label>
+                          <input
+                            type="date"
+                            id="expiryDateTime"
+                            class="form-control"
+                            formControlName="expiryDateTime"
+                            disabled
+                          />
+                        </div>
+                      }
+                    </div>
+                    <div class="row">
+                      <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                        <label>Description *</label>
+                        <textarea
+                          rows="3"
+                          class="form-control"
+                          name="desc"
+                          formControlName="description"
+                          placeholder="Enter Description"
+                        ></textarea>
+                      </div>
+                    </div>
+                  </div>
+                </fieldset>
+              </form>
+
+              @if (showSpecification) {
+                <fieldset style="margin-top: 0px">
+                  <legend>Inventory Specification Parameter Details</legend>
+                  <div class="boxWhite">
+                    <form [formGroup]="specificationParametersDTO">
+                      <div class="row">
+                        <table class="table">
+                          <thead>
+                            <tr>
+                              <th style="padding-left: 24px">Parameter</th>
+                              <th>Mandatory</th>
+                              <th style="text-align: center">Value</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            @for (
+                              parameter of specificationParametersDTOList.controls;
+                              track parameter;
+                              let i = $index
+                            ) {
+                              <tr>
+                                <td class="param-name-cell" style="padding-left: 40px">
+                                  {{ parameter.get("paramName").value }}
+                                </td>
+                                <td class="custom-checkbox-cell" style="padding-right: 312px">
+                                  <p-checkbox
+                                    class="big-checkbox customm"
+                                    formControlName="isMandatory"
+                                    [binary]="true"
+                                    [readonly]="true"
+                                    [formControl]="parameter.get('isMandatory')"
+                                  ></p-checkbox>
+                                </td>
+                                @if (!parameter.get("isMultiValueParam").value) {
+                                  <td class="param-value-cell">
+                                    <input
+                                      type="text"
+                                      class="form-control"
+                                      id="paramValue"
+                                      [formControl]="parameter.get('paramValue')"
+                                    />
+                                  </td>
+                                }
+                                @if (parameter.get("isMultiValueParam").value) {
+                                  <td>
+                                    <p-dropdown
+                                      [options]="parameter.get('paramValues').value"
+                                      [formControl]="parameter.get('paramValue')"
+                                      optionLabel="label"
+                                      optionValue="value"
+                                      filter="true"
+                                      filterBy="label"
+                                      placeholder="Select Parameter"
+                                    >
+                                    </p-dropdown>
+                                  </td>
+                                }
+                              </tr>
+                            }
+                          </tbody>
+                        </table>
+                      </div>
+                    </form>
+                  </div>
+                </fieldset>
+              }
+              <br />
+              <div class="addUpdateBtn">
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                  id="submit"
+                  (click)="submit()"
+                  [disabled]="this.showQtyError || !inwardFormGroup.valid"
+                >
+                  <i class="fa fa-check-circle"></i>
+                  {{ editMode ? "Update" : "Add" }} Inward
+                </button>
+                <br />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div> -->
+
+<!-- @if (this.listView) {
+    <div class="col-md-12">
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">Inwards</h3>
+          <div class="right">
+            <button
+              type="button"
+              class="btn-toggle-collapse"
+              data-toggle="collapse"
+              data-target="#listInwards"
+              aria-expanded="false"
+              aria-controls="listInwards"
+            >
+              <i class="fa fa-minus-circle"></i>
+            </button>
+          </div>
+        </div>
+        <div id="listInwards" class="panel-collapse collapse in">
+          <div class="panel-body table-responsive">
+            <div>
+              <div class="row">
+                <div class="col-lg-12 col-md-12">
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>Inward Number</th>
+                        <th>Product Name</th>
+                        <th>Type</th>
+                        <th>Quantity</th>
+                        <th>InTransit Quantity</th>
+                        <th>Created By</th>
+                      
+                        <th>Status</th>
+                        <th>Approval Status</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (
+                        inward of this.inwardListData
+                          | paginate
+                            : {
+                                id: "inwardListData",
+                                itemsPerPage: productListdataitemsPerPage,
+                                currentPage: currentPageProductListdata,
+                                totalItems: productListdatatotalRecords
+                              };
+                        track inward;
+                        let i = $index
+                      ) {
+                        <tr>
+                          <td
+                            class="curson_pointer"
+                            (click)="getInwardDetails(inward.id)"
+                            style="color: #f7941e"
+                          >
+                            {{ inward.inwardNumber }}
+                          </td>
+                          <td>{{ inward.productId.name }}</td>
+                          <td>
+                            @if (inward.type != null) {
+                              <span>
+                                {{ inward.type }}
+                              </span>
+                            }
+                            @if (inward.type == null) {
+                              <span>-</span>
+                            }
+                          </td>
+                          <td>{{ inward.qty }}</td>
+                          <td>{{ inward.inTransitQty }}</td>
+                          <td>{{ inward.createdBy }}</td>
+                       
+                          @if (inward.status == "ACTIVE") {
+                            <td>
+                              <span class="badge badge-success">Active</span>
+                            </td>
+                          }
+                          @if (inward.status == "INACTIVE") {
+                            <td>
+                              <span class="badge badge-danger">Inactive</span>
+                            </td>
+                          }
+                          @if (inward.approvalStatus == null) {
+                            <td>
+                              <span>-</span>
+                            </td>
+                          }
+                          @if (inward.approvalStatus == "Pending") {
+                            <td>
+                              <span class="badge badge-primary">Pending</span>
+                            </td>
+                          }
+                          @if (inward.approvalStatus == "Approve") {
+                            <td>
+                              <span class="badge badge-success">Approve</span>
+                            </td>
+                          }
+                          @if (inward.approvalStatus == "Rejected") {
+                            <td>
+                              <span class="badge badge-danger">Rejected</span>
+                            </td>
+                          }
+                          <td class="btnAction">
+                            @if (editAccess) {
+                              <button
+                                class="approve-btn"
+                                id="edit-button"
+                                [disabled]="
+                                  inward.approvalStatus != 'Pending' || inward.outwardId != null
+                                "
+                                type="button"
+                                href="javascript:void(0)"
+                                (click)="editInward(inward.id)"
+                              >
+                              <img src="assets/img/DashboardIcons/Edit.svg" >
+                              </button>
+                            }
+                            @if (deleteAccess) {
+                              <button
+                                id="delete-button"
+                                class="approve-btn"
+                                href="javascript:void(0)"
+                                [disabled]="
+                                  inward.approvalStatus != 'Pending' || inward.outwardId != null
+                                "
+                                (click)="deleteConfirmInward(inward.id)"
+                              >
+                                 <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                              </button>
+                            }
+                            <button
+                              data-target="#MACAssignModal"
+                              data-title="Add MAC address"
+                              title="Add MAC address"
+                              data-toggle="modal"
+                              data-backdrop="static"
+                              data-keyboard="false"
+                              (click)="addMACC(inward)"
+                              [disabled]="
+                                (inward.approvalStatus == 'Pending' &&
+                                  inward.status == 'INACTIVE') ||
+                                inward.approvalStatus == 'Approve' ||
+                                inward.approvalStatus == 'Rejected' ||
+                                inward.outwardId != null
+                              "
+                              class="approve-btn"
+                            >
+                              <img src="assets/img/icons-02.png" />
+                            </button>
+                            @if (
+                              !inward.approvalStatus != "Pending" &&
+                              isInwardEdit &&
+                              showMacAddressAccess
+                            ) {
+                              <a
+                                data-target="#MACShowModal"
+                                data-title="Add MAC address"
+                                title="Show MAC address"
+                                data-toggle="modal"
+                                data-backdrop="static"
+                                data-keyboard="false"
+                                (click)="addMAC(inward)"
+                                class="curson_pointer"
+                              >
+                                <img src="assets/img/E_Status_Y.png" />
+                              </a>
+                            }
+                            <button
+                              type="button"
+                              style="
+                                border: none;
+                                background: transparent;
+                                padding: 0;
+                                margin-right: 3px;
+                              "
+                              class="approve-btn"
+                              title="Approve"
+                              (click)="
+                                approveChangeStatus(
+                                  inward.id,
+                                  inward.productId,
+                                  inward.outwardId,
+                                  inward
+                                )
+                              "
+                              [disabled]="
+                                (inward.approvalStatus == 'Pending' &&
+                                  inward.status == 'INACTIVE') ||
+                                inward.approvalStatus == 'Approve' ||
+                                inward.approvalStatus == 'Rejected'
+                              "
+                            >
+                             <img src="assets/img/DashboardIcons/Assign.svg">
+                            </button>
+                            <button
+                              type="button"
+                              class="approve-btn"
+                              style="
+                                border: none;
+                                background: transparent;
+                                padding: 0;
+                                margin-right: 3px;
+                              "
+                              title="Rejected"
+                              (click)="rejectChangeStatus(inward.id, inward.productId)"
+                              [disabled]="
+                                (inward.approvalStatus == 'Pending' &&
+                                  inward.status == 'INACTIVE') ||
+                                inward.approvalStatus == 'Approve' ||
+                                inward.approvalStatus == 'Rejected'
+                              "
+                            >
+                               <img src="assets/img/DashboardIcons/Reject.svg">
+                            </button>
+                            <button
+                              (click)="uploadDocument(inward)"
+                              data-placement="top"
+                              data-toggle="tooltip"
+                              id="editbutton"
+                              title="Bulk Add"
+                              type="button"
+                              href="javascript:void(0)"
+                              class="approve-btn"
+                              style="
+                                border: none;
+                                background: transparent;
+                                padding: 0;
+                                margin-right: 3px;
+                              "
+                              [disabled]="
+                                (inward.approvalStatus == 'Pending' &&
+                                  inward.status == 'INACTIVE') ||
+                                inward.approvalStatus == 'Approve' ||
+                                inward.approvalStatus == 'Rejected' ||
+                                inward.outwardId != null
+                              "
+                            >
+                              <img height="32" src="assets/img/up.jpg" width="32" />
+                            </button>
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                  <div class="pagination_Dropdown">
+                    <pagination-controls
+                      id="inwardListData"
+                      [maxSize]="10"
+                      [directionLinks]="true"
+                      previousLabel=""
+                      nextLabel=""
+                      (pageChange)="pageChangedProductList((currentPageProductListdata = $event))"
+                    ></pagination-controls>
+                    <div id="itemPerPageDropdown">
+                      <p-dropdown
+                        [(ngModel)]="productListdataitemsPerPage"
+                        [options]="pageLimitOptions"
+                        optionLabel="value"
+                        optionValue="value"
+                        (onChange)="TotalItemPerPage($event)"
+                      ></p-dropdown>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  } -->
+<!-- @if (detailView) {
+  <div class="row">
+    <div class="col-md-12 col-sm-12">
+      <div class="panel">
+        <div class="panel-heading">
+          <div class="displayflex">
+            <button
+              type="button"
+              class="btn btn-secondary backbtn"
+              data-toggle="tooltip"
+              data-placement="bottom"
+              title="Go to Tax Details"
+              (click)="inwardList()"
+            >
+              <i
+                class="fa fa-arrow-circle-left"
+                style="color: #f7941e !important; font-size: 28px"
+              ></i>
+            </button>
+            <h3 class="panel-title">{{ viewInwardsDetails.inwardNumber }} Inward</h3>
+          </div>
+          <div class="right">
+            <button
+              type="button"
+              class="btn-toggle-collapse"
+              data-toggle="collapse"
+              data-target="#inwardDetail"
+              aria-expanded="false"
+              aria-controls="taxalldea"
+            >
+              <i class="fa fa-minus-circle"></i>
+            </button>
+          </div>
+        </div>
+        <div id="inwardDetail" class="panel-collapse collapse in">
+          <div class="panel-body table-responsive">
+            <fieldset style="margin-top: 0rem; margin-bottom: 2rem">
+              <legend>Basic Details</legend>
+              <div class="boxWhite">
+                <div class="row">
+                  <div class="col-lg-4 col-md-4 ">
+                    <label class="datalbl">Inward Name :</label>
+                    <span>{{ viewInwardsDetails.productId.name }}</span>
+                  </div>
+                  <div class="col-lg-4 col-md-4 dataGroup">
+                    <label class="datalbl">Quantity :</label>
+                    <span>{{ viewInwardsDetails.qty }}</span>
+                  </div>
+                  <div class="col-lg-4 col-md- dataGroup">
+                    <label class="datalbl">Transit Quality :</label>
+                    <span>{{ viewInwardsDetails.inTransitQty }}</span>
+                  </div>
+                
+                  <div class="col-lg-4 col-md- dataGroup">
+                    <label class="datalbl">Status :</label>
+                    <span>{{ viewInwardsDetails.status }}</span>
+                  </div>
+                  <div class="col-lg-4 col-md- dataGroup">
+                    <label class="datalbl">Destination Type :</label>
+                    <span>{{ viewInwardsDetails.destinationType }}</span>
+                  </div>
+                  <div class="col-lg-4 col-md- dataGroup">
+                    <label class="datalbl">Destination :</label>
+                    <span>{{ viewInwardsDetails.destination }}</span>
+                  </div>
+                
+                  <div class="col-lg-4 col-md- dataGroup">
+                    <label class="datalbl">Category Type :</label>
+                    <span>{{ viewInwardsDetails.categoryType }}</span>
+                  </div>
+                  <div class="col-lg-4 col-md- dataGroup">
+                    <label class="datalbl">Source :</label>
+                    <span>{{ viewInwardsDetails.source }}</span>
+                  </div>
+                  <div class="col-lg-4 col-md- dataGroup">
+                    <label class="datalbl">Source Type :</label>
+                    <span>{{ viewInwardsDetails.sourceType }}</span>
+                  </div>
+                
+                  <div class="col-lg-4 col-md- dataGroup">
+                    <label class="datalbl">Inward Date :</label>
+                    <span>{{ viewInwardsDetails.inwardDateTime }}</span>
+                  </div>
+                  <div class="col-lg-4 col-md- dataGroup">
+                    <label class="datalbl">Warranty Start Date :</label>
+                    @if (viewInwardsDetails.startDateTime != null) {
+                      <span>{{ viewInwardsDetails.startDateTime }}</span>
+                    }
+                    @if (viewInwardsDetails.startDateTime == null) {
+                      <span>-</span>
+                    }
+                  </div>
+                  <div class="col-lg-4 col-md- dataGroup">
+                    <label class="datalbl">Warranty End Date :</label>
+                    @if (viewInwardsDetails.expiryDateTime != null) {
+                      <span>{{ viewInwardsDetails.expiryDateTime }}</span>
+                    }
+                    @if (viewInwardsDetails.expiryDateTime == null) {
+                      <span>-</span>
+                    }
+                  </div>
+               
+                  <div class="col-lg-4 col-md- dataGroup">
+                    <label class="datalbl">Description :</label>
+                    <span>{{ viewInwardsDetails.description }}</span>
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+            @if (viewInwardsDetails.specificationParametersDTOList?.length > 0) {
+              <fieldset style="margin-top: 0rem; margin-bottom: 2rem">
+                <legend>Inventory Specification Parameter Details</legend>
+                <div class="boxWhite">
+                  <div class="row table-responsive">
+                    <div class="col-lg-12 col-md-12">
+                      <table class="table">
+                        <thead>
+                          <tr>
+                            <th id="parameter">Parameter</th>
+                            <th id="mandatory">Mandatory</th>
+                            <th id="value">Value</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @for (
+                            param of viewInwardsDetails.specificationParametersDTOList
+                              | paginate
+                                : {
+                                    id: "productDetailPageData",
+                                    itemsPerPage: productDeatilItemPerPage,
+                                    currentPage: productPageChargeDeatilList,
+                                    totalItems: productDeatiltotalRecords
+                                  };
+                            track param;
+                            let i = $index
+                          ) {
+                            <tr>
+                              <td>{{ param.paramName }}</td>
+                              <td>{{ param.isMandatory }}</td>
+                              <td>{{ param.paramValue }}</td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </fieldset>
+            }
+            @if (viewInwardsDetails.itemList?.length > 0) {
+              <fieldset style="margin-top: 0rem; margin-bottom: 2rem">
+                <legend>Item Details</legend>
+                <div class="boxWhite">
+                  <div class="row table-responsive">
+                    <div class="col-lg-12 col-md-12">
+                      <table class="table">
+                        <thead>
+                          <tr>
+                            <th id="parameter">AssetId</th>
+                            <th id="mandatory">Mac Address</th>
+                            <th id="value">Serial Number</th>
+                            <th id="value">Warranty Status</th>
+                            <th id="value">Warranty Period</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @for (
+                            param of viewInwardsDetails.itemList
+                              | paginate
+                                : {
+                                    id: "productDetailPageData",
+                                    itemsPerPage: productDeatilItemPerPage,
+                                    currentPage: productPageChargeDeatilList,
+                                    totalItems: productDeatiltotalRecords
+                                  };
+                            track param;
+                            let i = $index
+                          ) {
+                            <tr>
+                              <td>{{ param.assetId }}</td>
+                              <td>{{ param.macAddress }}</td>
+                              <td>{{ param.serialNumber }}</td>
+                              <td>{{ param.oemWarrantyStatus }}</td>
+                              <td>{{ param.oemWarrantyRemainingDays }}</td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </fieldset>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+} -->
+<!-- <div *ngIf="this.addMACaddress">
+    <div class="modal fade" id="MACAssignModal" role="dialog">
+      <div class="modal-dialog" style="width: 50%">
+        Modal content
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3 class="panel-title">Inward MAC Mapping</h3>
+          </div>
+          <div class="modal-body">
+            <p-table
+              #dt1
+              [value]="this.inwardMacList"
+              responsiveLayout="scroll"
+              [scrollable]="true"
+              scrollHeight="300px"
+              >
+              <ng-template pTemplate="header">
+                <tr>
+                  <th style="width: 45%" *ngIf="this.hasMac">
+                    <input
+
+                      type="text"
+                      placeholder="Pleas enter MAC Address"
+                      class="p-column-filter form-control"
+                      formControlName="macAddress"
+                      />
+                    </th>
+                    <th style="width: 45%" *ngIf="this.hasSerial">
+                      <input
+
+                        type="text"
+                        placeholder="Pleas enter serial Number"
+                        class="p-column-filter form-control"
+                        formControlName="serialNumber"
+                        />
+                      </th>
+                      <th style="width: 10%">
+                        <button
+                          id="addAtt"
+                          style="object-fit: cover; padding: 5px 8px"
+                          class="btn btn-primary"
+                          (click)="onAddAttribute()"
+                          >
+                          <i class="fa fa-plus-square" aria-hidden="true"></i>
+                          Add
+                        </button>
+                      </th>
+                    </tr>
+                    <tr>
+                      <th style="width: 45%" *ngIf="this.hasMac">MAC Address</th>
+                      <th style="width: 45%" *ngIf="this.hasSerial">Serial Number</th>
+                      <th style="text-align: center">Action</th>
+                    </tr>
+                  </ng-template>
+                  <ng-template pTemplate="body" let-product let-rowIndex="rowIndex">
+                    <tr>
+                      <td style="width: 45%" *ngIf="this.hasMac">
+                        <input
+                          type="text"
+                          name="mac"
+                          class="form-control"
+                          [value]="product.macAddress"
+                          disabled
+                          />
+                        </td>
+                        <td style="width: 45%" *ngIf="this.hasSerial">
+                          <input
+                            type="text"
+                            name="mac"
+                            class="form-control"
+                            [value]="product.serialNumber"
+                            disabled
+                            />
+                          </td>
+                          <td style="width: 10%">
+                            <a id="deleteMAC" (click)="deleteMACMapping(product.itemId)">
+                               <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                            </a>
+                          </td>
+                        </tr>
+                      </ng-template>
+                    </p-table>
+                  </div>
+                  <div class="modal-footer">
+                    <div class="addUpdateBtn">
+                      <button
+                        type="submit"
+                        class="btn btn-primary btn-sm"
+                        data-dismiss="modal"
+                        (click)="this.addMacMapping()"
+                        >
+                        <i class="fa fa-check-circle"></i>
+                        Save
+                      </button>
+
+                      <button
+                        type="button"
+                        class="btn btn-danger btn-sm"
+                        data-dismiss="modal"
+                        (click)="onclosed()"
+                        >
+                        Close
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div> -->
+<!-- <div *ngIf="this.addMACaddress"> -->
+<!-- <p-dialog
+  header="Inward MAC Mapping"
+  [(visible)]="MACShowModal"
+  [style]="{ width: '70%' }"
+  [modal]="true"
+  [responsive]="true"
+  [draggable]="false"
+  [closable]="true"
+  (onHide)="onclosed()"
+>
+  <div class="modal-body">
+    <p-table
+      #dt1
+      [value]="this.inwardMacList"
+      dataKey="id"
+      styleClass="p-datatable-customers"
+      [rowHover]="true"
+      [filterDelay]="0"
+      responsiveLayout="scroll"
+      [scrollable]="true"
+      scrollHeight="300px"
+      [globalFilterFields]="['condition', 'id', 'serialNumber', 'macAddress']"
+    >
+      <ng-template pTemplate="caption">
+        <div class="row">
+          <div class="col-lg-3 col-md-3">
+            <p-dropdown
+              [options]="macOptionSelect"
+              optionValue="value"
+              optionLabel="label"
+              filter="true"
+              filterBy="label"
+              [(ngModel)]="searchOption"
+              (ngModelChange)="selSearchOption($event)"
+              placeholder="Select a search option"
+            >
+            </p-dropdown>
+          </div>
+
+          @if (searchOption === "itemId") {
+            <div class="col-lg-3 col-md-3">
+              <input
+                id="namesearch"
+                type="text"
+                class="form-control"
+                [(ngModel)]="searchMacDeatil"
+                (keydown.enter)="searchMac()"
+                placeholder="Enter Item Id"
+              />
+            </div>
+          }
+          @if (searchOption === "mac") {
+            <div class="col-lg-3 col-md-3">
+              <input
+                id="mobilesearch"
+                (keydown.enter)="searchMac()"
+                type="text"
+                class="form-control"
+                [(ngModel)]="searchMacDeatil"
+                placeholder="Enter Mac"
+              />
+            </div>
+          }
+          @if (searchOption === "serialNumber") {
+            <div class="col-lg-3 col-md-3">
+              <input
+                id="leadSourcesearch"
+                (keydown.enter)="searchMac()"
+                type="text"
+                class="form-control"
+                [(ngModel)]="searchMacDeatil"
+                placeholder="Enter Serial Number"
+              />
+            </div>
+          }
+          @if (searchOption === "assetId ") {
+            <div class="col-lg-3 col-md-3">
+              <input
+                id="serviceArea"
+                (keydown.enter)="searchMac()"
+                type="text"
+                class="form-control"
+                [(ngModel)]="searchMacDeatil"
+                placeholder="Enter Asset Id"
+              />
+            </div>
+          }
+          @if (searchOption === "itemType") {
+            <div class="col-lg-3 col-md-3">
+              <input
+                id="Lead Assigne Name"
+                (keydown.enter)="searchMac()"
+                type="text"
+                class="form-control"
+                [(ngModel)]="searchMacDeatil"
+                placeholder="Enter Item Type"
+              />
+            </div>
+          }
+          <div class="row">
+            <button
+              type="button"
+              class="btn btn-primary"
+              id="searchbtn"
+              (click)="searchMac()"
+              [disabled]="!searchMacDeatil"
+            >
+              <i class="fa fa-search"></i>
+              Search
+            </button>
+            &nbsp;
+            <button type="button" class="btn btn-default" id="searchbtn" (click)="clearMac()">
+               <img src="assets/img/DashboardIcons/Refresh.svg" />
+              Clear
+            </button>
+          </div>
+        </div>
+      </ng-template>
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Item Id</th>
+          @if (this.hasMac) {
+            <th>MAC Address</th>
+          }
+          @if (this.hasSerial) {
+            <th>Serial Number</th>
+          }
+          <th>Asset Id</th>
+          <th>Item Type</th>
+          <th>Action</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-product let-rowIndex="rowIndex">
+        <tr>
+          <td (click)="InventoryDetails(product.id)">
+            <input name="itemId" class="form-control" [value]="product.id" readonly />
+          </td>
+          @if (this.hasMac) {
+            <td>
+              <input
+                type="text"
+                name="mac"
+                class="form-control"
+                [value]="product.macAddress"
+                disabled
+              />
+            </td>
+          }
+          @if (this.hasSerial) {
+            <td>
+              <input
+                type="text"
+                name="mac"
+                class="form-control"
+                [value]="product.serialNumber"
+                disabled
+              />
+            </td>
+          }
+          <td>
+            {{ product.assetId || "-" }}
+          </td>
+          <td>
+            {{ product.condition || "-" }}
+          </td>
+          <td>
+            <a id="deleteMAC" (click)="deleteShowMACMapping(product)">
+               <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+            </a>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="summary">
+        <p-paginator
+          (onPageChange)="paginate($event)"
+          [first]="newFirst"
+          [rows]="inwardMappingListitemsPerPage"
+          [totalRecords]="inwardMappingListdatatotalRecords"
+          [rowsPerPageOptions]="[5, 10, 20, 50, 100, 1000, 5000]"
+        ></p-paginator>
+      </ng-template>
+    </p-table>
+  </div>
+  <div class="modal-footer">
+    <div class="addUpdateBtn">
+      add mac alreday commect <button
+                          type="submit"
+                          class="btn btn-primary btn-sm"
+                          data-dismiss="modal"
+                          (click)="this.addMacMapping()"
+                          >
+                          <i class="fa fa-check-circle"></i>
+                          Save
+                        </button> 
+
+      <button type="button" class="btn btn-danger btn-sm" data-dismiss="modal" (click)="onclosed()">
+        Close
+      </button>
+    </div>
+  </div>
+</p-dialog> -->
+<!-- <p-dialog
+                  header="Inward Item MAC Mapping"
+                  [(visible)]="addMACaddress"
+                  [modal]="true"
+                  [style]="{ width: '85%' }"
+                  [responsive]="true"
+                  [draggable]="false"
+                  [closable]="false"
+                  >
+                  <div class="modal-body" [formGroup]="macForm">
+                    <p-table
+                      #dt1
+                      [value]="inwardMacList"
+                      responsiveLayout="scroll"
+                      [scrollable]="true"
+                      scrollHeight="300px"
+                      >
+                      <ng-template pTemplate="header">
+                        <tr>
+                          <th style="width: 45%" *ngIf="hasMac">
+                            <input
+                              type="text"
+                              placeholder="Please enter MAC Address"
+                              class="p-column-filter form-control"
+                              [(ngModel)]="macAddress"
+                              />
+                            </th>
+                            <th style="width: 45%" *ngIf="hasSerial">
+                              <input
+                                type="text"
+                                placeholder="Please enter Serial Number"
+                                class="p-column-filter form-control"
+                                [(ngModel)]="serialNumber"
+                                />
+                              </th>
+                              <th style="width: 10%">
+                                <button
+                                  id="addAtt"
+                                  style="object-fit: cover; padding: 5px 8px"
+                                  class="btn btn-primary"
+                                  (click)="onAddAttributee()"
+                                  >
+                                  <i class="fa fa-plus-square" aria-hidden="true"></i>
+                                  Add
+                                </button>
+                              </th>
+                            </tr>
+                            <tr>
+                              <th style="width: 45%" *ngIf="hasMac">MAC Address</th>
+                              <th style="width: 45%" *ngIf="hasSerial">Serial Number</th>
+                            </tr>
+                          </ng-template>
+                        </p-table>
+                        <ng-template pTemplate="body" let-product let-rowIndex="rowIndex">
+                          <tr>
+                            <td style="width: 45%" *ngIf="this.hasMac">
+                              <input
+                                type="text"
+                                name="mac"
+                                class="form-control"
+                                [value]="product.macAddress"
+                                disabled
+                                />
+                              </td>
+                              <td style="width: 45%" *ngIf="this.hasSerial">
+                                <input
+                                  type="text"
+                                  name="mac"
+                                  class="form-control"
+                                  [value]="product.serialNumber"
+                                  disabled
+                                  />
+                                </td>
+                                <td style="width: 10%">
+                                  <a id="deleteMAC" (click)="deleteMACMapping(product.itemId)">
+                                     <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                                  </a>
+                                </td>
+                              </tr>
+                            </ng-template>
+                          </div>
+                          <div class="modal-footer">
+                            <div class="addUpdateBtn">
+                              <button
+                                type="submit"
+                                class="btn btn-primary btn-sm"
+                                data-dismiss="modal"
+                                (click)="this.addMacMapping()"
+                                >
+                                <i class="fa fa-check-circle"></i>
+                                Save
+                              </button>
+                              <button
+                                type="button"
+                                class="btn btn-danger btn-sm"
+                                data-dismiss="modal"
+                                (click)="clearMacMapping()"
+                                >
+                                Close
+                              </button>
+                            </div>
+                          </div>
+                        </p-dialog> -->
+
+<!-- @if (this.addMACaddress) {
+  <div>
+    <p-dialog
+      header="Inward Item MAC Mapping"
+      [(visible)]="addMACaddress"
+      [modal]="true"
+      [style]="{ width: '50%' }"
+      [responsive]="true"
+      [draggable]="false"
+      [closable]="true"
+      (onHide)="clearMacMapping()"
+    >
+      <div class="modal-body" [formGroup]="macForm">
+        <p-table
+          #dt1
+          [value]="inwardMacList"
+          responsiveLayout="scroll"
+          [scrollable]="true"
+          scrollHeight="300px"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              @if (this.hasMac) {
+                <th style="width: 45%">
+                  <input
+                    type="text"
+                    placeholder="Pleas enter MAC Address"
+                    class="p-column-filter form-control"
+                    formControlName="macAddress"
+                    [ngClass]="{
+                      'is-invalid': macSubmitted && macForm.controls.macAddress.errors
+                    }"
+                  />
+                  @if (macSubmitted && macForm.controls.macAddress.errors) {
+                    <div class="errorWrap text-danger">
+                      @if (macSubmitted && macForm.controls.macAddress.errors.required) {
+                        <div class="error text-danger">MAC Address is required.</div>
+                      }
+                    </div>
+                  }
+                </th>
+              }
+              @if (this.hasSerial) {
+                <th style="width: 45%">
+                  <input
+                    type="text"
+                    placeholder="Pleas enter serial Number"
+                    class="p-column-filter form-control"
+                    formControlName="serialNumber"
+                    [ngClass]="{
+                      'is-invalid': macSubmitted && macForm.controls.serialNumber.errors
+                    }"
+                  />
+                  @if (macSubmitted && macForm.controls.serialNumber.errors) {
+                    <div class="errorWrap text-danger">
+                      @if (macSubmitted && macForm.controls.serialNumber.errors.required) {
+                        <div class="error text-danger">Serial Number is required.</div>
+                      }
+                    </div>
+                  }
+                </th>
+              }
+              <th style="width: 10%">
+                <button
+                  id="addAtt"
+                  style="object-fit: cover; padding: 5px 8px"
+                  class="btn btn-primary"
+                  (click)="onAddAttributee()"
+                >
+                  <i class="fa fa-plus-square" aria-hidden="true"></i>
+                  Add
+                </button>
+              </th>
+            </tr>
+            <tr>
+              @if (this.hasMac) {
+                <th style="width: 45%">MAC Address</th>
+              }
+              @if (this.hasSerial) {
+                <th style="width: 45%">Serial Number*</th>
+              }
+              <th style="width: 10%">Actions</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-product rowIndex="rowIndex">
+            <tr>
+              @if (this.hasMac) {
+                <td style="width: 45%">
+                  <input
+                    type="text"
+                    name="mac"
+                    class="form-control"
+                    [value]="isEditMode ? selectedProductForEdit.macAddress : product.macAddress"
+                    [disabled]="!isEditMode"
+                  />
+                </td>
+              }
+              @if (this.hasSerial) {
+                <td style="width: 45%">
+                  <input
+                    type="text"
+                    name="serial"
+                    class="form-control"
+                    [value]="
+                      isEditMode ? selectedProductForEdit.serialNumber : product.serialNumber
+                    "
+                    [disabled]="!isEditMode"
+                  />
+                </td>
+              }
+              
+              <td style="width: 10%">
+                <button
+                  type="button"
+                  id="delete-button"
+                  class="approve-btn"
+                  (click)="deleteMACMapping(product.itemId)"
+                >
+                   <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                </button>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+      <div class="modal-footer">
+        <div class="addUpdateBtn">
+          <button
+            type="submit"
+            class="btn btn-primary btn-sm"
+            data-dismiss="modal"
+            (click)="this.addMacMapping()"
+          >
+            <i class="fa fa-check-circle"></i>
+            Save
+          </button>
+          <button
+            type="button"
+            class="btn btn-danger btn-sm"
+            data-dismiss="modal"
+            (click)="clearMacMapping()"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </p-dialog>
+  </div>
+} -->
+
+<!-- <p-dialog
+  header="Change Approval Status"
+  [(visible)]="approveChangeStatusModal"
+  [modal]="true"
+  [style]="{ width: '40%' }"
+  [responsive]="true"
+  [draggable]="false"
+  [closable]="true"
+  (onHide)="closeApproveInventoryModal()"
+>
+  <div class="modal-body">
+    <form [formGroup]="assignInwardForm">
+      <div class="row">
+        <div class="col-lg-2 col-md-3 col-sm-4 col-xs-12">
+          <label>Remark*:</label>
+        </div>
+        <div class="col-lg-10 col-md-9 col-sm-8 col-xs-12">
+          <textarea class="form-control" formControlName="remark" name="remark"></textarea>
+          @if (assignInwardSubmitted && assignInwardForm.controls.remark.errors) {
+            <div class="errorWrap text-danger">
+              @if (assignInwardSubmitted && assignInwardForm.controls.remark.errors.required) {
+                <div class="error text-danger">Remark is required.</div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button (click)="approveInward()" class="btn btn-primary" id="submit" type="submit">
+      <i class="fa fa-check-circle"></i>
+      Approve
+    </button>
+    <button
+      class="btn btn-default"
+      (click)="closeApproveInventoryModal()"
+      data-dismiss="modal"
+      type="button"
+    >
+      Close
+    </button>
+  </div>
+</p-dialog> -->
+
+<!-- <p-dialog
+  header="Change Approval Status"
+  [(visible)]="rejectChangeStatusModal"
+  [modal]="true"
+  [style]="{ width: '40%' }"
+  [responsive]="true"
+  [draggable]="false"
+  [closable]="true"
+  (onHide)="closeRejectInventoryModal()"
+>
+  <div class="modal-body">
+    <form [formGroup]="rejectInwardForm">
+      <div class="row">
+        <div class="col-lg-2 col-md-3 col-sm-4 col-xs-12">
+          <label>Remark*:</label>
+        </div>
+        <div class="col-lg-10 col-md-9 col-sm-8 col-xs-12">
+          <textarea class="form-control" formControlName="remark" name="remark"></textarea>
+          @if (rejectInwardSubmitted && rejectInwardForm.controls.remark.errors) {
+            <div class="errorWrap text-danger">
+              @if (rejectInwardSubmitted && rejectInwardForm.controls.remark.errors.required) {
+                <div class="error text-danger">Remark is required.</div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button (click)="rejectInward()" class="btn btn-primary" id="submit" type="submit">
+      <i class="fa fa-check-circle"></i>
+      Reject
+    </button>
+    <button
+      class="btn btn-default"
+      (click)="closeRejectInventoryModal()"
+      data-dismiss="modal"
+      type="button"
+    >
+      Close
+    </button>
+  </div>
+</p-dialog> -->
+<!-- <p-dialog
+  header="Inventory Detail"
+  [(visible)]="inventoryDetailModal"
+  [style]="{ width: '75%' }"
+  [modal]="true"
+  [responsive]="true"
+  [draggable]="false"
+  [closable]="true"
+  (onHide)="closeInventoryDetailModal()"
+>
+  <div id="inwardDetail" class="panel-collapse collapse in">
+    <div class="panel-body table-responsive">
+      <fieldset style="margin-top: 0rem; margin-bottom: 2rem">
+        <legend>Inventory Specification Parameter Details</legend>
+        <div class="boxWhite">
+          <div class="row table-responsive">
+            <div class="col-lg-12 col-md-12">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th id="parameter">Parameter</th>
+                    <th id="mandatory">Mandatory</th>
+                    <th id="value">Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (
+                    param of inventorySpecificationDetails
+                      | paginate
+                        : {
+                            id: "productDetailPageData",
+                            itemsPerPage: productDeatilItemPerPage,
+                            currentPage: productPageChargeDeatilList,
+                            totalItems: productDeatiltotalRecords
+                          };
+                    track param;
+                    let i = $index
+                  ) {
+                    <tr>
+                      <td>{{ param.paramName }}</td>
+                      <td>{{ param.isMandatory }}</td>
+                      <td>
+                        {{ param.paramValue }}
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </fieldset>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <div class="addUpdateBtn">
+      <button
+        type="button"
+        (click)="closeInventoryDetailModal()"
+        class="btn btn-danger btn-sm"
+        data-dismiss="modal"
+      >
+        Close
+      </button>
+    </div>
+  </div>
+</p-dialog> -->
+
+<!-- Bulk Add Pop-up -->
+<!-- <p-dialog
+  header="Bulk Add"
+  [(visible)]="isBuldUpload"
+  [style]="{ width: '40%' }"
+  [modal]="true"
+  [responsive]="true"
+  [draggable]="false"
+  [closable]="true"
+  (onHide)="closeUploadDocumentId()"
+>
+  <div class="modal-body">
+    <div [formGroup]="uploadDocForm" class="row">
+      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <label>Select files to upload *</label>
+        <input
+          (change)="onFileChangeUpload($event)"
+          class="form-control"
+          formControlName="file"
+          id="txtSelectDocument"
+          multiple="multiple"
+          placeholder="Select Attachment"
+          style="padding: 2px; width: 100%"
+          type="file"
+          accept=".csv,text/csv"
+        />
+        @for (file of selectedFileUploadPreview; track file; let i = $index) {
+          <div>
+            <div
+              style="
+                padding-left: 10px;
+                padding-right: 10px;
+                padding-top: 4px;
+                padding-bottom: 4px;
+                font-size: 10px;
+              "
+            >
+              {{ file?.name }}
+              <button type="button" class="close" (click)="deletUploadedFile(file?.name)">
+                &times;
+              </button>
+            </div>
+          </div>
+        }
+        @if (submitted && uploadDocForm.controls.file.errors) {
+          <div class="errorWrap text-danger">
+            @if (submitted && uploadDocForm.controls.file.errors.required) {
+              <div class="error text-danger">File is required.</div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button (click)="uploadDocuments()" class="btn btn-primary" id="submit" type="submit">
+        <i class="fa fa-check-circle"></i>
+        Upload
+      </button>
+      <button type="button" class="btn btn-danger btn-sm" (click)="closeUploadDocumentId()">
+        Close
+      </button>
+    </div>
+  </div>
+</p-dialog> -->
+
+
+<ng-template #bulkProductDetailsDialog>
+    <div class="dialog-header dialog-title" style="display: flex; justify-content: space-between;">
+        Product Details
+        <a mat-icon-button (click)="closeProductDialog()">
+            <img src="assets/img/DashboardIcons/Reject.svg">
+        </a>
+    </div>
+    <mat-dialog-content>
+
+        <!-- <div class="table-responsive">
+            <table class="table table-bordered table-hover mat-elevation-z8 cursor-pointer " style="width: 100%;">
+                <thead class="table-header-bg">
+                    <tr>
+                        <th class="table-header-title">Product Name</th>
+                        <th class="table-header-title">Quantity</th>
+                        <th class="table-header-title">InTransit Quantity</th>
+                        <th class="table-header-title">Status</th>
+                        <th class="table-header-title">Approval Status</th>
+                       
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let product of bulkInwardList" class="table-content-row">
+
+                        <td class="f-s-14 text-center">{{ product.productId.name || '-' }}</td>
+                        <td class="f-s-14 text-center">{{product.qty}}</td>
+                        <td class="f-s-14 text-center">{{ product.inTransitQty }}</td>
+                        <td class="f-s-14 text-center">
+                            <span class="status-badge text-center" [ngClass]="{
+                                    'status-success': product.status === 'ACTIVE',
+                                    'status-danger': product.status === 'INACTIVE'
+                                }">
+                                {{ product.status }}
+                            </span>
+                        </td>
+                        <td class="f-s-14 text-center">
+                            <span class="status-badge" [ngClass]="{
+                                    'status-primary': product.approvalStatus === 'Pending',
+                                    'status-success': product.approvalStatus === 'Approve',
+                                    'status-danger': product.approvalStatus === 'Rejected'
+                                }">
+                                {{ product.approvalStatus || '-' }}
+                            </span>
+                        </td>
+
+                    </tr>
+                    @if (bulkInwardList.length === 0) {
+                    <tr>
+                        <td colspan="5" class="text-center font-italic" style="color: #757575; padding: 20px;">
+                            No product details available.
+                        </td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div> -->
+
+
+
+
+        <div class="table-responsive">
+
+            <table mat-table [dataSource]="dataSource" class="mat-elevation-z8 custom-table">
+
+                <!-- Product Name -->
+                <ng-container matColumnDef="productName">
+                    <th mat-header-cell *matHeaderCellDef> Product Name </th>
+                    <td mat-cell *matCellDef="let product">
+                        {{ product.productId.name || '-' }}
+                    </td>
+                </ng-container>
+
+                <!-- Quantity -->
+                <ng-container matColumnDef="qty">
+                    <th mat-header-cell *matHeaderCellDef> Quantity </th>
+                    <td mat-cell *matCellDef="let product">
+                        {{ product.qty }}
+                    </td>
+                </ng-container>
+
+                <!-- InTransit -->
+                <ng-container matColumnDef="inTransitQty">
+                    <th mat-header-cell *matHeaderCellDef> InTransit Quantity </th>
+                    <td mat-cell *matCellDef="let product">
+                        {{ product.inTransitQty }}
+                    </td>
+                </ng-container>
+
+
+                <ng-container matColumnDef="inwardNumber">
+                    <th mat-header-cell *matHeaderCellDef> Inward Number </th>
+                    <td mat-cell *matCellDef="let product">
+                        {{ product.id }}
+                    </td>
+                </ng-container>
+
+
+                <!-- Status -->
+                <ng-container matColumnDef="status">
+                    <th mat-header-cell *matHeaderCellDef> Status </th>
+                    <td mat-cell *matCellDef="let product">
+                        <span class="status-badge" [ngClass]="{
+                  'status-success': product.status === 'ACTIVE',
+                  'status-danger': product.status === 'INACTIVE'
+                }">
+                            {{ product.status }}
+                        </span>
+                    </td>
+                </ng-container>
+
+                <!-- Approval -->
+                <ng-container matColumnDef="approvalStatus">
+                    <th mat-header-cell *matHeaderCellDef> Approval Status </th>
+                    <td mat-cell *matCellDef="let product">
+                        <span class="status-badge" [ngClass]="{
+                  'status-primary': product.approvalStatus === 'Pending',
+                  'status-success': product.approvalStatus === 'Approve',
+                  'status-danger': product.approvalStatus === 'Rejected'
+                }">
+                            {{ product.approvalStatus || '-' }}
+                        </span>
+                    </td>
+                </ng-container>
+
+                <!-- Header -->
+                <tr mat-header-row *matHeaderRowDef="displayedColumnsdiloag"></tr>
+
+                <!-- Row -->
+                <tr mat-row *matRowDef="let row; columns: displayedColumnsdiloag" class="table-content-row">
+                </tr>
+
+            </table>
+
+        </div>
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+        <button mat-stroked-button color="warn" class="button-normal m-r-10" (click)="closeProductDialog()">
+            Close
+        </button>
+    </mat-dialog-actions>
+</ng-template>

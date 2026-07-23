@@ -1,0 +1,397 @@
+<div class="row header-row p-0 m-0">
+    <mat-card class="cardWithShadow w-100">
+        <mat-card-content class="mat-card-content-border">
+            <div class="row">
+                <div class="col-lg-3 col-sm-3 p-0 m-0">
+                    <mat-form-field appearance="outline" class="w-100 hide-hint mr-10 header-input"
+                        style="padding-left: 16px">
+                        <input class="input-p-5" matInput [(ngModel)]="searchkey" placeholder="Enter Name"
+                            (keydown.enter)="getsearch()" />
+                        <mat-icon matSuffix class="search-header-search-icon">
+                            <i class="pi pi-search icon-size"></i>
+                        </mat-icon>
+                    </mat-form-field>
+                </div>
+
+                <div class="col-lg-4 col-sm-4">
+                    <div class="d-flex" style="margin-left: -2%">
+                        <button class="button-normal mr-10" mat-button mat-flat-button color="primary"
+                            (click)="getsearch()">
+                            Search
+                        </button>
+
+                        <button mat-stroked-button matButton="outlined" class="button-normal " (click)="listViewData()">
+                            Clear
+                        </button>
+                    </div>
+                </div>
+
+                <div class="col-lg-5 col-sm-5 search-div">
+                    <div class="d-flex justify-content-end">
+                        <button mat-button mat-flat-button color="primary" (click)="createData()"
+                            class="button-normal mr-10" style="width: auto">
+                            Add Attribute
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+<div class="container-fluid contain-flud">
+
+    <div class="row">
+        <div class="col-md-12">
+            <mat-card class="cardWithShadow">
+                <mat-card-content class="mat-card-content-border">
+                    <div class="country-table-list">
+                        <div class="example-container mat-elevation-z8" tabindex="0">
+                            <table mat-table [dataSource]="dataSource.slice(
+            currentPageIndex * itemsPerPage,
+            currentPageIndex * itemsPerPage + itemsPerPage
+          )" class="mat-elevation-z8" style="width: 100%;">
+
+                                <!-- Attribute ID	 Column -->
+                                <ng-container matColumnDef="id">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef> Attribute ID </th>
+                                    <td mat-cell *matCellDef="let element"> {{element.attributeId}} </td>
+                                </ng-container>
+
+                                <!-- Name Column -->
+                                <ng-container matColumnDef="name">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef> Name </th>
+                                    <td mat-cell *matCellDef="let element"> {{element.name}} </td>
+                                </ng-container>
+
+                                <!-- Type Column -->
+                                <ng-container matColumnDef="type">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef> Type </th>
+                                    <td mat-cell *matCellDef="let element"> {{element.type}} </td>
+                                </ng-container>
+
+                                <!-- Created By Column -->
+                                <ng-container matColumnDef="createdBy">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef> Created By </th>
+                                    <td mat-cell *matCellDef="let element"> {{element.createdBy}} </td>
+                                </ng-container>
+
+                                <!-- Status Column -->
+                                <ng-container matColumnDef="status">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef> Status </th>
+                                    <td mat-cell *matCellDef="let element"> {{element.status}} </td>
+                                </ng-container>
+                                <ng-container matColumnDef="action">
+                                    <th mat-header-cell class="table-header-title" *matHeaderCellDef> Action </th>
+                                    <td mat-cell *matCellDef="let element"> <a mat-icon-button matTooltip="view"
+                                            href="javascript:void(0)" (click)="AllDetails(element)">
+                                            <img src="assets/img/DashboardIcons/eye-svgrepo-com (1) 1.svg">
+                                        </a>
+                                        <a mat-icon-button matTooltip="edit" href="javascript:void(0)"
+                                            *ngIf="editAccess" (click)="edit(element)">
+                                            <img src="assets/img/DashboardIcons/Edit.svg">
+                                        </a>
+                                        <a mat-icon-button matTooltip="delete" href="javascript:void(0)"
+                                            *ngIf="deleteAccess" (click)="delete(element)">
+                                            <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                        </a>
+                                    </td>
+                                </ng-container>
+
+                                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                            </table>
+                        </div>
+                        <mat-paginator [length]="dataSource.length" [pageSize]="itemsPerPage"
+                            [pageIndex]="currentPageIndex" [pageSizeOptions]="[5,10,20,50,100]" showFirstLastButtons
+                            (page)="
+                              currentPageIndex = $event.pageIndex;
+                              itemsPerPage = $event.pageSize
+                            ">
+                        </mat-paginator>
+
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </div>
+</div>
+<ng-template #addEditDialog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <!-- Header -->
+        <div class="dialog-header dialog-title">
+            {{ isAttrinuteEdit ? "Update" : "Create" }} Attribute
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <form [formGroup]="attributeForm">
+            <div mat-dialog-content>
+                <div class="row header-row p-0 m-0">
+                    <mat-card class="cardWithShadow w-100">
+                        <mat-card-content class="mat-card-content-border">
+                            <ng-container *ngIf="!createAccess && !isAttrinuteEdit">
+                                <mat-card-content class="matcard-content">
+                                    <div class="panel-body table-responsive">
+                                        Sorry you have not privilege to create operation!
+                                    </div>
+                                </mat-card-content>
+                            </ng-container>
+                            @if (createAccess || (isAttrinuteEdit && editAccess)) {
+                            <div class="row">
+
+
+                                <!-- Name -->
+                                <div class="col-md-4">
+                                    <label class="inputLabel">Name *</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <input matInput formControlName="name" placeholder="Enter Name" />
+                                        <mat-error *ngIf="submitted && attributeForm.controls.name.errors?.required">
+                                            Name is required.
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Mandatory -->
+                                <div class="col-md-4">
+                                    <label class="inputLabel">Mandatory *</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select formControlName="mandatory" placeholder="Select a Mandatory">
+                                            <mat-option value="yes">Yes</mat-option>
+                                            <mat-option value="no">No</mat-option>
+                                        </mat-select>
+                                        <mat-error
+                                            *ngIf="submitted && attributeForm.controls.mandatory.errors?.required">
+                                            Mandatory selection required
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Protected Flag -->
+                                <div class="col-md-4">
+                                    <label class="inputLabel">Protected Flag *</label>
+                                    <mat-form-field class="w-100" appearance="outline">
+                                        <mat-select formControlName="protectedFlag"
+                                            placeholder="Select a Protected Flag">
+                                            <mat-option value="yes">Yes</mat-option>
+                                            <mat-option value="no">No</mat-option>
+                                        </mat-select>
+                                        <mat-error
+                                            *ngIf="submitted && attributeForm.controls.protectedFlag.errors?.required">
+                                            Protected Flag required
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Encryption -->
+                                <div class="col-md-4">
+                                    <label class="inputLabel">Encryption *</label>
+                                    <mat-form-field class="w-100" appearance="outline">
+                                        <mat-select formControlName="encryption" placeholder="Select a Encryption">
+                                            <mat-option value="yes">Yes</mat-option>
+                                            <mat-option value="no">No</mat-option>
+                                        </mat-select>
+                                        <mat-error
+                                            *ngIf="submitted && attributeForm.controls.encryption.errors?.required">
+                                            Encryption required
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Type -->
+                                <div class="col-md-4">
+                                    <label class="inputLabel">Type *</label>
+                                    <mat-form-field class="w-100" appearance="outline">
+                                        <mat-select formControlName="type" placeholder="Select a Type">
+                                            <mat-option *ngFor="let t of dropdownService.MasterTypeList"
+                                                [value]="t.value">
+                                                {{ t.label }}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error *ngIf="submitted && attributeForm.controls.type.errors?.required">
+                                            Type is required
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+
+                                <!-- Status -->
+                                <div class="col-md-4">
+                                    <label class="inputLabel">Status *</label>
+                                    <mat-form-field appearance="outline" class="mat-form-field w-100">
+                                        <mat-select class="input-p-5" formControlName="status"
+                                            placeholder="Select a Status">
+                                            <mat-option *ngFor="let opt of statusOptions" [value]="opt.val">
+                                                {{ opt.label }}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error *ngIf="submitted && attributeForm.controls.status.errors?.required">
+                                            Status is required.
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Dictionary Type -->
+                                <div class="col-md-4">
+                                    <label class="inputLabel">Dictionary Type *</label>
+                                    <mat-form-field class="w-100" appearance="outline">
+                                        <mat-select formControlName="dictionaryType"
+                                            placeholder="Select a Dictionary Type">
+                                            <mat-option *ngFor="let d of dropdownService.DictionaryTypeList"
+                                                [value]="d.value">
+                                                {{ d.label }}
+                                            </mat-option>
+                                        </mat-select>
+                                        <mat-error
+                                            *ngIf="submitted && attributeForm.controls.dictionaryType.errors?.required">
+                                            Dictionary Type required
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Minimum -->
+                                <div class="col-md-4">
+                                    <label class="inputLabel">Minimum</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <input matInput type="number" formControlName="minimum"
+                                            placeholder="Enter Minimum " />
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Maximum -->
+                                <div class="col-md-4">
+                                    <label class="inputLabel">Maximum</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <input matInput type="number" formControlName="maximum"
+                                            placeholder="Enter Maximum " />
+                                    </mat-form-field>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="inputLabel">Vendor*</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select formControlName="vendorId" placeholder="Select Attribute Vendor">
+                                            <mat-option [value]="null">None</mat-option>
+                                            <mat-option *ngFor="let v of dropdownService.vendorData" [value]="v.id">
+                                                {{ v.name }}({{ v.id }})
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="inputLabel">Parent Attribute</label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select formControlName="parentAttributeId"
+                                            placeholder="Select Parent Attribute">
+                                            <mat-option [value]="null">None</mat-option>
+                                            <mat-option *ngFor="let p of dropdownService.attributData" [value]="p.id">
+                                                {{ p.name }}({{ p.attributeId }})
+                                            </mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+
+                                <!-- Created By -->
+                                <!-- <div class="col-md-4">
+                                    <label class="inputLabel">Created By </label>
+                                    <mat-form-field class="w-100" appearance="outline">
+                                        <input matInput formControlName="createdBy" placeholder="Enter Created By" />
+                                    </mat-form-field>
+                                </div> -->
+
+                                <!-- Modified By -->
+                                <!-- <div class="col-md-4">
+                                    <label class="inputLabel">Modified By </label>
+                                    <mat-form-field class="w-100" appearance="outline">
+                                        <input matInput formControlName="modifiedBy" placeholder="Enter Modified By" />
+                                    </mat-form-field>
+                                </div> -->
+
+                                <!-- Regex -->
+                                <div class="col-md-4">
+                                    <label class="inputLabel">Regex</label>
+                                    <mat-form-field class="w-100" appearance="outline">
+                                        <input matInput formControlName="regex" placeholder="Optional Regex" />
+                                    </mat-form-field>
+                                </div>
+                            </div>
+
+                            }
+                        </mat-card-content>
+                    </mat-card>
+                </div>
+            </div>
+            <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+                <button mat-button mat-flat-button color="primary" class="button-normal" type="submit"
+                    (click)="onSubmit(dialogRef)">
+                    {{ isAttrinuteEdit ? "Update" : "Create" }} Attribute
+                </button>
+                <button mat-stroked-button matButton="outlined" type="button" color="primary" class="button-normal"
+                    (click)="dialogRef.close()">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+</ng-template>
+
+
+
+<ng-template #detailsDialog let-dialogRef="dialogRef">
+    <div class="container-fluid p-0">
+        <!-- Header -->
+        <div class="dialog-header dialog-title">
+            {{ viewTrcData.nodeName }} Attribute Detail
+            <span>
+                <a mat-icon-button (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <div mat-dialog-content>
+            <mat-card>
+                <mat-card-content>
+                    <div class="row mt-4">
+                        <div class="col-lg-4 col-md-4 col-sm-6 dataGroup" *ngFor="let field of attributeDetailFields">
+                            <div class="field">
+                                <span class="label-text f-w-600 f-s-15">{{ field.label }}</span>
+                                <span class="colon">:</span>
+                                <span class="m-l-10">
+                                    {{ field.key || '—' }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </div>
+</ng-template>
+<ng-template #confirmDialog let-data>
+    <div class="dialog-container">
+        <div class="dialog-header dialog-header-titleFont">
+            {{ data.title || "Delete Confirmation" }}
+            <span class="w-h-18">
+                <a mat-icon-button href="javascript:void(0)" mat-dialog-close="false">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+            <p class="dialog-description">{{ data.description }}</p>
+
+            <div mat-dialog-actions class="p-0">
+                <button mat-flat-button type="button" class="primary" [mat-dialog-close]="true">
+                    {{ data.yesLabel || "Confirm" }}
+                </button>
+                <button mat-stroked-button matButton="outlined" color="primary" mat-dialog-close="false">
+                    {{ data.noLabel || "Cancel" }}
+                </button>
+            </div>
+        </div>
+    </div>
+</ng-template>

@@ -1,0 +1,1422 @@
+<!-- <div class="row">
+  <div class="col-md-12">
+    <div class="panel top">
+      <div class="panel-heading">
+        <h3 class="panel-title">Dunning Rule</h3>
+        <div class="right">
+          <button type="button" class="btn-toggle-collapse" data-toggle="collapse" data-target="#searchDunning"
+            aria-expanded="false" aria-controls="searchDunning">
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+
+      <div id="searchDunning" class="panel-collapse collapse in">
+        @if (listView) {
+        <div class="panel-body">
+          <div class="row">
+            <div class="col-lg-3 col-md-4">
+
+              <input type="text" [(ngModel)]="searchDunningRule" class="form-control" placeholder="Global Search Filter"
+                (keydown.enter)="searchdunning()" />
+            </div>
+
+            <div class="col-lg-3 col-md-4 marginTopSearchBtn">
+              <button type="button" class="btn btn-primary" id="searchbtn" (click)="searchdunning()">
+                <i class="fa fa-search"></i>
+                Search
+              </button>
+              &nbsp;
+              <button type="reset" class="btn btn-default" id="searchbtn" (click)="clearSearchDunning()">
+                 <img src="assets/img/DashboardIcons/Refresh.svg" />
+                Clear
+              </button>
+            </div>
+          </div>
+        </div>
+        }
+        <div class="panel-body no-padding panel-udata">
+          @if (createAccess) {
+          <div class="col-md-6 pcol">
+            <div class="dbox">
+              <a href="javascript:void(0)" (click)="createDunning()" class="curson_pointer">
+                <img src="../../../assets/img/i01.png" style="width: 32px" />
+                <h5>Create Dunning Rule</h5>
+
+              </a>
+            </div>
+          </div>
+          }
+          <div class="col-md-6 pcol">
+            <div class="dbox">
+              <a href="javascript:void(0)" (click)="listDunning()" class="curson_pointer">
+                <img src="../../../assets/img/i01.png" style="width: 32px" />
+                <h5>Search Dunning Rule</h5>
+
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row">
+  @if (createView) {
+  <div class="col-md-12 col-sm-12">
+    <div class="panel">
+      <div class="panel-heading">
+        @if (!isdunningEdit) {
+        <h3 class="panel-title">Create Dunning</h3>
+        }
+        @if (isdunningEdit) {
+        <h3 class="panel-title">Update Dunning</h3>
+        }
+        <div class="right">
+          <button type="button" class="btn-toggle-collapse" data-toggle="collapse" data-target="#createDunning"
+            aria-expanded="false" aria-controls="createDunning">
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+      <div id="createDunning" class="panel-collapse collapse in">
+        <div class="panel-body table-responsive">
+          <form [formGroup]="dunningGroupForm">
+
+            <fieldset style="margin-top: 0px">
+              <legend>Dunning Information*</legend>
+              <div class="boxWhite">
+                <div class="row">
+                  <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <div class="form-group">
+                      <label>Name *</label>
+                      <input id="name" type="text" class="form-control" placeholder="Enter Name" formControlName="name"
+                        [ngClass]="{
+                          'is-invalid': submitted && dunningGroupForm.controls.name.errors
+                        }" />
+                      @if (submitted && dunningGroupForm.controls.name.errors) {
+                      <div class="errorWrap text-danger">
+                        @if (submitted && dunningGroupForm.controls.name.errors.required) {
+                        <div class="error text-danger">
+                          Name is required.
+                        </div>
+                        }
+                      </div>
+                      }
+                    </div>
+                  </div>
+                  <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <div class="form-group">
+                      <label>CC Email</label>
+                      <input id="ccemail" type="text" class="form-control" placeholder="Enter CC Email"
+                        formControlName="ccemail" [ngClass]="{
+                          'is-invalid': submitted && dunningGroupForm.controls.ccemail.errors
+                        }" />
+                      @if (submitted && dunningGroupForm.controls.ccemail.errors) {
+                      <div class="errorWrap text-danger">
+                        @if (submitted && dunningGroupForm.controls.ccemail.errors.email) {
+                        <div class="error text-danger">
+                          Email is not valid.
+                        </div>
+                        }
+                      </div>
+                      }
+                    </div>
+                  </div>
+                  <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <div class="form-group">
+                      <label>Mobile </label>
+                      <input id="mobile" type="number" class="form-control" placeholder="Enter Mobile No."
+                        formControlName="mobile" [ngClass]="{
+                          'is-invalid': submitted && dunningGroupForm.controls.mobile.errors
+                        }" />
+                      @if (submitted && dunningGroupForm.controls.mobile.errors) {
+                      <div class="errorWrap text-danger">
+                        @if (submitted && dunningGroupForm.controls.mobile.errors.required) {
+                        <div class="error text-danger">
+                          Email is required.
+                        </div>
+                        }
+                        @if (
+                        submitted && dunningGroupForm.controls.collagencyemail.errors.email
+                        ) {
+                        <div class="error text-danger">
+                          Email is not valid.
+                        </div>
+                        }
+                      </div>
+                      }
+                    </div>
+                  </div>
+                  <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <div class="form-group">
+                      <label> Dunning For *</label>
+                      <p-dropdown [options]="dunningApplyTypes" optionValue="value" optionLabel="label" [filter]="true"
+                        filterBy="text" placeholder="Select Dunning type" formControlName="dunningFor"
+                        (onChange)="getDunningTypeFor($event)"></p-dropdown>
+                      @if (submitted && dunningGroupForm.controls.dunningFor.errors) {
+                      <div class="errorWrap text-danger">
+                        @if (submitted && dunningGroupForm.controls.dunningFor.errors.required) {
+                        <div class="error text-danger">
+                          Dunning For Customer or Partner is required.
+                        </div>
+                        }
+                      </div>
+                      }
+                    </div>
+                  </div>
+                </div>
+
+                <div class="row">
+                  <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <div class="form-group">
+                      <label>Status *</label>
+                      <p-dropdown [options]="statusOptions" optionValue="value" optionLabel="label" [filter]="true"
+                        filterBy="label" placeholder="Select a Status" formControlName="status" [ngClass]="{
+                          'is-invalid': submitted && dunningGroupForm.controls.status.errors
+                        }"></p-dropdown>
+                      @if (submitted && dunningGroupForm.controls.status.errors) {
+                      <div class="errorWrap text-danger">
+                        @if (submitted && dunningGroupForm.controls.status.errors.required) {
+                        <div class="error text-danger">
+                          Status is required.
+                        </div>
+                        }
+                      </div>
+                      }
+                    </div>
+                  </div>
+                  <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <div class="form-group">
+                      <label>Credentials class *</label>
+                      <p-dropdown [options]="CreditclassData" optionValue="value" optionLabel="value" filter="true"
+                        filterBy="value" placeholder="Select a Class" formControlName="creditclass" [ngClass]="{
+                          'is-invalid': submitted && dunningGroupForm.controls.creditclass.errors
+                        }"></p-dropdown>
+                      <div></div>
+                      @if (submitted && dunningGroupForm.controls.creditclass.errors) {
+                      <div class="errorWrap text-danger">
+                        @if (submitted && dunningGroupForm.controls.creditclass.errors.required) {
+                        <div class="error text-danger">
+                          Credentials is required.
+                        </div>
+                        }
+                      </div>
+                      }
+                    </div>
+                  </div>
+                  <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <div class="form-group">
+                      <label>Dunning Type *</label>
+                      <p-dropdown [options]="dunningTypeListByDropdown" optionValue="value" optionLabel="text"
+                        [filter]="true" filterBy="text" placeholder="Select Dunning type" formControlName="dunningType"
+                        (onChange)="getDunningEvent($event)"></p-dropdown>
+                      @if (submitted && dunningGroupForm.controls.dunningType.errors) {
+                      <div class="errorWrap text-danger">
+                        @if (submitted && dunningGroupForm.controls.dunningType.errors.required) {
+                        <div class="error text-danger">
+                          Dunning Type is required.
+                        </div>
+                        }
+                      </div>
+                      }
+                    </div>
+                  </div>
+                  @if (!isDunningForMvno) {
+                  <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <div class="form-group">
+                      <label>Customer Pay Type *</label>
+                      <p-dropdown [options]="customerTypes" optionValue="label" optionLabel="label" [filter]="true"
+                        filterBy="text" placeholder="Select customerPay Type"
+                        formControlName="customerPayType"></p-dropdown>
+                      @if (submitted && dunningGroupForm.controls.customerPayType.errors) {
+                      <div class="errorWrap text-danger">
+                        @if (
+                        submitted && dunningGroupForm.controls.customerPayType.errors.required
+                        ) {
+                        <div class="error text-danger">
+                          Dunning Type is required.
+                        </div>
+                        }
+                      </div>
+                      }
+                    </div>
+                  </div>
+                  }
+                  @if (!isDunningForMvno) {
+                  <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <div class="form-group">
+                      <label>Customer Type</label>
+                      <p-dropdown [options]="this.commondropdownService.customertypeList" optionValue="value"
+                        optionLabel="text" [filter]="true" filterBy="text" placeholder="Select customer type"
+                        formControlName="customerType" (onChange)="getCustSubType($event)"></p-dropdown>
+                    </div>
+                  </div>
+                  }
+                  @if (
+                  this.dunningGroupForm.controls.dunningSubType.enabled && isCustSubTypeCon
+                  ) {
+                  <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <div class="form-group">
+                      <label>Customer Sub Type</label>
+                      <p-dropdown [options]="this.commondropdownService.customerSubtypeList" optionValue="value"
+                        optionLabel="text" [filter]="text" filterBy="text" placeholder="Select Customer Sub Type"
+                        formControlName="dunningSubType"></p-dropdown>
+                    </div>
+                  </div>
+                  }
+                  @if (
+                  this.dunningGroupForm.controls.dunningSubType.enabled && !isCustSubTypeCon
+                  ) {
+                  <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <div class="form-group">
+                      <label>Customer Sub Type</label>
+                      <input type="text" class="form-control" placeholder="Enter Customer Sub Type"
+                        formControlName="dunningSubType" />
+                    </div>
+                  </div>
+                  }
+                  @if (!isDunningForMvno) {
+                  <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <div class="form-group">
+                      <label>Customer Sector</label>
+                      <p-dropdown [options]="this.commondropdownService.sectortypeList" optionValue="value"
+                        optionLabel="text" [filter]="text" filterBy="text" placeholder="Select Customer Sector"
+                        formControlName="dunningSector" (onChange)="getSectSubType($event)"></p-dropdown>
+                    </div>
+                  </div>
+                  }
+                  <div class="row">
+                    @if (this.dunningGroupForm.controls.dunningSubSector.enabled) {
+                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                      <div class="form-group">
+                        <label>Customer Sector Sub Type</label>
+                        <input type="text" class="form-control" placeholder="Enter Customer Sector Sub Type"
+                          formControlName="dunningSubSector" />
+                      </div>
+                    </div>
+                    }
+                    @if (!isDunningForMvno) {
+                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12 pd-3">
+                      <div class="form-group">
+                        <label>Service Area *</label>
+                        <p-multiSelect [options]="commondropdownService.serviceAreaList" optionValue="id"
+                          optionLabel="name" [filter]="true" filterBy="serviceName" placeholder="Select a Service"
+                          formControlName="serviceAreaIds" [ngClass]="{
+                            'is-invalid':
+                              submitted && dunningGroupForm.controls.serviceAreaIds.errors
+                          }" (onChange)="selServiceArea($event.value)"></p-multiSelect>
+                        <div></div>
+                        @if (submitted && dunningGroupForm.controls.serviceAreaIds.errors) {
+                        <div class="errorWrap text-danger">
+                          @if (
+                          submitted && dunningGroupForm.controls.serviceAreaIds.errors.required
+                          ) {
+                          <div class="error text-danger">
+                            Please select service.
+                          </div>
+                          }
+                        </div>
+                        }
+                      </div>
+                    </div>
+                    }
+                    @if (isBranchAvailable && !isDunningForMvno) {
+                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                      <label for="branchId">Branch/Partner *</label>
+                      <p-multiSelect [options]="branchData" optionValue="id" optionLabel="name" filter="true"
+                        filterBy="name" placeholder="Select a Branch" formControlName="branchIds" [ngClass]="{
+                          'is-invalid': submitted && dunningGroupForm.controls.branchIds.errors
+                        }">
+                      </p-multiSelect>
+                      @if (submitted && !dunningGroupForm.value.serviceAreaIds) {
+                      <div class="errorWrap text-danger">
+                        <div class="error text-danger">Please select Service Area first!</div>
+                      </div>
+                      }
+                      @if (submitted && dunningGroupForm.controls.branchIds.errors) {
+                      <div class="errorWrap text-danger">
+                        <div class="error text-danger">Branch Is required</div>
+                      </div>
+                      }
+                    </div>
+                    }
+                    @if (!isBranchAvailable && !isDunningForMvno) {
+                    <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12" style="margin-left: 15px">
+                      <label>Branch/Partner *</label>
+                      <p-multiSelect [options]="partnerListByServiceArea" optionValue="id" optionLabel="name"
+                        filter="true" filterBy="name" placeholder="Select a Partner" formControlName="partnerIds"
+                        [ngClass]="{
+                          'is-invalid': submitted && dunningGroupForm.controls.partnerIds.errors
+                        }"></p-multiSelect>
+                      @if (submitted && dunningGroupForm.controls.partnerIds.errors) {
+                      <div class="errorWrap text-danger">
+                        <div class="error text-danger">Partner is required.</div>
+                      </div>
+                      }
+                      <br />
+                    </div>
+                    }
+
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12" style="margin-top:15px">
+                    <div class="form-group form-check inputcheckboxCenter">
+                      <p-checkbox binary="true" class="checkbox-align" formControlName="isGeneratepaymentLink"
+                        name="isGeneratepaymentLink"></p-checkbox>&nbsp;&nbsp;
+                      <label class="form-check-label" for="isGeneratepaymentLink">Is Generate Payment Url</label>
+                    </div>
+                    <br />
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+
+            <fieldset>
+              <legend>Dunning Rule Action List</legend>
+              <div class="boxWhite">
+                <div class="row" [formGroup]="dunningRulefromgroup">
+                  <div class="col-lg-3 col-md-3 col-sm-3 col-12">
+                    <p-dropdown [options]="dunningEventList" optionValue="label" optionLabel="label" [filter]="true"
+                      filterBy="label" placeholder="Select a Action" formControlName="action" [ngClass]="{
+                        'is-invalid':
+                          dunningSubmitted && dunningRulefromgroup.controls.action.errors
+                      }"></p-dropdown>
+                    <div></div>
+                    @if (dunningSubmitted && dunningRulefromgroup.controls.action.errors) {
+                    <div class="errorWrap text-danger">
+                      <div class="error text-danger">Action required.</div>
+                    </div>
+                    }
+                  </div>
+
+                  <div class="col-lg-3 col-md-3 col-sm-3 col-12">
+                    <input class="form-control" type="number" min="0" placeholder="Enter Day" name="days"
+                      id="days        " formControlName="days" [ngClass]="{
+                        'is-invalid': dunningSubmitted && dunningRulefromgroup.controls.days.errors
+                      }" />
+                    @if (dunningSubmitted && dunningRulefromgroup.controls.days.errors) {
+                    <div class="errorWrap text-danger">
+
+                      @if (
+                      dunningSubmitted && dunningRulefromgroup.controls.days.errors.required
+                      ) {
+                      <div class="error text-danger">
+                        Day is required.
+                      </div>
+                      }
+                    </div>
+                    }
+                  </div>
+                  <div class="col-lg-3 col-md-3 col-sm-3 col-12">
+                    <button style="object-fit: cover; padding: 5px 8px" class="btn btn-primary"
+                      (click)="onAddChargeField()">
+                      <i class="fa fa-plus-square" aria-hidden="true"></i>
+                      Add
+                    </button>
+                  </div>
+                </div>
+                <table class="table coa-table" style="margin-top: 10px">
+                  <thead>
+                    <tr>
+                      <th style="text-align: center; width: 10%">Action</th>
+                      <th style="text-align: center; width: 10%">Days</th>
+                      <th style="text-align: right; width: 10%; padding: 8px">Delete</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (
+                    row of chargeFromArray.controls
+                    | paginate
+                    : {
+                    id: 'chargeFromArrayData',
+                    itemsPerPage: chargeitemsPerPage,
+                    currentPage: currentPageCharge,
+                    totalItems: chargetotalRecords
+                    }; track
+                    row; let index = $index) {
+                    <tr>
+                      <td style="padding-left: 8px">
+                        <p-dropdown [options]="dunningRoleAction" optionValue="label" optionLabel="label"
+                          [filter]="true" filterBy="label" placeholder="Select a Action"
+                          [formControl]="row.get('action')"></p-dropdown>
+                        <div></div>
+
+                      </td>
+                      <td>
+                        <input class="form-control" type="number" min="0" placeholder="Enter Day" name="days"
+                          id="days        " [formControl]="row.get('days')" />
+                        @if (submitted && row.get('days').errors) {
+                        <div class="errorWrap text-danger">
+                          @if (submitted && row.get('days').errors.pattern) {
+                          <div class="error text-danger">
+                            Only numeric charcter allowed.
+                          </div>
+                          }
+                        </div>
+                        }
+                      </td>
+                      <td style="text-align: right">
+                        <a id="deleteAtt" href="javascript:void(0)"
+                          (click)="deleteConfirmonChargeField(index, row.get('id').value)">
+                           <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                        </a>
+                      </td>
+                    </tr>
+                    }
+                  </tbody>
+                </table>
+                <div class="row">
+                  <div class="col-md-12">
+                    <pagination-controls id="chargeFromArrayData" [maxSize]="10" [directionLinks]="true"
+                      previousLabel="" nextLabel="" (pageChange)="pageChangedCharge($event)"></pagination-controls>
+                  </div>
+                </div>
+                <br />
+              </div>
+            </fieldset>
+            <div class="addUpdateBtn" style="margin: 3.5rem 0 2rem">
+              @if (!isdunningEdit) {
+              <button type="submit" class="btn btn-primary" id="submit" (click)="addEditdunning('')">
+                <i class="fa fa-check-circle"></i>
+                Add Dunning
+              </button>
+              }
+              @if (isdunningEdit) {
+              <button type="submit" class="btn btn-primary" id="submit"
+                (click)="addEditdunning(viewdunningListData.id)">
+                <i class="fa fa-check-circle"></i>
+                Update Dunning
+              </button>
+              }
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+  @if (listView) {
+  <div class="col-md-12 col-sm-12">
+    <div class="panel">
+      <div class="panel-heading">
+        <h3 class="panel-title">Dunning Rule</h3>
+        <div class="right">
+          <button type="button" class="btn-toggle-collapse" data-toggle="collapse" data-target="#listDunning"
+            aria-expanded="false" aria-controls="listDunning">
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+      <div id="listDunning" class="panel-collapse collapse in">
+        <div class="panel-body table-responsive">
+          <div class="row">
+            <div class="col-lg-12 col-md-12">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>CC Email</th>
+
+                    <th>Mobile No</th>
+                    <th>Credit class</th>
+                    <th>Status</th>
+                    <th>ISP Name</th>
+                    @if (editAccess || deleteAccess) {
+                    <th>Action</th>
+                    }
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (
+                  data of dunningListData
+                  | paginate
+                  : {
+                  id: 'dunningListpageData',
+                  itemsPerPage: dunningListdataitemsPerPage,
+                  currentPage: currentPagedunningListdata,
+                  totalItems: dunningListdatatotalRecords
+                  }; track
+                  data; let i = $index) {
+                  <tr>
+                    <td class="curson_pointer" (click)="dunningRuleDetails(data)" style="color: #f7941e">
+                      {{ data.name }}
+                    </td>
+                    <td>
+                      @if (data.ccemail) {
+                      <div>{{ data.ccemail }}</div>
+                      }
+                      @if (!data.ccemail) {
+                      <div>-</div>
+                      }
+                    </td>
+
+                    <td>
+                      {{ data.mobile }}
+                    </td>
+                    <td>{{ data.creditclass }}</td>
+
+                    <td>
+                      @if (data.status == 'Y') {
+                      <div>
+                        <span class="badge badge-success">Active</span>
+                      </div>
+                      }
+                      @if (data.status == 'N') {
+                      <div>
+                        <span class="badge badge-danger">Inactive</span>
+                      </div>
+                      }
+                    </td>
+                    <td>{{ data.mvnoName }}</td>
+                    @if (editAccess || deleteAccess) {
+                    <td class="btnAction">
+                      @if (editAccess) {
+                      <a id="editbutton" type="button" href="javascript:void(0)" (click)="editdunning(data.id)">
+                      <img src="assets/img/DashboardIcons/Edit.svg" >
+                      </a>
+                      }
+                      @if (deleteAccess) {
+                      <a id="delete-button" href="javascript:void(0)" (click)="deleteConfirmondunning(data.id)">
+                         <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                      </a>
+                      }
+                    </td>
+                    }
+                  </tr>
+                  }
+                </tbody>
+              </table>
+              <div class="pagination_Dropdown">
+                <pagination-controls id="dunningListpageData" [maxSize]="10" [directionLinks]="true" previousLabel=""
+                  nextLabel="" (pageChange)="pageChangeddunningList($event)"></pagination-controls>
+                <div id="itemPerPageDropdown">
+                  <p-dropdown [options]="pageLimitOptions" optionLabel="value" optionValue="value"
+                    (onChange)="TotalItemPerPage($event)"></p-dropdown>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+</div>
+
+@if (detailView) {
+<div class="row">
+  <div class="col-md-12 col-sm-12">
+    <div class="panel">
+      <div class="panel-heading">
+        <div class="displayflex">
+          <button type="button" class="btn btn-secondary backbtn" data-toggle="tooltip" data-placement="bottom"
+            title="Go to Dunning Rule Details" (click)="listDunning()">
+            <i class="fa fa-arrow-circle-left" style="color: #f7941e !important; font-size: 28px"></i>
+          </button>
+          <h3 class="panel-title">Dunning Rule</h3>
+        </div>
+        <div class="right">
+          <button type="button" class="btn-toggle-collapse" data-toggle="collapse" data-target="#dunningDeatils"
+            aria-expanded="false" aria-controls="dunningDeatils">
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+      <div id="dunningDeatils" class="panel-collapse collapse in">
+        <div class="panel-body table-responsive">
+          <fieldset style="margin-top: 0rem; margin-bottom: 2rem">
+            <legend>Basic Details</legend>
+            <div class="boxWhite">
+              <div class="row">
+                <div class="col-lg-4 col-md-4 dataGroup">
+                  <label class="datalbl">Name :</label>
+                  <span>{{ DunningruleActionlistData.name }}</span>
+                </div>
+                <div class="col-lg-4 col-md-4 dataGroup">
+                  <label class="datalbl">Credit Class :</label>
+                  <span>{{ DunningruleActionlistData.creditclass }}</span>
+                </div>
+                <div class="col-lg-4 col-md-4 dataGroup">
+                  <label class="datalbl">CC Email :</label>
+                  <span>{{ DunningruleActionlistData.ccemail }}</span>
+                </div>
+                <div class="col-lg-4 col-md-4 dataGroup">
+                  <label class="datalbl">Mobile :</label>
+                  <span>{{ DunningruleActionlistData.mobile }}</span>
+                </div>
+
+                <div class="col-lg-4 col-md-4 dataGroup">
+                  <label class="datalbl">Customer Type :</label>
+                  <span>{{ DunningruleActionlistData.dunningType }}</span>
+                </div>
+                <div class="col-lg-4 col-md-4 dataGroup">
+                  <label class="datalbl">Customer Sub Type :</label>
+                  <span>{{ DunningruleActionlistData.dunningSubType }}</span>
+                </div>
+                <div class="col-lg-4 col-md-4 dataGroup">
+                  <label class="datalbl">Customer Sector :</label>
+                  <span>{{ DunningruleActionlistData.dunningSector }}</span>
+                </div>
+                <div class="col-lg-4 col-md-4 dataGroup">
+                  <label class="datalbl">Customer Sector Sub Type :</label>
+                  <span>{{ DunningruleActionlistData.dunningSubSector }}</span>
+                </div>
+                <div class="col-lg-4 col-md-4 dataGroup">
+                  <label class="datalbl">Partner :</label>
+                  <span>{{ DunningruleActionlistData.partnerNames }}</span>
+                </div>
+                <div class="col-lg-4 col-md-4 dataGroup">
+                  <label class="datalbl">Branch :</label>
+                  <span>{{ DunningruleActionlistData.branchNames }}</span>
+                </div>
+                <div class="col-lg-4 col-md-4 dataGroup">
+                  <label class="datalbl">Status :</label>
+                  @if (DunningruleActionlistData.status == 'Y') {
+                  <span class="badge badge-success">
+                    Active
+                  </span>
+                  }
+                  @if (DunningruleActionlistData.status == 'N') {
+                  <span class="badge badge-danger">
+                    Inactive
+                  </span>
+                  }
+                </div>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset style="margin-top: 0rem; margin-bottom: 2rem">
+            <legend>Dunning Rule Action List</legend>
+            <div class="boxWhite">
+              <div class="row table-responsive">
+                <div class="col-lg-12 col-md-12">
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th>Action</th>
+                        <th>Days</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (
+                      data of DunningruleActionlistData.dunningRuleActionPojoList
+                      | paginate
+                      : {
+                      id: 'dunningRulepageData',
+                      itemsPerPage: dunningRuleItemPerPage,
+                      currentPage: currentPagedunningRuleList,
+                      totalItems: dunningRuletotalRecords
+                      }; track
+                      data; let i = $index) {
+                      <tr>
+                        <td>{{ data.action }}</td>
+                        <td>{{ data.days }}</td>
+                      </tr>
+                      }
+                    </tbody>
+                  </table>
+                  <pagination-controls id="dunningRulepageData" [maxSize]="10" [directionLinks]="true" previousLabel=""
+                    nextLabel="" (pageChange)="pageChangedDunningRuleList($event)"></pagination-controls>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+} -->
+<!-- 
+new code -->
+
+<div class="row header-row">
+  <mat-card class="cardWithShadow w-100">
+    <mat-card-content class="mat-card-content-border">
+      <div class="row">
+        <div class="col-sm-9 d-flex">
+          <mat-form-field appearance="outline" class="w-100 hide-hint mr-10 m-l-16">
+            <input class="input-p-5" [(ngModel)]="searchDunningRule" matInput placeholder="Global Search Filter"
+              (keydown.enter)="searchdunning()" />
+            <mat-icon matSuffix class="search-header-search-icon">
+              <i class="pi pi-search icon-size"></i>
+            </mat-icon>
+          </mat-form-field>
+
+          <button mat-button mat-flat-button color="primary" class="button-normal m-r-10" (click)="searchdunning()">
+            Search
+          </button>
+          <button mat-stroked-button matButton="outlined" class="button-normal" (click)="clearSearchDunning()">
+            Clear
+          </button>
+        </div>
+
+        <div class="col-sm-3 search-div">
+          @if (createAccess) {
+          <button mat-button mat-flat-button color="primary" (click)="createDunning()" class="button-normal mr-10">
+            Add Dunning Rule
+          </button>
+          }
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+<div class="container-fluid contain-flud">
+  <div class="row">
+    <div class="col-md-12">
+      @if (listView) {
+      <mat-card class="cardWithShadow">
+        <mat-card-content class="mat-card-content-border">
+          <div class="country-table-list">
+            <div class="table-container">
+              <table mat-table [dataSource]="dunningListData" matSort class="mat-elevation-z8 w-100">
+                <ng-container matColumnDef="id">
+                  <th mat-header-cell *matHeaderCellDef class="table-header-title">ID</th>
+
+                  <td mat-cell *matCellDef="let data"> {{ data.id }}</td>
+                </ng-container> 
+                <ng-container matColumnDef="name">
+                  <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title" sticky>
+                    Name
+                  </th>
+                  <td mat-cell *matCellDef="let data">
+                    <span>
+                      {{ data.name }}
+                    </span>
+                  </td>
+                </ng-container>
+
+                <!-- CC Email Column -->
+                <ng-container matColumnDef="ccemail">
+                  <th mat-header-cell *matHeaderCellDef class="table-header-title" sticky>
+                    CC Email
+                  </th>
+                  <td mat-cell *matCellDef="let data">
+                    @if (data.ccemail) {
+                    <div>{{ data.ccemail }}</div>
+                    }
+                    @if (!data.ccemail) {
+                    <div>-</div>
+                    }
+                  </td>
+                </ng-container>
+
+                <!-- Mobile No Column -->
+                <ng-container matColumnDef="mobile">
+                  <th mat-header-cell *matHeaderCellDef class="table-header-title" sticky>
+                    Mobile No
+                  </th>
+                  <td mat-cell *matCellDef="let data">
+                    {{ data.mobile }}
+                  </td>
+                </ng-container>
+
+                <!-- Credit Class Column -->
+                <ng-container matColumnDef="creditclass">
+                  <th mat-header-cell *matHeaderCellDef class="table-header-title" sticky>
+                    Credit class
+                  </th>
+                  <td mat-cell *matCellDef="let data">
+                    {{ data.creditclass }}
+                  </td>
+                </ng-container>
+
+                <!-- Status Column -->
+                <ng-container matColumnDef="status">
+                  <th mat-header-cell *matHeaderCellDef class="table-header-title" mat-sort-header sticky>
+                    Status
+                  </th>
+                  <td mat-cell *matCellDef="let data" class="f-s-14">
+                    <span class="status-badge" [ngClass]="{
+                    'status-success': data.status === 'Y',
+                    'status-danger': data.status === 'N'}">
+                      {{ data.status === 'Y' ? 'Active' : 'Inactive' }}
+                    </span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="mvnoName">
+                  <th mat-header-cell *matHeaderCellDef class="table-header-title" sticky>
+                    ISP Name
+                  </th>
+                  <td mat-cell *matCellDef="let data">
+                    {{ data.mvnoName }}
+                  </td>
+                </ng-container>
+
+                @if (editAccess || deleteAccess) {
+                <ng-container matColumnDef="action">
+                  <th mat-header-cell *matHeaderCellDef stickyEnd class="table-header-title">
+                    Action
+                  </th>
+                  <td mat-cell *matCellDef="let data">
+                    <a mat-icon-button matTooltip="view" href="javascript:void(0)" (click)="dunningRuleDetails(data)"
+                      title="View Details">
+                     <img src="assets/img/DashboardIcons/eye-svgrepo-com (1) 1.svg" >
+                    </a>
+
+                    <ng-container *ngIf="editAccess">
+                      <a mat-icon-button matTooltip="edit" href="javascript:void(0)" (click)="editdunning(data.id)" title="Edit">
+                        <img src="assets/img/DashboardIcons/Edit.svg" >
+                      </a>
+                    </ng-container>
+
+                    <ng-container *ngIf="deleteAccess">
+                      <a mat-icon-button matTooltip="delete" href="javascript:void(0)" (click)="deleteConfirmDunningDialog(data)"
+                        title="Delete">
+                        <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                      </a>
+                    </ng-container>
+                  </td>
+                </ng-container> }
+
+                <tr mat-header-row *matHeaderRowDef="getDisplayedPlanDetailsColumns(); sticky: true" class="table-header-bg"></tr>
+                <tr mat-row *matRowDef="let row; columns: getDisplayedPlanDetailsColumns()" class="table-content-row"></tr>
+              </table>
+
+              <mat-paginator [length]="dunningListdatatotalRecords" [pageSize]="dunningListdataitemsPerPage"
+                [pageSizeOptions]="[5,10,20,50,100]" showFirstLastButtons (page)="pageChangeddunningList($event)">
+              </mat-paginator>
+
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+      }
+    </div>
+  </div>
+</div>
+
+<ng-template #createEditDialog>
+  <div class="dialog-container">
+    <div class="dialog-header">
+      {{ editMode ? "Update" : "Create" }} Dunning
+      <span>
+        <a mat-icon-button href="javascript:void(0)" (click)="onCancel()">
+           <img src="assets/img/DashboardIcons/Reject.svg">
+        </a>
+      </span>
+    </div>
+    <div mat-dialog-content>
+      <div class="col-md-12">
+        <mat-card-content class="matcard-content" *ngIf="!createAccess && !editAccess">
+          <div class="panel-body table-responsive">
+            Sorry you have no privilege to add or edit operation!
+          </div>
+        </mat-card-content>
+
+        <mat-card-content class="matcardContent" *ngIf="createAccess || editAccess">
+          <form [formGroup]="dunningGroupForm" class="card-form mb-3" novalidate>
+
+            <mat-card class="cardWithShadow">
+              <div class="dialog-header">
+                Dunning Information*
+              </div>
+              <mat-card-content class="mat-card-content-border">
+
+                <div class="row g-3 p-3">
+                  <div class="col-md-4 col-sm-6 col-xs-12 mb-4">
+                    <label class="inputLabel">Name *</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                      <input matInput class="input-p-5" placeholder="Enter Name" formControlName="name" maxlength="250"
+                        [ngClass]="{'is-invalid': submitted && dunningGroupForm.controls.name.errors}" />
+                      <mat-error *ngIf="submitted && dunningGroupForm.controls.name.hasError('required')">
+                        Name is required.
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-md-4 col-sm-6 col-xs-12 mb-4">
+                    <label class="inputLabel">CC Email</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                      <input matInput class="input-p-5" placeholder="Enter CC Email" formControlName="ccemail"
+                        [ngClass]="{'is-invalid': submitted && dunningGroupForm.controls.ccemail.errors}" />
+                      <mat-error *ngIf="submitted && dunningGroupForm.controls.ccemail.hasError('email')">
+                        Email is not valid.
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-md-4 col-sm-6 col-xs-12 mb-4">
+                    <label class="inputLabel">Mobile</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                      <input matInput class="input-p-5" type="number" placeholder="Enter Mobile No."
+                        formControlName="mobile"
+                        [ngClass]="{'is-invalid': submitted && dunningGroupForm.controls.mobile.errors}" />
+                      <mat-error *ngIf="submitted && dunningGroupForm.controls.mobile.hasError('required')">
+                        Mobile is required.
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-md-4 col-sm-6 col-xs-12 mb-4">
+                    <label class="inputLabel">Dunning For *</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                      <mat-select placeholder="Select Dunning type" class="input-p-5" formControlName="dunningFor"
+                        (selectionChange)="getDunningTypeFor($event)"
+                        [ngClass]="{'is-invalid': submitted && dunningGroupForm.controls.dunningFor.errors}">
+                        <mat-option *ngFor="let type of dunningApplyTypes" [value]="type.value">
+                          {{ type.label }}
+                        </mat-option>
+                      </mat-select>
+                      <mat-error *ngIf="submitted && dunningGroupForm.controls.dunningFor.hasError('required')">
+                        Dunning For Customer or Partner is required.
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-md-4 col-sm-6 col-xs-12 mb-4">
+                    <label class="inputLabel">Status *</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                      <mat-select placeholder="Select a Status" class="input-p-5" formControlName="status"
+                        [ngClass]="{'is-invalid': submitted && dunningGroupForm.controls.status.errors}">
+                        <mat-option *ngFor="let status of statusOptions" [value]="status.value">
+                          {{ status.label }}
+                        </mat-option>
+                      </mat-select>
+                      <mat-error *ngIf="submitted && dunningGroupForm.controls.status.hasError('required')">
+                        Status is required.
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-md-4 col-sm-6 col-xs-12 mb-4">
+                    <label class="inputLabel">Credentials class *</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                      <mat-select placeholder="Select a Class" class="input-p-5" formControlName="creditclass"
+                        [ngClass]="{'is-invalid': submitted && dunningGroupForm.controls.creditclass.errors}">
+                        <mat-option *ngFor="let credit of CreditclassData" [value]="credit.value">
+                          {{ credit.value }}
+                        </mat-option>
+                      </mat-select>
+                      <mat-error *ngIf="submitted && dunningGroupForm.controls.creditclass.hasError('required')">
+                        Credentials is required.
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-md-4 col-sm-6 col-xs-12 mb-4">
+                    <label class="inputLabel">Dunning Type *</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                      <mat-select placeholder="Select Dunning type" class="input-p-5" formControlName="dunningType"
+                        (selectionChange)="getDunningEvent($event)"
+                        [ngClass]="{'is-invalid': submitted && dunningGroupForm.controls.dunningType.errors}">
+                        <mat-option *ngFor="let dType of dunningTypeListByDropdown" [value]="dType.value">
+                          {{ dType.text }}
+                        </mat-option>
+                      </mat-select>
+                      <mat-error *ngIf="submitted && dunningGroupForm.controls.dunningType.hasError('required')">
+                        Dunning Type is required.
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-md-4 col-sm-6 col-xs-12 mb-4" *ngIf="!isDunningForMvno">
+                    <label class="inputLabel">Customer Pay Type *</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                      <mat-select placeholder="Select Customer Pay Type" class="input-p-5"
+                        formControlName="customerPayType"
+                        [ngClass]="{'is-invalid': submitted && dunningGroupForm.controls.customerPayType.errors}">
+                        <mat-option *ngFor="let cType of customerTypes" [value]="cType.label">
+                          {{ cType.label }}
+                        </mat-option>
+                      </mat-select>
+                      <mat-error *ngIf="submitted && dunningGroupForm.controls.customerPayType.hasError('required')">
+                        Customer Pay Type is required.
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-md-4 col-sm-6 col-xs-12 mb-4" *ngIf="!isDunningForMvno">
+                    <label class="inputLabel">Customer Type</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                      <mat-select placeholder="Select Customer Type" class="input-p-5" formControlName="customerType"
+                        (selectionChange)="getCustSubType($event)">
+                        <mat-option *ngFor="let custType of commondropdownService.customertypeList"
+                          [value]="custType.value">
+                          {{ custType.text }}
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-md-4 col-sm-6 col-xs-12 mb-4"
+                    *ngIf="dunningGroupForm.controls.dunningSubType.enabled && isCustSubTypeCon">
+                    <label class="inputLabel">Customer Sub Type</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                      <mat-select placeholder="Select Customer Sub Type" class="input-p-5"
+                        formControlName="dunningSubType">
+                        <mat-option *ngFor="let subType of commondropdownService.customerSubtypeList"
+                          [value]="subType.value">
+                          {{ subType.text }}
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+                  <div class="col-md-4 col-sm-6 col-xs-12 mb-4"
+                    *ngIf="dunningGroupForm.controls.dunningSubType.enabled && !isCustSubTypeCon">
+                    <label class="inputLabel">Customer Sub Type</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                      <input matInput type="text" class="input-p-5" placeholder="Enter Customer Sub Type"
+                        formControlName="dunningSubType" />
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-md-4 col-sm-6 col-xs-12 mb-4" *ngIf="!isDunningForMvno">
+                    <label class="inputLabel">Customer Sector</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                      <mat-select placeholder="Select Customer Sector" class="input-p-5" formControlName="dunningSector"
+                        (selectionChange)="getSectSubType($event)">
+                        <mat-option *ngFor="let sectorType of commondropdownService.sectortypeList"
+                          [value]="sectorType.value">
+                          {{ sectorType.text }}
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-md-4 col-sm-6 col-xs-12 mb-4"
+                    *ngIf="dunningGroupForm.controls.dunningSubSector.enabled">
+                    <label class="inputLabel">Customer Sector Sub Type</label>
+                    <mat-form-field appearance="outline" class="w-100">
+                      <input matInput type="text" class="input-p-5" placeholder="Enter Customer Sector Sub Type"
+                        formControlName="dunningSubSector" />
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-md-4 col-sm-6 col-xs-12 mb-4" *ngIf="!isDunningForMvno">
+                    <label class="inputLabel">Service Area *</label>
+                    <mat-form-field appearance="outline" class="w-100"
+                      [ngClass]="{'is-invalid': submitted && dunningGroupForm.controls.serviceAreaIds.errors}">
+                      <mat-select class="input-p-5" placeholder="Select a Service" formControlName="serviceAreaIds"
+                        multiple (selectionChange)="selServiceArea($event.value)">
+                        <mat-option *ngFor="let service of commondropdownService.serviceAreaList" [value]="service.id">
+                          {{ service.name }}
+                        </mat-option>
+                      </mat-select>
+                      <mat-error *ngIf="submitted && dunningGroupForm.controls.serviceAreaIds.hasError('required')">
+                        Please select service.
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-md-4 col-sm-6 col-xs-12 mb-4" *ngIf="isBranchAvailable && !isDunningForMvno">
+                    <label class="inputLabel">Branch/Partner *</label>
+                    <mat-form-field appearance="outline" class="w-100"
+                      [ngClass]="{'is-invalid': submitted && dunningGroupForm.controls.branchIds.errors}">
+                      <mat-select class="input-p-5" placeholder="Select a Branch" formControlName="branchIds" multiple>
+                        <mat-option *ngFor="let branch of branchData" [value]="branch.id">
+                          {{ branch.name }}
+                        </mat-option>
+                      </mat-select>
+                      <mat-error *ngIf="submitted && dunningGroupForm.controls.branchIds.hasError('required')">
+                        Branch is required
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-md-4 col-sm-6 col-xs-12 mb-4" *ngIf="!isBranchAvailable && !isDunningForMvno">
+                    <label class="inputLabel">Branch/Partner *</label>
+                    <mat-form-field appearance="outline" class="w-100"
+                      [ngClass]="{'is-invalid': submitted && dunningGroupForm.controls.partnerIds.errors}">
+                      <mat-select class="input-p-5" placeholder="Select a Partner" formControlName="partnerIds"
+                        multiple>
+                        <mat-option *ngFor="let partner of partnerListByServiceArea" [value]="partner.id">
+                          {{ partner.name }}
+                        </mat-option>
+                      </mat-select>
+                      <mat-error *ngIf="submitted && dunningGroupForm.controls.partnerIds.hasError('required')">
+                        Partner is required.
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+                </div>
+                <div class="row g-3 p-3">
+                  <div class="col-md-4 col-sm-6 col-xs-12 mb-4">
+                    <mat-checkbox formControlName="isGeneratepaymentLink" name="isGeneratepaymentLink">
+                      Is Generate Payment Url
+                    </mat-checkbox>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+            <mat-card class="cardWithShadow w-100 mt-3">
+              <div class="dialog-header">
+                Dunning Rule Action List
+              </div>
+              <mat-card-content class="mat-card-content-border">
+
+                <form [formGroup]="dunningRulefromgroup" class="row g-3">
+                  <div class="col-md-4 mb-3">
+                    <label class="inputLabel">Action</label>
+                    <mat-form-field appearance="outline" class="w-100"
+                      [ngClass]="{'is-invalid': dunningSubmitted && dunningRulefromgroup.controls.action.invalid}">
+                      <mat-select class="input-p-5" placeholder="Select an Action" formControlName="action">
+                        <mat-option *ngFor="let action of dunningEventList" [value]="action.label">
+                          {{ action.label }}
+                        </mat-option>
+                      </mat-select>
+                      <mat-error *ngIf="dunningSubmitted && dunningRulefromgroup.controls.action.hasError('required')">
+                        Action is required.
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-md-4 mb-3">
+                    <label class="inputLabel">Days</label>
+                    <mat-form-field appearance="outline" class="w-100"
+                      [ngClass]="{'is-invalid': dunningSubmitted && dunningRulefromgroup.controls.days.invalid}">
+                      <input class="input-p-5" matInput type="number" min="0" placeholder="Enter Day"
+                        formControlName="days" />
+                      <mat-error *ngIf="dunningSubmitted && dunningRulefromgroup.controls.days.hasError('required')">
+                        Day is required.
+                      </mat-error>
+                      <mat-error *ngIf="dunningSubmitted && dunningRulefromgroup.controls.days.hasError('pattern')">
+                        Only numeric characters allowed.
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+
+                  <div class="col-md-4 d-flex align-items-end mb-3 m-b-20">
+                    <button mat-flat-button color="primary" type="button" (click)="onAddChargeField()">
+                      Add
+                    </button>
+                  </div>
+                </form>
+
+                <div class="table-container mt-4" style="overflow: auto;">
+                  <table mat-table [dataSource]="changeFromArrayDataSource" class="mat-elevation-z8 w-100">
+
+                    <ng-container matColumnDef="action">
+                      <th mat-header-cell *matHeaderCellDef>Action</th>
+                      <td mat-cell *matCellDef="let row; let i = index">
+                       
+                        <mat-form-field appearance="outline" class="w-100 m-t-12">
+                          <mat-select [formControl]="row.get('action')" class="input-p-5"
+                            placeholder="Select an Action">
+                            <mat-option *ngFor="let action of dunningRoleAction" [value]="action.label">
+                              {{ action.label }}
+                            </mat-option>
+                          </mat-select>
+                        </mat-form-field>
+                      </td>
+                    </ng-container>
+
+                    <!-- Days Column -->
+                    <ng-container matColumnDef="days">
+                      <th mat-header-cell *matHeaderCellDef>Days</th>
+                      <td mat-cell *matCellDef="let row; let i = index">
+                        <mat-form-field appearance="outline" class="w-100 m-t-12">
+                          <input class="input-p-5" matInput type="number" min="0" placeholder="Enter Day"
+                            [formControl]="row.get('days')" />
+                          <mat-error *ngIf="submitted && row.get('days').hasError('pattern')">
+                            Only numeric characters allowed.
+                          </mat-error>
+                          <mat-error *ngIf="submitted && row.get('days').hasError('required')">
+                            Day is required.
+                          </mat-error>
+                        </mat-form-field>
+                      </td>
+                    </ng-container>
+
+                  
+                    <ng-container matColumnDef="delete">
+                      <th mat-header-cell *matHeaderCellDef>Delete</th>
+                      <td mat-cell *matCellDef="let row; let i = index">
+                        <button mat-icon-button type="button" color="warn" style="margin-top: 12px;"
+                          (click)="deleteConfirmonChargeField(i, row.get('id').value)">
+                          <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                        </button>
+                      </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="['action', 'days', 'delete']"></tr>
+                    <tr mat-row *matRowDef="let row; columns: ['action', 'days', 'delete']"></tr>
+                  
+                  </table>
+                </div>
+
+              </mat-card-content>
+            </mat-card>
+
+          </form>
+        </mat-card-content>
+      </div>
+    </div>
+    <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+      <button mat-button mat-flat-button color="primary" class="button-normal" type="submit"
+        (click)="editMode ? addEditdunning(viewdunningListData.id) : addEditdunning('')">
+        {{ editMode ? "Update" : "Create" }} Dunning
+      </button>
+      <button mat-stroked-button matButton="outlined" type="button" color="primary" class="button-normal"
+        (click)="onCancel()">
+        Cancel
+      </button>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #detailDialog>
+  <div class="dialog-container">
+    <div class="dialog-header">
+      View Dunning Rule
+      <span>
+        <a mat-icon-button href="javascript:void(0)" (click)="onCancel()">
+           <img src="assets/img/DashboardIcons/Reject.svg">
+        </a>
+      </span>
+    </div>
+    <div mat-dialog-content>
+      <div class="col-md-12">
+
+        <mat-card class="cardWithShadow">
+          <div class="dialog-header">
+            Basic Details
+          </div>
+          <mat-card-content>
+            <div class="row">
+              <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                <div class="field">
+                  <span class="label-text">Name</span>
+                  <span class="colon">:</span>
+                  <span class="m-l-10">{{ DunningruleActionlistData.name }}</span>
+                </div>
+              </div>
+
+              <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                <div class="field">
+                  <span class="label-text">Credit Class</span>
+                  <span class="colon">:</span>
+                  <span class="m-l-10">{{ DunningruleActionlistData.creditclass }}</span>
+                </div>
+              </div>
+
+              <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                <div class="field">
+                  <span class="label-text">CC Email</span>
+                  <span class="colon">:</span>
+                  <span class="m-l-10">{{ DunningruleActionlistData.ccemail }}</span>
+                </div>
+              </div>
+
+              <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                <div class="field">
+                  <span class="label-text">Mobile</span>
+                  <span class="colon">:</span>
+                  <span class="m-l-10">{{ DunningruleActionlistData.mobile }}</span>
+                </div>
+              </div>
+
+              <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                <div class="field">
+                  <span class="label-text">Customer Type</span>
+                  <span class="colon">:</span>
+                  <span class="m-l-10">{{ DunningruleActionlistData.dunningType }}</span>
+                </div>
+              </div>
+
+              <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                <div class="field">
+                  <span class="label-text">Customer Sub Type</span>
+                  <span class="colon">:</span>
+                  <span class="m-l-10">{{ DunningruleActionlistData.dunningSubType }}</span>
+                </div>
+              </div>
+
+              <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                <div class="field">
+                  <span class="label-text">Customer Sector</span>
+                  <span class="colon">:</span>
+                  <span class="m-l-10">{{ DunningruleActionlistData.dunningSector }}</span>
+                </div>
+              </div>
+
+              <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                <div class="field">
+                  <span class="label-text">Customer Sector Sub Type</span>
+                  <span class="colon">:</span>
+                  <span class="m-l-10">{{ DunningruleActionlistData.dunningSubSector }}</span>
+                </div>
+              </div>
+
+              <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                <div class="field">
+                  <span class="label-text">Partner</span>
+                  <span class="colon">:</span>
+                  <span class="m-l-10">{{ DunningruleActionlistData.partnerNames }}</span>
+                </div>
+              </div>
+
+              <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                <div class="field">
+                  <span class="label-text">Branch</span>
+                  <span class="colon">:</span>
+                  <span class="m-l-10">{{ DunningruleActionlistData.branchNames }}</span>
+                </div>
+              </div>
+
+              <div class="col-lg-6 col-md-6 m-b-5 dataGroup">
+                <div class="field">
+                  <span class="label-text">Status</span>
+                  <span class="colon">:</span>
+                  <span class="status-badge m-l-10" [ngClass]="{
+  'status-success': DunningruleActionlistData.status === 'Y',
+  'status-danger': DunningruleActionlistData.status === 'N'
+}">
+                    {{ DunningruleActionlistData.status === 'Y' ? 'Active' : 'Inactive' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+
+        </mat-card>
+
+        <mat-card class="cardWithShadow">
+          <div class="dialog-header">
+            Dunning Rule Action List
+          </div>
+          <mat-card-content class="mat-card-content-border">
+            <div class="country-table-list">
+              <div class="table-container">
+                <table mat-table [dataSource]="DunningruleActionlistData.dunningRuleActionPojoList" matSort
+                  class="mat-elevation-z8 w-100">
+
+                  <ng-container matColumnDef="action">
+                    <th mat-header-cell *matHeaderCellDef class="table-header-title" sticky>Action</th>
+                    <td mat-cell *matCellDef="let data">{{ data.action }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="days">
+                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title" sticky>Days</th>
+                    <td mat-cell *matCellDef="let data">{{ data.days }}</td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="['action', 'days']; sticky: true" class="table-header-bg"></tr>
+                  <tr mat-row *matRowDef="let row; columns: ['action', 'days']" class="table-content-row"></tr>
+                </table>
+
+                <mat-paginator [length]="DunningruleActionlistData.dunningRuleActionPojoList?.length || 0"
+                  [pageSize]="10" [pageSizeOptions]="[5,10,20,50,100]" showFirstLastButtons
+                  (page)="pageChangedDunningRuleList($event)">
+                </mat-paginator>
+              </div>
+            </div>
+          </mat-card-content>
+
+        </mat-card>
+
+      </div>
+    </div>
+    <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+      <button mat-stroked-button matButton="outlined" type="button" color="primary" class="button-normal"
+        (click)="onCancel()">
+        Close
+      </button>
+    </div>
+  </div>
+</ng-template>

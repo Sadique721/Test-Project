@@ -1,0 +1,575 @@
+<div class="row header-row">
+    <mat-card class="cardWithShadow w-100">
+        <mat-card-content class="mat-card-content-border">
+            <div class="row">
+                <div class="col-sm-9 d-flex">
+                    <mat-form-field appearance="outline" class="w-100 hide-hint mr-10 header-input">
+                        <input class="input-p-5" [(ngModel)]="searchBuildingName" matInput
+                            placeholder="Global Search Filter" (keydown.enter)="searchBuilding()" />
+                        <mat-icon matSuffix class="search-header-search-icon">
+                            <i class="pi pi-search icon-size f-15"></i>
+                        </mat-icon>
+                    </mat-form-field>
+
+                    <button mat-button mat-flat-button color="primary" class="button-normal m-r-10" (click)="searchBuilding()">
+                        Search
+                    </button>
+                    <button mat-stroked-button matButton="outlined" class="button-normal" (click)="clearBuildingCountry()">
+                        Clear
+                    </button>
+                </div>
+
+                <div class="col-sm-3 search-div">
+                    <button mat-button mat-flat-button color="primary" (click)="addEditCountryDialog()"
+                        class="button-normal m-r-10">
+                        Add {{ title }}
+                    </button>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+<!-- country card header search part end -->
+
+<!-- body part start -->
+
+<div class="container-fluid contain-flud">
+    <div class="row">
+        <!-- country list table start -->
+        <div class="col-md-12">
+            <mat-card class="cardWithShadow">
+                <mat-card-content class="mat-card-content-border">
+                    <div class="country-table-list">
+                        <div class="table-container">
+                            <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8 w-100">
+                                <!-- Name Column -->
+                                <ng-container matColumnDef="Name">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Name
+                                    </th>
+                                    <td mat-cell *matCellDef="let buildingNameListData" class="f-s-14">
+                                        {{ buildingNameListData.buildingName }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Status Column -->
+
+                                <!-- Action Column -->
+                                <ng-container matColumnDef="Action">
+                                    <th mat-header-cell *matHeaderCellDef stickyEnd class="table-header-title">
+                                        <p class="w-100 text-center">Action</p>
+                                    </th>
+                                    <td mat-cell *matCellDef="let buildingNameListData">
+                                        <div class="w-100 text-center">
+                                            <a mat-icon-button matTooltip="edit" href="javascript:void(0)"
+                                                (click)="editBuilding(buildingNameListData.buildingMgmtId)">
+                                                <img width="32" height="32" src="assets/img/DashboardIcons/Edit.svg" />
+                                            </a>
+                                            <a mat-icon-button matTooltip="delete" href="javascript:void(0)"
+                                                (click)="deleteConfirmonCountryDialog(buildingNameListData)">
+                                                <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg"
+                                                    class="icon-size" />
+                                            </a>
+                                        </div>
+                                    </td>
+                                </ng-container>
+
+                                <tr mat-header-row class="table-header-bg"
+                                    *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+                                <tr mat-row class="table-content-row" *matRowDef="let row; columns: displayedColumns">
+                                </tr>
+                            </table>
+
+                            <mat-paginator [length]="buildingTotalRecords" [pageSize]="buildingItemsPerPage"
+                                [pageSizeOptions]="[5,10,20,50,100]" showFirstLastButtons
+                                (page)="pageChangedCountryList($event)">
+                            </mat-paginator>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+        <!-- country list table end -->
+    </div>
+</div>
+
+
+
+<!-- body part end -->
+<!-- ------------------------------------------------ -->
+<!-- <div class="row" >
+  <div class="col-md-12">
+    <div class="panel top">
+      <div class="panel-heading">
+        <h3 class="panel-title">{{ title }} Management</h3>
+        <div class="right">
+          <button type="button" class="btn-toggle-collapse" data-toggle="collapse"
+            data-target="#searchDataCountry">
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+      <div id="searchDataCountry" class="panel-collapse collapse in">
+        <div id="" class="panel-body">
+          <div class="row">
+            <div class="col-lg-3 col-md-3">
+              <input id="taxName" type="text" [(ngModel)]="searchBuildingName" class="form-control"
+                placeholder="Global Search Filter" (keydown.enter)="searchBuilding()" />
+              </div>
+              <div class="col-lg-3 col-md-4 marginTopSearchBtn">
+                <button type="button" class="btn btn-primary" id="searchbtn" (click)="searchBuilding()">
+                  <i class="fa fa-search"></i>
+                  Search
+                </button>
+                <button type="reset" class="btn btn-default" id="searchbtn"
+                  (click)="clearBuildingCountry()">
+                   <img src="assets/img/DashboardIcons/Refresh.svg" />
+                  Clear
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div> -->
+<!-- <div class="row">
+    <div class="col-md-6 left">
+        <div class="panel">
+            <div class="panel-heading">
+                <h3 class="panel-title">{{ title }}</h3>
+                <div class="right">
+                    <button type="button" class="btn-toggle-collapse" data-toggle="collapse"
+                        data-target="#allDataCountry" aria-expanded="false" aria-controls="allDataCountry">
+                        <i class="fa fa-minus-circle"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="allDataCountry" class="panel-collapse collapse in">
+                <div class="panel-body table-responsive">
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        @if (editAccess || deleteAccess) {
+                                        <th>Action</th>
+                                        }
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @for (
+                                    building of buildingNameListData
+                                    | paginate
+                                    : {
+                                    id: 'buildingNameListData',
+                                    itemsPerPage: buildingItemsPerPage,
+                                    currentPage: currentPageBuildingSlab,
+                                    totalItems: buildingTotalRecords
+                                    }; track
+                                    building; let i = $index) {
+                                    <tr>
+                                        <td>{{ building.buildingName }}</td>
+
+                                        @if (editAccess || deleteAccess) {
+                                        <td class="btnAction">
+                                            @if (editAccess) {
+                                            <a id="edit-button" href="javascript:void(0)" type="button"
+                                                (click)="editBuilding(building.buildingMgmtId)">
+                                              <img src="assets/img/DashboardIcons/Edit.svg" >
+                                            </a>
+                                            }
+                                            @if (deleteAccess) {
+                                            <a id="delete-button" href="javascript:void(0)"
+                                                (click)="deleteConfirmonBuilding(building)">
+                                                 <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                                            </a>
+                                            }
+                                        </td>
+                                        }
+                                    </tr>
+                                    }
+                                </tbody>
+                            </table>
+
+                            <div class="row">
+                                <div class="col-md-12" style="display: flex">
+                                    <pagination-controls id="buildingNameListData" maxSize="10" directionLinks="true"
+                                        previousLabel="" nextLabel=""
+                                        (pageChange)="pageChangedCountryList($event)"></pagination-controls>
+                                    <div id="itemPerPageDropdown">
+                                        <p-dropdown [options]="pageLimitOptions" optionLabel="value" optionValue="value"
+                                            (onChange)="TotalItemPerPage($event)"
+                                            [(ngModel)]="buildingItemsPerPage"></p-dropdown>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 right">
+        <div class="panel">
+            <div class="panel-heading">
+                <h3 class="panel-title">{{ isBuildingEdit ? "Update" : "Create" }} {{ title }}</h3>
+                <div class="right">
+                    <button type="button" class="btn-toggle-collapse" data-toggle="collapse"
+                        data-target="#createDataCountry" aria-expanded="false" aria-controls="createDataCountry">
+                        <i class="fa fa-minus-circle"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="createDataCountry" class="panel-collapse collapse in">
+                @if (!createAccess && !isBuildingEdit) {
+                <div class="panel-body table-responsive">
+                    Sorry you have not privilege to create operation!
+                </div>
+                }
+                @if (createAccess || (isBuildingEdit && editAccess)) {
+                <div class="panel-body">
+                    <form [formGroup]="buildingFormGroup">
+
+                        <br />
+                        <label>Building Name *</label>
+                        @if (isBuildingEdit) {
+                        <div>
+                            <input type="text" class="form-control" placeholder="Enter {{ areaTitle }} Name"
+                                formControlName="buildingName" disabled />
+                        </div>
+                        }
+                        @if (selectedMappingFrom === 'Pin Code' && !isBuildingEdit) {
+                        <div>
+                            <p-dropdown (onChange)="onChnage($event)" id="pincodeId" formControlName="pincode"
+                                [options]="pincodeListData" optionValue="pincodeid" optionLabel="pincode"
+                                placeholder="Select Building Name" [disabled]="isBuildingEdit"
+                                [ngClass]="{ 'is-invalid': submitted && buildingFormGroup.controls.pincode.errors }"></p-dropdown>
+                            @if (submitted && buildingFormGroup.controls.pincode.errors) {
+                            <div class="errorWrap text-danger">
+                                @if (submitted && buildingFormGroup.controls.pincode.errors.required) {
+                                <div class="error text-danger">
+                                    Building Name is required.
+                                </div>
+                                }
+                            </div>
+                            }
+                        </div>
+                        }
+                        @if (selectedMappingFrom === 'Area' && !isBuildingEdit) {
+                        <div>
+                            <p-dropdown (onChange)="onChnage($event)" id="areaId" formControlName="areaId"
+                                [options]="areaListData" optionLabel="name" optionValue="id"
+                                placeholder="Select Building Name" [disabled]="isBuildingEdit"
+                                [ngClass]="{ 'is-invalid': submitted && buildingFormGroup.controls.areaId.errors }"></p-dropdown>
+                            @if (submitted && buildingFormGroup.controls.areaId.errors) {
+                            <div class="errorWrap text-danger">
+                                @if (submitted && buildingFormGroup.controls.areaId.errors.required) {
+                                <div class="error text-danger">
+                                    Building Name is required.
+                                </div>
+                                }
+                            </div>
+                            }
+                        </div>
+                        }
+                        @if (selectedMappingFrom === 'Sub Area' && !isBuildingEdit) {
+                        <div>
+                            <p-dropdown (onChange)="onChnage($event)" id="subAreaId" formControlName="subAreaId"
+                                [options]="subAreaListData" optionLabel="name" optionValue="id"
+                                placeholder="Select Building Name" [disabled]="isBuildingEdit" [ngClass]="{
+                  'is-invalid': submitted && buildingFormGroup.controls.subAreaId.errors
+                }"></p-dropdown>
+                            @if (submitted && buildingFormGroup.controls.subAreaId.errors) {
+                            <div class="errorWrap text-danger">
+                                @if (submitted && buildingFormGroup.controls.subAreaId.errors.required) {
+                                <div class="error text-danger">
+                                    Building Name is required.
+                                </div>
+                                }
+                            </div>
+                            }
+                        </div>
+                        }
+                        <br />
+                        <div>
+                            <label>Building Type</label>
+                            <p-dropdown [options]="buildingTypeData" formControlName="buildingType"
+                                placeholder="Select a Building Type" optionLabel="displayName"
+                                optionValue="displayName">
+                            </p-dropdown>
+                        </div>
+                        <br />
+                        @if (!isBuildingEdit) {
+                        <div>
+                            <label>Method*</label>
+                            <p-dropdown [options]="methodOptions" formControlName="selectedMethod"
+                                placeholder="Select a Method" (onChange)="onMethodChange($event)">
+                            </p-dropdown>
+                        </div>
+                        }
+                        <br />
+                        @if (buildingFormGroup.get('selectedMethod')?.value === 'Range') {
+                        <div>
+                            <label>Range*</label>
+                            <div style="display: flex; justify-content: space-between">
+                                <span>
+                                    <input class="form-control" type="text" formControlName="rangeStart"
+                                        placeholder="Start" />
+                                </span>
+                                <span class="mx-2"
+                                    style="display: flex; justify-content: center; align-items: center">To</span>
+                                <span>
+                                    <input class="form-control" type="text" formControlName="rangeEnd"
+                                        placeholder="End" />
+                                </span>
+                            </div>
+                        </div>
+                        }
+                        @if (buildingFormGroup.get('selectedMethod')?.value === 'CSV') {
+                        <div>
+                            <label>Upload CSV*</label>
+                            <input (change)="onFileChange($event)" class="form-control" formControlName="file"
+                                id="txtSelectDocument" multiple="multiple" placeholder="Select Attachment"
+                                style="padding: 2px; width: 100%" type="file" />
+                        </div>
+                        }
+                        @if (buildingFormGroup.get('selectedMethod')?.value === 'Manual') {
+                        <div>
+                            <label>Building Number*</label>
+                            @for (control of manualControls.controls; track control; let i = $index) {
+                            <div formArrayName="manualControls" class="d-flex align-items-center mb-2" style="
+                  display: flex;
+                  justify-content: space-between;
+                  gap: 10px;
+                  margin-bottom: 10px;
+                ">
+                                <input class="form-control me-2" type="text" [formControlName]="i"
+                                    placeholder="Enter value" />
+                                @if (manualControls.length > 1) {
+                                <a id="delete-button" href="javascript:void(0)" (click)="removeManualInput(i)">
+                                     <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                                </a>
+                                }
+                            </div>
+                            }
+                            <button (click)="addManualInput()" class="btn btn-primary" type="button"
+                                style="margin-top: 5px">
+                                <i class="fa fa-plus-square"></i> Add
+                            </button>
+                        </div>
+                        }
+                        <div class="addUpdateBtn">
+                            @if (!isBuildingEdit) {
+                            <button type="submit" class="btn btn-primary" id="submit" (click)="addOrUpdateBuilding('')"
+                                [disabled]="buildingFormGroup.invalid">
+                                <i class="fa fa-check-circle"></i>
+                                Add {{ title }}
+                            </button>
+                            }
+                            @if (isBuildingEdit) {
+                            <button type="submit" class="btn btn-primary" id="submit"
+                                (click)="addOrUpdateBuilding(buildingData.buildingMgmtId)"
+                                [disabled]="buildingFormGroup.invalid">
+                                <i class="fa fa-check-circle"></i>
+                                Update {{ title }}
+                            </button>
+                            }
+                            <br />
+                        </div>
+                    </form>
+                </div>
+                }
+            </div>
+        </div>
+    </div>
+</div> -->
+
+
+<ng-template #homePassDialog>
+    <div class="dialog-container">
+        <div class="dialog-header">
+            {{isBuildingEdit ? "Update Home Pass": "Create Home Pass"}}
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="onCancel()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <div mat-dialog-content>
+            <div class="col-md-12">
+                @if (!createAccess && !isBuildingEdit) {
+                <mat-card-content class="matcard-content">
+                    <div class="panel-body table-responsive">
+                        Sorry you have not privilege to create operation!
+                    </div>
+                </mat-card-content>
+                }
+
+                @if (createAccess || (isBuildingEdit && editAccess)) {
+                <mat-card-content class="matcard-content">
+                    <form class="card-form mb-3" [formGroup]="buildingFormGroup">
+                        <div class="row g-3">
+                            <div class="col-md-6 mb-4">
+                                <label class="inputLabel">Building Name *</label>
+
+                                @if (isBuildingEdit) {
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <input matInput placeholder="Enter {{ areaTitle }} Name 1"
+                                        formControlName="buildingName" [readonly]="true" maxlength="250"
+                                        class="input-p-5" />
+                                </mat-form-field>
+                                }
+
+                                @if (!isBuildingEdit && selectedMappingFrom === "Pin Code") {
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select formControlName="pincode" class="input-p-5"
+                                        placeholder="Select Building Name " (selectionChange)="onChange($event)">
+                                        @for (pin of pincodeListData; track pin.pincodeid) {
+                                        <mat-option [value]="pin.pincodeid">
+                                            {{ pin.pincode }}
+                                        </mat-option>
+                                        }
+                                    </mat-select>
+                                    <mat-error>
+                                        @if (submitted && buildingFormGroup.get("pincode")?.hasError("required")) {
+                                        Pin Code is required.
+                                        }
+                                    </mat-error>
+                                </mat-form-field>
+                                }
+
+                                @if (!isBuildingEdit && selectedMappingFrom === "Area") {
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select formControlName="areaId" class="input-p-5"
+                                        placeholder="Select Building Name " (selectionChange)="onChnage($event)">
+                                        @for (area of areaListData; track area) {
+                                        <mat-option [value]="area.id">
+                                            {{ area.name }}
+                                        </mat-option>
+                                        }
+                                    </mat-select>
+                                    @if (submitted && buildingFormGroup.get("areaId")?.hasError("required")) {
+                                    <mat-error> Area is required. </mat-error>
+                                    }
+                                </mat-form-field>
+                                }
+                                @if (!isBuildingEdit && selectedMappingFrom === "Sub Area") {
+                                <div class="d-flex">
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <input matInput readonly formControlName="buildingName" class="input-p-5"
+                                            placeholder="Select Building Name ">
+                                    </mat-form-field>
+                                    <button mat-icon-button color="primary" type="button"
+                                        (click)="openSelectBuildingDialogComponent()">
+                                        <img src="assets/img/DashboardIcons/Add.svg">
+
+                                    </button>
+                                </div>
+                                @if (submitted && buildingFormGroup.get("subAreaId")?.hasError("required")) {
+                                <mat-error> Sub Area is required. </mat-error>
+                                }
+                                }
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label for="buildingType" class="inputLabel">Building Type</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select formControlName="buildingType" class="input-p-5"
+                                        placeholder="Select Building Type">
+                                        @for (type of buildingTypeData; track type) {
+                                        <mat-option [value]="type.displayName">
+                                            {{ type.displayName }}
+                                        </mat-option>
+                                        }
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+
+                            @if (!isBuildingEdit) {
+                            <div class="col-md-6 mb-4">
+                                <label for="selectedMethod" class="inputLabel">Method*</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select formControlName="selectedMethod" class="input-p-5"
+                                        placeholder="Select a Method" (selectionChange)="onMethodChange($event)">
+                                        @for (method of methodOptions; track method) {
+                                        <mat-option [value]="method.value">
+                                            {{ method.label }}
+                                        </mat-option>
+                                        }
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+                            }
+
+                            @if (buildingFormGroup.get("selectedMethod")?.value === "Range") {
+                            <div class="col-md-12 mb-4">
+                                <label for="range" class="inputLabel">Range*</label>
+                                <div class="range-select">
+                                    <mat-form-field appearance="outline" class="flex-grow-1">
+                                        <input matInput type="text" class="input-p-5" formControlName="rangeStart"
+                                            placeholder="Start" />
+                                    </mat-form-field>
+                                    <mat-form-field appearance="outline" class="flex-grow-1">
+                                        <input matInput type="text" class="input-p-5" formControlName="rangeEnd"
+                                            placeholder="End" />
+                                    </mat-form-field>
+                                </div>
+                            </div>
+                            }
+                            @if (buildingFormGroup.get("selectedMethod")?.value === "CSV") {
+                            <div class="col-md-12 mb-4">
+                                <label for="file" class="inputLabel">Upload CSV*</label>
+                                <input type="file" (change)="onFileChange($event)" class="input-p-5"
+                                    formControlName="file" multiple placeholder="Select Attachment" />
+                            </div>
+                            }
+
+                            @if (buildingFormGroup.get("selectedMethod")?.value === "Manual") {
+                            <div class="col-md-12 mb-4">
+                                <div class="row g-2">
+                                    <label for="manualControls" class="inputLabel col-md-6">Building Number*</label>
+                                    <button mat-button mat-flat-button class="button-normal" color="primary"
+                                        type="button" (click)="addManualInput()">
+                                        Add Another
+                                    </button>
+                                </div>
+                                <div formArrayName="manualControls" class="m-t-10">
+                                    @for (control of manualControls.controls; let i = $index; track i) {
+                                    <div class="manual-select row g-2">
+                                        <mat-form-field appearance="outline" class="col-md-6">
+                                            <input matInput class="input-p-5" [formControlName]="i"
+                                                placeholder="Enter value" />
+                                        </mat-form-field>
+                                        @if (manualControls.length > 1) {
+                                        <button mat-icon-button  class="w-100" type="button" href="javascript:void(0)"
+                                            (click)="removeManualInput(i)">
+                                            <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                        </button>
+                                        }
+                                    </div>
+                                    }
+                                </div>
+                            </div>
+                            }
+                        </div>
+                    </form>
+                </mat-card-content>
+                }
+            </div>
+        </div>
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+            <button *ngIf="!isBuildingEdit" type="submit" mat-flat-button color="primary"
+                (click)="addOrUpdateBuilding('')" [disabled]="buildingFormGroup.invalid">
+                {{ isBuildingEdit ? "Update" : "Add" }} Home Pass
+            </button>
+            <button *ngIf="isBuildingEdit" type="submit" mat-flat-button color="primary"
+                (click)="addOrUpdateBuilding(buildingData.buildingMgmtId)">
+                {{ isBuildingEdit ? "Update" : "Add" }} Home Pass
+            </button>
+            <button mat-stroked-button type="button" (click)="onCancel()">Cancel</button>
+        </div>
+    </div>
+</ng-template>

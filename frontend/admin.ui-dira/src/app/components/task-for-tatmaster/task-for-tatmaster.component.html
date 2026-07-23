@@ -1,0 +1,768 @@
+<!-- tat-for-task card header search part start -->
+<div class="row header-row">
+    <mat-card class="cardWithShadow w-100">
+        <mat-card-content class="mat-card-content-border">
+            <div class="row">
+                <div class="col-sm-9 d-flex">
+                    <mat-form-field appearance="outline" style="margin-left: 16px;" class="w-100 hide-hint mr-10 header-input">
+                        <input class="input-p-5" [(ngModel)]="searchTrcName" matInput placeholder='Search {{title}}'
+                            (keydown.enter)="searchTrc()" />
+                        <mat-icon matSuffix class="search-header-search-icon">
+                            <i class="pi pi-search icon-size"></i>
+                        </mat-icon>
+                    </mat-form-field>
+                    <button mat-button mat-flat-button color="primary"  class="button-normal mr-10" (click)="searchTrc()">Search
+                    </button>
+                    <button mat-stroked-button matButton="outlined"  class="button-normal" (click)="clearSearchTrc()">Clear
+                    </button>
+
+                </div>
+
+                <div class="col-sm-3 search-div">
+                    @if (createAccess) {
+                    <button mat-button mat-flat-button color="primary" (click)="addEditTaskForMasterDialog()"
+                         class="button-normal mr-10" style="width: auto;">
+                        Add {{title}}</button>
+                    }
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+<!-- tat-for-task card header search part end -->
+
+
+
+
+<!-- body part start -->
+@if(listView){
+<div class="container-fluid contain-flud">
+    <div class="row">
+        <!--  list table start -->
+        <div class="col-md-12">
+            <mat-card class="cardWithShadow">
+                <mat-card-content class="mat-card-content-border">
+                    <div class="country-table-list">
+                        <div class="table-container">
+                            
+                            <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8 w-100">
+                                <!-- Id Column -->
+                                <ng-container matColumnDef="id">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">
+                                        ID
+                                    </th>
+
+                                    <td mat-cell *matCellDef="let ticketReasonCat">
+                                        {{ ticketReasonCat.id
+                                        }}
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="Name">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Name
+                                    </th>
+                                    <td mat-cell *matCellDef="let ticketReasonCat" class="f-s-14">
+                                        {{ ticketReasonCat.name }}
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="Status">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Status
+                                    </th>
+
+                                    <td mat-cell *matCellDef="let ticketReasonCat" class="f-s-14">
+                                        <span class="status-badge" [ngClass]="{
+                                                            'status-success': ticketReasonCat.status === 'Active',
+                                                            'status-danger': ticketReasonCat.status === 'Inactive'
+                                                          }">
+                                            {{ ticketReasonCat.status }}
+                                        </span>
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="Action">
+                                    @if (editAccess || deleteAccess) {
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">
+                                        Action
+                                    </th>
+                                    }
+
+                                    <td mat-cell *matCellDef="let ticketReasonCat">
+                                        <a mat-icon-button matTooltip="view" href="javascript:void(0)"
+                                            (click)="trcAllDetails(ticketReasonCat)">
+                                           <img src="assets/img/DashboardIcons/eye-svgrepo-com (1) 1.svg" >
+
+                                        </a>
+                                        @if (editAccess) {
+                                        <a mat-icon-button matTooltip="edit" href="javascript:void(0)"
+                                            (click)="editTATMatrix(ticketReasonCat.id)">
+                                            <img src="assets/img/DashboardIcons/Edit.svg" >
+
+                                        </a>
+                                        }
+
+                                        @if (deleteAccess) {
+                                        <a mat-icon-button matTooltip="delete" href="javascript:void(0)"
+                                            (click)="deleteConfirmonTicketReasonCatDialog(ticketReasonCat)">
+                                            <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+
+                                        </a>
+                                        }
+                                    </td>
+                                </ng-container>
+
+                                <tr mat-header-row class="table-header-bg"
+                                    *matHeaderRowDef="getDisplayedPlanDetailsColumns(); sticky: true"></tr>
+                                <tr mat-row class="table-content-row"
+                                    *matRowDef="let row; columns: getDisplayedPlanDetailsColumns()">
+                                </tr>
+                            </table>
+
+                            <mat-paginator [length]="TATMatrixListDatatotalRecords"
+                                [pageSize]="TATMatrixListdataitemsPerPage" [pageSizeOptions]="[5,10,20,50,100]"
+                                showFirstLastButtons (page)="pageChangedTrcList($event)">
+                            </mat-paginator>
+
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+        <!--  list table end -->
+    </div>
+</div>
+}
+<!-- body part end -->
+
+<!-- tat-for-task add-edit card dialog start -->
+<ng-template #addEditTatForTaskDialog>
+    @if (this.createView) {
+    <div class="dialog-container">
+        <div class="dialog-header">
+            {{ isTATMatrixEdit ? "Update" : "Create" }} {{title}}
+            <span>
+                <a mat-icon-button (click)="closeDialog()">
+                     <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <mat-dialog-content>
+            <form [formGroup]="this.ticketReasonCatFormGroup" class="row p-15">
+                <!-- basic card -->
+                 <mat-card *ngIf="createAccess">
+                <mat-card>
+                    <mat-card-header>
+                        <mat-card-title class="font-900">Basic Detail</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content class="matcard-content">
+                        <div class="row m-l-15">
+                            <!-- Tat name -->
+                            <div class="col-sm-3">
+                                <label for="name" class="inputLabel">TAT Name*</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <input matInput placeholder="Enter TaT Name" class="input-p-5"
+                                        formControlName="name" [ngClass]="{
+                        'is-invalid': submitted && ticketReasonCatFormGroup.controls.name.errors
+                      }" />
+                                </mat-form-field>
+                                @if (submitted && ticketReasonCatFormGroup.controls.name.errors) {
+                                <div class="errorWrap text-danger">
+                                    @if (submitted && ticketReasonCatFormGroup.controls.name.errors.required) {
+                                    <div class="error text-danger">
+                                        TAT Name is required.
+                                    </div>
+                                    }
+                                </div>
+                                }
+                            </div>
+                            <!-- Status -->
+                            <div class="col-sm-3">
+                                <label for="name" class="inputLabel">Status *</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select class="input-p-5" placeholder="Select Status" formControlName="status"
+                                        [ngClass]="{
+                          'is-invalid': submitted && ticketReasonCatFormGroup.controls.status.errors
+                        }">
+                                        <mat-option *ngFor="let s of statusOptions" [value]="s.label">
+                                            {{ s.label }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                                @if (submitted && ticketReasonCatFormGroup.controls.status.errors) {
+                                <div class="errorWrap text-danger">
+                                    @if (
+                                    submitted && ticketReasonCatFormGroup.controls.status.errors.required
+                                    ) {
+                                    <div class="error text-danger">
+                                        Status is required.
+                                    </div>
+                                    }
+                                </div>
+                                }
+                            </div>
+
+                            <div class="col-sm-3">
+    <label for="rtime" class="inputLabel">Response Time *</label>
+    <mat-form-field appearance="outline" class="w-100">
+        <div style="display: flex; align-items: center;">
+            <input matInput placeholder="Enter Time" formControlName="rtime" type="number" min="1"
+                [ngClass]="{'is-invalid': submitted && ticketReasonCatFormGroup.controls.rtime.errors}"
+                style="flex: 1; border: none; outline: none;">
+
+            <mat-select formControlName="runit" 
+                [ngClass]="{'is-invalid': submitted && ticketReasonCatFormGroup.controls.runit.errors}"
+                style="flex: 1; border-left: 1px solid rgba(0,0,0,0.12); padding-left: 8px; height: 100%;">
+                <mat-option *ngFor="let s of timeUnitData" [value]="s.label">
+                    {{ s.label }}
+                </mat-option>
+            </mat-select>
+        </div>
+    </mat-form-field>
+
+    @if (submitted && (ticketReasonCatFormGroup.controls.rtime.errors || ticketReasonCatFormGroup.controls.runit.errors)) {
+    <div class="errorWrap text-danger">
+        <div class="error">
+            @if (ticketReasonCatFormGroup.controls.rtime.errors?.required) {
+                Response Time is required.
+            } @else if (ticketReasonCatFormGroup.controls.runit.errors?.required) {
+                Unit is required.
+            }
+        </div>
+    </div>
+    }
+</div>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+
+                <!-- sla card -->
+                <mat-card>
+    <mat-card-header>
+        <mat-card-title class="font-900">SLA</mat-card-title>
+    </mat-card-header>
+    <mat-card-content class="matcard-content">
+        <div class="row">
+            <div class="col-sm-4">
+                <label class="inputLabel">SLA Time P1 *</label>
+                <mat-form-field appearance="outline" class="w-100">
+                    <div style="display: flex; align-items: center;">
+                        <input matInput placeholder="Time" formControlName="slaTimep1" type="number" min="1"
+                            [ngClass]="{'is-invalid': submitted && ticketReasonCatFormGroup.controls.slaTimep1.errors}"
+                            style="flex: 1; border: none; outline: none;">
+                        
+                        <mat-select formControlName="sunitp1" 
+                            style="flex: 1; border-left: 1px solid rgba(0,0,0,0.12); padding-left: 8px;">
+                            <mat-option *ngFor="let s of timeUnitData" [value]="s.label">{{ s.label }}</mat-option>
+                        </mat-select>
+                    </div>
+                </mat-form-field>
+                @if (submitted && (ticketReasonCatFormGroup.controls.slaTimep1.errors || ticketReasonCatFormGroup.controls.sunitp1.errors)) {
+                    <div class="errorWrap text-danger">
+                        <small>SLA Time P1 and Unit are required.</small>
+                    </div>
+                }
+            </div>
+
+            <div class="col-sm-4">
+                <label class="inputLabel">SLA Time P2 *</label>
+                <mat-form-field appearance="outline" class="w-100">
+                    <div style="display: flex; align-items: center;">
+                        <input matInput placeholder="Time" formControlName="slaTimep2" type="number" min="1"
+                            [ngClass]="{'is-invalid': submitted && ticketReasonCatFormGroup.controls.slaTimep2.errors}"
+                            style="flex: 1; border: none; outline: none;">
+                        
+                        <mat-select formControlName="sunitp2" 
+                            style="flex: 1; border-left: 1px solid rgba(0,0,0,0.12); padding-left: 8px;">
+                            <mat-option *ngFor="let s of timeUnitData" [value]="s.label">{{ s.label }}</mat-option>
+                        </mat-select>
+                    </div>
+                </mat-form-field>
+                @if (submitted && (ticketReasonCatFormGroup.controls.slaTimep2.errors || ticketReasonCatFormGroup.controls.sunitp2.errors)) {
+                    <div class="errorWrap text-danger">
+                        <small>SLA Time P2 and Unit are required.</small>
+                    </div>
+                }
+            </div>
+
+            <div class="col-sm-4">
+                <label class="inputLabel">SLA Time P3 *</label>
+                <mat-form-field appearance="outline" class="w-100">
+                    <div style="display: flex; align-items: center;">
+                        <input matInput placeholder="Time" formControlName="slaTime3" type="number" min="1"
+                            [ngClass]="{'is-invalid': submitted && ticketReasonCatFormGroup.controls.slaTime3.errors}"
+                            style="flex: 1; border: none; outline: none;">
+                        
+                        <mat-select formControlName="sunitp3" 
+                            style="flex: 1; border-left: 1px solid rgba(0,0,0,0.12); padding-left: 8px;">
+                            <mat-option *ngFor="let s of timeUnitData" [value]="s.label">{{ s.label }}</mat-option>
+                        </mat-select>
+                    </div>
+                </mat-form-field>
+                @if (submitted && (ticketReasonCatFormGroup.controls.slaTime3.errors || ticketReasonCatFormGroup.controls.sunitp3.errors)) {
+                    <div class="errorWrap text-danger">
+                        <small>SLA Time P3 and Unit are required.</small>
+                    </div>
+                }
+            </div>
+        </div>
+    </mat-card-content>
+</mat-card>
+
+                <!-- tat card -->
+                <mat-card>
+                    <mat-card-header>
+                        <mat-card-title class="font-900">TAT</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content class="matcard-content">
+                        <form [formGroup]="TATMatrixTATForm">
+                            <!-- create table start -->
+                            <table [dataSource]="dataSourceData" mat-table class="mat-elevation-z8 full-width-table">
+
+                                <ng-container matColumnDef="orderNo" class="m-t-5">
+                                    <th mat-header-cell *matHeaderCellDef class="m-t-5">
+                                        Order No*</th>
+                                    @if (TATMatrixTATForm.value.orderNo) {
+                                    <th for="customer">
+                                        Order No. *
+                                    </th>
+                                    }
+                                    <td mat-cell *matCellDef="let row; let i = index" class="m-t-5">
+                                        <mat-form-field appearance="outline" class="w-100 m-t-10 disabled-class">
+                                            <input matInput type="number" class="input-p-5" formControlName="orderNo"
+                                                [ngClass]="{
+                                                               'is-invalid':
+                                                                 TATMatrixTATSubmitted && TATMatrixTATForm.controls.orderNo.errors
+                                                             }" [disabled]="true" [value]="row.orderNo" min="1"
+                                                placeholder="{{orderno}}" readonly />
+                                        </mat-form-field>
+
+                                    </td>
+                                </ng-container>
+
+
+                                <ng-container matColumnDef="level" class="m-t-5">
+                                    <th mat-header-cell *matHeaderCellDef>Level*</th>
+                                    <td mat-cell *matCellDef="let row; let i = index">
+                                        <mat-form-field appearance="outline" class="w-100 m-t-10 disabled-class">
+                                            <input matInput class="input-p-5" type="text" [ngClass]="{
+                                                                    'is-invalid':
+                                                                        TATMatrixTATSubmitted && TATMatrixTATForm.controls.level.errors
+                                                                        }" formControlName="level"
+                                                placeholder="Level {{levelno}}" [value]="row.level" [disabled]="true"
+                                                readonly />
+                                        </mat-form-field>
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="mtime1" class="m-t-5">
+                                    <th mat-header-cell *matHeaderCellDef>TAT P1*</th>
+                                    <td mat-cell *matCellDef="let form">
+                                        <mat-form-field appearance="outline" class="w-100 m-t-15">
+                                            <input class="input-p-5" matInput type="number" min="1"
+                                                placeholder="Enter TAT time for P1" formControlName="mtime1" [ngClass]="{
+                                                                'is-invalid':
+                                                                    TATMatrixTATSubmitted && TATMatrixTATForm.controls.mtime1.errors
+                                                                }" />
+                                            <mat-error *ngIf="
+                                                    (TATMatrixTATForm.get('mtime1')?.touched || TATMatrixTATSubmitted)
+                                                    ">
+                                                P1 is required
+                                            </mat-error>
+                                        </mat-form-field>
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="mtime2" class="m-t-5">
+                                    <th mat-header-cell *matHeaderCellDef>TAT P2*</th>
+                                    <td mat-cell *matCellDef="let form">
+                                        <mat-form-field appearance="outline" class="w-100 m-t-10">
+                                            <input class="input-p-5" matInput type="number" min="1"
+                                                placeholder="Enter TAT time for P2" formControlName="mtime2" [ngClass]="{
+                                                                                    'is-invalid':
+                                                                    TATMatrixTATSubmitted && TATMatrixTATForm.controls.mtime2.errors
+                                                                    }" />
+                                            <mat-error *ngIf="
+                                                (TATMatrixTATForm.get('mtime2')?.touched || TATMatrixTATSubmitted)
+                                                ">
+                                                P2 is required
+                                            </mat-error>
+                                        </mat-form-field>
+
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="mtime3" class="m-t-5">
+                                    <th mat-header-cell *matHeaderCellDef>TAT P3*</th>
+                                    <td mat-cell *matCellDef="let form">
+                                        <mat-form-field appearance="outline" class="w-100 m-t-10">
+                                            <input class="input-p-5" matInput type="number"
+                                                placeholder="Enter TAT time for P3" formControlName="mtime3" [ngClass]="{
+                                                                            'is-invalid':
+                                                                                    TATMatrixTATSubmitted && TATMatrixTATForm.controls.mtime3.errors
+                                                                            }" />
+                                            <mat-error *ngIf="
+                                                (TATMatrixTATForm.get('mtime3')?.touched || TATMatrixTATSubmitted)
+                                                ">
+                                                P3 is required
+                                            </mat-error>
+                                        </mat-form-field>
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="munit" class="m-t-5">
+                                    <th mat-header-cell *matHeaderCellDef>Unit*</th>
+                                    <td mat-cell *matCellDef="let form">
+                                        <mat-form-field appearance="outline" class="w-100 m-t-10">
+                                            <mat-select class="input-p-5" placeholder="Unit" formControlName="munit"
+                                                [ngClass]="{
+                                                                        'is-invalid':
+                                                                                TATMatrixTATSubmitted && TATMatrixTATForm.controls.munit.errors
+                                                                        }">
+                                                <mat-option *ngFor="let unit of timeUnitData" [value]="unit.value">
+                                                    {{ unit.label }}
+                                                </mat-option>
+                                            </mat-select>
+                                            <mat-error *ngIf="
+                                            (TATMatrixTATForm.get('munit')?.touched || TATMatrixTATSubmitted)
+                                            ">
+                                                Unit is required
+                                            </mat-error>
+                                        </mat-form-field>
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="action" class="m-t-5">
+                                    <th mat-header-cell *matHeaderCellDef>Action*</th>
+                                    <td mat-cell *matCellDef="let form">
+                                        <mat-form-field appearance="outline" class="w-100 m-t-10">
+                                            <mat-select class="input-p-5" placeholder="Select Action"
+                                                formControlName="action" [ngClass]="{
+                                                                            'is-invalid':
+                                                                                TATMatrixTATSubmitted && TATMatrixTATForm.controls.action.errors
+                                                                            }">
+                                                <mat-option *ngFor="let action of actionData" [value]="action.value">
+                                                    {{ action.label }}
+                                                </mat-option>
+                                            </mat-select>
+                                            <mat-error *ngIf="
+                                                (TATMatrixTATForm.get('action')?.touched || TATMatrixTATSubmitted)
+                                                ">
+                                                Action is required
+                                            </mat-error>
+                                        </mat-form-field>
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="addButton" class="m-t-10">
+                                    <th mat-header-cell *matHeaderCellDef>Add</th>
+                                    <td mat-cell *matCellDef="let form">
+                                        <button mat-flat-button color="primary" style="margin-top: -11px;
+                                                        height: 50px;" (click)="onAddTATMatrixTATField()"
+                                            class="button-normal clear-btn  w-100">
+                                            Add
+                                        </button>
+                                    </td>
+                                </ng-container>
+
+                                <tr mat-header-row
+                                    *matHeaderRowDef="['orderNo', 'level', 'mtime1', 'mtime2', 'mtime3', 'munit', 'action', 'addButton']">
+                                </tr>
+                                <tr mat-row
+                                    *matRowDef="let row; columns: ['orderNo', 'level', 'mtime1', 'mtime2', 'mtime3', 'munit', 'action', 'addButton']">
+                                </tr>
+                            </table>
+                            <!-- create table start -->
+
+                            <!-- display detail table start -->
+                            <table [dataSource]="rowArray" mat-table class="mat-elevation-z8 full-width-table">
+
+                                <ng-container matColumnDef="orderNo" class="m-t-5">
+                                    <th mat-header-cell *matHeaderCellDef class="m-t-5">
+                                        Order No*</th>
+                                    <td mat-cell *matCellDef="let row; let i = index" class="m-t-5">
+                                        <mat-form-field appearance="outline" class="w-100 m-t-10">
+                                            <input matInput type="number" class="input-p-5" [disabled]="true"
+                                                placeholder="Enter Order No" [value]="row.orderNo" min="1" readonly />
+                                        </mat-form-field>
+
+                                    </td>
+                                </ng-container>
+
+
+                                <ng-container matColumnDef="level" class="m-t-5">
+                                    <th mat-header-cell *matHeaderCellDef>Level*</th>
+                                    <td mat-cell *matCellDef="let row; let i = index">
+                                        <mat-form-field appearance="outline" class="w-100 m-t-10">
+                                            <input matInput class="input-p-5" type="text" [value]="row.level"
+                                                [disabled]="true" readonly />
+                                        </mat-form-field>
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="mtime1" class="m-t-5">
+                                    <th mat-header-cell *matHeaderCellDef>TAT P1*</th>
+                                    <td mat-cell *matCellDef="let row">
+                                        <mat-form-field appearance="outline" class="w-100 m-t-10">
+                                            <input class="input-p-5" matInput type="number" min="1"
+                                                [value]="row.mtime1" />
+                                        </mat-form-field>
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="mtime2" class="m-t-5">
+                                    <th mat-header-cell *matHeaderCellDef>TAT P2*</th>
+                                    <td mat-cell *matCellDef="let row">
+                                        <mat-form-field appearance="outline" class="w-100 m-t-10">
+                                            <input class="input-p-5" matInput type="number" min="1"
+                                                [value]="row.mtime2" />
+                                        </mat-form-field>
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="mtime3" class="m-t-5">
+                                    <th mat-header-cell *matHeaderCellDef>TAT P3*</th>
+                                    <td mat-cell *matCellDef="let row">
+                                        <mat-form-field appearance="outline" class="w-100 m-t-10">
+                                            <input class="input-p-5" matInput type="number" [value]="row.mtime3" />
+                                        </mat-form-field>
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="munit" class="m-t-5">
+                                    <th mat-header-cell *matHeaderCellDef>Unit*</th>
+                                    <td mat-cell *matCellDef="let row">
+                                        <mat-form-field appearance="outline" class="w-100 m-t-10">
+                                            <mat-select class="input-p-5" placeholder="{{row.munit}}">
+                                                <mat-option [value]="row.munit">
+                                                    {{ row.munit }}
+                                                </mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="action" class="m-t-5">
+                                    <th mat-header-cell *matHeaderCellDef>Action*</th>
+                                    <td mat-cell *matCellDef="let row">
+                                        <mat-form-field appearance="outline" class="w-100 m-t-10">
+                                            <mat-select class="input-p-5" placeholder="{{row.action}}">
+                                                <mat-option [value]="row.action">
+                                                    {{ row.action }}
+                                                </mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="deleteButton" class="m-t-10">
+                                    <th mat-header-cell *matHeaderCellDef>Delete</th>
+                                    <td mat-cell *matCellDef="let row; let i = index">
+                                        <button mat-flat-button color="primary" style="margin-top: -11px;
+                                                        height: 50px;" (click)="deleteRow(i)"
+                                            class="button-normal clear-btn  w-100">
+                                            Delete
+                                        </button>
+                                    </td>
+                                </ng-container>
+
+                                <tr mat-header-row
+                                    *matHeaderRowDef="['orderNo', 'level', 'mtime1', 'mtime2', 'mtime3', 'munit', 'action', 'deleteButton']">
+                                </tr>
+                                <tr mat-row
+                                    *matRowDef="let row; columns: ['orderNo', 'level', 'mtime1', 'mtime2', 'mtime3', 'munit', 'action', 'deleteButton']">
+                                </tr>
+                            </table>
+                            <div class="col-md-12">
+                                <mat-paginator [length]="rowArray.length" [pageSize]="5" [pageSizeOptions]="[5,10,20,50,100]"
+                                    showFirstLastButtons (page)="onPageChange($event)">
+                                </mat-paginator>
+                            </div>
+                            <!-- display detail table start -->
+
+                            <!-- </div> -->
+                        </form>
+                    </mat-card-content>
+                </mat-card>
+                </mat-card>
+            </form>
+            <mat-card *ngIf="!createAccess">
+<mat-card-content class="matcard-content">
+            <div class="panel-body table-responsive">
+              Sorry you have not privilege to create operation!
+            </div>
+          </mat-card-content>
+            </mat-card>
+        </mat-dialog-content>
+        <mat-dialog-actions align="end" class="dialog-action-adjust">
+            @if (!isTATMatrixEdit) {
+            <button (click)="addEditTicketReasonCat('')" mat-flat-button color="primary"
+                class="button-normal clear-btn">
+                Create TAT
+            </button> }
+            @if (isTATMatrixEdit) {
+            <button (click)="addEditTicketReasonCat(editId)" mat-flat-button color="primary"
+                class="button-normal clear-btn">
+                Update TAT
+            </button>
+            }
+            @if (isViewMode) {
+            <button mat-stroked-button color="warn" (click)="closeDialog()">Close</button>
+            }
+            <button mat-stroked-button color=" warn" class="button-normal" (click)="closeDialog()">
+                Close
+            </button>
+        </mat-dialog-actions>
+    </div>
+    }
+</ng-template>
+<!-- tat-for-task add-edit card dialog end -->
+
+<!-- view detail template start -->
+<ng-template #viewTatForTaskDialog>
+    <div class="container-fluid p-0">
+        <div class="dialog-header">
+            View {{ title }}
+            <span>
+                <a mat-icon-button (click)="closeDialog()">
+                     <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+        <mat-dialog-content>
+            <!-- basic detail card start -->
+            <mat-card>
+                <mat-card-header>
+                    <mat-card-title class="font-900">Basic Details</mat-card-title>
+                </mat-card-header>
+                <div class="row p-15 m-t-10">
+                    <!-- Name -->
+                    <div class="col-md-4 field-row detail-row">
+                        <span class="field-label f-s-15 f-w-700 label">TAT Name</span>
+                        <span class="field-label f-s-15 f-w-700 colon">:</span>
+                        <span class="field-value value m-l-10">{{ ticketReasonCatFormGroup.value.name }}</span>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="col-md-4 field-row detail-row">
+                        <span class="field-label f-s-15 f-w-700 label">Status</span>
+                        <span class="field-label f-s-15 f-w-700 colon">:</span>
+                        <span class="field-value value m-l-10">{{ ticketReasonCatFormGroup.value.status }}</span>
+                    </div>
+
+                    <!-- Response Time -->
+                    <div class="col-md-4 field-row detail-row">
+                        <span class="field-label f-s-15 f-w-700 label">Response Time</span>
+                        <span class="field-label f-s-15 f-w-700 colon">:</span>
+                        <span class="field-value value m-l-10">{{ ticketReasonCatFormGroup.value.rtime }}
+                            {{ ticketReasonCatFormGroup.value.runit }}</span>
+                    </div>
+
+                    <div class="col-md-4 field-row detail-row">
+                        <span class="field-label f-s-15 f-w-700 label">SLA Time P1</span>
+                        <span class="field-label f-s-15 f-w-700 colon">:</span>
+                        <span class="field-value value m-l-10">{{ ticketReasonCatFormGroup.value.slaTimep1 }}
+                            {{ ticketReasonCatFormGroup.value.sunitp1 }}</span>
+                    </div>
+
+                    <div class="col-md-4 field-row detail-row">
+                        <span class="field-label f-s-15 f-w-700 label">SLA Time P2</span>
+                        <span class="field-label f-s-15 f-w-700 colon">:</span>
+                        <span class="field-value value m-l-10">{{ ticketReasonCatFormGroup.value.slaTimep2 }}
+                            {{ ticketReasonCatFormGroup.value.sunitp2 }}</span>
+                    </div>
+
+                    <div class="col-md-4 field-row detail-row">
+                        <span class="field-label f-s-15 f-w-700 label">SLA Time P3</span>
+                        <span class="field-label f-s-15 f-w-700 colon m-l-6">:</span>
+                        <span class="field-value value m-l-10">{{ ticketReasonCatFormGroup.value.slaTime3 }}
+                            {{ ticketReasonCatFormGroup.value.sunitp3 }}</span>
+                    </div>
+
+                </div>
+            </mat-card>
+            <!-- basic detail card start -->
+
+            <!-- tat mapping detail card end -->
+            <mat-card>
+                <mat-card-header>
+                    <mat-card-title class="font-900">TAT Mapping Detail</mat-card-title>
+                </mat-card-header>
+                <table [dataSource]="rowArray" mat-table class="mat-elevation-z8 full-width-table">
+
+                    <ng-container matColumnDef="orderNo" class="m-t-5">
+                        <th mat-header-cell *matHeaderCellDef class="m-t-5 f-s-13 f-w-700">
+                            Order No*</th>
+
+                        <td mat-cell *matCellDef=" let row;" class="m-t-5">
+                            <label for="">{{row.orderNo}}</label>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="level" class="m-t-5">
+                        <th mat-header-cell *matHeaderCellDef class="m-t-5 f-s-13 f-w-700">
+                            Level</th>
+                        <td mat-cell *matCellDef=" let row;" class="m-t-5">
+                            <label for="">{{row.level}}</label>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="mtime1" class="m-t-5">
+                        <th mat-header-cell *matHeaderCellDef class="m-t-5 f-s-13 f-w-700">
+                            TAT time for P1</th>
+                        <td mat-cell *matCellDef=" let row;" class="m-t-5">
+                            <label for="">{{row.mtime1}}</label>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="mtime2" class="m-t-5">
+                        <th mat-header-cell *matHeaderCellDef class="m-t-5 f-s-13 f-w-700">
+                            TAT time for P2</th>
+                        <td mat-cell *matCellDef=" let row;" class="m-t-5">
+                            <label for="">{{row.mtime2}}</label>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="mtime3" class="m-t-5">
+                        <th mat-header-cell *matHeaderCellDef class="m-t-5 f-s-13 f-w-700">
+                            TAT time for P3</th>
+                        <td mat-cell *matCellDef=" let row;" class="m-t-5">
+                            <label for="">{{row.mtime3}}</label>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="munit" class="m-t-5">
+                        <th mat-header-cell *matHeaderCellDef class="m-t-5 f-s-13 f-w-700">
+                            Unit</th>
+                        <td mat-cell *matCellDef=" let row;" class="m-t-5">
+                            <label for="">{{row.munit}}</label>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="action" class="m-t-5">
+                        <th mat-header-cell *matHeaderCellDef class="m-t-5 f-s-13 f-w-700">
+                            Action</th>
+                        <td mat-cell *matCellDef=" let row;" class="m-t-5">
+                            <label for="">{{row.action}}</label>
+                        </td>
+                    </ng-container>
+
+
+
+
+                    <tr mat-header-row
+                        *matHeaderRowDef="['orderNo', 'level', 'mtime1', 'mtime2', 'mtime3', 'munit', 'action']">
+                    </tr>
+                    <tr mat-row
+                        *matRowDef="let row; columns: ['orderNo', 'level', 'mtime1', 'mtime2', 'mtime3', 'munit', 'action']">
+                    </tr>
+                </table>
+            </mat-card>
+            <!-- tat mapping detail card end -->
+        </mat-dialog-content>
+
+        <mat-dialog-actions align="end">
+            <button mat-stroked-button color="warn" (click)="closeDialog()">Close</button>
+        </mat-dialog-actions>
+    </div>
+</ng-template>
+
+
+<!-- view detail template end  -->

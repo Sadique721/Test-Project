@@ -1,0 +1,613 @@
+<!-- <div class="row">
+    <div class="col-md-6 left">
+ 
+    <div class="panel">
+      <div class="panel-heading">
+        <h3 class="panel-title">Email Configuration Parameters</h3>
+        <div class="right">
+          <button
+            type="button"
+            class="btn-toggle-collapse"
+            data-toggle="collapse"
+            data-target="#searchEmail"
+            aria-expanded="false"
+            aria-controls="searchEmail"
+            >
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+
+      <div id="searchEmail" class="panel-collapse collapse in">
+        <div class="panel-body table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>UserName</th>
+                <th>Host Server</th>
+                <th>Port No</th>
+                <th>ISP Name</th>
+                @if (editAccess) {
+                  <th>Action</th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (
+                group of groupData
+                | paginate
+                : {
+                id: 'listing_groupdata',
+                itemsPerPage: itemsPerPage,
+                currentPage: currentPage,
+                totalItems: totalRecords
+                }; track
+                group; let i = $index) {
+                <tr
+                  >
+                  <td>{{ group.userName }}</td>
+                  <td>{{ group.hostServer }}</td>
+                  <td>{{ group.port }}</td>
+                  <td>{{ group.mvnoName }}</td>
+                  @if (editAccess) {
+                    <td class="btnAction">
+                    @if (editAccess) {
+                      <a
+                        (click)="editConfigById(group.emailConfigId, i)"
+                        class="curson_pointer"
+                        >
+                      <img src="assets/img/DashboardIcons/Edit.svg" >
+                      </a>
+                    }
+
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+        <br />
+        <div class="pagination_Dropdown">
+          <pagination-controls
+            id="listing_groupdata"
+            maxSize="10"
+            directionLinks="true"
+            previousLabel=""
+            nextLabel=""
+            (pageChange)="pageChanged($event)"
+          ></pagination-controls>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div class="col-md-6 right">
+  <div class="panel">
+    <div class="panel-heading">
+      <h3 class="panel-title">{{ editMode ? "Update" : "Create" }} Email Config</h3>
+      <div class="right">
+        <button
+          type="button"
+          class="btn-toggle-collapse"
+          data-toggle="collapse"
+          data-target="#editEmail"
+          aria-expanded="false"
+          aria-controls="editEmail"
+          >
+          <i class="fa fa-minus-circle"></i>
+        </button>
+      </div>
+    </div>
+
+    <div id="editEmail" class="panel-collapse collapse in">
+      <div class="panel-body">
+        @if (!createAccess && !editMode) {
+          <div class="panel-body table-responsive">
+            Sorry you have not privilege to create operation!
+          </div>
+        }
+        @if (createAccess || (editMode && editAccess)) {
+          <div>
+            <form class="form-auth-small" [formGroup]="editForm">
+              <label>Username</label>
+              <input
+                type="text"
+                name="userName"
+                class="form-control"
+                placeholder="Enter Username"
+                formControlName="userName"
+                [ngClass]="{
+                  'is-invalid': submitted && editForm.controls.userName.errors
+                }"
+                />
+                @if (submitted && editForm.controls.userName.errors) {
+                  <div
+                    class="errorWrap text-danger"
+                    >
+                    @if (submitted && editForm.controls.userName.errors.required) {
+                      <div
+                        class="error text-danger"
+                        >
+                        Username is required
+                      </div>
+                    }
+                  </div>
+                }
+                <br />
+                <label>Password</label>
+                <div class="form-control displayflex">
+                  <div style="width: 95%">
+                    <input
+                      [type]="_passwordType"
+                      class="inputPassword"
+                      name="password"
+                      placeholder="Enter password"
+                      formControlName="password"
+                    [ngClass]="{
+                      'is-invalid': submitted && editForm.controls.password.errors
+                    }"
+                      />
+                    </div>
+                  
+                </div>
+                @if (submitted && editForm.controls.password.errors) {
+                  <div
+                    class="errorWrap text-danger"
+                    >
+                    @if (submitted && editForm.controls.password.errors.required) {
+                      <div
+                        class="error text-danger"
+                        >
+                        Password is required
+                      </div>
+                    }
+                  </div>
+                }
+               
+                  <br />
+                  <div>
+                    <label>SMTP Authentication</label>
+                    <br />
+                    <p-dropdown
+                      [options]="smtpAuth"
+                      placeholder="Select SMTP Authentication Value"
+                      optionLabel="label"
+                      optionValue="value"
+                      formControlName="authValue"
+                      filter="true"
+                      filterBy="label"
+                  [ngClass]="{
+                    'is-invalid': submitted && editForm.controls.authValue.errors
+                  }"
+                    ></p-dropdown>
+                   
+                    @if (submitted && editForm.controls.authValue.errors) {
+                      <div
+                        class="errorWrap text-danger"
+                        >
+                        @if (submitted && editForm.controls.authValue.errors.required) {
+                          <div
+                            class="error text-danger"
+                            >
+                            SMTP Authentication Value is required
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+               
+                    <br />
+                    <div>
+                      <label>Authentication Type</label>
+                      <br />
+                      <p-dropdown
+                        [options]="authType"
+                        placeholder="Select Authentication Type"
+                        optionLabel="label"
+                        optionValue="value"
+                        formControlName="authType"
+                        filter="true"
+                        filterBy="label"
+                  [ngClass]="{
+                    'is-invalid': submitted && editForm.controls.authType.errors
+                  }"
+                      ></p-dropdown>
+              
+                      @if (submitted && editForm.controls.authType.errors) {
+                        <div
+                          class="errorWrap text-danger"
+                          >
+                          @if (submitted && editForm.controls.authType.errors.required) {
+                            <div
+                              class="error text-danger"
+                              >
+                              Authentication Type is required
+                            </div>
+                          }
+                        </div>
+                      }
+                    </div>
+                    <br />
+                
+                      <div>
+                        <label>Host Server</label>
+                        <br />
+                        <input
+                          type="text"
+                          name="hostValue"
+                          class="form-control"
+                          placeholder="Enter Host Server"
+                          formControlName="hostValue"
+                  [ngClass]="{
+                    'is-invalid': submitted && editForm.controls.hostValue.errors
+                  }"
+                          />
+                     
+                        @if (submitted && editForm.controls.hostValue.errors) {
+                          <div
+                            class="errorWrap text-danger"
+                            >
+                            @if (submitted && editForm.controls.hostValue.errors.required) {
+                              <div
+                                class="error text-danger"
+                                >
+                                Host Server is required
+                              </div>
+                            }
+                          </div>
+                        }
+                      </div>
+                      <br />
+                    
+                        <label>Port Number</label>
+                        <br />
+                        <input
+                          type="text"
+                          name="portValue"
+                          class="form-control"
+                          placeholder="Enter Port Number"
+                          formControlName="portValue"
+                [ngClass]="{
+                  'is-invalid': submitted && editForm.controls.portValue.errors
+                }"
+                          />
+                          @if (submitted && editForm.controls.portValue.errors) {
+                            <div
+                              class="errorWrap text-danger"
+                              >
+                              @if (submitted && editForm.controls.portValue.errors.required) {
+                                <div
+                                  class="error text-danger"
+                                  >
+                                  Port Number is required
+                                </div>
+                              }
+                            </div>
+                          }
+                          <br />
+                          @if (editMode == false) {
+                            <div class="addUpdateBtn">
+                              <button type="submit" class="btn btn-primary" (click)="addeditEmailConfig('')">
+                                <i class="fa fa-check-circle"></i>
+                                Add Email Config
+                              </button>
+                              <br />
+                            </div>
+                          }
+                          @if (editMode == true) {
+                            <div class="addUpdateBtn">
+                              <button
+                                type="submit"
+                                class="btn btn-primary"
+                                (click)="addeditEmailConfig('')"
+                                [disabled]="isEmailConfigEdit"
+                                >
+                                <i class="fa fa-check-circle"></i>
+                                Update Email Config
+                              </button>
+                              <br />
+                            </div>
+                          }
+                        </form>
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+    </div>
+</div> -->
+
+<div class="row header-row">
+    <mat-card class="cardWithShadow w-100">
+        <mat-card-content class="mat-card-content-border">
+            <div class="row">
+                <div class="col-sm-9 d-flex">
+                    <mat-form-field appearance="outline" style="margin-left: 16px" class="w-100 hide-hint mr-10">
+                        <input matInput class="input-p-5" [(ngModel)]="searchName" placeholder="Global Search Filter"
+                            (keydown.enter)="search()" />
+                        <mat-icon matSuffix class="search-header-search-icon">
+                            <i class="pi pi-search icon-size"></i>
+                        </mat-icon>
+                    </mat-form-field>
+
+                    <button mat-button mat-flat-button color="primary" class="button-normal m-r-10" (click)="search()">
+                        Search
+                    </button>
+                    <button mat-stroked-button matButton="outlined" class="button-normal" (click)="clearSearch()">
+                        Clear
+                    </button>
+                </div>
+
+                <div class="col-sm-3 search-div">
+                    <button mat-button mat-flat-button color="primary" (click)="openEmailConfigDialog()"
+                        class="button-normal m-r-10">
+                        Add Email Config
+                    </button>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+
+
+<div class="container-fluid contain-flud">
+    <div class="row">
+        <div class="col-md-12">
+            <mat-card class="cardWithShadow">
+                <mat-card-content class="mat-card-content-border">
+                    <div class="country-table-list">
+                        <div class="table-container">
+                            <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8 w-100">
+                                <ng-container matColumnDef="index">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">#</th>
+                                    <td mat-cell *matCellDef="let element; let i = index" class="f-s-14">
+                                        {{ totalRecords - i - (paginator?.pageIndex * paginator?.pageSize || 0) }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- UserName Column -->
+
+                                <ng-container matColumnDef="userName">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">UserName</th>
+                                    <td mat-cell *matCellDef="let group" class="f-s-14">
+                                        {{ group.userName }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Host Server Column -->
+                                <ng-container matColumnDef="hostServer">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">Host Server</th>
+                                    <td mat-cell *matCellDef="let group" class="f-s-14">
+                                        {{ group.hostServer }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Port No Column -->
+                                <ng-container matColumnDef="port">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">Port No</th>
+                                    <td mat-cell *matCellDef="let group" class="f-s-14">
+                                        {{ group.port }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- ISP Name Column -->
+                                <ng-container matColumnDef="mvnoName">
+                                    <th mat-header-cell *matHeaderCellDef class="table-header-title">ISP Name</th>
+                                    <td mat-cell *matCellDef="let group" class="f-s-14">
+                                        {{ group.mvnoName }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Action Column -->
+                                <ng-container matColumnDef="action">
+                                    <th mat-header-cell *matHeaderCellDef stickyEnd class="table-header-title">Action
+                                    </th>
+                                    <td mat-cell *matCellDef="let group">
+                                        @if (editAccess) {
+                                        <!-- <a mat-icon-button href="javascript:void(0)"
+                                            (click)="editConfigById(group.emailConfigId, i)"
+                                            matTooltip="Edit Configuration">
+                                            <img <img src="assets/img/DashboardIcons/Edit.svg" > style="width: 20px; height: 20px;" />
+                                        </a> -->
+                                        <a mat-icon-button matTooltip="edit" href="javascript:void(0)"
+                                            (click)="openEditDialog(group.emailConfigId, i)">
+                                            <img src="assets/img/DashboardIcons/Edit.svg">
+                                        </a>
+                                        }
+                                    </td>
+                                </ng-container>
+
+                                <!-- Header Row -->
+                                <tr mat-header-row class="table-header-bg"
+                                    *matHeaderRowDef="getDisplayedPlanDetailsColumns(); sticky: true"></tr>
+
+                                <!-- Data Rows -->
+                                <tr mat-row class="table-content-row"
+                                    *matRowDef="let row; columns: getDisplayedPlanDetailsColumns()">
+                                </tr>
+                            </table>
+
+                            <!-- Pagination -->
+                            <mat-paginator [length]="totalRecords" [pageSize]="itemsPerPage"
+                                [pageSizeOptions]="[5,10,20,50,100]" showFirstLastButtons
+                                (page)="pageChanged($event)"></mat-paginator>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </div>
+</div>
+
+
+<ng-template #EmailConfigDialog let-dialogRef="dialogRef">
+    <div class="dialog-container">
+        <!-- Header -->
+        <div class="dialog-header">
+            {{ editMode ? "Update" : "Create" }} Email Config
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="closeDialog()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <form [formGroup]="editForm" class="card-form mb-3">
+            <!-- Content -->
+            <div mat-dialog-content>
+                <div class="col-md-12">
+                    @if (!createAccess && !editMode) {
+                    <mat-card-content class="matcard-content">
+                        <div class="panel-body table-responsive">
+                            Sorry you have not privilege to create operation!
+                        </div>
+                    </mat-card-content>
+                    }
+                    @if (createAccess || (editMode && editAccess)) {
+                    <mat-card-content class="matcardContent">
+                        <div class="row g-2">
+                            <!-- Username -->
+                            <div class="col-sm-6">
+                                <label for="userName" class="inputLabel">Username*</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <input id="userName" matInput type="text" placeholder="Enter Username"
+                                        formControlName="userName" [ngClass]="{
+                          'is-invalid': submitted && editForm.controls.userName.errors
+                        }" class="input-p-5" />
+
+                                    <mat-error *ngIf="
+                          (submitted || editForm.controls['userName'].touched) &&
+                          editForm.controls['userName'].errors as errors
+                        ">
+                                        <span *ngIf="errors['required']">Username is required</span>
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Password -->
+                            <div class="col-sm-6">
+                                <label for="password" class="inputLabel">Password*</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <input id="password" matInput [type]="_passwordType" placeholder="Enter password"
+                                        formControlName="password" [ngClass]="{
+                          'is-invalid': submitted && editForm.controls.password.errors
+                        }" class="input-p-5" />
+
+                                    <mat-error *ngIf="
+                          (submitted || editForm.controls['password'].touched) &&
+                          editForm.controls['password'].errors as errors
+                        ">
+                                        <span *ngIf="errors['required']">Password is required</span>
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- SMTP Authentication -->
+                            <div class="col-sm-6">
+                                <label class="inputLabel">SMTP Authentication*</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select formControlName="authValue" class="input-p-5"
+                                        placeholder="Select SMTP Authentication Value" [ngClass]="{
+                          'is-invalid': submitted && editForm.controls.authValue.errors
+                        }">
+                                        <mat-option *ngFor="let item of smtpAuth" [value]="item.value">
+                                            {{ item.label }}
+                                        </mat-option>
+                                    </mat-select>
+
+                                    <mat-error *ngIf="
+                          submitted &&
+                          editForm.controls['authValue']?.hasError('required')
+                        ">
+                                        SMTP Authentication Value is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Authentication Type -->
+                            <div class="col-sm-6">
+                                <label class="inputLabel">Authentication Type*</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select formControlName="authType" class="input-p-5"
+                                        placeholder="Select Authentication Type" [ngClass]="{
+                          'is-invalid': submitted && editForm.controls.authType.errors
+                        }">
+                                        <mat-option *ngFor="let item of authType" [value]="item.value">
+                                            {{ item.label }}
+                                        </mat-option>
+                                    </mat-select>
+
+                                    <mat-error *ngIf="
+                          submitted &&
+                          editForm.controls['authType']?.hasError('required')
+                        ">
+                                        Authentication Type is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Host Server -->
+                            <div class="col-sm-6">
+                                <label for="hostValue" class="inputLabel">Host Server*</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <input id="hostValue" matInput type="text" placeholder="Enter Host Server"
+                                        formControlName="hostValue" [ngClass]="{
+                          'is-invalid': submitted && editForm.controls.hostValue.errors
+                        }" class="input-p-5" />
+
+                                    <mat-error *ngIf="
+                          (submitted || editForm.controls['hostValue'].touched) &&
+                          editForm.controls['hostValue'].errors as errors
+                        ">
+                                        <span *ngIf="errors['required']">Host Server is required</span>
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Port Number -->
+                            <div class="col-sm-6">
+                                <label for="portValue" class="inputLabel">Port Number*</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <input id="portValue" matInput type="text" placeholder="Enter Port Number"
+                                        formControlName="portValue" [ngClass]="{
+                          'is-invalid': submitted && editForm.controls.portValue.errors
+                        }" class="input-p-5" />
+
+                                    <mat-error *ngIf="
+                          (submitted || editForm.controls['portValue'].touched) &&
+                          editForm.controls['portValue'].errors as errors
+                        ">
+                                        <span *ngIf="errors['required']">Port Number is required</span>
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                    </mat-card-content>
+                    }
+                </div>
+            </div>
+            @if (createAccess || (editMode && editAccess)) {
+            <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+                @if (editMode == false) {
+                <button mat-button mat-flat-button type="submit" id="submit" (click)="addeditEmailConfig('')"
+                    class="button-normal">
+                    Create Email Config
+                </button>
+                }
+                @if (editMode == true) {
+                <button mat-button mat-flat-button type="submit" id="submit" (click)="addeditEmailConfig('')"
+                    [disabled]="isEmailConfigEdit" class="button-normal">
+                    Update Email Config
+                </button>
+                }
+                <button mat-stroked-button matButton="outlined" class="button-normal" color="primary"
+                    (click)="closeDialog()">
+                    Cancel
+                </button>
+            </div>}
+        </form>
+    </div>
+</ng-template>

@@ -1,0 +1,2948 @@
+<div class="row header-row">
+    <mat-card class="cardWithShadow w-100">
+        <mat-card-content class="mat-card-content-border">
+            <div class="row align-items-center g-2">
+                <div class="col d-flex flex-wrap gap-2">
+                    <!-- Search Option -->
+                    <div class="col-12 col-sm-6 col-md-3">
+                        <mat-form-field appearance="outline" class="w-100 hide-hint">
+                            <mat-label>Select Search Option</mat-label>
+                            <mat-select [(ngModel)]="searchOption" (selectionChange)="selSearchOption($event)">
+                                <mat-option *ngFor="let opt of commondropdownService.planGroupSearchOption"
+                                    [value]="opt.value">
+                                    {{ opt.label }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Text Search -->
+                    <div class="col-12 col-sm-6 col-md-3" *ngIf="
+              searchOption !== 'plantype' &&
+              searchOption !== 'planvalidity' &&
+              searchOption !== 'planstatus' &&
+              searchOption !== 'plancreatedby' &&
+              searchOption !== 'planstartdate' &&
+              searchOption !== 'planenddate' &&
+              searchOption !== 'plancreateddate'
+            ">
+                        <mat-form-field appearance="outline" class="w-100 hide-hint">
+                            <mat-label>Enter Search Detail</mat-label>
+                            <input matInput [(ngModel)]="searchDeatil" placeholder="Enter Search Detail"
+                                (keydown.enter)="searchByName('')" />
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Plan Status -->
+                    <div class="col-12 col-sm-6 col-md-3" *ngIf="searchOption === 'planstatus'">
+                        <mat-form-field appearance="outline" class="w-100 hide-hint">
+                            <mat-label>Select Status</mat-label>
+                            <mat-select [(ngModel)]="searchDeatil">
+                                <mat-option *ngFor="let status of planFilterStatus" [value]="status.value">
+                                    {{ status.label }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Created By -->
+                    <div class="col-12 col-sm-6 col-md-3" *ngIf="searchOption === 'plancreatedby'">
+                        <mat-form-field appearance="outline" class="w-100 hide-hint">
+                            <mat-label>Select Created By</mat-label>
+                            <mat-select [(ngModel)]="searchDeatil">
+                                <mat-option *ngFor="let staff of commondropdownService.activeStaffList"
+                                    [value]="staff.fullName">
+                                    {{ staff.fullName }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- From Date -->
+                    <div class="col-12 col-sm-6 col-md-3" *ngIf="searchOption === 'plancreateddate'">
+                        <mat-form-field appearance="outline" class="w-100 hide-hint">
+                            <mat-label>From Date</mat-label>
+                            <input matInput [matDatepicker]="fromPicker" [(ngModel)]="searchDeatilFromDate" />
+                            <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+                            <mat-datepicker #fromPicker></mat-datepicker>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- To Date -->
+                    <div class="col-12 col-sm-6 col-md-3" *ngIf="searchOption === 'plancreateddate'">
+                        <mat-form-field appearance="outline" class="w-100 hide-hint">
+                            <mat-label>To Date</mat-label>
+                            <input matInput [matDatepicker]="toPicker" [min]="searchDeatilFromDate"
+                                [(ngModel)]="searchDeatilToDate" />
+                            <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+                            <mat-datepicker #toPicker></mat-datepicker>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Plan Type -->
+                    <div class="col-12 col-sm-6 col-md-3"
+                        *ngIf="searchOption === 'planname' || searchOption === 'plantype'">
+                        <mat-form-field appearance="outline" class="w-100 hide-hint">
+                            <mat-label>Select Plan Type</mat-label>
+                            <mat-select [(ngModel)]="searchOptionType">
+                                <mat-option *ngFor="let type of planTypeData" [value]="type.value">
+                                    {{ type.text }}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Search / Clear -->
+                    <div class="col-12 col-sm-3 col-md-2 d-flex align-items-center ">
+                        <button mat-button mat-flat-button color="primary" class="button-normal m-r-10"
+                            (click)="searchByName('')">
+                            Search
+                        </button>
+                        <button mat-stroked-button matButton="outlined" class="button-normal m-l-10"
+                            (click)="clearSearchForm()">
+                            Clear
+                        </button>
+
+                        <!-- <img src="assets/img/DashboardIcons/Clear.svg" (click)="clearSearchForm()"
+                            style="cursor:pointer; height:36px;margin-left: 15px;" /> -->
+                    </div>
+                </div>
+                <div class="col-auto ms-auto flex-shrink-0">
+                    <button mat-flat-button color="primary" (click)="openPlanGroupDialog(false)">
+                        Add Plan Group
+                    </button>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+
+
+<div class=" container-fluid contain-flud">
+    <div class="row">
+        <div class="col-md-12">
+            <mat-card class="cardWithShadow">
+                <mat-card-content class="mat-card-content-border">
+                    <div class="plan-table-list">
+                        <div class="table-container">
+                            <table mat-table [dataSource]="planGroupDataList" matSort class="mat-elevation-z8 w-100">
+
+                                <!-- Plan Bundle -->
+                                <ng-container matColumnDef="PlanBundle">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header sticky
+                                        class="table-header-title">
+                                        Plan Bundle
+                                    </th>
+                                    <td mat-cell *matCellDef="let data">
+                                        <a class="detailOnAnchorClick" style="color:#f7941e; cursor:pointer;"
+                                            (click)="planGroupDataById(data.planGroupId)">
+                                            {{ data.planGroupName }}
+                                        </a>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Plan Type -->
+                                <ng-container matColumnDef="PlanType">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header sticky
+                                        class="table-header-title" style="text-align:center;">
+                                        Plan Type
+                                    </th>
+                                    <td mat-cell *matCellDef="let data" style="text-align:center;">
+                                        {{ data.plantype }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Status -->
+                                <ng-container matColumnDef="Status">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header sticky
+                                        class="table-header-title" style="text-align:center;">
+                                        Status
+                                    </th>
+                                    <td mat-cell *matCellDef="let data" style="text-align:center;">
+                                        <span class="status-badge" [ngClass]="{
+                      'status-success': data.status === 'Active' || data.status === 'NewActivation',
+                      'status-danger': data.status === 'Inactive' || data.status === 'Rejected'
+                    }">
+                                            {{ data.status }}
+                                        </span>
+                                    </td>
+                                </ng-container>
+
+                                <!-- Create Date -->
+                                <ng-container matColumnDef="CreateDate">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header sticky
+                                        class="table-header-title" style="text-align:center;">
+                                        Create Date
+                                    </th>
+                                    <td mat-cell *matCellDef="let data" style="text-align:center;">
+                                        {{ data.createdate | date:'dd-MM-yyyy' }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Create By -->
+                                <ng-container matColumnDef="CreatedBy">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header sticky
+                                        class="table-header-title" style="text-align:center;">
+                                        Create By
+                                    </th>
+                                    <td mat-cell *matCellDef="let data" style="text-align:center;">
+                                        {{ data.createdByName }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- ISP Name -->
+                                <ng-container matColumnDef="ISP">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header sticky
+                                        class="table-header-title" style="text-align:center;">
+                                        ISP Name
+                                    </th>
+                                    <td mat-cell *matCellDef="let data" style="text-align:center;">
+                                        {{ data.mvnoName }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Amount -->
+                                <ng-container matColumnDef="Amount">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header sticky
+                                        class="table-header-title" style="text-align:center;">
+                                        Amount
+                                    </th>
+                                    <td mat-cell *matCellDef="let data" style="text-align:center;">
+                                        {{ data.offerprice }}
+                                    </td>
+                                </ng-container>
+
+                                <!-- Action -->
+                                <ng-container matColumnDef="Action">
+                                    <th mat-header-cell *matHeaderCellDef stickyEnd class="table-header-title"
+                                        style="text-align:center;">
+                                        Action
+                                    </th>
+
+                                    <td mat-cell *matCellDef="let data" style="text-align:center;">
+
+                                        <!-- View Details -->
+                                        <a mat-icon-button matTooltip="view" color="primary"
+                                            (click)="planGroupDataById(data.planGroupId)">
+                                            <img src="assets/img/DashboardIcons/eye-svgrepo-com (1) 1.svg" />
+                                            <!-- <i class="pi pi-eye icon-size"></i> -->
+                                        </a>
+
+                                        <!-- Edit -->
+                                        <a mat-icon-button *ngIf="editAccess" matTooltip="Edit"
+                                            (click)="editplanGroupById(data.planGroupId)">
+                                            <img src="assets/img/DashboardIcons/Edit.svg" />
+                                        </a>
+
+                                        <!-- Pick (Active / INACTIVE / Expired / Rejected) -->
+                                        <ng-container *ngIf="
+                                  data.status == 'Active' ||
+                                  data.status == 'INACTIVE' ||
+                                  data.status == 'Expired' ||
+                                  data.status == 'Rejected'
+                                ">
+                                            <button mat-icon-button matTooltip="Pick"
+                                                [disabled]="data.nextStaff != staffID" (click)="pickModalOpen(data)">
+                                                <img src="assets/img/DashboardIcons/Pick-ticket-to-resolve.svg" />
+                                            </button>
+                                        </ng-container>
+
+                                        <!-- Pick (NewActivation) -->
+                                        <ng-container *ngIf="data.status == 'NewActivation'">
+                                            <button mat-icon-button matTooltip="Pick"
+                                                [disabled]="data.nextStaff !== null" (click)="pickModalOpen(data)">
+                                                <img src="assets/img/DashboardIcons/Pick-ticket-to-resolve.svg" />
+                                            </button>
+                                        </ng-container>
+
+                                        <!-- Approve -->
+                                        <button mat-icon-button matTooltip="Approve" [disabled]="
+                                          (data.nextStaff == null && loggedInUser != 'admin admin') ||
+                                          data.nextStaff != staffId
+                                        " (click)="approvePlanOpen(data.planGroupId, '')">
+                                            <img src="assets/img/DashboardIcons/Assign.svg" />
+                                        </button>
+
+                                        <!-- Reject -->
+                                        <button mat-icon-button matTooltip="Reject" [disabled]="
+                                          (data.nextStaff == null && loggedInUser != 'admin admin') ||
+                                          data.nextStaff != staffId
+                                        " (click)="rejectPlanOpen(data.planGroupId, '')">
+                                            <img src="assets/img/DashboardIcons/Reject.svg" />
+                                        </button>
+
+                                        <!-- Workflow -->
+                                        <a mat-icon-button matTooltip="Workflow Status Details"
+                                            (click)="openPaymentWorkFlow('custauditWorkflowModal', data.planGroupId)">
+                                            <img src="assets/img/DashboardIcons/WorkFlow status Details.svg" />
+                                        </a>
+
+                                        <!-- Reassign -->
+                                        <a mat-icon-button
+                                            *ngIf="data.status == 'NewActivation' && data.nextStaff == staffId"
+                                            matTooltip="Reassign Plan Group" (click)="StaffReasignList(data)">
+                                            <img src="assets/img/DashboardIcons/send-svgrepo-com 1.svg" />
+                                        </a>
+
+                                    </td>
+                                </ng-container>
+
+
+                                <!-- Table Rows -->
+                                <tr mat-header-row *matHeaderRowDef="planDisplayedColumns; sticky: true"></tr>
+                                <tr mat-row class="table-content-row"
+                                    *matRowDef="let row; columns: planDisplayedColumns"></tr>
+                            </table>
+
+                            <!-- Pagination -->
+                            <mat-paginator [length]="totalRecords" [pageSize]="itemsPerPage"
+                                [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons (page)="pageChanged($event)">
+                            </mat-paginator>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </div>
+</div>
+<ng-template #confirmDialog let-data>
+    <div class="dialog-container">
+        <div class="dialog-header dialog-header-titleFont">
+            {{ data.title || "Delete Confirmation" }}
+            <span class="w-h-18">
+                <a mat-icon-button href="javascript:void(0)" mat-dialog-close="false">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+
+                </a>
+            </span>
+        </div>
+        <div mat-dialog-content>
+            <p class="dialog-description">{{ data.description }}</p>
+
+            <div mat-dialog-actions class="p-0">
+                <button mat-flat-button type="button" class="primary" [mat-dialog-close]="true">
+                    {{ data.yesLabel || "Confirm" }}
+                </button>
+                <button mat-stroked-button matButton="outlined" color="primary" mat-dialog-close="false">
+                    {{ data.noLabel || "Cancel" }}
+                </button>
+            </div>
+        </div>
+    </div>
+</ng-template>
+<!--  Plan Group Dialog Template start -->
+<ng-template #planGroupDialogTemplate>
+    <div class="dialog-container">
+        <div class="dialog-header">
+            {{ editMode ? "Update" : "Create" }} Plan Bundle
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="onCancel()">
+                      <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <div mat-dialog-content>
+            <mat-card class="cardWithShadow w-100">
+                <mat-card-header>
+                    <mat-card-title class="font-900">Basic Information</mat-card-title>
+                </mat-card-header>
+
+                <mat-card-content class="matcardContent">
+                    <form [formGroup]="planGroupForm">
+
+                        <div class="row g-3">
+                            <!-- Plan Bundle Name -->
+                            <div class="col-md-4 mb-3">
+                                <label class="inputLabel">Plan Bundle Name *</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <input matInput placeholder="Enter Plan Bundle Name" formControlName="planGroupName"
+                                        class="input-p-5"
+                                        [ngClass]="{'is-invalid': submitted && planGroupForm.controls.planGroupName.errors}" />
+                                    <mat-error
+                                        *ngIf="planGroupForm.get('planGroupName')?.hasError('required') && (submitted || planGroupForm.get('planGroupName')?.touched)">
+                                        Plan Bundle is required
+                                    </mat-error>
+                                    <mat-error
+                                        *ngIf="planGroupForm.get('planGroupName')?.hasError('cannotContainSpace') && (submitted || planGroupForm.get('planGroupName')?.touched)">
+                                        White spaces are not allowed
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Plan Type -->
+                            <div class="col-md-4 mb-3">
+                                <label class="inputLabel">Plan Type *</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select class="input-p-5" formControlName="planType"
+                                        placeholder="Select a Plan Type" [disabled]="editMode">
+                                        <mat-option *ngFor="let option of planTypeData" [value]="option.value">{{
+                                            option.text }}</mat-option>
+                                    </mat-select>
+                                    <mat-error
+                                        *ngIf="planGroupForm.get('planType')?.hasError('required') && (submitted || planGroupForm.get('planType')?.touched)">
+                                        Plan Type is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Service Area -->
+                            <div class="col-md-4 mb-3">
+                                <label class="inputLabel">Service Area *</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select class="input-p-5" formControlName="serviceAreaId" [disabled]="editMode"
+                                        placeholder="Select Service Area" multiple
+                                        (selectionChange)="getServiceByServiceAreaID($event)">
+                                        <mat-option *ngFor="let area of commondropdownService.serviceAreaList"
+                                            [value]="area.id">
+                                            {{ area.name }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error
+                                        *ngIf="planGroupForm.get('serviceAreaId')?.hasError('required') && (submitted || planGroupForm.get('serviceAreaId')?.touched)">
+                                        Service Area is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                        </div>
+
+
+                        <div class="row g-3">
+                            <!-- Plan Mode -->
+                            <div class="col-md-4 mb-3">
+                                <label class="inputLabel">Plan Mode *</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select class="input-p-5" formControlName="planMode" [disabled]="editMode"
+                                        (selectionChange)="selPlanMode($event)">
+                                        <mat-option *ngFor="let option of type" [value]="option.label">{{ option.label
+                                            }}</mat-option>
+                                    </mat-select>
+                                    <mat-error
+                                        *ngIf="planGroupForm.get('planMode')?.hasError('required') && (submitted || planGroupForm.get('planMode')?.touched)">
+                                        Plan Mode is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Plan Group Type -->
+                            <div class="col-md-4 mb-3">
+                                <label class="inputLabel">Plan Group *</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select class="input-p-5" formControlName="planGroupType"
+                                        placeholder="Select a Plan Group" [disabled]="editMode"
+                                        (selectionChange)="resetPlanMappingList($event)">
+                                        <mat-option *ngFor="let option of dynamicDropdown" [value]="option.value">{{
+                                            option.text }}</mat-option>
+                                    </mat-select>
+                                    <mat-error
+                                        *ngIf="planGroupForm.get('planGroupType')?.hasError('required') && (submitted || planGroupForm.get('planGroupType')?.touched)">
+                                        Plan Group is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Plan Category -->
+                            <div class="col-md-4 mb-3">
+                                <label class="inputLabel">Plan Category *</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select class="input-p-5" formControlName="category"
+                                        placeholder="Select a Plan Category" [disabled]="editMode"
+                                        (selectionChange)="resetPlanMappingList($event)">
+                                        <mat-option *ngFor="let option of planCategoryData" [value]="option.value">{{
+                                            option.text }}</mat-option>
+                                    </mat-select>
+                                    <mat-error
+                                        *ngIf="planGroupForm.get('category')?.hasError('required') && (submitted || planGroupForm.get('category')?.touched)">
+                                        Plan Category is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <!-- Allow Discount -->
+                            <div class="col-md-4 mb-3">
+                                <label class="inputLabel">Allow Discount *</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select class="input-p-5" formControlName="allowdiscount"
+                                        placeholder="Select a Discount">
+                                        <mat-option *ngFor="let option of planDiscount" [value]="option.value">
+                                            {{ option.label }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error
+                                        *ngIf="planGroupForm.get('allowdiscount')?.hasError('required') && (submitted || planGroupForm.get('allowdiscount')?.touched)">
+                                        Discount is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+
+                            <!-- Offer Price -->
+                            <div class="col-md-4 mb-3">
+                                <label class="inputLabel">Offer Price *</label>
+                                <mat-form-field appearance="outline" class="w-100 readonly-field">
+                                    <input class="input-p-5" matInput placeholder="Enter Offer Price"
+                                        formControlName="offerprice" readonly />
+                                    <mat-error
+                                        *ngIf="planGroupForm.get('offerprice')?.hasError('required') && (submitted || planGroupForm.get('offerprice')?.touched)">
+                                        Offer Price is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+
+
+                            <!-- Invoice to Org (conditional) -->
+                            <div class="col-md-4 mb-3" *ngIf="planGroupForm.value.category === 'Business Promotion'">
+                                <label class="inputLabel">Invoice To Org *</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select class="input-p-5" formControlName="invoiceToOrg"
+                                        placeholder="Select Invoice to org or not" [disabled]="editMode">
+                                        <mat-option *ngFor="let option of planDiscount" [value]="option.value">{{
+                                            option.label }}</mat-option>
+                                    </mat-select>
+                                    <mat-error
+                                        *ngIf="planGroupForm.get('invoiceToOrg')?.hasError('required') && (submitted || planGroupForm.get('invoiceToOrg')?.touched)">
+                                        Invoice To Org is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                        <div class="row g-3">
+                            <!-- Required Approval (only for Business Promotion) -->
+                            <div class="col-md-4 mb-3" *ngIf="planGroupForm.value.category === 'Business Promotion'">
+                                <label class="inputLabel">Required Approval *</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select class="input-p-5" formControlName="requiredApproval"
+                                        placeholder="Select a Required Approval" [disabled]="editMode">
+                                        <mat-option *ngFor="let option of planDiscount" [value]="option.value">
+                                            {{ option.label }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error
+                                        *ngIf="planGroupForm.get('requiredApproval')?.hasError('required') && (submitted || planGroupForm.get('requiredApproval')?.touched)">
+                                        Required Approval is required.
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Status (if editMode and category !== Business Promotion) -->
+                            <div class="col-md-4 mb-3"
+                                *ngIf="editMode && planGroupForm.value.category !== 'Business Promotion'">
+                                <label class="inputLabel">Status *</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select class="input-p-5" formControlName="status">
+                                        <mat-option *ngFor="let s of status" [value]="s.label">{{ s.label
+                                            }}</mat-option>
+                                    </mat-select>
+                                    <mat-error
+                                        *ngIf="planGroupForm.get('status')?.hasError('required') && (submitted || planGroupForm.get('status')?.touched)">
+                                        Please select Status.
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Status (if editMode and category === Business Promotion) -->
+                            <div class="col-md-4 mb-3"
+                                *ngIf="editMode && planGroupForm.value.category === 'Business Promotion'">
+                                <label class="inputLabel">Status *</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select class="input-p-5" formControlName="status">
+                                        <mat-option *ngFor="let s of status" [value]="s.label">{{ s.label
+                                            }}</mat-option>
+                                    </mat-select>
+                                    <mat-error
+                                        *ngIf="planGroupForm.get('status')?.hasError('required') && (submitted || planGroupForm.get('status')?.touched)">
+                                        Please select Status.
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                        </div>
+
+
+
+                    </form>
+                </mat-card-content>
+
+            </mat-card>
+            @if (planGroupForm.valid) {
+            <mat-card class="cardWithShadow w-100 mt-3">
+                <mat-card-header>
+                    <mat-card-title class="font-900">Plan Mapping</mat-card-title>
+                </mat-card-header>
+
+                <mat-card-content class="mat-card-content-border">
+                    <form [formGroup]="PlanMappingfromgroup" class="row g-3" style="padding: 0 20px;">
+
+                        <!-- Service Dropdown -->
+                        <div class="col-lg-2 col-md-2 col-sm-6 col-12">
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-label>Select Service *</mat-label>
+                                <mat-select class="input-p-5" formControlName="service"
+                                    (selectionChange)="serviceBasePlanDATA($event)"
+                                    [disabled]="!planGroupForm.value.serviceAreaId">
+                                    <mat-option *ngFor="let s of serviceData" [value]="s.id">{{ s.name }}</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            <div *ngIf="!planGroupForm.value.serviceAreaId" class="text-danger">Please select Service
+                                Area first!</div>
+                            <div *ngIf="PlanMappingSubmitted && PlanMappingfromgroup.controls.service.errors"
+                                class="text-danger">Service is required.</div>
+                        </div>
+
+                        <!-- Plan Dropdown -->
+                        <div class="col-lg-2 col-md-2 col-sm-6 col-12">
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-label>Select Plan *</mat-label>
+                                <mat-select class="input-p-5" formControlName="planId"
+                                    (selectionChange)="getPlanValidity($event)">
+                                    <mat-option *ngFor="let plan of plantypaSelectData" [value]="plan.id">{{ plan.name
+                                        }}</mat-option>
+                                </mat-select>
+                            </mat-form-field>
+                            <div *ngIf="PlanMappingSubmitted && PlanMappingfromgroup.controls.planId.errors"
+                                class="text-danger">Plan is required.</div>
+                        </div>
+
+                        <!-- Validity (Prepaid only) -->
+                        <ng-container *ngIf="planGroupForm.get('planType')?.value == 'Prepaid'">
+                            <div class="col-lg-2 col-md-2 col-sm-6 col-12" style="display:flex;">
+                                <mat-form-field appearance="outline" style="width:60%;">
+                                    <input matInput placeholder="Enter Validity" formControlName="validity" readonly
+                                        class="readonly-input" />
+                                </mat-form-field>
+                                <mat-form-field appearance="outline" style="width:50%;">
+                                    <mat-select formControlName="validityUnit" [disabled]="true">
+                                        <mat-option value="">Select Unit</mat-option>
+                                        <mat-option *ngFor="let label of commondropdownService.validityUnitData"
+                                            [value]="label.label">
+                                            {{ label.label }}
+                                        </mat-option>
+                                    </mat-select>
+                                </mat-form-field>
+                            </div>
+                        </ng-container>
+
+
+                        <!-- Amount -->
+                        <div class="col-lg-2 col-md-2 col-sm-6 col-12">
+                            <mat-form-field appearance="outline" class="w-100">
+                                <mat-label> Enter Price</mat-label>
+                                <input class="input-p-5" matInput type="text" formControlName="amount" readonly />
+                            </mat-form-field>
+                        </div>
+
+                        <!-- New Offer Price -->
+                        <div class="col-lg-2 col-md-2 col-sm-6 col-12">
+                            <mat-form-field appearance="outline" class="w-100 disabled-class">
+                                <mat-label> Enter New Offer Price</mat-label>
+                                <input class="input-p-5" matInput type="text" formControlName="newOfferPrice"
+                                    readonly />
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Edit & Add Buttons -->
+                        <div class="col-lg-1 col-md-1 col-sm-3 col-12">
+                            <button class=" button-normal" mat-icon-button (click)="ViewPlanCharges('', '')"
+                                matTooltip="Edit Charges">
+                                <img src="assets/img/DashboardIcons/Edit.svg">
+                            </button>
+                        </div>
+                        <div class="col-lg-1 col-md-1 col-sm-3 col-12">
+
+                            <button mat-button mat-flat-button color="primary" (click)="onAddPlanMappingField()"
+                                class="search-btn" style="width: auto;">
+                                Add
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                    <!-- Plan Mapping Table -->
+                    <div class="table-container mt-3" style="overflow:auto;">
+                        <table mat-table [dataSource]="planMappingData"
+                            class="mat-elevation-z8 w-100 table-layout-fixed">
+
+                            <!-- Service Column -->
+                            <ng-container matColumnDef="service">
+                                <th mat-header-cell *matHeaderCellDef>Service*</th>
+                                <td mat-cell *matCellDef="let row">
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select class="input-p-5" [formControl]="row.get('service')"
+                                            [disabled]="true">
+                                            <mat-option *ngFor="let s of commondropdownService.planserviceData"
+                                                [value]="s.id">{{ s.name }}</mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </td>
+                            </ng-container>
+
+                            <!-- Plan Column -->
+                            <ng-container matColumnDef="plan">
+                                <th mat-header-cell *matHeaderCellDef>Plan*</th>
+                                <td mat-cell *matCellDef="let row">
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select class="input-p-5" [formControl]="row.get('planId')"
+                                            [disabled]="true">
+                                            <mat-option
+                                                *ngFor="let p of (planMode=='NORMAL'? commondropdownService.NomalpostpaidplanData : commondropdownService.specialpostpaidplanData)"
+                                                [value]="p.id">{{ p.name }}</mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+                                </td>
+                            </ng-container>
+
+                            <!-- Validity Column (Prepaid) -->
+                            <ng-container matColumnDef="validity">
+                                <th mat-header-cell *matHeaderCellDef style="width: 25%;">Validity</th>
+                                <td mat-cell *matCellDef="let row" style="width: 25%;">
+                                    <div style="display:flex; gap:5px;">
+                                        <mat-form-field appearance="outline" style="width:60%;">
+                                            <input matInput type="number" [formControl]="row.get('validity')"
+                                                readonly />
+                                        </mat-form-field>
+                                        <mat-form-field appearance="outline" style="width:50%;">
+                                            <mat-select [formControl]="row.get('validityUnit')" [disabled]="true">
+                                                <mat-option *ngFor="let label of commondropdownService.validityUnitData"
+                                                    [value]="label.label">
+                                                    {{ label.label }}
+                                                </mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+                                    </div>
+                                </td>
+                            </ng-container>
+
+
+
+                            <!-- Amount Column -->
+                            <ng-container matColumnDef="amount">
+                                <th mat-header-cell *matHeaderCellDef>Price</th>
+                                <td mat-cell *matCellDef="let row">
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <input class="input-p-5" matInput [formControl]="row.get('amount')" readonly />
+                                    </mat-form-field>
+                                </td>
+                            </ng-container>
+
+                            <!-- New Offer Price Column -->
+                            <ng-container matColumnDef="newOfferPrice">
+                                <th mat-header-cell *matHeaderCellDef>New Offer Price</th>
+                                <td mat-cell *matCellDef="let row">
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <input class="input-p-5" matInput [formControl]="row.get('newOfferPrice')"
+                                            readonly />
+                                    </mat-form-field>
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="edit">
+                                <th mat-header-cell *matHeaderCellDef>Edit</th>
+                                <td mat-cell *matCellDef="let row; let i=index">
+                                    <button mat-icon-button
+                                        [ngClass]="{'disabled-link': editMode && !row.get('isNew').value}"
+                                        (click)="ViewPlanCharges(row.get('planId').value, i)">
+                                        <img src="assets/img/DashboardIcons/Edit.svg">
+                                    </button>
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="delete">
+                                <th mat-header-cell *matHeaderCellDef>Delete</th>
+                                <td mat-cell *matCellDef="let row; let i=index">
+                                    <button mat-icon-button
+                                        [ngClass]="{'disabled-link': editMode && !row.get('isNew').value}"
+                                        (click)="deleteConfirmonPlanMappingField(i, row.get('planGroupMappingId').value, row.get('planId').value, row.get('planGroupId').value)">
+                                        <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                    </button>
+                                </td>
+                            </ng-container>
+
+
+                            <tr mat-header-row
+                                *matHeaderRowDef="['service','plan','validity','amount','newOfferPrice','edit','delete']">
+                            </tr>
+                            <tr mat-row
+                                *matRowDef="let row; columns: ['service','plan','validity','amount','newOfferPrice','edit','delete']">
+                            </tr>
+
+                        </table>
+
+                        <!-- Paginator -->
+                        <mat-paginator #planMappingPaginator [length]="PlanMapping.length"
+                            [pageSize]="PlanMappingitemsPerPage" [pageSizeOptions]="[5,10,20]" showFirstLastButtons
+                            (page)="pageChangedPlanMapping($event)">
+                        </mat-paginator>
+                    </div>
+
+                </mat-card-content>
+            </mat-card>
+
+            }
+        </div>
+
+        <div mat-dialog-actions class="p-0 mt-2 dialog-action-adjust">
+            <button mat-button mat-flat-button class="button-normal" color="primary" (click)="addNewplanGroup()">
+                {{ editMode ? 'Update' : 'Add' }} Plan Bundle
+            </button>
+            <button mat-stroked-button matButton="outlined" type="button" color="primary" (click)="onCancel()">
+                Cancel
+            </button>
+        </div>
+    </div>
+</ng-template>
+<!--  Plan Group Dialog Template end -->
+
+
+@if (openPlanChargeDetails) {
+<app-plan-charge (planChargeChange)="changePlanChargeData($event)" [planCharge]="selectedPlan"></app-plan-charge>
+}
+
+
+<ng-template #viewPlanGroupDialogTemplate>
+    <div class="dialog-container">
+        <div class="dialog-header">
+            {{ planGroupData.planGroupName }} Plan Bundle
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="dialogRef.close()">
+                    <i class="pi pi-times f-s-15"></i>
+                </a>
+            </span>
+        </div>
+
+        <div mat-dialog-content>
+
+            <!-- Basic Details -->
+            <mat-card class="cardWithShadow w-100">
+                <mat-card-header>
+                    <mat-card-title class="font-900">Basic Details</mat-card-title>
+                </mat-card-header>
+
+                <mat-card-content class="mat-card-content-border">
+                    <div class="row" style="margin-top: 20px;">
+
+                        <!-- Plan Bundle Name -->
+                        <div class="col-4 m-b-5 dataGroup field">
+                            <span class="label-text">Plan Bundle Name</span>
+                            <span class="colon">:</span>
+                            <span class="m-l-10">{{ planGroupData?.planGroupName || '-' }}</span>
+                        </div>
+
+                        <!-- Plan Type -->
+                        <div class="col-4 m-b-5 dataGroup field">
+                            <span class="label-text">Plan Type</span>
+                            <span class="colon">:</span>
+                            <span class="m-l-10">{{ planGroupData?.plantype || '-' }}</span>
+                        </div>
+
+                        <!-- Plan Mode -->
+                        <div class="col-4 m-b-5 dataGroup field">
+                            <span class="label-text">Plan Mode</span>
+                            <span class="colon">:</span>
+                            <span class="m-l-10">{{ planGroupData?.planMode || '-' }}</span>
+                        </div>
+
+                        <!-- Plan Group -->
+                        <div class="col-4 m-b-5 dataGroup field">
+                            <span class="label-text">Plan Group</span>
+                            <span class="colon">:</span>
+                            <span class="m-l-10">{{ planGroupData?.planGroupType || '-' }}</span>
+                        </div>
+
+                        <!-- Plan Category -->
+                        <div class="col-4 m-b-5 dataGroup field">
+                            <span class="label-text">Plan Category</span>
+                            <span class="colon">:</span>
+                            <span class="m-l-10">{{ planGroupData?.category || '-' }}</span>
+                        </div>
+
+                        <!-- Service Area -->
+                        <div class="col-4 m-b-5 dataGroup field">
+                            <span class="label-text">Service Area</span>
+                            <span class="colon">:</span>
+                            <span class="m-l-10 HoverEffect text-primary" (click)="openServiceAreaDialog()">Click
+                                here</span>
+                        </div>
+
+                        <!-- Allow Discount -->
+                        <div class="col-4 m-b-5 dataGroup field">
+                            <span class="label-text">Allow Discount</span>
+                            <span class="colon">:</span>
+                            <span class="m-l-10">{{ planGroupData?.allowDiscount ? 'Yes' : 'No' }}</span>
+                        </div>
+
+                        <!-- Invoice To Org -->
+                        <div *ngIf="planGroupData?.category === 'Business Promotion'"
+                            class="col-12 m-b-5 dataGroup field">
+                            <span class="label-text">Invoice To Org</span>
+                            <span class="colon">:</span>
+                            <span class="m-l-10">{{ planGroupData?.invoiceToOrg ? 'Yes' : 'No' }}</span>
+                        </div>
+
+                        <!-- Required Approval -->
+                        <div *ngIf="planGroupData?.category === 'Business Promotion'"
+                            class="col-12 m-b-5 dataGroup field">
+                            <span class="label-text">Required Approval</span>
+                            <span class="colon">:</span>
+                            <span class="m-l-10">{{ planGroupData?.requiredApproval ? 'Yes' : 'No' }}</span>
+                        </div>
+
+
+                        <!-- Status -->
+                        <div class="col-4 m-b-5 dataGroup field">
+                            <span class="label-text">Status</span>
+                            <span class="colon">:</span>
+                            <span class="m-l-10 status-badge" [ngClass]="{
+            'status-success': planGroupData?.status === 'Active',
+            'status-info': planGroupData?.status === 'NewActivation',
+            'status-danger': planGroupData?.status === 'Inactive'
+          }">
+                                {{ planGroupData?.status === 'NewActivation' ? 'New Activation' : planGroupData?.status
+                                || '-' }}
+                            </span>
+                        </div>
+
+                    </div>
+                </mat-card-content>
+            </mat-card>
+
+
+            <!-- Plan Mapping List -->
+            <!-- Plan Mapping List -->
+            <mat-card class="cardWithShadow w-100 mt-3">
+                <mat-card-header>
+                    <mat-card-title class="font-900">Plan Mapping List</mat-card-title>
+                </mat-card-header>
+
+                <mat-card-content class="mat-card-content-border">
+                    <table mat-table [dataSource]="planGroupMapingList" class="mat-elevation-z8 w-100">
+
+                        <!-- Service Column -->
+                        <ng-container matColumnDef="service">
+                            <th mat-header-cell *matHeaderCellDef>Service</th>
+                            <td mat-cell *matCellDef="let row">{{ row.service }}</td>
+                            <td mat-footer-cell *matFooterCellDef></td>
+                        </ng-container>
+
+                        <!-- Plan Name Column -->
+                        <ng-container matColumnDef="planName">
+                            <th mat-header-cell *matHeaderCellDef>Plan Name</th>
+                            <td mat-cell *matCellDef="let row">{{ row.plan.name }}</td>
+                            <td mat-footer-cell *matFooterCellDef></td>
+                        </ng-container>
+
+                        <!-- Validity Column -->
+                        <ng-container matColumnDef="validity">
+                            <th mat-header-cell *matHeaderCellDef>Validity</th>
+                            <td mat-cell *matCellDef="let row">
+                                {{ planGroupData.plantype === 'Prepaid' ? row.plan.validity + ' ' +
+                                row.plan.unitsOfValidity : 'N/A' }}
+                            </td>
+                            <td mat-footer-cell *matFooterCellDef></td>
+                        </ng-container>
+
+                        <!-- Price Column -->
+                        <ng-container matColumnDef="price">
+                            <th mat-header-cell *matHeaderCellDef>Price</th>
+                            <td mat-cell *matCellDef="let row">{{ row.plan.offerprice }}</td>
+                            <td mat-footer-cell *matFooterCellDef><b>Total Price:</b></td>
+                        </ng-container>
+
+                        <!-- New Price Column -->
+                        <ng-container matColumnDef="newPrice">
+                            <th mat-header-cell *matHeaderCellDef>New Price</th>
+                            <td mat-cell *matCellDef="let row">{{ row.newofferprice }}</td>
+                            <td mat-footer-cell *matFooterCellDef>{{ totalOfferPrice }}</td>
+                        </ng-container>
+
+                        <!-- Header Row -->
+                        <tr mat-header-row *matHeaderRowDef="['service','planName','validity','price','newPrice']"></tr>
+
+                        <!-- Data Rows -->
+                        <tr mat-row *matRowDef="let row; columns: ['service','planName','validity','price','newPrice']">
+                        </tr>
+
+                        <!-- Footer Row -->
+                        <tr mat-footer-row *matFooterRowDef="['service','planName','validity','price','newPrice']"></tr>
+                    </table>
+                </mat-card-content>
+            </mat-card>
+
+
+            <!-- Product Details -->
+            <mat-card class="cardWithShadow w-100 mt-3">
+                <mat-card-header>
+                    <mat-card-title class="font-900">Product Details</mat-card-title>
+                </mat-card-header>
+                <mat-card-content class="mat-card-content-border">
+                    <table mat-table [dataSource]="bindedProductPlanGroupMappingList" class="mat-elevation-z8 w-100">
+                        <ng-container matColumnDef="planName">
+                            <th mat-header-cell *matHeaderCellDef>Plan Name</th>
+                            <td mat-cell *matCellDef="let row">{{ row.planName }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="productCategory">
+                            <th mat-header-cell *matHeaderCellDef>Product Category</th>
+                            <td mat-cell *matCellDef="let row">{{ row.productCategoryName || '-' }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="product">
+                            <th mat-header-cell *matHeaderCellDef>Product</th>
+                            <td mat-cell *matCellDef="let row">{{ row.productName || '-' }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="productType">
+                            <th mat-header-cell *matHeaderCellDef>Product Type</th>
+                            <td mat-cell *matCellDef="let row">{{ row.product_type }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="revisedCharge">
+                            <th mat-header-cell *matHeaderCellDef>Revised Charge</th>
+                            <td mat-cell *matCellDef="let row">{{ row.revisedCharge || '-' }}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="ownershipType">
+                            <th mat-header-cell *matHeaderCellDef>Ownership Type</th>
+                            <td mat-cell *matCellDef="let row">{{ row.ownershipType }}</td>
+                        </ng-container>
+
+                        <tr mat-header-row
+                            *matHeaderRowDef="['planName','productCategory','product','productType','revisedCharge','ownershipType']">
+                        </tr>
+                        <tr mat-row
+                            *matRowDef="let row; columns: ['planName','productCategory','product','productType','revisedCharge','ownershipType']">
+                        </tr>
+                    </table>
+                </mat-card-content>
+            </mat-card>
+            <!-- Plan Workflow Audit -->
+            <mat-card class="cardWithShadow w-100 mt-3">
+                <mat-card-header>
+                    <mat-card-title class="font-900">Plan Workflow Audit</mat-card-title>
+                </mat-card-header>
+
+                <mat-card-content class="mat-card-content-border">
+                    <table mat-table [dataSource]="workflowAuditData1" class="mat-elevation-z8 w-100">
+
+                        <!-- Plan Name Column -->
+                        <ng-container matColumnDef="planName">
+                            <th mat-header-cell *matHeaderCellDef>Plan Name</th>
+                            <td mat-cell *matCellDef="let row">
+                                <div *ngIf="row.entityName">{{ row.entityName }}</div>
+                                <div *ngIf="row.planName">{{ row.planName }}</div>
+                            </td>
+                            <td mat-footer-cell *matFooterCellDef></td>
+                        </ng-container>
+
+                        <!-- Action Column -->
+                        <ng-container matColumnDef="action">
+                            <th mat-header-cell *matHeaderCellDef>Action</th>
+                            <td mat-cell *matCellDef="let row">{{ row.action }}</td>
+                            <td mat-footer-cell *matFooterCellDef></td>
+                        </ng-container>
+
+                        <!-- Staff Name Column -->
+                        <ng-container matColumnDef="staffName">
+                            <th mat-header-cell *matHeaderCellDef>Staff Name</th>
+                            <td mat-cell *matCellDef="let row">{{ row.actionByName }}</td>
+                            <td mat-footer-cell *matFooterCellDef></td>
+                        </ng-container>
+
+                        <!-- Remark Column -->
+                        <ng-container matColumnDef="remark">
+                            <th mat-header-cell *matHeaderCellDef>Remark</th>
+                            <td mat-cell *matCellDef="let row">{{ row.remark }}</td>
+                            <td mat-footer-cell *matFooterCellDef></td>
+                        </ng-container>
+
+                        <!-- Action Date Column -->
+                        <ng-container matColumnDef="actionDate">
+                            <th mat-header-cell *matHeaderCellDef>Action Date</th>
+                            <td mat-cell *matCellDef="let row">{{ row.actionDateTime | date: 'dd-MM-yyyy hh:mm a' }}
+                            </td>
+                            <td mat-footer-cell *matFooterCellDef></td>
+                        </ng-container>
+
+                        <!-- Header Row -->
+                        <tr mat-header-row *matHeaderRowDef="['planName','action','staffName','remark','actionDate']">
+                        </tr>
+
+                        <!-- Data Rows -->
+                        <tr mat-row
+                            *matRowDef="let row; columns: ['planName','action','staffName','remark','actionDate']"></tr>
+
+                        <!-- Footer Row (optional if you want totals or notes) -->
+                        <!-- <tr mat-footer-row *matFooterRowDef="['planName','action','staffName','remark','actionDate']"></tr> -->
+
+                    </table>
+
+
+                </mat-card-content>
+            </mat-card>
+
+        </div>
+
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+            <button mat-stroked-button matButton="outlined" type="button" color="primary" (click)="onCancel()">
+                Close
+            </button>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #serviceAreaDialogTemplate let-dialogRef="dialogRef">
+    <div class="dialog-container">
+
+        <!-- Header -->
+        <div class="dialog-header">
+            Service Area List
+            <span>
+                <a mat-icon-button mat-dialog-close>
+                    <i class="pi pi-times close-btn-icon f-s-15"></i>
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <mat-card-content>
+            <div class="row" style="margin-top: 20px;">
+                <div class="col-12 m-b-5 dataGroup field">
+                    <span class="label-text">Service Area</span>
+                    <span class="colon">:</span>
+                    <span class="m-l-10">
+                        <ng-container *ngFor="let serviceName of serviceAreaListPlanbundle; let last = last">
+                            {{ serviceName }}<span *ngIf="!last">, <br /></span>
+                        </ng-container>
+                        <ng-container
+                            *ngIf="!serviceAreaListPlanbundle || serviceAreaListPlanbundle.length === 0">-</ng-container>
+                    </span>
+                </div>
+            </div>
+        </mat-card-content>
+
+        <!-- Actions -->
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+            <button mat-stroked-button color="primary" mat-dialog-close>
+                Close
+            </button>
+        </div>
+
+    </div>
+</ng-template>
+<ng-template #approvePlanDialogTemplate let-dialogRef="dialogRef">
+    <div class="dialog-container">
+
+        <!-- Header -->
+        <div class="dialog-header">
+            Approve Plan
+            <span>
+                <a mat-icon-button mat-dialog-close>
+                    <i class="pi pi-times close-btn-icon f-s-15"></i>
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <mat-dialog-content>
+            <form [formGroup]="assignPlanForm" class="p-3">
+
+                <!-- If approved: show staff search and selection -->
+                <div *ngIf="approved">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <input type="text" class="form-control" placeholder="Global Search Filter"
+                                [(ngModel)]="searchStaffDeatil" (keydown.enter)="searchStaffByName()"
+                                [ngModelOptions]="{ standalone: true }" />
+                        </div>
+                        <div class="col-md-6">
+                            <button mat-flat-button color="primary" type="button" (click)="searchStaffByName()"
+                                [disabled]="!searchStaffDeatil">
+                                Search
+                            </button>
+                            <button mat-stroked-button color="primary" type="button" (click)="clearForm()">
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+
+                    <mat-card class="mt-2">
+                        <mat-card-title>Select Staff</mat-card-title>
+                        <p-table [value]="approvePlanData" [(selection)]="selectStaff" responsiveLayout="scroll"
+                            [paginator]="true" [rows]="5" [rowsPerPageOptions]="[5,10,15,20]">
+                            <ng-template pTemplate="header">
+                                <tr>
+                                    <th style="width: 3rem"></th>
+                                    <th>Name</th>
+                                    <th>Username</th>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="body" let-product>
+                                <tr>
+                                    <td><p-tableRadioButton [value]="product.id"></p-tableRadioButton></td>
+                                    <td>{{ product.fullName }}</td>
+                                    <td>{{ product.username }}</td>
+                                </tr>
+                            </ng-template>
+                        </p-table>
+                    </mat-card>
+                </div>
+
+                <!-- If not approved: show remark textarea -->
+                <div *ngIf="!approved">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Remark*</mat-label>
+                        <textarea matInput formControlName="remark" rows="4"></textarea>
+                        <mat-error *ngIf="assignPlansubmitted && assignPlanForm.get('remark')?.hasError('required')">
+                            Remark is required.
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+            </form>
+        </mat-dialog-content>
+
+        <!-- Actions -->
+        <mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+            <button *ngIf="!approved" mat-flat-button color="primary" (click)="assignPlan()"
+                [disabled]="assignPlanForm.invalid">
+                Approve
+            </button>
+
+            <button *ngIf="approved" mat-flat-button color="primary" (click)="assignToStaff(true)">
+                Assign
+            </button>
+
+            <button mat-stroked-button color="primary" mat-dialog-close>
+                Close
+            </button>
+        </mat-dialog-actions>
+
+    </div>
+</ng-template>
+
+<ng-template #rejectPlanDialogTemplate let-dialogRef="dialogRef">
+    <div class="dialog-container">
+
+        <!-- Header -->
+        <div class="dialog-header">
+            Reject Plan
+            <span>
+                <a mat-icon-button mat-dialog-close>
+                    <i class="pi pi-times close-btn-icon f-s-15"></i>
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <mat-dialog-content>
+            <form [formGroup]="rejectPlanForm" class="p-3">
+
+                <!-- If reject = true → show staff table -->
+                <div *ngIf="reject">
+                    <mat-card class="mt-2">
+                        <mat-card-title>Select Staff</mat-card-title>
+
+                        <p-table [value]="rejectPlanData" [(selection)]="selectStaffReject" responsiveLayout="scroll"
+                            [paginator]="true" [rows]="5" [rowsPerPageOptions]="[5,10,15,20]">
+                            <ng-template pTemplate="header">
+                                <tr>
+                                    <th style="width: 3rem"></th>
+                                    <th>Name</th>
+                                    <th>Username</th>
+                                </tr>
+                            </ng-template>
+
+                            <ng-template pTemplate="body" let-product>
+                                <tr>
+                                    <td>
+                                        <p-tableRadioButton [value]="product.id"></p-tableRadioButton>
+                                    </td>
+                                    <td>{{ product.fullName }}</td>
+                                    <td>{{ product.username }}</td>
+                                </tr>
+                            </ng-template>
+                        </p-table>
+                    </mat-card>
+                </div>
+
+                <!-- If reject = false → show remark field -->
+                <div *ngIf="!reject">
+                    <mat-form-field appearance="outline" class="w-100">
+                        <mat-label>Remark*</mat-label>
+                        <textarea matInput formControlName="remark" rows="4"></textarea>
+                        <mat-error *ngIf="rejectPlanSubmitted && rejectPlanForm.get('remark')?.hasError('required')">
+                            Remark is required.
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+            </form>
+        </mat-dialog-content>
+
+        <!-- Actions -->
+        <mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+            <!-- Show Reject button -->
+            <button *ngIf="!reject" mat-flat-button color="warn" (click)="rejectPlan()"
+                [disabled]="rejectPlanForm.invalid">
+
+                Reject
+            </button>
+
+            <!-- Show Assign buttons when reject = true -->
+            <button *ngIf="reject && !selectStaffReject" mat-flat-button color="primary" disabled
+                (click)="assignToStaff(false)">
+                <i class="fa fa-user"></i>
+                Assign
+            </button>
+
+            <button *ngIf="reject && selectStaffReject" mat-flat-button color="primary" (click)="assignToStaff(false)">
+                <i class="fa fa-user"></i>
+                Assign
+            </button>
+
+            <button mat-stroked-button color="primary" mat-dialog-close>
+                Close
+            </button>
+        </mat-dialog-actions>
+
+    </div>
+</ng-template>
+@if (ifModelIsShow) {
+<app-workflow-audit-details-modal [auditcustid]="auditcustid" dialogId="custauditWorkflowModal"
+    (closeParentCustt)="closeParentCustt()">
+</app-workflow-audit-details-modal>
+}
+
+<!-- <div class="row">
+  <div class="col-md-12">
+    <!- User Data ->
+    <div class="panel top">
+      <div class="panel-heading">
+        <h3 class="panel-title">Prepaid Plan Bundle</h3>
+        <div class="right">
+          <button
+            type="button"
+            class="btn-toggle-collapse"
+            data-toggle="collapse"
+            data-target="#dbMappingSearchPanel"
+            aria-expanded="false"
+            aria-controls="dbMappingSearchPanel"
+            >
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+      <div id="dbMappingSearchPanel" class="panel-collapse collapse in">
+        <div class="panel-body">
+          <div class="row">
+            <div class="col-lg-3 col-md-3 m-b-10">
+              <p-dropdown
+                (onChange)="selSearchOption($event)"
+                [(ngModel)]="searchOption"
+                [filter]="true"
+                [options]="commondropdownService.planGroupSearchOption"
+                filterBy="label"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Select a Search Option"
+              ></p-dropdown>
+            </div>
+            @if (
+              searchOption != 'plantype' &&
+              searchOption != 'planvalidity' &&
+              searchOption != 'planstatus' &&
+              searchOption != 'plancreatedby' &&
+              searchOption != 'planstartdate' &&
+              searchOption != 'planenddate' &&
+              searchOption != 'plancreateddate'
+              ) {
+              <div
+                class="col-lg-3 col-md-3 m-b-10"
+                >
+                <input
+                  [(ngModel)]="searchDeatil"
+                  class="form-control"
+                  id="username"
+                  placeholder="Enter Search Detail"
+                  type="text"
+                  (keydown.enter)="searchcustomer()"
+                  />
+                </div>
+              }
+              @if (searchOption === 'planstatus') {
+                <div class="col-lg-3 col-md-3 m-b-10">
+                  <p-dropdown
+                    [options]="planFilterStatus"
+                    optionValue="value"
+                    optionLabel="label"
+                    filter="true"
+                    filterBy="label"
+                    placeholder="Select a Status"
+                    [(ngModel)]="searchDeatil"
+                  ></p-dropdown>
+                </div>
+              }
+              @if (searchOption === 'plancreatedby') {
+                <div class="col-lg-3 col-md-3 m-b-10">
+                  <p-dropdown
+                    [options]="commondropdownService.activeStaffList"
+                    optionValue="fullName"
+                    optionLabel="fullName"
+                    filter="true"
+                    filterBy="fullName"
+                    placeholder="Select a Created By Staff"
+                    [(ngModel)]="searchDeatil"
+                  ></p-dropdown>
+                </div>
+              }
+              @if (searchOption === 'plancreateddate') {
+                <div class="col-lg-3 col-md-3 m-b-10">
+                  <p-calendar
+                    [hideOnDateTimeSelect]="true"
+                    [showButtonBar]="true"
+                    [showIcon]="true"
+                    [style]="{ width: '100%' }"
+                    dateFormat="dd-MM-yyyy"
+                    [(ngModel)]="searchDeatilFromDate"
+                    placeholder="Enter From Date"
+                  ></p-calendar>
+                </div>
+              }
+
+              @if (searchOption === 'plancreateddate') {
+                <div class="col-lg-3 col-md-3 m-b-10">
+                  <p-calendar
+                    [hideOnDateTimeSelect]="true"
+                    [showButtonBar]="true"
+                    [showIcon]="true"
+                    [style]="{ width: '100%' }"
+                    dateFormat="dd-MM-yyyy"
+                    [minDate]="searchDeatilFromDate"
+                    [(ngModel)]="searchDeatilToDate"
+                    placeholder="Enter To Date"
+                  ></p-calendar>
+                </div>
+              }
+              @if (searchOption === 'planname' || searchOption === 'plantype') {
+                <div
+                  class="col-lg-3 col-md-3 m-b-10"
+                  >
+                  <p-dropdown
+                    [options]="planTypeData"
+                    optionValue="value"
+                    optionLabel="text"
+                    filter="true"
+                    filterBy="text"
+                    placeholder="Select a Plan Type"
+                    [(ngModel)]="searchOptionType"
+                  ></p-dropdown>
+                </div>
+              }
+              <div class="col-lg-3 col-md-4 marginTopSearchBtn">
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  (click)="searchByName()"
+                  id="search-button"
+                  >
+                  <i class="fa fa-search"></i>
+                  Search
+                </button>
+                &nbsp;
+                <button
+                  type="reset"
+                  class="btn btn-default"
+                  (click)="clearSearchForm()"
+                  id="search-clear"
+                  >
+                   <img src="assets/img/DashboardIcons/Refresh.svg" />
+                  Clear
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="panel-body no-padding panel-udata">
+            @if (createAccess) {
+              <div class="col-md-6 pcol">
+                <div class="dbox">
+                  <a href="javascript:void(0)" (click)="createPlanGroup()">
+                    <img src="../../../assets/img/i01.png" style="width: 32px" />
+                    <h5>Create Plan Bundle</h5>
+                  </a>
+                </div>
+              </div>
+            }
+            <div class="col-md-6 pcol">
+              <div class="dbox">
+                <a href="javascript:void(0)" (click)="clearSearchForm()">
+                  <img src="../../../assets/img/i01.png" style="width: 32px" />
+                  <h5>Search Plan Bundle</h5>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!- END User Data ->
+      </div>
+      <div class="row">
+        @if (ifPlangroupList) {
+          <div class="col-md-12">
+            <!- Data Table ->
+            <div class="panel">
+              <div class="panel-heading">
+                <h3 class="panel-title">Plan Bundles</h3>
+                <div class="right">
+                  <button
+                    type="button"
+                    class="btn-toggle-collapse"
+                    data-toggle="collapse"
+                    data-target="#dbMappingTablePanel"
+                    aria-expanded="false"
+                    aria-controls="dbMappingTablePanel"
+                    >
+                    <i class="fa fa-minus-circle"></i>
+                  </button>
+                </div>
+              </div>
+              <div id="dbMappingTablePanel" class="panel-collapse collapse in">
+                <div class="panel-body table-responsive">
+                  <div>
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th>Plan Bundle</th>
+                          <th>Plan Type</th>
+                          <th>Status</th>
+                          <th>Create Date</th>
+                          <th>Create By</th>
+                          <th>ISP Name</th>
+                          <th>Amount</th>
+                          <th>Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (
+                          data of planGroupDataList
+                          | paginate
+                          : {
+                          id: 'listing_groupdata',
+                          itemsPerPage: itemsPerPage,
+                          currentPage: currentPage,
+                          totalItems: totalRecords
+                          }; track
+                          data; let i = $index) {
+                          <tr
+                            >
+                            <td>
+                              <a
+                                class="detailOnAnchorClick"
+                                (click)="planGroupDataById(data.planGroupId)"
+                                style="color: #f7941e"
+                                >
+                                {{ data.planGroupName }}
+                              </a>
+                            </td>
+                            <td>
+                              {{ data.plantype }}
+                            </td>
+                            <td>
+                              @if (data.status == 'Active') {
+                                <span class="badge badge-success">
+                                  Active
+                                </span>
+                              }
+                              @if (data.status == 'NewActivation') {
+                                <span class="badge badge-success">
+                                  New Activation
+                                </span>
+                              }
+                              @if (data.status == 'Inactive') {
+                                <span class="badge badge-danger">
+                                  Inactive
+                                </span>
+                              }
+                              @if (data.status == 'Rejected') {
+                                <span class="badge badge-danger">
+                                  Rejected
+                                </span>
+                              }
+                            </td>
+                            <td>{{ data.createdate }}</td>
+                            <td>{{ data.createdByName }}</td>
+                            <td>{{ data.mvnoName }}</td>
+                            <td>{{ data.offerprice }}</td>
+                            <td class="btnAction">
+                              @if (editAccess) {
+                                <a
+                                  id="edit-button"
+                                  type="button"
+                                  data-title="Edit"
+                                  data-toggle="tooltip"
+                                  class="curson_pointer"
+                                  (click)="editplanGroupById(data.planGroupId)"
+                                  >
+                                <img src="assets/img/DashboardIcons/Edit.svg" >
+                                </a>
+                              }
+                              @if (
+                                data.status == 'Active' ||
+                                data.status == 'INACTIVE' ||
+                                data.status == 'Expired' ||
+                                data.status == 'Rejected'
+                                ) {
+                                <button
+                                  class="approve-btn"
+                          style="
+                            border: none;
+                            background: transparent;
+                            padding: 0;
+                            margin-right: 3px;
+                          "
+                                  type="button"
+                                  title="Pick"
+                                  [disabled]="data.nextStaff != staffID"
+                                  (click)="pickModalOpen(data)"
+                                  >
+                                 <img src="assets/img/DashboardIcons/Pick-ticket-to-resolve.svg" />
+                                </button>
+                              }
+                              @if (data.status == 'NewActivation') {
+                                <button
+                                  class="approve-btn"
+                          style="
+                            border: none;
+                            background: transparent;
+                            padding: 0;
+                            margin-right: 3px;
+                          "
+                                  type="button"
+                                  title="Pick"
+                                  [disabled]="data.nextStaff !== null"
+                                  (click)="pickModalOpen(data)"
+                                  >
+                                 <img src="assets/img/DashboardIcons/Pick-ticket-to-resolve.svg" />
+                                </button>
+                              }
+                              <button
+                                type="button"
+                                class="approve-btn"
+                          style="
+                            border: none;
+                            background: transparent;
+                            padding: 0;
+                            margin-right: 3px;
+                          "
+                          [disabled]="
+                            (data.nextStaff == null && loggedInUser != 'admin admin') ||
+                            data.nextStaff != staffId
+                          "
+                                (click)="approvePlanOpen(data.planGroupId, '')"
+                                title="Approve"
+                                >
+                               <img src="assets/img/DashboardIcons/Assign.svg">
+                              </button>
+                              <button
+                                type="button"
+                                class="approve-btn"
+                          style="
+                            border: none;
+                            background: transparent;
+                            padding: 0;
+                            margin-right: 3px;
+                          "
+                          [disabled]="
+                            (data.nextStaff == null && loggedInUser != 'admin admin') ||
+                            data.nextStaff != staffId
+                          "
+                                (click)="rejectPlanOpen(data.planGroupId, '')"
+                                title="Reject"
+                                >
+                                 <img src="assets/img/DashboardIcons/Reject.svg">
+                              </button>
+                              <a
+                                class="detailOnAnchorClick"
+                                title="Workflow Status Details"
+                                (click)="openPaymentWorkFlow('custauditWorkflowModal', data.planGroupId)"
+                                >
+                                <img
+                                  width="32"
+                                  height="32"
+                                  src="assets/img/DashboardIcons/WorkFlow status Details.svg"
+                                  />
+                                </a>
+                                @if (data.status == 'NewActivation' && data.nextStaff == staffId) {
+                                  <button
+                          style="
+                            border: none;
+                            background: transparent;
+                            padding: 0;
+                            margin-right: 3px;
+                            cursor: pointer;
+                          "
+                                    id="assign-button"
+                                    title="Reassign Plan-Grouup"
+                                    (click)="StaffReasignList(data)"
+                                    >
+                                    <img
+                                      width="32"
+                                      height="32"
+                                      alt="Assign CAF"
+                                      src="assets/img/DashboardIcons/send-svgrepo-com 1.svg"
+                                      />
+                                    </button>
+                                  }
+                                </td>
+                              </tr>
+                            }
+                          </tbody>
+                        </table>
+                        <div class="row">
+                          <div class="col-md-12" style="display: flex">
+                            <pagination-controls
+                              id="listing_groupdata"
+                              [maxSize]="10"
+                              [directionLinks]="true"
+                              previousLabel=""
+                              nextLabel=""
+                              (pageChange)="pageChanged($event)"
+                            ></pagination-controls>
+                            <div id="itemPerPageDropdown">
+                              <p-dropdown
+                                [options]="pageLimitOptions"
+                                optionLabel="value"
+                                optionValue="value"
+                                (onChange)="TotalItemPerPage($event)"
+                              ></p-dropdown>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!- END Data Table ->
+              </div>
+            }
+
+            @if (creatPlangroup) {
+              <div class="col-md-12">
+                <!- Form Design ->
+                <div class="panel">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">{{ editMode ? "Update" : "Create" }} Plan Bundle</h3>
+                    <div class="right">
+                      <button
+                        type="button"
+                        class="btn-toggle-collapse"
+                        data-toggle="collapse"
+                        data-target="#dbMappingFormPanel"
+                        aria-expanded="false"
+                        aria-controls="dbMappingFormPanel"
+                        >
+                        <i class="fa fa-minus-circle"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div id="dbMappingFormPanel" class="panel-collapse collapse in">
+                    @if (createAccess || (editMode && editAccess)) {
+                      <div class="panel-body">
+                        <form class="form-auth-small" [formGroup]="planGroupForm">
+                          <div class="panel-body">
+                            <fieldset style="margin-top: 0rem; margin-bottom: 2rem">
+                              <legend>Basic Information</legend>
+                              <div class="boxWhite">
+                                <div class="row">
+                                  <div class="col-lg-4 col-md-4">
+                                    <label>Plan Bundle Name *</label>
+                                    <input
+                                      id="name"
+                                      type="text"
+                                      name="name"
+                                      class="form-control"
+                                      placeholder="Enter Plan Bundle Name"
+                                      formControlName="planGroupName"
+                            [ngClass]="{
+                              'is-invalid': submitted && planGroupForm.controls.planGroupName.errors
+                            }"
+                                      />
+                                      @if (submitted && planGroupForm.controls.planGroupName.errors) {
+                                        <div
+                                          class="errorWrap text-danger"
+                                          >
+                                          @if (
+                                            submitted && planGroupForm.controls.planGroupName.errors.required
+                                            ) {
+                                            <div
+                                              class="error text-danger"
+                                              >
+                                              Plan Bundle is required.
+                                            </div>
+                                          }
+                                          @if (
+                                            submitted &&
+                                            planGroupForm.controls.planGroupName.errors?.cannotContainSpace
+                                            ) {
+                                            <div
+                                              class="position"
+                                              >
+                                              <p class="error">White space are not allowed.</p>
+                                            </div>
+                                          }
+                                        </div>
+                                      }
+                                      <br />
+                                    </div>
+                                    <div class="col-lg-4 col-md-4">
+                                      <label>Plan Type *</label>
+                                      <p-dropdown
+                                        [options]="planTypeData"
+                                        optionValue="value"
+                                        optionLabel="text"
+                                        filter="true"
+                                        filterBy="text"
+                                        placeholder="Select a Plan Type"
+                                        (onChange)="selPlanType($event)"
+                                        formControlName="planType"
+                                        [disabled]="editMode"
+                            [ngClass]="{
+                              'is-invalid': submitted && planGroupForm.controls.planType.errors
+                            }"
+                                      ></p-dropdown>
+                                      @if (submitted && planGroupForm.controls.planType.errors) {
+                                        <div
+                                          class="errorWrap text-danger"
+                                          >
+                                          @if (submitted && planGroupForm.controls.planType.errors.required) {
+                                            <div
+                                              class="error text-danger"
+                                              >
+                                              Plan Type is required.
+                                            </div>
+                                          }
+                                        </div>
+                                      }
+                                      <br />
+                                    </div>
+                                    <div class="col-lg-4 col-md-4">
+                                      <div>
+                                        <label>Service Area *</label>
+                                        <p-multiSelect
+                                          [options]="commondropdownService.serviceAreaList"
+                                          formControlName="serviceAreaId"
+                                          placeholder="Select Area"
+                                          optionLabel="name"
+                                          optionValue="id"
+                                          filter="true"
+                                          filterBy="name"
+                                          [disabled]="editMode"
+                                          (onChange)="getServiceByServiceAreaID($event)"
+                              [ngClass]="{
+                                'is-invalid':
+                                  submitted && planGroupForm.controls.serviceAreaId.errors
+                              }"
+                                        ></p-multiSelect>
+                                        <div></div>
+                                        @if (submitted && planGroupForm.controls.serviceAreaId.errors) {
+                                          <div
+                                            class="errorWrap text-danger"
+                                            >
+                                            @if (
+                                              submitted && planGroupForm.controls.serviceAreaId.errors.required
+                                              ) {
+                                              <div
+                                                class="error text-danger"
+                                                >
+                                                Service Area is required.
+                                              </div>
+                                            }
+                                          </div>
+                                        }
+                                        <br />
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div class="row">
+                                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                      <label>Plan Mode *</label>
+                                      <p-dropdown
+                                        [options]="type"
+                                        optionValue="label"
+                                        optionLabel="label"
+                                        placeholder="Select a Plan Mode"
+                                        formControlName="planMode"
+                                        (onChange)="selPlanMode($event)"
+                                        [disabled]="editMode"
+                            [ngClass]="{
+                              'is-invalid': submitted && planGroupForm.controls.planMode.errors
+                            }"
+                                      ></p-dropdown>
+                                      <div></div>
+                                      @if (submitted && planGroupForm.controls.planMode.errors) {
+                                        <div
+                                          class="errorWrap text-danger"
+                                          >
+                                          @if (submitted && planGroupForm.controls.planMode.errors.required) {
+                                            <div
+                                              class="error text-danger"
+                                              >
+                                              Plan Mode is required.
+                                            </div>
+                                          }
+                                        </div>
+                                      }
+                                    </div>
+                                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                      <label>Plan Group *</label>
+                                      <p-dropdown
+                                        [options]="dynamicDropdown"
+                                        optionValue="value"
+                                        optionLabel="text"
+                                        filter="true"
+                                        filterBy="text"
+                                        placeholder="Select a Plan Group"
+                                        formControlName="planGroupType"
+                                        [disabled]="editMode"
+                                        (onChange)="resetPlanMappingList($event)"
+                            [ngClass]="{
+                              'is-invalid': submitted && planGroupForm.controls.planGroupType.errors
+                            }"
+                                      ></p-dropdown>
+                                      <div></div>
+                                      @if (submitted && planGroupForm.controls.planGroupType.errors) {
+                                        <div
+                                          class="errorWrap text-danger"
+                                          >
+                                          @if (
+                                            submitted && planGroupForm.controls.planGroupType.errors.required
+                                            ) {
+                                            <div
+                                              class="error text-danger"
+                                              >
+                                              Plan Group is required.
+                                            </div>
+                                          }
+                                        </div>
+                                      }
+                                      <br />
+                                    </div>
+                                    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                                      <label>Plan Category *</label>
+                                      <p-dropdown
+                                        [options]="planCategoryData"
+                                        optionValue="value"
+                                        optionLabel="text"
+                                        filter="true"
+                                        filterBy="text"
+                                        placeholder="Select a Plan Category"
+                                        formControlName="category"
+                                        [disabled]="editMode"
+                                        (onChange)="resetPlanMappingList($event)"
+                            [ngClass]="{
+                              'is-invalid': submitted && planGroupForm.controls.category.errors
+                            }"
+                                      ></p-dropdown>
+                                      <div></div>
+                                      @if (submitted && planGroupForm.controls.category.errors) {
+                                        <div
+                                          class="errorWrap text-danger"
+                                          >
+                                          @if (submitted && planGroupForm.controls.category.errors.required) {
+                                            <div
+                                              class="error text-danger"
+                                              >
+                                              Plan Category is required.
+                                            </div>
+                                          }
+                                        </div>
+                                      }
+                                      <br />
+                                    </div>
+                                  </div>
+                                  <div class="row">
+                                    <div class="col-lg-4 col-md-4">
+                                      <label>Allow Discount *</label>
+                                      <p-dropdown
+                            [ngClass]="{
+                              'is-invalid': submitted && planGroupForm.controls.allowdiscount.errors
+                            }"
+                                        [options]="planDiscount"
+                                        filter="true"
+                                        filterBy="label"
+                                        formControlName="allowdiscount"
+                                        optionLabel="label"
+                                        optionValue="value"
+                                        placeholder="Select a Discount"
+                                      ></p-dropdown>
+                                      @if (submitted && planGroupForm.controls.allowdiscount.errors) {
+                                        <div
+                                          class="errorWrap text-danger"
+                                          >
+                                          @if (
+                                            submitted && planGroupForm.controls.allowdiscount.errors.required
+                                            ) {
+                                            <div
+                                              class="error text-danger"
+                                              >
+                                              Discount is required.
+                                            </div>
+                                          }
+                                        </div>
+                                      }
+                                      <br />
+                                    </div>
+                                    <div class="col-lg-4 col-md-4">
+                                      <label>Offer Price *</label>
+                                      <input
+                                        id="offerPrice"
+                                        type="text"
+                                        name="offerprice"
+                                        class="form-control"
+                                        placeholder="Enter Offer Price"
+                                        formControlName="offerprice"
+                                        [readonly]="true"
+                            [ngClass]="{
+                              'is-invalid': submitted && planGroupForm.controls.offerprice.errors
+                            }"
+                                        />
+                                      </div>
+                                      @if (planGroupForm.value.category == 'Business Promotion') {
+                                        <div
+                                          class="col-lg-4 col-md-4"
+                                          >
+                                          <label>Invoice To Org: *</label>
+                                          <p-dropdown
+                                            [disabled]="editMode"
+                            [ngClass]="{
+                              'is-invalid': submitted && planGroupForm.controls.invoiceToOrg.errors
+                            }"
+                                            [options]="planDiscount"
+                                            filter="true"
+                                            filterBy="label"
+                                            formControlName="invoiceToOrg"
+                                            optionLabel="label"
+                                            optionValue="value"
+                                            placeholder="Select Invoice to org or not"
+                                          ></p-dropdown>
+                                          @if (submitted && planGroupForm.controls.invoiceToOrg.errors) {
+                                            <div
+                                              class="errorWrap text-danger"
+                                              >
+                                              @if (
+                                                submitted && planGroupForm.controls.invoiceToOrg.errors.required
+                                                ) {
+                                                <div
+                                                  class="error text-danger"
+                                                  >
+                                                  Invoice To Org is required.
+                                                </div>
+                                              }
+                                            </div>
+                                          }
+                                          <br />
+                                        </div>
+                                      }
+                                    </div>
+                                    <br />
+                                    <div class="row">
+                                      @if (planGroupForm.value.category == 'Business Promotion') {
+                                        <div
+                                          class="col-lg-4 col-md-4"
+                                          >
+                                          <label>Required Approval *</label>
+                                          <p-dropdown
+                                            [disabled]="editMode"
+                            [ngClass]="{
+                              'is-invalid':
+                                submitted && planGroupForm.controls.requiredApproval.errors
+                            }"
+                                            [options]="planDiscount"
+                                            filter="true"
+                                            filterBy="label"
+                                            formControlName="requiredApproval"
+                                            optionLabel="label"
+                                            optionValue="value"
+                                            placeholder="Select a Required Approval"
+                                          ></p-dropdown>
+                                          @if (submitted && planGroupForm.controls.requiredApproval.errors) {
+                                            <div
+                                              class="errorWrap text-danger"
+                                              >
+                                              @if (
+                                                submitted && planGroupForm.controls.requiredApproval.errors.required
+                                                ) {
+                                                <div
+                                                  class="error text-danger"
+                                                  >
+                                                  Required Approval is required.
+                                                </div>
+                                              }
+                                            </div>
+                                          }
+                                          <br />
+                                        </div>
+                                      }
+                                      @if (editMode && planGroupForm.value.category !== 'Business Promotion') {
+                                        <div
+                                          class="col-lg-4 col-md-4"
+                                          >
+                                          <div>
+                                            <label style="display: block">Status</label>
+                                            <p-dropdown
+                                              [options]="status"
+                                              placeholder="Select Status"
+                                              optionLabel="label"
+                                              optionValue="label"
+                                              formControlName="status"
+                                              filter="true"
+                                              filterBy="label"
+                              [ngClass]="{
+                                'is-invalid': submitted && planGroupForm.controls.status.errors
+                              }"
+                                            ></p-dropdown>
+                                            <div></div>
+                                            @if (submitted && planGroupForm.controls.status.errors) {
+                                              <div
+                                                class="errorWrap text-danger"
+                                                >
+                                                @if (submitted && planGroupForm.controls.status.errors.required) {
+                                                  <div
+                                                    class="error text-danger"
+                                                    >
+                                                    Please select Status.
+                                                  </div>
+                                                }
+                                              </div>
+                                            }
+                                          </div>
+                                          <br />
+                                        </div>
+                                      }
+                                      @if (editMode && planGroupForm.value.category == 'Business Promotion') {
+                                        <div
+                                          class="col-lg-4 col-md-4"
+                                          >
+                                          <div>
+                                            <label style="display: block">Status</label>
+                                            <p-dropdown
+                                              [options]="status"
+                                              placeholder="Select Status"
+                                              optionLabel="label"
+                                              optionValue="label"
+                                              formControlName="status"
+                                              filter="true"
+                                              filterBy="label"
+                              [ngClass]="{
+                                'is-invalid': submitted && planGroupForm.controls.status.errors
+                              }"
+                                            ></p-dropdown>
+                                            <div></div>
+                                            @if (submitted && planGroupForm.controls.status.errors) {
+                                              <div
+                                                class="errorWrap text-danger"
+                                                >
+                                                @if (submitted && planGroupForm.controls.status.errors.required) {
+                                                  <div
+                                                    class="error text-danger"
+                                                    >
+                                                    Please select Status.
+                                                  </div>
+                                                }
+                                              </div>
+                                            }
+                                          </div>
+                                          <br />
+                                        </div>
+                                      }
+                                    </div>
+                                  </div>
+                                </fieldset>
+                                <!-     Plan Mapping  ->
+                                @if (planGroupForm.valid) {
+                                  <fieldset>
+                                    <legend>Plan Mapping</legend>
+                                    <div class="boxWhite">
+                                      <div class="row" [formGroup]="PlanMappingfromgroup">
+                                        <div class="col-lg-2 col-md-2 col-sm-6 col-12">
+                                          <p-dropdown
+                                            [options]="serviceData"
+                                            optionValue="id"
+                                            optionLabel="name"
+                                            filter="true"
+                                            filterBy="name"
+                                            placeholder="Select a Service *"
+                                            formControlName="service"
+                                            (onChange)="serviceBasePlanDATA($event)"
+                                            [disabled]="!planGroupForm.value.serviceAreaId"
+                            [ngClass]="{
+                              'is-invalid':
+                                PlanMappingSubmitted && PlanMappingfromgroup.controls.service.errors
+                            }"
+                                          ></p-dropdown>
+                                          <div></div>
+                                          @if (!planGroupForm.value.serviceAreaId) {
+                                            <div class="error text-danger">
+                                              <div class="error text-danger">Please select Service Area first!</div>
+                                            </div>
+                                          }
+                                          @if (
+                                            PlanMappingSubmitted && PlanMappingfromgroup.controls.service.errors
+                                            ) {
+                                            <div
+                                              class="errorWrap text-danger"
+                                              >
+                                              <div class="error text-danger">Service is required.</div>
+                                            </div>
+                                          }
+                                        </div>
+                                        <div class="col-lg-2 col-md-2 col-sm-6 col-12">
+                                          <p-dropdown
+                                            [options]="plantypaSelectData"
+                                            optionValue="id"
+                                            optionLabel="name"
+                                            filter="true"
+                                            filterBy="name"
+                                            placeholder="Select a Plan"
+                                            formControlName="planId"
+                                            (onChange)="getPlanValidity($event)"
+                            [ngClass]="{
+                              'is-invalid':
+                                PlanMappingSubmitted && PlanMappingfromgroup.controls.planId.errors
+                            }"
+                                          ></p-dropdown>
+                                          @if (
+                                            PlanMappingSubmitted && PlanMappingfromgroup.controls.planId.errors
+                                            ) {
+                                            <div
+                                              class="errorWrap text-danger"
+                                              >
+                                              @if (
+                                                PlanMappingSubmitted &&
+                                                PlanMappingfromgroup.controls.planId.errors.required
+                                                ) {
+                                                <div
+                                                  class="error text-danger"
+                                                  >
+                                                  Plan is required.
+                                                </div>
+                                              }
+                                            </div>
+                                          }
+                                        </div>
+                                        @if (planType == 'Prepaid') {
+                                          <div
+                                            class="col-lg-2 col-md-2 col-sm-6 col-12"
+                                            >
+                                            <div style="display: flex">
+                                              <div style="width: 60%">
+                                                <input
+                                                  id="validity"
+                                                  type="number"
+                                                  min="1"
+                                                  class="form-control"
+                                                  placeholder="Enter Validity"
+                                                  formControlName="validity"
+                                                  readonly
+                                                  />
+                                                </div>
+                                                <div style="width: 40%; height: 34px">
+                                                  <select
+                                                    class="form-control"
+                                                    style="width: 100%"
+                                                    formControlName="validityUnit"
+                                                    disabled
+                                                    >
+                                                    <option value="">Select Unit</option>
+                                                    @for (label of commondropdownService.validityUnitData; track label) {
+                                                      <option
+                                                        value="{{ label.label }}"
+                                                        >
+                                                        {{ label.label }}
+                                                      </option>
+                                                    }
+                                                  </select>
+                                                </div>
+                                              </div>
+                                            </div>
+                                          }
+                                          <div class="col-lg-2 col-md-2 col-sm-6 col-12">
+                                            <input
+                                              class="form-control"
+                                              type="text"
+                                              min="0"
+                                              placeholder="Enter Price"
+                                              name="amount"
+                                              id="amount"
+                                              formControlName="amount"
+                            [ngClass]="{
+                              'is-invalid':
+                                PlanMappingSubmitted && PlanMappingfromgroup.controls.amount.errors
+                            }"
+                                              readonly
+                                              />
+                                              @if (
+                                                PlanMappingSubmitted && PlanMappingfromgroup.controls.amount.errors
+                                                ) {
+                                                <div
+                                                  class="errorWrap text-danger"
+                                                  >
+                                                  <div class="error text-danger">Price is required.</div>
+                                                </div>
+                                              }
+                                            </div>
+                                            <div class="col-lg-2 col-md-2 col-sm-6 col-12">
+                                              
+                                              <input
+                                                class="form-control"
+                                                type="text"
+                                                min="0"
+                                                placeholder="Enter New Offer Price"
+                                                name="newOfferPrice"
+                                                id="newOfferPrice"
+                                                formControlName="newOfferPrice"
+                                                readonly
+                                                />
+                                              </div>
+                                              <div class="col-lg-1 col-md-1 col-sm-3 col-12">
+                                                <button
+                                                  class="approve-btn"
+                                                  (click)="ViewPlanCharges('', '')"
+                                                  title="Edit Charges"
+                                                  data-toggle="tooltip"
+                                                  >
+                                                <img src="assets/img/DashboardIcons/Edit.svg" >
+                                                </button>
+                                              </div>
+                                              <div class="col-lg-1 col-md-1 col-sm-3 col-12">
+                                                <button
+                                                  id="addAtt"
+                                                  style="object-fit: cover; padding: 5px 8px"
+                                                  class="btn btn-primary"
+                                                  (click)="onAddPlanMappingField()"
+                                                  >
+                                                  <i class="fa fa-plus-square" aria-hidden="true"></i>
+                                                  Add
+                                                </button>
+                                              </div>
+                                            </div>
+                                            <table class="table coa-table" style="margin-top: 10px">
+                                              <thead>
+                                                <tr>
+                                                  <th style="text-align: center">Service*</th>
+                                                  <th style="text-align: center">Plan*</th>
+                                                  @if (planType == 'Prepaid') {
+                                                    <th
+                                                      style="text-align: center; width: 20%"
+                                                      >
+                                                      Validity
+                                                    </th>
+                                                  }
+                                                  <th style="text-align: center">Price</th>
+                                                  <th style="text-align: center">
+                                                  
+                                                    New Offer Price
+                                                  </th>
+                                                  <th style="text-align: right; width: 10%; padding: 8p">Edit</th>
+                                                  <th style="text-align: right; width: 10%; padding: 8px">Delete</th>
+                                                </tr>
+                                              </thead>
+                                              <tbody>
+                                                @for (
+                                                  row of PlanMapping.controls
+                                                  | paginate
+                                                  : {
+                                                  id: 'PlanMappingData',
+                                                  itemsPerPage: PlanMappingitemsPerPage,
+                                                  currentPage: currentPagePlanMapping,
+                                                  totalItems: PlanMappingtotalRecords
+                                                  }; track
+                                                  row; let index = $index) {
+                                                  <tr
+                                                    >
+                                                    <td>
+                                                      <p-dropdown
+                                                        [options]="commondropdownService.planserviceData"
+                                                        optionValue="id"
+                                                        optionLabel="name"
+                                                        filter="true"
+                                                        filterBy="name"
+                                                        placeholder="Select a Service *"
+                                                        [formControl]="row.get('service')"
+                                                        [readonly]="true"
+                                                      ></p-dropdown>
+                                                    </td>
+                                                    <td style="padding-left: 8px">
+                                                      @if (planMode == 'NORMAL') {
+                                                        <div>
+                                                          <p-dropdown
+                                                            [options]="commondropdownService.NomalpostpaidplanData"
+                                                            optionValue="id"
+                                                            optionLabel="name"
+                                                            filter="true"
+                                                            filterBy="name"
+                                                            placeholder="Select a Plan"
+                                                            [formControl]="row.get('planId')"
+                                                            [readonly]="true"
+                                                          ></p-dropdown>
+                                                        </div>
+                                                      }
+                                                      @if (planMode == 'SPECIAL') {
+                                                        <div>
+                                                          <p-dropdown
+                                                            [options]="commondropdownService.specialpostpaidplanData"
+                                                            optionValue="id"
+                                                            optionLabel="name"
+                                                            filter="true"
+                                                            filterBy="name"
+                                                            placeholder="Select a Plan"
+                                                            [formControl]="row.get('planId')"
+                                                            [readonly]="true"
+                                                          ></p-dropdown>
+                                                        </div>
+                                                      }
+                                                    </td>
+                                                    @if (planType == 'Prepaid') {
+                                                      <td>
+                                                        <div style="display: flex">
+                                                          <div style="width: 60%">
+                                                            <input
+                                                              id="validity"
+                                                              type="number"
+                                                              min="1"
+                                                              class="form-control"
+                                                              placeholder="Enter Validity"
+                                                              [formControl]="row.get('validity')"
+                                                              readonly
+                                                              />
+                                                            </div>
+                                                            <div style="width: 40%; height: 34px">
+                                                              <select
+                                                                class="form-control"
+                                                                style="width: 100%"
+                                                                [formControl]="row.get('validityUnit')"
+                                                                disabled
+                                                                >
+                                                                <option value="">Select Unit</option>
+                                                                @for (label of commondropdownService.validityUnitData; track label) {
+                                                                  <option
+                                                                    value="{{ label.label }}"
+                                                                    >
+                                                                    {{ label.label }}
+                                                                  </option>
+                                                                }
+                                                              </select>
+                                                            
+                                                          </div>
+                                                        </div>
+                                                      </td>
+                                                    }
+                                                    <td>
+                                                      <input
+                                                        class="form-control"
+                                                        type="text"
+                                                        min="0"
+                                                        placeholder="Enter Amount"
+                                                        name="amount"
+                                                        id="amount"
+                                                        [formControl]="row.get('amount')"
+                                                        readonly
+                                                        />
+                                                      </td>
+                                                    
+                                                      <td>
+                                                        <input
+                                                          class="form-control"
+                                                          type="text"
+                                                          min="0"
+                                                          name="newOfferPrice"
+                                                          id="newOfferPrice"
+                                                          [formControl]="row.get('newOfferPrice')"
+                                                          readonly
+                                                          />
+                                                        </td>
+                                                        <td style="text-align: right">
+                                                          <button
+                                                            [disabled]="editMode && !row.get('isNew').value"
+                                                            (click)="ViewPlanCharges(row.value.planId, index)"
+                                                            class="approve-btn"
+                                                            >
+                                                          <img src="assets/img/DashboardIcons/Edit.svg" >
+                                                          </button>
+                                                        </td>
+                                                        <td style="text-align: right">
+                                                          <!-- <button
+                                                          class="approve-btn"
+                                                          (click)="getProductPlanDetails()"
+                                                          title="productPlanDetails"
+                                                          >
+                                                        <img src="assets/img/DashboardIcons/Edit.svg" >
+                                                        </button>
+                                                        &nbsp; -->
+<!-- <button [disabled]="editMode && !row.get('isNew').value" id="deleteAtt" class="approve-btn" (click)="
+                                  deleteConfirmonPlanMappingField(
+                                    index,
+                                    row.get('planGroupMappingId').value,
+                                    row.get('planId').value,
+                                    row.get('planGroupId').value
+                                  )
+                                ">
+    <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+</button>
+</td>
+</tr>
+}
+</tbody>
+</table>
+<div class="row">
+    <div class="col-md-12">
+        <pagination-controls id="PlanMappingData" maxSize="10" directionLinks="true" previousLabel="" nextLabel=""
+            (pageChange)="pageChangedPlanMapping($event)"></pagination-controls>
+    </div>
+</div>
+<br />
+</div>
+</fieldset>
+}
+@if (planGroupForm.valid && productPlanDetailFlag) {
+<fieldset>
+    <legend>Plan Product Details</legend>
+    <div style="margin-top: 15px">
+        <table class="table coa-table">
+            <thead>
+                <tr>
+                    <th style="text-align: center">Plan Name</th>
+                    <th style="text-align: center">Product Category</th>
+                    <th style="text-align: center">Product</th>
+                    <th style="text-align: center">Product Type</th>
+                    <th style="text-align: center">Revised Charge</th>
+                    <th style="text-align: center">Ownership Type</th>
+                    <th style="text-align: right; padding: 8px">Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (
+                row of productplanmappingList.controls
+                | paginate
+                : {
+                id: 'productplanmappingList',
+                itemsPerPage: planProductMappingItemsPerPage,
+                currentPage: currentPagePlanProductMapping,
+                totalItems: planProductMappingTotalRecords
+                }; track
+                row; let index = $index) {
+                <tr>
+                    <td style="padding-left: 8px">
+                        <input class="form-control" [formControl]="row.get('planName')" type="text" readonly />
+                    </td>
+                    <td style="padding-left: 8px">
+                        <input class="form-control" [formControl]="row.get('productCategoryName')" type="text"
+                            readonly />
+                    </td>
+                    <td style="padding-left: 8px">
+                        <input class="form-control" [formControl]="row.get('productName')" type="text" readonly />
+                    </td>
+                    <td>
+                        <input class="form-control" [formControl]="row.get('product_type')" type="text" readonly />
+                    </td>
+                    <td>
+                        <input [formControl]="row.get('revisedCharge')" class="form-control" min="1" type="number"
+                            [readonly]="revisedChargeArray[index]" (keypress)="revicedChargeValidation($event)" />
+                        {{ row.revisedCharge }}
+                    </td>
+                    <td>
+                        <input class="form-control" [formControl]="row.get('ownershipType')" type="text" readonly />
+                    </td>
+                    <td style="text-align: right">
+                        <button (click)="deleteConfirmonPlanProductField(index, row.get('id'))" class="approve-btn"
+                            id="deleteAtt" [disabled]="editMode">
+                            <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                        </button>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+</fieldset>
+}
+ <div>
+                                                  <label>Attribute Mapping</label>
+                                                  <table class="table map-table" style="margin-top: 10px;">
+                                                    <thead>
+                                                      <tr>
+                                                        <th style="text-align: center; width: 41%;">
+                                                          Plan
+                                                        </th>
+                                                        <th style="text-align: right; width: 18%; padding: 8px;">
+                                                          <button
+                                                            id="addAtt"
+                                                            style="object-fit: cover; padding: 5px 8px;"
+                                                            class="btn btn-primary"
+                                                            (click)="onAddAttribute()"
+                                                            >
+                                                            <i class="fa fa-plus-square" aria-hidden="true"></i>
+                                                            Add
+                                                          </button>
+                                                        </th>
+                                                      </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                      <tr *ngFor="let row of attribute.controls; let index = index">
+                                                        <td style="padding-left: 8px; width: 41%;">
+                                                          <p-dropdown
+                                                            [options]="plantypaSelectData"
+                                                            optionValue="id"
+                                                            optionLabel="name"
+                                                            filter="true"
+                                                            filterBy="name"
+                                                            placeholder="Select a Plan *"
+                                                            formControlName="planId"
+                                                            (onChange)="getPlanValidity($event)"
+                                                          ></p-dropdown>
+                                                          <div
+                                                            class="errorWrap text-danger"
+                                                            *ngIf="submitted && row.get('planId').errors"
+                                                            >
+                                                            <div
+                                                              class="error text-danger"
+                                                              *ngIf="submitted && row.get('planId').errors"
+                                                              >
+                                                              Please select Radius Attribute OR delete the row.
+                                                            </div>
+                                                          </div>
+                                                        </td>
+                                                        <td style="text-align: right;">
+                                                          <a
+                                                            id="deleteAtt"
+                                                            class="curson_pointer"
+                        (click)="
+                          deleteConfirmAttribute(
+                            index,
+                            row.get('planGroupMappingId').value
+                          )
+                        "
+                                                            >
+                                                             <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                                                          </a>
+                                                        </td>
+                                                      </tr>
+                                                    </tbody>
+                                                  </table>
+                                                </div>
+<div class="addUpdateBtn" style="margin-top: 1.5rem">
+    <button type="submit" class="btn btn-primary" title="Submit Plan Bundle Details" data-toggle="tooltip"
+        (click)="addNewplanGroup()">
+        <i class="fa fa-check-circle"></i>
+        {{ editMode ? "Update Plan Bundle" : "Add Plan Bundle" }}
+    </button>
+    <br />
+</div>
+</div>
+</form>
+</div>
+}
+</div>
+</div>-->
+<!-- <!- END Form Design -> -->
+<!-- </div> -->
+<!-- } -->
+<!-- @if (ifModelIsShow) {
+<app-workflow-audit-details-modal [auditcustid]="auditcustid" dialogId="custauditWorkflowModal"
+    (closeParentCustt)="closeParentCustt()">
+</app-workflow-audit-details-modal>
+} -->
+<!-- </div> -->
+
+
+<!-- <div class="modal fade" id="assignApporvePlanModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="myModalLabel" style="color: #fff !important">Approve Plan</h4>
+            </div>
+            <div class="modal-body" style="margin: 10px">
+                <form [formGroup]="assignPlanForm">
+                    <div class="row">
+                        <div class="row">
+                            @if (approved) {
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <input id="searchStaffName" type="text" name="username" class="form-control"
+                                            placeholder="Global Search Filter" [(ngModel)]="searchStaffDeatil"
+                                            (keydown.enter)="searchStaffByName()"
+                                            [ngModelOptions]="{ standalone: true }" />
+                                    </div>
+                                    <div class="col-lg-6 col-md-6 col-sm-12">
+                                        <button (click)="searchStaffByName()" class="btn btn-primary" id="searchbtn"
+                                            type="submit" [disabled]="!searchStaffDeatil">
+                                            <i class="fa fa-search"></i>
+                                            Search
+                                        </button>
+                                        <button (click)="clearForm()" class="btn btn-default" id="searchbtn"
+                                            type="reset">
+                                            <img src="assets/img/DashboardIcons/Refresh.svg" />
+                                            Clear
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card">
+                                    <h5>Select Staff</h5>
+                                    <p-table [value]="approvePlanData" [(selection)]="selectStaff"
+                                        responsiveLayout="scroll" [paginator]="true" [rows]="5"
+                                        [rowsPerPageOptions]="[5,10,20,50,100]">
+                                        <ng-template pTemplate="header">
+                                            <tr>
+                                                <th style="width: 3rem"></th>
+                                                <th>Name</th>
+                                                <th>Username</th>
+                                            </tr>
+                                        </ng-template>
+                                        <ng-template pTemplate="body" let-product>
+                                            <tr>
+                                                <td>
+                                                    <p-tableRadioButton [value]="product.id"></p-tableRadioButton>
+                                                </td>
+                                                <td>{{ product.fullName }}</td>
+                                                <td>
+                                                    {{ product.username }}
+                                                </td>
+                                            </tr>
+                                        </ng-template>
+                                    </p-table>
+                                </div>
+                            </div>
+                            }
+                            @if (!approved) {
+                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                                <label>Remark*</label>
+                                <textarea class="form-control" name="remark" formControlName="remark" [ngClass]="{
+                    'is-invalid': assignPlansubmitted && assignPlanForm.controls.remark.errors
+                  }"></textarea>
+                                @if (assignPlansubmitted && assignPlanForm.controls.remark.errors) {
+                                <div class="errorWrap text-danger">
+                                    @if (assignPlansubmitted && assignPlanForm.controls.remark.errors.required) {
+                                    <div class="error text-danger">
+                                        Remark is required.
+                                    </div>
+                                    }
+                                </div>
+                                }
+                            </div>
+                            }
+                            <br />
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+            <div class="modal-footer">
+                @if (!approved) {
+                <button type="submit" class="btn btn-primary" id="submit" (click)="assignPlan()">
+                    <i class="fa fa-check-circle"></i>
+                    Approve
+                </button>
+                }
+                @if (approved) {
+                <button type="submit" class="btn btn-primary" id="submit" (click)="assignToStaff(true)">
+                    <i class="fa fa-check-circle"></i>
+                    Assign
+                </button>
+                }
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="rejectPlanModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="myModalLabel" style="color: #fff !important">Reject Plan</h4>
+            </div>
+            <div class="modal-body">
+                <form [formGroup]="rejectPlanForm">
+                    <div class="row">
+                        @if (reject) {
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                            <div class="card">
+                                <h5>Select Staff</h5>
+                                <p-table [value]="rejectPlanData" [(selection)]="selectStaffReject"
+                                    responsiveLayout="scroll">
+                                    <ng-template pTemplate="header">
+                                        <tr>
+                                            <th style="width: 3rem"></th>
+                                            <th>Name</th>
+                                            <th>Username</th>
+                                        </tr>
+                                    </ng-template>
+                                    <ng-template pTemplate="body" let-product>
+                                        <tr>
+                                            <td>
+                                                <p-tableRadioButton [value]="product.id"></p-tableRadioButton>
+                                            </td>
+                                            <td>{{ product.fullName }}</td>
+                                            <td>
+                                                {{ product.username }}
+                                            </td>
+                                        </tr>
+                                    </ng-template>
+                                </p-table>
+                            </div>
+                        </div>
+                        }
+                        @if (!reject) {
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                            <label>Remark*</label>
+                            <textarea class="form-control" name="remark" formControlName="remark" [ngClass]="{
+                  'is-invalid': rejectPlanSubmitted && rejectPlanForm.controls.remark.errors
+                }"></textarea>
+                            @if (rejectPlanSubmitted && rejectPlanForm.controls.remark.errors) {
+                            <div class="errorWrap text-danger">
+                                @if (rejectPlanSubmitted && rejectPlanForm.controls.remark.errors.required) {
+                                <div class="error text-danger">
+                                    Remark is required.
+                                </div>
+                                }
+                            </div>
+                            }
+                        </div>
+                        }
+                        <br />
+                    </div>
+
+                </form>
+            </div>
+            <div class="modal-footer">
+                @if (!reject) {
+                <button type="submit" class="btn btn-primary" id="submit" (click)="rejectPlan()">
+                    <i class="fa fa-times-circle"></i>
+                    Reject
+                </button>
+                }
+                @if (reject && !selectStaffReject) {
+                <button type="submit" class="btn btn-primary" id="submit" disabled (click)="assignToStaff(false)">
+                    <i class="fa fa-times-circle"></i>
+                    Assign
+                </button>
+                }
+                @if (reject && selectStaffReject) {
+                <button type="submit" class="btn btn-primary" id="submit" (click)="assignToStaff(false)">
+                    <i class="fa fa-times-circle"></i>
+                    Assign
+                </button>
+                }
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div> -->
+
+<!-- <!- service area list -> -->
+<!-- <div class="modal fade" id="serviceareaModal" role="dialog">
+    <div class="modal-dialog" style="width: 35%">
+        <!- Modal content->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="close" data-dismiss="modal" type="button">&times;</button>
+                <h3 class="panel-title">{{ planGroupData.planGroupName }} Service Area List</h3>
+            </div>
+            <div class="modal-body">
+                <div class="panel-body table-responsive" id="networkDeviceTabel">
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <td><label class="networkLabel">Service Area :</label></td>
+                                <td>
+                                    @for (serviceName of serviceAreaListPlanbundle; track serviceName) {
+                                    <span style="word-break: break-all">
+                                        <span>
+                                            {{ serviceName }},
+                                            <br />
+                                        </span>
+                                    </span>
+                                    }
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" data-dismiss="modal" type="button">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="reasignPlanGroup" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="myModalLabel" style="color: #fff !important">
+                    Approve Customer
+                </h4>
+            </div>
+            <div class="modal-body">
+                <form [formGroup]="assignPlanForm">
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                            <div class="card">
+                                <h5>Select Staff</h5>
+                                <p-table [value]="approvableStaff" [(selection)]="selectStaff"
+                                    responsiveLayout="scroll">
+                                    <ng-template pTemplate="header">
+                                        <tr>
+                                            <th style="width: 3rem"></th>
+                                            <th>Name</th>
+                                            <th>Username</th>
+                                        </tr>
+                                    </ng-template>
+                                    <ng-template pTemplate="body" let-product>
+                                        <tr>
+                                            <td>
+                                                <p-tableRadioButton [value]="product.id"></p-tableRadioButton>
+                                            </td>
+                                            <td>{{ product.fullName }}</td>
+                                            <td>
+                                                {{ product.username }}
+                                            </td>
+                                        </tr>
+                                    </ng-template>
+                                </p-table>
+                            </div>
+                        </div>
+                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                            <label>Remark</label>
+                            <textarea class="form-control" name="remark" formControlName="remark" [ngClass]="{
+                  'is-invalid': assignPlansubmitted && assignPlanForm.controls.remark.errors
+                }"></textarea>
+                            @if (assignPlansubmitted && assignPlanForm.controls.remark.errors) {
+                            <div class="errorWrap text-danger"></div>
+                            }
+                            <br />
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" id="submit" (click)="reassignWorkflow()"
+                    [disabled]="!selectStaff">
+                    <i class="fa fa-check-circle"></i>
+                    Assign
+                </button>
+
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+@if (openPlanChargeDetails) {
+<app-plan-charge (planChargeChange)="changePlanChargeData($event)" [planCharge]="selectedPlan"></app-plan-charge>
+} -->

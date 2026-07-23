@@ -1,0 +1,44 @@
+package com.savbill.revenuemanagement.productmanagement.Tax.dto;
+
+import com.savbill.revenuemanagement.core.dto.common.Auditable;
+import lombok.Data;
+import org.hibernate.validator.constraints.Length;
+
+import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
+import java.util.List;
+
+@Data
+public class TaxPojo extends Auditable {
+
+    private Integer id;
+
+    @NotNull
+    private String name;
+
+    @NotNull
+    @Length(max = 150, message = "The field must be less than 150 characters")
+    private String desc;
+
+    @NotNull
+    private String taxtype;
+    @NotNull
+    private String status;
+    private Boolean isDelete = false;
+
+    private List<TaxTypeTierPojo> tieredList = new ArrayList<>();
+
+    private List<TaxTypeSlabPojo> slabList = new ArrayList<>();
+    
+    private Integer mvnoId;
+
+    private Long buId;
+
+
+    @Override
+    public String toString() {
+        return "TaxPojo [id=" + id + ", name=" + name + ", desc=" + desc + ", taxType=" + taxtype + ", status=" + status
+                + ", tieredList=" + tieredList + ", slabList=" + slabList + "]";
+    }
+
+}

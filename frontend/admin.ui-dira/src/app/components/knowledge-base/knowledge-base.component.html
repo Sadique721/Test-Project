@@ -1,0 +1,1005 @@
+<!-- 
+<div class="row">
+  <div class="col-md-12">
+    <div class="panel top">
+      <div class="panel-heading">
+        <h3 class="panel-title">{{ title }} Management</h3>
+        <div class="right">
+          <button
+            type="button"
+            class="btn-toggle-collapse"
+            data-toggle="collapse"
+            data-target="#searchDataCountry"
+            >
+            <i class="fa fa-minus-circle"></i>
+          </button>
+        </div>
+      </div>
+      <div id="searchDataCountry" class="panel-collapse collapse in">
+        <div id="" class="panel-body">
+          <div class="row">
+            <div class="col-lg-3 col-md-3">
+              <input
+                id="taxName"
+                type="text"
+                [(ngModel)]="knowledgebaseName"
+                class="form-control"
+                placeholder="Global Search Filter"
+                (keydown.enter)="searchKnowledgeBase()"
+                />
+              </div>
+              <div class="col-lg-3 col-md-4 marginTopSearchBtn">
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  id="searchbtn"
+                  (click)="searchKnowledgeBase()"
+                  >
+                  <i class="fa fa-search"></i>
+                  Search
+                </button>
+                <button
+                  type="reset"
+                  class="btn btn-default"
+                  id="searchbtn"
+                  (click)="clearsearchKnowledgeBase()"
+                  >
+                   <img src="assets/img/DashboardIcons/Refresh.svg" />
+                  Clear
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div> -->
+
+
+<!-- <div class="row">
+    <div class="col-md-6 left">
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">{{ title }}</h3>
+          <div class="right">
+            <button
+              type="button"
+              class="btn-toggle-collapse"
+              data-toggle="collapse"
+              data-target="#allDataCountry"
+              aria-expanded="false"
+              aria-controls="allDataCountry"
+              >
+              <i class="fa fa-minus-circle"></i>
+            </button>
+          </div>
+        </div>
+        <div id="allDataCountry" class="panel-collapse collapse in">
+          <div class="panel-body table-responsive">
+            <div class="row">
+              <div class="col-lg-12 col-md-12">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Event Type</th>
+                      <th>Category</th>
+                      <th>Type</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (
+                      knowledgebase of knowledgebaseListData
+                      | paginate
+                      : {
+                      id: 'knowledgebaseListData',
+                      itemsPerPage: knowledgebaseitemsPerPage,
+                      currentPage: currentPageKnowledgeBaseSlab,
+                      totalItems: knowledgebaseTotalRecords
+                      }; track
+                      knowledgebase; let i = $index) {
+                      <tr
+                        >
+                        <td>{{ knowledgebase.eventName }}</td>
+                        <td>{{ knowledgebase.docType }}</td>
+                        <td>{{ knowledgebase.documentFor }}</td>
+                        @if (editAccess || deleteAccess) {
+                          <td class="btnAction">
+                            @if (editAccess) {
+                              <a
+                                id="edit-button"
+                                href="javascript:void(0)"
+                                type="button"
+                                (click)="editKnowledgebase(knowledgebase.id)"
+                                >
+                              <img src="assets/img/DashboardIcons/Edit.svg" >
+                              </a>
+                            }
+                            @if (deleteAccess) {
+                              <a
+                                id="delete-button"
+                                href="javascript:void(0)"
+                                (click)="deleteKnowledgeConfirmation(knowledgebase)"
+                                >
+                                 <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                              </a>
+                            }
+                            <a
+                              id="upload-button"
+                              href="javascript:void(0)"
+                              (click)="downloadDocument(knowledgebase)"
+                              >
+                              <img src="assets/img/pdf.png" />
+                            </a>
+                          </td>
+                        }
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+
+                <div class="row">
+                  <div class="col-md-12" style="display: flex">
+                    <pagination-controls
+                      id="knowledgebaseListData"
+                      maxSize="10"
+                      directionLinks="true"
+                      previousLabel=""
+                      nextLabel=""
+                      (pageChange)="pageChangedKnowledgebaseList($event)"
+                    ></pagination-controls>
+                    <div id="itemPerPageDropdown">
+                      <p-dropdown
+                        [(ngModel)]="knowledgebaseitemsPerPage"
+                        [options]="pageLimitOptions"
+                        optionLabel="value"
+                        optionValue="value"
+                        (onChange)="TotalItemPerPage($event)"
+                      ></p-dropdown>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 right">
+      <div class="panel">
+        <div class="panel-heading">
+          <h3 class="panel-title">{{ isKnowledgebaseEdit ? "Update" : "Upload" }} {{ title }}</h3>
+          <div class="right">
+            <button
+              type="button"
+              class="btn-toggle-collapse"
+              data-toggle="collapse"
+              data-target="#createDataCountry"
+              aria-expanded="false"
+              aria-controls="createDataCountry"
+              >
+              <i class="fa fa-minus-circle"></i>
+            </button>
+          </div>
+        </div>
+        <div id="createDataCountry" class="panel-collapse collapse in">
+          @if (!createAccess && !isKnowledgebaseEdit) {
+            <div class="panel-body table-responsive">
+              Sorry you have not privilege to create operation!
+            </div>
+          }
+
+          @if (createAccess || (isKnowledgebaseEdit && editAccess)) {
+            <div class="panel-body">
+              <form [formGroup]="knowledgeBaseFormGroup">
+                <div>
+                  <label>Event Type*</label>
+                  <p-dropdown
+                    [options]="commonDropdownService.knowledgeEventList"
+                    optionValue="value"
+                    optionLabel="displayName"
+                    placeholder="Select a Event Type"
+                    formControlName="eventName"
+                [ngClass]="{
+                  'is-invalid': submitted && knowledgeBaseFormGroup.controls.eventName.errors
+                }"
+                  ></p-dropdown>
+                  @if (submitted && knowledgeBaseFormGroup.controls.eventName.errors) {
+                    <div
+                      class="errorWrap text-danger"
+                      >
+                      @if (submitted && knowledgeBaseFormGroup.controls.eventName.errors.required) {
+                        <div
+                          class="error text-danger"
+                          >
+                          Event Type is required.
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+                <br />
+                <div>
+                  <label>Select Category*</label>
+                  <p-dropdown
+                    [options]="commonDropdownService.knowledgeCategoryList"
+                    optionValue="value"
+                    optionLabel="displayName"
+                    placeholder="Select a Category"
+                    formControlName="docType"
+                [ngClass]="{
+                  'is-invalid': submitted && knowledgeBaseFormGroup.controls.docType.errors
+                }"
+                  ></p-dropdown>
+                  @if (submitted && knowledgeBaseFormGroup.controls.docType.errors) {
+                    <div
+                      class="errorWrap text-danger"
+                      >
+                      @if (submitted && knowledgeBaseFormGroup.controls.docType.errors.required) {
+                        <div
+                          class="error text-danger"
+                          >
+                          Select Category is required.
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+                <br />
+                <label>Select Type*</label>
+                <div>
+                  <p-dropdown
+                    [options]="commonDropdownService.knowledgeTypeList"
+                    optionValue="value"
+                    optionLabel="displayName"
+                    placeholder="Select a Type"
+                    formControlName="documentFor"
+                [ngClass]="{
+                  'is-invalid': submitted && knowledgeBaseFormGroup.controls.documentFor.errors
+                }"
+                  ></p-dropdown>
+                </div>
+                @if (submitted && knowledgeBaseFormGroup.controls.documentFor.errors) {
+                  <div
+                    class="errorWrap text-danger"
+                    >
+                    @if (submitted && knowledgeBaseFormGroup.controls.documentFor.errors.required) {
+                      <div
+                        class="error text-danger"
+                        >
+                        Select Type is required.
+                      </div>
+                    }
+                  </div>
+                }
+                <br />
+                <div>
+                  <label>File*</label>
+                  <input
+                    (change)="onFileChange($event)"
+                    class="form-control"
+                    id="fileInput"
+                    multiple="multiple"
+                    placeholder="Select Attachment"
+                    style="padding: 2px; width: 100%"
+                    type="file"
+                    />
+                    @if (submitted && knowledgeBaseFormGroup.controls.file.errors) {
+                      <div
+                        class="errorWrap text-danger"
+                        >
+                        @if (knowledgeBaseFormGroup.controls.file.errors.required) {
+                          <div
+                            class="error text-danger"
+                            >
+                            File is required.
+                          </div>
+                        }
+                      </div>
+                    }
+                    @for (file of selectedFilePreviewd; track file; let i = $index) {
+                      <div>
+                        <div
+                  style="
+                    padding-left: 10px;
+                    padding-right: 10px;
+                    padding-top: 4px;
+                    padding-bottom: 4px;
+                    font-size: 10px;
+                  "
+                          >
+                          {{ file?.name }}
+                          <button
+                            type="button"
+                            class="close"
+                    (click)="
+                      file.uniqueName
+                        ? deleteConfirm(
+                            viewKnowledgeBaseListData.id,
+                            file.uniqueName,
+                            file.name,
+                            true
+                          )
+                        : deletSelectedFile(file?.name)
+                    "
+                            >
+                            &times;
+                          </button>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                  <br />
+                  <div>
+                    <label>Remark*</label>
+                    <textarea
+                      class="form-control"
+                      name="remarks"
+                      formControlName="remarks"
+                [ngClass]="{
+                  'is-invalid': submitted && knowledgeBaseFormGroup.controls.remarks.errors
+                }"
+                    ></textarea>
+                    @if (submitted && knowledgeBaseFormGroup.controls.remarks.errors) {
+                      <div
+                        class="errorWrap text-danger"
+                        >
+                        @if (submitted && knowledgeBaseFormGroup.controls.remarks.errors.required) {
+                          <div
+                            class="error text-danger"
+                            >
+                            Remark is required.
+                          </div>
+                        }
+                      </div>
+                    }
+                  </div>
+                  <div class="addUpdateBtn">
+                    @if (!isKnowledgebaseEdit) {
+                      <button
+                        type="submit"
+                        class="btn btn-primary"
+                        id="submit"
+                        (click)="addEditKnowledgebase('')"
+                        >
+                        <i class="fa fa-check-circle"></i>
+                        Add {{ title }}
+                      </button>
+                    }
+                    @if (isKnowledgebaseEdit) {
+                      <button
+                        type="submit"
+                        class="btn btn-primary"
+                        id="submit"
+                        (click)="addEditKnowledgebase(viewKnowledgeBaseListData.id)"
+                        >
+                        <i class="fa fa-check-circle"></i>
+                        Update {{ title }}
+                      </button>
+                    }
+                    <br />
+                  </div>
+                </form>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div> -->
+
+
+<!--  
+    <p-dialog
+      header="View Document"
+      [(visible)]="downloadDocumentId"
+      [style]="{ width: '70%' }"
+      [modal]="true"
+      [responsive]="true"
+      [draggable]="false"
+      [closable]="false"
+      >
+      <div class="modal-body">
+        <p-table
+          [value]="knowledgeBaseFileData?.fileDetails"
+          [paginator]="true"
+          [rows]="5"
+          [rowsPerPageOptions]="[5,10,20,50,100]"
+          responsiveLayout="scroll"
+          >
+          <ng-template pTemplate="header">
+            <tr>
+              <th>File Name</th>
+              <th>Action</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-filedata>
+            <tr>
+              <td>{{ filedata?.filename }}</td>
+              <td>
+                <button
+                  style="border-radius: 5px; padding: 5px 10px; line-height: 1.5; margin-left: 5px"
+                  id="download-button"
+              (click)="
+                downloadDoc(filedata.filename, knowledgeBaseFileData.id, filedata.uniqueName)
+              "
+                  [disabled]="!filedata.filename"
+                  title="Download Document"
+                  class="btn btn-primary"
+                  >
+                  <img style="width: 25px; height: 25px; border-radius: 3px" src="assets/img/pdf.png" />
+                </button>
+                @if (filedata.filename && !isWordFile(filedata.filename)) {
+                  <button
+                    style="border-radius: 5px; padding: 5px 10px; line-height: 1.5; margin-left: 5px"
+                    id="view-button"
+                    [disabled]="!filedata.filename"
+                    title="View Document"
+                    class="btn btn-primary"
+              (click)="
+                showknowledgetDocData(
+                  filedata.filename,
+                  knowledgeBaseFileData.id,
+                  filedata.uniqueName
+                )
+              "
+                    >
+                    <img
+                      style="width: 25px; height: 25px; border-radius: 3px"
+                      src="assets/img/eye-icon.png"
+                      />
+                    </button>
+                  }
+                  <button
+                    style="border-radius: 5px; padding: 3px 8px; line-height: 1.5; margin-left: 5px"
+                    class="btn btn-primary"
+                    [disabled]="!filedata.filename"
+                    title="Remove File"
+                    id="delete-button"
+              (click)="
+                deleteConfirm(knowledgeBaseFileData.id, filedata.uniqueName, filedata.filename)
+              "
+                    >
+                     <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg" >
+                  </button>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger btn-sm" (click)="closeDownloadDocumentId()">
+              Close
+            </button>
+          </div>
+        </div>
+      </p-dialog> 
+ -->
+
+
+
+<!-- 
+ <p-dialog header="Document Preview" [(visible)]="documentPreview" [style]="{ width: '60%' }" [modal]="true"
+    [responsive]="true" [draggable]="false" [closable]="true" (onHide)="closeDocumentPreview()">
+    <div class="modal-body" style="height: 600px; text-align: center">
+        @switch (previewType) {
+        @case ('pdf') {
+        <iframe [src]="previewUrl" width="100%" height="100%"></iframe>
+        }
+        @case ('png') {
+        <img [src]="previewUrl" alt="Image" style="max-width: 100%; max-height: 100%" />
+        }
+        @case ('jpg') {
+        <img [src]="previewUrl" alt="Image" style="max-width: 100%; max-height: 100%" />
+        }
+        @case ('jpeg') {
+        <img [src]="previewUrl" alt="Image" style="max-width: 100%; max-height: 100%" />
+        }
+        @case ('mp4') {
+        <video [src]="previewUrl" controls width="100%" height="100%"></video>
+        }
+        @default {
+        <div>
+            <p>Unsupported file format for preview.</p>
+        </div>
+        }
+        }
+    </div>
+
+    <div class="modal-footer">
+        <button class="btn btn-default" (click)="closeDocumentPreview()" type="button">Close</button>
+    </div>
+</p-dialog> -->
+
+
+<div class="row header-row">
+    <mat-card class="cardWithShadow w-100">
+        <mat-card-content class="mat-card-content-border">
+            <div class="row">
+                <div class="col-sm-9 d-flex">
+                    <mat-form-field appearance="outline" style="margin-left: 16px" class="w-100 hide-hint mr-10">
+                        <input class="input-p-5" [(ngModel)]="knowledgebaseName" matInput
+                            placeholder="Global Search Filter" (keydown.enter)="searchKnowledgeBase()" />
+                        <mat-icon matSuffix class="search-header-search-icon">
+                            <i class="pi pi-search icon-size"></i>
+                        </mat-icon>
+                    </mat-form-field>
+
+                    <button mat-button mat-flat-button color="primary" class="button-normal m-r-10"
+                        (click)="searchKnowledgeBase()">
+                        Search
+                    </button>
+                    <button mat-stroked-button matButton="outlined" class="button-normal"
+                        (click)="clearsearchKnowledgeBase()">
+                        Clear
+                    </button>
+                </div>
+
+                <div class="col-sm-3 search-div">
+                    <button mat-button mat-flat-button color="primary" (click)="openknowledgeBaseDialog()"
+                        class="button-normal mr-10">
+                        Add {{ title }}
+                    </button>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>
+
+
+<div class="container-fluid contain-flud">
+    <div class="row">
+        <!-- knowledgebase list table start -->
+        <div class="col-md-12">
+            <mat-card class="cardWithShadow">
+                <mat-card-content class="mat-card-content-border">
+                    <div class="country-table-list">
+                        <div class="table-container">
+                            <!-- Change dataSource to dataSource.data -->
+                            <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8 w-100">
+                                <!-- Event Type Column -->
+                                <ng-container matColumnDef="id">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        ID
+                                    </th>
+                                    <td mat-cell *matCellDef="let knowledgebase" class="f-s-14">{{ knowledgebase.id }}
+                                    </td>
+                                </ng-container>
+
+                                <ng-container matColumnDef="eventType">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Event Type
+                                    </th>
+                                    <td mat-cell *matCellDef="let knowledgebase" class="f-s-14">{{
+                                        knowledgebase.eventName }}</td>
+                                </ng-container>
+
+                                <!-- Category Column -->
+                                <ng-container matColumnDef="category">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Category
+                                    </th>
+                                    <td mat-cell *matCellDef="let knowledgebase" class="f-s-14">{{ knowledgebase.docType
+                                        }}</td>
+                                </ng-container>
+
+                                <!-- Type Column -->
+                                <ng-container matColumnDef="type">
+                                    <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                        sticky>
+                                        Type
+                                    </th>
+                                    <td mat-cell *matCellDef="let knowledgebase" class="f-s-14">{{
+                                        knowledgebase.documentFor }}</td>
+                                </ng-container>
+
+                                <!-- Action Column -->
+                                @if (deleteAccess || editAccess) {
+                                <ng-container matColumnDef="action">
+                                    <th mat-header-cell *matHeaderCellDef stickyEnd class="table-header-title">
+                                        Action
+                                    </th>
+                                    <td mat-cell *matCellDef="let knowledgebase" class="btnAction">
+                                        @if (editAccess) {
+                                        <a mat-icon-button href="javascript:void(0)" matTooltip="Edit"
+                                            (click)="editKnowledgebase(knowledgebase.id)">
+                                            <img src="assets/img/DashboardIcons/Edit.svg">
+                                        </a>
+                                        }
+                                        @if (deleteAccess) {
+                                        <a mat-icon-button matTooltip="delete" href="javascript:void(0)"
+                                            (click)="deleteKnowledgeConfirmation(knowledgebase)">
+                                            <img src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                        </a>
+                                        }
+                                        <a mat-icon-button href="javascript:void(0)" matTooltip="pdf Download"
+                                            (click)="openknowledgeBaseDialogData(knowledgebase)">
+                                            <!-- <img src="assets/img/pdf.png" /> -->
+                                            <img src="assets/img/DashboardIcons/pdf-file-symbol-svgrepo-com 1.svg"
+                                                class="icon-size" />
+                                        </a>
+                                    </td>
+                                </ng-container>
+                                }
+
+                                <tr mat-header-row class="table-header-bg"
+                                    *matHeaderRowDef="getDisplayedPlanDetailsColumns(); sticky: true"></tr>
+                                <tr mat-row class="table-content-row"
+                                    *matRowDef="let row; columns: getDisplayedPlanDetailsColumns()">
+                                </tr>
+                            </table>
+
+                            <!-- Fix paginator binding -->
+                            <mat-paginator #paginator [length]="knowledgebaseTotalRecords"
+                                [pageSize]="knowledgebaseitemsPerPage" [pageSizeOptions]="[5,10,20,50,100]"
+                                [pageIndex]="currentPageKnowledgeBaseSlab - 1" showFirstLastButtons
+                                (page)="onPageChange($event)">
+                            </mat-paginator>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+        <!-- knowledgebase list table end -->
+    </div>
+</div>
+
+<ng-template #knowledgeBaseDialog let-dialogRef="dialogRef">
+
+    <div class="dialog-container">
+        <!-- Header -->
+        <div class="dialog-header dialog-header-titleFont">
+            <span class="dialog-header-titleFont">{{ isKnowledgebaseEdit ? "Update" : "Upload" }} {{ title }}</span>
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <form [formGroup]="knowledgeBaseFormGroup" class="card-form mb-3">
+            <!-- Content -->
+            <div mat-dialog-content>
+                <div class="col-md-12">
+                    @if (!createAccess && !isKnowledgebaseEdit) {
+                    <mat-card-content class="matcard-content">
+                        <div class="panel-body table-responsive">
+                            Sorry you have not privilege to create operation!
+                        </div>
+                    </mat-card-content>
+                    }
+                    @if (createAccess || (isKnowledgebaseEdit && editAccess)) {
+                    <mat-card-content class="matcardContent">
+                        <div class="row g-2">
+                            <!-- Event Type -->
+                            <div class="col-sm-6">
+                                <label for="eventType" class="inputLabel">Event Type*</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select id="eventType" class="input-p-5" placeholder="Select a Event Type"
+                                        formControlName="eventName" [ngClass]="{
+                      'is-invalid': submitted && knowledgeBaseFormGroup.controls.eventName.errors
+                    }">
+                                        <mat-option *ngFor="let option of commonDropdownService.knowledgeEventList"
+                                            [value]="option.value">
+                                            {{ option.displayName }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error *ngIf="
+                      (submitted || knowledgeBaseFormGroup.controls['eventName'].touched) &&
+                      knowledgeBaseFormGroup.controls['eventName'].errors as errors
+                    ">
+                                        <span *ngIf="errors['required']">
+                                            Event Type is required.
+                                        </span>
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Select Category -->
+                            <div class="col-sm-6">
+                                <label for="categorySelect" class="inputLabel">Select Category*</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select id="categorySelect" class="input-p-5" placeholder="Select a Category"
+                                        formControlName="docType" [ngClass]="{
+                      'is-invalid': submitted && knowledgeBaseFormGroup.controls.docType.errors
+                    }">
+                                        <mat-option *ngFor="let option of commonDropdownService.knowledgeCategoryList"
+                                            [value]="option.value">
+                                            {{ option.displayName }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error *ngIf="
+                      (submitted || knowledgeBaseFormGroup.controls['docType'].touched) &&
+                      knowledgeBaseFormGroup.controls['docType'].errors as errors
+                    ">
+                                        <span *ngIf="errors['required']">
+                                            Select Category is required.
+                                        </span>
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- Select Type -->
+                            <div class="col-sm-6">
+                                <label for="typeSelect" class="inputLabel">Select Type*</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select id="typeSelect" class="input-p-5" placeholder="Select a Type"
+                                        formControlName="documentFor" [ngClass]="{
+                      'is-invalid': submitted && knowledgeBaseFormGroup.controls.documentFor.errors
+                    }">
+                                        <mat-option *ngFor="let option of commonDropdownService.knowledgeTypeList"
+                                            [value]="option.value">
+                                            {{ option.displayName }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error *ngIf="
+                      (submitted || knowledgeBaseFormGroup.controls['documentFor'].touched) &&
+                      knowledgeBaseFormGroup.controls['documentFor'].errors as errors
+                    ">
+                                        <span *ngIf="errors['required']">
+                                            Select Type is required.
+                                        </span>
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <!-- File Upload -->
+                            <div class="col-sm-6">
+                                <label for="fileInput" class="inputLabel">File*</label>
+
+
+                                <div class="file-upload-container">
+                                    <input (change)="onFileChange($event)" class="form-control" id="fileInput"
+                                        multiple="multiple" placeholder="Select Attachment"
+                                        style="padding: 2px; width: 100%" type="file" />
+                                </div>
+                                @if (submitted && knowledgeBaseFormGroup.controls.file.errors) {
+                                <div class="errorWrap text-danger m-t-5">
+                                    @if (knowledgeBaseFormGroup.controls.file.errors.required) {
+                                    <div class="error text-danger">
+                                        File is required.
+                                    </div>
+                                    }
+                                </div>
+                                }
+
+
+                                <div class="selected-files-container m-t-10" *ngIf="selectedFilePreviewd?.length > 0 && !isKnowledgebaseEdit">
+                                    @for (file of selectedFilePreviewd; track file; let i = $index) {
+                                    <div class="selected-file-item">
+                                        <span class="file-name">{{ file?.name }}</span>
+                                        <button type="button" class="close-btn" (click)="
+                          file.uniqueName
+                            ? deleteConfirm(
+                                viewKnowledgeBaseListData.id,
+                                file.uniqueName,
+                                file.name,
+                                true
+                              )
+                            : deletSelectedFile(file?.name)
+                        ">
+                                            &times;
+                                        </button>
+                                    </div>
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- Remark -->
+                            <div class="col-sm-12">
+                                <label for="remarks" class="inputLabel">Remark*</label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <textarea id="remarks" matInput class="textarea-field" placeholder="Enter Remark"
+                                        formControlName="remarks" rows="3" [ngClass]="{
+                                          'is-invalid': submitted && knowledgeBaseFormGroup.controls.remarks.errors
+                                        }"></textarea>
+                                    <mat-error *ngIf="
+                                          (submitted || knowledgeBaseFormGroup.controls['remarks'].touched) &&
+                                          knowledgeBaseFormGroup.controls['remarks'].errors as errors
+                                        ">
+                                        <span *ngIf="errors['required']">
+                                            Remark is required.
+                                        </span>
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                        </div>
+                    </mat-card-content>
+                    }
+                </div>
+            </div>
+            <!-- @if (!createAccess && isKnowledgebaseEdit) { -->
+            <!-- Actions -->
+            <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+                @if (!isKnowledgebaseEdit) {
+                <button mat-button mat-flat-button color="primary" type="submit" id="submit"
+                    (click)="addEditKnowledgebase('')" class="button-normal">
+                    Add {{ title }}
+                </button>
+                }
+                @if (isKnowledgebaseEdit) {
+                <button mat-button mat-flat-button color="primary" type="submit" id="submit"
+                    (click)="addEditKnowledgebase(viewKnowledgeBaseListData.id)" class="button-normal">
+                    Update {{ title }}
+                </button>
+                }
+                <button mat-stroked-button matButton="outlined" type="button" color="primary" class="button-normal"
+                    (click)="dialogRef.close()">
+                    Cancel
+                </button>
+            </div>
+          <!-- } -->
+        </form>
+    </div>
+
+</ng-template>
+
+<ng-template #knowledgeBaseDialogContent let-dialogRef="dialogRef">
+    <div class="dialog-container">
+        <!-- Header -->
+        <div class="dialog-header dialog-header-titleFont">
+            <span class="dialog-header-titleFont">View Document</span>
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <div class="card-form mb-3">
+            <!-- Content -->
+            <div mat-dialog-content>
+                <div class="col-md-12">
+                    <mat-card-content class="mat-card-content-border">
+                        <div class="country-table-list">
+                            <div class="table-container">
+                                <!-- Fix: Use knowledgeBaseFileDataSource directly -->
+                                <table mat-table [dataSource]="paginatedFileData" matSort
+                                    class="mat-elevation-z8 w-100">
+
+                                    <!-- File Name Column -->
+                                    <ng-container matColumnDef="fileName">
+                                        <th mat-header-cell *matHeaderCellDef mat-sort-header class="table-header-title"
+                                            sticky>
+                                            File Name
+                                        </th>
+                                        <td mat-cell *matCellDef="let file" class="f-s-14">
+                                            {{ file?.filename }}
+                                        </td>
+                                    </ng-container>
+
+                                    <!-- Action Column -->
+                                    <ng-container matColumnDef="action">
+                                        <th mat-header-cell *matHeaderCellDef stickyEnd class="table-header-title">
+                                            Action
+                                        </th>
+                                        <td mat-cell *matCellDef="let file">
+                                            <div class="action-buttons">
+                                                <!-- Download Button -->
+                                                <a mat-icon-button color="primary" id="download-button"
+                                                    href="javascript:void(0)" matTooltip="Download Document"
+                                                    (click)="downloadDoc(file.filename, file.parentId, file.uniqueName)"
+                                                    [disabled]="!file.filename" class="action-btn">
+                                                    <img src="assets/img/DashboardIcons/pdf-file-symbol-svgrepo-com 1.svg"
+                                                        class="icon-size" />
+                                                </a>
+
+                                                <!-- View Button -->
+                                                <ng-container *ngIf="file.filename && !isWordFile(file.filename)">
+                                                    <a mat-icon-button color="primary" id="view-button"
+                                                        href="javascript:void(0)" [disabled]="!file.filename"
+                                                        matTooltip="View Document" class="action-btn"
+                                                        (click)="showknowledgetDocData(file.filename, file.parentId, file.uniqueName)">
+                                                        <img src="assets/img/DashboardIcons/eye-svgrepo-com (1) 1.svg">
+                                                    </a>
+
+
+                                                </ng-container>
+
+                                                <!-- Remove Button -->
+                                                <a mat-icon-button color="warn" class="action-btn"
+                                                    href="javascript:void(0)" matTooltip="Remove File"
+                                                    [disabled]="!file.filename" id="delete-button"
+                                                    (click)="deleteConfirm(file.parentId, file.uniqueName, file.filename, false)">
+                                                    <img
+                                                        src="assets/img/DashboardIcons/trash-bin-trash-svgrepo-com 1.svg">
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </ng-container>
+
+                                    <tr mat-header-row class="table-header-bg"
+                                        *matHeaderRowDef="displayedColumns1; sticky: true"></tr>
+                                    <tr mat-row class="table-content-row"
+                                        *matRowDef="let row; columns: displayedColumns1"></tr>
+
+                                    <!-- Fix: Add no data row -->
+                                    <tr *matNoDataRow class="mat-row">
+                                        <td class="mat-cell" [attr.colspan]="displayedColumns1.length">
+                                            No files found
+                                        </td>
+                                    </tr>
+                                </table>
+
+                                <!-- Fix: Proper paginator binding -->
+                                <mat-paginator #filePaginator [length]="knowledgeBaseFileDataSource.data?.length"
+                                    [pageSize]="pageSize" [pageSizeOptions]="[5,10,20,50,100]" [pageIndex]="currentFilePage"
+                                    showFirstLastButtons (page)="onKnowledgeBasePageChange($event)">
+                                </mat-paginator>
+                            </div>
+                        </div>
+                    </mat-card-content>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+                <button mat-stroked-button matButton="outlined" type="button" color="primary" class="button-normal"
+                    (click)="dialogRef.close()">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #documentPreviewDialog let-dialogRef="dialogRef">
+    <div class="dialog-container dialog-box">
+        <!-- Header -->
+        <div class="dialog-header dialog-header-titleFont">
+            Document Preview
+            <span>
+                <a mat-icon-button href="javascript:void(0)" (click)="dialogRef.close()">
+                    <img src="assets/img/DashboardIcons/Reject.svg">
+                </a>
+            </span>
+        </div>
+
+        <!-- Content -->
+        <div mat-dialog-content class="dialog-box-content">
+            <div class="modal-body">
+                <mat-card class="cardWithShadow">
+                    <mat-card-content>
+                        @switch (previewType) {
+                        @case ('pdf') {
+                        <iframe [src]="previewUrl" width="100%" height="550px" style="border: none;"></iframe>
+                        }
+                        @case ('png') {
+                        <img [src]="previewUrl" alt="Image"
+                            style="max-width: 100%; max-height: 550px; object-fit: contain;" />
+                        }
+                        @case ('jpg') {
+                        <img [src]="previewUrl" alt="Image"
+                            style="max-width: 100%; max-height: 550px; object-fit: contain;" />
+                        }
+                        @case ('jpeg') {
+                        <img [src]="previewUrl" alt="Image"
+                            style="max-width: 100%; max-height: 550px; object-fit: contain;" />
+                        }
+                        @case ('mp4') {
+                        <video [src]="previewUrl" controls width="100%" height="550px"
+                            style="background: #000;"></video>
+                        }
+                        @default {
+                        <div class="unsupported-format"
+                            style="display: flex; align-items: center; justify-content: center; height: 550px; flex-direction: column;">
+                            <i class="pi pi-file-excel" style="font-size: 48px; color: #ccc; margin-bottom: 16px;"></i>
+                            <p style="color: #666; font-size: 16px;">Unsupported file format for preview.</p>
+                            <p style="color: #999; font-size: 14px; margin-top: 8px;">File type: {{ previewType }}</p>
+                        </div>
+                        }
+                        }
+                    </mat-card-content>
+                </mat-card>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div mat-dialog-actions class="p-0 m-t-10 dialog-action-adjust">
+            <button mat-stroked-button type="button" color="primary" class="button-normal" (click)="dialogRef.close()">
+                Close
+            </button>
+        </div>
+    </div>
+</ng-template>
