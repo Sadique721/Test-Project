@@ -1,7 +1,63 @@
-<div align="center">
+<!-- ================================================================= -->
+<!-- ========== 🌟 ANIMATED HEADER BANNER & PROFILE IDENTITY ========== -->
+<!-- ================================================================= -->
 
-# 🌐 BSS-OSS Enterprise Telecom Suite
-### Next-Generation Business & Operations Support System, Real-Time Online Charging (OCS/CPM), AAA Diameter/RADIUS Engine, and Omnichannel Self-Care Ecosystem
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:22d3ee,100:8b5cf6&height=220&section=header&text=BSS-OSS%20Telecom%20Suite&fontSize=48&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Enterprise%20Telecom%20BSS%2FOSS%20%7C%20AAA%20Diameter%20%26%20RADIUS%20%7C%20Real-Time%20OCS%20Charging&descAlignY=60&descAlign=50" width="100%" alt="Header Banner">
+</p>
+
+<p align="center">
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=24&duration=3000&pause=500&color=22D3EE&center=true&vCenter=true&width=800&lines=Enterprise+Telecom+BSS%2FOSS+Core+Platform;3GPP+Diameter+Gy%2FRo%2FGx+Online+Charging+System;Carrier-Grade+FreeRADIUS+AAA+Session+Engine;Spring+Cloud+Microservices+%2B+Kafka+Event+Mesh;Angular+11%2B+Admin+Portal+%2B+Flutter+Mobile+Apps" alt="Typing SVG">
+</p>
+
+<p align="center">
+  <a href="https://github.com/Sadique721"><img src="https://komarev.com/ghpvc/?username=Sadique721&label=Repository%20Views&color=22d3ee&style=flat-square" alt="Repository Views" /></a>
+  <a href="https://github.com/Sadique721/Test-Project"><img src="https://img.shields.io/github/stars/Sadique721/Test-Project?label=Stars&style=social" alt="GitHub stars"></a>
+  <a href="https://github.com/Sadique721/Test-Project/network/members"><img src="https://img.shields.io/github/forks/Sadique721/Test-Project?label=Forks&style=social" alt="GitHub forks"></a>
+  <a href="https://github.com/Sadique721?tab=followers"><img src="https://img.shields.io/github/followers/Sadique721?label=Followers&style=social" alt="GitHub followers"></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/Sadique721"><img src="https://img.shields.io/badge/Author-Md%20Sadique%20Amin-22d3ee?style=for-the-badge&logo=github&labelColor=0a192f" alt="Author"></a>
+  <a href="https://github.com/Sadique721?tab=repositories"><img src="https://img.shields.io/badge/Repositories-19-8b5cf6?style=for-the-badge&logo=git&labelColor=0a192f" alt="Repositories"></a>
+  <a href="https://github.com/Sadique721/Test-Project/issues"><img src="https://img.shields.io/badge/Issues-0%20Open-10b981?style=for-the-badge&logo=githubactions&labelColor=0a192f" alt="Issues"></a>
+  <a href="#-17-contributing-governance--licensing"><img src="https://img.shields.io/badge/License-Enterprise%20Proprietary-f59e0b?style=for-the-badge&logo=open-source-initiative&labelColor=0a192f" alt="License"></a>
+  <a href="#-1-executive-architectural-overview"><img src="https://img.shields.io/badge/Status-Production%20Grade%20%40%20Keyanna%20Tech-10b981?style=for-the-badge&logo=codeforces&logoColor=white&labelColor=0a192f" alt="Status"></a>
+</p>
+
+```text
+┌──(sadique721⚡developer-machine)-[~/BSS-OSS]
+└─$ neofetch -------------------------------------------------------------------┐
+│                                                                               │
+│   💻 Platform    : BSS-OSS Enterprise Telecom & AAA Charging Suite            │
+│   👨‍💻 Architect   : ☕ Md Sadique Amin (Java Developer @ Keyanna Technology)    │
+│   🏢 Deployment  : 🌐 Tier-1 Telecom Operators, FTTH ISPs & 4G/5G Networks   │
+│   ⚡ Core Engine : ☕ Java 17/11 • 🌱 Spring Boot 3 • 🧱 14 Microservices      │
+│   📡 AAA Protocols: 📶 3GPP Diameter (Gy/Ro/Gx) • 📡 FreeRADIUS (CoA/PoD)     │
+│   🔄 Event Stream: 🚀 Apache Kafka • 🐬 MySQL 8.0 • 📦 Docker Container Mesh   │
+│   📱 Frontends   : 🅰️ Angular 11/12 Admin & CWSC • 📱 Flutter Mobile Apps      │
+│   🚀 Uptime SLA  : 🟢 99.999% High-Availability (Five Nines) Carrier-Grade   │
+│   📫 Author      : 📧 mdsadiqueamin721786@gmail.com | 🌐 GitHub: @Sadique721  │
+│                                                                               │
+└-------------------------------------------------------------------------------┘
+```
+
+<p align="center">
+  <img src="https://img.shields.io/badge/💻%20Architecture-Distributed%20Microservices-22d3ee?style=for-the-badge&labelColor=0a192f" alt="Architecture Badge">
+  <img src="https://img.shields.io/badge/⚡%20OCS%20Charging-Sub--5ms%20Latency-8b5cf6?style=for-the-badge&labelColor=0a192f" alt="Speed Badge">
+  <img src="https://img.shields.io/badge/📡%20Protocols-3GPP%20Diameter%20%7C%20FreeRADIUS-10b981?style=for-the-badge&labelColor=0a192f" alt="Protocol Badge">
+  <img src="https://img.shields.io/badge/🔒%20Security-JWT%20%7C%20RBAC%20%7C%20PCI--DSS-f59e0b?style=for-the-badge&labelColor=0a192f" alt="Security Badge">
+</p>
+
+<p align="center">
+  <a href="https://myportfoliositesadique.netlify.app/"><img src="https://img.shields.io/badge/🌐%20Portfolio-Visit%20Website-22d3ee?style=for-the-badge&labelColor=0a192f"></a>
+  <a href="mailto:mdsadiqueamin721786@gmail.com"><img src="https://img.shields.io/badge/✉️%20Email-Contact%20Me-8b5cf6?style=for-the-badge&labelColor=0a192f"></a>
+  <a href="https://www.linkedin.com/in/md-sadique-amin-b6a948198/"><img src="https://img.shields.io/badge/💼%20LinkedIn-Connect-10b981?style=for-the-badge&labelColor=0a192f"></a>
+  <a href="https://github.com/Sadique721"><img src="https://img.shields.io/badge/🐙%20GitHub-Profile-f59e0b?style=for-the-badge&labelColor=0a192f"></a>
+  <a href="http://www.youtube.com/@mdsadiqueamin721"><img src="https://img.shields.io/badge/📺%20YouTube-Subscribe-ec4899?style=for-the-badge&labelColor=0a192f"></a>
+</p>
+
+<div align="center">
 
 [![Java](https://img.shields.io/badge/Java-11%20%7C%2017%20LTS-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)](https://www.oracle.com/java/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-2.7%2B%20%7C%203.x-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
@@ -14,7 +70,6 @@
 [![Docker](https://img.shields.io/badge/Docker-Containerized%20Mesh-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://www.docker.com/)
 [![MySQL](https://img.shields.io/badge/MySQL-8.0%20InnoDB-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](https://www.mysql.com/)
 [![SLA](https://img.shields.io/badge/SLA%20Uptime-99.999%25%20(Five%20Nines)-brightgreen?style=for-the-badge)](https://en.wikipedia.org/wiki/High_availability)
-[![Architecture](https://img.shields.io/badge/Architecture-Distributed%20Microservices-blueviolet?style=for-the-badge)]()
 
 <br/>
 
@@ -646,7 +701,31 @@ This software is developed and maintained for enterprise telecommunications envi
 
 ---
 
+<!-- ================================================================= -->
+<!-- ========== 🌟 ANIMATED FOOTER & AUTHOR CONNECT SECTION ========== -->
+<!-- ================================================================= -->
+
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:8b5cf6,100:22d3ee&height=150&section=footer" width="100%" alt="Footer Banner">
+</p>
+
 <div align="center">
-  <sub>Built with ❤️ by the Telecom & Cloud Infrastructure Engineering Team</sub><br/>
-  <b>Enterprise BSS-OSS & Diameter AAA Charging Platform</b>
+
+### 👨‍💻 Developed & Maintained by **Md Sadique Amin**
+**Software Engineer | Java / Spring Boot Specialist | Enterprise Telecom Solutions**
+
+[![Portfolio](https://img.shields.io/badge/🌐%20Portfolio-Visit%20Website-22d3ee?style=for-the-badge&logo=googlechrome&logoColor=white&labelColor=0a192f)](https://myportfoliositesadique.netlify.app/)
+[![LinkedIn](https://img.shields.io/badge/💼%20LinkedIn-Connect-0077B5?style=for-the-badge&logo=linkedin&logoColor=white&labelColor=0a192f)](https://www.linkedin.com/in/md-sadique-amin-b6a948198/)
+[![GitHub](https://img.shields.io/badge/🐙%20GitHub-Follow-181717?style=for-the-badge&logo=github&logoColor=white&labelColor=0a192f)](https://github.com/Sadique721)
+[![Email](https://img.shields.io/badge/✉️%20Email-Contact%20Me-D14836?style=for-the-badge&logo=gmail&logoColor=white&labelColor=0a192f)](mailto:mdsadiqueamin721786@gmail.com)
+[![YouTube](https://img.shields.io/badge/📺%20YouTube-Subscribe-FF0000?style=for-the-badge&logo=youtube&logoColor=white&labelColor=0a192f)](http://www.youtube.com/@mdsadiqueamin721)
+
+<br/>
+
+```text
+⭐ If you find this BSS-OSS architecture valuable, please star this repository on GitHub! ⭐
+```
+
+<sub>© 2026 **Md Sadique Amin** & **KTPL Engineering**. All Rights Reserved. Built with ❤️ for Global High-Performance Telecom Operations.</sub>
+
 </div>
