@@ -3,11 +3,11 @@
 <!-- ================================================================= -->
 
 <p align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:22d3ee,100:8b5cf6&height=220&section=header&text=BSS-OSS%20Telecom%20Suite&fontSize=48&fontColor=ffffff&animation=fadeIn&fontAlignY=38&desc=Enterprise%20Telecom%20BSS%2FOSS%20%7C%20AAA%20Diameter%20%26%20RADIUS%20%7C%20Real-Time%20OCS%20Charging&descAlignY=60&descAlign=50" width="100%" alt="Header Banner">
+  <img src="https://raw.githubusercontent.com/Sadique721/Test-Project/main/assets/header_banner.svg" width="100%" alt="BSS-OSS Enterprise Telecom Suite">
 </p>
 
 <p align="center">
-  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=24&duration=3000&pause=500&color=22D3EE&center=true&vCenter=true&width=800&lines=Enterprise+Telecom+BSS%2FOSS+Core+Platform;3GPP+Diameter+Gy%2FRo%2FGx+Online+Charging+System;Carrier-Grade+FreeRADIUS+AAA+Session+Engine;Spring+Cloud+Microservices+%2B+Kafka+Event+Mesh;Angular+11%2B+Admin+Portal+%2B+Flutter+Mobile+Apps" alt="Typing SVG">
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=22&duration=3000&pause=500&color=22D3EE&center=true&vCenter=true&width=720&lines=Enterprise+Telecom+BSS%2FOSS+Core+Platform;3GPP+Diameter+Gy%2FRo%2FGx+Online+Charging;Carrier-Grade+FreeRADIUS+AAA+Session+Engine;Spring+Cloud+Microservices+%2B+Kafka+Mesh;Angular+11%2B+Admin+Portal+%2B+Flutter+Mobile+Apps" alt="Typing SVG">
 </p>
 
 <p align="center">
@@ -706,7 +706,7 @@ This software is developed and maintained for enterprise telecommunications envi
 <!-- ================================================================= -->
 
 <p align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:8b5cf6,100:22d3ee&height=150&section=footer" width="100%" alt="Footer Banner">
+  <img src="https://raw.githubusercontent.com/Sadique721/Test-Project/main/assets/footer_banner.svg" width="100%" alt="Footer Banner">
 </p>
 
 <div align="center">
