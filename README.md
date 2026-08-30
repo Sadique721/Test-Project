@@ -32,6 +32,18 @@
 </tr>
 </table>
 
+<!-- ========== NEW: SYSTEM DIAGRAM SECTION ========== -->
+## 📊 System Architecture & Workflow
+
+```mermaid
+flowchart LR
+    A[Test Suite Trigger] --> B[Target Feature Prototypes]
+    B --> C[JUnit / Mockito Tests]
+    C --> D{Success?}
+    D -->|Yes| E[Build Passes]
+    D -->|No| F[Failure Alert & Debug]
+```
+
 ---
 
 <!-- ================================================================= -->
